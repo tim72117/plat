@@ -25,7 +25,6 @@ class File {
 		'delete',
 		'rename',
 		'save',
-		'save',
 		'save_as',
 		'share_to',
 	);
