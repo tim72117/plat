@@ -47,7 +47,7 @@ class File {
 	
 	public function upload() {	}
 	
-	public function save() {	}
+	//public function save() {	}
 	
 	public function save_as() { }
 	
