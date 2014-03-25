@@ -14,7 +14,7 @@
 
 
 //Route::group(array('domain' => 'plat.{domain}'), function() {
-	ff
+
 	Route::get('test', function() {
 		if( Session::has('file') ){
 			echo 'yes';
