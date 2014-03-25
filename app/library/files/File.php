@@ -25,7 +25,6 @@ class File {
 		'delete',
 		'rename',
 		'save',
-		'save',
 		'save_as',
 		'share_to',
 	);
@@ -48,7 +47,7 @@ class File {
 	
 	public function upload() {	}
 	
-	public function save() {	}
+	//public function save() {	}
 	
 	public function save_as() { }
 	
