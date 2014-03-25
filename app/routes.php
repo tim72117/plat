@@ -11,7 +11,7 @@
 |
 */
 
-111
+
 
 //Route::group(array('domain' => 'plat.{domain}'), function() {
 	
@@ -22,7 +22,7 @@
 			echo 'no';
 			var_dump(Session::get('file'));
 			echo Session::put('file','a');
-			22222
+
 			
 		}
 	});
