@@ -1,0 +1,16 @@
+/app/commands
+/app/config
+/app/database
+/app/storage
+/app/start
+/app/lang
+/app/tests
+/vendor
+/bootstrap
+server.php
+composer.phar
+composer.lock
+.env.local.php
+.env.php
+.DS_Store
+Thumbs.db
