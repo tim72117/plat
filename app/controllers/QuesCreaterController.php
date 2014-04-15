@@ -16,10 +16,10 @@ class QuesCreaterController extends BaseController {
 	protected $dataroot = '';
 	
 	public function __construct(){
-		$this->dataroot = app_path().'/views/ques/data/';
+		$this->dataroot = ques_path().'/ques/data/';
 		$this->beforeFilter(function($route){
 			$this->root = $route->getParameter('root');
-			Config::addNamespace('ques', app_path().'/views/ques/data/'.$this->root);
+			Config::addNamespace('ques', ques_path().'/ques/data/'.$this->root);
 			$this->config = Config::get('ques::setting');
 			Config::set('database.default', 'sqlsrv');
 			Config::set('database.connections.sqlsrv.database', $this->config['database']);
@@ -140,6 +140,7 @@ class QuesCreaterController extends BaseController {
 			
 		}
 		
+		DB::table($tablename.'_pstat')->update(array('page'=>0, 'tStamp'=>NULL));
 		/*
 		Schema::hasTable($tablename.'_pstat') && Schema::drop($tablename.'_pstat');
 		Schema::create($tablename.'_pstat', function($table){
@@ -152,7 +153,7 @@ class QuesCreaterController extends BaseController {
 		
 		//$this->creatUser();
 		
-		return Redirect::to($root);
+		return Redirect::to('http://192.168.0.8/'.$root);
 	}	
 	
 	public function creatUser() {

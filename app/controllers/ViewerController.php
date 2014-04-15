@@ -48,19 +48,15 @@ class ViewerController extends BaseController {
 
 		$newcid = Input::get('newcid','');
 		if( $newcid=='' ){
-			$user_table = DB::table($this->config['tablename'].'_userinfo AS u')
-					->leftJoin($this->config['tablename'].'_pstat AS p','u.newcid','=','p.newcid')
-					->leftJoin($this->config['tablename'].'_id AS i','u.newcid','=','i.newcid')
-					->where('u.stdname','=','測試員')
-					->orWhereNull('u.stdname')
-					->select('u.newcid','i.stdidnumber','u.stdname','p.page','p.tStamp')->get();
+			$user_table = DB::table($this->config['tablename'].'_pstat AS u')
+					->select('u.newcid','u.page','u.ques','u.tStamp')->get();
 			echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
 			echo '<table>';
 			foreach($user_table as $index => $user){
 				echo '<tr>';
 				echo '<td>'.$index.'</td>';
-				echo '<td>'.$user->stdname.'</td>';
-				echo '<td>'.$user->stdidnumber.'</td>';
+				echo '<td>'.$user->newcid.'</td>';
+				echo '<td>'.$user->ques.'</td>';
 				echo '<td width="30" align="center"><a href="?page=1&newcid='.$user->newcid.'">'.$user->page.'</a></td>';
 				echo '<td>'.$user->tStamp.'</td>';
 				//echo '<td>'.$user->udepname.'</td>';
@@ -112,6 +108,7 @@ class ViewerController extends BaseController {
 			'qname'=>$this->root,			
 			'timenow'=>date("Y/n/d H:i:s"),
 			'question'=>$question_html,
+			'questionEvent'=>'',
 			'init_value' => $init_value
  		))
 		->nest('child_sub', 'management.ques.show.page_show')

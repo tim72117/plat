@@ -473,7 +473,7 @@ a.button {
 }
 
 .question.open {
-	background-color: rgba(0,0,0,0.2);
+	background-color: rgba(200,200,200,0.1);
 }
 
 .button {

@@ -15,7 +15,6 @@
 			"app/tests/TestCase.php",
 			"app/library",
 			"app/library/1.10.2",
-			"app/library/1.10.3",
 			"app/library/files"
 		],
 		"files": [

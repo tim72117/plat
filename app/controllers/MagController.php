@@ -26,11 +26,6 @@ class MagController extends BaseController {
 		});
 	}
 	
-	public function fileManager($intent_key) {
-		$fileManager = new app\library\files\v0\FileManager();
-		$fileManager->accept($intent_key);
-	}
-	
 	public function test($root) {
 		return $root;
 	}

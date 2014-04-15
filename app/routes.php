@@ -16,15 +16,7 @@
 //Route::group(array('domain' => 'plat.{domain}'), function() {
 
 	Route::get('test', function() {
-		if( Session::has('file') ){
-			echo 'yes';
-		}else{
-			echo 'no';
-			var_dump(Session::get('file'));
-			echo Session::put('file','a');
-
-			
-		}
+		return View::make('tr_qtree', array('auth'=>'empty', 'root'=>''));
 	});
 
 	//平台-------------------------------------------------------------------------------------------------------------------------------
@@ -43,11 +35,13 @@
 		
 		Route::post('upload', 'MagController@upload');
 		
+		Route::get('{root}/demo', array('before' => 'folder_ques', 'uses' => 'HomeController@demo'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/show', array('before' => 'folder_ques|loginAdmin', 'uses' => 'ViewerController@showData'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/codebook', array('before' => 'folder_ques', 'uses' => 'ViewerController@codebook'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/traffic', array('before' => 'folder_ques', 'uses' => 'ViewerController@traffic'))->where('root', '[a-z0-9_]+');
 		
-		Route::get('fileManager/{active_uniqid}', 'MagController@fileManager');
+		Route::get('fileManager/{active_uniqid}', 'FileController@fileManager');
+		Route::get('fileBulider/{active_uniqid}', 'FileController@fileBulider');
 	});
 	
 	
@@ -60,7 +54,7 @@
 
 
 
-	Route::get('{root}/demo', array('before' => 'folder_ques', 'uses' => 'HomeController@demo'))->where('root', '[a-z0-9_]+');
+	
 
 	Route::get('{root}/creatTable', array('before' => 'folder_ques|loginAdmin', 'uses' => 'QuesCreaterController@creatTable'))->where('root', '[a-z0-9_]+');
 	Route::get('{root}/deleteTable', array('before' => 'folder_ques|loginAdmin', 'uses' => 'QuesCreaterController@deleteTable'))->where('root', '[a-z0-9_]+');
