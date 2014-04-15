@@ -1,7 +1,7 @@
 <?php
 namespace app\library\files\v0;
 use DB;
-class RowsFile extends File {
+class RowsFile extends CommFile {
 	
 	/**
 	 * @var array 2 dimension

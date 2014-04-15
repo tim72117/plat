@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-class File {
+class CommFile {
 	
 	/**
 	 * @var string
