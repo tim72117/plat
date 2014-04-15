@@ -29,6 +29,19 @@ class MagController extends BaseController {
 	public function test($root) {
 		return $root;
 	}
+	
+	public function report($root) {
+		$reports = DB::table('report')->where('root', $this->root)->select('contact','text','time')->get();
+		$out = '';
+		foreach($reports as $report){
+			$out .= '<tr>';
+			$out .= '<td>'.strip_tags($report->time).'</td>';
+			$out .= '<td>'.strip_tags($report->contact).'</td>';
+			$out .= '<td>'.strip_tags($report->text).'</td>';
+			$out .= '</tr>';
+		}
+		return '<table>'.$out.'</table>';
+	}
 				
 	public function home() {
 		return View::make('management.index');

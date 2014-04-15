@@ -44,6 +44,7 @@ foreach($docs as $doc){
 	$docsTable .= '<td><a href="http://192.168.0.8:8080/platform/'.$doc->dir.'/show">showdata</a></td>';
 	$docsTable .= '<td><a href="http://192.168.0.8:8080/platform/'.$doc->dir.'/codebook">codebook</a></td>';  
 	$docsTable .= '<td><a href="http://192.168.0.8:8080/platform/'.$doc->dir.'/traffic">traffic</a></td>';  
+	$docsTable .= '<td><a href="http://192.168.0.8:8080/platform/'.$doc->dir.'/report">report</a></td>';  
 	if( is_file($pageinfo_path) ){
 		$docsTable .= '<td>'.$pageinfo->changetime.'</td>';
 		$docsTable .= '<td '.(strtotime($pageinfo->changetime) > strtotime($pageinfo->databasetime) ? 'style="color:#f00"' : '').'>'.$pageinfo->databasetime.'</td>';
@@ -74,6 +75,7 @@ foreach($docs as $doc){
 		<th width="90">填答值</th> 
 		<th width="90">codebook</th>
 		<th width="80">流量</th>
+		<th width="80">問題回報</th>
 		<th width="150">文件檔最後更新</th>
 		<th width="150">資料庫最後更新</th>
 	</tr>

@@ -39,6 +39,7 @@
 		Route::get('platform/{root}/show', array('before' => 'folder_ques|loginAdmin', 'uses' => 'ViewerController@showData'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/codebook', array('before' => 'folder_ques', 'uses' => 'ViewerController@codebook'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/traffic', array('before' => 'folder_ques', 'uses' => 'ViewerController@traffic'))->where('root', '[a-z0-9_]+');
+		Route::get('platform/{root}/report', array('before' => 'folder_ques', 'uses' => 'MagController@report'))->where('root', '[a-z0-9_]+');
 		
 		Route::get('fileManager/{active_uniqid}', 'FileController@fileManager');
 		Route::get('fileBulider/{active_uniqid}', 'FileController@fileBulider');
