@@ -16,21 +16,23 @@ class FileProvider {
 			$actives = $fileClass::get_intent();
 		}		
 		
-		$docs = DB::table('doc')->where('owner',1)->select('id','title','folder','ctime')->get();
+		$docs = DB::table('doc')->where('owner',2)->select('id','title','folder','ctime')->get();
+		
+		$packageDocs = array();
+		
 		foreach($docs as $doc){
-			echo $doc->title.'<br />';
+			$packageDoc = array('title'=>$doc->title, 'actives'=>array());
 			foreach($actives as $active){
 				$intent_key = $this->get_intent_uniqid();
-				echo '<a href="fileManager/'.$intent_key.'">'.$active.'</a><br />';
+				array_push($packageDoc['actives'], array('intent_key'=>$intent_key, 'active'=>$active));
 				$intent = array('active'=>$active,'file_id'=>$doc->id,'fileClass'=>$fileClass);
 				$this->files[$intent_key] = $intent;
 			}
+			array_push($packageDocs, $packageDoc);
 		}
 		
-
-
-		
 		$this->save_intent();
+		return $packageDocs;
 	}
 	
 	private function auth_file() {

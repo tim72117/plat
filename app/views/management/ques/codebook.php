@@ -103,6 +103,7 @@ function buildQuestion($question,$question_array,&$table_array){
 			
 			$size = strlen(count($question->answer->degree))+1;
 			$is_first = true;
+			$sub_index = 1;
 			foreach($question->answer->item as $key => $item){
 				$attr = $item->attributes();
 				$name = $attr["name"];
@@ -112,7 +113,7 @@ function buildQuestion($question,$question_array,&$table_array){
 				$tdobj = new tdobj();
 				$tdobj->objtype = "question";
 				$tdobj->name = $name;
-				$tdobj->id = $id;
+				$tdobj->id = $id.' - '.$sub_index;
 				$tdobj->question_type = $question->type;
 				$tdobj->nullvalue = 0;
 				$tdobj->tablesize = $size;
@@ -121,6 +122,7 @@ function buildQuestion($question,$question_array,&$table_array){
 				$tdobj->input = 0;
 				$tdobj->length = count($question->answer->item);
 				array_push($table_array,$tdobj);
+				$sub_index++;
 			}			
 
 			

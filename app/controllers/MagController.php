@@ -26,13 +26,21 @@ class MagController extends BaseController {
 		});
 	}
 	
-	public function fileManager($intent_key) {
-		$fileManager = new app\library\files\v0\FileManager();
-		$fileManager->accept($intent_key);
-	}
-	
 	public function test($root) {
 		return $root;
+	}
+	
+	public function report($root) {
+		$reports = DB::table('report')->where('root', $this->root)->select('contact','text','time')->get();
+		$out = '';
+		foreach($reports as $report){
+			$out .= '<tr>';
+			$out .= '<td>'.strip_tags($report->time).'</td>';
+			$out .= '<td>'.strip_tags($report->contact).'</td>';
+			$out .= '<td>'.strip_tags($report->text).'</td>';
+			$out .= '</tr>';
+		}
+		return '<table>'.$out.'</table>';
 	}
 				
 	public function home() {
