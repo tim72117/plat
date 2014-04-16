@@ -40,11 +40,11 @@ foreach($docs as $doc){
 	$docsTable .= '<tr>';
 	$docsTable .= '<td>'.$doc->title.'</td>';
 	$docsTable .= '<td><a href="http://192.168.0.8/'.$doc->dir.'">'.$doc->dir.'</a></td>';
-	$docsTable .= '<td><a href="http://192.168.0.8:8080/'.$doc->dir.'/demo">demo</a></td>';
-	$docsTable .= '<td><a href="http://192.168.0.8:8080/platform/'.$doc->dir.'/show">showdata</a></td>';
-	$docsTable .= '<td><a href="http://192.168.0.8:8080/platform/'.$doc->dir.'/codebook">codebook</a></td>';  
-	$docsTable .= '<td><a href="http://192.168.0.8:8080/platform/'.$doc->dir.'/traffic">traffic</a></td>';  
-	$docsTable .= '<td><a href="http://192.168.0.8:8080/platform/'.$doc->dir.'/report">report</a></td>';  
+	$docsTable .= '<td><a href="'.$doc->dir.'/demo">demo</a></td>';
+	$docsTable .= '<td><a href="platform/'.$doc->dir.'/show">showdata</a></td>';
+	$docsTable .= '<td><a href="platform/'.$doc->dir.'/codebook">codebook</a></td>';  
+	$docsTable .= '<td><a href="platform/'.$doc->dir.'/traffic">traffic</a></td>';  
+	$docsTable .= '<td><a href="platform/'.$doc->dir.'/report">report</a></td>';  
 	if( is_file($pageinfo_path) ){
 		$docsTable .= '<td>'.$pageinfo->changetime.'</td>';
 		$docsTable .= '<td '.(strtotime($pageinfo->changetime) > strtotime($pageinfo->databasetime) ? 'style="color:#f00"' : '').'>'.$pageinfo->databasetime.'</td>';

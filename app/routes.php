@@ -23,8 +23,8 @@
 	Route::get('login', array('before' => 'delay', 'uses' => 'MagController@platformLoginPage'));
 	Route::post('loginAuth', array('before' => 'delay|csrf|dddos', 'uses' => 'MagController@platformLoginAuth'));
 	
-	Route::get('registerPage', array('before' => 'delay', 'uses' => 'MagController@platformRegisterPage'));	
-	Route::post('register', array('before' => 'delay|csrf|dddos', 'uses' => 'MagController@platformRegister'));		 
+	Route::get('registerPage', array('before' => 'delay|loginAdmin', 'uses' => 'MagController@platformRegisterPage'));	
+	Route::post('register', array('before' => 'delay|csrf|dddos|loginAdmin', 'uses' => 'MagController@platformRegister'));		 
 
 	Route::group(array('before' => 'auth_logined'), function() {
 		Route::get('/', function() {
@@ -84,7 +84,7 @@ Route::filter('loginOwner', function($route) {
 });
 
 Route::filter('loginAdmin', function($route) {
-	//return '無權限存取';
+	return '無權限存取';
 });
 
 Route::filter('loginPublic', function($route) {
@@ -108,9 +108,12 @@ Route::filter('delay', function() {
 });
 
 Route::filter('dddos', function() {	
+	$input = Input::all();	
+		
 	if (Session::get('dddos') != Input::get('_token2')){
-		//throw new Illuminate\Session\TokenMismatchException;
-		return Redirect::back();
+		//throw new Illuminate\Session\TokenMismatchException;	
+		$input['dddos_error'] = false;
+		return Redirect::back()->withInput($input);
 	}
 	Session::forget('dddos');
 	
@@ -128,8 +131,9 @@ Route::filter('dddos', function() {
 	}
 	Cache::put($ip, $ip_time, 10);
 
+	$input['dddos_error'] = true;
 	if( $ip_time['block'] )
-		return Redirect::back()->withInput(array('dddos_error'=>true));
+		return Redirect::back()->withInput($input);
 });
 
 App::error(function($exception) {//找不到子頁面
