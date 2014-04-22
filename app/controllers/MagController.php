@@ -29,19 +29,6 @@ class MagController extends BaseController {
 	public function test($root) {
 		return $root;
 	}
-	
-	public function report($root) {
-		$reports = DB::table('report')->where('root', $this->root)->select('contact','text','time')->get();
-		$out = '';
-		foreach($reports as $report){
-			$out .= '<tr>';
-			$out .= '<td>'.strip_tags($report->time).'</td>';
-			$out .= '<td>'.strip_tags($report->contact).'</td>';
-			$out .= '<td>'.strip_tags($report->text).'</td>';
-			$out .= '</tr>';
-		}
-		return '<table>'.$out.'</table>';
-	}
 				
 	public function home() {
 		return View::make('management.index');
@@ -82,9 +69,10 @@ class MagController extends BaseController {
 	public function platformLoginAuth() {
 		
 		$input = Input::only('username', 'password');
+		$input['active'] = 1;
 		$rulls = array(
-			'username' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:3,16',
-			'password' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:3,16' );
+			'username' => 'required|regex:/[0-9a-zA-Z!@_]/|between:3,20',
+			'password' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:3,20' );
 		$rulls_message = array(
 			'username.required' => '帳號必填',
 			'password.required' => '密碼必填',
@@ -135,9 +123,9 @@ class MagController extends BaseController {
 	public function platformRegister() {
 		$input = Input::only('username', 'password', 'password_confirmation','agree');
 		$rulls = array(
-			'username'              => 'required|between:1,50',
-			'password'              => 'required|alpha_num|between:6,20|confirmed',
-			'password_confirmation' => 'required|alpha_num|between:6,20',
+			'username'              => 'required|regex:/[0-9a-zA-Z!@_]/|between:3,20',
+			'password'              => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:6,20|confirmed',
+			'password_confirmation' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:6,20',
 			'agree'                 => 'required|accepted' );
 		$validator = Validator::make($input, $rulls);
 		

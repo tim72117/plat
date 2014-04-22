@@ -96,11 +96,13 @@ $(function(){
 	
 	$('.button.intent').click(function(){
 		event.stopPropagation();
-		$.getJSON('fileBulider/'+$(this).attr('intent_key'),function(data){
+		$.getJSON('fileActiver/'+$(this).attr('intent_key'),function(data){
 			var shadow = $('<div class="shadow" style="width:100%;height:100%;position:fixed;background-color:rgba(0,0,0,0.5);top:0;z-index:3000"></div>').appendTo('body');
 			$('body').css({overflow:'hidden','margin-right': '15px'});
 			$('.tabs-box').css({'margin-right': '15px'});
 			shadow.append('<div class="shadowDialog" style="width:500px;height:300px;background-color:#fff;margin:10% auto;border: 1px solid #333">'+data+'</div>');
+		}).error(function(e){
+			console.log(e);
 		});
 	});
 	

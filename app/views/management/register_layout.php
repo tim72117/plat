@@ -232,8 +232,8 @@ a.button {
 							<div class="col3" style="height: 40px"></div>
 							<div class="col9 last">
 								<div style="margin:10px">
-									<select class="search_area" style="width:200px;height:40px;padding:10px"><option>選擇地區</option></select>
-									<button class="search" style="width:80px;height:40px;text-align: center" title="搜尋">搜尋</button>
+									<!--<select class="search_area" style="width:200px;height:40px;padding:10px"><option>選擇地區</option></select>
+									<button class="search" style="width:80px;height:40px;text-align: center" title="搜尋">搜尋</button>-->
 								</div>
 							</div>
 							<div style="clear:both"></div>

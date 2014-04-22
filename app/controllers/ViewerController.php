@@ -39,6 +39,22 @@ class ViewerController extends BaseController {
 		return Response::json(array('changetime'=>(string)$newpage->pageinfo->changetime,'databasetime'=>(string)$newpage->pageinfo->databasetime));
 	}	
 	
+	public function report() {
+		Config::set('database.default', 'sqlsrv');
+		Config::set('database.connections.sqlsrv.database', 'ques_admin');
+		$reports = DB::table('report')->where('root', $this->root)->select('contact','text','explorer','time')->orderBy('time','desc')->get();
+		$out = '';
+		foreach($reports as $report){
+			$out .= '<tr>';
+			$out .= '<td width="200">'.$report->time.'</td>';
+			$out .= '<td width="300">'.strip_tags($report->contact).'</td>';
+			$out .= '<td>'.strip_tags($report->text).'</td>';
+			$out .= '<td width="400">'.$report->explorer.'</td>';
+			$out .= '</tr>';
+		}
+		return '<table>'.$out.'</table>';
+	}
+	
 	public function sharePage($root,$page) {
 		View::share('config',$this->config);
 		return View::make('ques.other_page')->nest('child', 'ques.share.'.$page);

@@ -23,8 +23,8 @@
 	Route::get('login', array('before' => 'delay', 'uses' => 'MagController@platformLoginPage'));
 	Route::post('loginAuth', array('before' => 'delay|csrf|dddos', 'uses' => 'MagController@platformLoginAuth'));
 	
-	Route::get('registerPage', array('before' => 'delay|loginAdmin', 'uses' => 'MagController@platformRegisterPage'));	
-	Route::post('register', array('before' => 'delay|csrf|dddos|loginAdmin', 'uses' => 'MagController@platformRegister'));		 
+	Route::get('registerPage', array('before' => 'delay|loginRegister', 'uses' => 'MagController@platformRegisterPage'));	
+	Route::post('register', array('before' => 'delay|csrf|dddos|loginRegister', 'uses' => 'MagController@platformRegister'));		 
 
 	Route::group(array('before' => 'auth_logined'), function() {
 		Route::get('/', function() {
@@ -39,10 +39,10 @@
 		Route::get('platform/{root}/show', array('before' => 'folder_ques|loginAdmin', 'uses' => 'ViewerController@showData'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/codebook', array('before' => 'folder_ques', 'uses' => 'ViewerController@codebook'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/traffic', array('before' => 'folder_ques', 'uses' => 'ViewerController@traffic'))->where('root', '[a-z0-9_]+');
-		Route::get('platform/{root}/report', array('before' => 'folder_ques', 'uses' => 'MagController@report'))->where('root', '[a-z0-9_]+');
+		Route::get('platform/{root}/report', array('before' => 'folder_ques', 'uses' => 'ViewerController@report'))->where('root', '[a-z0-9_]+');
 		
 		Route::get('fileManager/{active_uniqid}', 'FileController@fileManager');
-		Route::get('fileBulider/{active_uniqid}', 'FileController@fileBulider');
+		Route::get('fileActiver/{active_uniqid}', 'FileController@fileActiver');
 	});
 	
 	
@@ -87,6 +87,10 @@ Route::filter('loginAdmin', function($route) {
 	return '無權限存取';
 });
 
+Route::filter('loginRegister', function($route) {
+	return '無權限存取';
+});
+
 Route::filter('loginPublic', function($route) {
 });
 
@@ -94,7 +98,7 @@ Route::filter('folder_ques', function($route) {//找不到根目錄
 	$root = $route->getParameter('root');
 	$folder = ques_path().'/ques/data/'.$root;
 	if( !is_dir($folder) )
-		return Response::view('ques.nopage', array(), 404);
+		return Response::view('nopage', array(), 404);
 });
 
 Route::filter('login', function($route) {
@@ -137,9 +141,9 @@ Route::filter('dddos', function() {
 });
 
 App::error(function($exception) {//找不到子頁面
-	//return Response::view('ques.nopage', array(), 404);
+	//return Response::view('nopage', array(), 404);
 });
 
 App::missing(function($exception) {
-    //return Response::view('ques.nopage', array(), 404);
+	//return Response::view('nopage', array(), 404);
 });

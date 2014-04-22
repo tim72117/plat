@@ -31,13 +31,13 @@ class FileController extends BaseController {
 		$fileManager->accept($intent_key);
 	}
 	
-	public function fileBulider($intent_key) {
-		//$fileManager = new app\library\files\v0\FileManager();
-		//$fileManager->accept($intent_key);
-		$intent = Session::get('file')[$intent_key];
-		$file_id = $intent['file_id'];
-		$active = $intent['active'];
-		return Response::json(array($active));
+	public function fileActiver($intent_key) {
+		$fileAcitver = new app\library\files\v0\FileActiver();
+		$view = $fileAcitver->accept($intent_key);
+		//$intent = Session::get('file')[$intent_key];
+		//$file_id = $intent['file_id'];
+		//$active = $intent['active'];
+		return Response::json(array($view));
 	}
 	
 
