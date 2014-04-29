@@ -16,7 +16,7 @@ class FileProvider {
 			$actives = $fileClass::get_intent();
 		}		
 		
-		$docs = DB::table('doc')->where('owner',2)->select('id','title','folder','ctime')->get();
+		$docs = DB::table('doc_ques')->where('ver','new')->select('id','title','dir')->get();
 		
 		$packageDocs = array();
 		
@@ -33,6 +33,19 @@ class FileProvider {
 		
 		$this->save_intent();
 		return $packageDocs;
+	}
+	
+	public function create_list() {		
+		$create_list = array();
+		$fileClasss = array('QuesFile','RowsFile');		
+		foreach($fileClasss as $fileClass){
+			$intent_key = $this->get_intent_uniqid();
+			array_push($create_list, array('intent_key'=>$intent_key, 'active'=>$fileClass.'_create'));
+			$intent = array('active'=>'create','file_id'=>null,'fileClass'=>$fileClass);			
+			$this->files[$intent_key]= $intent;
+		}
+		$this->save_intent();
+		return $create_list;
 	}
 	
 	private function auth_file() {
