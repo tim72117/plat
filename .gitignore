@@ -2,7 +2,6 @@ app/commands
 app/config
 app/database
 app/lang
-app/models
 app/start
 app/storage
 app/tests
