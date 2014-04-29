@@ -10,17 +10,35 @@
 | and give it the Closure to execute when that URI is requested.
 |
 */
+use Illuminate\Auth\Guard as AuthGuard,
+	Illuminate\Auth\EloquentUserProvider,
+	Illuminate\Hashing\BcryptHasher;
+class AdminGuard extends AuthGuard
+{
+	public function getName()
+	{
+		return 'admin_login_'.md5(get_class($this));
+	}
 
+	public function getRecallerName()
+	{
+		return 'admin_remember_'.md5(get_class($this));
+	}
+}
 
+Auth::extend('eloquent.normal', function()
+{	
+    return new AdminGuard(new EloquentUserProvider(new BcryptHasher, 'Normal'), App::make('session.store'));
+});
 
 //Route::group(array('domain' => 'plat.{domain}'), function() {
 
-	Route::get('test', function() {
-		return View::make('tr_qtree', array('auth'=>'empty', 'root'=>''));
-	});
+Route::get('test', function() {
+	return View::make('tr_qtree', array('auth'=>'empty', 'root'=>''));
+});
 
 	//平台-------------------------------------------------------------------------------------------------------------------------------
-	Route::get('login', array('before' => 'delay', 'uses' => 'MagController@platformLoginPage'));
+	Route::get('login', array('before' => 'delay', 'uses' => 'MagController@platformLoginPage'));	
 	Route::post('loginAuth', array('before' => 'delay|csrf|dddos', 'uses' => 'MagController@platformLoginAuth'));
 	
 	Route::get('registerPage', array('before' => 'delay|loginRegister', 'uses' => 'MagController@platformRegisterPage'));	
@@ -40,12 +58,32 @@
 		Route::get('platform/{root}/codebook', array('before' => 'folder_ques', 'uses' => 'ViewerController@codebook'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/traffic', array('before' => 'folder_ques', 'uses' => 'ViewerController@traffic'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/report', array('before' => 'folder_ques', 'uses' => 'ViewerController@report'))->where('root', '[a-z0-9_]+');
+		Route::get('platform/{root}/report_solve', array('before' => 'folder_ques', 'uses' => 'ViewerController@report_solve'))->where('root', '[a-z0-9_]+');
 		
 		Route::get('fileManager/{active_uniqid}', 'FileController@fileManager');
 		Route::get('fileActiver/{active_uniqid}', 'FileController@fileActiver');
 	});
 	
 	
+	Route::get('user/auth/login', array('before' => 'delay', 'uses' => 'UserController@platformLoginPage'));
+	Route::post('user/auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@platformLoginAuth'));
+	
+	Route::group(array('before' => 'auth_logined_normal'), function() {
+		Route::get('user/home1', function() {
+			//return View::make('demo.use.home', array('sql_post'=>array(),'sql_note'=>array()))->nest('child_tab','demo.tabs',array('pagename'=>'index'));
+		});
+		Route::get('user/auth/logout', 'UserController@platformLogout');
+		Route::get('user/{context}', array('before' => '', 'uses' => 'DemoController@home'));
+		
+		Route::post('user/auth/password/change', array('before' => 'csrf', 'uses' => 'UserController@passwordChange'));
+		
+	});
+	
+	Route::get('user/auth/password/remind', 'UserController@remindPage');
+	Route::post('user/auth/password/remind', 'UserController@remind');
+	
+	Route::get('user/auth/password/reset/{token}', 'UserController@resetPage');	
+	Route::post('user/auth/password/reset/{token}', 'UserController@reset');
 	
 	//平台-------------------------------------------------------------------------------------------------------------------------------
 	
@@ -65,6 +103,16 @@
 	//編輯器-------------------------------------------------------------------------------------------------------------------------------
 	
 //});//domain
+	
+Route::filter('auth_logined_normal', function($route) {
+	Config::set('database.default', 'sqlsrv');
+	Config::set('database.connections.sqlsrv.database', 'ques_admin');
+	Config::set('auth.table', 'users_normal');
+	Config::set('auth.driver', 'eloquent.normal');
+	Config::set('auth.model', 'Normal');
+	if( Auth::guest() )
+		return Redirect::to('user/auth/login');
+});
 
 Route::filter('auth_logined', function($route) {
 	Config::set('database.default', 'sqlsrv');
@@ -88,7 +136,7 @@ Route::filter('loginAdmin', function($route) {
 });
 
 Route::filter('loginRegister', function($route) {
-	return '無權限存取';
+	//return '無權限存取';
 });
 
 Route::filter('loginPublic', function($route) {
@@ -136,7 +184,7 @@ Route::filter('dddos', function() {
 	Cache::put($ip, $ip_time, 10);
 
 	$input['dddos_error'] = true;
-	if( $ip_time['block'] )
+	if( $ip_time['block']  && false )
 		return Redirect::back()->withInput($input);
 });
 

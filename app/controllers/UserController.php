@@ -1,5 +1,9 @@
 <?php
-class MagController extends BaseController {
+//use Illuminate\Auth\Guard as AuthGuard,
+//	Illuminate\Auth\EloquentUserProvider,
+//	Illuminate\Hashing\BcryptHasher;
+
+class UserController extends BaseController {
 
 	/*
 	|--------------------------------------------------------------------------
@@ -14,6 +18,10 @@ class MagController extends BaseController {
 	|
 	*/
 	protected $dataroot = '';
+	protected $auth_rull = array(
+			'username'              => 'required|regex:/[0-9a-zA-Z!@_]/|between:3,20',
+			'password'              => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:6,20|confirmed',
+			'password_confirmation' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:6,20');
 	
 	public function __construct(){
 		$this->dataroot = app_path().'/views/ques/data/';
@@ -23,24 +31,17 @@ class MagController extends BaseController {
 			$this->config = Config::get('ques::setting');
 			Config::set('database.default', 'sqlsrv');
 			Config::set('database.connections.sqlsrv.database', 'ques_admin');
+			Config::set('auth.table', 'users_normal');
+			Config::set('auth.driver', 'eloquent.normal');
+			Config::set('auth.model', 'Normal');
 		});
 	}
 	
-	public function test($root) {
-		return $root;
-	}
-				
-	public function home() {
-		return View::make('management.index');
-	}
-	
-	public function platformHome() {
-		return View::make('management.platform.layout.main')
-			->nest('child_tab','management.platform.tabs')
-			->nest('child_main','management.platform.gg')
-			->nest('child_footer','management.footer');
-	}
-		
+	public function platformLogout() {
+		Auth::logout();
+		return Redirect::to('user/home');
+	}	
+
 	public function platformLoginPage() {
 		$dddos_error = Input::old('dddos_error');
 		$csrf_error = Input::old('csrf_error');
@@ -50,9 +51,9 @@ class MagController extends BaseController {
 		
 		View::share('dddos_error',$dddos_error);
 		View::share('csrf_error',$csrf_error);
-		$contents = View::make('management.home')
-			->nest('child_tab','management.tabs',array('pagename'=>'index'))
-			->nest('child_main','management.login')
+		$contents = View::make('demo.use.home', array('sql_post'=>array(),'sql_note'=>array()))
+			->nest('child_tab','demo.use.tabs')
+			->nest('context','demo.login')				
 			->nest('child_footer','management.footer');		
 		$response = Response::make($contents, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
@@ -61,13 +62,7 @@ class MagController extends BaseController {
 		return $response;
 	}
 	
-	public function platformLogout() {
-		Auth::logout();
-		return Redirect::to('/');
-	}	
-	
 	public function platformLoginAuth() {
-
 		$input = Input::only('username', 'password');		
 		$rulls = array(
 			'username' => 'required|regex:/[0-9a-zA-Z!@_]/|between:3,20',
@@ -81,7 +76,7 @@ class MagController extends BaseController {
 		$validator = Validator::make($input, $rulls, $rulls_message);
 
 		if( $validator->fails() ){
-			return Redirect::back()->withErrors($validator);
+			return Redirect::back()->withErrors($validator)->withInput();
 		}
 		
 		/*
@@ -94,29 +89,75 @@ class MagController extends BaseController {
 		if( Auth::validate($input) ){ 	
 			$input['active'] = 1;
 			if( Auth::attempt($input, true) ){
-				return Redirect::intended('/');
+				return Redirect::intended('user/home');
 			}else{
 				$validator->getMessageBag()->add('login_error', '帳號尚未開通');
-				return Redirect::back()->withErrors($validator);
+				return Redirect::back()->withErrors($validator)->withInput();
 			}			
 		}else{			
 			$validator->getMessageBag()->add('login_error', '帳號密碼錯誤');
-			return Redirect::back()->withErrors($validator);
+			return Redirect::back()->withErrors($validator)->withInput();
 		}
 		
 	}
 	
-	public function upload() {
-		$upload_handler = new UploadHandler();
-		//return View::make('management.index');
+	public function remindPage() {
+		return View::make('demo.use.home', array('sql_post'=>array(),'sql_note'=>array()))
+			->nest('context','demo.remind');
+	}
+
+	public function remind() {
+		$credentials = array('email' => Input::get('email'));
+		return Password::remind($credentials, function($message) {
+				$message->subject('Password Reminder');
+			});
 	}
 	
-	public function maintenance() {
-		View::share('config', $this->config);
-		return View::make('management.home')
-			->nest('child_tab','management.tabs')
-			->nest('child_main','management.maintenance')
-			->nest('child_footer','management.footer');	
+	public function resetPage($token) {
+		return View::make('demo.auth_reset')->with('token', $token);
+	}
+		
+	public function reset($token) {
+		$credentials = array(
+			'email' => Input::get('email'),
+			'password' => Input::get('password'),
+			'password_confirmation' => Input::get('password_confirmation'),
+			'token' => $token,
+		);
+
+		return Password::reset($credentials, function($user, $password)
+		{
+			$user->password = Hash::make($password);
+
+			$user->save();
+
+			return Redirect::to('home');
+		});
+	}
+	
+	public function passwordChange() {
+		
+		$input = Input::only('username', 'password', 'password_confirmation');
+		$rulls_message = array(
+			'password.required' => '密碼必填',
+			'password_confirmation.required' => '確認密碼必填',
+			'password.regex' => '帳號格式錯誤',
+			'password.regex' => '密碼格式錯誤',
+			'password.confirmed' => '確認密碼必須相同',			
+		);
+		unset($this->auth_rull['username']);
+		$validator = Validator::make($input, $this->auth_rull, $rulls_message);
+		
+		if( $validator->fails() ){
+			return Redirect::back()->withErrors($validator);
+		}
+		$user = Auth::User();
+		
+		$user->password = Hash::make($input['password']);
+			
+		$user->save();
+		return Redirect::intended('user/home');
+
 	}
 	
 	public function platformRegisterPage() {
@@ -128,11 +169,8 @@ class MagController extends BaseController {
 	
 	public function platformRegister() {
 		$input = Input::only('username', 'password', 'password_confirmation','agree');
-		$rulls = array(
-			'username'              => 'required|regex:/[0-9a-zA-Z!@_]/|between:3,20',
-			'password'              => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:6,20|confirmed',
-			'password_confirmation' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:6,20',
-			'agree'                 => 'required|accepted' );
+		$this->auth_rull['agree'] = 'required|accepted';
+		$rulls = $this->auth_rull;
 		$validator = Validator::make($input, $rulls);
 		
 		if( $validator->fails() ){

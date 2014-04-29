@@ -1,5 +1,9 @@
 <?php
-class FileController extends BaseController {
+//use Illuminate\Auth\Guard as AuthGuard,
+//	Illuminate\Auth\EloquentUserProvider,
+//	Illuminate\Hashing\BcryptHasher;
+
+class DemoController extends BaseController {
 
 	/*
 	|--------------------------------------------------------------------------
@@ -23,23 +27,21 @@ class FileController extends BaseController {
 			$this->config = Config::get('ques::setting');
 			Config::set('database.default', 'sqlsrv');
 			Config::set('database.connections.sqlsrv.database', 'ques_admin');
+			Config::set('auth.table', 'users_normal');
+			Config::set('auth.driver', 'eloquent.normal');
+			Config::set('auth.model', 'Normal');
 		});
 	}
 	
-	public function fileManager($intent_key) {
-		$fileManager = new app\library\files\v0\FileManager();
-		$fileManager->accept($intent_key);
+	public function home($context = null) {
+		if( $context=='home' ){
+			return View::make('demo.use.main')->nest('context','demo.use.context.intro');
+		}else{
+			return View::make('demo.use.main')->nest('context','demo.use.context.'.$context);
+		}		
 	}
 	
-	public function fileActiver($intent_key) {
-		$fileAcitver = new app\library\files\v0\FileActiver();
-		$view = $fileAcitver->accept($intent_key);
-		//$intent = Session::get('file')[$intent_key];
-		//$file_id = $intent['file_id'];
-		//$active = $intent['active'];
-		return Response::json($view);
-	}
-	
+
 
 	
 
