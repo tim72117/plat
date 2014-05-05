@@ -44,7 +44,7 @@ foreach($docs as $doc){
 	$docsTable .= '<tr>';
 	$docsTable .= '<td>'.$doc->title.'</td>';
 	$docsTable .= '<td><a href="http://ques.cher.ntnu.edu.tw/'.$doc->dir.'">'.$doc->dir.'</a></td>';
-	$docsTable .= '<td><a href="'.$doc->dir.'/demo">demo</a></td>';
+	$docsTable .= '<td><a href="platform/'.$doc->dir.'/demo">demo</a></td>';
 	$docsTable .= '<td><a href="platform/'.$doc->dir.'/show">showdata</a></td>';
 	$docsTable .= '<td><a href="platform/'.$doc->dir.'/codebook">codebook</a></td>';  
 	$docsTable .= '<td><a href="platform/'.$doc->dir.'/traffic">receives</a></td>';  

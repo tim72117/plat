@@ -65,13 +65,9 @@ Route::get('test', function() {
 	});
 	
 	
-	Route::get('user/auth/login', array('before' => 'delay', 'uses' => 'UserController@platformLoginPage'));
-	Route::post('user/auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@platformLoginAuth'));
 	
 	Route::group(array('before' => 'auth_logined_normal'), function() {
-		Route::get('user/home1', function() {
-			//return View::make('demo.use.home', array('sql_post'=>array(),'sql_note'=>array()))->nest('child_tab','demo.tabs',array('pagename'=>'index'));
-		});
+
 		Route::get('user/auth/logout', 'UserController@platformLogout');
 		Route::get('user/{context}', array('before' => '', 'uses' => 'DemoController@home'));
 		
@@ -84,6 +80,10 @@ Route::get('test', function() {
 	
 	Route::get('user/auth/password/reset/{token}', 'UserController@resetPage');	
 	Route::post('user/auth/password/reset/{token}', 'UserController@reset');
+	
+	Route::get('user/auth/project', 'UserController@project');
+	Route::post('user/auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@login'));
+	Route::get('user/auth/{project}', array('before' => 'delay', 'uses' => 'UserController@loginPage'));	
 	
 	//平台-------------------------------------------------------------------------------------------------------------------------------
 	
@@ -111,7 +111,7 @@ Route::filter('auth_logined_normal', function($route) {
 	Config::set('auth.driver', 'eloquent.normal');
 	Config::set('auth.model', 'Normal');
 	if( Auth::guest() )
-		return Redirect::to('user/auth/login');
+		return Redirect::to('user/auth/project');
 });
 
 Route::filter('auth_logined', function($route) {

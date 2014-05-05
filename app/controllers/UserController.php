@@ -37,12 +37,16 @@ class UserController extends BaseController {
 		});
 	}
 	
+	public function project() {
+		return View::make('demo.project');
+	}
+	
 	public function platformLogout() {
 		Auth::logout();
 		return Redirect::to('user/home');
 	}	
 
-	public function platformLoginPage() {
+	public function loginPage($project) {
 		$dddos_error = Input::old('dddos_error');
 		$csrf_error = Input::old('csrf_error');
 		
@@ -52,8 +56,8 @@ class UserController extends BaseController {
 		View::share('dddos_error',$dddos_error);
 		View::share('csrf_error',$csrf_error);
 		$contents = View::make('demo.use.home', array('sql_post'=>array(),'sql_note'=>array()))
-			->nest('child_tab','demo.use.tabs')
-			->nest('context','demo.login')				
+			->nest('child_tab','demo.'.$project.'.tabs')
+			->nest('context','demo.login', array('project'=>$project))				
 			->nest('child_footer','management.footer');		
 		$response = Response::make($contents, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
@@ -62,22 +66,27 @@ class UserController extends BaseController {
 		return $response;
 	}
 	
-	public function platformLoginAuth() {
-		$input = Input::only('username', 'password');		
+	public function login() {
+		$input = Input::only('username', 'password','project');		
 		$rulls = array(
 			'username' => 'required|regex:/[0-9a-zA-Z!@_]/|between:3,20',
-			'password' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:3,20' );
+			'password' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:3,20',
+			'project'  => 'required|alpha',
+		);
 		$rulls_message = array(
 			'username.required' => '帳號必填',
 			'password.required' => '密碼必填',
 			'username.regex' => '帳號格式錯誤',
-			'username.regex' => '密碼格式錯誤'
+			'username.regex' => '密碼格式錯誤',
+			'project.required' => '計畫錯誤',			
 		);
 		$validator = Validator::make($input, $rulls, $rulls_message);
 
 		if( $validator->fails() ){
 			return Redirect::back()->withErrors($validator)->withInput();
 		}
+		
+		$auth_input = Input::only('username', 'password');		
 		
 		/*
 		$user = new User;
@@ -86,9 +95,9 @@ class UserController extends BaseController {
 		$user->save();
 		*/
 		
-		if( Auth::validate($input) ){ 	
-			$input['active'] = 1;
-			if( Auth::attempt($input, true) ){
+		if( Auth::validate($auth_input) ){ 	
+			$auth_input['active'] = 1;
+			if( Auth::attempt($auth_input, true) ){
 				return Redirect::intended('user/home');
 			}else{
 				$validator->getMessageBag()->add('login_error', '帳號尚未開通');
