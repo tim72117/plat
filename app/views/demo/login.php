@@ -5,6 +5,7 @@
 	密碼：<?=Form::password('password', array('placeholder' => '密碼','class' => 'register-block'))?><br />
 	<input type="hidden" name="_token1" value="<?=csrf_token()?>" />
 	<input type="hidden" name="_token2" value="<?=dddos_token()?>" />
+	<input type="hidden" name="project" value="<?=$project?>" />
 	<input type="submit" name="Submit" value="送出">
   </p>
 
