@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-class QuesFile extends File {
+class QuesFile extends CommFile {
 	
 	/**
 	 * @var rows

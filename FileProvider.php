@@ -11,24 +11,30 @@ class FileProvider {
 	 */	
 	public function lists() {
 		//get lists and put session
-		$fileClass = 'app\library\files\v0\RowsFile';
-		if( class_exists($fileClass) ){
-			$actives = $fileClass::get_intent();
-		}		
 		
-		$docs = DB::table('doc_ques')->where('ver','new')->select('id','title','dir')->get();
+	
+		
+		$docs = DB::table('doc')->leftJoin('doc_type','doc.type','=','doc_type.id')->select('doc.id','title','doc_type.class')->get();
+		
+		
 		
 		$packageDocs = array();
 		
 		foreach($docs as $doc){
-			$packageDoc = array('title'=>$doc->title, 'actives'=>array());
-			foreach($actives as $active){
-				$intent_key = $this->get_intent_uniqid();
-				array_push($packageDoc['actives'], array('intent_key'=>$intent_key, 'active'=>$active));
-				$intent = array('active'=>$active,'file_id'=>$doc->id,'fileClass'=>$fileClass);
-				$this->files[$intent_key] = $intent;
-			}
-			array_push($packageDocs, $packageDoc);
+			$fileClass = 'app\\library\\files\\v0\\'.$doc->class;
+			if( class_exists($fileClass) ){
+
+				$actives = $fileClass::get_intent();
+				$packageDoc = array('title'=>$doc->title, 'actives'=>array());
+				foreach($actives as $active){
+					$intent_key = $this->get_intent_uniqid();
+					array_push($packageDoc['actives'], array('intent_key'=>$intent_key, 'active'=>$active));
+					$intent = array('active'=>$active,'file_id'=>$doc->id,'fileClass'=>$fileClass);
+					$this->files[$intent_key] = $intent;
+				}
+				array_push($packageDocs, $packageDoc);
+			}	
+
 		}
 		
 		$this->save_intent();
