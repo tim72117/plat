@@ -37,6 +37,7 @@ class FileController extends BaseController {
 		//$intent = Session::get('file')[$intent_key];
 		//$file_id = $intent['file_id'];
 		//$active = $intent['active'];
+		return $view;
 		return Response::json($view);
 	}
 	

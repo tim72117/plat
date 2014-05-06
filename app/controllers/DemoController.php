@@ -35,10 +35,15 @@ class DemoController extends BaseController {
 	
 	public function home($context = null) {
 		if( $context=='home' ){
-			return View::make('demo.use.main')->nest('context','demo.use.context.intro');
+			$contents = View::make('demo.use.main')->nest('context','demo.use.context.intro');
 		}else{
-			return View::make('demo.use.main')->nest('context','demo.use.context.'.$context);
-		}		
+			$contents = View::make('demo.use.main')->nest('context','demo.use.context.'.$context);
+		}	
+		$response = Response::make($contents, 200);
+		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+		$response->header('Pragma', 'no-cache');
+		$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
+		return $response;
 	}
 
 

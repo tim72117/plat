@@ -14,6 +14,7 @@ class FileManager {
 		$file_id = $intent['file_id'];
 		$active = $intent['active'];
 		$file = new $intent['fileClass'];
+		
 		$file->$active();
 		//echo $active_uniqid;
 	}

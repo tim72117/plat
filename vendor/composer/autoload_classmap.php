@@ -24,6 +24,7 @@ return array(
     'User' => $baseDir . '/app/models/User.php',
     'ViewerController' => $baseDir . '/app/controllers/ViewerController.php',
     'app\\library\\files\\v0\\CommFile' => $baseDir . '/app/library/files/CommFile.php',
+	'app\\library\\files\\v0\\CustomFile' => $baseDir . '/app/library/files/CustomFile.php',
     'app\\library\\files\\v0\\FileActiver' => $baseDir . '/app/library/files/FileActiver.php',
     'app\\library\\files\\v0\\FileManager' => $baseDir . '/app/library/files/FileManager.php',
     'app\\library\\files\\v0\\FileProvider' => $baseDir . '/app/library/files/FileProvider.php',

@@ -74,6 +74,8 @@ Route::get('test', function() {
 		
 		Route::post('user/auth/password/change', array('before' => 'csrf', 'uses' => 'UserController@passwordChange'));
 		
+		Route::get('user/fileManager/{active_uniqid}', 'FileController@fileManager');
+		Route::get('user/fileActiver/{active_uniqid}', 'FileController@fileActiver');
 	});
 	
 	Route::get('user/auth/password/remind', 'UserController@remindPage');
