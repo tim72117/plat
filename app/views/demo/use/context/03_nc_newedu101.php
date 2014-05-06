@@ -7,7 +7,8 @@
 # 維護日期: 20140213
 #
 ##########################################################################################
-
+$value = Session::get('uid');
+echo $value;
  /*session_start();
 	if (!($_SESSION['Login'])){
 		header("Location: ../../index.php");

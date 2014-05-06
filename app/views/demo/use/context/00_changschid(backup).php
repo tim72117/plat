@@ -21,14 +21,18 @@
 	<tr>
 		<td class="intd">
 		  <p>您目前登入的帳號為&nbsp;
-
+         
+		  	<font color="red">
+		  
+          
           		<?
+
 		  			/*$account = $_SESSION['account']; 
 		  			echo $account; */
 		  		?>
-		  	，您好。
+		  	</font>，您好。
 		  </p>
-  </tr>
+	</tr>
 	<tr>
 	  <td class="header2">&nbsp;變更進入學校</td>
 	</tr>
@@ -42,9 +46,11 @@
 				</tr>
 				<tr>
 					<td>
-<form  method="post">
-<form name="form2">
+<form action="auth/00_changschid" method="post">
+<input type="hidden" name="_token1" value="<?=csrf_token()?>" />
+<input type="hidden" name="_token2" value="<?=dddos_token()?>" />
 
+<form name="form2" method="post" action="00_changschid">
 <p align="center" class="style3 style5">請選擇學校，並按送出</p>
 <p align="center">
 <select name="uid" id="uid">
