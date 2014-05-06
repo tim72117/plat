@@ -70,6 +70,7 @@ Route::get('test', function() {
 
 		Route::get('user/auth/logout', 'UserController@platformLogout');
 		Route::get('user/{context}', array('before' => '', 'uses' => 'DemoController@home'));
+		Route::post('user/post/{context}', array('before' => '', 'uses' => 'DemoController@home'));
 		
 		Route::post('user/auth/password/change', array('before' => 'csrf', 'uses' => 'UserController@passwordChange'));
 		
