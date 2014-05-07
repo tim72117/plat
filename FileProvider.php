@@ -4,20 +4,19 @@ use DB, Session;
 class FileProvider {
 	
 	private $files = array();
+	private $intent_hash_table;
 	
+	public function __construct(){
+		$this->intent_hash_table = Session::get('intent_hash_table', array());		
+	}
 	/**
 	 * @var string
 	 * @return
 	 */	
 	public function lists() {
-		//get lists and put session
-		
-	
-		
+		//get lists and put session		
 		$docs = DB::table('doc')->leftJoin('doc_type','doc.type','=','doc_type.id')->select('doc.id','title','doc_type.class')->get();
-		
-		
-		
+				
 		$packageDocs = array();
 		
 		foreach($docs as $doc){
@@ -27,9 +26,10 @@ class FileProvider {
 				$actives = $fileClass::get_intent();
 				$packageDoc = array('title'=>$doc->title, 'actives'=>array());
 				foreach($actives as $active){
-					$intent_key = $this->get_intent_uniqid();
-					array_push($packageDoc['actives'], array('intent_key'=>$intent_key, 'active'=>$active));
 					$intent = array('active'=>$active,'file_id'=>$doc->id,'fileClass'=>$fileClass);
+					$intent_key = $this->get_intent_id($intent);
+					array_push($packageDoc['actives'], array('intent_key'=>$intent_key, 'active'=>$active));					
+					
 					$this->files[$intent_key] = $intent;
 				}
 				array_push($packageDocs, $packageDoc);
@@ -45,9 +45,10 @@ class FileProvider {
 		$create_list = array();
 		$fileClasss = array('QuesFile','RowsFile');		
 		foreach($fileClasss as $fileClass){
-			$intent_key = $this->get_intent_uniqid();
+			$intent = array('active'=>'create','file_id'=>null,'fileClass'=>$fileClass);	
+			$intent_key = $this->get_intent_id($intent);
 			array_push($create_list, array('intent_key'=>$intent_key, 'active'=>$fileClass.'_create'));
-			$intent = array('active'=>'create','file_id'=>null,'fileClass'=>$fileClass);			
+					
 			$this->files[$intent_key]= $intent;
 		}
 		$this->save_intent();
@@ -60,10 +61,19 @@ class FileProvider {
 	
 	private function save_intent() {	
 		Session::put('file',$this->files);
+		Session::put('intent_hash_table',$this->intent_hash_table);
+	}
+	
+	private function get_intent_id($intent) {
+		$intent_hash = md5(serialize($intent));		
+		if( !isset($this->intent_hash_table[$intent_hash]) ){
+			$this->intent_hash_table[$intent_hash] = $this->get_intent_uniqid();
+		}
+		return $this->intent_hash_table[$intent_hash];
 	}
 	
 	private function get_intent_uniqid() {
-		
+				
 		while( true ){
 			$key = md5(uniqid(rand()));		
 			//$key = md5(uniqid());		
