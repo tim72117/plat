@@ -34,6 +34,9 @@ Auth::extend('eloquent.normal', function()
 //Route::group(array('domain' => 'plat.{domain}'), function() {
 
 Route::get('test', function() {
+	$value = Session::get('keyuni', rand(0,1000));
+	Session::put('keyuni', $value);
+	return $value;
 	return View::make('tr_qtree', array('auth'=>'empty', 'root'=>''));
 });
 
@@ -62,6 +65,7 @@ Route::get('test', function() {
 		
 		Route::get('fileManager/{active_uniqid}', 'FileController@fileManager');
 		Route::get('fileActiver/{active_uniqid}', 'FileController@fileActiver');
+
 	});
 	
 	
@@ -69,7 +73,7 @@ Route::get('test', function() {
 	Route::group(array('before' => 'auth_logined'), function() {
 		
 		Route::get('user/fileManager', 'FileController@fileManager');
-		Route::get('user/fileActiver', 'FileController@fileActiver');
+		Route::any('user/fileActiver', 'FileController@fileActiver');
 
 		Route::get('user/auth/logout', 'UserController@platformLogout');
 		Route::get('user/{context}', array('before' => '', 'uses' => 'DemoController@home'));

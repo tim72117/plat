@@ -15,7 +15,7 @@
 	  </tr>
 	  <tr>
 		<td>               
-<form action="03_nc_newedu101" method="post">
+<form action="<?=$fileAcitver->get_post_url()?>" method="post">
 <p align="center">請選擇學校，並按送出</p>
 <p align="center">
 <?PHP								

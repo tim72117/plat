@@ -35,6 +35,7 @@ class FileController extends BaseController {
 		$intent_key = Input::get('f');
 		$fileAcitver = new app\library\files\v0\FileActiver();
 		$view = $fileAcitver->accept($intent_key);
+		View::share('fileAcitver',$fileAcitver);
 		//$intent = Session::get('file')[$intent_key];
 		//$file_id = $intent['file_id'];
 		//$active = $intent['active'];
