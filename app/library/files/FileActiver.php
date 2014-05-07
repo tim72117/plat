@@ -10,7 +10,7 @@ class FileActiver {
 	
 	public function accept($intent_key) {
 		
-
+		var_dump(Session::get('file'));
 		$intent = Session::get('file')[$intent_key];
 		$file_id = $intent['file_id'];
 		$active = $intent['active'];
@@ -20,9 +20,9 @@ class FileActiver {
 			return $file->$active($file_id);
 		}
 		
-		$builderName = $intent['fileClass'].'Builder';
+		//$builderName = $intent['fileClass'].'Builder';
 		
-		return $builderName::view($intent);
+		//return $builderName::view($intent);
 		//$file = new $intent['fileClass'];
 		//$file->$active();
 		//echo $active_uniqid;

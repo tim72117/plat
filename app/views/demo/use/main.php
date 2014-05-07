@@ -156,7 +156,7 @@ foreach($packageDocs as $packageDoc){
 		if( $active['active']=='open' ){
 			echo '<div class="count button" folder="" style="font-size:12px;text-decoration: underline;float:left;margin-left:10px">';
 			//echo '<div class="intent button" intent_key="'.$active['intent_key'].'">'.$active['active'].'</div>';
-			echo '<a href="'.URL::to('user/fileActiver/'.$active['intent_key']).'">'.$active['active'].$packageDoc['title'].'</a> - ';
+			echo '<a href="'.URL::to('user/fileActiver?f='.$active['intent_key']).'">'.$active['active'].$packageDoc['title'].'</a> - ';
 			echo '</div>';
 		}
 		echo '</div>';

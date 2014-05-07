@@ -31,12 +31,19 @@ class FileController extends BaseController {
 		$fileManager->accept($intent_key);
 	}
 	
-	public function fileActiver($intent_key) {
+	public function fileActiver() {
+		$intent_key = Input::get('f');
 		$fileAcitver = new app\library\files\v0\FileActiver();
 		$view = $fileAcitver->accept($intent_key);
 		//$intent = Session::get('file')[$intent_key];
 		//$file_id = $intent['file_id'];
 		//$active = $intent['active'];
+		$response = Response::make($view, 200);
+		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+		$response->header('Pragma', 'no-cache');
+		$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
+		return $response;
+		
 		return $view;
 		return Response::json($view);
 	}

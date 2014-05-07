@@ -27,9 +27,6 @@ class DemoController extends BaseController {
 			$this->config = Config::get('ques::setting');
 			Config::set('database.default', 'sqlsrv');
 			Config::set('database.connections.sqlsrv.database', 'ques_admin');
-			Config::set('auth.table', 'users_normal');
-			Config::set('auth.driver', 'eloquent.normal');
-			Config::set('auth.model', 'Normal');
 		});
 	}
 	

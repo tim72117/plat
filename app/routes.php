@@ -66,7 +66,10 @@ Route::get('test', function() {
 	
 	
 	
-	Route::group(array('before' => 'auth_logined_normal'), function() {
+	Route::group(array('before' => 'auth_logined'), function() {
+		
+		Route::get('user/fileManager', 'FileController@fileManager');
+		Route::get('user/fileActiver', 'FileController@fileActiver');
 
 		Route::get('user/auth/logout', 'UserController@platformLogout');
 		Route::get('user/{context}', array('before' => '', 'uses' => 'DemoController@home'));
@@ -74,8 +77,7 @@ Route::get('test', function() {
 		
 		Route::post('user/auth/password/change', array('before' => 'csrf', 'uses' => 'UserController@passwordChange'));
 		
-		Route::get('user/fileManager/{active_uniqid}', 'FileController@fileManager');
-		Route::get('user/fileActiver/{active_uniqid}', 'FileController@fileActiver');
+		
 	});
 	
 	Route::get('user/auth/password/remind', 'UserController@remindPage');
@@ -106,7 +108,8 @@ Route::get('test', function() {
 	//編輯器-------------------------------------------------------------------------------------------------------------------------------
 	
 //});//domain
-	
+
+	/*
 Route::filter('auth_logined_normal', function($route) {
 	Config::set('database.default', 'sqlsrv');
 	Config::set('database.connections.sqlsrv.database', 'ques_admin');
@@ -116,10 +119,9 @@ Route::filter('auth_logined_normal', function($route) {
 	if( Auth::guest() )
 		return Redirect::to('user/auth/project');
 });
+	 */
 
 Route::filter('auth_logined', function($route) {
-	Config::set('database.default', 'sqlsrv');
-	Config::set('database.connections.sqlsrv.database', 'ques_admin');
 	if( Auth::guest() )
 		return Redirect::to('login');
 });
