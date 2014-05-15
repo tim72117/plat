@@ -1,75 +1,56 @@
 <?
-##########################################################################################
-#
-# filename: modify_fieldwork102.php
-# function: ­×§ï102°ª¤@·s¥Íª¬ºA
-#           1. ÀË¬d¬O§_¤wµn¤J
-#           2. ¦C¥X¿ï¾Ü
-#
-# ºûÅ@ªÌ  : ©P®a¦N
-# ºûÅ@¤é´Á: 2013/11/22
-#
-##########################################################################################
 
-  //¨ú®É¥Ø«e®É¶¡
- /* $now=date("Y/n/d g:i");
+  $table_name = 'tted_edu_102.dbo.graduation101_userinfo';
+  $now = date("Y/n/d g:i");
   
-  session_start();
-  if (!($_SESSION['Login'])) {
-           //¦pªG¥¼µn¤J,«hÅã¥Üµn¤Jµe­±
-           header("Location: ../../index.php");
-  }else{
-	  $user=$_SESSION['sname'];
-	  $sch_id=$_SESSION['sch_id100'];//¾Ç®Õ¥N¸¹
-	  
-	  $table_name = '[tted_edu_102].[dbo].[graduation101_userinfo]';
-		
-		include_once("/home/leon/data/edu/config/use_102/setting.inc.php"); 	
-	 
-	  $sql = new mod_db();
-	  $pmode = $_GET['pmode'];
-	  	  $list_string = "SELECT stdid,udepcode ,udepname ,stdschoolsys ,stdname  ,birthyear,pstat ,qtype ,newcid        
-						  FROM $table_name WHERE uid='$sch_id' " ;
-	 
-	  $pmode = $_GET['pmode'];
-	  switch ($pmode) {  //§PÂ_¿ï¾Ü°õ¦æ¬d¸ß»y¥y
+if (Input::has('pmode')){
+	$pmode = Input::get('pmode');
+	echo 'pmode = '.$pmode.' (if)'; //test
+	  switch ($pmode) {  //åˆ¤æ–·é¸æ“‡åŸ·è¡ŒæŸ¥è©¢èªå¥
 	         case "0":
-	              $list_string = $list_string. " AND pstat=0 "; //²¦·~
+		 	   $resultss = DB::table($table_name)->where('pstat', '=', 0)->get();
+			   $num_all = DB::table($table_name)->where('pstat', '=', 0)->count();
 	         break;
 	         case "1":
-	              $list_string = $list_string. " AND pstat=1 "; //¥¼²¦·~
+		  	   $resultss = DB::table($table_name)->where('pstat', '=', 1)->get();
+			   $num_all = DB::table($table_name)->where('pstat', '=', 1)->count();
 	         break;
 	         default:
-				  $list_string = $list_string. " AND pstat=0 "; //²¦·~
+			   $resultss = DB::table($table_name)->where('pstat', '=', 0)->get();
+			   $num_all = DB::table($table_name)->where('pstat', '=', 0)->count();
 	         break;
-	  }
-	  $list_string= $list_string . "order by stdid asc";
-	  $num_all = $sql->nums("$list_string");*/
+	  }}
+else {
+	$pmode = 0;
+	echo 'pmode = '.$pmode.' (else)';//test
+	$resultss = DB::table($table_name)->where('pstat', '=', 0)->get();
+	$num_all = DB::table($table_name)->where('pstat', '=', 0)->count();
+	}
 ?>
-<html><head>
-<meta http-equiv="Content-Type" content="text/html; charset=big5">
-	<title>¸ê®Æ­×§ï</title>
-<script language="JavaScript" src="../../js/tigra_tables.js"></script>
-<script type="text/javascript" src="../../js/jquery-1.7.1.min.js"></script>   
-<script type="text/javascript" src="../../js/jeditable.js"></script>
+
+
+<script src="<?=asset('js/jquery-1.7.1.min.js')?>"></script>
+<script src="<?=asset('js/jeditable.js')?>"></script>
+<script src="<?=asset('js/tigra_tables.js')?>"></script>
+
 <script type="text/javascript">
 $( function() {
 		$("#all_table").on("mouseover",'th.qtype', function() {
-        	$(this).editable("save_modify_graduation101.php" ,{
-				data   : "{'0':'½Õ¬d¹ï¶H','1':'«D½Õ¬d¹ï¶H'}",
+        	$(this).editable("04_save_modify_graduation101.php" ,{
+				data   : "{'0':'èª¿æŸ¥å°è±¡','1':'éèª¿æŸ¥å°è±¡'}",
     			type   : "select",
 				id        : 'elementid',
 				name      : 'newvalue',
-				tooltip   : 'ÂI¨â¤U¥i­×§ï',
-				cancel    : '¨ú®ø',
-				submit    : '½T©w',
-				indicator : '­×§ï¤¤...',
+				tooltip   : 'é»å…©ä¸‹å¯ä¿®æ”¹',
+				cancel    : 'å–æ¶ˆ',
+				submit    : 'ç¢ºå®š',
+				indicator : 'ä¿®æ”¹ä¸­...',
 				event     : "dblclick",
 				callback : function(value, settings) {
 					var pmode = '<? //echo $pmode; ?>';
 					if(pmode== 0)
 					{
-						if(value.substr(0,9) == '	­×§ï¦¨:½Õ¬d¹ï¶H' ){
+						if(value.substr(0,9) == '	ä¿®æ”¹æˆ:èª¿æŸ¥å°è±¡' ){
 							 $(this).parent().find(":checkbox").prop("disabled",true);
 						 }else{
 							$(this).parent().find(":checkbox").prop("disabled",false);
@@ -78,7 +59,7 @@ $( function() {
 					else
 					{
 						console.log(value);
-						if(value.substr(0,9) == '	­×§ï¦¨:½Õ¬d¹ï¶H' ){
+						if(value.substr(0,9) == '	ä¿®æ”¹æˆ:èª¿æŸ¥å°è±¡' ){
 							 $(this).parent().find(":checkbox").prop("disabled",true);
 						 }else{
 							$(this).parent().find(":checkbox").prop("disabled",false);
@@ -90,32 +71,16 @@ $( function() {
 		 });
 </script>
 <style>
-	a, A:link, a:visited, a:active
-		{color: #0000aa; text-decoration: none; font-family: Tahoma, Verdana; font-size: 11px}
-	A:hover
-		{color: #ff0000; text-decoration: none; font-family: Tahoma, Verdana; font-size: 11px}
-	p, tr, td, ul, li
-		{color: #000000; font-family: Tahoma, Verdana; font-size: 11px}
 	.header1, h1
 		{color: #ffffff; background: #B69866; font-weight: bold; font-family: Tahoma, Verdana; font-size: 13px; margin: 0px; padding: 3px;}
 	.header2, h2
-		{color: #000000; background: #B69866; font-weight: bold; font-family: Tahoma, Verdana; font-size: 12px;}
-	.intd
-		{color: #000000; font-family: Tahoma, Verdana; font-size: 11px; padding-left: 15px;}
-	.head5 {
-color: red;font-family : Verdana, Helvetica, sans-serif;
-font-size : 16pt;
-font-weight : bold; 
-}
-.style3 {color: #FF0000; font-weight: bold; }
-.style4 {color: #0000FF}
-.style11 {font-size: 18px; color: #FF0000; font-weight: bold; }
+		{color: #000000; background: #B69866; font-weight: bold; font-family: Tahoma, Verdana; }
 </style>
 </head>
 <body bottommargin="0" topmargin="0" leftmargin="0" rightmargin="0" marginheight="0" marginwidth="0" bgcolor="white">
 <table cellpadding="3" cellspacing="1" border="0" width="100%" align="center">
 	<tr>
-	  <td class="header2">&nbsp;§ó§ï101¾Ç¦~«×À³©¡²¦·~®v¸ê¥Íª¬ºA</td>
+	  <td class="header2">&nbsp;æ›´æ”¹101å­¸å¹´åº¦æ‡‰å±†ç•¢æ¥­å¸«è³‡ç”Ÿç‹€æ…‹</td>
 	</tr>
 	<tr>
 	  <td>
@@ -127,8 +92,8 @@ font-weight : bold;
 					<td>
 					<table id="menu_table" width="30%" border="1" cellspacing=1 cellpadding=1>
 					<tr>
-						<th scope="col" width="50%" <?if ($pmode==0) {echo "bgcolor=#F0F0FD";} else {echo "bgcolor=#ffffff";}?>><span class="head2"><a href="<? //echo $_SERVER['PHP_SELF'].'?pmode=0' ?>">101¾Ç¦~«×À³©¡²¦·~®v¸ê¥Í¦W³æ</a></span></th>
-								<th scope="col" width="50%" <?if ($pmode==1) {echo "bgcolor=#F0F0FD";} else {echo "bgcolor=#ffffff";}?>><span class="head2"><a href="<? //echo $_SERVER['PHP_SELF'].'?pmode=1' ?>">¤w§R°£101¾Ç¦~«×À³©¡²¦·~®v¸ê¥Í¦W³æ</a></span></th>
+						<th scope="col" width="50%" <? if ($pmode==0) {echo "bgcolor=#F0F0FD";} else {echo "bgcolor=#ffffff";}?>><span class="head2"><a href="04_modify_graduation101?pmode=0">101å­¸å¹´åº¦æ‡‰å±†ç•¢æ¥­å¸«è³‡ç”Ÿåå–®</a></span></th>
+								<th scope="col" width="50%" <? if ($pmode==1) {echo "bgcolor=#F0F0FD";} else {echo "bgcolor=#ffffff";}?>><span class="head2"><a href="04_modify_graduation101?pmode=0">å·²åˆªé™¤101å­¸å¹´åº¦æ‡‰å±†ç•¢æ¥­å¸«è³‡ç”Ÿåå–®</a></span></th>
 							</tr>
 			</table>
 					</td>
@@ -140,66 +105,53 @@ font-weight : bold;
 			<table cellpadding=4 cellspacing=0 border=0 align="left" width="95%">
 				<tr>
 				<td>
-				<form name="form2" method="post" action="modify_data.php">
-			  	  <p><font color="#FF0000"><? //echo $user; ?> </font>±z¦n¡G¶Q®Õ¥Ø«e¦@¦³ <font color="blue" size="+3"><? echo $num_all;?></font> ¦ìª¬ºA¬°&lt;<font color="red"><?php //if($pmode==1){ echo "«D101¾Ç¦~«×À³©¡²¦·~®v¸ê¥Í";}else{ echo "101¾Ç¦~«×À³©¡²¦·~®v¸ê¥Í";} ?></font>&gt;¤§101¾Ç¦~«×À³©¡²¦·~®v¸ê¥Í</p>
-			    <input type="hidden" name="stu_mode" value="<?php //if($pmode==1){ echo "0";}else{ echo "1";}?>">
-						<span class="head5"></span><?php //if($pmode==1){ echo "½Ğ¤Ä¿ï­n<<font color=\"red\">´_­ì§R°£</font>>¤§¤H­û";}else{ echo "½Ğ¤Ä¿ï­n<<font color=\"red\">§R°£</font>>¤§¤H­û";}?>¡A¤Ä¿ï§¹²¦½Ğ«ö³Ì¤U¤è©Î¥k¤è¤§°e¥X«ö¶s¡C
-						<input type="submit" name="Submit2" value="°e¥X">
+				<form name="form2" method="post" action="04_modify_data.php">
+			  	  <p><font color="#FF0000"><? //echo $user; ?> </font>æ‚¨å¥½ï¼šè²´æ ¡ç›®å‰å…±æœ‰ <font color="blue" size="+3"><? echo $num_all;?></font> ä½ç‹€æ…‹ç‚º&lt;<font color="red"><?php if($pmode==1){ echo "é101å­¸å¹´åº¦æ‡‰å±†ç•¢æ¥­å¸«è³‡ç”Ÿ";}else{ echo "101å­¸å¹´åº¦æ‡‰å±†ç•¢æ¥­å¸«è³‡ç”Ÿ";} ?></font>&gt;ä¹‹101å­¸å¹´åº¦æ‡‰å±†ç•¢æ¥­å¸«è³‡ç”Ÿ</p>
+			    <input type="hidden" name="stu_mode" value="<?php if($pmode==1){ echo "0";}else{ echo "1";}?>">
+						<span class="head5"></span><?php if($pmode==1){ echo "è«‹å‹¾é¸è¦<<font color=\"red\">å¾©åŸåˆªé™¤</font>>ä¹‹äººå“¡";}else{ echo "è«‹å‹¾é¸è¦<<font color=\"red\">åˆªé™¤</font>>ä¹‹äººå“¡";}?>ï¼Œå‹¾é¸å®Œç•¢è«‹æŒ‰æœ€ä¸‹æ–¹æˆ–å³æ–¹ä¹‹é€å‡ºæŒ‰éˆ•ã€‚
+						<input type="submit" name="Submit2" value="é€å‡º">
 						<input type="hidden" name="degree" value="3"/>
 						<br>
 		  	      <table width="100%" border="1" id="all_table" cellpadding="2">
 		            <tr class="header1">
-                    				<th width="5%" scope="col" >¿ï¾Ü</th>
-									<th width="10%" scope="col" align="center">¾Ç¸¹</th>
-                                    <th width="10%" scope="col" align="center">¬ì¨t©Ò¥N½X</th>
-                                    <th width="10%" scope="col" align="center">¬ì¨t¤¤¤å¦WºÙ</th>
-                                    <th width="10%" scope="col" align="center">¾Ç¨î§O</th>
-									<th width="10%" scope="col" align="center">©m¦W</th>
-                                    <th width="10%" scope="col" align="center">¥X¥Í¦~</th>
-									<th width="20%" scope="col" align="center">¬O/§_½Õ¬d¹ï¶H</th>
-								    <th width="15%" scope="col">¥Ø«eª¬ºA</th>
+                    				<th width="5%" scope="col" >é¸æ“‡</th>
+									<th width="10%" scope="col" align="center">å­¸è™Ÿ</th>
+                                    <th width="10%" scope="col" align="center">ç§‘ç³»æ‰€ä»£ç¢¼</th>
+                                    <th width="10%" scope="col" align="center">ç§‘ç³»ä¸­æ–‡åç¨±</th>
+                                    <th width="10%" scope="col" align="center">å­¸åˆ¶åˆ¥</th>
+									<th width="10%" scope="col" align="center">å§“å</th>
+                                    <th width="10%" scope="col" align="center">å‡ºç”Ÿå¹´</th>
+									<th width="20%" scope="col" align="center">æ˜¯/å¦èª¿æŸ¥å°è±¡</th>
+								    <th width="15%" scope="col">ç›®å‰ç‹€æ…‹</th>
 		            </tr>
 <?
-	 /* $all_query = $sql->query("$list_string");
-		$dep = 0;
-	
+	 
 		if ($pmode == 0)
-			$std_pstat = '101¾Ç¦~«×À³©¡²¦·~®v¸ê¥Í';
+			$std_pstat = '101å­¸å¹´åº¦æ‡‰å±†ç•¢æ¥­å¸«è³‡ç”Ÿ';
 		else
-			$std_pstat = '«D101¾Ç¦~«×À³©¡²¦·~®v¸ê¥Í';
+			$std_pstat = 'é101å­¸å¹´åº¦æ‡‰å±†ç•¢æ¥­å¸«è³‡ç”Ÿ';
 	
-	    while ($obj_all = $sql->objects('',$all_query)){
+		foreach ($resultss as $results){
 
-		 //¥ğ°h¾Ç¨ä¥¦
-		if($obj_all->qtype == 0)
-			{$qtype ='½Õ¬d¹ï¶H';}
-		else if($obj_all->qtype == 1)
-			{$qtype ='«D½Õ¬d¹ï¶H';}
+		 //ä¼‘é€€å­¸å…¶å®ƒ
+		if($results->qtype == 0)
+			{$qtype ='èª¿æŸ¥å°è±¡';}
+		else if($results->qtype == 1)
+			{$qtype ='éèª¿æŸ¥å°è±¡';}
 				  
-			echo "<tr>";
-			if($qtype == '½Õ¬d¹ï¶H' && $pmode == 0){
-				echo "<td align=center><input type=\"checkbox\" name=junior[] value=". $obj_all->newcid ."  disabled></td>\n";
-			}
-			elseif($qtype != '«D½Õ¬d¹ï¶H' && $pmode == 1)
-			{
-				echo "<td align=center><input type=\"checkbox\" name=junior[] value=". $obj_all->newcid ." disabled></td>\n";
-			}
-			else
-			{
-				echo "<td align=center><input type=\"checkbox\" name=junior[] value=". $obj_all->newcid ." ></td>\n";
-			}
-			echo "<td scope=col align=center>&nbsp;&nbsp;&nbsp;".$obj_all->stdid. "</td>\n";
-			echo "<td scope=col align=center>&nbsp;&nbsp;&nbsp;".$obj_all->udepcode. "</td>\n";
-			echo "<td scope=col align=center>&nbsp;&nbsp;&nbsp;".$obj_all->udepname. "</td>\n";
-			echo "<td scope=col align=center>".$obj_all->stdschoolsys ."</td>\n";
-			echo "<td scope=col align=center>&nbsp;&nbsp;&nbsp;".$obj_all->stdname . "</font></td>\n";	
-			echo "<td scope=col align=center>&nbsp;&nbsp;&nbsp;".$obj_all->birthyear. "</font></td>\n";		
+		
+			echo "<td scope=col align=center>&nbsp;&nbsp;&nbsp;".$results->stdid. "</td>\n";
+			echo "<td scope=col align=center>&nbsp;&nbsp;&nbsp;".$results->udepcode. "</td>\n";
+			echo "<td scope=col align=center>&nbsp;&nbsp;&nbsp;".$results->udepname. "</td>\n";
+			echo "<td scope=col align=center>".$results->stdschoolsys ."</td>\n";
+			echo "<td scope=col align=center>&nbsp;&nbsp;&nbsp;".$results->stdname . "</font></td>\n";	
+			echo "<td scope=col align=center>&nbsp;&nbsp;&nbsp;".$results->birthyear. "</font></td>\n";		
 			
-		if($qtype == '½Õ¬d¹ï¶H'){
-				echo "<th class=qtype id=$obj_all->newcid  scope=col align=center><font color=\"#990000\">".$qtype.' ½ĞÂI¿ï¨â¤U'. "</th >\n";
+		if($qtype == 'èª¿æŸ¥å°è±¡'){
+				echo "<th class=qtype id=$results->newcid  scope=col align=center><font color=\"#990000\">".$qtype.' è«‹é»é¸å…©ä¸‹'. "</th >\n";
 			}
-		else if($qtype == '«D½Õ¬d¹ï¶H'){
-				echo "<th class=qtype id=$obj_all->newcid  scope=col align=center><font color=\"FF8040\">".$qtype.' ½ĞÂI¿ï¨â¤U'. "</th >\n";
+		else if($qtype == 'éèª¿æŸ¥å°è±¡'){
+				echo "<th class=qtype id=$results->newcid  scope=col align=center><font color=\"FF8040\">".$qtype.' è«‹é»é¸å…©ä¸‹'. "</th >\n";
 			}
 		
 		
@@ -214,11 +166,10 @@ font-weight : bold;
 	
 			echo "</tr>";
 	  }
-	  $sql->disconnect();*/
 ?>
         </table>
 	      <p>
-	        <input type="submit" name="Submit" value="°e¥X"/>
+	        <input type="submit" name="Submit" value="é€å‡º"/>
 		  </p>
 	    </form>
 	    <p></p>

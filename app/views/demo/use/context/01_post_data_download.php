@@ -42,12 +42,12 @@ $type ='';
 <?    echo '標題 :'."<font color=\"#FF0000\">".$results->title."</font>".
 		 "　公告時間 : ".date("Y-m-d",strtotime($results->uploadtime))."。";
 	  echo Form::submit('按此下載');  
-}?>
+?>
 <input name="file" type="hidden" id="hiddenField" value=<? echo $results->filename;
 ?> />
 
 </form>
-
+<? } ?>
   </td>
 </tr>
 </table>
