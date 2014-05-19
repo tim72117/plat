@@ -10,7 +10,7 @@
     include("/home/leon/data/edu/config/use_102/setting.inc.php"); 
 	 	
 		$sql1 = new mod_db();
-		
+*/		
 		$obj1=$sql1->objects("SELECT [uid],[uname],[totalnum],[returnnum],[return_percent] 
 							FROM [tted_edu_102].[dbo].[fieldwork102_公私立回收率] where uid='$sch_id'");
 		
