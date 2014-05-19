@@ -47,6 +47,7 @@ foreach($docs as $doc){
 	$docsTable .= '<td><a href="platform/'.$doc->dir.'/demo">demo</a></td>';
 	$docsTable .= '<td><a href="platform/'.$doc->dir.'/show">showdata</a></td>';
 	$docsTable .= '<td><a href="platform/'.$doc->dir.'/codebook">codebook</a></td>';  
+	$docsTable .= '<td><a href="platform/'.$doc->dir.'/spss">spss</a></td>';  
 	$docsTable .= '<td><a href="platform/'.$doc->dir.'/traffic">receives</a></td>';  
 	$docsTable .= '<td><a href="platform/'.$doc->dir.'/report">report</a>( '.$reports_num.' )</td>';  
 	if( is_file($pageinfo_path) ){
@@ -77,7 +78,8 @@ foreach($docs as $doc){
 		<th width="200">目錄</th>
 		<th width="90">預覽問卷</th>
 		<th width="90">填答值</th> 
-		<th width="90">codebook</th>
+		<th width="100">codebook</th>
+		<th width="60">spss</th>
 		<th width="80">回收數</th>
 		<th width="100">問題回報</th>
 		<th width="150">文件檔最後更新</th>

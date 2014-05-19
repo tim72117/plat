@@ -11,6 +11,8 @@ class FileActiver {
 	
 	public function accept($intent_key) {
 		
+		
+			
 		$this->intent_key = $intent_key;
 		$intent = Session::get('file')[$intent_key];
 		$file_id = $intent['file_id'];

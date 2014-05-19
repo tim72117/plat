@@ -33,6 +33,9 @@ class FileController extends BaseController {
 	
 	public function fileActiver() {
 		$intent_key = Input::get('f');
+		if( !Session::has('file.'.$intent_key) )
+			return $this->timeOut();
+		
 		$fileAcitver = new app\library\files\v0\FileActiver();
 		$view = $fileAcitver->accept($intent_key);
 		View::share('fileAcitver',$fileAcitver);
@@ -47,6 +50,10 @@ class FileController extends BaseController {
 		
 		return $view;
 		return Response::json($view);
+	}
+	
+	public function timeOut() {
+		return View::make('demo.timeout');
 	}
 	
 

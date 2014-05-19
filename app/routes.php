@@ -33,11 +33,38 @@ Auth::extend('eloquent.normal', function()
 
 //Route::group(array('domain' => 'plat.{domain}'), function() {
 
-Route::get('test', function() {
-	$value = Session::get('keyuni', rand(0,1000));
-	Session::put('keyuni', $value);
-	return $value;
-	return View::make('tr_qtree', array('auth'=>'empty', 'root'=>''));
+Route::get('registGCM', function() {
+	
+});
+
+Route::get('sentGCM', function() {
+	echo Form::open(array('url' => 'sentGCM'));
+	echo Form::text('message', '');
+	echo Form::submit('Click Me!');
+	echo Form::close();
+});
+Route::post('sentGCM', function() {
+	$url = 'https://android.googleapis.com/gcm/send';
+	$apiKey = 'AIzaSyDNL87CW-gE2UctY7FlKKaJPgvhFGWnclc';
+	$fields = array('registration_ids'  => array('APA91bHKFB6OE0qROz5ulRZniM7-W7dsvx1QwLJc16CaV3A9E6IVUAilgDXmpWOQxLrO_RJK-45uEjzNVRpJpVpJ2bKuRgRmwxcUQF96VIuC72BWz2MdNxXscAyI1Y2w7gQL4YsJCpReJQobT0UKhE3zxA2Ss-pimg'),
+                    'data'              => array('message' => Input::get('message',''))
+              );
+	$headers = array('Content-Type: application/json',
+                     'Authorization: key='.$apiKey
+               );
+	$ch = curl_init();
+    // Set the url, number of POST vars, POST data
+    curl_setopt( $ch, CURLOPT_URL, $url );
+    curl_setopt( $ch, CURLOPT_POST, true );
+	curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, FALSE); 
+    curl_setopt( $ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+    curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode($fields));
+ 
+    // 送出 post, 並接收回應, 存入 $result	
+    $result = curl_exec($ch);
+	var_dump($result);	
+	curl_close($ch);
 });
 
 	//平台-------------------------------------------------------------------------------------------------------------------------------
@@ -59,6 +86,7 @@ Route::get('test', function() {
 		Route::get('{root}/demo', array('before' => 'folder_ques', 'uses' => 'HomeController@demo'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/show', array('before' => 'folder_ques|loginAdmin', 'uses' => 'ViewerController@showData'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/codebook', array('before' => 'folder_ques', 'uses' => 'ViewerController@codebook'))->where('root', '[a-z0-9_]+');
+		Route::get('platform/{root}/spss', array('before' => 'folder_ques', 'uses' => 'ViewerController@spss'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/traffic', array('before' => 'folder_ques', 'uses' => 'ViewerController@traffic'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/report', array('before' => 'folder_ques', 'uses' => 'ViewerController@report'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/report_solve', array('before' => 'folder_ques', 'uses' => 'ViewerController@report_solve'))->where('root', '[a-z0-9_]+');
@@ -76,8 +104,8 @@ Route::get('test', function() {
 		Route::any('user/fileActiver', 'FileController@fileActiver');
 
 		Route::get('user/auth/logout', 'UserController@platformLogout');
-		Route::get('user/{context}', array('before' => '', 'uses' => 'DemoController@home'));
-		Route::post('user/{context}', array('before' => '', 'uses' => 'DemoController@home'));
+		Route::get('demo/{project}/{context}', array('before' => '', 'uses' => 'DemoController@home'))->where('project', '[a-z]+');
+		Route::post('demo/{project}/{context}', array('before' => '', 'uses' => 'DemoController@home'))->where('project', '[a-z]+');
 		
 		Route::post('user/auth/password/change', array('before' => 'csrf', 'uses' => 'UserController@passwordChange'));
 		

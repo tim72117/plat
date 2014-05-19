@@ -32,6 +32,11 @@ class ViewerController extends BaseController {
 		return View::make('management.ques.codebook')->nest('child_tab','management.tabs',array('pagename'=>'index'));
 	}
 	
+	public function spss() {
+		View::share('config',$this->config);
+		return View::make('management.ques.spss')->nest('child_tab','management.tabs',array('pagename'=>'index'));
+	}
+	
 	public function updatetime() {
 		$newpage = new app\library\page;		
 		$newpage->root = $this->dataroot.$this->root;

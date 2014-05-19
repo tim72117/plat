@@ -1,20 +1,23 @@
 <?php
 namespace app\library\files\v0;
-use DB, Session;
+use DB, Session, Auth;
 class FileProvider {
 	
 	private $files = array();
 	private $intent_hash_table;
+	private $id_user;
 	
 	public function __construct(){
-		$this->intent_hash_table = Session::get('intent_hash_table', array());		
+		$this->intent_hash_table = Session::get('intent_hash_table', array());	
+		$this->id_user = Auth::user()->id;
 	}
 	/**
 	 * @var string
 	 * @return
 	 */	
 	public function lists() {
-		//get lists and put session		
+		//get lists and put session	
+		//$docs = DB::table('doc')->leftJoin('doc_type','doc.type','=','doc_type.id')->where('doc.owner',$this->id_user)->select('doc.id','title','doc_type.class')->get();
 		$docs = DB::table('doc')->leftJoin('doc_type','doc.type','=','doc_type.id')->select('doc.id','title','doc_type.class')->get();
 				
 		$packageDocs = array();

@@ -125,7 +125,7 @@ a:hover{color:#FFFFFF;background-color: #FF6600;text-decoration: none;}
 	<div style="width:100%;height: 130px;position: absolute;z-index:10;background-color: #fff">
 		<div style="background-color: #fff;width:100%;height: 80px"><img src="<?=asset('demo/use/images/title.jpg')?>" width="500" height="80"></div>
 		<div style="background-color: #eee;width:100%;height: 20px;border-bottom: 1px solid #ddd" align="right">
-	    	&nbsp;<a href="auth/logout" target="_top">登出</a>&nbsp;|&nbsp;<a href="https://use-database.cher.ntnu.edu.tw/use/" target="_top">回台灣後期中等教育資料庫整合計畫首頁</a>
+	    	&nbsp;<a href="auth/logout" target="_top">登出</a>&nbsp;|&nbsp;<a href="https://tted.cher.ntnu.edu.tw/edu/" target="_top">回臺灣師資培育資料庫 學校查詢平台首頁</a>
         </div>
 	</div>
 	
@@ -133,70 +133,86 @@ a:hover{color:#FFFFFF;background-color: #FF6600;text-decoration: none;}
 		
 		<div style="height:100%;overflow-y: hidden;float:left">
 			<div style="width: 350px;height:100%;background-color: #fff;border-right: 1px solid #ddd;overflow-y: auto">
-				<div id ="Layer1">
+		  <div id ="Layer1">
 					<h5>聯絡人查詢及修改</h5>
 						<div>
 						<ul>
 							<? /*<p><li id="links"><a href="<?php // echo URL::to('changepasswd'); ?>" pageid="1" src="">更改密碼</a></li></p>*/ ?>
-							<p><li id="links"><a href="changepasswd" pageid="1" src="">更改密碼</a></li></p>
+							<p><li id="links"><a href="01_changepasswd" pageid="1" src="">更改密碼</a></li></p>
 						</ul>
 						</div>
-					 <h5>下載資料</h5>
-						<div>
-						<ul>
-							<p><li id="links"><a href="post_data_download" pageid="1" src="">102年度所有調查文件及文宣下載</a></li></p>
-						</ul>
-						</div>
-					 <h5>上傳資料</h5>
-						<div>
-						<ul>
-							<p><li id="links"><a href="up102seniorOne" pageid="1" src="">102學年入學新生名單</a></li></p>                  
-						</ul>
-						</div>
-					<h5>101年_資料瀏覽與下載</h5>
-						<div>
-						<ul>
-							<p><li id="links"><a href="101grade_lottery.pdf" pageid="1" src="">101學年度新生調查中獎名單</a></li></p>
-							<p><li id="links"><a href="101par_lottery.pdf" pageid="1" src="">101學年度高二及專二家長調查中獎名單</a></li></p>
-							<p><li id="links"><a href="101tutor_lottery.pdf" pageid="1" src="">101學年度高二及專二導師調查中獎名單</a></li></p>
-							<p><li id="links"><a href="101soph_lottery.pdf" pageid="1" src="">101學年度高二及專二學生調查中獎名單</a></li></p>
-							<p><li id="links"><a href="101_award documents.pdf" pageid="1" src="">101高二(專二)導師、學生調查敘獎公文</a></li></p>
-						</ul>
-						</div> 
-					<h5>名單狀態修改</h5>
-						<div>
-						<ul>
-							<p><li id="links"><a href="modify_102seniorOne" pageid="1" src="">102學年度入學新生名單狀態更改</a></li></p>                  
-						</ul>
-						</div>	
-					<h5>查詢進行中調查名單與填寫狀況</h5>
-                	<div id="Layer2">
-                        <h4>102高一基本資料普查</h4>
-                        <div>
-                            <ul>
-                                <p><li id="links"><a href="return_102seniorOne" pageid="1" src="">本校回收率</a></li></p>
-                                <p><li id="links"><a href="nc_102seniorOne" pageid="1" src="">填答狀況</a></li></p>
-                            </ul>
-                        </div>
-                        <h4>102高二基本資料普查</h4>
-                        <div>
-                            <ul>
-                                <p><li id="links"><a href="return_102seniorOne" pageid="1" src="">本校回收率</a></li></p>
-                                <p><li id="links"><a href="nc_102seniorOne" pageid="1" src="">填答狀況</a></li></p>
-                            </ul>
-                        </div>
-                     </div>
+
+                     
+<div id="Layer4">
+ <h4>【 師培查詢平台 】</h4>
+ <?
+$user = new app\library\files\v0\User();
+$packageDocs = $user->get_file_provider()->lists();
+
+foreach($packageDocs as $packageDoc){
+	foreach($packageDoc['actives'] as $active){		
+		
+		echo '<div class="inbox" style="clear:both;overflow: hidden;cursor:default">';
+		if( $active['active']=='open' ){
+			echo '<div class="count button" folder="" style="font-size:12px;text-decoration: underline;float:left;margin-left:10px">';
+			//echo '<div class="intent button" intent_key="'.$active['intent_key'].'">'.$active['active'].'</div>';
+			echo '<a href="'.URL::to('user/fileActiver?f='.$active['intent_key']).'">'.$active['active'].$packageDoc['title'].'</a> - ';
+			echo '</div>';
+		}
+		echo '</div>';
+	}
+}
+ ?>
+ <div>
+   <ul>
+     <p>各校師培中心聯絡人選單
+       <li id="links"><a href="00_changschid" pageid="1" src="">選擇學校</a></li></p>
+       <li id="links"><a href="01_post_data_download" pageid="1" src="">調查文件及文宣下載</a></li></p>
+    </ul>
+</div>
+ <div>
+   <ul>
+     <p>本校師資生基本資料上傳及下載<br>
+      <li id="links"><a href="return_102seniorOne" pageid="1" src="">101學年度新進師資生資料</a></li></p>
+      <li id="links"><a href="return_102seniorOne" pageid="1" src="">101學年度應屆畢業師資生資料</a></li></p>
+      <li id="links"><a href="return_102seniorOne" pageid="1" src="">102年實習師資生資料</a></li></p>
+      <li id="links"><a href="return_102seniorOne" pageid="1" src="">102學年度應屆畢業師資生資料</a></li></p>
+    </ul>
+</div>
+ 
+  <div>
+   <!--<ul>
+    <p>回收情形查詢<br>
+     <li id="links"><a href="03_return_field_newedu_grade" pageid="1" src="">本校及全國回收率</a></li></p>
+     <li id="links"><a href="03_nc_newedu101" pageid="1" src="">101學年度新進師資生填答情況</a></li></p>
+     <li id="links"><a href="03_nc_fieldwork102" pageid="1" src="">102年實習師資生填答情況</a></li></p>
+     <li id="links"><a href="03_nc_graduation102" pageid="1" src="">102學年度應屆畢業師資生填答情況</a></li></p>
+    </ul>-->
+  </div>
+  
+  <div>
+   <ul>
+    <p>更改學生狀態<br>
+     <li id="links"><a href="04_modify_newedu101" pageid="1" src="">101學年度新進師資生資料</a></li></p>
+     <li id="links"><a href="04_modify_graduation101" pageid="1" src="">101學年度新進師資生填答情況</a></li></p>
+     <li id="links"><a href="04_modify_fieldwork102" pageid="1" src="">102年實習師資生填答情況</a></li></p>
+     <li id="links"><a href="04_modify_graduation102" pageid="1" src="">102學年度應屆畢業師資生填答情況</a></li></p>
+    </ul>
+  </div>
+</div>
+                     
+                     
 				</div>
 			</div>
 		</div>
 
 		<div style="height: 100%;overflow-y: hidden;margin-left: 200px">
 			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:14px;text-align: left">
-				<?=$context?>
+<?=$context?>
 				<table style="width:100%" cellpadding="0" cellspacing="0">
 					<thead>
 						<tr>
-							<div id='pageLoad'><? echo Session::get('sch_id'); ?></div>
+							<div id='pageLoad'><? //echo Session::get('sch_id'); ?></div>
 						</tr>
 					</thead>
 					<tbody>
