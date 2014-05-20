@@ -52,7 +52,7 @@ class UserController extends BaseController {
 		
 		View::share('dddos_error',$dddos_error);
 		View::share('csrf_error',$csrf_error);
-		$contents = View::make('demo.use.home', array('sql_post'=>array(),'sql_note'=>array()))
+		$contents = View::make('demo.'.$project.'.home', array('sql_post'=>array(),'sql_note'=>array()))
 			->nest('child_tab','demo.'.$project.'.tabs')
 			->nest('context','demo.login', array('project'=>$project))				
 			->nest('child_footer','management.footer');		
@@ -64,17 +64,17 @@ class UserController extends BaseController {
 	}
 	
 	public function login() {
-		$input = Input::only('username', 'password','project');		
+		$input = Input::only('email', 'password', 'project');		
 		$rulls = array(
-			'username' => 'required|regex:/[0-9a-zA-Z!@_]/|between:3,20',
+			'email' => 'required|email',
 			'password' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:3,20',
 			'project'  => 'required|alpha',
 		);
 		$rulls_message = array(
-			'username.required' => '帳號必填',
+			'email.required' => '電子郵件必填',
+			'email.email' => '電子郵件格式錯誤',
 			'password.required' => '密碼必填',
-			'username.regex' => '帳號格式錯誤',
-			'username.regex' => '密碼格式錯誤',
+			'password.regex' => '密碼格式錯誤',						
 			'project.required' => '計畫錯誤',			
 		);
 		$validator = Validator::make($input, $rulls, $rulls_message);
@@ -83,7 +83,7 @@ class UserController extends BaseController {
 			return Redirect::back()->withErrors($validator)->withInput();
 		}
 		
-		$auth_input = Input::only('username', 'password');		
+		$auth_input = Input::only('email', 'password');		
 		
 		/*
 		$user = new User;
@@ -95,7 +95,7 @@ class UserController extends BaseController {
 		if( Auth::validate($auth_input) ){ 	
 			$auth_input['active'] = 1;
 			if( Auth::attempt($auth_input, true) ){
-				return Redirect::intended('user/home');
+				return Redirect::intended('user/doc');
 			}else{
 				$validator->getMessageBag()->add('login_error', '帳號尚未開通');
 				return Redirect::back()->withErrors($validator)->withInput();
@@ -115,8 +115,8 @@ class UserController extends BaseController {
 	public function remind() {
 		$credentials = array('email' => Input::get('email'));
 		return Password::remind($credentials, function($message) {
-				$message->subject('Password Reminder');
-			});
+			$message->subject('Password Reminder');
+		});
 	}
 	
 	public function resetPage($token) {

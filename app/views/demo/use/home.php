@@ -70,7 +70,7 @@
  	<tr>
         <td width="50%"></td>
         <td width="10%">
-        <div id="twcaseal" class="BIG"><img src="BIG.gif"/></div>
+        <div id="twcaseal" class="SMALL"><img src="<?=asset('images/twca.gif')?>"/></div>
         <script type="text/javascript" src="//ssllogo.twca.com.tw/twcaseal_v3.js"
         charset="utf-8"></script>
         </td>

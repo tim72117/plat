@@ -1,7 +1,7 @@
 <form action="login" method="post">
 	
   <p align="center">
-	帳號：<?=Form::text('username', Input::old('username',''), array('placeholder' => '帳號','class' => 'register-block'))?><br />
+	電子郵件：<?=Form::text('email', Input::old('email',''), array('placeholder' => '電子郵件','class' => 'register-block'))?><br />
 	密碼：<?=Form::password('password', array('placeholder' => '密碼','class' => 'register-block'))?><br />
 	<input type="hidden" name="_token1" value="<?=csrf_token()?>" />
 	<input type="hidden" name="_token2" value="<?=dddos_token()?>" />

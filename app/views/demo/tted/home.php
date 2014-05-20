@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=10" />
 <meta http-equiv="X-UA-Compatible" content="IE=9" />
 <meta http-equiv="X-UA-Compatible" content="IE=8" />
-<title>後期中等教育資料庫資料查詢平台</title>
+<title>師資培育資料庫資料查詢平台</title>
 
 <script type = "text/javascript">
 
@@ -16,7 +16,7 @@
 </head>
 	
 <body bottommargin="0" topmargin="0" leftmargin="0" rightmargin="0" marginheight="0" marginwidth="0" bgcolor="white">
-<p align="center"><img src="<?=asset('demo/use/images/title.jpg')?>" width="558" height="114"></p>
+<p align="center"><img src="<?=asset('demo/tted/images/header_bg.jpg')?>" width="800"></p>
 
 <body bgcolor="white" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginwidth="0" marginheight="0" class="intd">
 <table cellpadding="3" cellspacing="1" border="1" width="50%" align="center">
@@ -70,7 +70,7 @@
  	<tr>
         <td width="50%"></td>
         <td width="10%">
-        <div id="twcaseal" class="BIG"><img src="BIG.gif"/></div>
+        <div id="twcaseal" class="SMALL"><img src="<?=asset('images/twca.gif')?>"/></div>
         <script type="text/javascript" src="//ssllogo.twca.com.tw/twcaseal_v3.js"
         charset="utf-8"></script>
         </td>

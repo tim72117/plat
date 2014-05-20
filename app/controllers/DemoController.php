@@ -32,7 +32,7 @@ class DemoController extends BaseController {
 	
 	public function home($context = null) {
 		$project = Auth::user()->project;
-		if( $context=='home' ){
+		if( $context==null ){
 			$contents = View::make('demo.'.$project.'.main')->nest('context','demo.'.$project.'.context.intro');
 		}else{
 			$contents = View::make('demo.'.$project.'.main')->nest('context','demo.'.$project.'.context.'.$context);
