@@ -145,7 +145,7 @@ a:hover{color:#FFFFFF;background-color: #FF6600;text-decoration: none;}
                      
 <div id="Layer4">
  <h4>【 師培查詢平台 】</h4>
- <?
+<?
 $user = new app\library\files\v0\User();
 $packageDocs = $user->get_file_provider()->lists();
 
@@ -156,13 +156,14 @@ foreach($packageDocs as $packageDoc){
 		if( $active['active']=='open' ){
 			echo '<div class="count button" folder="" style="font-size:12px;text-decoration: underline;float:left;margin-left:10px">';
 			//echo '<div class="intent button" intent_key="'.$active['intent_key'].'">'.$active['active'].'</div>';
-			echo '<a href="'.URL::to('user/fileActiver?f='.$active['intent_key']).'">'.$active['active'].$packageDoc['title'].'</a> - ';
+			echo '<a href="'.URL::to('user/doc/'.$active['intent_key']).'">'.$active['active'].$packageDoc['title'].'</a> - ';
 			echo '</div>';
 		}
 		echo '</div>';
 	}
 }
- ?>
+?>
+<!-- 
  <div>
    <ul>
      <p>各校師培中心聯絡人選單
@@ -179,15 +180,15 @@ foreach($packageDocs as $packageDoc){
       <li id="links"><a href="return_102seniorOne" pageid="1" src="">102學年度應屆畢業師資生資料</a></li></p>
     </ul>
 </div>
- 
+
   <div>
-   <!--<ul>
+<ul>
     <p>回收情形查詢<br>
      <li id="links"><a href="03_return_field_newedu_grade" pageid="1" src="">本校及全國回收率</a></li></p>
      <li id="links"><a href="03_nc_newedu101" pageid="1" src="">101學年度新進師資生填答情況</a></li></p>
      <li id="links"><a href="03_nc_fieldwork102" pageid="1" src="">102年實習師資生填答情況</a></li></p>
      <li id="links"><a href="03_nc_graduation102" pageid="1" src="">102學年度應屆畢業師資生填答情況</a></li></p>
-    </ul>-->
+    </ul>
   </div>
   
   <div>
@@ -199,6 +200,7 @@ foreach($packageDocs as $packageDoc){
      <li id="links"><a href="04_modify_graduation102" pageid="1" src="">102學年度應屆畢業師資生填答情況</a></li></p>
     </ul>
   </div>
+-->
 </div>
                      
                      

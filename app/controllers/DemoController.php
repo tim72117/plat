@@ -30,11 +30,12 @@ class DemoController extends BaseController {
 		});
 	}
 	
-	public function home($project, $context = null) {
+	public function home($context = null) {
+		$project = Auth::user()->project;
 		if( $context=='home' ){
-			$contents = View::make('demo.use.main')->nest('context','demo.'.$project.'.context.intro');
+			$contents = View::make('demo.'.$project.'.main')->nest('context','demo.'.$project.'.context.intro');
 		}else{
-			$contents = View::make('demo.use.main')->nest('context','demo.'.$project.'.context.'.$context);
+			$contents = View::make('demo.'.$project.'.main')->nest('context','demo.'.$project.'.context.'.$context);
 		}	
 		$response = Response::make($contents, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');

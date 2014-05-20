@@ -101,11 +101,11 @@ Route::post('sentGCM', function() {
 	Route::group(array('before' => 'auth_logined'), function() {
 		
 		Route::get('user/fileManager', 'FileController@fileManager');
-		Route::any('user/fileActiver', 'FileController@fileActiver');
+		Route::any('user/doc/{intent_key}', 'FileController@fileActiver');
 
 		Route::get('user/auth/logout', 'UserController@platformLogout');
-		Route::get('demo/{project}/{context}', array('before' => '', 'uses' => 'DemoController@home'))->where('project', '[a-z]+');
-		Route::post('demo/{project}/{context}', array('before' => '', 'uses' => 'DemoController@home'))->where('project', '[a-z]+');
+		Route::get('demo/{context}', array('before' => '', 'uses' => 'DemoController@home'))->where('project', '[a-z]+');
+		Route::post('demo/{context}', array('before' => '', 'uses' => 'DemoController@home'))->where('project', '[a-z]+');
 		
 		Route::post('user/auth/password/change', array('before' => 'csrf', 'uses' => 'UserController@passwordChange'));
 		
@@ -119,8 +119,8 @@ Route::post('sentGCM', function() {
 	Route::post('user/auth/password/reset/{token}', 'UserController@reset');
 	
 	Route::get('user/auth/project', 'UserController@project');
-	Route::post('user/auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@login'));
 	Route::get('user/auth/{project}', array('before' => 'delay', 'uses' => 'UserController@loginPage'));	
+	Route::post('user/auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@login'));
 	
 	//平台-------------------------------------------------------------------------------------------------------------------------------
 	

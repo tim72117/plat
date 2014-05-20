@@ -31,8 +31,7 @@ class FileController extends BaseController {
 		$fileManager->accept($intent_key);
 	}
 	
-	public function fileActiver() {
-		$intent_key = Input::get('f');
+	public function fileActiver($intent_key) {
 		if( !Session::has('file.'.$intent_key) )
 			return $this->timeOut();
 		
