@@ -67,6 +67,24 @@ Route::post('sentGCM', function() {
 	curl_close($ch);
 });
 
+Route::get('test', function() {
+	$ex = new COM("Excel.Application", NULL, CP_UTF8) or Die ("Did not instantiate Excel");
+	$Workbook = $ex->Workbooks->Open('C:/AppServ/www/1.xls');
+	$Worksheet = $Workbook->Worksheets(1);
+	var_dump($Worksheet->Rows(1)->Cells->text);
+	$rows = 1;
+	
+	$reader = PHPExcel_IOFactory::load('C:/AppServ/www/1.xls');
+	$workSheet = $reader->getActiveSheet();
+	foreach ($workSheet->getRowIterator() as $row) {
+		$cellIterator = $row->getCellIterator();
+		$cellIterator->setIterateOnlyExistingCells(false);
+		foreach ($cellIterator as $cell){
+			echo $cell->getValue();
+		}
+	}
+});
+
 	//平台-------------------------------------------------------------------------------------------------------------------------------
 	Route::get('login', array('before' => 'delay', 'uses' => 'MagController@platformLoginPage'));	
 	Route::post('loginAuth', array('before' => 'delay|csrf|dddos', 'uses' => 'MagController@platformLoginAuth'));
