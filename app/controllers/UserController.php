@@ -20,8 +20,8 @@ class UserController extends BaseController {
 	protected $dataroot = '';
 	protected $auth_rull = array(
 			'username'              => 'required|regex:/[0-9a-zA-Z!@_]/|between:3,20',
-			'password'              => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:6,20|confirmed',
-			'password_confirmation' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:6,20');
+			'password'              => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:6,20',
+			'password_confirmation' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:6,20|confirmed');
 	
 	public function __construct(){
 		$this->dataroot = app_path().'/views/ques/data/';
@@ -39,8 +39,9 @@ class UserController extends BaseController {
 	}
 	
 	public function platformLogout() {
+		$project = Auth::user()->project;
 		Auth::logout();
-		return Redirect::to('user/home');
+		return Redirect::to('user/auth/'.$project);
 	}	
 
 	public function loginPage($project) {
@@ -83,7 +84,7 @@ class UserController extends BaseController {
 			return Redirect::back()->withErrors($validator)->withInput();
 		}
 		
-		$auth_input = Input::only('email', 'password');		
+		$auth_input = Input::only('email', 'password','project');		
 		
 		/*
 		$user = new User;
@@ -95,7 +96,8 @@ class UserController extends BaseController {
 		if( Auth::validate($auth_input) ){ 	
 			$auth_input['active'] = 1;
 			if( Auth::attempt($auth_input, true) ){
-				return Redirect::intended('user/doc');
+				return Redirect::route('project');
+				return Redirect::intended('project');
 			}else{
 				$validator->getMessageBag()->add('login_error', '帳號尚未開通');
 				return Redirect::back()->withErrors($validator)->withInput();
@@ -141,28 +143,51 @@ class UserController extends BaseController {
 		});
 	}
 	
-	public function passwordChange() {
-		
-		$input = Input::only('username', 'password', 'password_confirmation');
-		$rulls_message = array(
-			'password.required' => '密碼必填',
-			'password_confirmation.required' => '確認密碼必填',
-			'password.regex' => '帳號格式錯誤',
-			'password.regex' => '密碼格式錯誤',
-			'password.confirmed' => '確認密碼必須相同',			
+	public function passwordChangePage() {
+		$project = Auth::user()->project;
+		$dddos_error = Input::old('dddos_error');
+		$csrf_error = Input::old('csrf_error');
+		View::share('dddos_error',$dddos_error);
+		View::share('csrf_error',$csrf_error);
+		$contents = View::make('demo.'.$project.'.main')->nest('context','demo.page.01_changepasswd');
+		$response = Response::make($contents, 200);
+		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+		$response->header('Pragma', 'no-cache');
+		$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
+		return $response;
+	}
+	
+	public function passwordChange() {		
+		$input = Input::only('passwordold', 'password', 'password_confirmation');
+		$rulls = array(
+			'passwordold' => $this->auth_rull['password'],
+			'password' => $this->auth_rull['password_confirmation'],
+			'password_confirmation'  => $this->auth_rull['password'],
 		);
-		unset($this->auth_rull['username']);
-		$validator = Validator::make($input, $this->auth_rull, $rulls_message);
+		$rulls_message = array(
+			'passwordold.required' => '舊密碼必填',
+			'passwordold.regex' => '舊密碼格式錯誤',
+			'password.required' => '新密碼必填',
+			'password.regex' => '新密碼格式錯誤',
+			'password_confirmation.required' => '確認新密碼必填',			
+			'password_confirmation.regex' => '確認新密碼格式錯誤',
+			'password.confirmed' => '確認新密碼必須相同',			
+		);
+		$validator = Validator::make($input, $rulls, $rulls_message);
 		
 		if( $validator->fails() ){
 			return Redirect::back()->withErrors($validator);
 		}
 		$user = Auth::User();
 		
-		$user->password = Hash::make($input['password']);
-			
-		$user->save();
-		return Redirect::intended('user/home');
+		if( Hash::check($input['passwordold'], $user->password) ){
+			$user->password = Hash::make($input['password']);
+			$user->save();
+			return Redirect::route('project');
+		}else{
+			$validator->getMessageBag()->add('passwordold', '舊密碼錯誤');
+			return Redirect::back()->withErrors($validator);
+		}
 
 	}
 	

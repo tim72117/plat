@@ -104,14 +104,16 @@ Route::post('sentGCM', function() {
 		Route::get('user/doc', 'DemoController@home');
 		Route::any('user/doc/{intent_key}', 'FileController@fileActiver');		
 		
-		Route::get('page/project/{context?}', array('before' => '', 'uses' => 'DemoController@project'));
+		Route::get('page/project/{context?}', array('as' => 'project', 'before' => '', 'uses' => 'DemoController@project'));
 		Route::post('page/project/{context}', array('before' => '', 'uses' => 'DemoController@project'));
 		
 		Route::get('page/{context}', 'DemoController@page');
 		Route::post('page/{context}', 'DemoController@page');
 		
 		Route::get('user/auth/logout', 'UserController@platformLogout');
-		Route::post('user/auth/password/change', array('before' => 'csrf', 'uses' => 'UserController@passwordChange'));		
+		
+		Route::get('user/auth/password/change', array('before' => 'delay', 'uses' => 'UserController@passwordChangePage'));
+		Route::post('user/auth/password/change', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@passwordChange'));		
 		
 	});
 	
@@ -200,9 +202,9 @@ Route::filter('delay', function() {
 });
 
 Route::filter('dddos', function() {	
-	$input = Input::all();	
+	$input = Input::all();
 		
-	if (Session::get('dddos') != Input::get('_token2')){
+	if( Session::get('dddos') != Input::get('_token2') ){
 		//throw new Illuminate\Session\TokenMismatchException;	
 		$input['dddos_error'] = false;
 		return Redirect::back()->withInput($input);
@@ -224,7 +226,7 @@ Route::filter('dddos', function() {
 	Cache::put($ip, $ip_time, 10);
 
 	$input['dddos_error'] = true;
-	if( $ip_time['block']  && false )
+	if( $ip_time['block'] )
 		return Redirect::back()->withInput($input);
 });
 

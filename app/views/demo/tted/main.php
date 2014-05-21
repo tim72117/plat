@@ -125,7 +125,7 @@ a:hover{color:#FFFFFF;background-color: #FF6600;text-decoration: none;}
 	<div style="width:100%;height: 130px;position: absolute;z-index:10;background-color: #fff">
 		<div style="background-color: #fff;width:100%;height: 80px"><img src="<?=asset('demo/use/images/title.jpg')?>" width="500" height="80"></div>
 		<div style="background-color: #eee;width:100%;height: 20px;border-bottom: 1px solid #ddd" align="right">
-	    	&nbsp;<a href="auth/logout" target="_top">登出</a>&nbsp;|&nbsp;<a href="https://tted.cher.ntnu.edu.tw/edu/" target="_top">回臺灣師資培育資料庫 學校查詢平台首頁</a>
+	    	&nbsp;<a href="<?=URL::to('user/auth/logout')?>" target="_top">登出</a>&nbsp;|&nbsp;<a href="https://tted.cher.ntnu.edu.tw/edu/" target="_top">回臺灣師資培育資料庫 學校查詢平台首頁</a>
         </div>
 	</div>
 	
