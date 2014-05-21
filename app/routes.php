@@ -68,6 +68,8 @@ Route::post('sentGCM', function() {
 });
 
 Route::get('test', function() {
+	$project = 'use';
+	var_dump(Auth::user()->contact($project)->sch_id);exit;
 	$ex = new COM("Excel.Application", NULL, CP_UTF8) or Die ("Did not instantiate Excel");
 	$Workbook = $ex->Workbooks->Open('C:/AppServ/www/1.xls');
 	$Worksheet = $Workbook->Worksheets(1);
@@ -119,14 +121,14 @@ Route::get('test', function() {
 	Route::group(array('before' => 'auth_logined'), function() {
 		
 		Route::get('user/fileManager', 'FileController@fileManager');
-		Route::get('user/doc', 'DemoController@home');
+		Route::get('user/doc', 'PageController@home');
 		Route::any('user/doc/{intent_key}', 'FileController@fileActiver');		
 		
-		Route::get('page/project/{context?}', array('as' => 'project', 'before' => '', 'uses' => 'DemoController@project'));
-		Route::post('page/project/{context}', array('before' => '', 'uses' => 'DemoController@project'));
+		Route::get('page/project/{context?}', array('as' => 'project', 'before' => '', 'uses' => 'PageController@project'));
+		Route::post('page/project/{context}', array('before' => '', 'uses' => 'PageController@project'));
 		
-		Route::get('page/{context}', 'DemoController@page');
-		Route::post('page/{context}', 'DemoController@page');
+		Route::get('page/{context}', 'PageController@page');
+		Route::post('page/{context}', 'PageController@page');
 		
 		Route::get('user/auth/logout', 'UserController@platformLogout');
 		

@@ -3,7 +3,7 @@
 //	Illuminate\Auth\EloquentUserProvider,
 //	Illuminate\Hashing\BcryptHasher;
 
-class DemoController extends BaseController {
+class PageController extends BaseController {
 
 	/*
 	|--------------------------------------------------------------------------

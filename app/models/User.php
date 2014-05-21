@@ -49,9 +49,25 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 		return $this->email;
 	}
 	
-	public function scopeContact($query)
-    {
-        return $query->leftJoin('contact',$this->table.'.id','=','contact.id')->where('active','1');
-    }
+	public function getRememberToken()
+	{
+		return $this->remember_token;
+	}
+	
+	public function setRememberToken($value)
+	{
+		$this->remember_token = $value;
+	}
+
+	public function getRememberTokenName()
+	{
+		return 'remember_token';
+	}
+	
+	public function scopeContact($query, $project)
+	{
+		$contact = 'contact_'.$project;
+		return $query->leftJoin($contact,$this->table.'.id','=',$contact.'.id')->where('active','1')->first();
+	}
 
 }

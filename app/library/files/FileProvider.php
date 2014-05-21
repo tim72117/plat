@@ -18,7 +18,11 @@ class FileProvider {
 	public function lists() {
 		//get lists and put session	
 		//$docs = DB::table('doc')->leftJoin('doc_type','doc.type','=','doc_type.id')->where('doc.owner',$this->id_user)->select('doc.id','title','doc_type.class')->get();
-		$docs = DB::table('doc')->leftJoin('doc_type','doc.type','=','doc_type.id')->select('doc.id','title','doc_type.class')->get();
+		$docs = DB::table('auth')
+				->leftJoin('doc','auth.id_doc','=','doc.id')
+				->leftJoin('doc_type','doc.type','=','doc_type.id')
+				->where('auth.id_user',$this->id_user)
+				->select('doc.id','title','doc_type.class')->get();
 				
 		$packageDocs = array();
 		

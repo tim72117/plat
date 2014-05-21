@@ -8,7 +8,7 @@
 	<div style="margin: 0 auto;width:600px;text-align: center">
 		<p style="font-size:120px;color:#fff">404</p>
 		<p style="font-size:20px;color:#fff;line-height: 40px">您的請求已過期</p>
-		<p style="font-size:20px;color:#fff;line-height: 40px"><a href="<?=asset('user/home')?>" style="color:#fff">請返回選單畫面</a></p>
+		<p style="font-size:20px;color:#fff;line-height: 40px"><a href="<?=asset('page/project')?>" style="color:#fff">請返回選單畫面</a></p>
 	</div>
 	
 </body>
