@@ -32,7 +32,7 @@ class FileActiver {
 	}
 	
 	public function get_post_url() {
-		return URL::to('user/fileActiver?f='.$this->intent_key);
+		return URL::to('user/doc/'.$this->intent_key);
 	}
 	
 	
