@@ -131,16 +131,16 @@ a:hover{color:#FFFFFF;background-color: #FF6600;text-decoration: none;}
 	
 	<div class="border-box" style="height:100%;width:100%;background-color: #f00;padding-top:130px">
 		
-		<div style="height:100%;overflow-y: hidden;float:left">
-			<div style="width: 350px;height:100%;background-color: #fff;border-right: 1px solid #ddd;overflow-y: auto">
-		  <div id ="Layer1">
+<div style="height:100%;overflow-y: hidden;float:left">
+	<div style="width: 350px;height:100%;background-color: #fff;border-right: 1px solid #ddd;overflow-y: auto">
+		<div id ="Layer1">
 					<h5>聯絡人查詢及修改</h5>
-						<div>
-						<ul>
-							<? /*<p><li id="links"><a href="<?php // echo URL::to('changepasswd'); ?>" pageid="1" src="">更改密碼</a></li></p>*/ ?>
-							<p><li id="links"><a href="01_changepasswd" pageid="1" src="">更改密碼</a></li></p>
-						</ul>
-						</div>
+					<div>
+					<ul>
+						<li id="links"><a href="<?=URL::to('page/project')?>">首頁</a></li>
+						<li id="links"><a href="<?=URL::to('page/01_changepasswd')?>">更改密碼</a></li>
+					</ul>
+					</div>
 
                      
 <div id="Layer4">
@@ -163,50 +163,12 @@ foreach($packageDocs as $packageDoc){
 	}
 }
 ?>
-<!--
- <div>
-   <ul>
-     <p>各校師培中心聯絡人選單
-       <li id="links"><a href="00_changschid" pageid="1" src="">選擇學校</a></li></p>
-       <li id="links"><a href="01_post_data_download" pageid="1" src="">調查文件及文宣下載</a></li></p>
-    </ul>
-</div>
- <div>
-   <ul>
-     <p>本校師資生基本資料上傳及下載<br>
-      <li id="links"><a href="return_102seniorOne" pageid="1" src="">101學年度新進師資生資料</a></li></p>
-      <li id="links"><a href="return_102seniorOne" pageid="1" src="">101學年度應屆畢業師資生資料</a></li></p>
-      <li id="links"><a href="return_102seniorOne" pageid="1" src="">102年實習師資生資料</a></li></p>
-      <li id="links"><a href="return_102seniorOne" pageid="1" src="">102學年度應屆畢業師資生資料</a></li></p>
-    </ul>
-</div>
-
-  <div>
-   <ul>
-    <p>回收情形查詢<br>
-     <li id="links"><a href="03_return_field_newedu_grade" pageid="1" src="">本校及全國回收率</a></li></p>
-     <li id="links"><a href="03_nc_newedu101" pageid="1" src="">101學年度新進師資生填答情況</a></li></p>
-     <li id="links"><a href="03_nc_fieldwork102" pageid="1" src="">102年實習師資生填答情況</a></li></p>
-     <li id="links"><a href="03_nc_graduation102" pageid="1" src="">102學年度應屆畢業師資生填答情況</a></li></p>
-    </ul>
-  </div>
-  
-  <div>
-   <ul>
-    <p>更改學生狀態<br>
-     <li id="links"><a href="04_modify_newedu101" pageid="1" src="">101學年度新進師資生資料</a></li></p>
-     <li id="links"><a href="04_modify_graduation101" pageid="1" src="">101學年度新進師資生填答情況</a></li></p>
-     <li id="links"><a href="04_modify_fieldwork102" pageid="1" src="">102年實習師資生填答情況</a></li></p>
-     <li id="links"><a href="04_modify_graduation102" pageid="1" src="">102學年度應屆畢業師資生填答情況</a></li></p>
-    </ul>
-  </div>
--->
 </div>
                      
                      
-				</div>
-			</div>
 		</div>
+	</div>
+</div>
 
 		<div style="height: 100%;overflow-y: hidden;margin-left: 200px">
 			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:14px;text-align: left">

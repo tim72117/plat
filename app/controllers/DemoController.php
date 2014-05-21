@@ -18,6 +18,7 @@ class DemoController extends BaseController {
 	|
 	*/
 	protected $dataroot = '';
+	protected $project;
 	
 	public function __construct(){
 		$this->dataroot = app_path().'/views/ques/data/';
@@ -27,16 +28,26 @@ class DemoController extends BaseController {
 			$this->config = Config::get('ques::setting');
 			Config::set('database.default', 'sqlsrv');
 			Config::set('database.connections.sqlsrv.database', 'ques_admin');
+			$this->project = Auth::user()->project;
 		});
 	}
 	
-	public function home($context = null) {
+	public function project($context = null) {
 		$project = Auth::user()->project;
 		if( $context==null ){
 			$contents = View::make('demo.'.$project.'.main')->nest('context','demo.'.$project.'.context.intro');
 		}else{
 			$contents = View::make('demo.'.$project.'.main')->nest('context','demo.'.$project.'.context.'.$context);
 		}	
+		$response = Response::make($contents, 200);
+		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+		$response->header('Pragma', 'no-cache');
+		$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
+		return $response;
+	}
+	
+	public function page($context) {
+		$contents = View::make('demo.'.$this->project.'.main')->nest('context','demo.page.'.$context);
 		$response = Response::make($contents, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
 		$response->header('Pragma', 'no-cache');

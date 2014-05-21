@@ -9,9 +9,7 @@
 #
 ##########################################################################################
 ?>
-<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <script>
 $('form').submit(function(evt) {
 	
@@ -59,16 +57,15 @@ $('form').submit(function(evt) {
 	evt.preventDefault();
 });
 </script>
-<title>修改校級聯絡人密碼</title>
 </head>
 
-<body bottommargin="0" topmargin="0" leftmargin="0" rightmargin="0" marginheight="0" marginwidth="0" bgcolor="white">
+
 <table cellpadding="3" cellspacing="1" border="0" width="100%">
 	<tr>
 	  <td class="header2">&nbsp;修改聯絡人密碼</td>
 	</tr>
 </table>
-<form action="auth/password/change" method="post">
+<form action="01_changepasswd" method="post">
 <input type="hidden" name="_token1" value="<?=csrf_token()?>" />
 <input type="hidden" name="_token2" value="<?=dddos_token()?>" />
 <table id="editschool" width="30%" align="center" style="display:inline" border="1">
@@ -100,5 +97,3 @@ $('form').submit(function(evt) {
 				echo implode('、',array_filter($errors->all()));
 			?>
 
-</body>
-</html>

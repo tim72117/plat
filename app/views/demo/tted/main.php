@@ -137,8 +137,7 @@ a:hover{color:#FFFFFF;background-color: #FF6600;text-decoration: none;}
 					<h5>聯絡人查詢及修改</h5>
 						<div>
 						<ul>
-							<? /*<p><li id="links"><a href="<?php // echo URL::to('changepasswd'); ?>" pageid="1" src="">更改密碼</a></li></p>*/ ?>
-							<p><li id="links"><a href="01_changepasswd" pageid="1" src="">更改密碼</a></li></p>
+							<li id="links"><a href="<?=URL::to('demo/page/01_changepasswd')?>">更改密碼</a></li>
 						</ul>
 						</div>
 

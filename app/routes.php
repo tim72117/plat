@@ -102,29 +102,30 @@ Route::post('sentGCM', function() {
 		
 		Route::get('user/fileManager', 'FileController@fileManager');
 		Route::get('user/doc', 'DemoController@home');
-		Route::any('user/doc/{intent_key}', 'FileController@fileActiver');
+		Route::any('user/doc/{intent_key}', 'FileController@fileActiver');		
 		
-
+		Route::get('page/project/{context?}', array('before' => '', 'uses' => 'DemoController@project'));
+		Route::post('page/project/{context}', array('before' => '', 'uses' => 'DemoController@project'));
+		
+		Route::get('page/{context}', 'DemoController@page');
+		Route::post('page/{context}', 'DemoController@page');
+		
 		Route::get('user/auth/logout', 'UserController@platformLogout');
-		Route::get('demo/{context}', array('before' => '', 'uses' => 'DemoController@home'));
-		Route::post('demo/{context}', array('before' => '', 'uses' => 'DemoController@home'));
-		
-		Route::post('user/auth/password/change', array('before' => 'csrf', 'uses' => 'UserController@passwordChange'));
-		
+		Route::post('user/auth/password/change', array('before' => 'csrf', 'uses' => 'UserController@passwordChange'));		
 		
 	});
 	
 	Route::get('user/auth/password/remind', 'UserController@remindPage');
 	Route::post('user/auth/password/remind', 'UserController@remind');
 	
-	Route::get('user/auth/password/reset/{token}', 'UserController@resetPage');	
+	Route::get('user/auth/password/reset/{token}', 'UserController@resetPage');
 	Route::post('user/auth/password/reset/{token}', 'UserController@reset');
 	
 	Route::get('user/auth/project', 'UserController@project');
 	Route::get('user/auth/{project}', array('before' => 'delay', 'uses' => 'UserController@loginPage'))->where('project', '[a-z]+');
 	Route::post('user/auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@login'));
 	
-	//平台-------------------------------------------------------------------------------------------------------------------------------
+	//平台---------------------------------------------------------------------------------------------------------------------------------
 	
 		
 	//編輯器-------------------------------------------------------------------------------------------------------------------------------
