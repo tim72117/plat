@@ -36,7 +36,7 @@ else {
 $( function() {
 	
 		$("#all_table").on("mouseover",'th.qtype', function() {
-        	$(this).editable("04_save_modify_newedu101.php" ,{
+        	$(this).editable("demo/04_save_modify_newedu101.php" ,{
 				data   : "{'0':'調查對象','1':'非調查對象'}",
     			type   : "select",
 				id        : 'elementid',

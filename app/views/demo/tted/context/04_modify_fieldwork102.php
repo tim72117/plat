@@ -109,7 +109,7 @@ $( function() {
 			<table cellpadding=4 cellspacing=0 border=0 align="left" width="95%">
 				<tr>
 				<td>
-				<form name="form2" method="post" action="modify_data.php">
+				<form name="form2" method="post" action="modify_data">
 			  	  <p><font color="#FF0000"><? //echo $user; ?> </font>您好：貴校目前共有 <font color="blue" size="+3"><? echo $num_all;?></font> 位狀態為&lt;<font color="red"><?php if($pmode==1){ echo "非102年實習師資生";}else{ echo "102年實習師資生";} ?></font>&gt;之102年實習師資生</p>
 			    <input type="hidden" name="stu_mode" value="<?php if($pmode==1){ echo "0";}else{ echo "1";}?>">
 						<span class="head5"></span><?php if($pmode==1){ echo "請勾選要<<font color=\"red\">復原刪除</font>>之人員";}else{ echo "請勾選要<<font color=\"red\">刪除</font>>之人員";}?>，勾選完畢請按最下方或右方之送出按鈕。
