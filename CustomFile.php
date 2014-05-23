@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB,View,Response;
+use DB, View, Response, Session, Request, Redirect, Input;
 class CustomFile extends CommFile {
 	
 	/**
@@ -22,14 +22,22 @@ class CustomFile extends CommFile {
 	);
 	
 	public static function get_intent() {
-		return array_merge(parent::$intent,self::$intent);
+		return array_unique(array_merge(parent::$intent,self::$intent));
 	}
 	
 	/**
 	 * @var string
 	 * @return
 	 */	
-	public function import() {	}
+	public function import() {
+		$file_id = $this->upload();	
+		if( $file_id ){
+			Session::flash('upload_file_id', $file_id);		
+		}
+		$intent_key = Request::segment(3);
+		return Redirect::to('user/doc/'.Input::get('intent_key'));	
+
+	}
 	
 	public function export() {	}
 	
