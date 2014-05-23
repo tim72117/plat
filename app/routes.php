@@ -68,15 +68,12 @@ Route::post('sentGCM', function() {
 });
 
 Route::get('test', function() {
-	$project = 'use';
-	var_dump(Auth::user()->contact($project)->sch_id);exit;
-	$ex = new COM("Excel.Application", NULL, CP_UTF8) or Die ("Did not instantiate Excel");
-	$Workbook = $ex->Workbooks->Open('C:/AppServ/www/1.xls');
-	$Worksheet = $Workbook->Worksheets(1);
-	var_dump($Worksheet->Rows(1)->Cells->text);
-	$rows = 1;
+	//$project = 'use';
+	//$ex = new COM("Excel.Application", NULL, CP_UTF8) or Die ("Did not instantiate Excel");
+	//$Workbook = $ex->Workbooks->Open('C:/AppServ/www/1.xls');
+	//$Worksheet = $Workbook->Worksheets(1);
 	
-	$reader = PHPExcel_IOFactory::load('C:/AppServ/www/1.xls');
+	$reader = PHPExcel_IOFactory::load('C:/AppServ/www/99p.xlsx');
 	$workSheet = $reader->getActiveSheet();
 	foreach ($workSheet->getRowIterator() as $row) {
 		$cellIterator = $row->getCellIterator();
@@ -118,11 +115,13 @@ Route::get('test', function() {
 	
 	
 	
-	Route::group(array('before' => 'auth_logined'), function() {
+	Route::group(array('before' => 'auth_logined_project'), function() {
 		
 		Route::get('user/fileManager', 'FileController@fileManager');
 		Route::get('user/doc', 'PageController@home');
-		Route::any('user/doc/{intent_key}', 'FileController@fileActiver');		
+		Route::any('user/doc/{intent_key}', 'FileController@fileActiver');	
+		Route::post('user/doc/upload/{intent_key}', array('before' => 'delay', 'uses' => 'FileController@upload'));
+		//Route::post('user/doc/upload/{content}', array('before' => 'delay|csrf|dddos', 'uses' => 'FileController@upload'));
 		
 		Route::get('page/project/{context?}', array('as' => 'project', 'before' => '', 'uses' => 'PageController@project'));
 		Route::post('page/project/{context}', array('before' => '', 'uses' => 'PageController@project'));
@@ -181,6 +180,11 @@ Route::filter('auth_logined_normal', function($route) {
 Route::filter('auth_logined', function($route) {
 	if( Auth::guest() )
 		return Redirect::to('login');
+});
+
+Route::filter('auth_logined_project', function($route) {
+	if( Auth::guest() )
+		return Redirect::to('user/auth/project');
 });
 
 Route::filter('maintenance', function($route) {

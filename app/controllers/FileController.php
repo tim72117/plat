@@ -36,12 +36,15 @@ class FileController extends BaseController {
 			return $this->timeOut();
 		
 		$fileAcitver = new app\library\files\v0\FileActiver();
-		$view = $fileAcitver->accept($intent_key);
+		$views = $fileAcitver->accept($intent_key);
 		View::share('fileAcitver',$fileAcitver);
 		//$intent = Session::get('file')[$intent_key];
 		//$file_id = $intent['file_id'];
+		if( get_class($views)=='Illuminate\Http\RedirectResponse' ){	
+			return $views;
+		}
 		//$active = $intent['active'];
-		$response = Response::make($view, 200);
+		$response = Response::make($views, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
 		$response->header('Pragma', 'no-cache');
 		$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
@@ -51,9 +54,22 @@ class FileController extends BaseController {
 		return Response::json($view);
 	}
 	
+	public function upload($intent_key) {
+		$fileClass = 'app\\library\\files\\v0\\CommFile';
+		$file = new $fileClass();
+		$file_id = $file->upload();
+		if( $file_id ){		
+			$context = Session::get('file')[$intent_key];
+			$intent = array('active'=>'open','file_id'=>$context['file_id'],'fileClass'=>$fileClass);
+			return Redirect::to('user/doc/'.$intent_key)->withInput(array('file_id'=>$file_id));
+		}		
+	}
+	
 	public function timeOut() {
 		return View::make('demo.timeout');
 	}
+	
+	//public function 
 	
 
 	

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Question Management</title>
+<title>師培查詢平台</title>
 
 <link href="css/pub.css" rel="stylesheet" type="text/css">
 <script type="text/javascript" src="<?=asset('js/tigra_tables.js')?>"></script>
@@ -158,6 +158,7 @@ foreach($packageDocs as $packageDoc){
 			echo '<a href="'.URL::to('user/doc/'.$active['intent_key']).'">'.$active['active'].$packageDoc['title'].'</a> - ';
 			echo '</div>';
 		}
+
 		echo '</div>';
 	}
 }

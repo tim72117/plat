@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, Session, Auth;
+use DB, Session, Auth, Request;
 class FileProvider {
 	
 	private $files = array();
@@ -23,11 +23,12 @@ class FileProvider {
 				->leftJoin('doc_type','doc.type','=','doc_type.id')
 				->where('auth.id_user',$this->id_user)
 				->select('doc.id','title','doc_type.class')->get();
-				
+			
 		$packageDocs = array();
 		
 		foreach($docs as $doc){
 			$fileClass = 'app\\library\\files\\v0\\'.$doc->class;
+			
 			if( class_exists($fileClass) ){
 
 				$actives = $fileClass::get_intent();
@@ -48,6 +49,17 @@ class FileProvider {
 		return $packageDocs;
 	}
 	
+	public function get_active_url($intent_key, $active) {
+		$intent_active = Session::get('file')[$intent_key];
+		$intent_active['active'] = $active;
+		$intent_hash = md5(serialize($intent_active));		
+		return 'user/doc/'.$this->intent_hash_table[$intent_hash];
+	}
+	
+	public function get_upload_url() {
+		return 'user/doc/upload/'.Request::segment(3);
+	}
+	
 	public function create_list() {		
 		$create_list = array();
 		$fileClasss = array('QuesFile','RowsFile');		
@@ -64,6 +76,10 @@ class FileProvider {
 	
 	private function auth_file() {
 		
+	}
+	
+	public function get_intent_hash_table() {
+		return $this->intent_hash_table;
 	}
 	
 	private function save_intent() {	
