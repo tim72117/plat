@@ -53,12 +53,12 @@ class CommFile {
 		if (Input::hasFile('file_upload')){
 			
 			$file = Input::file('file_upload');
-			$storage_path = storage_path();
+			$storage_path = storage_path().'/file_upload';
 			$name = hash_file('md5', $file->getRealPath());
 			
 			$key = Auth::user()->id;
 			$parts = array_slice(str_split($hash = md5($key), 2), 0, 2);
-			$path = 'file_upload/'.join('/', $parts);
+			$path = join('/', $parts);
 			
 			
 			$filesystem = new Filesystem();

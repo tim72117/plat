@@ -18,7 +18,7 @@ echo Form::close();
 if( Session::has('upload_file_id') ){
 	$file_id = Session::get('upload_file_id');	
 	$file = DB::table('doc')->where('id',$file_id)->pluck('file');
-	$reader = PHPExcel_IOFactory::load( storage_path(). '/'. $file );
+	$reader = PHPExcel_IOFactory::load( storage_path(). '/file_upload/'. $file );
 	$workSheet = $reader->getActiveSheet();
 	foreach ($workSheet->getRowIterator() as $row) {
 		$cellIterator = $row->getCellIterator();
