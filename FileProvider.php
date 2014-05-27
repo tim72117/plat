@@ -19,8 +19,8 @@ class FileProvider {
 		//get lists and put session	
 		//$docs = DB::table('doc')->leftJoin('doc_type','doc.type','=','doc_type.id')->where('doc.owner',$this->id_user)->select('doc.id','title','doc_type.class')->get();
 		$docs = DB::table('docs')
-				->leftJoin('doc','docs.id_doc','=','doc.id')
-				->leftJoin('doc_type','doc.type','=','doc_type.id')
+				->leftJoin('files','docs.id_file','=','files.id')
+				->leftJoin('doc_type','files.type','=','doc_type.id')
 				->where('docs.id_user',$this->id_user)
 				//->where('doc.owner',$this->id_user)
 				->select('docs.id','title','doc_type.class')->get();
@@ -63,9 +63,12 @@ class FileProvider {
 		$virtualFiles = VirtualFile::with('preparer')->where('id_user',$this->id_user)->get();
 		
 		foreach($virtualFiles as $virtualFile)	
-			foreach($virtualFile->preparer as $preparer)
-				foreach($preparer->docs as $docs)
-					echo $docs->title.'<br />';
+			foreach($virtualFile->preparer as $preparer){
+				echo $preparer->doc->user->username.'<br /><br />';
+				foreach($preparer->files as $file)
+					echo $file->title.'<br />';
+				echo '<br />';
+			}
 		
 		/*
 		$queries = DB::getQueryLog();
