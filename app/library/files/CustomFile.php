@@ -53,7 +53,7 @@ class CustomFile extends CommFile {
 	public function export() {	}
 	
 	public function open($file_id) {
-		$doc = DB::table('auth')->leftJoin('doc','auth.id_doc','=','doc.id')->where('auth.id',$file_id)->select('doc.file')->first();
+		$doc = DB::table('docs')->leftJoin('doc','docs.id_doc','=','doc.id')->where('docs.id',$file_id)->select('doc.file')->first();
 		return View::make('demo.use.main')->nest('context',$doc->file);
 	}
 	

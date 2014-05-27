@@ -20,7 +20,7 @@ class VirtualFile extends Eloquent {
 	 *
 	 * @var string
 	 */
-	protected $table = 'auth';
+	protected $table = 'docs';
 	
 	public $timestamps = false;
 	
