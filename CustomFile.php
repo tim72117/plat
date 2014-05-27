@@ -52,7 +52,8 @@ class CustomFile extends CommFile {
 	
 	public function export() {	}
 	
-	public function open($file_id) {
+	public function open($file_id) {		
+		View::share('file_id',$file_id);
 		$doc = DB::table('docs')->leftJoin('doc','docs.id_doc','=','doc.id')->where('docs.id',$file_id)->select('doc.file')->first();
 		return View::make('demo.use.main')->nest('context',$doc->file);
 	}

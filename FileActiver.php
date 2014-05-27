@@ -8,6 +8,7 @@ class FileActiver {
 	 */
 	public $file_list;
 	public $intent_key;
+	public $file_id;
 	
 	public function accept($intent_key) {
 		
@@ -15,12 +16,12 @@ class FileActiver {
 			
 		$this->intent_key = $intent_key;
 		$intent = Session::get('file')[$intent_key];
-		$file_id = $intent['file_id'];
+		$this->file_id = $intent['file_id'];
 		$active = $intent['active'];
 		
 		if( $intent['fileClass']=='app\\library\\files\\v0\\CustomFile' ){
-			$file = new $intent['fileClass']($file_id);
-			return $file->$active($file_id);
+			$file = new $intent['fileClass']($this->file_id);
+			return $file->$active($this->file_id);
 		}
 		
 		//$builderName = $intent['fileClass'].'Builder';

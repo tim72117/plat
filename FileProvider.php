@@ -51,19 +51,30 @@ class FileProvider {
 	}
 	
 	public function get_request() {
-		//$Requester = Requester::where('id_requester',$this->id_user);
-		//$requester = Requester::find(1);
-		//var_dump($requester->docs);
-		$virtualFile = new VirtualFile;
-		//$virtualFile->where('id_user',$this->id_user);
+		/*
 		$virtualFiles = VirtualFile::where('id_user',$this->id_user)->get();
-
+		
 		foreach($virtualFiles as $virtualFile)
-		if($virtualFile->requester)
-		foreach($virtualFile->requester->docs as $doc){
-			echo $doc->id;
+			if($virtualFile->preparer->count()>0)
+				foreach($virtualFile->preparer as $preparer)
+					var_dump($preparer->docs);
+		exit;
+		*/
+		$virtualFiles = VirtualFile::with('preparer')->where('id_user',$this->id_user)->get();
+		
+		foreach($virtualFiles as $virtualFile)	
+			foreach($virtualFile->preparer as $preparer)
+				foreach($preparer->docs as $docs)
+					echo $docs->title.'<br />';
+		
+		/*
+		$queries = DB::getQueryLog();
+		foreach($queries as $query){
+			var_dump($query);echo '<br /><br />';
 		}
-		//echo $virtualFile->get();
+		exit;
+		 * 
+		 */
 	}
 	
 	public function get_active_url($intent_key, $active) {
