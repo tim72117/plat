@@ -11,7 +11,12 @@ echo Form::hidden('_token1', csrf_token());
 echo Form::hidden('_token2', dddos_token());
 echo Form::close();
 
-$virtualFile = VirtualFile::find(53);
+
+$virtualFile = VirtualFile::find($fileAcitver->file_id);
+foreach($virtualFile->files as $file)
+	echo $file->title.'<br />';
+
+$user->get_file_provider()->get_request();
 //$virtualFile->struct = 4;
 //$virtualFile->requester->id_requester = 1;
 //$virtualFile->requester->save();
@@ -44,4 +49,5 @@ if( Session::has('upload_file_id') ){
 	if( $errors )
 		echo implode('、',array_filter($errors->all()));
 }
+
 

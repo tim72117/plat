@@ -9,8 +9,9 @@ class Requester extends Eloquent {
 	public $timestamps = false;
 	
 	public function docs() {
-		return $this->hasMany('doc','owner','id_auth');
+		return $this->hasMany('doc','owner','id_doc');
 	}
+	
 }
 	
 class VirtualFile extends Eloquent {
@@ -28,8 +29,17 @@ class VirtualFile extends Eloquent {
 	//	return $this;
 	//}
 	
+	public function files() {
+		return $this->hasMany('doc','owner');
+	}
+	
 	public function requester() {
-		return $this->hasOne('Requester','id_requester');
+		//return $this->hasOne('Requester','id_requester');
+		//return $this->leftJoin('auth_requester','auth.id','=','auth_requester.id_auth');
+	}
+	
+	public function preparer() {
+		return $this->hasMany('Requester','id_requester');
 		//return $this->leftJoin('auth_requester','auth.id','=','auth_requester.id_auth');
 	}
 

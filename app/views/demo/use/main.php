@@ -147,9 +147,7 @@ a:hover{color:#FFFFFF;background-color: #FF6600;text-decoration: none;}
 <div id="Layer4">
 <h4>【 後期中等教育資料庫查詢平台 】</h4>
 <?
-//$user = new app\library\files\v0\User();
 $user = Auth::user();
-$user->get_file_provider()->get_request();
 $packageDocs = $user->get_file_provider()->lists();
 
 
