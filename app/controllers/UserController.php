@@ -85,14 +85,7 @@ class UserController extends BaseController {
 		}
 		
 		$auth_input = Input::only('email', 'password','project');		
-		
-		/*
-		$user = new User;
-		$user->password = Hash::make($input['password']);
-		$user->username = $input['username'];
-		$user->save();
-		*/
-		
+				
 		if( Auth::validate($auth_input) ){ 	
 			$auth_input['active'] = 1;
 			if( Auth::attempt($auth_input, true) ){
@@ -169,9 +162,9 @@ class UserController extends BaseController {
 			'passwordold.regex' => '舊密碼格式錯誤',
 			'password.required' => '新密碼必填',
 			'password.regex' => '新密碼格式錯誤',
-			'password_confirmation.required' => '確認新密碼必填',			
+			'password_confirmation.required' => '確認新密碼必填',	
 			'password_confirmation.regex' => '確認新密碼格式錯誤',
-			'password.confirmed' => '確認新密碼必須相同',			
+			'password.confirmed' => '確認新密碼必須相同',	
 		);
 		$validator = Validator::make($input, $rulls, $rulls_message);
 		

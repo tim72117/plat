@@ -110,6 +110,8 @@ Route::get('test', function() {
 		
 		Route::get('fileManager/{active_uniqid}', 'FileController@fileManager');
 		Route::get('fileActiver/{active_uniqid}', 'FileController@fileActiver');
+		
+		Route::post('user/email/change', array('before' => 'delay|csrf', 'uses' => 'MagController@emailChange'));
 
 	});
 	
@@ -120,7 +122,6 @@ Route::get('test', function() {
 		Route::get('user/fileManager', 'FileController@fileManager');
 		Route::get('user/doc', 'PageController@home');
 		Route::any('user/doc/{intent_key}', 'FileController@fileActiver');	
-		Route::post('user/doc/upload/{intent_key}', array('before' => 'delay', 'uses' => 'FileController@upload'));
 		//Route::post('user/doc/upload/{content}', array('before' => 'delay|csrf|dddos', 'uses' => 'FileController@upload'));
 		
 		Route::get('page/project/{context?}', array('as' => 'project', 'before' => '', 'uses' => 'PageController@project'));

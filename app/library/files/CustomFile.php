@@ -11,7 +11,7 @@ class CustomFile extends CommFile {
 	/**
 	 * @var array 1 dimension
 	 */
-	public $columns;
+	public $columns;	
 	
 	public static $intent = array(
 		'import',
@@ -29,12 +29,23 @@ class CustomFile extends CommFile {
 	 * @var string
 	 * @return
 	 */	
-	public function import() {
-		$file_id = $this->upload();	
-		if( $file_id ){
-			Session::flash('upload_file_id', $file_id);		
-		}
+	public function import() {		
+		
+		$id_doc_new = $this->upload(false);	
 		$intent_key = Request::segment(3);
+		
+
+
+		$returner = Redirect::to('user/doc/'.Input::get('intent_key'));
+		
+		if( $id_doc_new && is_numeric($id_doc_new) ){
+			Session::flash('upload_file_id', $id_doc_new);		
+		}
+		
+		if( is_object($id_doc_new) && get_class($id_doc_new)=='Illuminate\Validation\Validator' ){
+			$returner->withErrors($id_doc_new);
+		}		
+		
 		return Redirect::to('user/doc/'.Input::get('intent_key'));	
 
 	}
@@ -42,8 +53,8 @@ class CustomFile extends CommFile {
 	public function export() {	}
 	
 	public function open($file_id) {
-		$docs = DB::table('doc')->where('id',$file_id)->select('file')->first();
-		return View::make('demo.use.main')->nest('context',$docs->file);
+		$doc = DB::table('auth')->leftJoin('doc','auth.id_doc','=','doc.id')->where('auth.id',$file_id)->select('doc.file')->first();
+		return View::make('demo.use.main')->nest('context',$doc->file);
 	}
 	
 	/**

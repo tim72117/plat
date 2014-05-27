@@ -2,6 +2,7 @@
 
 use Illuminate\Auth\UserInterface;
 use Illuminate\Auth\Reminders\RemindableInterface;
+use app\library\files\v0\FileProvider;
 
 class User extends Eloquent implements UserInterface, RemindableInterface {
 
@@ -69,5 +70,13 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 		$contact = 'contact_'.$project;
 		return $query->leftJoin($contact,$this->table.'.id','=',$contact.'.id')->where('active','1')->first();
 	}
+	
+	public $fileProvider;
+	
+	public function get_file_provider() {
+		$this->fileProvider = new FileProvider();
+		return $this->fileProvider;
+	}
+	
 
 }

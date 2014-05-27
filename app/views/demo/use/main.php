@@ -120,6 +120,8 @@ a:hover{color:#FFFFFF;background-color: #FF6600;text-decoration: none;}
 
 <body>
 
+
+
 <div style="width: 100%;height: 100%;max-height:100%">
 
 	<div style="width:100%;height: 130px;position: absolute;z-index:10;background-color: #fff">
@@ -145,8 +147,11 @@ a:hover{color:#FFFFFF;background-color: #FF6600;text-decoration: none;}
 <div id="Layer4">
 <h4>【 後期中等教育資料庫查詢平台 】</h4>
 <?
-$user = new app\library\files\v0\User();
+//$user = new app\library\files\v0\User();
+$user = Auth::user();
+$user->get_file_provider()->get_request();
 $packageDocs = $user->get_file_provider()->lists();
+
 
 foreach($packageDocs as $packageDoc){
 	foreach($packageDoc['actives'] as $active){		

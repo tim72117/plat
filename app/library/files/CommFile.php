@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use Input, Auth, DB, Illuminate\Filesystem\Filesystem;
+use Input, Auth, DB, Validator, VirtualFile, Illuminate\Filesystem\Filesystem;
 class CommFile {
 	
 	/**
@@ -18,6 +18,8 @@ class CommFile {
 	 */
 	private $auth;
 	
+	public $file_id;
+	
 	/**
 	 * @var active
 	 */
@@ -29,7 +31,11 @@ class CommFile {
 		'save_as',
 		'share_to',
 		'open',
-	);
+	);	
+	
+	public function __construct($file_id){
+		$this->file_id = $file_id;
+	}
 	
 	public static function get_intent() {
 		return self::$intent;
@@ -49,15 +55,32 @@ class CommFile {
 	
 	public function open($file_id) {  }
 	
-	public function upload() {	
+	public function upload($visible = true) {	
+		
+
 		if (Input::hasFile('file_upload')){
 			
 			$file = Input::file('file_upload');
-			$storage_path = storage_path().'/file_upload';
-			$name = hash_file('md5', $file->getRealPath());
+			$mime = $file->getMimeType();
+			$name_real = $file->getClientOriginalName();
+			$id_user = Auth::user()->id;
+			$virtualFile = VirtualFile::find($this->file_id);
 			
-			$key = Auth::user()->id;
-			$parts = array_slice(str_split($hash = md5($key), 2), 0, 2);
+			$validator = Validator::make(
+					array('file_upload' => Input::file('file_upload')),
+					array('file_upload' => 'required|mimes:xls,xlsx'),
+					array('file_upload.mimes' => '檔案格式錯誤')
+			);
+			
+			if( $validator->fails() ){
+				return $validator;
+			}
+			
+			
+			$storage_path = storage_path().'/file_upload';
+			$name = hash_file('md5', $file->getRealPath());			
+			
+			$parts = array_slice(str_split($hash = md5($id_user), 2), 0, 2);
 			$path = join('/', $parts);
 			
 			
@@ -67,26 +90,24 @@ class CommFile {
 				
 				try	
 				{				
-					$filesystem->makeDirectory(dirname($storage_path.'/'.$path.'/'.$name), 0777, true, true);			
-
-					$name_real = $file->getClientOriginalName();
-					$mime = $file->getMimeType();
+					$filesystem->makeDirectory(dirname($storage_path.'/'.$path.'/'.$name), 0777, true, true);									
 
 					$file->move($storage_path.'/'.$path, $name);				
 
-					$file_id = DB::table('doc')->insertGetId(array(
+					$id_doc = DB::table('doc')->insertGetId(array(
 						'title'   =>   $name_real,
 						'type'    =>   3,
-						'owner'   =>   1,
+						'owner'   =>   $virtualFile->id,
 						'file'    =>   $path.'/'.$name,
 					));	
 
-					DB::table('auth')->insert(array(
-						'id_user'   =>   $key,
-						'id_doc'    =>   $file_id,
-					));	
+					//$file_id = DB::table('auth')->insertGetId(array(
+					//	'id_user'   =>   $id_user,
+					//	'id_doc'    =>   $id_doc,
+					//	'visible'   =>   $visible,
+					//));	
 
-					return $file_id;			
+					return $id_doc;			
 
 				}
 				catch (\Exception $e)
@@ -95,7 +116,10 @@ class CommFile {
 				}
 				
 			}else{
-				return false;
+				
+				$validator->getMessageBag()->add('file_upload', '檔案已上傳');
+				return $validator;
+				
 			}
 			
 		}		

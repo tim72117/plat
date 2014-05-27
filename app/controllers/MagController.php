@@ -67,6 +67,11 @@ class MagController extends BaseController {
 	}	
 	
 	public function platformLoginAuth() {
+		
+		$login_return = $this->login();
+		if( $login_return ){
+			return $login_return;
+		}
 
 		$input = Input::only('username', 'password');		
 		$rulls = array(
@@ -84,13 +89,6 @@ class MagController extends BaseController {
 			return Redirect::back()->withErrors($validator);
 		}
 		
-		/*
-		$user = new User;
-		$user->password = Hash::make($input['password']);
-		$user->username = $input['username'];
-		$user->save();
-		*/
-		
 		if( Auth::validate($input) ){ 	
 			$input['active'] = 1;
 			if( Auth::attempt($input, true) ){
@@ -102,6 +100,49 @@ class MagController extends BaseController {
 		}else{			
 			$validator->getMessageBag()->add('login_error', '帳號密碼錯誤');
 			return Redirect::back()->withErrors($validator);
+		}
+		
+	}
+	
+	public function login() {
+		$inpu_temp = Input::only('username', 'password');	
+		$input = array('email'=>$inpu_temp['username'],'password'=>$inpu_temp['password']);
+		//$input = Input::only('email', 'password', 'project');	
+		$rulls = array(
+			'email' => 'required|email',
+			'password' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:3,20',
+			//'project'  => 'required|alpha',
+		);
+		$rulls_message = array(
+			'email.required' => '電子郵件必填',
+			'email.email' => '電子郵件格式錯誤',
+			'password.required' => '密碼必填',
+			'password.regex' => '密碼格式錯誤',						
+			//'project.required' => '計畫錯誤',			
+		);
+		$validator = Validator::make($input, $rulls, $rulls_message);
+		
+		if( $validator->fails() ){
+			return false;
+			return Redirect::back()->withErrors($validator)->withInput();
+		}
+		
+		$auth_input = $input;	
+		//$auth_input = Input::only('email', 'password','project');	
+				
+		if( Auth::validate($auth_input) ){ 	
+			$auth_input['active'] = 1;
+			if( Auth::attempt($auth_input, true) ){
+				return Redirect::intended('/');
+				return Redirect::route('project');
+				return Redirect::intended('project');
+			}else{
+				$validator->getMessageBag()->add('login_error', '帳號尚未開通');
+				return Redirect::back()->withErrors($validator)->withInput();
+			}			
+		}else{			
+			$validator->getMessageBag()->add('login_error', '電子郵件密碼錯誤');
+			return Redirect::back()->withErrors($validator)->withInput();
 		}
 		
 	}
@@ -150,6 +191,27 @@ class MagController extends BaseController {
 
 		$response = Response::json($response_obj);
 		return $response;
+	}
+	
+	public function emailChange() {
+		$input = Input::only('email');
+		$rulls = array(
+			'email' => 'required|email',
+		);
+		$rulls_message = array(
+			'email.required' => '電子郵件必填',
+			'email.email' => '電子郵件格式錯誤',		
+		);
+		$validator = Validator::make($input, $rulls, $rulls_message);
+
+		if( $validator->fails() ){
+			return Redirect::back()->withErrors($validator)->withInput();
+		}
+		
+		$user = Auth::User();
+		$user->email = $input['email'];
+		$user->save();
+		return Redirect::back();
 	}
 
 	

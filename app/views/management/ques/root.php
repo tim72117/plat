@@ -30,6 +30,22 @@ th {
 	
 <?
 
+if( Auth::user()->email=='' ){
+	echo '更改email 更改後登入帳號請輸入email';
+	echo Form::open(array('url' => URL::to('user/email/change')));
+	echo Form::text('email');
+	echo Form::submit('Click Me!');
+	echo Form::hidden('_token1', csrf_token());
+	echo Form::hidden('_token2', dddos_token());
+	echo Form::close();
+	if( isset($dddos_error) && $dddos_error )
+		echo '嘗試次數過多,請等待30秒後再進行更改';
+	if( isset($csrf_error) && $csrf_error )
+		echo '畫面過期，請重新登入';
+	echo implode('、',array_filter($errors->all()));
+	exit;
+}
+
 $count_report = DB::table('report')->where('solve','False')->groupBy('root')->select(DB::raw('root,count(root) AS count'))->lists('count','root');
 		
 $docs = DB::table('doc_ques')->select('qid','title','year','dir','edit','ver')->orderBy('ver')->get();
