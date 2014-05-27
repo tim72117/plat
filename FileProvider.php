@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, Session, Auth, Request;
+use DB, Session, Auth, Request, VirtualFile, Requester;
 class FileProvider {
 	
 	private $files = array();
@@ -22,7 +22,8 @@ class FileProvider {
 				->leftJoin('doc','auth.id_doc','=','doc.id')
 				->leftJoin('doc_type','doc.type','=','doc_type.id')
 				->where('auth.id_user',$this->id_user)
-				->select('doc.id','title','doc_type.class')->get();
+				//->where('doc.owner',$this->id_user)
+				->select('auth.id','title','doc_type.class')->get();
 			
 		$packageDocs = array();
 		
@@ -49,15 +50,27 @@ class FileProvider {
 		return $packageDocs;
 	}
 	
+	public function get_request() {
+		//$Requester = Requester::where('id_requester',$this->id_user);
+		//$requester = Requester::find(1);
+		//var_dump($requester->docs);
+		$virtualFile = new VirtualFile;
+		//$virtualFile->where('id_user',$this->id_user);
+		$virtualFiles = VirtualFile::where('id_user',$this->id_user)->get();
+
+		foreach($virtualFiles as $virtualFile)
+		if($virtualFile->requester)
+		foreach($virtualFile->requester->docs as $doc){
+			echo $doc->id;
+		}
+		//echo $virtualFile->get();
+	}
+	
 	public function get_active_url($intent_key, $active) {
 		$intent_active = Session::get('file')[$intent_key];
 		$intent_active['active'] = $active;
 		$intent_hash = md5(serialize($intent_active));		
 		return 'user/doc/'.$this->intent_hash_table[$intent_hash];
-	}
-	
-	public function get_upload_url() {
-		return 'user/doc/upload/'.Request::segment(3);
 	}
 	
 	public function create_list() {		

@@ -19,7 +19,7 @@ class FileActiver {
 		$active = $intent['active'];
 		
 		if( $intent['fileClass']=='app\\library\\files\\v0\\CustomFile' ){
-			$file = new $intent['fileClass'];
+			$file = new $intent['fileClass']($file_id);
 			return $file->$active($file_id);
 		}
 		
