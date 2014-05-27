@@ -24,6 +24,8 @@ return array(
     'TestCase' => $baseDir . '/app/tests/TestCase.php',
     'UploadHandler' => $baseDir . '/app/library/1.10.2/UploadHandler.php',
     'User' => $baseDir . '/app/models/User.php',
+	'VirtualFile' => $baseDir . '/app/models/VirtualFile.php',
+	'Requester' => $baseDir . '/app/models/VirtualFile.php',
     'UserController' => $baseDir . '/app/controllers/UserController.php',
     'ViewerController' => $baseDir . '/app/controllers/ViewerController.php',
     'app\\library\\files\\v0\\CommFile' => $baseDir . '/app/library/files/CommFile.php',

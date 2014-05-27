@@ -1,6 +1,6 @@
 <?php
-class doc extends Eloquent {
-	protected $table = 'doc';
+class Files extends Eloquent {
+	protected $table = 'files';
 	public $timestamps = false;
 }
 
@@ -8,8 +8,12 @@ class Requester extends Eloquent {
 	protected $table = 'auth_requester';
 	public $timestamps = false;
 	
-	public function docs() {
-		return $this->hasMany('doc','owner','id_doc');
+	public function files() {
+		return $this->hasMany('Files','owner','id_doc');
+	}
+	
+	public function doc() {
+		return $this->hasOne('VirtualFile','id','id_doc');
 	}
 	
 }
@@ -25,22 +29,26 @@ class VirtualFile extends Eloquent {
 	
 	public $timestamps = false;
 	
-	//public function docs() {
-	//	return $this;
-	//}
+	protected $fillable = array('id_user', 'id_file');
+	
+	public function user() {
+		return $this->hasOne('User','id','id_user');
+	}
 	
 	public function files() {
-		return $this->hasMany('doc','owner');
+		return $this->hasMany('Files','owner');
 	}
 	
 	public function requester() {
-		//return $this->hasOne('Requester','id_requester');
-		//return $this->leftJoin('auth_requester','auth.id','=','auth_requester.id_auth');
+		return $this->hasOne('Requester','id_doc');
 	}
 	
 	public function preparer() {
 		return $this->hasMany('Requester','id_requester');
-		//return $this->leftJoin('auth_requester','auth.id','=','auth_requester.id_auth');
+	}
+	
+	public function scopeFile($query) {
+		return $query->leftJoin('files','docs.id_file','=','files.id');
 	}
 
 }
