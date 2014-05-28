@@ -1,4 +1,18 @@
 <?php
+
+echo 'test<br />';
+
+
+
+//var_dump($group->users);
+//var_dump(Group::find(2)->users->count());
+
+//$requester = Requester::with('doc.requester')->where('id_requester','=',$fileAcitver->file_id)->get();
+//var_dump($requester);
+//var_dump($requester[0]->doc->id_user);
+
+
+
 $user = Auth::user();
 $csrf_token = csrf_token();
 $dddos_token = dddos_token();
@@ -21,36 +35,41 @@ echo Form::close();
 | 被請求者 取得匯入的檔案列表
 */
 $virtualFile = VirtualFile::find($fileAcitver->file_id);
-foreach($virtualFile->files as $file)
+foreach($virtualFile->hasFiles as $file)
 	echo $file->title.'<br />';
 
 
 
 echo '<br /><br />';
 
-
 /*
-| 請求者 取得匯入的檔案列表
+| 請求者
 */
-$user->get_file_provider()->get_request();
-
-
-$has_requester = Requester::where('id_requester','=',$fileAcitver->file_id)->exists();
-/*
-| 送出請求
-*/
-if( is_null($virtualFile->requester) && !$has_requester ){	
+if( is_null($virtualFile->requester) ){	
+	/*
+	| 請求者 取得匯入的檔案列表
+	*/
+	$user->get_file_provider()->get_request();
 	
-	$groups = Group::with(array('docs_target' => function($query) use ($fileAcitver) {
+	/*
+	| 送出請求
+	*/
+	$preparers = Requester::with('docPreparer.user')->where('id_requester','=',$fileAcitver->file_id)->get();
+	$preparers_user_id = array_pluck(array_pluck($preparers->toArray(),'doc_preparer'),'id_user');
+	$group = Group::with('users')->where('id','2')->get();
+	echo $preparers->count();
+
+	/*
+	$groups = Group::with(array('docsTarget' => function($query) use ($fileAcitver) {
 		$query->leftJoin('auth_requester','docs.id','=','auth_requester.id_doc')->where('auth_requester.id_requester',$fileAcitver->file_id);
 	}))->where('id_user',$user->id)->get();
-
-	if( $groups->count()>0 ){
+	 */
+	if( $group[0]->users->count() > 0 ){
 		echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_to'), 'files' => true));
-		foreach($groups as $group){	
-			if( $group->docs_target->count()<1 ){
-				echo Form::checkbox('group[]', $group->user->id, true);
-				echo $group->user->username;
+		foreach($group[0]->users as $user_in_group){
+			if( !in_array($user_in_group->id, $preparers_user_id) ){				
+				echo Form::checkbox('group[]', $user_in_group->id, true);
+				echo $user_in_group->username;
 			}
 		}
 		echo Form::submit('Request!');
@@ -59,27 +78,30 @@ if( is_null($virtualFile->requester) && !$has_requester ){
 		echo Form::hidden('_token2', $dddos_token);
 		echo Form::close();
 	}
-}
-
-/*
-| 停止請求
-*/
-if( $has_requester ){
 	
-	$requesters = Requester::with('doc')->where('id_requester','=',$fileAcitver->file_id)->get();
-	echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_end'), 'files' => true));	
-	foreach($requesters as $requester){	
-		echo Form::checkbox('doc[]', $requester->id_doc, true);
-		echo $requester->doc->user->username;
+
+
+	if( $preparers->count() > 0 ){
+		/*
+		| 停止請求
+		*/
+		echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_end'), 'files' => true));	
+		foreach($preparers as $preparer){	
+			echo Form::checkbox('doc[]', $preparer->id_doc, true);
+			echo $preparer->docPreparer->user->username;			
+		}
+		echo Form::submit('Request end!');
+		echo Form::hidden('intent_key', $intent_key);
+		echo Form::hidden('_token1', $csrf_token);
+		echo Form::hidden('_token2', $dddos_token);
+		echo Form::close();
 	}
-	echo Form::submit('Request end!');
-	echo Form::hidden('intent_key', $intent_key);
-	echo Form::hidden('_token1', $csrf_token);
-	echo Form::hidden('_token2', $dddos_token);
-	echo Form::close();
 }
 
-
+		$queries = DB::getQueryLog();
+		foreach($queries as $query){
+			//var_dump($query);echo '<br /><br />';
+		}
 
 /*
 | 檔案上傳後執行
@@ -108,5 +130,9 @@ if( Session::has('upload_file_id') ){
 	if( $errors )
 		echo implode('、',array_filter($errors->all()));
 }
+
+
+
+
 
 

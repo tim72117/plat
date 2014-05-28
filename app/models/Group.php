@@ -4,13 +4,14 @@ class Group extends Eloquent {
 	
 	protected $table = 'group';
 	public $timestamps = false;
+
 	
-	public function user() {
-		return $this->hasOne('User', 'id', 'id_user_target');
+	public function usersDocs() {
+		return $this->belongsToMany('User', 'user_in_group', 'id_group', 'id_user')->with('docs');//->leftJoin('docs','users.id','=','docs.id_user');
 	}
 	
-	public function docs_target() {
-		return $this->hasMany('VirtualFile', 'id_user', 'id_user_target');
-	}
+	public function users() {
+		return $this->belongsToMany('User', 'user_in_group', 'id_group', 'id_user');
+	}	
 	
 }
