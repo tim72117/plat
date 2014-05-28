@@ -1,93 +1,22 @@
 <?
+
+//$user = auth::user();
 ##########################################################################################
 #
 # filename: gra102.php
-# function: 上傳101學年度國三畢業生基本資料
-#
-# 維護者  : 周家吉
-# 維護日期: 2013/04/26
+# function: 上傳101學年度國三畢業生基本資料	
 #
 ##########################################################################################
+
 $now=date("Ymd-His");
-	
-if (Input::has('filetype')){
-
-//接收傳值
-$value = Input::get('memo');
-$filetype = Input::get('filetype');
-$name = Input::get('name');
-$school = "test_school"; //之後改回抓使用者學校名
-
-//上傳檔案
-if ($_FILES["sfile"]["error"] > 0)echo "Error: ".$_FILES["sfile"]["error"];
-else{
-	//echo storage_path()."</br>";//列出路徑
-echo "檔案名稱: " . $_FILES["sfile"]["name"]."<br/>";
-echo "檔案類型: " . $_FILES["sfile"]["type"]."<br/>";
-echo "檔案大小: " . ($_FILES["sfile"]["size"] / 1024)." Kb<br />";
-echo "暫存名稱: " . $_FILES["sfile"]["tmp_name"]."<br/>";
-
-
-		$sfilename = stripslashes($_FILES['sfile']['name']);//抓出上傳檔名
-		$sfilename = $now."_".$school."_".$value."_".$filetype."_".$sfilename;//將檔名加上資訊
-		
-		$serverdir = storage_path()."/storage"; //設定存取路徑(存放在app/storage下
-		
-		$sfile = $_FILES["sfile"]["tmp_name"];
-        $sdestination = $serverdir."$sfilename";		
-		copy($sfile,$sdestination);
-	
-}
+	//echo $user->id;
 
 ?>
 
- <form action="<?=$fileAcitver->get_post_url()?>" method="post">
-        <input name="add" type="submit" value="回到上頁">
-	<?
-	}
-		
-else {		  
-/*include("../../../css/use100.css");  
 
-	session_start();
-
-	if (!($_SESSION['Login'])){
-		header("Location: ../../index.php");
-	}
-	
-	$sch_id=$_SESSION['sch_id'];
-	$tb_name='[use_102].[dbo].[upload102]';
-*/
-?>
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <script src="<?=asset('js/tigra_tables.js')?>"></script>
-<script language="JavaScript" src="../../tigra_tables.js"></script>
-<title> 上傳101學年度國三畢業生基本資料</title>
-<link href="../../../css/theme_inc.css" rel="stylesheet" type="text/css">
-<?
 
-
-  //資料庫連結，及存取之資料表
-
-/*  include("../../../../../../../../../../../home/leon/data/use102/config/setting102.inc.php");
-
-  $sql = new mod_db();
-  $q_string = "select uploadtime,filename from $tb_name where school='".$_SESSION['sch_id']."' AND type=9 order by id ";
-  $obj_query = $sql->query("$q_string");    
-  $sql->disconnect();*/
-  
-$resultss = DB::table('use_102.dbo.upload102')
-				  ->select('uploadtime','filename')
-				 //->where('type', '=', 9)  測試用，應選9
-				  ->get();
-
-?>
-</head>
-
-<body bottommargin="0" topmargin="0" leftmargin="0" rightmargin="0" marginheight="0" marginwidth="0" bgcolor="white">
 <table cellpadding="3" cellspacing="1" border="0" width="100%">
 	<tr>
 	  <td class="header2">101學年度國三畢業生基本資料</td>
@@ -101,35 +30,152 @@ $resultss = DB::table('use_102.dbo.upload102')
 
     <td colspan="8" align="left" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;">相關檔案: 
     	<a href="../../function/download_file.php?file=101gra_form.xls">表格下載</a> <!-- /
-	    <a href="../../function/download.php?file=101gra_in.xls">格式範例</a>  -->
 
-<!---原本		<form enctype="multipart/form-data" method="POST" action="gra102_puserdata">  --->
-        <form enctype="multipart/form-data" action="<?=$fileAcitver->get_post_url()?>" method="post">
+<? 
+$intent_key = $fileAcitver->intent_key;
+echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true, 'method' => 'post'));
+//'method' => 'post'
+echo Form::file('file_upload');
+echo Form::submit('上傳檔案');
+echo Form::hidden('intent_key', $intent_key);
+echo Form::hidden('_token1', csrf_token());
+echo Form::hidden('_token2', dddos_token());
+echo Form::hidden('filetype', '9');
+echo Form::close();
 
-                <p align="center">所提供名單作業說明：
-                  <select name="memo" size="1">
-<option value="0">請選擇</option>
-                             <option value="4">完整名單資料</option>
-                             <option value="1">增加新名單</option>
-                             <option value="2">更改名單資料</option>
-                             <option value="3">刪除名單資料</option>
-                   </select><br><br>
-            備註：
-        	<input name="contact" size="50"> 
-           		<font COLOR ="red">(50字內)</font><br><br>
-					<input type="file" name="sfile">
-					<input type="hidden" name="filetype" value="9">
-            <br><br>																						
-        	<input name="add" type="submit" value="送出檔案"></p></p>
-      </form>
+if( Session::has('upload_file_id') ){ 
+//$aaa='1';
+//if ($aaa = '1'){
+
+//測式////////////////////////////////////////////////////
+
+$value_array =array();
+$j=0;
+$k=0;
+
+	$id_doc = Session::get('upload_file_id');	
+//	$id_doc = 192;
+	$doc = DB::table('files')->where('id',$id_doc)->pluck('file');
+	
+	$reader = PHPExcel_IOFactory::createReaderForFile( storage_path(). '/file_upload/'. $doc );
+	$reader->setReadDataOnly(true);
+	$objPHPExcel  = $reader->load( storage_path(). '/file_upload/'. $doc );
+	
+	$workSheet = $objPHPExcel->getActiveSheet();
+	
+	//var_dump($workSheet->toArray(null,true,true,true));
+	echo "</br>"."</br>";
+	$abc = ($workSheet->toArray(null,true,true,true));
+	
+		$RowHigh = $workSheet->getHighestRow(); // row數 = 3
+		$ColHigh = $workSheet->getHighestColumn(); // col數 = D
+				
+		function alpha2num($ColHigh)  //將英文索引轉為數字(A=>0、B=>1、AA=>26...)
+		{
+			$l = strlen($ColHigh);
+			$n = 0;
+			for($i = 0; $i < $l; $i++)
+				$n = $n*26 + ord($a[$i]) - 0x40;
+			return $n-1;
+		
+		}		
+		
+		echo "RowHigh = ".$RowHigh." , ColHigh = ".$ColHigh."</br>";
+
+	echo "</br>"."</br>";
+	//echo $abc[3]["A"]."---------------";
+	echo "</br>"."</br>";
+	echo '<pre>', print_r($workSheet->toArray(null,true,true,true), true), '</pre>';
+	echo "</br>"."</br>";
+	
+	
+		
+	
+	
+	//var_export($workSheet->toArray(null,true,true,true));
+	//echo $value_array[1]["A"]."</br>"."</br>";
+	foreach ($workSheet->getRowIterator() as $row) {
+		
+
+		$cellIterator = $row->getCellIterator();
+		//echo "test1"."</br>"."</br>";
+		$cellIterator->setIterateOnlyExistingCells(false);
+		//echo "test2"."</br>"."</br>";	
+		
+		foreach ($cellIterator as $cell){
+		//echo "test3"."</br>"."</br>";
+
+		echo $cell->getValue();
+			//$value_array[$j][$k] = $cell->getValue();
+			//echo "j".$j."k".$k."【".$value_array[$j][$k]."】"."</br>";
+			$k++;
+		}
+				
+				/*	if(empty($value_array[$j][1])){
+					$RowHigh = $j-1;
+					$ColHigh = $k-1;
+						break;}
+								
+					$j++;
+					$k=0;*/
+		//echo "test4"."</br>"."</br>";
+			
+		}
+
+/*for ($l=0;$l<$j;$l++){
+	for ($m=0;$m<$k;$m++){
+	echo $value_array[$l][$m]."\t";}
+	echo "</br>";}*/
+
+
+//$insert = DB::insert('insert into use_102.dbo.upload102 (school,name,account,memo,filename,type,ip) values (?,?,?,?,?,?,?)', 												array($school, 'name','xuabjin',1,$name,9,$ip));
+
+/////////////////
+
+/*$id_doc = Session::get('upload_file_id');	
+	$doc = DB::table('doc')->where('id',$id_doc)->pluck('file');
+	
+	$reader = PHPExcel_IOFactory::createReaderForFile( storage_path(). '/file_upload/'. $doc );
+	$reader->setReadDataOnly(true);
+	$objPHPExcel  = $reader->load( storage_path(). '/file_upload/'. $doc );
+	
+	$workSheet = $objPHPExcel->getActiveSheet();
+	
+	var_dump($workSheet->toArray(null,true,true,true));
+	
+	foreach ($workSheet->getRowIterator() as $row) {
+		$cellIterator = $row->getCellIterator();
+		$cellIterator->setIterateOnlyExistingCells(false);
+		foreach ($cellIterator as $cell){
+			echo $cell->getValue().'-';
+		}
+	}*/
+}else{
+	
+	if( $errors )
+		echo implode('、',array_filter($errors->all()));
+}
+
+
+
+
+
+
+/////////////////
+
+//}
+
+?>
+
 	</td>
-  </tr>		
+  </tr>	
+  	
 <?php
-  $i=1;
-foreach ($resultss as $results){
- // while($obj_all = $sql->objects('',$obj_query)){
-		if ($i==1){
+$virtualFile = VirtualFile::find($fileAcitver->file_id);
+$i=1;
+foreach($virtualFile->files as $file){
 
+		if ($i==1){
 ?>
   <tr id="gen_content">
 	<td colspan="8" class="header1" align="center" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;">已上傳的名單</td>
@@ -138,12 +184,17 @@ foreach ($resultss as $results){
 	}
 ?>
   <tr id="gen_content">
-	<td align="left" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;"><?php echo "檔案".$i."　上傳於".$results->uploadtime."___".$results->filename."。";?></td>
+	<td align="left" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;"><?php 
+	//echo "檔案".$i."　上傳於".$results->uploadtime."___".$results->filename."。";
+	
+		echo "檔案".$i."　檔名：".$file->title."　上傳於：".$file->ctime.'<br />';
+?></td>
+    
+    
   </tr>
 <?php
 		$i++;
-  }}
+  //}
+  }
 ?>
 </table>
-</body>
-</html>
