@@ -1,6 +1,6 @@
 <?
 
-//$user = auth::user();
+$user = auth::user();
 ##########################################################################################
 #
 # filename: gra102.php
@@ -29,7 +29,7 @@ $now=date("Ymd-His");
   <tr id="gen_content">
 
     <td colspan="8" align="left" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;">相關檔案: 
-    	<a href="../../function/download_file.php?file=101gra_form.xls">表格下載</a> <!-- /
+    	<a href="../../function/download_file.php?file=101gra_form.xls">表格下載</a> 
 
 <? 
 $intent_key = $fileAcitver->intent_key;
