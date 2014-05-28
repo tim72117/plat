@@ -77,6 +77,6 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 		$this->fileProvider = new FileProvider();
 		return $this->fileProvider;
 	}
-	
+
 
 }

@@ -9,4 +9,8 @@ class Group extends Eloquent {
 		return $this->hasOne('User', 'id', 'id_user_target');
 	}
 	
+	public function docs_target() {
+		return $this->hasMany('VirtualFile', 'id_user', 'id_user_target');
+	}
+	
 }
