@@ -38,12 +38,14 @@ Route::get('registGCM', function() {
 });
 
 Route::get('sentGCM', function() {
+	exit;
 	echo Form::open(array('url' => 'sentGCM'));
 	echo Form::text('message', '');
 	echo Form::submit('Click Me!');
 	echo Form::close();
 });
 Route::post('sentGCM', function() {
+	exit;
 	$url = 'https://android.googleapis.com/gcm/send';
 	$apiKey = 'AIzaSyDNL87CW-gE2UctY7FlKKaJPgvhFGWnclc';
 	$fields = array('registration_ids'  => array('APA91bHKFB6OE0qROz5ulRZniM7-W7dsvx1QwLJc16CaV3A9E6IVUAilgDXmpWOQxLrO_RJK-45uEjzNVRpJpVpJ2bKuRgRmwxcUQF96VIuC72BWz2MdNxXscAyI1Y2w7gQL4YsJCpReJQobT0UKhE3zxA2Ss-pimg'),
@@ -68,6 +70,7 @@ Route::post('sentGCM', function() {
 });
 
 Route::get('test', function() {
+	exit;
 	//$project = 'use';
 	//$ex = new COM("Excel.Application", NULL, CP_UTF8) or Die ("Did not instantiate Excel");
 	//$Workbook = $ex->Workbooks->Open('C:/AppServ/www/1.xls');
@@ -203,7 +206,7 @@ Route::filter('loginAdmin', function($route) {
 });
 
 Route::filter('loginRegister', function($route) {
-	//return '無權限存取';
+	return '無權限存取';
 });
 
 Route::filter('loginPublic', function($route) {
@@ -222,43 +225,4 @@ Route::filter('login', function($route) {
 		return Redirect::to($root);
 });
 
-Route::filter('delay', function() {
-	usleep(500000);
-});
 
-Route::filter('dddos', function() {	
-	$input = Input::all();
-		
-	if( Session::get('dddos') != Input::get('_token2') ){
-		//throw new Illuminate\Session\TokenMismatchException;	
-		$input['dddos_error'] = false;
-		return Redirect::back()->withInput($input);
-	}
-	Session::forget('dddos');
-	
-	$ip = Request::server('REMOTE_ADDR');
-	$ip_time = Cache::get($ip, array('block'=>false,'time'=>array()));
-	array_push($ip_time['time'],date("Y/n/d H:i:s"));	
-
-	$ip_time_re = array_reverse($ip_time['time']);
-	if( count($ip_time_re)>2 ){
-		if( $ip_time['block'] ){
-			$ip_time['block'] = (strtotime($ip_time_re[0])-strtotime($ip_time_re[1])<30);
-		}else{
-			$ip_time['block'] = (strtotime($ip_time_re[0])-strtotime($ip_time_re[1])<10) && (strtotime($ip_time_re[1])-strtotime($ip_time_re[2])<10);
-		}
-	}
-	Cache::put($ip, $ip_time, 10);
-
-	$input['dddos_error'] = true;
-	if( $ip_time['block'] )
-		return Redirect::back()->withInput($input);
-});
-
-App::error(function($exception) {//找不到子頁面
-	//return Response::view('nopage', array(), 404);
-});
-
-App::missing(function($exception) {
-	//return Response::view('nopage', array(), 404);
-});

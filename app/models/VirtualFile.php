@@ -16,6 +16,10 @@ class Requester extends Eloquent {
 		return $this->hasOne('VirtualFile','id','id_doc');
 	}
 	
+	public function doc_requester() {
+		return $this->hasOne('VirtualFile','id','id_requester');
+	}
+	
 }
 	
 class VirtualFile extends Eloquent {

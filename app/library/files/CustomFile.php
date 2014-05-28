@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Response, Session, Request, Redirect, Input, VirtualFile;
+use DB, View, Response, Session, Request, Redirect, Input, VirtualFile, Requester;
 class CustomFile extends CommFile {
 	
 	/**
@@ -18,6 +18,8 @@ class CustomFile extends CommFile {
 		'export',
 		'receives',
 		'get_columns',
+		'request_to',
+		'request_end',
 		'open',
 	);
 	
@@ -56,6 +58,38 @@ class CustomFile extends CommFile {
 		View::share('file_id',$file_id);
 		$doc = VirtualFile::where('docs.id',$file_id)->File()->first();
 		return View::make('demo.use.main')->nest('context',$doc->file);
+	}	
+	
+	
+	public function request_to() {		
+		foreach(Input::get('group') as $target){
+			$this_doc = VirtualFile::find($this->file_id);
+			
+			$doc = new VirtualFile(array(
+				'id_user'  =>  $target,
+				'id_file'  =>  $this_doc->id_file,
+			));
+			$doc->save();
+
+			$requester = new Requester;
+			$requester->id_doc = $doc->id;
+			$requester->id_requester = $this->file_id;
+			$requester->save();
+		}
+		return Redirect::to('user/doc/'.Input::get('intent_key'));
+	}
+	
+	public function request_end() {
+		$docs_id = Input::get('doc');
+		$docs = VirtualFile::with('requester')->whereIn('id', $docs_id)->get();
+		foreach($docs as $doc){
+			$requester = $doc->requester;
+			if( $requester->id_requester==$this->file_id ){
+				$doc->requester->delete();
+				$doc->delete();
+			}
+		}
+		return Redirect::to('user/doc/'.Input::get('intent_key'));	
 	}
 	
 	/**

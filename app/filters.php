@@ -22,6 +22,22 @@ App::after(function($request, $response)
 	//
 });
 
+App::error(function(app\library\files\v0\FileFailedException $exception) {
+	//return Response::view('nopage', array(), 404);
+});
+
+App::error(function(PDOException $exception) {
+	//return Response::view('nopage', array(), 404);
+});
+
+App::error(function($exception) {//找不到子頁面
+	//return Response::view('nopage', array(), 404);
+});
+
+App::missing(function($exception) {
+	//return Response::view('nopage', array(), 404);
+});
+
 /*
 |--------------------------------------------------------------------------
 | Authentication Filters
@@ -78,4 +94,37 @@ Route::filter('csrf', function()
 		//throw new Illuminate\Session\TokenMismatchException;
 		return Redirect::back()->withInput(array('csrf_error'=>true));
 	}
+});
+
+Route::filter('delay', function() {
+	usleep(500000);
+});
+
+Route::filter('dddos', function() {	
+	$input = Input::all();
+		
+	if( Session::get('dddos') != Input::get('_token2') ){
+		//throw new Illuminate\Session\TokenMismatchException;	
+		$input['dddos_error'] = false;
+		return Redirect::back()->withInput($input);
+	}
+	Session::forget('dddos');
+	
+	$ip = Request::server('REMOTE_ADDR');
+	$ip_time = Cache::get($ip, array('block'=>false,'time'=>array()));
+	array_push($ip_time['time'],date("Y/n/d H:i:s"));	
+
+	$ip_time_re = array_reverse($ip_time['time']);
+	if( count($ip_time_re)>2 ){
+		if( $ip_time['block'] ){
+			$ip_time['block'] = (strtotime($ip_time_re[0])-strtotime($ip_time_re[1])<30);
+		}else{
+			$ip_time['block'] = (strtotime($ip_time_re[0])-strtotime($ip_time_re[1])<10) && (strtotime($ip_time_re[1])-strtotime($ip_time_re[2])<10);
+		}
+	}
+	Cache::put($ip, $ip_time, 10);
+
+	$input['dddos_error'] = true;
+	if( $ip_time['block'] )
+		return Redirect::back()->withInput($input);
 });

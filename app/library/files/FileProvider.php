@@ -64,7 +64,7 @@ class FileProvider {
 		
 		foreach($virtualFiles as $virtualFile)	
 			foreach($virtualFile->preparer as $preparer){
-				echo $preparer->doc->user->username.'<br /><br />';
+				//echo $preparer->doc->user->username.'<br /><br />';
 				foreach($preparer->files as $file)
 					echo $file->title.'<br />';
 				echo '<br />';

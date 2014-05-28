@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use Input, Auth, DB, Validator, VirtualFile, Requester, Illuminate\Filesystem\Filesystem;
+use Input, Auth, DB, Validator, VirtualFile, Illuminate\Filesystem\Filesystem;
 class CommFile {
 	
 	/**
@@ -29,8 +29,7 @@ class CommFile {
 		'rename',
 		'save',
 		'save_as',
-		'share_to',
-		'request_to',
+		'share_to',				
 		'open',
 	);	
 	
@@ -131,25 +130,6 @@ class CommFile {
 	public function save_as() { }
 	
 	public function share_to() { }
-	
-	public function request_to() {
-		
-		foreach(Input::get('group') as $target){
-			$this_file = VirtualFile::find($this->file_id);
-			
-			$doc = new VirtualFile(array(
-				'id_user'  =>  $target,
-				'id_file'  =>  $this_file->id_file,
-			));
-			$doc->save();
-
-			$requester = new Requester;
-			$requester->id_doc = $doc->id;
-			$requester->id_requester = $this->file_id;
-			$requester->save();
-		}
-
-	}
 	
 	public function get_auth() {
 		return $this->auth;
