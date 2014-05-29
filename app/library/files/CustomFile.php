@@ -80,6 +80,7 @@ class CustomFile extends CommFile {
 	}
 	
 	public function request_end() {
+		//未完成 file 轉移
 		$docs_id = Input::get('doc');
 		$docs = VirtualFile::with('requester')->whereIn('id', $docs_id)->get();
 		foreach($docs as $doc){

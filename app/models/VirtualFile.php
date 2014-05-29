@@ -12,11 +12,11 @@ class Requester extends Eloquent {
 		return $this->hasMany('Files','owner','id_doc');
 	}
 	
-	public function doc() {
+	public function docPreparer() {
 		return $this->hasOne('VirtualFile','id','id_doc');
 	}
 	
-	public function doc_requester() {
+	public function docRequester() {
 		return $this->hasOne('VirtualFile','id','id_requester');
 	}
 	
@@ -39,15 +39,19 @@ class VirtualFile extends Eloquent {
 		return $this->hasOne('User','id','id_user');
 	}
 	
-	public function files() {
+	public function hasFiles() {
 		return $this->hasMany('Files','owner');
+	}
+	
+	public function isFiles() {
+		return $this->hasOne('Files','owner','id_file');
 	}
 	
 	public function requester() {
 		return $this->hasOne('Requester','id_doc');
 	}
 	
-	public function preparer() {
+	public function preparers() {
 		return $this->hasMany('Requester','id_requester');
 	}
 	
