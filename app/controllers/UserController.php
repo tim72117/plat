@@ -53,7 +53,7 @@ class UserController extends BaseController {
 		
 		View::share('dddos_error',$dddos_error);
 		View::share('csrf_error',$csrf_error);
-		$contents = View::make('demo.'.$project.'.home', array('sql_post'=>array(),'sql_note'=>array()))
+		$contents = View::make('demo.'.$project.'.home', array('sql_post'=>array(),'sql_note'=>array(), 'contextFile'=>'login', 'title'=>'使用者登入'))
 			->nest('child_tab','demo.'.$project.'.tabs')
 			->nest('context','demo.login', array('project'=>$project))				
 			->nest('child_footer','management.footer');		
@@ -184,36 +184,34 @@ class UserController extends BaseController {
 
 	}
 	
-	public function platformRegisterPage() {
-		return View::make('management.register_layout')
-			->nest('child_tab','management.tabs')
-			->nest('child_main','management.register')
-			->nest('child_footer','management.footer');
-	}
-	
-	public function platformRegister() {
-		$input = Input::only('username', 'password', 'password_confirmation','agree');
-		$this->auth_rull['agree'] = 'required|accepted';
-		$rulls = $this->auth_rull;
-		$validator = Validator::make($input, $rulls);
-		
-		if( $validator->fails() ){
-			return Redirect::to('registerPage')->withErrors($validator)->withInput();
+	public function register($project) {
+				
+		if( Request::isMethod('post') ){	
+			$register = require app_path().'\views\demo\\'.$project.'\registerValidator.php';	
+			if( $register->validator()->fails() ){		
+				return Redirect::back()->withErrors($register->validator)->withInput();
+			}else{
+				/*
+				foreach(DB::getQueryLog() as $queryLog){
+					var_dump($queryLog);
+					echo '<br />';			
+				}
+				*/
+				echo $register->save();
+			}
 		}
 		
-		$user = new User;
-		$user->password = Hash::make($input['password']);
-		$user->username = $input['username'];
-		$user->save();
-	
+		$contents = View::make('demo.'.$project.'.home', array('sql_post'=>array(),'sql_note'=>array(), 'contextFile'=>'register','title'=>'註冊帳號'))
+			->nest('child_tab','demo.'.$project.'.tabs')
+			->nest('context','demo.'.$project.'.register', array('project'=>$project))				
+			->nest('child_footer','management.footer');	
 		
-		return '註冊成功';
-
-
-		$response = Response::json($response_obj);
+		$response = Response::make($contents, 200);
+		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+		$response->header('Pragma', 'no-cache');
+		$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
 		return $response;
 	}
-
 	
 
 }

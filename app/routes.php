@@ -88,11 +88,7 @@ Route::get('test', function() {
 });
 
 	//平台-------------------------------------------------------------------------------------------------------------------------------
-	Route::get('login', array('before' => 'delay', 'uses' => 'MagController@platformLoginPage'));	
-	Route::post('loginAuth', array('before' => 'delay|csrf|dddos', 'uses' => 'MagController@platformLoginAuth'));
-	
-	Route::get('registerPage', array('before' => 'delay|loginRegister', 'uses' => 'MagController@platformRegisterPage'));	
-	Route::post('register', array('before' => 'delay|csrf|dddos|loginRegister', 'uses' => 'MagController@platformRegister'));		 
+
 
 	Route::group(array('before' => 'auth_logined'), function() {
 		Route::get('/', function() {
@@ -146,9 +142,21 @@ Route::get('test', function() {
 	Route::get('user/auth/password/reset/{token}', 'UserController@resetPage');
 	Route::post('user/auth/password/reset/{token}', 'UserController@reset');
 	
+	
+	
 	Route::get('user/auth/project', 'UserController@project');
 	Route::get('user/auth/{project}', array('before' => 'delay', 'uses' => 'UserController@loginPage'))->where('project', '[a-z]+');
 	Route::post('user/auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@login'));
+	
+	Route::get('login', array('before' => 'delay', 'uses' => 'MagController@platformLoginPage'));	
+	Route::post('loginAuth', array('before' => 'delay|csrf|dddos', 'uses' => 'MagController@platformLoginAuth'));
+	
+	Route::get('registerPage', array('before' => 'delay|loginRegister', 'uses' => 'MagController@platformRegisterPage'));	
+	Route::post('register', array('before' => 'delay|csrf|dddos|loginRegister', 'uses' => 'MagController@platformRegister'));	
+	
+	Route::get('user/auth/register/{project}', 'UserController@register');
+	Route::post('user/auth/register/{project}', 'UserController@register');
+	
 	
 	//平台---------------------------------------------------------------------------------------------------------------------------------
 	

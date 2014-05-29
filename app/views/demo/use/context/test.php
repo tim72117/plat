@@ -17,6 +17,7 @@ $user = Auth::user();
 $csrf_token = csrf_token();
 $dddos_token = dddos_token();
 
+
 echo 'My file id:'.$fileAcitver->file_id;
 
 /*
@@ -98,10 +99,7 @@ if( is_null($virtualFile->requester) ){
 	}
 }
 
-		$queries = DB::getQueryLog();
-		foreach($queries as $query){
-			//var_dump($query);echo '<br /><br />';
-		}
+
 
 /*
 | 檔案上傳後執行

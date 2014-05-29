@@ -11,7 +11,7 @@
 
 </script>
 
-
+<link href="<?=asset('demo/use/css/use100.css')?>" rel="stylesheet" type="text/css">
 
 </head>
 	
@@ -20,17 +20,24 @@
 
 <body bgcolor="white" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginwidth="0" marginheight="0" class="intd">
 <table cellpadding="3" cellspacing="1" border="1" width="50%" align="center">
-<tr>
-	  <td class="header1" align="center">使用者登入</td>
-  </tr>
 	<tr>
-	  <td height="10" class="intd">
+	  <td class="header1" align="center"><?=$title?></td>
+	</tr>
+	<tr>
+	  <td class="intd">
 		  <?=$context?>
 	  </td>
 	</tr>
     <tr>
 	    <td>        
-        	<p align="right"><a href="create_user" target="_blank">帳號申請</a> \ <a href="isms_sel_acc" target="_blank">帳號註銷</a> <br>
+        	<p align="right">
+				<?
+					if( $contextFile=='register' )
+						echo link_to('user/auth/use', '登入');
+					if( $contextFile=='login' )
+						echo link_to('user/auth/register/use', '帳號申請');
+				?>
+			\ <a href="isms_sel_acc" target="_blank">帳號註銷</a> <br>
         	<a href="AccountApplyProcess.pdf" target="_blank">帳號申請說明</a> \ <a href="AccountCancelProcess.pdf" target="_blank">帳號註銷說明</a><br>
         	<a href="accountQA.pdf" target="_blank">帳號申請Q&amp;A</a> </p>       
         </td>
@@ -52,9 +59,6 @@
 		} ?>
         </td>
     </tr>
-	<tr>
-		<td class="header2" align="center">附註</td>
-  	</tr>  
     <tr>
     	<td class="intd" align="center">
 		<? foreach ($sql_note as $sql_str) {

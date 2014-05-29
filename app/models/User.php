@@ -3,6 +3,7 @@
 use Illuminate\Auth\UserInterface;
 use Illuminate\Auth\Reminders\RemindableInterface;
 use app\library\files\v0\FileProvider;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Eloquent implements UserInterface, RemindableInterface {
 
@@ -67,8 +68,8 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 	
 	public function scopeContact($query, $project)
 	{
-		$contact = 'contact_'.$project;
-		return $query->leftJoin($contact,$this->table.'.id','=',$contact.'.id')->where('active','1')->first();
+		//$contact = 'contact_'.$project;
+		//return $query->leftJoin($contact,$this->table.'.id','=',$contact.'.id')->where('active','1')->where($this->table.'.id',$this->getAuthIdentifier())->first();
 	}
 	
 	public $fileProvider;
@@ -79,6 +80,12 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 	}
 	public function docsHasRequester() {
 		return $this->hasMany('VirtualFile', 'id_user');//->has('requester','=',0);
+	}
+	
+	public function contact($project) {
+		$instance = new Contact;
+		$instance->setTable('contact_'.$project);
+		return new HasOne($instance->newQuery(), $this, $instance->getTable().'.id', 'id');
 	}
 
 }
