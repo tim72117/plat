@@ -7,11 +7,11 @@ class Group extends Eloquent {
 
 	
 	public function usersDocs() {
-		return $this->belongsToMany('User', 'user_in_group', 'id_group', 'id_user')->with('docs');//->leftJoin('docs','users.id','=','docs.id_user');
+		return $this->belongsToMany('User', 'user_in_group', 'group_id', 'user_id')->with('docs');//->leftJoin('docs','users.id','=','docs.id_user');
 	}
 	
 	public function users() {
-		return $this->belongsToMany('User', 'user_in_group', 'id_group', 'id_user');
+		return $this->belongsToMany('User', 'user_in_group', 'group_id', 'user_id');
 	}	
 	
 }

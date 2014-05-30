@@ -94,7 +94,7 @@ class CommFile {
 
 					$file->move($storage_path.'/'.$path, $name);				
 
-					$id_doc = DB::table('files')->insertGetId(array(
+					$doc_id = DB::table('files')->insertGetId(array(
 						'title'   =>   $name_real,
 						'type'    =>   3,
 						'owner'   =>   $virtualFile->id,
@@ -107,7 +107,7 @@ class CommFile {
 					//	'visible'   =>   $visible,
 					//));	
 
-					return $id_doc;			
+					return $doc_id;			
 
 				}
 				catch (\Exception $e)

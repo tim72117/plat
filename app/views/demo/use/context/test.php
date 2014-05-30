@@ -55,8 +55,8 @@ if( is_null($virtualFile->requester) ){
 	/*
 	| 送出請求
 	*/
-	$preparers = Requester::with('docPreparer.user')->where('id_requester','=',$fileAcitver->file_id)->get();
-	$preparers_user_id = array_pluck(array_pluck($preparers->toArray(),'doc_preparer'),'id_user');
+	$preparers = Requester::with('docPreparer.user')->where('requester_doc_id','=',$fileAcitver->file_id)->get();
+	$preparers_user_id = array_pluck(array_pluck($preparers->toArray(),'doc_preparer'),'user_id');
 	$group = Group::with('users')->where('id','2')->get();
 	echo $preparers->count();
 
@@ -88,7 +88,7 @@ if( is_null($virtualFile->requester) ){
 		*/
 		echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_end'), 'files' => true));	
 		foreach($preparers as $preparer){	
-			echo Form::checkbox('doc[]', $preparer->id_doc, true);
+			echo Form::checkbox('doc[]', $preparer->preparer_doc_id, true);
 			echo $preparer->docPreparer->user->username;			
 		}
 		echo Form::submit('Request end!');

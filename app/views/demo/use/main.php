@@ -127,7 +127,7 @@ a:hover{color:#FFFFFF;background-color: #FF6600;text-decoration: none;}
 	<div style="width:100%;height: 130px;position: absolute;z-index:10;background-color: #fff">
 		<div style="background-color: #fff;width:100%;height: 80px"><img src="<?=asset('demo/use/images/title.jpg')?>" width="500" height="80"></div>
 		<div style="background-color: #eee;width:100%;height: 20px;border-bottom: 1px solid #ddd" align="right">
-	    	&nbsp;<a href="<?=URL::to('user/auth/logout')?>" target="_top">登出</a>&nbsp;|&nbsp;<a href="<?=URL::to('page/project')?>" target="_top">回首頁</a>
+	    	&nbsp;<a href="<?=URL::to('user/auth/logout')?>" target="_top">登出</a>;
         </div>
 	</div>
 	
@@ -138,7 +138,8 @@ a:hover{color:#FFFFFF;background-color: #FF6600;text-decoration: none;}
 		<div id ="Layer1">
 			
 			<div>
-			<ul>
+			<ul>				
+				<li id="links"><a href="<?=URL::to('page/project')?>">回首頁</a></li>
 				<li id="links"><a href="<?=URL::to('user/auth/password/change')?>">更改密碼</a></li>
 			</ul>
 			</div>

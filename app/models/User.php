@@ -79,7 +79,7 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 		return $this->fileProvider;
 	}
 	public function docsHasRequester() {
-		return $this->hasMany('VirtualFile', 'id_user');//->has('requester','=',0);
+		return $this->hasMany('VirtualFile', 'user_id');//->has('requester','=',0);
 	}
 	
 	public function contact($project) {

@@ -70,6 +70,44 @@ Route::post('sentGCM', function() {
 });
 
 Route::get('test', function() {
+	$file_path = storage_path(). '/temp/stu_20140530_05-10/';
+	//$files_name = scandir( $file_path );
+	$files_name = array();
+	if( $handle = opendir( $file_path ) ) {
+		while (false !== ($file = readdir($handle))) {
+			if( $file != '.' && $file != '..' ) {
+				$filemtime = filemtime($file_path.$file);
+				$modified = date("Y-m-d H:i:s", $filemtime);
+				$files_name[$modified.' --- '.$file] = $file;
+			}
+		}		
+		closedir($handle);
+	}
+	
+	ksort($files_name);
+	$index = 1;
+	foreach($files_name as $date => $file_name){
+		if( $file_name!='.' && $file_name!='..' ){
+			$file = File::get( $file_path.$file_name );
+			$lines = explode('}', $file);		
+			
+			echo $index.'    ----   '.$date.' ----- ';
+			//echo $lines[count($lines)-2].'}';
+			$last_line = json_decode($lines[count($lines)-2].'}');
+			echo $last_line->page;
+			if( $last_line->page!='17' )
+				echo '          ----------------';
+			
+			$index++;
+			echo '<br />';
+			echo '<br />';
+			echo '<br />';
+		}
+	}
+	exit;
+	
+	
+	
 	exit;
 	//$project = 'use';
 	//$ex = new COM("Excel.Application", NULL, CP_UTF8) or Die ("Did not instantiate Excel");
