@@ -186,24 +186,32 @@ class UserController extends BaseController {
 	
 	public function register($project) {
 				
-		if( Request::isMethod('post') ){	
+		if( Request::isMethod('post') && Session::has('register') ){	
 			$register = require app_path().'\views\demo\\'.$project.'\registerValidator.php';	
 			if( $register->validator()->fails() ){		
 				return Redirect::back()->withErrors($register->validator)->withInput();
 			}else{
+				if( $register->save() ){
+					$context = '註冊成功';
+				}else{
+					return Redirect::back()->withErrors($register->validator)->withInput();
+				}				
 				/*
 				foreach(DB::getQueryLog() as $queryLog){
 					var_dump($queryLog);
 					echo '<br />';			
 				}
-				*/
-				echo $register->save();
+				*/				
 			}
+		}else{
+			Session::flash('register', true);
+			$context =  View::make('demo.'.$project.'.register');			
 		}
 		
 		$contents = View::make('demo.'.$project.'.home', array('sql_post'=>array(),'sql_note'=>array(), 'contextFile'=>'register','title'=>'註冊帳號'))
+			->with('context', $context)
 			->nest('child_tab','demo.'.$project.'.tabs')
-			->nest('context','demo.'.$project.'.register', array('project'=>$project))				
+			//->nest('context', $context, array('project'=>$project))				
 			->nest('child_footer','management.footer');	
 		
 		$response = Response::make($contents, 200);

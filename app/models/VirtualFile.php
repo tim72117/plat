@@ -1,12 +1,16 @@
 <?php
 class Files extends Eloquent {
+	
 	protected $table = 'files';
+	
 	public $timestamps = false;
 }
 
 class Requester extends Eloquent {
+	
 	protected $table = 'auth_requester';
-	public $timestamps = false;
+	
+	public $timestamps = true;
 	
 	public function files() {
 		return $this->hasMany('Files','owner','preparer_doc_id');

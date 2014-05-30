@@ -34,7 +34,7 @@ Auth::extend('eloquent.normal', function()
 //Route::group(array('domain' => 'plat.{domain}'), function() {
 
 Route::get('registGCM', function() {
-	
+	phpinfo();
 });
 
 Route::get('sentGCM', function() {
@@ -70,7 +70,17 @@ Route::post('sentGCM', function() {
 });
 
 Route::get('test', function() {
-	$file_path = storage_path(). '/temp/stu_20140530_05-10/';
+	echo '';
+	
+	if( Session::has('newcid') ){
+		echo 'has';
+	}else{
+		echo 'miss';
+		Session::put('newcid', 123);
+	}
+	
+	return ;
+	$file_path = storage_path(). '/temp/par_20140530_05-10/';
 	//$files_name = scandir( $file_path );
 	$files_name = array();
 	if( $handle = opendir( $file_path ) ) {
@@ -91,13 +101,19 @@ Route::get('test', function() {
 			$file = File::get( $file_path.$file_name );
 			$lines = explode('}', $file);		
 			
-			echo $index.'    ----   '.$date.' ----- ';
+			echo '--'.$index.'    ----   '.$date.' ----- ';
 			//echo $lines[count($lines)-2].'}';
 			$last_line = json_decode($lines[count($lines)-2].'}');
 			echo $last_line->page;
 			if( $last_line->page!='17' )
 				echo '          ----------------';
 			
+
+			$newcid = explode('.', $file_name)[0];
+			
+			echo '<br />';
+			//echo "insert into ntcse103par_pstat (page,newcid,ques,grade,sch_id,tStamp) values (".($last_line->page+1).", '".$newcid."', 'Na', 'N', '999999', '".substr($last_line->stime.($last_line->page+1), 0, 15)."')";
+			echo "update ntcse103par_pstat set page = ".($last_line->page+1)." where newcid = '".$newcid."'";
 			$index++;
 			echo '<br />';
 			echo '<br />';

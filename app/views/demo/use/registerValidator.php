@@ -88,12 +88,17 @@ class Register {
 		
 		$contact->setTable('contact_use');
 		
-		$contact = $user->contact('use')->save($contact);
+		$contact = $user->contact()->save($contact);
 		
-		$credentials = array('email' => $this->input['email']);
-		Password::remind($credentials, function($message) {
-			$message->subject('Password Reminder');
-		});
+		if( is_null($contact->getKey()) ){
+			
+		}else{			
+			$credentials = array('email' => $this->input['email']);
+		
+			Password::remind($credentials);
+			
+			return true;
+		}		
 	}
 	
 };

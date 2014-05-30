@@ -159,12 +159,13 @@ foreach($packageDocs as $packageDoc){
 		if( $active['active']=='open' ){
 			echo '<div class="count button" folder="" style="font-size:12px;text-decoration: underline;float:left;margin-left:10px">';
 			//echo '<div class="intent button" intent_key="'.$active['intent_key'].'">'.$active['active'].'</div>';
-			echo '<a href="'.URL::to('user/doc/'.$active['intent_key']).'">'.$active['active'].$packageDoc['title'].'</a> - ';
+			echo '<a href="'.URL::to('user/doc/'.$active['intent_key']).'">'.$packageDoc['title'].'</a>';
 			echo '</div>';
 		}
 		echo '</div>';
 	}
 }
+
 ?>
 </div>
                      
@@ -175,7 +176,7 @@ foreach($packageDocs as $packageDoc){
 
 		<div style="height: 100%;overflow-y: hidden;margin-left: 200px">
 			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:14px;text-align: left">
-				<?=$context?>
+				
 				<table style="width:100%" cellpadding="0" cellspacing="0">
 					<thead>
 						<tr>
@@ -183,6 +184,10 @@ foreach($packageDocs as $packageDoc){
 						</tr>
 					</thead>
 					<tbody>
+						<tr>
+							<td width="1000px"><?=$context?></td>
+							<td style="vertical-align:top"><?=$request?></td>
+						</tr>					
 					</tbody>
 				</table>
 			</div>			
