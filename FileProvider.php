@@ -5,11 +5,11 @@ class FileProvider {
 	
 	private $files = array();
 	private $intent_hash_table;
-	private $id_user;
+	private $user_id;
 	
 	public function __construct(){
 		$this->intent_hash_table = Session::get('intent_hash_table', array());	
-		$this->id_user = Auth::user()->id;
+		$this->user_id = Auth::user()->id;
 	}
 	/**
 	 * @var string
@@ -19,9 +19,9 @@ class FileProvider {
 		//get lists and put session	
 		//$docs = DB::table('doc')->leftJoin('doc_type','doc.type','=','doc_type.id')->where('doc.owner',$this->id_user)->select('doc.id','title','doc_type.class')->get();
 		$docs = DB::table('docs')
-				->leftJoin('files','docs.id_file','=','files.id')
+				->leftJoin('files','docs.file_id','=','files.id')
 				->leftJoin('doc_type','files.type','=','doc_type.id')
-				->where('docs.id_user',$this->id_user)
+				->where('docs.user_id',$this->user_id)
 				//->where('doc.owner',$this->id_user)
 				->select('docs.id','title','doc_type.class')->get();
 			
@@ -60,7 +60,7 @@ class FileProvider {
 					var_dump($preparer->docs);
 		exit;
 		*/
-		$virtualFiles = VirtualFile::with('preparers')->where('id_user',$this->id_user)->get();
+		$virtualFiles = VirtualFile::with('preparers')->where('user_id',$this->user_id)->get();
 		
 		foreach($virtualFiles as $virtualFile)	
 			foreach($virtualFile->preparers as $preparer){
