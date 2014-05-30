@@ -57,7 +57,7 @@ class CustomFile extends CommFile {
 	public function open($file_id) {		
 		View::share('file_id',$file_id);
 		$doc = VirtualFile::where('docs.id',$file_id)->File()->first();
-		return View::make('demo.use.main')->nest('context',$doc->file);
+		return $doc->file;
 	}	
 	
 	

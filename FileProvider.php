@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, Session, Auth, Request, VirtualFile, Requester;
+use DB, Session, Auth, Request, VirtualFile, Requester, User;
 class FileProvider {
 	
 	private $files = array();
@@ -21,19 +21,29 @@ class FileProvider {
 		$docs = DB::table('docs')
 				->leftJoin('files','docs.file_id','=','files.id')
 				->leftJoin('doc_type','files.type','=','doc_type.id')
+				->leftJoin('auth_requester','docs.id','=','auth_requester.preparer_doc_id')
 				->where('docs.user_id',$this->user_id)
 				//->where('doc.owner',$this->id_user)
-				->select('docs.id','title','doc_type.class')->get();
-			
+				->select('docs.id','title','doc_type.class','auth_requester.requester_doc_id')->get();
+		
+		
 		$packageDocs = array();
 		
 		foreach($docs as $doc){
 			$fileClass = 'app\\library\\files\\v0\\'.$doc->class;
 			
+			$file_from = '';
+			if( !is_null($doc->requester_doc_id) ){
+				$requester_doc = VirtualFile::find($doc->requester_doc_id);
+				$file_from = ' (來自:'.$requester_doc->user->username.')';
+			}
+			
 			if( class_exists($fileClass) ){
 
 				$actives = $fileClass::get_intent();
-				$packageDoc = array('title'=>$doc->title, 'actives'=>array());
+				
+				
+				$packageDoc = array('title'=>$doc->title.$file_from, 'actives'=>array());
 				foreach($actives as $active){
 					$intent = array('active'=>$active,'file_id'=>$doc->id,'fileClass'=>$fileClass);
 					$intent_key = $this->get_intent_id($intent);
@@ -79,6 +89,8 @@ class FileProvider {
 		 * 
 		 */
 	}
+	
+	
 	
 	public function get_active_url($intent_key, $active) {
 		$intent_active = Session::get('file')[$intent_key];
