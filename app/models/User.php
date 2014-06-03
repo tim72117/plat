@@ -72,6 +72,16 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 		//return $query->leftJoin($contact,$this->table.'.id','=',$contact.'.id')->where('active','1')->where($this->table.'.id',$this->getAuthIdentifier())->first();
 	}
 	
+	
+	
+	
+	/**
+	 * Get the e-mail address where password reminders are sent.
+	 *
+	 * @return string
+	 */	
+
+	
 	public $fileProvider;
 	
 	public function get_file_provider() {
@@ -92,6 +102,11 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 		$instance = new Contact;
 		$instance->setTable('contact_'.$this->project);
 		return new HasOne($instance->newQuery(), $this, $instance->getTable().'.id', 'id');
+	}
+	
+	public function schools() {
+		//return $this->hasMany('Contact_sch_use','user_id','id');
+		return $this->belongsToMany('School', 'Contact_sch_use', 'user_id', 'sch_id');
 	}
 
 }

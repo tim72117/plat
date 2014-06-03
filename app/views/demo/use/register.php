@@ -44,7 +44,7 @@
     	<th width="175" height="30" valign="middle" align="center">學校名稱、代號</th>
         <td align="center" colspan="3">
 			<?
-			$schoos = DB::table('use_public.dbo.pub_school')->where('year',102)->lists('sname','sch_id');
+			$schoos = DB::table('pub_school')->where('year',102)->orderBy('type','desc')->lists('sname','id');
 			echo Form::select('sch_id', $schoos, Input::old('sch_id')); 
 			?>
         </td>

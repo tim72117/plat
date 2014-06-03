@@ -92,6 +92,8 @@ class Register {
 		
 		if( is_null($contact->getKey()) ){
 			
+			return false;
+			
 		}else{			
 			$credentials = array('email' => $this->input['email']);
 		

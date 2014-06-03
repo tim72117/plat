@@ -124,17 +124,17 @@ a:hover{color:#FFFFFF;background-color: #FF6600;text-decoration: none;}
 
 <div style="width: 100%;height: 100%;max-height:100%">
 
-	<div style="width:100%;height: 130px;position: absolute;z-index:10;background-color: #fff">
+	<div style="width:100%;height: 100px;position: absolute;z-index:10;background-color: #fff">
 		<div style="background-color: #fff;width:100%;height: 80px"><img src="<?=asset('demo/use/images/title.jpg')?>" width="500" height="80"></div>
 		<div style="background-color: #eee;width:100%;height: 20px;border-bottom: 1px solid #ddd" align="right">
 	    	&nbsp;<a href="<?=URL::to('user/auth/logout')?>" target="_top">登出</a>;
         </div>
 	</div>
 	
-	<div class="border-box" style="height:100%;width:100%;background-color: #f00;padding-top:130px">
+	<div class="border-box" style="height:100%;width:100%;background-color: #fff;padding-top:100px">
 		
 <div style="height:100%;overflow-y: hidden;float:left">
-	<div style="width: 350px;height:100%;background-color: #fff;border-right: 1px solid #ddd;overflow-y: auto">
+	<div style="width: 350px;height:100%;background-color: #fff;border-right: 1px solid #ddd;overflow-y: auto;margin-top:30px">
 		<div id ="Layer1">
 			
 			<div>
@@ -155,14 +155,15 @@ $packageDocs = $user->get_file_provider()->lists();
 foreach($packageDocs as $packageDoc){
 	foreach($packageDoc['actives'] as $active){		
 		
-		echo '<div class="inbox" style="clear:both;overflow: hidden;cursor:default">';
 		if( $active['active']=='open' ){
-			echo '<div class="count button" folder="" style="font-size:12px;text-decoration: underline;float:left;margin-left:10px">';
+			echo '<div class="inbox" style="clear:both;overflow: hidden;cursor:default;margin-top:10px">';
+			echo '<div class="count button" folder="" style="font-size:14px;text-decoration: underline;float:left;margin-left:10px">';
 			//echo '<div class="intent button" intent_key="'.$active['intent_key'].'">'.$active['active'].'</div>';
 			echo '<a href="'.URL::to('user/doc/'.$active['intent_key']).'">'.$packageDoc['title'].'</a>';
 			echo '</div>';
+			echo '</div>';
 		}
-		echo '</div>';
+		
 	}
 }
 

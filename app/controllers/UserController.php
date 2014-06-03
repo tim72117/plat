@@ -53,10 +53,11 @@ class UserController extends BaseController {
 		
 		View::share('dddos_error',$dddos_error);
 		View::share('csrf_error',$csrf_error);
-		$contents = View::make('demo.'.$project.'.home', array('sql_post'=>array(),'sql_note'=>array(), 'contextFile'=>'login', 'title'=>'使用者登入'))
+		$contents = View::make('demo.'.$project.'.home', array('contextFile'=>'login', 'title'=>'使用者登入'))
 			->nest('child_tab','demo.'.$project.'.tabs')
-			->nest('context','demo.login', array('project'=>$project))				
-			->nest('child_footer','management.footer');		
+			->nest('context','demo.login', array('project'=>$project))	
+			->nest('news','demo.'.$project.'.news', array('sql_post'=>array(),'sql_note'=>array()))	
+			->nest('child_footer','demo.'.$project.'.footer');		
 		$response = Response::make($contents, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
 		$response->header('Pragma', 'no-cache');
@@ -102,20 +103,35 @@ class UserController extends BaseController {
 		
 	}
 	
-	public function remindPage() {
-		return View::make('demo.use.home', array('sql_post'=>array(),'sql_note'=>array()))
-			->nest('context','demo.remind');
+	public function remindPage($state = Null) {
+		if( $state == 'send' ){
+			return View::make('demo.use.home', array('contextFile'=>'login', 'title'=>'重設密碼信件已寄出'))
+				->with('context', '<div style="margin:30px auto;width:300px;color:#f00">重設密碼信件已寄出，請到您的電子郵件信箱收取信件</div>')
+				->nest('child_footer','demo.use.footer');
+		}
+		return View::make('demo.use.home', array('contextFile'=>'login', 'title'=>'忘記密碼'))
+			->nest('context','demo.remind')
+			->nest('child_footer','demo.use.footer');
 	}
 
 	public function remind() {
 		$credentials = array('email' => Input::get('email'));
-		return Password::remind($credentials, function($message) {
-			$message->subject('Password Reminder');
+		$response = Password::remind($credentials, function($message) {
+			$message->subject('重設您的查詢平台帳戶密碼');
 		});
+		switch ($response){
+			case Password::INVALID_USER:				
+				return Redirect::back()->withErrors(['error' => Lang::get($response)]);
+
+			case Password::REMINDER_SENT:
+				return Redirect::to('user/auth/password/remind/send');
+		}
 	}
 	
 	public function resetPage($token) {
-		return View::make('demo.auth_reset')->with('token', $token);
+		return View::make('demo.use.home', array('sql_post'=>array(),'sql_note'=>array(), 'contextFile'=>'register','title'=>'重設密碼'))
+			->nest('context', 'demo.auth_reset', array('token'=>$token))
+			->nest('child_footer','demo.use.footer');
 	}
 		
 	public function reset($token) {
@@ -126,14 +142,36 @@ class UserController extends BaseController {
 			'token' => $token,
 		);
 
-		return Password::reset($credentials, function($user, $password)
+		Password::validator(function($credentials){
+			$input = array('password'=>$credentials['password']);
+			$rulls = array('password' => $this->auth_rull['password']);
+			$rulls_message = array(
+				'password.required' => '密碼必填',
+				'password.regex' => '密碼格式錯誤',									
+			);
+			$validator = Validator::make($input, $rulls, $rulls_message);
+
+			return $validator->passes();
+		});
+
+		$response = Password::reset($credentials, function($user, $password) use (&$project)
 		{
 			$user->password = Hash::make($password);
 
 			$user->save();
-
-			return Redirect::to('home');
+			
+			$project = $user->project;			
 		});
+	
+		switch ($response){
+			case Password::INVALID_PASSWORD:
+			case Password::INVALID_TOKEN:
+			case Password::INVALID_USER:				
+				return Redirect::back()->withErrors(['error' => Lang::get($response)]);
+
+			case Password::PASSWORD_RESET:
+				return Redirect::to('user/auth/'.$project);
+		}
 	}
 	
 	public function passwordChangePage() {
@@ -142,7 +180,9 @@ class UserController extends BaseController {
 		$csrf_error = Input::old('csrf_error');
 		View::share('dddos_error',$dddos_error);
 		View::share('csrf_error',$csrf_error);
-		$contents = View::make('demo.'.$project.'.main')->nest('context','demo.page.01_changepasswd');
+		$contents = View::make('demo.'.$project.'.main')
+			->with('request', '')
+			->nest('context','demo.page.01_changepasswd');
 		$response = Response::make($contents, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
 		$response->header('Pragma', 'no-cache');
@@ -212,7 +252,7 @@ class UserController extends BaseController {
 			->with('context', $context)
 			->nest('child_tab','demo.'.$project.'.tabs')
 			//->nest('context', $context, array('project'=>$project))				
-			->nest('child_footer','management.footer');	
+			->nest('child_footer','demo.'.$project.'.footer');		
 		
 		$response = Response::make($contents, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');

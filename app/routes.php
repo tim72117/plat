@@ -178,7 +178,7 @@ Route::get('test', function() {
 		//Route::post('user/doc/upload/{content}', array('before' => 'delay|csrf|dddos', 'uses' => 'FileController@upload'));
 		
 		Route::get('page/project/{context?}', array('as' => 'project', 'before' => '', 'uses' => 'PageController@project'));
-		Route::post('page/project/{context}', array('before' => '', 'uses' => 'PageController@project'));
+		Route::post('page/project/{context?}', array('before' => '', 'uses' => 'PageController@project'));
 		
 		Route::get('page/{context}', 'PageController@page');
 		Route::post('page/{context}', 'PageController@page');
@@ -190,7 +190,7 @@ Route::get('test', function() {
 		
 	});
 	
-	Route::get('user/auth/password/remind', 'UserController@remindPage');
+	Route::get('user/auth/password/remind/{state?}', 'UserController@remindPage');
 	Route::post('user/auth/password/remind', 'UserController@remind');
 	
 	Route::get('user/auth/password/reset/{token}', 'UserController@resetPage');

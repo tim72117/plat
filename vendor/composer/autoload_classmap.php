@@ -26,6 +26,8 @@ return array(
     'User' => $baseDir . '/app/models/User.php',
 	'VirtualFile' => $baseDir . '/app/models/VirtualFile.php',
 	'Requester' => $baseDir . '/app/models/VirtualFile.php',
+	'Contact_sch_use' => $baseDir . '/app/models/Contact.php',
+	'School' => $baseDir . '/app/models/Contact.php',
     'UserController' => $baseDir . '/app/controllers/UserController.php',
     'ViewerController' => $baseDir . '/app/controllers/ViewerController.php',
     'app\\library\\files\\v0\\CommFile' => $baseDir . '/app/library/files/CommFile.php',

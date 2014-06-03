@@ -1,22 +1,30 @@
 <form action="login" method="post">
-	
-  <p align="center">
-	電子郵件：<?=Form::text('email', Input::old('email',''), array('placeholder' => '電子郵件','class' => 'register-block'))?><br />
-	密碼：<?=Form::password('password', array('placeholder' => '密碼','class' => 'register-block'))?><br />
+	<table style="width:300px;margin:0 auto">
+		<tr>
+			<th>電子郵件信箱</th>
+			<td><?=Form::text('email', Input::old('email',''), array('placeholder' => '電子郵件','class' => 'register-block'))?></td>
+		</tr>
+		<tr>
+			<th>密碼</th>
+			<td><?=Form::password('password', array('placeholder' => '密碼','class' => 'register-block'))?></td>
+		</tr>
+		<tr>
+			<td colspan="2" style="text-align:center;color:#f00">
+			<?
+				if( isset($dddos_error) && $dddos_error )
+					echo '登入次數過多,請等待30秒後再進行登入';
+				if( isset($csrf_error) && $csrf_error )
+					echo '畫面過期，請重新登入';
+				echo implode('、',array_filter($errors->all()));
+			?>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" style="text-align:center"><input type="submit" value="送出"></td>
+		</tr>	
+	</table>
 	<input type="hidden" name="_token1" value="<?=csrf_token()?>" />
 	<input type="hidden" name="_token2" value="<?=dddos_token()?>" />
 	<input type="hidden" name="project" value="<?=$project?>" />
-	<input type="submit" name="Submit" value="送出">
-  </p>
-
 </form>
-
-	<?
-		if( isset($dddos_error) && $dddos_error )
-			echo '登入次數過多,請等待30秒後再進行登入';
-		if( isset($csrf_error) && $csrf_error )
-			echo '畫面過期，請重新登入';
-		echo implode('、',array_filter($errors->all()));
-	?>
-
 <p align="right"><a href="password/remind" target="_self">忘記密碼</a></p>

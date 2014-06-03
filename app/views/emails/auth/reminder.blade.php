@@ -4,10 +4,22 @@
 		<meta charset="utf-8">
 	</head>
 	<body>
-		<h2>Password Reset</h2>
+		<h2>重設密碼</h2>
 
 		<div>
-			To reset your password, complete this form: {{ URL::to('user/auth/password/reset', array($token)) }}.
+			要重設密碼，只需點擊下方連結。此連結會帶你前往一個可以讓你建立新密碼的網頁
+			<br />
+			{{ link_to('user/auth/password/reset/'.$token, '重設您的密碼>', array(), $secure = true) }}
+		</div>
+		
+		<br />
+		<br />
+		<div>
+			國立臺灣師範大學教育研究與評鑑中心
+			<br />
+			聯絡電話：02-77343669（直撥）
+			<br />
+			電子信箱：tsp@deps.ntnu.edu.tw
 		</div>
 	</body>
 </html>
