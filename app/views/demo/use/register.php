@@ -16,19 +16,19 @@
 	</tr>
     <tr>
     	<th width="175" height="30" valign="middle" align="center">E-mail <span style="color:#f00">(登入帳號)</span></th>		
-        <td width="175" align="center" colspan="3"><?=Form::text('email', Input::old('email'), array('size'=>70))?></td>    	
+        <td width="175" align="left" colspan="3"><?=Form::text('email', Input::old('email'), array('size'=>70, 'class'=>'register-block'))?></td>    	
     </tr>
     <tr>
     	<th width="175" height="30" valign="middle" align="center">姓名</th>
-        <td width="175" align="center"><?=Form::text('name', Input::old('name'), array('size'=>20))?></td>
+        <td width="175" align="left"><?=Form::text('name', Input::old('name'), array('size'=>20, 'class'=>'register-block'))?></td>
         <th width="175" valign="middle" align="center">職稱</th>
-        <td width="175" align="center"><?=Form::text('title', Input::old('title'), array('size'=>20))?></td>
+        <td width="175" align="left"><?=Form::text('title', Input::old('title'), array('size'=>20, 'class'=>'register-block'))?></td>
     </tr>
     <tr>
     	<th width="175" height="30" valign="middle" align="center">單位</th>
-        <td width="175" align="center"><?=Form::text('department', Input::old('department'), array('size'=>20))?></td>
+        <td width="175" align="left"><?=Form::text('department', Input::old('department'), array('size'=>20, 'class'=>'register-block'))?></td>
 		<th width="100" height="30" valign="middle" align="center">單位級別</th>
-	   	<td width="300" align="center">
+	   	<td width="300" align="left">
 			<?=Form::radio('department_class', 1, false, array('id'=>'department_class[0]','size'=>20)).Form::label('department_class[0]', '中央政府')?>
 			<?=Form::radio('department_class', 2, false, array('id'=>'department_class[1]','size'=>20)).Form::label('department_class[1]', '縣市政府')?>
 			<?=Form::radio('department_class', 0, false, array('id'=>'department_class[2]','size'=>20)).Form::label('department_class[2]', '各級學校')?>
@@ -36,13 +36,13 @@
     </tr>
     <tr>
     	<th width="175"  height="30" valign="middle" align="center">聯絡電話(Tel)</th>
-        <td width="175" align="center"><?=Form::text('tel', Input::old('tel'), array('size'=>20))?></td>
+        <td width="175" align="left"><?=Form::text('tel', Input::old('tel'), array('size'=>20, 'class'=>'register-block'))?></td>
         <th width="175" valign="middle" align="center">傳真電話(Fax)</th>
-        <td width="175" align="center"><?=Form::text('fax', Input::old('fax'), array('size'=>20))?></td>
+        <td width="175" align="left"><?=Form::text('fax', Input::old('fax'), array('size'=>20, 'class'=>'register-block'))?></td>
     </tr>
 	<tr>
     	<th width="175" height="30" valign="middle" align="center">學校名稱、代號</th>
-        <td align="center" colspan="3">
+        <td align="left" colspan="3">
 			<?
 			$schoos = DB::table('pub_school')->where('year',102)->orderBy('type','desc')->lists('sname','id');
 			echo Form::select('sch_id', $schoos, Input::old('sch_id')); 
@@ -97,11 +97,6 @@
 			<input type="submit" value="申請表送出">
   		</td>
 	</tr>
-    <tr> 	
-        <td align="center" valign="middle" colspan="4">
-			<input type="button" value='列印申請表'>
-       	</td>
-    </tr>
 </table>
 </form>
 

@@ -109,7 +109,7 @@ class UserController extends BaseController {
 				->with('context', '<div style="margin:30px auto;width:300px;color:#f00">重設密碼信件已寄出，請到您的電子郵件信箱收取信件</div>')
 				->nest('child_footer','demo.use.footer');
 		}
-		return View::make('demo.use.home', array('contextFile'=>'login', 'title'=>'忘記密碼'))
+		return View::make('demo.use.home', array('contextFile'=>'remind', 'title'=>'忘記密碼'))
 			->nest('context','demo.remind')
 			->nest('child_footer','demo.use.footer');
 	}
@@ -225,14 +225,21 @@ class UserController extends BaseController {
 	}
 	
 	public function register($project) {
-				
+						
 		if( Request::isMethod('post') && Session::has('register') ){	
 			$register = require app_path().'\views\demo\\'.$project.'\registerValidator.php';	
 			if( $register->validator()->fails() ){		
 				return Redirect::back()->withErrors($register->validator)->withInput();
 			}else{
 				if( $register->save() ){
-					$context = '註冊成功';
+					$context =  View::make('demo.'.$project.'.registerPrint', array('user'=>$register->user));	
+					$html2pdf = new HTML2PDF('L', 'A4', 'en', true, 'UTF-8', array(0, 5, 0, 5));
+					$html2pdf->pdf->SetAuthor('國立臺灣師範大學 教育研究與評鑑中心');
+					$html2pdf->pdf->SetTitle('後期中等教育整合資料庫國民中學承辦人員帳號使用權申請表');
+					$html2pdf->setDefaultFont('kaiu');
+					$html2pdf->writeHTML($context, false);
+					return Response::make($html2pdf->Output('register.pdf'), 200, array('content-type'=>'application/pdf'));
+					//$context = '註冊成功';
 				}else{
 					return Redirect::back()->withErrors($register->validator)->withInput();
 				}				

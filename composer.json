@@ -19,7 +19,10 @@
 		],
 		"files": [
             "app/function/myfunction.php"
-    	]
+    	],
+		"psr-0": {
+            "HTML2PDF": "vendor/phpoffice/html2pdf_v4.03"
+        }
 	},
 	"scripts": {
 		"post-install-cmd": [

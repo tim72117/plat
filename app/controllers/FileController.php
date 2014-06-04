@@ -76,7 +76,7 @@ class FileController extends BaseController {
 		*/
 		$html = '';
 		$preparers = Requester::with('docPreparer.user')->where('requester_doc_id','=',$this->fileAcitver->file_id)->get();
-		$preparers_user_id = array_pluck(array_pluck($preparers->toArray(),'doc_preparer'),'user_id');
+		$preparers_user_id = array_pluck($preparers->lists('doc_preparer'),'user_id');
 		$group = Group::with('users')->where('id','2')->get();
 		//$html .= $preparers->count();
 		

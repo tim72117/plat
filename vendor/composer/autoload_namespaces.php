@@ -33,6 +33,7 @@ return array(
     'Math' => array($vendorDir . '/phpseclib/phpseclib/phpseclib'),
     'Jeremeamia\\SuperClosure' => array($vendorDir . '/jeremeamia/SuperClosure/src'),
     'Illuminate' => array($vendorDir . '/laravel/framework/src'),
+    'HTML2PDF' => array($vendorDir . '/phpoffice/html2pdf_v4.03'),
     'File' => array($vendorDir . '/phpseclib/phpseclib/phpseclib'),
     'Crypt' => array($vendorDir . '/phpseclib/phpseclib/phpseclib'),
     'ClassPreloader' => array($vendorDir . '/classpreloader/classpreloader/src'),

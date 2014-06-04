@@ -6,6 +6,7 @@ class Register {
 	
 	public $validator;
 	public $input;
+	public $user;
 	
 	function validator() {
 		
@@ -64,12 +65,12 @@ class Register {
 	
 	public function save() {
 		
-		$user = new User;
-		$user->username    = $this->input['name'];
-		$user->password    = '';
-		$user->email       = $this->input['email'];
-		$user->project     = 'use';		
-		$user->save();		
+		$this->user = new User;
+		$this->user->username    = $this->input['name'];
+		$this->user->password    = '';
+		$this->user->email       = $this->input['email'];
+		$this->user->project     = 'use';		
+		$this->user->save();		
 		
 		$contact = new Contact(array(
 			'sch_id'           => $this->input['sch_id'],
@@ -88,7 +89,7 @@ class Register {
 		
 		$contact->setTable('contact_use');
 		
-		$contact = $user->contact()->save($contact);
+		$contact = $this->user->contact()->save($contact);
 		
 		if( is_null($contact->getKey()) ){
 			

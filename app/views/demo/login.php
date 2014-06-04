@@ -2,7 +2,7 @@
 	<table style="width:300px;margin:0 auto">
 		<tr>
 			<th>電子郵件信箱</th>
-			<td><?=Form::text('email', Input::old('email',''), array('placeholder' => '電子郵件','class' => 'register-block'))?></td>
+			<td><?=Form::text('email', Input::old('email',''), array('placeholder' => '電子郵件信箱','class' => 'register-block'))?></td>
 		</tr>
 		<tr>
 			<th>密碼</th>
@@ -27,4 +27,3 @@
 	<input type="hidden" name="_token2" value="<?=dddos_token()?>" />
 	<input type="hidden" name="project" value="<?=$project?>" />
 </form>
-<p align="right"><a href="password/remind" target="_self">忘記密碼</a></p>

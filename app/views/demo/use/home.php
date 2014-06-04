@@ -30,45 +30,44 @@
 	</tr>
 	<tr>
 	  <td class="intd2">
-		  <?=$context?>		  
+			<?=$context?>	
+		  	
+        	
+			<?
+			echo '<p align="center">';
+			if( $contextFile!='remind' && $contextFile!='register' )
+				echo link_to('user/auth/password/remind', '忘記密碼');
+			echo '</p>';
+			echo '<p align="center">';
+				if( $contextFile!='login' )
+					echo link_to('user/auth/use', '登入');
 
+				if( $contextFile=='login' ){
+					echo link_to('user/auth/register/use', '帳號申請');
+				}
+			echo '</p>';
+			?>
+			<!--\ <a href="isms_sel_acc" target="_blank">帳號註銷</a> <br>
+        	<a href="AccountApplyProcess.pdf" target="_blank">帳號申請說明</a> \ <a href="AccountCancelProcess.pdf" target="_blank">帳號註銷說明</a><br>
+        	<a href="accountQA.pdf" target="_blank">帳號申請Q&amp;A</a>--> 
+			
+		  <div style="float:right;margin:10px">
+			  <div id="twcaseal" class="SMALL"><img src="<?=asset('images/twca.gif')?>"/></div>
+		  </div>
 	  </td>	
 	</tr>
     <tr>
 	    <td>      
-		  <div style="float:right;margin:10px">
-			  <div id="twcaseal" class="SMALL"><img src="<?=asset('images/twca.gif')?>"/></div>
-		  </div>
-			
-        	<p align="right">
-				<?
-					echo link_to('user/auth/use', '登入');
-					echo ' \ ';
-					if( $contextFile=='login' )
-						echo link_to('user/auth/register/use', '帳號申請');
-				?>
-			\ <a href="isms_sel_acc" target="_blank">帳號註銷</a> <br>
-        	<a href="AccountApplyProcess.pdf" target="_blank">帳號申請說明</a> \ <a href="AccountCancelProcess.pdf" target="_blank">帳號註銷說明</a><br>
-        	<a href="accountQA.pdf" target="_blank">帳號申請Q&amp;A</a> </p>       
+
+ 
         </td>
 </tr>
-
-
-	<tr>
-	  <td class="intd2">	
-      <b>  　</b>
-      </td>
-	</tr>
-    
-
 	<tr>
 	  <td class="intd">
 		您於&nbsp;<b><?=Session::get('now')?></b>&nbsp;&nbsp;從&nbsp;<b><?=Session::get('ip'); ?></b>&nbsp;連結至本網站。
       </td>
 	</tr>
 	<?=@$news?>
-
-
     
 </table>
 
