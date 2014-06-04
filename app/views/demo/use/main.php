@@ -13,6 +13,7 @@
 <![endif]-->
 
 <link rel="stylesheet" href="<?=asset('js/jquery-ui-1.10.3.custom.min.css')?>" />
+<link href="<?=asset('demo/use/css/use100_content.css')?>" rel="stylesheet" type="text/css">
 
 <script type="text/javascript">
  	$(document).ready(function(){	//選單功能
@@ -32,88 +33,7 @@
 		});
   	});
 </script>
-<style>
-html,body {
-	height: 100%;
-	font-family: 微軟正黑體;
-}
-body {
-	margin: 0;
-	padding: 0;
-}
-.question:hover {
-	background-color: #dd4b39;
-	color: #fff;
-}
-.folder {
-	background-image: url(images/folder.png);
-	line-height: 40px;
-	margin: 12px 12px 12px 0;
-	width: 16px;
-	height: 16px;
-	float: left;
-}
-.cnew {
-	/*background-image: url(images/cfolder.png);*/
-	background-repeat: no-repeat;
-	width: 62px;
-	height: 32px;
-	background-position: center;
-	background-color: #dd4b39;
-	/*background-image: -webkit-linear-gradient(top,#dd4b39,#d14836);*/
-	border-radius: 5px;
-	text-align: center;
-	line-height: 32px;
-	color: #fff;
-	border: 1px solid #ddd;
-}
-.upload {
-	background-image: url(images/upload.png);
-	background-repeat: no-repeat;
-	background-position: center;
-	width: 32px;
-	height: 32px;
-	background-color: #dd4b39;
-	border-radius: 3px;
-	text-align: center;
-	line-height: 32px;
-	border: 1px solid #ddd;
-}
-.upload-file {
-	font-size: 12px;
-}
-.button:hover {
-	cursor: pointer;
-	-ms-user-select:none;
-	-webkit-user-select: none;
-}
-.border-box {
-	-webkit-box-sizing: border-box;	
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-}
-.ui-widget {
-	font-size: 12px;
-}
-#Layer1 ul {
-	margin: 0px;
-	padding: 0px;
-	list-style-type: none;
-}
-#Layer2 ul {
-	margin: 0px;
-	padding: 0px;
-	list-style-type: none;
-}
 
-a,a:link,a:visited{color:#0066FF;text-decoration: none}
-a:hover{color:#FFFFFF;background-color: #FF6600;text-decoration: none;}
-
-.clear {
-	clear: both;
-	height: 0;
-}
-</style>
 
 
 </head>
@@ -126,8 +46,8 @@ a:hover{color:#FFFFFF;background-color: #FF6600;text-decoration: none;}
 
 	<div style="width:100%;height: 100px;position: absolute;z-index:10;background-color: #fff">
 		<div style="background-color: #fff;width:100%;height: 80px"><img src="<?=asset('demo/use/images/title.jpg')?>" width="500" height="80"></div>
-		<div style="background-color: #eee;width:100%;height: 20px;border-bottom: 1px solid #ddd" align="right">
-	    	&nbsp;<a href="<?=URL::to('user/auth/logout')?>" target="_top">登出</a>;
+		<div style="background-color:#458A00;width:100%;height: 20px;border-bottom: 1px solid #ddd" align="right";>
+	    	&nbsp;<a href="<?=URL::to('user/auth/logout')?>" target="_top" >登出</a>;
         </div>
 	</div>
 	
@@ -146,7 +66,7 @@ a:hover{color:#FFFFFF;background-color: #FF6600;text-decoration: none;}
 
                      
 <div id="Layer4">
-<h4>【 後期中等教育資料庫查詢平台 】</h4>
+<h2>【 後期中等教育資料庫查詢平台 】</h2>
 <?
 $user = Auth::user();
 $packageDocs = $user->get_file_provider()->lists();
@@ -157,7 +77,7 @@ foreach($packageDocs as $packageDoc){
 		
 		if( $active['active']=='open' ){
 			echo '<div class="inbox" style="clear:both;overflow: hidden;cursor:default;margin-top:10px">';
-			echo '<div class="count button" folder="" style="font-size:14px;text-decoration: underline;float:left;margin-left:10px">';
+			echo '<div class="count button" folder="" style="font-size:16px;text-decoration: none;float:left;margin-left:10px">';
 			//echo '<div class="intent button" intent_key="'.$active['intent_key'].'">'.$active['active'].'</div>';
 			echo '<a href="'.URL::to('user/doc/'.$active['intent_key']).'">'.$packageDoc['title'].'</a>';
 			echo '</div>';

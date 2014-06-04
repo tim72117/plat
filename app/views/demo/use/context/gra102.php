@@ -80,18 +80,20 @@ function checkstdid($sch_id){
 
 
 <script src="<?=asset('js/tigra_tables.js')?>"></script>
+<link href="<?=asset('demo/use/css/use100_content.css')?>" rel="stylesheet" type="text/css">
 
 <table cellpadding="3" cellspacing="1" border="0" width="100%">
 	<tr>
 	  <td class="header2">103學年度國三畢業生基本資料</td>
 	</tr>
 </table>
-<table id="newupload" align="left" style="display:block" border="1" >
+<!--    <td class="header1" align="left" style="display:block" border="0" width="50%">-->
+<table id="header2" align="left" style="display:block" border="0" >
 	<tr bgcolor="#CAFFCA">
 	  <td class="header1" colspan="8" align="center" >上傳103學年度國三畢業生基本資料</td>
   </tr>
   <tr id="gen_content">
-    <td colspan="8" align="left" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;">相關檔案: 
+    <td class="header3" colspan="8" align="left" style="padding-left:10px;border-bottom:0px solid none;border-left:0px solid black;">相關檔案: 
     	<a href="../../function/download_file.php?file=101gra_form.xls">表格下載</a> 
 
 <? 
@@ -174,7 +176,7 @@ if( Session::has('upload_file_id') ){
 				break;
 				case '2' : //身分證代碼
 					if (!empty($value[2])){
-						if (checkid($value[2])==false) {
+						if (check_my_idnumber($value[2])==false) {
 							$error_flag = 1;
 							$error_msg[$j] = "身分證字號錯誤 ； ";
 							}
@@ -249,8 +251,14 @@ if ($error_flag == 1){
 			}
 
 	else{
-		//gra103_userinfo			
-		$insert = DB::insert('insert into use_103.dbo.gra103_userinfo (shid,name,sex,newcid,stdidnumber,id_user) values (?,?,?,?,?,?)',array($value[0],$value[1],$value[3],$value[4],$value[2],$user->id));
+		//gra103_userinfo	
+		
+/////////////////// test /////////////////////		
+$insert = DB::table('use_103.dbo.gra103_userinfo')->insert(
+    array('shid' => $value[0],'name' => $value[1] , 'sex' => $value[3],'newcid' => $value[4],'stdidnumber' => $value[2],'id_user' => $user->id)
+);
+		
+//		$insert = DB::insert('insert into use_103.dbo.gra103_userinfo (shid,name,sex,newcid,stdidnumber,id_user) values (?,?,?,?,?,?)',array($value[0],$value[1],$value[3],$value[4],$value[2],$user->id));
 		}
 							}
 			}
@@ -271,15 +279,14 @@ $i=1;
 		if ($i==1){
 ?>
 	<tr bgcolor="#CAFFCA">
-	<td colspan="8" class="header1" align="center" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;">已上傳的名單</td>
+	<td colspan="8" class="header1" align="center" style="padding-left:10px;border-bottom:0px solid black;border-left:0px solid black;">已上傳的名單</td>
   </tr>
 
 <?php
 	}
 ?>
   <tr id="gen_content">
-	<td colspan="8" class="header1" align="center" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;"><?php 
-	
+	<td colspan="8" class="header2" align="center" style="padding-left:10px;border-bottom:0px solid black;border-left:0px solid black;"><?php 
 		echo "檔案".$i."　檔名：".$file->title."　上傳於：". date('Y-m-d h:i:s A',strtotime($file->ctime)).'<br />';
 ?>
 	</td>

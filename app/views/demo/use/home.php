@@ -24,12 +24,12 @@
 <p align="center"><img src="<?=asset('demo/use/images/title.jpg')?>" width="558" height="114"></p>
 
 <body bgcolor="white" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginwidth="0" marginheight="0" class="intd">
-<table cellpadding="3" cellspacing="1" border="1" width="50%" align="center">
+<table cellpadding="3" cellspacing="2" border="0" width="50%" align="center">
 	<tr>
 	  <td class="header1" align="center"><?=$title?></td>
 	</tr>
 	<tr>
-	  <td class="intd">
+	  <td class="intd2">
 		  <?=$context?>		  
 
 	  </td>	
@@ -52,6 +52,15 @@
         	<a href="accountQA.pdf" target="_blank">帳號申請Q&amp;A</a> </p>       
         </td>
 </tr>
+
+
+	<tr>
+	  <td class="intd2">	
+      <b>  　</b>
+      </td>
+	</tr>
+    
+
 	<tr>
 	  <td class="intd">
 		您於&nbsp;<b><?=Session::get('now')?></b>&nbsp;&nbsp;從&nbsp;<b><?=Session::get('ip'); ?></b>&nbsp;連結至本網站。
@@ -59,6 +68,8 @@
 	</tr>
 	<?=@$news?>
 
+
+    
 </table>
 
 		
@@ -67,8 +78,7 @@
 <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
 document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-</script>
-<script type="text/javascript">
+</script><script type="text/javascript">
 var pageTracker = _gat._getTracker("UA-3887306-1");
 pageTracker._initData();
 pageTracker._trackPageview();
