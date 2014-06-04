@@ -35,7 +35,7 @@ class FileProvider {
 			$file_from = '';
 			if( !is_null($doc->requester_doc_id) ){
 				$requester_doc = VirtualFile::find($doc->requester_doc_id);
-				$file_from = ' (來自:'.$requester_doc->user->username.')';
+				$file_from = '<br />(來自於:'.$requester_doc->user->username.')';
 			}
 			
 			if( class_exists($fileClass) ){
