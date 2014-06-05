@@ -65,7 +65,7 @@ class CustomFile extends CommFile {
 	
 	public function request_to() {		
 		foreach(Input::get('group') as $target){
-			$this_doc = VirtualFile::find($this->file_id);
+			$this_doc = VirtualFile::find($this->doc_id);
 			
 			$doc = new VirtualFile(array(
 				'user_id'  =>  $target,
@@ -75,7 +75,7 @@ class CustomFile extends CommFile {
 
 			$requester = new Requester;
 			$requester->preparer_doc_id = $doc->id;
-			$requester->requester_doc_id = $this->file_id;
+			$requester->requester_doc_id = $this->doc_id;
 			$requester->save();
 		}
 		return Redirect::to('user/doc/'.Input::get('intent_key'));
@@ -87,7 +87,7 @@ class CustomFile extends CommFile {
 		$docs = VirtualFile::with('requester')->whereIn('id', $docs_id)->get();
 		foreach($docs as $doc){
 			$requester = $doc->requester;
-			if( $requester->requester_doc_id==$this->file_id ){
+			if( $requester->requester_doc_id==$this->doc_id ){
 				$doc->requester->delete();
 				$doc->delete();
 			}

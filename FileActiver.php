@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use Session, URL, Redirect;
+use Session, URL, Redirect, Response;
 class FileActiver {	
 	
 	/**
@@ -30,6 +30,12 @@ class FileActiver {
 				$returner->withErrors($file_id);
 			}	
 			return $returner;	
+		}
+		
+		if( $active=='download' ){
+			$file = new $intent['fileClass']($this->file_id);
+			$file_fullPath = $file->$active(true);
+			return Response::download($file_fullPath);
 		}
 		
 		if( $intent['fileClass']=='app\\library\\files\\v0\\CustomFile' ){

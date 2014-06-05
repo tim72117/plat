@@ -24,6 +24,14 @@ class FileProvider {
 		$this->save_intent();
 		return 'user/doc/'.$intent_key;
 	}
+	
+	public function download($file_id) {
+		$intent = array('active'=>'download','file_id'=>$file_id,'fileClass'=>'app\\library\\files\\v0\\CommFile');
+		$intent_key = $this->get_intent_id($intent);
+		$this->files[$intent_key] = $intent;
+		$this->save_intent();
+		return 'user/doc/'.$intent_key;	
+	}
 	/**
 	 * @var string
 	 * @return

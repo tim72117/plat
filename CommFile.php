@@ -31,6 +31,7 @@ class CommFile {
 		'save_as',
 		'share_to',				
 		'open',
+		'download',
 	);	
 	
 	public function __construct($doc_id){
@@ -135,6 +136,7 @@ class CommFile {
 			}else{
 				
 				$file = Files::where('file', $path.'/'.$name)->first();
+				$file->touch();
 				return $file->id;
 				$validator->getMessageBag()->add('file_upload', '檔案已上傳');
 				return $validator;
@@ -144,7 +146,11 @@ class CommFile {
 		}		
 	}
 	
-	//public function save() {	}
+	public function download() {
+		$storage_path = storage_path().'/file_upload';
+		$file_path = Files::find($this->doc_id)->file;
+		return $storage_path.'/'.$file_path;
+	}
 	
 	public function save_as() { }
 	
