@@ -18,7 +18,7 @@ class CommFile {
 	 */
 	private $auth;
 	
-	public $file_id;
+	public $doc_id;
 	
 	/**
 	 * @var active
@@ -33,8 +33,8 @@ class CommFile {
 		'open',
 	);	
 	
-	public function __construct($file_id){
-		$this->file_id = $file_id;
+	public function __construct($doc_id){
+		$this->doc_id = $doc_id;
 	}
 	
 	public static function get_intent() {
@@ -64,11 +64,17 @@ class CommFile {
 			$mime = $file->getMimeType();
 			$name_real = $file->getClientOriginalName();
 			$id_user = Auth::user()->id;
-			$virtualFile = VirtualFile::find($this->file_id);
+			
+			if( is_null($this->doc_id) ){
+				$doc_id = $id_user;
+			}else{
+				$doc_id = $this->doc_id;
+			}
+			
 			
 			$validator = Validator::make(
 					array('file_upload' => Input::file('file_upload')),
-					array('file_upload' => 'required|mimes:xls,xlsx'),
+					array('file_upload' => 'required|mimes:xls,xlsx,pdf'),
 					array('file_upload.mimes' => '檔案格式錯誤')
 			);
 			
@@ -94,10 +100,10 @@ class CommFile {
 
 					$file->move($storage_path.'/'.$path, $name);				
 
-					$doc_id = DB::table('files')->insertGetId(array(
+					$file_id = DB::table('files')->insertGetId(array(
 						'title'   =>   $name_real,
 						'type'    =>   3,
-						'owner'   =>   $virtualFile->id,
+						'owner'   =>   $doc_id,
 						'file'    =>   $path.'/'.$name,
 					));	
 
@@ -107,7 +113,7 @@ class CommFile {
 					//	'visible'   =>   $visible,
 					//));	
 
-					return $doc_id;			
+					return $file_id;			
 
 				}
 				catch (\Exception $e)
@@ -117,6 +123,8 @@ class CommFile {
 				
 			}else{
 				
+				$file = DB::table('files')->where('file', $path.'/'.$name)->first();
+				return $file->id;
 				$validator->getMessageBag()->add('file_upload', '檔案已上傳');
 				return $validator;
 				

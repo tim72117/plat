@@ -10,6 +10,7 @@
 | and give it the Closure to execute when that URI is requested.
 |
 */
+/*
 use Illuminate\Auth\Guard as AuthGuard,
 	Illuminate\Auth\EloquentUserProvider,
 	Illuminate\Hashing\BcryptHasher;
@@ -68,18 +69,12 @@ Route::post('sentGCM', function() {
 	var_dump($result);	
 	curl_close($ch);
 });
-
+*/
 Route::get('test', function() {
-	echo '';
 	
-	if( Session::has('newcid') ){
-		echo 'has';
-	}else{
-		echo 'miss';
-		Session::put('newcid', 123);
-	}
+	return;
+
 	
-	return ;
 	$file_path = storage_path(). '/temp/par_20140530_05-10/';
 	//$files_name = scandir( $file_path );
 	$files_name = array();

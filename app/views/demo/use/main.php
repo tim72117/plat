@@ -3,24 +3,13 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>後期中等教育資料庫查詢平台</title>
 
-<script type="text/javascript" src="<?=asset('js/tigra_tables.js')?>"></script>
 <script type="text/javascript" src="<?=asset('js/jquery-1.10.2.min.js')?>"></script>
-<script type="text/javascript" src="<?=asset('js/jeditable.js')?>"></script>
-<script type="text/javascript" src="<?=asset('js/jquery-ui-1.10.3.custom.min.js')?>"></script>
 <!--[if lt IE 9]><script src="js/html5shiv.js"></script><![endif]-->
 
-<link href="css/pub.css" rel="stylesheet" type="text/css">
-<link href="<?=asset('js/jquery-ui-1.10.3.custom.min.css')?>" rel="stylesheet" type="text/css" />
 <link href="<?=asset('demo/use/css/use100_content.css')?>" rel="stylesheet" type="text/css" />
 
 <script type="text/javascript">
  	$(document).ready(function(){	//選單功能
-    	$( "#Layer1" ).accordion({
-      		heightStyle: "content"
-		});
-		$( "#Layer2" ).accordion({
-      		heightStyle: "content"
-		});
 		$('a').click(function(){
 			$("#pageLoad").load($(this).attr("href"));
 			// Prevent browsers default behavior to follow the link when clicked
@@ -28,6 +17,9 @@
 		});
 		$('#pageLoad').on('click','.pagebtn',function(){
 			$("#pageLoad").load($(this).attr("src"));
+		});
+		$('.queryLog').click(function(){
+			alert();
 		});
   	});
 </script>
@@ -42,10 +34,15 @@
 
 	<div style="width:100%;height: 110px;position: absolute;z-index:10;background-color: #fff">
 		<div style="background-color: #ffffff;width:100%;height:80px"><img src="<?=asset('demo/use/images/title.jpg')?>" width="500" height="80"></div>
-		<div style="background-color: #458A00;width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #ddd;color:#fff" align="right">
-			<a href="<?=URL::to('page/project')?>" style="margin-right:10px" class="login-bar">回首頁</a>
-			<a href="<?=URL::to('user/auth/password/change')?>" style="margin-right:10px" class="login-bar">更改密碼</a>
-	    	<a href="<?=URL::to('user/auth/logout')?>" style="margin-right:10px" class="login-bar">登出</a>
+		<div style="background-color: #458A00;width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #ddd;color:#fff" align="right">			
+			<div style="float:left">
+				<a href="<?=URL::to('page/upload')?>" style="margin-left:10px" class="login-bar">上傳檔案</a>
+			</div>
+			<div style="float:right">
+				<a href="<?=URL::to('page/project')?>" style="margin-right:10px" class="login-bar">回首頁</a>
+				<a href="<?=URL::to('user/auth/password/change')?>" style="margin-right:10px" class="login-bar">更改密碼</a>
+				<a href="<?=URL::to('user/auth/logout')?>" style="margin-right:10px" class="login-bar">登出</a>
+			</div>
         </div>
 	</div>
 	
@@ -60,7 +57,7 @@
 				<?
 				$user = Auth::user();
 				$packageDocs = $user->get_file_provider()->lists();
-
+				
 				foreach($packageDocs as $packageDoc){
 					foreach($packageDoc['actives'] as $active){		
 
@@ -82,8 +79,8 @@
 			</div>
 		</div>
 
-		<div style="height: 100%;overflow-y: hidden;margin-left: 200px">
-			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:14px;text-align: left">
+		<div style="height: 100%;overflow-y: hidden;margin:0 0 0 200px">
+			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:14px;text-align: left;margin-top:10px">
 				
 				<table style="width:100%" cellpadding="0" cellspacing="0">
 					<thead>
@@ -98,7 +95,17 @@
 						</tr>					
 					</tbody>
 				</table>
+				
 			</div>			
+		</div>
+		
+		<div class="queryLog" style="position: absolute;bottom:0;height:50px;width:100%;background-color: #f00;overflow-y: hidden">			
+			<?
+				$queries = DB::getQueryLog();
+				foreach($queries as $query){
+					var_dump($query);echo '<br /><br />';
+				}
+			?>
 		</div>
 		
 	</div>

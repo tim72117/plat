@@ -104,6 +104,8 @@ class UserController extends BaseController {
 	}
 	
 	public function remindPage($state = Null) {
+			$response = Response::make('gg', 200)->header('Refresh','5;url=page/project');
+			return $response;
 		if( $state == 'send' ){
 			return View::make('demo.use.home', array('contextFile'=>'login', 'title'=>'重設密碼信件已寄出'))
 				->with('context', '<div style="margin:30px auto;width:300px;color:#f00">重設密碼信件已寄出，請到您的電子郵件信箱收取信件</div>')

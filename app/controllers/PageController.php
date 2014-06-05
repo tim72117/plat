@@ -46,8 +46,8 @@ class PageController extends BaseController {
 		return $response;
 	}
 	
-	public function page($context) {
-		$contents = View::make('demo.'.$this->project.'.main')->nest('context','demo.page.'.$context);
+	public function page($context) {		
+		$contents = View::make('demo.'.$this->project.'.main')->nest('context','demo.page.'.$context)->with('request', '');
 		$response = Response::make($contents, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
 		$response->header('Pragma', 'no-cache');

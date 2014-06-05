@@ -10,7 +10,7 @@ foreach($group->users as $user){
 	
 	$credentials = array('email' => $user->email);
 		
-	Password::remind($credentials);
+	//Password::remind($credentials);
 }
 
 

@@ -64,6 +64,8 @@ class FileController extends BaseController {
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
 		$response->header('Pragma', 'no-cache');
 		$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
+		
+		//$this->showQuery();
 		return $response;
 		
 		return $view;
@@ -136,6 +138,13 @@ class FileController extends BaseController {
 		return View::make('demo.timeout');
 	}
 	
+	
+	public function showQuery() {
+		$queries = DB::getQueryLog();
+		foreach($queries as $query){
+			var_dump($query);echo '<br /><br />';
+		}
+	}
 	//public function 
 	
 

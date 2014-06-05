@@ -79,7 +79,7 @@ function checkstdid($sch_id){
 ?>
 
 
-<script src="<?=asset('js/tigra_tables.js')?>"></script>
+
 
 <table cellpadding="3" cellspacing="1" border="0" width="100%">
 	<tr>
