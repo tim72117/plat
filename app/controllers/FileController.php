@@ -46,6 +46,10 @@ class FileController extends BaseController {
 		View::share('fileAcitver',$this->fileAcitver);
 		//$intent = Session::get('file')[$intent_key];
 		//$file_id = $intent['file_id'];
+
+		if( is_object($view_name) && get_class($view_name)=='Symfony\Component\HttpFoundation\BinaryFileResponse' ){	
+			return $view_name;
+		}
 		if( is_object($view_name) && get_class($view_name)=='Illuminate\Http\RedirectResponse' ){	
 			return $view_name;
 		}
