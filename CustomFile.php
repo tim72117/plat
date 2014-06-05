@@ -1,6 +1,7 @@
 <?php
 namespace app\library\files\v0;
 use DB, View, Response, Session, Request, Redirect, Input, VirtualFile, Requester;
+
 class CustomFile extends CommFile {
 	
 	/**
@@ -57,6 +58,9 @@ class CustomFile extends CommFile {
 	public function open($file_id) {		
 		View::share('file_id',$file_id);
 		$doc = VirtualFile::where('docs.id',$file_id)->File()->first();
+		if( is_null($doc) )
+			throw new FileFailedException;
+		//var_dump(VirtualFile::has('isFiles')->where('docs.id',$file_id)->first());exit;
 		return $doc->file;
 	}	
 	

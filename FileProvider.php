@@ -9,7 +9,20 @@ class FileProvider {
 	
 	public function __construct(){
 		$this->intent_hash_table = Session::get('intent_hash_table', array());	
+		$this->files = Session::get('file', array());	
 		$this->user_id = Auth::user()->id;
+	}
+	
+	public static function make() {
+		return new FileProvider;
+	}
+	
+	public function create() {
+		$intent = array('active'=>'upload','file_id'=>Null,'fileClass'=>'app\\library\\files\\v0\\CommFile');
+		$intent_key = $this->get_intent_id($intent);
+		$this->files[$intent_key] = $intent;
+		$this->save_intent();
+		return 'user/doc/'.$intent_key;
 	}
 	/**
 	 * @var string
@@ -35,7 +48,8 @@ class FileProvider {
 			$file_from = '';
 			if( !is_null($doc->requester_doc_id) ){
 				$requester_doc = VirtualFile::find($doc->requester_doc_id);
-				$file_from = '<br />(來自於:'.$requester_doc->user->username.')';
+				if( !is_null($requester_doc->user) )
+					$file_from = '<br />(來自於:'.$requester_doc->user->username.')';
 			}
 			
 			if( class_exists($fileClass) ){
