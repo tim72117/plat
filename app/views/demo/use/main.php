@@ -11,15 +11,18 @@
 <script type="text/javascript">
  	$(document).ready(function(){	//選單功能
 		$('a').click(function(){
-			$("#pageLoad").load($(this).attr("href"));
+			//$("#pageLoad").load($(this).attr("href"));
 			// Prevent browsers default behavior to follow the link when clicked
-			return false;
+			//return false;
 		});
 		$('#pageLoad').on('click','.pagebtn',function(){
 			$("#pageLoad").load($(this).attr("src"));
 		});
-		$('.queryLog').click(function(){
-			alert();
+		$('.queryLogBtn').click(function(){
+			$('.queryLog').height(500);
+		});
+		$('.context').click(function(){
+			$('.queryLog').height(0);
 		});
   	});
 </script>
@@ -39,6 +42,7 @@
 				<a href="<?=URL::to('page/upload')?>" style="margin-left:10px" class="login-bar">上傳檔案</a>
 			</div>
 			<div style="float:right">
+				<span style="margin-right:10px" class="login-bar queryLogBtn">queryLog</span>
 				<a href="<?=URL::to('page/project')?>" style="margin-right:10px" class="login-bar">回首頁</a>
 				<a href="<?=URL::to('user/auth/password/change')?>" style="margin-right:10px" class="login-bar">更改密碼</a>
 				<a href="<?=URL::to('user/auth/logout')?>" style="margin-right:10px" class="login-bar">登出</a>
@@ -79,7 +83,7 @@
 			</div>
 		</div>
 
-		<div style="height: 100%;overflow-y: hidden;margin:0 0 0 200px">
+		<div style="height: 100%;overflow-y: hidden;margin:0 0 0 200px" class="context">
 			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:14px;text-align: left;margin-top:10px">
 				
 				<table style="width:100%" cellpadding="0" cellspacing="0">
@@ -99,7 +103,7 @@
 			</div>			
 		</div>
 		
-		<div class="queryLog" style="position: absolute;bottom:0;height:50px;width:100%;background-color: #f00;overflow-y: hidden">			
+		<div class="queryLog" style="position: absolute;bottom:0;height:0;width:100%;background-color: #fff;overflow-y: hidden;border-top:1px solid #000">			
 			<?
 				$queries = DB::getQueryLog();
 				foreach($queries as $query){

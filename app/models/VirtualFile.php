@@ -3,7 +3,9 @@ class Files extends Eloquent {
 	
 	protected $table = 'files';
 	
-	public $timestamps = false;
+	public $timestamps = true;
+	
+	protected $fillable = array('title', 'type', 'owner', 'file');
 }
 
 class Requester extends Eloquent {

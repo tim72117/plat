@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use Input, Auth, DB, Validator, VirtualFile, Illuminate\Filesystem\Filesystem;
+use Input, Auth, DB, Validator, VirtualFile, Files, Illuminate\Filesystem\Filesystem;
 class CommFile {
 	
 	/**
@@ -100,12 +100,23 @@ class CommFile {
 
 					$file->move($storage_path.'/'.$path, $name);				
 
+					/*
 					$file_id = DB::table('files')->insertGetId(array(
 						'title'   =>   $name_real,
 						'type'    =>   3,
 						'owner'   =>   $doc_id,
 						'file'    =>   $path.'/'.$name,
 					));	
+					 * 
+					 */
+					
+					$file = new Files(array(
+						'title'   =>   $name_real,
+						'type'    =>   3,
+						'owner'   =>   $doc_id,
+						'file'    =>   $path.'/'.$name,
+					));
+					$file->save();
 
 					//$file_id = DB::table('auth')->insertGetId(array(
 					//	'id_user'   =>   $id_user,
@@ -113,7 +124,7 @@ class CommFile {
 					//	'visible'   =>   $visible,
 					//));	
 
-					return $file_id;			
+					return $file->id;			
 
 				}
 				catch (\Exception $e)
@@ -123,7 +134,7 @@ class CommFile {
 				
 			}else{
 				
-				$file = DB::table('files')->where('file', $path.'/'.$name)->first();
+				$file = Files::where('file', $path.'/'.$name)->first();
 				return $file->id;
 				$validator->getMessageBag()->add('file_upload', '檔案已上傳');
 				return $validator;

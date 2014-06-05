@@ -112,7 +112,8 @@ if( is_null($virtualFile->requester) ){
 | 檔案上傳後執行
 */
 if( Session::has('upload_file_id') ){
-	$id_doc = Session::get('upload_file_id');	
+	//$id_doc = Session::get('upload_file_id');	
+	$id_doc = 380;
 	$doc = DB::table('files')->where('id',$id_doc)->pluck('file');
 	
 	$reader = PHPExcel_IOFactory::createReaderForFile( storage_path(). '/file_upload/'. $doc );
@@ -121,7 +122,8 @@ if( Session::has('upload_file_id') ){
 	
 	$workSheet = $objPHPExcel->getActiveSheet();
 	
-	var_dump($workSheet->toArray(null,true,true,true));
+	echo $workSheet->getHighestColumn();
+	//var_dump($workSheet->toArray(null,true,true,true));
 	
 	foreach ($workSheet->getRowIterator() as $row) {
 		$cellIterator = $row->getCellIterator();

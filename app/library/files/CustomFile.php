@@ -36,8 +36,6 @@ class CustomFile extends CommFile {
 		
 		$id_doc_new = $this->upload(false);	
 		$intent_key = Request::segment(3);
-		
-
 
 		$returner = Redirect::to('user/doc/'.Input::get('intent_key'));
 		
