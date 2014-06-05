@@ -7,7 +7,7 @@
 #
 ##########################################################################################
 
-$now=date("Ymd-His");
+$fileProvider = app\library\files\v0\FileProvider::make();
 	
 function num2alpha($n)  //數字轉英文(0=>A、1=>B、26=>AA...)
 {   for($r = ""; $n >= 0; $n = intval($n / 26) - 1)
@@ -21,7 +21,7 @@ function alpha2num($a){  //英文轉數字(A=>0、B=>1、AA=>26...)
         $n = $n*26 + ord($a[$i]) - 0x40;
     return $n-1;}
 	
-function checkid($id){
+/*function check_id_number($id){
 	$id = strtoupper($id);
 	//建立字母分數陣列
 	$headPoint = array(
@@ -59,13 +59,14 @@ function checkid($id){
 	}else{
 	   return false;
 	}
-}
+}*/
 
 function checkname($name){
-	if (preg_match("/^[\x{4e00}-\x{9fa5}]{2,5}$/u",$name)) {
-		return true;	
+	if (preg_match("/^[a-zA-Z0-9]$/u",$name)) {
+	//if (preg_match("/^[\x{4e00}-\x{9fa5}][‧]{2,5}$/u",$name)) {
+		return false;	
 	}else{
-		return false;
+		return true;
 	}
 }
 
@@ -92,13 +93,14 @@ function checkstdid($sch_id){
   </tr>
   <tr id="gen_content">
     <td colspan="8" align="left" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;">相關檔案: 
-    	<a href="../../function/download_file.php?file=101gra_form.xls">表格下載</a> 
+    	<a href="<?=URL::to($fileProvider->download(394))?>">範例表格下載</a><br />
 
 <? 
 
 $user = auth::user();
 $csrf_token = csrf_token();
 $dddos_token = dddos_token();
+
 
 //表單資料
 echo "</br>"."</br>";
@@ -174,7 +176,7 @@ if( Session::has('upload_file_id') ){
 				break;
 				case '2' : //身分證代碼
 					if (!empty($value[2])){
-						if (checkid($value[2])==false) {
+						if (check_id_number($value[2])==false) {
 							$error_flag = 1;
 							$error_msg[$j] = "身分證字號錯誤 ； ";
 							}
@@ -200,7 +202,7 @@ if( Session::has('upload_file_id') ){
 				}	
 		}
 		
-		if ((!empty($value[2])) && (checkid($value[2]))) $value[4] =createnewcid($value[2]); 
+		if ((!empty($value[2])) && (check_id_number($value[2]))) $value[4] =createnewcid($value[2]); 
 		
 
 //檢查內容
