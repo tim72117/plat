@@ -282,7 +282,7 @@ $i=1;
   <tr id="gen_content">
 	<td colspan="8" class="header1" align="left" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;"><?php 
 	
-		echo "檔案".$i."　檔名：".$file->title."　上傳於：". date('Y-m-d h:i:s A',strtotime($file->ctime)).'<br />';
+		echo "檔案".$i."　檔名：".$file->title."　上傳於：". date('Y-m-d h:i:s A',strtotime($file->updated_at)).'<br />';
 ?>
 	</td>
 	 </tr>
