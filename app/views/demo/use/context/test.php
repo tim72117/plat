@@ -18,7 +18,7 @@ $csrf_token = csrf_token();
 $dddos_token = dddos_token();
 
 
-echo 'My file id:'.$fileAcitver->file_id;
+echo 'My file id:'.$fileAcitver->file_id.'<br />';
 echo $user->project;
 
 /*
@@ -33,13 +33,40 @@ echo Form::hidden('_token1', $csrf_token);
 echo Form::hidden('_token2', $dddos_token);
 echo Form::close();
 
-/*
-| 被請求者 取得匯入的檔案列表
-*/
-$virtualFile = VirtualFile::find($fileAcitver->file_id);
-foreach($virtualFile->hasFiles as $file)
-	echo $file->title.'<br />';
 
+$virtualFile = VirtualFile::find($fileAcitver->file_id);
+if( $virtualFile->user_id==$user->id ){
+	/*
+	| 被請求者 取得匯入的檔案列表
+	*/
+	
+	echo 'My files:';
+	foreach($virtualFile->hasFiles as $file){
+		echo $file->title.'<br />';
+	}
+	
+	echo '<br />------------------------------------<br />';
+	if( is_null($virtualFile->requester) ){	
+		/*
+		| 請求者 取得匯入的檔案列表
+		*/
+		$fileProvider = app\library\files\v0\FileProvider::make();
+		$preparers = $virtualFile->preparers;
+		echo '<table>';
+		foreach($preparers as $preparer){
+			foreach($preparer->docPreparer->hasFiles as $file){
+				echo '<tr>';					
+					echo '<td>'.$preparer->docPreparer->user->username.'</td>';
+					echo '<td>'.$file->title.'</td>';
+					echo '<td><a href="'.URL::to($fileProvider->download($file->id)).'">下載</a><br /></td>';
+					
+				echo '</tr>';
+			}
+		}
+		echo '</table>';
+		
+	}
+}
 
 
 echo '<br /><br />';
@@ -48,10 +75,7 @@ echo '<br /><br />';
 | 請求者
 */
 if( is_null($virtualFile->requester) ){	
-	/*
-	| 請求者 取得匯入的檔案列表
-	*/
-	$user->get_file_provider()->get_request();
+
 	
 	/*
 	| 送出請求
@@ -112,8 +136,7 @@ if( is_null($virtualFile->requester) ){
 | 檔案上傳後執行
 */
 if( Session::has('upload_file_id') ){
-	//$id_doc = Session::get('upload_file_id');	
-	$id_doc = 380;
+	$id_doc = Session::get('upload_file_id');	
 	$doc = DB::table('files')->where('id',$id_doc)->pluck('file');
 	
 	$reader = PHPExcel_IOFactory::createReaderForFile( storage_path(). '/file_upload/'. $doc );

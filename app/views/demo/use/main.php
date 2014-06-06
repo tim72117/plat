@@ -19,7 +19,7 @@
 			$("#pageLoad").load($(this).attr("src"));
 		});
 		$('.queryLogBtn').click(function(){
-			$('.queryLog').height(500);
+			$('.queryLog').height('50%');
 		});
 		$('.context').click(function(){
 			$('.queryLog').height(0);
@@ -62,6 +62,7 @@
 				$user = Auth::user();
 				$packageDocs = $user->get_file_provider()->lists();
 				
+				
 				foreach($packageDocs as $packageDoc){
 					foreach($packageDoc['actives'] as $active){		
 
@@ -103,11 +104,11 @@
 			</div>			
 		</div>
 		
-		<div class="queryLog" style="position: absolute;bottom:0;height:0;width:100%;background-color: #fff;overflow-y: hidden;border-top:1px solid #000">			
+		<div class="queryLog" style="position: absolute;bottom:0;height:0;width:100%;background-color: #fff;overflow-y: scroll;border-top:1px solid #000">			
 			<?
 				$queries = DB::getQueryLog();
-				foreach($queries as $query){
-					var_dump($query);echo '<br /><br />';
+				foreach($queries as $key => $query){
+					echo $key.' - ';var_dump($query);echo '<br /><br />';
 				}
 			?>
 		</div>

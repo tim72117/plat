@@ -20,7 +20,7 @@ echo Form::close();
 
 $files = Files::where('owner',$user->id)->where('type',3)->get();
 foreach($files as $file){
-	echo '<a href="'.URL::to($fileProvider->download($file->id)).'">'.$file->title.'下載<a/><br />';
+	echo '<a href="'.URL::to($fileProvider->download($file->id)).'">'.$file->title.'下載</a><br />';
 }
 
 

@@ -35,7 +35,7 @@ class FileActiver {
 		if( $active=='download' ){
 			$file = new $intent['fileClass']($this->file_id);
 			$file_fullPath = $file->$active(true);
-			return Response::download($file_fullPath);
+			return call_user_func_array('Response::download', $file_fullPath);
 		}
 		
 		if( $intent['fileClass']=='app\\library\\files\\v0\\CustomFile' ){

@@ -14,12 +14,18 @@ class Requester extends Eloquent {
 	
 	public $timestamps = true;
 	
+	protected $fillable = array('preparer_doc_id', 'requester_doc_id');
+	
 	public function files() {
 		return $this->hasMany('Files','owner','preparer_doc_id');
 	}
 	
 	public function docPreparer() {
 		return $this->hasOne('VirtualFile','id','preparer_doc_id');
+	}
+	
+	public function doc() {
+		return $this->belongsTo('VirtualFile','preparer_doc_id','id');//未使用未測試
 	}
 	
 	public function docRequester() {
@@ -37,7 +43,7 @@ class VirtualFile extends Eloquent {
 	 */
 	protected $table = 'docs';
 	
-	public $timestamps = false;
+	public $timestamps = true;
 	
 	protected $fillable = array('user_id', 'file_id');
 	
@@ -63,6 +69,10 @@ class VirtualFile extends Eloquent {
 	
 	public function scopeFile($query) {
 		return $query->leftJoin('files','docs.file_id','=','files.id');
+	}
+	
+	public function docPreparer() {
+		return $this->belongsToMany('VirtualFile', 'auth_requester', 'requester_doc_id', 'preparer_doc_id');//未使用未測試
 	}
 
 }

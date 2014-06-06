@@ -58,6 +58,7 @@ class FileController extends BaseController {
 		
 		if( is_null($virtualFile->requester) ){	
 			$data_request = $this->fileRequest($intent_key);
+			//$data_request = '';
 		}else{
 			$data_request = '';
 		}
@@ -77,13 +78,15 @@ class FileController extends BaseController {
 	}
 	
 	public function fileRequest($intent_key) {
+		
+		$user = Auth::user();
 		/*
 		| 送出請求
 		*/
 		$html = '';
 		$preparers = Requester::with('docPreparer.user')->where('requester_doc_id','=',$this->fileAcitver->file_id)->get();
 		$preparers_user_id = array_pluck($preparers->lists('doc_preparer'),'user_id');
-		$group = Group::with('users')->where('id','2')->get();
+		//$group = Group::with('users')->where('user_id', $user->id)->get();
 		//$html .= $preparers->count();
 		
 		
@@ -91,16 +94,23 @@ class FileController extends BaseController {
 		$groups = Group::with(array('docsTarget' => function($query) use ($fileAcitver) {
 			$query->leftJoin('auth_requester','docs.id','=','auth_requester.id_doc')->where('auth_requester.id_requester',$fileAcitver->file_id);
 		}))->where('id_user',$user->id)->get();
-		 */
-		$user = Auth::user();
-		if( $group[0]->users->count() > 0 ){
+		 */		
+		$user->load('groups.users');
+		if( $user->groups->count() > 0 ){
 			$html .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_to'), 'files' => true));
-			foreach($group[0]->users as $user_in_group){
-				if( !in_array($user_in_group->id, $preparers_user_id) ){				
-					$html .= Form::checkbox('group[]', $user_in_group->id, true);
-					$html .= $user_in_group->username;
+			
+			foreach($user->groups as $group){
+				$html .= Form::checkbox('group[]', $group->id, true);
+				$html .= $group->description;
+				
+				foreach($group->users as $user_in_group){
+					if( !in_array($user_in_group->id, $preparers_user_id) && $user_in_group->active==true && $user_in_group->id!=$user->id ){
+						$html .= Form::checkbox('user[]', $user_in_group->id, true);
+						$html .= $user_in_group->username;
+					}
 				}
 			}
+
 			$html .= Form::submit('Request!');
 			$html .= Form::hidden('intent_key', $intent_key);
 			$html .= Form::hidden('_token1', $this->csrf_token);
