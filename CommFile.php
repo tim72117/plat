@@ -72,6 +72,7 @@ class CommFile {
 				$doc_id = $this->doc_id;
 			}
 			
+
 			
 			$validator = Validator::make(
 					array('file_upload' => Input::file('file_upload')),
@@ -148,8 +149,9 @@ class CommFile {
 	
 	public function download() {
 		$storage_path = storage_path().'/file_upload';
-		$file_path = Files::find($this->doc_id)->file;
-		return $storage_path.'/'.$file_path;
+		$file = Files::find($this->doc_id);
+		$file_path = $file->file;
+		return array('path'=>$storage_path.'/'.$file_path,'name'=>$file->title);
 	}
 	
 	public function save_as() { }

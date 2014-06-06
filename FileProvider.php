@@ -92,15 +92,26 @@ class FileProvider {
 					var_dump($preparer->docs);
 		exit;
 		*/
-		$virtualFiles = VirtualFile::with('preparers')->where('user_id',$this->user_id)->get();
+		$virtualFile = VirtualFile::with('preparers')->where('user_id',$this->user_id)->get();
+		$usersFiles = array();
 		
+		/*
 		foreach($virtualFiles as $virtualFile)	
 			foreach($virtualFile->preparers as $preparer){
-				echo $preparer->docPreparer->user->username.'<br /><br />';
-				foreach($preparer->files as $file)
-					echo $file->title.'<br />';
-				echo '<br />';
+				$usersFiles[$preparer->docPreparer->user->id] = array(
+					'name'  => $preparer->docPreparer->user->username,
+					'files' => array(),
+				);
+				//echo $preparer->docPreparer->user->username.'<br /><br />';
+				foreach($preparer->files as $file){
+
+				}
+				//echo '<br />';
 			}
+		 * 
+		 */
+			
+		return $virtualFile;
 		
 		/*
 		$queries = DB::getQueryLog();

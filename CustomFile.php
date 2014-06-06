@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Response, Session, Request, Redirect, Input, VirtualFile, Requester;
+use DB, View, Response, Session, Request, Redirect, Input, VirtualFile, Requester, Group, Auth;
 
 class CustomFile extends CommFile {
 	
@@ -64,20 +64,63 @@ class CustomFile extends CommFile {
 	
 	
 	public function request_to() {		
-		foreach(Input::get('group') as $target){
-			$this_doc = VirtualFile::find($this->doc_id);
-			
-			$doc = new VirtualFile(array(
-				'user_id'  =>  $target,
-				'file_id'  =>  $this_doc->file_id,
-			));
-			$doc->save();
+		
+		$preparers_id = Requester::with('docPreparer')->where('requester_doc_id', $this->doc_id)->get()->map(function($doc){
+			return $doc->docPreparer->user_id;
+		})->all();
+		$preparers_id_unique = array_unique($preparers_id);
 
-			$requester = new Requester;
-			$requester->preparer_doc_id = $doc->id;
-			$requester->requester_doc_id = $this->doc_id;
-			$requester->save();
+		var_dump($preparers_id_unique);
+		//exit;
+		$user_id = Auth::user()->id;
+		
+		
+		$inputs_id = Group::with(array('users' => function($query) use ($user_id){
+			
+			$query->where('users.id', '<>', $user_id)->where('users.active', true);
+			
+		}))->whereIn('id', Input::get('group'))->get()->map(function($group){
+			
+			return $group->users->lists('id');
+			
+		})->collapse()->all();
+		
+		$inputs_unique_id = array_unique($inputs_id);
+		var_dump($inputs_unique_id);
+		
+		
+		$file_id = VirtualFile::find($this->doc_id)->file_id;
+
+		foreach($inputs_unique_id as $input_unique_id){
+			
+			if( !in_array($input_unique_id, $preparers_id_unique) ){
+				
+				echo $input_unique_id.'<br />';
+				
+				$doc = VirtualFile::create(array(
+					'user_id'  =>  $input_unique_id,
+					'file_id'  =>  $file_id,
+				));
+
+				Requester::create(array(
+					'preparer_doc_id'  => $doc->id,
+					'requester_doc_id' => $this->doc_id,
+				));
+
+					
+			}
 		}
+		
+				/*
+				$queries = DB::getQueryLog();
+				foreach($queries as $key => $query){
+					echo $key.' - ';var_dump($query);echo '<br /><br />';
+				}
+				exit;
+				 * 
+				 */
+
+
 		return Redirect::to('user/doc/'.Input::get('intent_key'));
 	}
 	
