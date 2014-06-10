@@ -19,47 +19,8 @@ function alpha2num($a){  //英文轉數字(A=>0、B=>1、AA=>26...)
     $n = 0;
     for($i = 0; $i < $l; $i++)
         $n = $n*26 + ord($a[$i]) - 0x40;
-    return $n-1;}
-	
-/*function check_id_number($id){
-	$id = strtoupper($id);
-	//建立字母分數陣列
-	$headPoint = array(
-		'A'=>1,'I'=>39,'O'=>48,'B'=>10,'C'=>19,'D'=>28,
-		'E'=>37,'F'=>46,'G'=>55,'H'=>64,'J'=>73,'K'=>82,
-		'L'=>2,'M'=>11,'N'=>20,'P'=>29,'Q'=>38,'R'=>47,
-		'S'=>56,'T'=>65,'U'=>74,'V'=>83,'W'=>21,'X'=>3,
-		'Y'=>12,'Z'=>30
-	);
-	//建立加權基數陣列
-	$multiply = array(8,7,6,5,4,3,2,1);
-	//檢查身份字格式是否正確
-	if (preg_match("/^[a-zA-Z][1-2][0-9]+$/",$id) AND strlen($id) == 10){
-		//切開字串
-		$len = strlen($id);
-		for($i=0; $i<$len; $i++){
-			$stringArray[$i] = substr($id,$i,1);
-		}
-		//取得字母分數
-		$total = $headPoint[array_shift($stringArray)];
-		//取得比對碼
-		$point = array_pop($stringArray);
-		//取得數字分數
-		$len = count($stringArray);
-		for($j=0; $j<$len; $j++){
-			$total += $stringArray[$j]*$multiply[$j];
-		}
-		//計算餘數碼並比對
-		$last = (($total%10) == 0 )?0:(10-($total%10));
-		if ($last != $point) {
-			return false;
-		} else {
-			return true;
-		}
-	}else{
-	   return false;
-	}
-}*/
+    return $n-1;
+}	
 
 function checkname($name){
 	if (preg_match("/^[a-zA-Z0-9]$/u",$name)) {
@@ -77,47 +38,10 @@ function checkstdid($sch_id){
 		return false;
 	}
 }
-?>
-
-
-
-
-<table cellpadding="3" cellspacing="1" border="0" width="100%">
-	<tr>
-	  <td class="header2">103學年度國三畢業生基本資料</td>
-	</tr>
-</table>
-<table id="newupload" align="left" style="display:block" border="1" >
-	<tr bgcolor="#CAFFCA">
-	  <td class="header1" colspan="8" align="center" >上傳103學年度國三畢業生基本資料</td>
-  </tr>
-  <tr id="gen_content">
-    <td colspan="8" align="left" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;">相關檔案: 
-    	<a href="<?=URL::to($fileProvider->download(2))?>">範例表格下載</a><br />
-
-<? 
 
 $user = auth::user();
-$csrf_token = csrf_token();
-$dddos_token = dddos_token();
-
-
-//表單資料
-echo "</br>"."</br>";
-$intent_key = $fileAcitver->intent_key;
-echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true));
-echo Form::file('file_upload');
-echo "</br>"."</br>";
-echo Form::submit('上傳檔案');
-echo Form::hidden('intent_key', $intent_key);
-echo Form::hidden('_token1', csrf_token());
-echo Form::hidden('_token2', dddos_token());
-echo Form::close();
-
-echo "</br>";
-
+$error_text = '';
 //上傳判斷
-$r=1;
 if( Session::has('upload_file_id') ){ 
 
 	$id_doc = Session::get('upload_file_id');	
@@ -205,89 +129,120 @@ if( Session::has('upload_file_id') ){
 		if ((!empty($value[2])) && (check_id_number($value[2]))) $value[4] =createnewcid($value[2]); 
 		
 
-//檢查內容
+		//檢查內容
 
-if ($error_flag == 1){
-	if ($r==1){ 
-	?>
-<table cellpadding="3" cellspacing="0" border="1" width="100%">
-	<tr bgcolor="#CAFFCA">
-		<td colspan="8" align="center">以下資料有誤，請協助修改後重新上傳</td>
-	</tr> 
-</table>
-	<table id="all_table" width="100%" cellpadding=3 cellspacing=0 border=1 align="left">
-		<tr bgcolor="#E4E4E4">
-		  <th width="10%" class="title" scope="col">學校代碼</th>
-		  <th width="10%" class="title" scope="col">學生姓名</th>
-		  <th width="15%" class="title" scope="col">身分證字號</th>
-		  <th width="5%" class="title" scope="col">性別</th>
-		  <th width="60%" class="title" scope="col">錯誤資訊</th>
-		</tr>
-<?
-	  $r++;}
+		if ($error_flag == 1){
+		
 			
-				echo "<tr>";
-				
-				for ($j=0;$j<=$ColHigh;$j++)
-					if (empty($error_msg[$j])) echo "<td scope=col>".$value[$j]."</td>\n";
-					else echo '<td scope=col  bgcolor="#FFFFCC">'.'<p>'.'<font color="red">'.$value[$j].'</p>'.'</font>'."</td>\n";
+			$error_text .= "<tr>";
 
-				echo "<td scope=col>";
-				for ($k=0;$k<=$ColHigh;$k++) {
-					if(!empty($error_msg[$k])) echo $error_msg[$k];
+			for ($j=0;$j<=$ColHigh;$j++)
+				if (empty($error_msg[$j])){
+					$error_text .= "<td scope=col>".$value[$j]."</td>";
+				}else{
+					$error_text .= '<td scope=col  bgcolor="#FFFFCC">'.'<p>'.'<font color="red">'.$value[$j].'</p>'.'</font>'."</td>";
 				}
-				echo "</td>\n";
-	}
-			else{
+
+			$error_text .= "<td scope=col>";
+			for ($k=0;$k<=$ColHigh;$k++) {
+				if(!empty($error_msg[$k]))
+					$error_text .= $error_msg[$k];
+			}
+			$error_text .= "</td>";
+			
+			$error_text .= "</tr>";
+
+		}else{
+			
 			//更新或寫入資料
 			$DB = DB::table('use_103.dbo.gra103_userinfo')
-							  ->where('stdidnumber', $value[2])
-							  ->get();
-				if ($DB) {		
-			//gra103_userinfo
-			$update = DB::table('use_103.dbo.gra103_userinfo')
+						->where('stdidnumber', $value[2])
+						->get();
+			if ($DB) {		
+				//gra103_userinfo
+				DB::table('use_103.dbo.gra103_userinfo')
 						->where('stdidnumber', $value[2])
 						->update(array('shid' => $value[0],'name' => $value[1],'sex' => $value[3],'newcid' => $value[4],'stdidnumber' => $value[2],'id_user' => $user->id));
+			}else{
+				//gra103_userinfo			
+				DB::insert('insert into use_103.dbo.gra103_userinfo (shid,name,sex,newcid,stdidnumber,id_user) values (?,?,?,?,?,?)',array($value[0],$value[1],$value[3],$value[4],$value[2],$user->id));
 			}
-
-	else{
-		//gra103_userinfo			
-		$insert = DB::insert('insert into use_103.dbo.gra103_userinfo (shid,name,sex,newcid,stdidnumber,id_user) values (?,?,?,?,?,?)',array($value[0],$value[1],$value[3],$value[4],$value[2],$user->id));
+			
 		}
-							}
-			}
+}
 
 
-}else{
-	
+}else{//if( Session::has('upload_file_id') ){ 
+
 	if($errors){
 		echo implode('、',array_filter($errors->all()));}
 
 }
-
-//列出已上傳的名單
-$virtualFile = VirtualFile::find($fileAcitver->file_id);
-
-$i=1;
-	foreach($virtualFile->hasFiles as $file){
-		if ($i==1){
 ?>
-	<tr bgcolor="#CAFFCA">
-	<td colspan="8" class="header1" align="left" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;">已上傳的名單</td>
-  </tr>
 
-<?php
-	}
-?>
-  <tr id="gen_content">
-	<td colspan="8" class="header1" align="left" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;"><?php 
+<div style="margin:10px 0 0 10px;width:800px">
 	
-		echo "檔案".$i."　檔名：".$file->title."　上傳於：". date('Y-m-d h:i:s A',strtotime($file->updated_at)).'<br />';
-?>
-	</td>
-	 </tr>
-<?php
-		$i++;
-  }
-?>
+<table width="100%" cellpadding="3" cellspacing="0" border="0">
+	<tr bgcolor="#CAFFCA">
+		<td class="header1" colspan="8" align="center" >上傳102學年度國三畢業生基本資料</td>
+	</tr>
+	<tr id="gen_content">
+		<td colspan="8" align="left" style="padding-left:10px">相關檔案: 
+			<a href="<?=URL::to($fileProvider->download(2))?>">範例表格下載</a><br />
+			<?
+			//表單資料
+			echo "</br>"."</br>";
+			$intent_key = $fileAcitver->intent_key;
+			echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true));
+			echo Form::file('file_upload');
+			echo "</br>"."</br>";
+			echo Form::submit('上傳檔案');
+			echo Form::hidden('intent_key', $intent_key);
+			echo Form::hidden('_token1', csrf_token());
+			echo Form::hidden('_token2', dddos_token());
+			echo Form::close();
+
+			echo "</br>";
+			?>		
+		</td>
+	</tr>
 </table>
+
+
+<table width="100%" cellpadding="3" cellspacing="0" border="1">
+	<tr bgcolor="#CAFFCA"><td colspan="8" align="center">以下資料有誤，請協助修改後重新上傳</td></tr> 
+	<tr bgcolor="#E4E4E4">
+		<th width="10%" class="title" scope="col">學校代碼</th>
+		<th width="10%" class="title" scope="col">學生姓名</th>
+		<th width="15%" class="title" scope="col">身分證字號</th>
+		<th width="5%" class="title" scope="col">性別</th>
+		<th width="60%" class="title" scope="col">錯誤資訊</th>
+	</tr>
+	<?=$error_text?>
+</table>
+
+
+<table width="100%" cellpadding="3" cellspacing="0" border="1">
+	<tr bgcolor="#CAFFCA">
+		<td colspan="8" class="header1" align="left" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;">已上傳的名單</td>
+	</tr>
+<?
+	//列出已上傳的名單
+	$virtualFile = VirtualFile::find($fileAcitver->file_id);
+
+	?>
+
+	<?
+	$i=1;
+	foreach($virtualFile->hasFiles as $file){
+		echo '<tr id="gen_content">';
+		echo '   <td colspan="8" class="header1" align="left" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;">';
+		echo "     檔案".$i."　檔名：".$file->title."　上傳於：". date('Y-m-d h:i:s A',strtotime($file->updated_at)).'<br />';
+		echo '   </td>';
+		echo '</tr>';
+		$i++;
+	}
+	?>
+</table>	
+
+</div>
