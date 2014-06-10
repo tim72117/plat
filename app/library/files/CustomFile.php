@@ -65,16 +65,16 @@ class CustomFile extends CommFile {
 	
 	public function request_to() {		
 		
+		$user_id = Auth::user()->id;
+		
 		$preparers_id = Requester::with('docPreparer')->where('requester_doc_id', $this->doc_id)->get()->map(function($doc){
 			return $doc->docPreparer->user_id;
 		})->all();
 		$preparers_id_unique = array_unique($preparers_id);
-
-		var_dump($preparers_id_unique);
-		//exit;
-		$user_id = Auth::user()->id;
 		
 		
+		$inputs_id = array();
+		if( is_array(Input::get('group')) && count(Input::get('group'))>1 )
 		$inputs_id = Group::with(array('users' => function($query) use ($user_id){
 			
 			$query->where('users.id', '<>', $user_id)->where('users.active', true);
@@ -83,10 +83,17 @@ class CustomFile extends CommFile {
 			
 			return $group->users->lists('id');
 			
-		})->collapse()->all();
-		
+		})->collapse()->all();		
 		$inputs_unique_id = array_unique($inputs_id);
-		var_dump($inputs_unique_id);
+		
+		
+		if( is_array(Input::get('user')) && count(Input::get('user'))>0 ){	
+			foreach(Input::get('user') as $input_user_id){
+				if( !in_array($input_user_id, $inputs_unique_id) ){
+					array_push($inputs_unique_id, $input_user_id);
+				}				
+			}
+		}
 		
 		
 		$file_id = VirtualFile::find($this->doc_id)->file_id;

@@ -66,7 +66,7 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 		return 'remember_token';
 	}
 	
-	public function scopeContact($query, $project)
+	public function scopeContactj($query, $project)
 	{
 		//$contact = 'contact_'.$project;
 		//return $query->leftJoin($contact,$this->table.'.id','=',$contact.'.id')->where('active','1')->where($this->table.'.id',$this->getAuthIdentifier())->first();
@@ -80,6 +80,57 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 	 *
 	 * @return string
 	 */	
+	
+	protected $isValid = false;
+	
+	protected $rules = 	array(
+			'username'              => 'required|max:50',
+	);
+	
+	protected $rulls_message = array(
+			'email.required'    => '電子郵件必填',
+			'username.required' => '姓名必填',
+
+			'email.email'       => '電子郵件格式錯誤',
+			'username.max'      => '姓名不能超過50個字',
+
+			'email.unique'      => '電子郵件已被註冊',
+	);
+	
+	public function valid() {		
+		
+		$this->rules = array_filter($this->rules);
+		
+		$dirty = $this->getDirty();
+		
+		foreach ($this->rules as $column => $norm) {
+			if( !array_key_exists($column, $dirty) ){
+				unset($this->rules[$column]);
+			}
+		}		
+
+		$validator = Validator::make($dirty, $this->rules, $this->rulls_message);
+		
+		if( $validator->fails() ){
+			throw new app\library\files\v0\ValidateException($validator);
+		}
+
+		return $this->isValid = true;	
+	}
+	
+	public function save(array $options = array()) {	
+		
+		$this->isValid || $this->valid();
+		
+		foreach($this->getRelations() as $relation){
+			if( method_exists($relation, 'valid') ){
+				$relation->valid();
+			}
+		}
+
+		return parent::save($options);
+	}
+			
 
 	
 	public $fileProvider;
@@ -100,6 +151,7 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 	
 	public function contact() {
 		$instance = new Contact;
+		is_null($this->project) && $this->project = Config::get('demo.project');
 		$instance->setTable('contact_'.$this->project);
 		return new HasOne($instance->newQuery(), $this, $instance->getTable().'.id', 'id');
 	}

@@ -43,6 +43,7 @@ return array(
     'app\\library\\files\\v0\\QuesFile' => $baseDir . '/app/library/files/QuesFile.php',
     'app\\library\\files\\v0\\RowsFile' => $baseDir . '/app/library/files/RowsFile.php',
     'app\\library\\files\\v0\\RowsFileBuilder' => $baseDir . '/app/library/files/RowsFileBuilder.php',
+    'app\\library\\files\\v0\\ValidateException' => $baseDir . '/app/library/files/ValidateException.php',
     'app\\library\\page' => $baseDir . '/app/library/1.10.2/page.class.php',
     'app\\library\\v10\\buildQuestion' => $baseDir . '/app/library/1.10.2/buildQuestion.class.php',
     'app\\library\\v10\\buildQuestionEvent' => $baseDir . '/app/library/1.10.2/buildQuestionEvent.class.php',

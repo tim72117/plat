@@ -49,10 +49,12 @@
 		</tr>
 		<tr>
 			<td width="100" height="30">填寫日期</td>
-			<td width="300"><p align="right">（西元年/月份/日期）</p></td>
+			<td width="300"><?=$user->created_at?></td>
 			<td width="100">機構名稱	</td>
 			<td width="300"><?
-								$user->sch_id
+							foreach($user->schools as $school){
+								echo $school->id.' - '.$school->sname;
+							}
 							?></td>
 		</tr>
 		<tr>

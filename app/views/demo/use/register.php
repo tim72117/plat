@@ -29,9 +29,9 @@
         <td width="175" align="left"><?=Form::text('department', Input::old('department'), array('size'=>20, 'class'=>'register-block'))?></td>
 		<th width="100" height="30" valign="middle" align="center">單位級別</th>
 	   	<td width="300" align="left">
-			<?=Form::radio('department_class', 1, false, array('id'=>'department_class[0]','size'=>20)).Form::label('department_class[0]', '中央政府')?>
-			<?=Form::radio('department_class', 2, false, array('id'=>'department_class[1]','size'=>20)).Form::label('department_class[1]', '縣市政府')?>
-			<?=Form::radio('department_class', 0, false, array('id'=>'department_class[2]','size'=>20)).Form::label('department_class[2]', '各級學校')?>
+			<?=Form::radio('department_class', 1, false, array('id'=>'department_class[0]', 'size'=>20, 'disabled')).Form::label('department_class[0]', '中央政府')?>
+			<?=Form::radio('department_class', 2, true, array('id'=>'department_class[1]', 'size'=>20)).Form::label('department_class[1]', '縣市政府')?>
+			<?=Form::radio('department_class', 0, false, array('id'=>'department_class[2]', 'size'=>20, 'disabled')).Form::label('department_class[2]', '各級學校')?>
 		</td>  
     </tr>
     <tr>

@@ -39,11 +39,14 @@
 		<div style="background-color: #ffffff;width:100%;height:80px"><img src="<?=asset('demo/use/images/title.jpg')?>" width="500" height="80"></div>
 		<div style="background-color: #458A00;width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #ddd;color:#fff" align="right">			
 			<div style="float:left">
-				<a href="<?=URL::to('page/upload')?>" style="margin-left:10px" class="login-bar">上傳檔案</a>
+				<!--<a href="<?=URL::to('page/upload')?>" style="margin-left:10px" class="login-bar">上傳檔案</a>-->
 			</div>
 			<div style="float:right">
+				<? if( Auth::user()->id==1 ){ ?>
 				<span style="margin-right:10px" class="login-bar queryLogBtn">queryLog</span>
+				<? } ?>
 				<a href="<?=URL::to('page/project')?>" style="margin-right:10px" class="login-bar">回首頁</a>
+				<a href="<?=URL::to('page/project/profile')?>" style="margin-right:10px" class="login-bar">個人資料</a>
 				<a href="<?=URL::to('user/auth/password/change')?>" style="margin-right:10px" class="login-bar">更改密碼</a>
 				<a href="<?=URL::to('user/auth/logout')?>" style="margin-right:10px" class="login-bar">登出</a>
 			</div>
@@ -106,9 +109,11 @@
 		
 		<div class="queryLog" style="position: absolute;bottom:0;height:0;width:100%;background-color: #fff;overflow-y: scroll;border-top:1px solid #000">			
 			<?
-				$queries = DB::getQueryLog();
-				foreach($queries as $key => $query){
-					echo $key.' - ';var_dump($query);echo '<br /><br />';
+				if( Auth::user()->id==1 ){
+					$queries = DB::getQueryLog();
+					foreach($queries as $key => $query){
+						echo $key.' - ';var_dump($query);echo '<br /><br />';
+					}
 				}
 			?>
 		</div>

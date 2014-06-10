@@ -26,6 +26,10 @@ App::error(function(app\library\files\v0\FileFailedException $exception) {
 	return Response::view('noFile', array(), 404)->header('Refresh','5;url='.URL::to('page/project'));
 });
 
+App::error(function(app\library\files\v0\ValidateException $exception) {
+	return Redirect::back()->withErrors($exception->validator)->withInput();
+});
+
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 App::error(function(ModelNotFoundException $e)
 {

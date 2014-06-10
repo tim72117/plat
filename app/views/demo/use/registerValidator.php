@@ -14,12 +14,8 @@ class Register {
 		
 		$rulls = array(
 			'email'               => 'required|email|unique:users',
-			'name'                => 'required|max:50',
-			'title'               => 'required|max:50',
 			'department'          => 'required|max:50',
 			'department_class'    => 'required|in:0,1,2',
-			'tel'                 => 'required|regex:/[0-9-]/|max:30',
-			'fax'                 => 'regex:/[0-9-]/|max:30',
 			'sch_id'              => 'required|alpha_num|max:6',
 			'operational'         => 'required',
 			'operational.schpeo'  => 'in:1',
@@ -31,32 +27,22 @@ class Register {
 		
 		$rulls_message = array(
 			'email.required'            => '電子郵件必填',
-			'name.required'             => '姓名必填',
-			'title.required'            => '職稱必填',
 			'department.required'       => '單位必填',
 			'department_class.required' => '單位級別必填',	
-			'tel.required'              => '聯絡電話必填',
 			'sch_id.required'           => '學校名稱、代號必填',	
 			'operational.required'      => '承辦業務必填',	
 
 			'email.email'            => '電子郵件格式錯誤',
-			'name.max'               => '姓名不能超過50個字',
-			'title.max'              => '職稱不能超過50個字',
+			'email.unique'           => '電子郵件已被註冊',
 			'department.max'         => '單位不能超過50個字',
 			'department_class.in'    => '單位級別格式錯誤',	
-			'tel.regex'              => '聯絡電話格式錯誤',
-			'tel.max'                => '聯絡電話不能超過30個字',
-			'fax.regex'              => '傳真電話格式錯誤',	
-			'fax.max'                => '傳真電話不能超過30個字',
 			'sch_id.alpha_num'       => '學校名稱、代號格式錯誤',	
 			'sch_id.max'             => '代號不能格式錯誤',	
 			'operational.schpeo.in'  => '承辦業務格式錯誤',
 			'operational.senior1.in' => '承辦業務格式錯誤',
 			'operational.senior2.in' => '承辦業務格式錯誤',
 			'operational.tutor.in'   => '承辦業務格式錯誤',
-			'operational.parent.in'  => '承辦業務格式錯誤',
-
-			'email.unique' => '電子郵件已被註冊',
+			'operational.parent.in'  => '承辦業務格式錯誤',			
 		);
 		
 		return $this->validator = Validator::make($this->input, $rulls, $rulls_message);
@@ -67,10 +53,9 @@ class Register {
 		
 		$this->user = new User;
 		$this->user->username    = $this->input['name'];
-		$this->user->password    = '';
+		//$this->user->password    = '';
 		$this->user->email       = $this->input['email'];
-		$this->user->project     = 'use';		
-		$this->user->save();		
+		$this->user->project     = 'use';	
 		
 		$contact = new Contact(array(
 			'sch_id'           => $this->input['sch_id'],
@@ -85,11 +70,18 @@ class Register {
 			'tutor'            => Input::get('operational.tutor',  '0'),
 			'parent'           => Input::get('operational.parent', '0'),
 			'created_ip'       => Request::getClientIp(),
-		));
+		));		
 		
-		$contact->setTable('contact_use');
+		$contact->setTable('contact_use');	
+		
+		$this->user->valid();
+		$contact->valid();
+		
+		$this->user->save();	
 		
 		$contact = $this->user->contact()->save($contact);
+		
+		$this->user->schools()->attach($this->input['sch_id']);		
 		
 		if( is_null($contact->getKey()) ){
 			

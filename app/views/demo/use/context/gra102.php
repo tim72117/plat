@@ -93,7 +93,7 @@ function checkstdid($sch_id){
   </tr>
   <tr id="gen_content">
     <td colspan="8" align="left" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;">相關檔案: 
-    	<a href="<?=URL::to($fileProvider->download(394))?>">範例表格下載</a><br />
+    	<a href="<?=URL::to($fileProvider->download(2))?>">範例表格下載</a><br />
 
 <? 
 

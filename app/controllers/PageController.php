@@ -35,9 +35,9 @@ class PageController extends BaseController {
 	public function project($context = null) {
 		$project = Auth::user()->project;
 		if( $context==null ){
-			$contents = View::make('demo.'.$project.'.main')->nest('context','demo.'.$project.'.context.intro')->with('request', '');
+			$contents = View::make('demo.'.$project.'.main')->nest('context','demo.'.$project.'.page.intro')->with('request', '');
 		}else{
-			$contents = View::make('demo.'.$project.'.main')->nest('context','demo.'.$project.'.context.'.$context)->with('request', '');
+			$contents = View::make('demo.'.$project.'.main')->nest('context','demo.'.$project.'.page.'.$context)->with('request', '');
 		}	
 		$response = Response::make($contents, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');

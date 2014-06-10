@@ -182,7 +182,7 @@ class UserController extends BaseController {
 		View::share('csrf_error',$csrf_error);
 		$contents = View::make('demo.'.$project.'.main')
 			->with('request', '')
-			->nest('context','demo.page.01_changepasswd');
+			->nest('context','demo.page.passwordChange');
 		$response = Response::make($contents, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
 		$response->header('Pragma', 'no-cache');
@@ -225,7 +225,7 @@ class UserController extends BaseController {
 	}
 	
 	public function register($project) {
-						
+	
 		if( Request::isMethod('post') && Session::has('register') ){	
 			$register = require app_path().'\views\demo\\'.$project.'\registerValidator.php';	
 			if( $register->validator()->fails() ){		

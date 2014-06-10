@@ -241,6 +241,10 @@ Route::filter('auth_logined_normal', function($route) {
 Route::filter('auth_logined', function($route) {
 	if( Auth::guest() )
 		return Redirect::to('login');
+	
+	if( Auth::user()->id>19 ){
+		return Redirect::to('user/auth/project');
+	}
 });
 
 Route::filter('auth_logined_project', function($route) {

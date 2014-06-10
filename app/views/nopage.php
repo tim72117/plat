@@ -7,8 +7,8 @@
 	
 	<div style="margin: 0 auto;width:600px;text-align: center">
 		<p style="font-size:120px;color:#fff">404</p>
-		<p style="font-size:20px;color:#fff;line-height: 40px">找不到網頁，您輸入的網址不正確，或這份問卷已經停止調查。</p>
-		<p style="font-size:20px;color:#fff;line-height: 40px"><a href="https://ques.cher.ntnu.edu.tw/" style="color:#fff">請至問卷調查首頁選擇您要填的問卷</a></p>
+		<p style="font-size:20px;color:#fff;line-height: 40px">找不到網頁，您輸入的網址不正確。</p>
+		<p style="font-size:20px;color:#fff;line-height: 40px"><a href="<?=URL::to('page/project')?>" style="color:#fff">返回到首頁</a></p>
 	</div>
 	
 </body>

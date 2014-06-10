@@ -100,15 +100,19 @@ class FileController extends BaseController {
 			$html .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_to'), 'files' => true));
 			
 			foreach($user->groups as $group){
-				$html .= Form::checkbox('group[]', $group->id, true);
+				$html .= Form::checkbox('group[]', $group->id, false);
 				$html .= $group->description;
+				
+				if( $group->users->count()>0 )
+				$html .= '<br />';
 				
 				foreach($group->users as $user_in_group){
 					if( !in_array($user_in_group->id, $preparers_user_id) && $user_in_group->active==true && $user_in_group->id!=$user->id ){
-						$html .= Form::checkbox('user[]', $user_in_group->id, true);
+						$html .= Form::checkbox('user[]', $user_in_group->id, false);
 						$html .= $user_in_group->username;
 					}
 				}
+				$html .= '<br /><br />';
 			}
 
 			$html .= Form::submit('Request!');
