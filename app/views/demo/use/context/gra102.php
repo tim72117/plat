@@ -41,6 +41,7 @@ function checkstdid($sch_id){
 
 $user = auth::user();
 $error_text = '';
+
 //上傳判斷
 if( Session::has('upload_file_id') ){ 
 
@@ -60,6 +61,11 @@ if( Session::has('upload_file_id') ){
 	$value = array();//上傳用暫存陣列
 	$error_msg = array();
 	$data = ($workSheet->toArray(null,true,true,true));
+	
+	//紀錄空白列
+	$null_row_flag = 0;
+	$null_row = array();
+	$s=0;
 
 	//檢查每筆資料並存入上傳陣列
 	for($i=2;$i<=$RowHigh;$i++)
@@ -124,8 +130,9 @@ if( Session::has('upload_file_id') ){
 				break;
 				default:
 				}	
-		}
 		
+		}
+	
 		if ((!empty($value[2])) && (check_id_number($value[2]))) $value[4] =createnewcid($value[2]); 
 		
 
@@ -133,25 +140,34 @@ if( Session::has('upload_file_id') ){
 
 		if ($error_flag == 1){
 		
-			
-			$error_text .= "<tr>";
-
-			for ($j=0;$j<=$ColHigh;$j++)
-				if (empty($error_msg[$j])){
-					$error_text .= "<td scope=col>".$value[$j]."</td>";
-				}else{
-					$error_text .= '<td scope=col  bgcolor="#FFFFCC">'.'<p>'.'<font color="red">'.$value[$j].'</p>'.'</font>'."</td>";
-				}
-
-			$error_text .= "<td scope=col>";
-			for ($k=0;$k<=$ColHigh;$k++) {
-				if(!empty($error_msg[$k]))
-					$error_text .= $error_msg[$k];
+			//判斷一筆資料是否皆為空白	
+			if ((empty($value[0]))&&(empty($value[1]))&&(empty($value[2]))&&(empty($value[3])))
+			{	
+				$null_row_flag = 1;
+				$null_row[$s] = $i-1; // 將皆為空白的資料序號存入陣列
+				$s++;
+				
 			}
-			$error_text .= "</td>";
-			
-			$error_text .= "</tr>";
-
+			else
+			{
+				$error_text .= "<tr>";
+	
+				for ($j=0;$j<=$ColHigh;$j++)
+					if (empty($error_msg[$j])){
+						$error_text .= "<td scope=col>".$value[$j]."</td>";
+					}else{
+						$error_text .= '<td scope=col  bgcolor="#FFFFCC">'.'<p>'.'<font color="red">'.$value[$j].'</p>'.'</font>'."</td>";
+					}
+	
+				$error_text .= "<td scope=col>";
+				for ($k=0;$k<=$ColHigh;$k++) {
+					if(!empty($error_msg[$k]))
+						$error_text .= $error_msg[$k];
+				}
+				$error_text .= "</td>";
+				
+				$error_text .= "</tr>";
+			}
 		}else{
 			
 			//更新或寫入資料
@@ -182,11 +198,11 @@ if( Session::has('upload_file_id') ){
 
 <div style="margin:10px 0 0 10px;width:800px">
 	
-<table width="100%" cellpadding="3" cellspacing="0" border="0">
+<table width="100%" cellpadding="3" cellspacing="3" border="0">
 	<tr bgcolor="#CAFFCA">
 		<td class="header1" colspan="8" align="center" >上傳102學年度國三畢業生基本資料</td>
 	</tr>
-	<tr id="gen_content">
+	<tr>
 		<td colspan="8" align="left" style="padding-left:10px">相關檔案: 
 			<a href="<?=URL::to($fileProvider->download(2))?>">範例表格下載</a><br />
 			<?
@@ -208,23 +224,47 @@ if( Session::has('upload_file_id') ){
 	</tr>
 </table>
 
+<? if ($error_text){ 
+echo '<table width="100%" cellpadding="3" cellspacing="0" border="1">';
+	echo '<tr bgcolor="#CAFFCA"><td colspan="8" align="center">以下資料有誤，請協助修改後重新上傳</td></tr>'; 
+	echo '<tr bgcolor="#E4E4E4">';
 
-<table width="100%" cellpadding="3" cellspacing="0" border="1">
-	<tr bgcolor="#CAFFCA"><td colspan="8" align="center">以下資料有誤，請協助修改後重新上傳</td></tr> 
-	<tr bgcolor="#E4E4E4">
-		<th width="10%" class="title" scope="col">學校代碼</th>
-		<th width="10%" class="title" scope="col">學生姓名</th>
-		<th width="15%" class="title" scope="col">身分證字號</th>
-		<th width="5%" class="title" scope="col">性別</th>
-		<th width="60%" class="title" scope="col">錯誤資訊</th>
-	</tr>
+	//判斷是否出現空白資料列
+	if ($null_row_flag == 1) 
+	{
+		if ($s<=5)
+		{	
+			echo '<tr><td colspan="8" align="left">※ 第';
+			//foreach($null_row as $null) echo $null."、";
+			for ($r=0;$r<$s-1;$r++){
+				echo $null_row[$r]."、"; } //第1~($s-1)筆
+			echo $null_row[$r]."筆資料為空白列，請注意。".'</td></tr>';
+		}
+		else
+		{	echo '<tr><td colspan="8" align="left">※ 第';
+			for ($s=0;$s<5;$s++){
+				echo $null_row[$s]."、"; } //第1~5筆
+			echo $null_row[$s]."筆及其他數筆資料為空白資料列，請注意。".'</td></tr>';
+		}
+		
+	}
+		
+		echo '<th width="10%" class="title" scope="col">學校代碼</th>';
+		echo '<th width="10%" class="title" scope="col">學生姓名</th>';
+		echo '<th width="15%" class="title" scope="col">身分證字號</th>';
+		echo '<th width="5%" class="title" scope="col">性別</th>';
+		echo '<th width="60%" class="title" scope="col">錯誤資訊</th>';
+	echo '</tr>';
+}
+	?>
 	<?=$error_text?>
 </table>
 
-
-<table width="100%" cellpadding="3" cellspacing="0" border="1">
-	<tr bgcolor="#CAFFCA">
-		<td colspan="8" class="header1" align="left" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;">已上傳的名單</td>
+</br>
+<div style="margin:0px 0 0 10px;width:800px">
+<table width=800px cellpadding="3" cellspacing="3" border="0" >
+	<tr>
+		<td class="header1" colspan="8" align="center">已上傳的名單</td>
 	</tr>
 <?
 	//列出已上傳的名單
@@ -235,8 +275,8 @@ if( Session::has('upload_file_id') ){
 	<?
 	$i=1;
 	foreach($virtualFile->hasFiles as $file){
-		echo '<tr id="gen_content">';
-		echo '   <td colspan="8" class="header1" align="left" style="padding-left:10px;border-bottom:1px solid black;border-left:1px solid black;">';
+		echo '<tr>';
+		echo '   <td colspan="8" class="header1" align="left" style="padding-left:10px;border-bottom:0px solid black;border-left:0px solid black;">';
 		echo "     檔案".$i."　檔名：".$file->title."　上傳於：". date('Y-m-d h:i:s A',strtotime($file->updated_at)).'<br />';
 		echo '   </td>';
 		echo '</tr>';
@@ -244,5 +284,5 @@ if( Session::has('upload_file_id') ){
 	}
 	?>
 </table>	
-
+</div>
 </div>
