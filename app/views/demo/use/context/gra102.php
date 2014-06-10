@@ -56,7 +56,7 @@ if( Session::has('upload_file_id') ){
 	
 		//取得行列值
 		$RowHigh = $workSheet->getHighestRow(); //資料筆數
-		$ColHigh = alpha2num($workSheet->getHighestColumn()); //欄位數目
+		$ColHigh = 3;
 
 	$value = array();//上傳用暫存陣列
 	$error_msg = array();
