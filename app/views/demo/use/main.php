@@ -88,7 +88,7 @@
 		</div>
 
 		<div style="height: 100%;overflow-y: hidden;margin:0 0 0 200px" class="context">
-			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:14px;text-align: left;margin-top:10px">
+			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:14px;text-align: left;margin-top:0">
 				
 				<table style="width:100%" cellpadding="0" cellspacing="0">
 					<thead>
