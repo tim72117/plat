@@ -41,6 +41,8 @@ function checkstdid($sch_id){
 
 $user = auth::user();
 $error_text = '';
+$null_text = '';
+$null_row_flag = 0; 
 
 //上傳判斷
 if( Session::has('upload_file_id') ){ 
@@ -56,16 +58,16 @@ if( Session::has('upload_file_id') ){
 	
 		//取得行列值
 		$RowHigh = $workSheet->getHighestRow(); //資料筆數
+		//if (alpha2num($workSheet->getHighestColumn())!=3) $ColHigh = 3;
+		//else $ColHigh = alpha2num($workSheet->getHighestColumn());
 		$ColHigh = 3;
 
 	$value = array();//上傳用暫存陣列
-	$error_msg = array();
+	$error_msg = array();//儲存錯誤資訊用陣列
+	$null_row = array();// 紀錄空白列資訊
+	$s=0;				//
+
 	$data = ($workSheet->toArray(null,true,true,true));
-	
-	//紀錄空白列
-	$null_row_flag = 0;
-	$null_row = array();
-	$s=0;
 
 	//檢查每筆資料並存入上傳陣列
 	for($i=2;$i<=$RowHigh;$i++)
@@ -74,9 +76,12 @@ if( Session::has('upload_file_id') ){
 		$error_flag = 0;
 		for ($k=0;$k<=$ColHigh;$k++) if(!empty($error_msg[$k])) $error_msg[$k]="";//清空錯誤代碼
 		for ($j=0;$j<=$ColHigh;$j++){
-			$value[$j] = $data[$i][num2alpha($j)];
+			
+			if (!empty($data[$i][num2alpha($j)])){
+			 	$value[$j] = $data[$i][num2alpha($j)];
+			}else $value[$j] = '';//當欄位無值時亦將該上傳陣列存入無值
 
-			//檢查內容
+			//檢查資料欄位內容：$value[0] = 學校代碼；$value[1] = 姓名；$value[2] = 身分證字號；$value[2] = 性別代碼
 	   		switch($j){
 				case '0' : //學校代碼
 					if (!empty($value[0])){
@@ -133,11 +138,11 @@ if( Session::has('upload_file_id') ){
 		
 		}
 	
+		//檢查身分證字號，無誤則串出Newcid至$value[4]
 		if ((!empty($value[2])) && (check_id_number($value[2]))) $value[4] =createnewcid($value[2]); 
 		
 
-		//檢查內容
-
+		//檢查錯誤資訊
 		if ($error_flag == 1){
 		
 			//判斷一筆資料是否皆為空白	
@@ -180,11 +185,14 @@ if( Session::has('upload_file_id') ){
 						->where('stdidnumber', $value[2])
 						->update(array('shid' => $value[0],'name' => $value[1],'sex' => $value[3],'newcid' => $value[4],'stdidnumber' => $value[2],'id_user' => $user->id));
 			}else{
-				//gra103_userinfo			
-				DB::insert('insert into use_103.dbo.gra103_userinfo (shid,name,sex,newcid,stdidnumber,id_user) values (?,?,?,?,?,?)',array($value[0],$value[1],$value[3],$value[4],$value[2],$user->id));
+				//gra103_userinfo	
+				DB::table('use_103.dbo.gra103_userinfo')
+						->insert(array('shid' => $value[0],'name' => $value[1],'sex' => $value[3],'newcid' => $value[4],'stdidnumber' => $value[2],'id_user' => $user->id));	
+						
 			}
 			
 		}
+
 }
 
 
@@ -194,14 +202,34 @@ if( Session::has('upload_file_id') ){
 		echo implode('、',array_filter($errors->all()));}
 
 }
+
+//判斷是否出現空白資料列
+if ($null_row_flag == 1) 
+{
+	if ($s<=5)
+	{	
+		$null_text .= '<tr><td colspan="8" align="left">※ 第';
+		for ($r=0;$r<$s-1;$r++){
+			$null_text .= $null_row[$r]."、"; } //第1~($s-1)筆
+			$null_text .= $null_row[$r]."筆資料為空白列，請注意。".'</td></tr>';
+	}
+	else
+	{	$null_text .='<tr><td colspan="8" align="left">※ 第';
+		for ($s=0;$s<5;$s++){
+			$null_text .= $null_row[$s]."、"; } //第1~5筆
+			$null_text .= $null_row[$s]."筆及其他數筆資料為空白資料列，請注意。".'</td></tr>';
+	}
+}
+	
 ?>
 
-<div style="margin:10px 0 0 10px;width:800px">
-	
+
+
+<div style="margin:10px 0 0 10px;width:800px">	
 <table width="100%" cellpadding="3" cellspacing="3" border="0">
 	<tr bgcolor="#CAFFCA">
-		<td class="header1" colspan="8" align="center" >上傳102學年度國三畢業生基本資料</td>
-	</tr>
+		<td height="32" colspan="8" align="center" class="header1" >上傳102學年度國三畢業生基本資料</td>
+  </tr>
 	<tr>
 		<td colspan="8" align="left" style="padding-left:10px">相關檔案: 
 			<a href="<?=URL::to($fileProvider->download(2))?>">範例表格下載</a><br />
@@ -224,47 +252,32 @@ if( Session::has('upload_file_id') ){
 	</tr>
 </table>
 
-<? if ($error_text){ 
-echo '<table width="100%" cellpadding="3" cellspacing="0" border="1">';
-	echo '<tr bgcolor="#CAFFCA"><td colspan="8" align="center">以下資料有誤，請協助修改後重新上傳</td></tr>'; 
-	echo '<tr bgcolor="#E4E4E4">';
 
-	//判斷是否出現空白資料列
-	if ($null_row_flag == 1) 
-	{
-		if ($s<=5)
-		{	
-			echo '<tr><td colspan="8" align="left">※ 第';
-			//foreach($null_row as $null) echo $null."、";
-			for ($r=0;$r<$s-1;$r++){
-				echo $null_row[$r]."、"; } //第1~($s-1)筆
-			echo $null_row[$r]."筆資料為空白列，請注意。".'</td></tr>';
-		}
-		else
-		{	echo '<tr><td colspan="8" align="left">※ 第';
-			for ($s=0;$s<5;$s++){
-				echo $null_row[$s]."、"; } //第1~5筆
-			echo $null_row[$s]."筆及其他數筆資料為空白資料列，請注意。".'</td></tr>';
-		}
-		
-	}
-		
-		echo '<th width="10%" class="title" scope="col">學校代碼</th>';
-		echo '<th width="10%" class="title" scope="col">學生姓名</th>';
-		echo '<th width="15%" class="title" scope="col">身分證字號</th>';
-		echo '<th width="5%" class="title" scope="col">性別</th>';
-		echo '<th width="60%" class="title" scope="col">錯誤資訊</th>';
-	echo '</tr>';
-}
-	?>
-	<?=$error_text?>
+<? if ($error_text){ ?>
+
+<table width="99%" cellpadding="3" cellspacing="0" border="1">
+	<tr bgcolor="#CAFFCA"><td colspan="8" align="center">以下資料有誤，請協助修改後重新上傳</td></tr> 
+	<tr bgcolor="#EEEEEE">		
+		<th width="10%" class="title" scope="col" align="center">學校代碼</th>
+		<th width="10%" class="title" scope="col" align="center">學生姓名</th>
+		<th width="15%" class="title" scope="col" align="center">身分證字號</th>
+		<th width="10%" class="title" scope="col" align="center">性別</th>
+		<th width="55%" class="title" scope="col" align="center">錯誤資訊</th>
+	</tr>
+<?
+	echo $error_text;
+    echo $null_text;
+?>
 </table>
-
 </br>
-<div style="margin:0px 0 0 10px;width:800px">
-<table width=800px cellpadding="3" cellspacing="3" border="0" >
-	<tr>
-		<td class="header1" colspan="8" align="center">已上傳的名單</td>
+<?				  }
+?>
+
+
+<table width="100%" cellpadding="3" cellspacing="3" border="0">
+	<tr bgcolor="#EEEEEE">	
+		<td colspan="8" align="center">已上傳的名單</td>
+        
 	</tr>
 <?
 	//列出已上傳的名單
@@ -284,5 +297,4 @@ echo '<table width="100%" cellpadding="3" cellspacing="0" border="1">';
 	}
 	?>
 </table>	
-</div>
 </div>
