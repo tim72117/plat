@@ -270,8 +270,8 @@ if ($null_row_flag == 1)
 ?>
 </table>
 </br>
-<?				  }
-?>
+
+<? } ?>
 
 
 <table width="100%" cellpadding="3" cellspacing="3" border="0">
@@ -279,21 +279,18 @@ if ($null_row_flag == 1)
 		<td colspan="8" align="center">已上傳的名單</td>
         
 	</tr>
-<?
-	//列出已上傳的名單
-	$virtualFile = VirtualFile::find($fileAcitver->file_id);
-
-	?>
-
 	<?
-	$i=1;
-	foreach($virtualFile->hasFiles as $file){
+	//列出已上傳的名單
+	$virtualFile = VirtualFile::with(array('hasFiles'=>function($query){
+		$query->orderBy('updated_at','desc');
+	}))->find($fileAcitver->file_id);
+
+	foreach($virtualFile->hasFiles as $key => $file){
 		echo '<tr>';
 		echo '   <td colspan="8" class="header1" align="left" style="padding-left:10px;border-bottom:0px solid black;border-left:0px solid black;">';
-		echo "     檔案".$i."　檔名：".$file->title."　上傳於：". date('Y-m-d h:i:s A',strtotime($file->updated_at)).'<br />';
+		echo "     檔案".($key+1).'　上傳於：'. date('Y-m-d h:i:s A',strtotime($file->updated_at))."　檔名：".$file->title.'<br />';
 		echo '   </td>';
 		echo '</tr>';
-		$i++;
 	}
 	?>
 </table>	
