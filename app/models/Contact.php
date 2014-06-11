@@ -30,8 +30,8 @@ class Contact extends Eloquent {
 	
 	protected $rules = 	array(
 			'title'               => 'required|max:50',
-			'tel'                 => 'required|regex:/[0-9-]/|max:30',
-			'fax'                 => 'regex:/[0-9-]/|max:30',
+			'tel'                 => array('required', 'regex:/^[0-9-#]+$/', 'max:30'),
+			'fax'                 => array('regex:/^[0-9-#]+$/', 'max:30'),
 	);
 	
 	protected $rulls_message = array(
@@ -58,7 +58,7 @@ class Contact extends Eloquent {
 		}		
 		
 		$validator = Validator::make($dirty, $this->rules, $this->rulls_message);
-		
+
 		if( $validator->fails() ){
 			throw new app\library\files\v0\ValidateException($validator);
 		}

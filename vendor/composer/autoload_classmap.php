@@ -27,6 +27,7 @@ return array(
     'ResourceController' => $baseDir . '/app/controllers/ResourceController.php',
     'School' => $baseDir . '/app/models/Contact.php',
     'SessionHandlerInterface' => $vendorDir . '/symfony/http-foundation/Symfony/Component/HttpFoundation/Resources/stubs/SessionHandlerInterface.php',
+    'Sharer' => $baseDir . '/app/models/VirtualFile.php',
     'TestCase' => $baseDir . '/app/tests/TestCase.php',
     'UploadHandler' => $baseDir . '/app/library/1.10.2/UploadHandler.php',
     'User' => $baseDir . '/app/models/User.php',

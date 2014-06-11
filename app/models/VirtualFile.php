@@ -6,6 +6,7 @@ class Files extends Eloquent {
 	public $timestamps = true;
 	
 	protected $fillable = array('title', 'type', 'owner', 'file');
+	
 }
 
 class Requester extends Eloquent {
@@ -14,7 +15,7 @@ class Requester extends Eloquent {
 	
 	public $timestamps = true;
 	
-	protected $fillable = array('preparer_doc_id', 'requester_doc_id');
+	protected $fillable = array('preparer_doc_id', 'requester_doc_id', 'running');
 	
 	public function files() {
 		return $this->hasMany('Files','owner','preparer_doc_id');
@@ -30,6 +31,24 @@ class Requester extends Eloquent {
 	
 	public function docRequester() {
 		return $this->hasOne('VirtualFile','id','requester_doc_id');
+	}
+	
+}
+
+class Sharer extends Eloquent {
+	
+	protected $table = 'share';
+	
+	public $timestamps = true;
+	
+	protected $fillable = array('from_doc_id', 'shared_user_id', 'accept');
+	
+	public function fromUser() {
+		return $this->hasOne('User','id','shared_user_id');
+	}
+	
+	public function fromDoc() {
+		return $this->hasOne('VirtualFile','id','from_doc_id');
 	}
 	
 }
@@ -55,8 +74,8 @@ class VirtualFile extends Eloquent {
 		return $this->hasMany('Files','owner');
 	}
 	
-	public function isFiles() {
-		return $this->hasOne('Files','owner','file_id');
+	public function isFile() {
+		return $this->hasOne('Files','id','file_id');
 	}
 	
 	public function requester() {
@@ -73,6 +92,11 @@ class VirtualFile extends Eloquent {
 	
 	public function docPreparer() {
 		return $this->belongsToMany('VirtualFile', 'auth_requester', 'requester_doc_id', 'preparer_doc_id');//未使用未測試
+	}
+	
+	public static function getRequester() {
+
+		return new Requester;
 	}
 
 }

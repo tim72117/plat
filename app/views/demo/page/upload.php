@@ -29,6 +29,11 @@ foreach($files as $file){
 if( Session::has('upload_file_id') ){
 	$file_id = Session::get('upload_file_id');	
 	echo $file_id;
+	
+	VirtualFile::create(array(
+		'user_id'  =>  $user->id,
+		'file_id'  =>  $file_id,
+	));
 }else{
 	
 	if( $errors )

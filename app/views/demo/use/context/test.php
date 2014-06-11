@@ -2,14 +2,18 @@
 
 echo 'test<br />';
 
+VirtualFile::getRequester()->doc;
 
-
-//var_dump($group->users);
-//var_dump(Group::find(2)->users->count());
-
-//$requester = Requester::with('doc.requester')->where('id_requester','=',$fileAcitver->file_id)->get();
-//var_dump($requester);
-//var_dump($requester[0]->doc->id_user);
+/*
+				$queries = DB::getQueryLog();
+				foreach($queries as $key => $query){
+					echo $key.' - ';var_dump($query);echo '<br /><br />';
+				}
+				
+			
+ * 
+ */	
+				
 
 
 
@@ -70,66 +74,6 @@ if( $virtualFile->user_id==$user->id ){
 
 
 echo '<br /><br />';
-
-/*
-| 請求者
-*/
-if( is_null($virtualFile->requester) ){	
-
-	
-	/*
-	| 送出請求
-	*/
-	/*
-	$preparers = Requester::with('docPreparer.user')->where('requester_doc_id','=',$fileAcitver->file_id)->get();
-	$preparers_user_id = array_pluck(array_pluck($preparers->toArray(),'doc_preparer'),'user_id');
-	$group = Group::with('users')->where('id','2')->get();
-	echo $preparers->count();
-
-	
-	//$groups = Group::with(array('docsTarget' => function($query) use ($fileAcitver) {
-	//	$query->leftJoin('auth_requester','docs.id','=','auth_requester.id_doc')->where('auth_requester.id_requester',$fileAcitver->file_id);
-	//}))->where('id_user',$user->id)->get();
-	 
-	 
-	if( $group[0]->users->count() > 0 ){
-		echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_to'), 'files' => true));
-		foreach($group[0]->users as $user_in_group){
-			if( !in_array($user_in_group->id, $preparers_user_id) ){				
-				echo Form::checkbox('group[]', $user_in_group->id, true);
-				echo $user_in_group->username;
-			}
-		}
-		echo Form::submit('Request!');
-		echo Form::hidden('intent_key', $intent_key);
-		echo Form::hidden('_token1', $csrf_token);
-		echo Form::text('_token2', $dddos_token);
-		echo Form::close();
-	}
-
-	 
-	
-
-
-	if( $preparers->count() > 0 ){
-		/*/
-		//| 停止請求
-		/*/
-		echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_end'), 'files' => true));	
-		foreach($preparers as $preparer){	
-			echo Form::checkbox('doc[]', $preparer->preparer_doc_id, true);
-			echo $preparer->docPreparer->user->username;			
-		}
-		echo Form::submit('Request end!');
-		echo Form::hidden('intent_key', $intent_key);
-		echo Form::hidden('_token1', $csrf_token);
-		echo Form::hidden('_token2', $dddos_token);
-		echo Form::close();
-	}
-	
-	*/
-}
-
 
 
 /*

@@ -84,7 +84,8 @@ class FileController extends BaseController {
 		| 送出請求
 		*/
 		$html = '';
-		$preparers = Requester::with('docPreparer.user')->where('requester_doc_id','=',$this->fileAcitver->file_id)->get();
+		$html_share = '';
+		$preparers = Requester::with('docPreparer.user')->where('requester_doc_id','=',$this->fileAcitver->file_id)->where('running',true)->get();
 		$preparers_user_id = array_pluck($preparers->lists('doc_preparer'),'user_id');
 		//$group = Group::with('users')->where('user_id', $user->id)->get();
 		//$html .= $preparers->count();
@@ -120,6 +121,36 @@ class FileController extends BaseController {
 			$html .= Form::hidden('_token1', $this->csrf_token);
 			$html .= Form::hidden('_token2', $this->dddos_token);
 			$html .= Form::close();
+			
+			
+			
+			//share
+			$html_share .= '-------------------------------------------------';
+			$html_share .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'share_to'), 'files' => true));
+			
+			foreach($user->groups as $group){
+				$html_share .= Form::checkbox('group[]', $group->id, false);
+				$html_share .= $group->description;
+				
+				if( $group->users->count()>0 )
+				$html_share .= '<br />';
+				
+				foreach($group->users as $user_in_group){
+					if( !in_array($user_in_group->id, $preparers_user_id) && $user_in_group->active==true && $user_in_group->id!=$user->id ){
+						$html_share .= Form::checkbox('user[]', $user_in_group->id, false);
+						$html_share .= $user_in_group->username;
+					}
+				}
+				$html_share .= '<br /><br />';
+			}
+
+			$html_share .= Form::submit('Share!');
+			$html_share .= Form::hidden('intent_key', $intent_key);
+			$html_share .= Form::hidden('_token1', $this->csrf_token);
+			$html_share .= Form::hidden('_token2', $this->dddos_token);
+			$html_share .= Form::close();
+			
+			
 		}
 		
 		if( $preparers->count() > 0 ){
@@ -138,7 +169,7 @@ class FileController extends BaseController {
 			$html .= Form::close();
 		}
 		
-		return $html;
+		return $html.$html_share;
 	}
 	
 	public function upload($intent_key) {

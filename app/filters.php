@@ -40,14 +40,9 @@ App::error(function(PDOException $exception) {
 	//return Response::view('nopage', array(), 404);
 });
 
-App::error(function($exception) {//找不到頁面
-	//return Response::view('nopage', array(), 404);
-});
-
 App::missing(function($exception) {
 	//return Response::view('nopage', array(), 404);
 });
-
 
 /*
 |--------------------------------------------------------------------------

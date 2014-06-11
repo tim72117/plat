@@ -5,11 +5,11 @@
 			<td><input type="text" name="email"></td>
 		</tr>
 		<tr>
-			<th>密碼</th>
+			<th>新密碼</th>
 			<td><input type="password" name="password"></td>
 		</tr>
 		<tr>
-			<th>確認密碼</th>
+			<th>確認新密碼</th>
 			<td><input type="password" name="password_confirmation"></td>
 		</tr>
 		<tr>

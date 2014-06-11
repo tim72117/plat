@@ -24,6 +24,14 @@
 		$('.context').click(function(){
 			$('.queryLog').height(0);
 		});
+
+        $('.shareBtn').click(function(){
+            if( $('.share').css('left')=='0px' ){
+                $('.share').animate({left:-501}); 
+            }else{
+                $('.share').animate({left:0}); 
+            }
+		});
   	});
 </script>
 
@@ -39,11 +47,14 @@
 		<div style="background-color: #ffffff;width:100%;height:80px"><img src="<?=asset('demo/use/images/title.jpg')?>" width="500" height="80"></div>
 		<div style="background-color: #458A00;width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #ddd;color:#fff" align="right">			
 			<div style="float:left">
-				<!--<a href="<?=URL::to('page/upload')?>" style="margin-left:10px" class="login-bar">上傳檔案</a>-->
+				<? if( Auth::user()->id==1 ){ ?>
+				<a href="<?=URL::to('page/upload')?>" style="margin-left:10px" class="login-bar">上傳檔案</a>
+				<? } ?>
 			</div>
 			<div style="float:right">
 				<? if( Auth::user()->id==1 ){ ?>
-				<span style="margin-right:10px" class="login-bar queryLogBtn">queryLog</span>
+                <span style="margin-right:10px;cursor: pointer" class="login-bar shareBtn">share</span>
+				<span style="margin-right:10px;cursor: pointer" class="login-bar queryLogBtn">queryLog</span>
 				<? } ?>
 				<a href="<?=URL::to('page/project')?>" style="margin-right:10px" class="login-bar">回首頁</a>
 				<a href="<?=URL::to('page/project/profile')?>" style="margin-right:10px" class="login-bar">個人資料</a>
@@ -58,20 +69,25 @@
 		<div style="height:100%;overflow-y: hidden;float:left">
 			<div style="width: 350px;height:100%;background-color: #fff;border-right: 1px solid #ddd;overflow-y: auto;margin-top:0">
 
-
-				<div id="Layer4">
+				
+				<div style="font-size:18px;margin-top:10px;margin-left:10px">
+					檔案夾
+				</div>
+				
 				<h2>【 後期中等教育資料庫查詢平台 】</h2>
+				<div>				
 				<?
 				$user = Auth::user();
 				$packageDocs = $user->get_file_provider()->lists();
 				
+                $intent_key = is_null(@$fileAcitver) ? '' : $fileAcitver->intent_key;
 				
 				foreach($packageDocs as $packageDoc){
 					foreach($packageDoc['actives'] as $active){		
 
 						if( $active['active']=='open' ){
 							echo '<div class="inbox" style="clear:both;overflow: hidden;cursor:default;margin-top:10px">';
-							echo '<div class="count button" folder="" style="font-size:16px;text-decoration: none;float:left;margin-left:10px">';
+							echo '<div class="count button page-menu '.($intent_key==$active['intent_key']?'active':'').'" folder="" style="font-size:16px;text-decoration: none;float:left;margin-left:10px">';
 							//echo '<div class="intent button" intent_key="'.$active['intent_key'].'">'.$active['active'].'</div>';
 							echo '<a href="'.URL::to('user/doc/'.$active['intent_key']).'">'.$packageDoc['title'].'</a>';
 							echo '</div>';
@@ -88,22 +104,14 @@
 		</div>
 
 		<div style="height: 100%;overflow-y: hidden;margin:0 0 0 200px" class="context">
-			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:14px;text-align: left;margin-top:0">
-				
-				<table style="width:100%" cellpadding="0" cellspacing="0">
-					<thead>
-						<tr>
-							<div id='pageLoad'><? //echo Session::get('sch_id'); ?></div>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td width="1000px"><?=$context?></td>
-							<td style="vertical-align:top"><?=$request?></td>
-						</tr>					
-					</tbody>
-				</table>
-				
+			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:16px;text-align: left;margin-top:0; position:  relative">			
+                
+                <div><?=$context?></div>
+                
+                <div style="width:500px;position: absolute;top:0;background-color: #fff;border-right: 1px solid #ddd;height: 100%;left:-501px;font-size:16px;overflow: auto" class="share">
+                    <div style="margin:10px"><?=$request?></div>
+                </div>
+	
 			</div>			
 		</div>
 		

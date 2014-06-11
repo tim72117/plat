@@ -16,22 +16,7 @@ class FileProvider {
 	public static function make() {
 		return new FileProvider;
 	}
-	
-	public function create() {
-		$intent = array('active'=>'upload','file_id'=>Null,'fileClass'=>'app\\library\\files\\v0\\CommFile');
-		$intent_key = $this->get_intent_id($intent);
-		$this->files[$intent_key] = $intent;
-		$this->save_intent();
-		return 'user/doc/'.$intent_key;
-	}
-	
-	public function download($file_id) {
-		$intent = array('active'=>'download','file_id'=>$file_id,'fileClass'=>'app\\library\\files\\v0\\CommFile');
-		$intent_key = $this->get_intent_id($intent);
-		$this->files[$intent_key] = $intent;
-		$this->save_intent();
-		return 'user/doc/'.$intent_key;	
-	}
+
 	/**
 	 * @var string
 	 * @return
@@ -42,9 +27,12 @@ class FileProvider {
 		$docs = DB::table('docs')
 				->leftJoin('files','docs.file_id','=','files.id')
 				->leftJoin('doc_type','files.type','=','doc_type.id')
-				->leftJoin('auth_requester','docs.id','=','auth_requester.preparer_doc_id')
-				->where('docs.user_id',$this->user_id)
-				//->where('doc.owner',$this->id_user)
+				->leftJoin('auth_requester','docs.id','=','auth_requester.preparer_doc_id')				
+				->where('docs.user_id', $this->user_id)
+				->where(function($query){
+					return $query->whereNull('auth_requester.running')->orWhere('auth_requester.running', '1');
+				})
+				->where('files.type', 2)
 				->select('docs.id','title','doc_type.class','auth_requester.requester_doc_id')->get();
 		
 		
@@ -62,68 +50,46 @@ class FileProvider {
 			
 			if( class_exists($fileClass) ){
 
-				$actives = $fileClass::get_intent();
-				
+				$actives = $fileClass::get_intent();				
 				
 				$packageDoc = array('title'=>$doc->title.$file_from, 'actives'=>array());
 				foreach($actives as $active){
-					$intent = array('active'=>$active,'file_id'=>$doc->id,'fileClass'=>$fileClass);
-					$intent_key = $this->get_intent_id($intent);
+					$intent_key = $this->doc_intent_key($active, $doc->id, $fileClass);
 					array_push($packageDoc['actives'], array('intent_key'=>$intent_key, 'active'=>$active));					
-					
-					$this->files[$intent_key] = $intent;
 				}
 				array_push($packageDocs, $packageDoc);
 			}	
 
 		}
 		
-		$this->save_intent();
 		return $packageDocs;
 	}
 	
-	public function get_request() {
-		/*
-		$virtualFiles = VirtualFile::where('id_user',$this->id_user)->get();
-		
-		foreach($virtualFiles as $virtualFile)
-			if($virtualFile->preparer->count()>0)
-				foreach($virtualFile->preparer as $preparer)
-					var_dump($preparer->docs);
-		exit;
-		*/
-		$virtualFile = VirtualFile::with('preparers')->where('user_id',$this->user_id)->get();
-		$usersFiles = array();
-		
-		/*
-		foreach($virtualFiles as $virtualFile)	
-			foreach($virtualFile->preparers as $preparer){
-				$usersFiles[$preparer->docPreparer->user->id] = array(
-					'name'  => $preparer->docPreparer->user->username,
-					'files' => array(),
-				);
-				//echo $preparer->docPreparer->user->username.'<br /><br />';
-				foreach($preparer->files as $file){
-
-				}
-				//echo '<br />';
-			}
-		 * 
-		 */
-			
-		return $virtualFile;
-		
-		/*
-		$queries = DB::getQueryLog();
-		foreach($queries as $query){
-			var_dump($query);echo '<br /><br />';
-		}
-		exit;
-		 * 
-		 */
+	public function create() {	
+		$intent_key = $this->doc_intent_key('upload', Null, 'app\\library\\files\\v0\\CommFile');		
+		return 'user/doc/'.$intent_key;
 	}
 	
+	public function download($file_id) {
+		$intent_key = $this->doc_intent_key('download', $file_id, 'app\\library\\files\\v0\\CommFile');		
+		return 'user/doc/'.$intent_key;	
+	}
 	
+	public function doc_intent_key($active, $doc_id, $fileClass) {
+		$intent = array('active'=>$active,'file_id'=>$doc_id,'fileClass'=>$fileClass);
+		$intent_key = $this->get_intent_id($intent);					
+		$this->files[$intent_key] = $intent;
+		$this->save_intent();
+		return $intent_key;
+	}
+	
+	public function get_doc_active_url($active, $doc_id) {
+		//待修正
+		//$doc = VirtualFile::find($doc_id);
+		$fileClass = 'app\\library\\files\\v0\\CustomFile';		
+		$intent_key = $this->doc_intent_key($active, $doc_id, $fileClass);		
+		return 'user/doc/'.$intent_key;
+	}
 	
 	public function get_active_url($intent_key, $active) {
 		$intent_active = Session::get('file')[$intent_key];

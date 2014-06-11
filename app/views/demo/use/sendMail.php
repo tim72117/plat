@@ -11,16 +11,19 @@ $group = Group::with(array('users' => function($query){
 $users = $group->users;
 */
 
+set_time_limit(0);
 
 $users = DB::table('users')
 		->leftJoin('contact_use','users.id','=','contact_use.id')
-		->where('contact_use.sname','like','%教育%')
-		//->where('users.id','=','1')
+		->leftJoin('password_reminders','users.email','=','password_reminders.email')
+		//->where('contact_use.sname','like','%教育%')
+		->whereNull('password_reminders.email')
+		->where('users.password','=','')
 		->get();
 
-foreach($users as $user){
+foreach($users as $index => $user){
 	
-	echo $user->email.'<br />';
+	echo $index.' - '.$user->email.'<br />';
 	echo $user->sname.'<br />';
 	
 	$credentials = array('email' => $user->email);
