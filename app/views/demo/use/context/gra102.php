@@ -47,9 +47,8 @@ $null_row_flag = 0;
 //上傳判斷
 if( Session::has('upload_file_id') ){ 
 
-	$id_doc = Session::get('upload_file_id');	
-	$doc = DB::table('files')->where('id',$id_doc)->pluck('file');
-
+	$file_id = Session::get('upload_file_id');	
+	$doc = DB::table('files')->where('id',$file_id)->pluck('file');
 	$reader = PHPExcel_IOFactory::createReaderForFile( storage_path(). '/file_upload/'. $doc );
 	$reader->setReadDataOnly(true);
 	$objPHPExcel  = $reader->load( storage_path(). '/file_upload/'. $doc );
@@ -179,15 +178,17 @@ if( Session::has('upload_file_id') ){
 			$DB = DB::table('use_103.dbo.gra103_userinfo')
 						->where('stdidnumber', $value[2])
 						->get();
-			if ($DB) {		
+			if ($DB) {
 				//gra103_userinfo
+				$newdate = date("Y-m-d H:i:s");	
 				DB::table('use_103.dbo.gra103_userinfo')
-						->where('stdidnumber', $value[2])
-						->update(array('shid' => $value[0],'name' => $value[1],'sex' => $value[3],'newcid' => $value[4],'stdidnumber' => $value[2],'id_user' => $user->id));
+						->where('newcid', $value[4])
+						->update(array('shid' => $value[0],'name' => $value[1],'sex' => $value[3],'newcid' => $value[4],'stdidnumber' => $value[2],'created_by' => $user->id,'file_id' => $file_id,'update_at'=>$newdate));
 			}else{
+				
 				//gra103_userinfo	
 				DB::table('use_103.dbo.gra103_userinfo')
-						->insert(array('shid' => $value[0],'name' => $value[1],'sex' => $value[3],'newcid' => $value[4],'stdidnumber' => $value[2],'id_user' => $user->id));	
+						->insert(array('shid' => $value[0],'name' => $value[1],'sex' => $value[3],'newcid' => $value[4],'stdidnumber' => $value[2],'created_by' => $user->id,'file_id' => $file_id));	
 						
 			}
 			
@@ -281,6 +282,7 @@ if ($null_row_flag == 1)
 	</tr>
 	<?
 	//列出已上傳的名單
+	//列出已上傳的名單
 	$virtualFile = VirtualFile::with(array('hasFiles'=>function($query){
 		$query->orderBy('updated_at','desc');
 	}))->find($fileAcitver->file_id);
@@ -292,6 +294,7 @@ if ($null_row_flag == 1)
 		echo '   </td>';
 		echo '</tr>';
 	}
+	
 	?>
 </table>	
 </div>
