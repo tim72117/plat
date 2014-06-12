@@ -28,6 +28,7 @@ if( Request::isMethod('post') ){
 	$user->contact->title = Input::get('title');
 	$user->contact->tel = Input::get('tel');
 	$user->contact->fax = Input::get('fax');
+    $user->contact->email2 = Input::get('email2');
 	$user->contact->setTable('contact_use');	
 	
 	User::saved(function() use ($errors){
@@ -60,16 +61,19 @@ if( Request::isMethod('post') ){
         <th width="175" align="left" style="padding:0 0 0 20px">職稱</th>
         <td width="175" align="left" style="padding:0 0 0 20px"><?=Form::text('title', $user->contact->title, array('size'=>20, 'class'=>'register-block'))?></td>
 	</tr>
-
     <tr>
     	<th width="175" align="left" style="padding:0 0 0 20px">聯絡電話(Tel)</th>
         <td width="175" align="left" style="padding:0 0 0 20px"><?=Form::text('tel', $user->contact->tel, array('size'=>20, 'class'=>'register-block'))?></td>
-
     </tr>
-		<th width="175" align="left" style="padding:0 0 0 20px">傳真電話(Fax)</th>
-		<td width="175" align="left" style="padding:0 0 0 20px"><?=Form::text('fax', $user->contact->fax, array('size'=>20, 'class'=>'register-block'))?></td>
     <tr>
-	</tr>
+        <th width="175" align="left" style="padding:0 0 0 20px">傳真電話(Fax)</th>
+		<td width="175" align="left" style="padding:0 0 0 20px"><?=Form::text('fax', $user->contact->fax, array('size'=>20, 'class'=>'register-block'))?></td>
+    </tr>
+    <tr>
+        <th width="175" align="left" style="padding:0 0 0 20px">備用信箱</th>
+        <td width="175" align="left" style="padding:0 0 0 20px"><?=Form::text('email2', $user->contact->email2, array('size'=>50, 'class'=>'register-block'))?></td>
+	</tr> 
+
 
 	<tr>
 		<td colspan="2" style="color:#f00;line-height: 20px">

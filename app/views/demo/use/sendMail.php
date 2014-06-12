@@ -16,9 +16,10 @@ set_time_limit(0);
 $users = DB::table('users')
 		->leftJoin('contact_use','users.id','=','contact_use.id')
 		->leftJoin('password_reminders','users.email','=','password_reminders.email')
-		//->where('contact_use.sname','like','%教育%')
+		->where('users.email','=','ericeyogo@shute.kh.edu.tw')
 		->whereNull('password_reminders.email')
-		->where('users.password','=','')
+		//->where('users.password','=','')
+        ->select('users.email','contact_use.sname')
 		->get();
 
 foreach($users as $index => $user){

@@ -22,16 +22,17 @@ class Contact extends Eloquent {
 	
 	public $timestamps = true;
 	
-	protected $fillable = array('sch_id', 'department', 'department_class', 'title', 'tel', 'fax', 'schpeo', 'senior1', 'senior2', 'tutor', 'parent', 'sname', 'created_by', 'created_ip');
+	protected $fillable = array('sch_id', 'department', 'department_class', 'title', 'tel', 'fax', 'email2', 'schpeo', 'senior1', 'senior2', 'tutor', 'parent', 'sname', 'created_by', 'created_ip');
 	
 	protected $guarded = array('id');
 	
 	protected $isValid = false;
 	
 	protected $rules = 	array(
-			'title'               => 'required|max:50',
-			'tel'                 => array('required', 'regex:/^[0-9-#]+$/', 'max:30'),
-			'fax'                 => array('regex:/^[0-9-#]+$/', 'max:30'),
+			'title'    => 'required|max:50',
+			'tel'      => array('required', 'regex:/^[0-9-#]+$/', 'max:30'),
+			'fax'      => array('regex:/^[0-9-#]+$/', 'max:30'),
+            'email2'   => 'email',
 	);
 	
 	protected $rulls_message = array(
@@ -42,7 +43,8 @@ class Contact extends Eloquent {
 			'tel.regex'           => '聯絡電話格式錯誤',
 			'tel.max'             => '聯絡電話不能超過30個字',
 			'fax.regex'           => '傳真電話格式錯誤',	
-			'fax.max'             => '傳真電話不能超過30個字',    
+			'fax.max'             => '傳真電話不能超過30個字', 
+            'email2.email'        => '電子郵件信箱格式錯誤',	
 	);	
 	
 	public function valid() {		
