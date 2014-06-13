@@ -125,6 +125,8 @@ class CommFile {
 					//	'id_doc'    =>   $id_doc,
 					//	'visible'   =>   $visible,
 					//));	
+                    
+                    DB::table('log_file')->insert(array('file_id'=>$file->id,'active'=>'upload'));
 
 					return $file->id;			
 
@@ -137,7 +139,11 @@ class CommFile {
 			}else{
 				
 				$file = Files::where('file', $path.'/'.$name)->first();
+                
 				$file->touch();
+                
+                DB::table('log_file')->insert(array('file_id'=>$file->id,'active'=>'reUpload'));
+                
 				return $file->id;
 				$validator->getMessageBag()->add('file_upload', '檔案已上傳');
 				return $validator;
