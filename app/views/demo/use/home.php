@@ -20,10 +20,10 @@
 
 </head>
 	
-<body bottommargin="0" topmargin="0" leftmargin="0" rightmargin="0" marginheight="0" marginwidth="0" bgcolor="white">
-<p align="center"><img src="<?=asset('demo/use/images/title.jpg')?>" width="558" height="114"></p>
+
 
 <body bgcolor="white" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginwidth="0" marginheight="0" class="intd">
+<p align="center"><img src="<?=asset('demo/use/images/title.jpg')?>" width="558" height="114"></p>
 <table cellpadding="3" cellspacing="2" border="0" width="50%" align="center">
 	<tr>
 	  <td class="header1" align="center"><?=$title?></td>
@@ -74,13 +74,5 @@
 		
         
 <?=$child_footer?>
-<script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-</script><script type="text/javascript">
-var pageTracker = _gat._getTracker("UA-3887306-1");
-pageTracker._initData();
-pageTracker._trackPageview();
-</script>
 </body>
 </html>

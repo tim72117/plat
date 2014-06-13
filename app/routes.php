@@ -11,27 +11,6 @@
 |
 */
 /*
-use Illuminate\Auth\Guard as AuthGuard,
-	Illuminate\Auth\EloquentUserProvider,
-	Illuminate\Hashing\BcryptHasher;
-class AdminGuard extends AuthGuard
-{
-	public function getName()
-	{
-		return 'admin_login_'.md5(get_class($this));
-	}
-
-	public function getRecallerName()
-	{
-		return 'admin_remember_'.md5(get_class($this));
-	}
-}
-
-Auth::extend('eloquent.normal', function()
-{	
-    return new AdminGuard(new EloquentUserProvider(new BcryptHasher, 'Normal'), App::make('session.store'));
-});
-
 //Route::group(array('domain' => 'plat.{domain}'), function() {
 
 Route::get('registGCM', function() {
@@ -178,7 +157,7 @@ Route::get('test', function() {
 		Route::get('page/{context}', 'PageController@page');
 		Route::post('page/{context}', 'PageController@page');
 		
-		Route::get('user/auth/logout', 'UserController@platformLogout');
+		Route::get('user/auth/logout', 'UserController@logout');
 		
 		Route::get('user/auth/password/change', array('before' => 'delay', 'uses' => 'UserController@passwordChangePage'));
 		Route::post('user/auth/password/change', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@passwordChange'));		

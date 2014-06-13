@@ -146,13 +146,16 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 	//public $project;
 	
 	public function setProject($project){
-		$this->project = $project;
+        Session::put('user.project', $project);
 	}
+    
+ 	public function getProject(){
+        return Session::get('user.project');
+	}   
 	
 	public function contact() {
 		$instance = new Contact;
-		is_null($this->project) && $this->project = Config::get('demo.project');
-		$instance->setTable('contact_'.$this->project);
+		$instance->setTable('contact_'.$this->getProject());
 		return new HasOne($instance->newQuery(), $this, $instance->getTable().'.id', 'id');
 	}
 	

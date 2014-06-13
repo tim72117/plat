@@ -29,15 +29,15 @@ class PageController extends BaseController {
 			Config::set('database.default', 'sqlsrv');
 			Config::set('database.connections.sqlsrv.database', 'ques_admin');
 			$this->project = Auth::user()->project;
+            Config::set('demo.project', $this->project);
 		});
 	}
 	
 	public function project($context = null) {
-		$project = Auth::user()->project;
 		if( $context==null ){
-			$contents = View::make('demo.'.$project.'.main')->nest('context','demo.'.$project.'.page.intro')->with('request', '');
+			$contents = View::make('demo.'.$this->project.'.main')->nest('context','demo.'.$this->project.'.page.intro')->with('request', '');
 		}else{
-			$contents = View::make('demo.'.$project.'.main')->nest('context','demo.'.$project.'.page.'.$context)->with('request', '');
+			$contents = View::make('demo.'.$this->project.'.main')->nest('context','demo.'.$this->project.'.page.'.$context)->with('request', '');
 		}	
 		$response = Response::make($contents, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');

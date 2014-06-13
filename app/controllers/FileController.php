@@ -17,6 +17,7 @@ class FileController extends BaseController {
 	protected $fileAcitver;
 	protected $csrf_token;
 	protected $dddos_token;
+    protected $project;
 	
 	public function __construct(){
 		$this->dataroot = app_path().'/views/ques/data/';
@@ -29,6 +30,8 @@ class FileController extends BaseController {
 			
 			$this->csrf_token = csrf_token();
 			$this->dddos_token = dddos_token();
+            
+            $this->project = Auth::user()->project;
 		});
 	}
 	
@@ -63,7 +66,7 @@ class FileController extends BaseController {
 			$data_request = '';
 		}
 		
-		$view = View::make('demo.use.main')->nest('context',$view_name)->with('request', $data_request);
+		$view = View::make('demo.'.$this->project.'.main')->nest('context',$view_name)->with('request', $data_request);
 		//$active = $intent['active'];
 		$response = Response::make($view, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');

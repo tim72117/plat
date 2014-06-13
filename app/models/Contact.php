@@ -22,7 +22,7 @@ class Contact extends Eloquent {
 	
 	public $timestamps = true;
 	
-	protected $fillable = array('sch_id', 'department', 'department_class', 'title', 'tel', 'fax', 'email2', 'schpeo', 'senior1', 'senior2', 'tutor', 'parent', 'sname', 'created_by', 'created_ip');
+	protected $fillable = array('active', 'sch_id', 'sname', 'department', 'department_class', 'title', 'tel', 'fax', 'email2', 'created_by', 'created_ip');//, 'schpeo', 'senior1', 'senior2', 'tutor', 'parent'
 	
 	protected $guarded = array('id');
 	
@@ -46,6 +46,13 @@ class Contact extends Eloquent {
 			'fax.max'             => '傳真電話不能超過30個字', 
             'email2.email'        => '電子郵件信箱格式錯誤',	
 	);	
+    
+    public function Contact($attributes = array()) {
+        parent::__construct($attributes);
+        if( Auth::check() ){
+            $this->setTable('contact_'.Auth::user()->getProject());
+        }
+    }
 	
 	public function valid() {		
 		

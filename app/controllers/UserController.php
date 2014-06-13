@@ -38,25 +38,22 @@ class UserController extends BaseController {
 		return View::make('demo.project');
 	}
 	
-	public function platformLogout() {
-		$project = Auth::user()->project;
+	public function logout() {
+		$project = Auth::user()->getProject();
 		Auth::logout();
 		return Redirect::to('user/auth/'.$project);
 	}	
 
 	public function loginPage($project) {
-		$dddos_error = Input::old('dddos_error');
-		$csrf_error = Input::old('csrf_error');
+    
+        if( Auth::check() ){
+            if( Auth::user()->getProject() == $project ) return Redirect::route('project');
+        }
 		
-		Session::flush();
-		Session::start();
-		
-		View::share('dddos_error',$dddos_error);
-		View::share('csrf_error',$csrf_error);
 		$contents = View::make('demo.'.$project.'.home', array('contextFile'=>'login', 'title'=>'使用者登入'))
-			->nest('child_tab','demo.'.$project.'.tabs')
-			->nest('context','demo.login', array('project'=>$project))	
-			->nest('news','demo.'.$project.'.news', array('sql_post'=>array(),'sql_note'=>array()))	
+			->nest('child_tab',   'demo.'.$project.'.tabs')
+			->nest('context',     'demo.login', array('project'=>$project))	
+			->nest('news',        'demo.'.$project.'.news', array('sql_post'=>array(),'sql_note'=>array()))	
 			->nest('child_footer','demo.'.$project.'.footer');		
 		$response = Response::make($contents, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
@@ -66,39 +63,49 @@ class UserController extends BaseController {
 	}
 	
 	public function login() {
-		$input = Input::only('email', 'password', 'project');		
+		$input = Input::only('email', 'password', 'project');
+        
 		$rulls = array(
-			'email' => 'required|email',
+			'email'    => 'required|email',
 			'password' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:3,20',
 			'project'  => 'required|alpha',
 		);
+        
 		$rulls_message = array(
-			'email.required' => '電子郵件必填',
-			'email.email' => '電子郵件格式錯誤',
+			'email.required'    => '電子郵件必填',
+			'email.email'       => '電子郵件格式錯誤',
 			'password.required' => '密碼必填',
-			'password.regex' => '密碼格式錯誤',						
-			'project.required' => '計畫錯誤',			
+			'password.regex'    => '密碼格式錯誤',						
+			'project.required'  => '計畫錯誤',			
 		);
+        
 		$validator = Validator::make($input, $rulls, $rulls_message);
 
 		if( $validator->fails() ){
-			return Redirect::back()->withErrors($validator)->withInput();
+			throw new app\library\files\v0\ValidateException($validator);
 		}
 		
-		$auth_input = Input::only('email', 'password','project');		
+		$auth_input = Input::only('email', 'password', 'project');		
 				
-		if( Auth::validate($auth_input) ){ 	
-			$auth_input['active'] = 1;
-			if( Auth::attempt($auth_input, true) ){
-				return Redirect::route('project');
-				return Redirect::intended('project');
-			}else{
-				$validator->getMessageBag()->add('login_error', '帳號尚未開通');
-				return Redirect::back()->withErrors($validator)->withInput();
-			}			
+		if( Auth::once(array('email'=>$input['email'], 'password'=>$input['password'])) ){     
+            
+            $user = Auth::user();
+            
+            $user->setProject($input['project']);
+            
+            if( $user->active != 1 || is_null($user->contact) || $user->contact->active != 1 ){
+                Auth::logout();
+                $validator->getMessageBag()->add('login_error', '帳號尚未開通');
+                throw new app\library\files\v0\ValidateException($validator);
+            }
+                
+            Auth::login($user, true);
+            
+            return Redirect::route('project');
+			
 		}else{			
 			$validator->getMessageBag()->add('login_error', '帳號密碼錯誤');
-			return Redirect::back()->withErrors($validator)->withInput();
+			throw new app\library\files\v0\ValidateException($validator);
 		}
 		
 	}
@@ -227,28 +234,20 @@ class UserController extends BaseController {
 	public function register($project) {
 	
 		if( Request::isMethod('post') && Session::has('register') ){	
-			$register = require app_path().'\views\demo\\'.$project.'\registerValidator.php';	
-			if( $register->validator()->fails() ){		
-				return Redirect::back()->withErrors($register->validator)->withInput();
+			$user = require app_path().'\views\demo\\'.$project.'\registerValidator.php';
+			if( $user ){			
+				
+                $context =  View::make('demo.'.$project.'.registerPrint', array('user'=>$user))->render();
+                $html2pdf = new HTML2PDF('L', 'A4', 'en', true, 'UTF-8', array(0, 5, 0, 5));
+                $html2pdf->pdf->SetAuthor('國立臺灣師範大學 教育研究與評鑑中心');
+                $html2pdf->pdf->SetTitle('後期中等教育整合資料庫國民中學承辦人員帳號使用權申請表');
+                $html2pdf->setDefaultFont('kaiu');
+                $html2pdf->writeHTML($context, false);
+                return Response::make($html2pdf->Output('register.pdf'), 200, array('content-type'=>'application/pdf'));
+                //$context = '註冊成功';
+                
 			}else{
-				if( $register->save() ){
-					$context =  View::make('demo.'.$project.'.registerPrint', array('user'=>$register->user));	
-					$html2pdf = new HTML2PDF('L', 'A4', 'en', true, 'UTF-8', array(0, 5, 0, 5));
-					$html2pdf->pdf->SetAuthor('國立臺灣師範大學 教育研究與評鑑中心');
-					$html2pdf->pdf->SetTitle('後期中等教育整合資料庫國民中學承辦人員帳號使用權申請表');
-					$html2pdf->setDefaultFont('kaiu');
-					$html2pdf->writeHTML($context, false);
-					return Response::make($html2pdf->Output('register.pdf'), 200, array('content-type'=>'application/pdf'));
-					//$context = '註冊成功';
-				}else{
-					return Redirect::back()->withErrors($register->validator)->withInput();
-				}				
-				/*
-				foreach(DB::getQueryLog() as $queryLog){
-					var_dump($queryLog);
-					echo '<br />';			
-				}
-				*/				
+				return Redirect::back();
 			}
 		}else{
 			Session::flash('register', true);

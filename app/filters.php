@@ -30,6 +30,10 @@ App::error(function(app\library\files\v0\ValidateException $exception) {
 	return Redirect::back()->withErrors($exception->validator)->withInput();
 });
 
+App::error(function(app\library\files\v0\TokenMismatchException $exception) {
+	return Redirect::back()->withErrors($exception->validator)->withInput(Input::except('_token','_token2'));
+});
+
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 App::error(function(ModelNotFoundException $e)
 {
@@ -95,10 +99,12 @@ Route::filter('guest', function()
 
 Route::filter('csrf', function()
 {
-	if (Session::token() != Input::get('_token1'))
+	if (Session::token() != Input::get('_token'))
 	{		
 		//throw new Illuminate\Session\TokenMismatchException;
-		return Redirect::back()->withInput(array('csrf_error'=>true));
+        $messageBag = new Illuminate\Support\MessageBag();
+        $messageBag->add('csrf', '畫面過期1，請重新登入');
+		throw new app\library\files\v0\TokenMismatchException($messageBag);
 	}
 });
 
@@ -111,8 +117,9 @@ Route::filter('dddos', function() {
 		
 	if( Session::get('dddos') != Input::get('_token2') ){
 		//throw new Illuminate\Session\TokenMismatchException;	
-		$input['dddos_error'] = false;
-		return Redirect::back()->withInput($input);
+        $messageBag = new Illuminate\Support\MessageBag();
+        $messageBag->add('dddos', '畫面過期2，請重新登入');
+		throw new app\library\files\v0\TokenMismatchException($messageBag);
 	}
 	Session::forget('dddos');
 	
@@ -131,6 +138,9 @@ Route::filter('dddos', function() {
 	Cache::put($ip, $ip_time, 10);
 
 	$input['dddos_error'] = true;
-	if( $ip_time['block'] )
-		return Redirect::back()->withInput($input);
+	if( $ip_time['block'] ){
+        $messageBag = new Illuminate\Support\MessageBag();
+        $messageBag->add('dddos', '登入次數過多,請等待30秒後再進行登入');
+		throw new app\library\files\v0\TokenMismatchException($messageBag);
+    }
 });
