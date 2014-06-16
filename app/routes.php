@@ -64,11 +64,11 @@ Route::get('test', function() {
 		
 	});
 	
-	Route::get('user/auth/password/remind/{state?}', 'UserController@remindPage');
-	Route::post('user/auth/password/remind', 'UserController@remind');
+	Route::get('auth/password/remind/{project}', 'UserController@remindPage');
+	Route::post('auth/password/remind/{project}', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@remind'));
 	
 	Route::get('user/auth/password/reset/{token}', 'UserController@resetPage');
-	Route::post('user/auth/password/reset/{token}', 'UserController@reset');
+	Route::post('user/auth/password/reset/{token}', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@reset'));
 	
 	
 	

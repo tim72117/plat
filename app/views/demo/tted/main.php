@@ -4,6 +4,7 @@
 <title>師資培育資料庫查詢平台</title>
 
 <script type="text/javascript" src="<?=asset('js/jquery-1.10.2.min.js')?>"></script>
+<script type="text/javascript" src="<?=asset('js/angular.min.js')?>"></script>
 <!--[if lt IE 9]><script src="js/html5shiv.js"></script><![endif]-->
 
 <link href="<?=asset('demo/use/css/use100_content.css')?>" rel="stylesheet" type="text/css" />

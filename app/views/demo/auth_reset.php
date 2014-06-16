@@ -1,4 +1,5 @@
-<form action="" method="post">
+<?=Form::open(array('url' => action('UserController@reset', array($token)), 'method' => 'post'))?>
+    <input type="hidden" name="_token2" value="<?=dddos_token()?>" />
 	<table style="width:300px;margin:0 auto">
 		<tr>
 			<th>電子郵件信箱</th>
@@ -20,4 +21,4 @@
 		</tr>
 
 	</table>	
-</form>
+<?=Form::close()?>

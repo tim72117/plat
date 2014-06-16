@@ -1,4 +1,5 @@
-<form action="<?=action('UserController@remind')?>" method="post">
+<?=Form::open(array('url' => action('UserController@remind', array($project)), 'method' => 'post'))?>
+    <input type="hidden" name="_token2" value="<?=dddos_token()?>" />
 	<table style="width:500px;margin:0 auto">
 		<tr>
 			<th>電子郵件信箱</th>
@@ -11,4 +12,4 @@
 			<td colspan="2" style="text-align:center"><input type="submit" value="送出"></td>
 		</tr>	
 	</table>
-</form>
+<?=Form::close()?>

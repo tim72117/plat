@@ -107,18 +107,13 @@ class UserController extends BaseController {
 		
 	}
 	
-	public function remindPage($state = Null) {
-		if( $state == 'send' ){
-			return View::make('demo.use.home', array('contextFile'=>'login', 'title'=>'重設密碼信件已寄出'))
-				->with('context', '<div style="margin:30px auto;width:300px;color:#f00">重設密碼信件已寄出，請到您的電子郵件信箱收取信件</div>')
-				->nest('child_footer','demo.use.footer');
-		}
-		return View::make('demo.use.home', array('contextFile'=>'remind', 'title'=>'忘記密碼'))
-			->nest('context','demo.remind')
+	public function remindPage($project) {
+		return View::make('demo.'.$project.'.home', array('contextFile'=>'remind', 'title'=>'忘記密碼'))
+			->nest('context','demo.remind', array('project'=>$project))
 			->nest('child_footer','demo.use.footer');
 	}
 
-	public function remind() {
+	public function remind($project) {
 		$credentials = array('email' => Input::get('email'));
 		$response = Password::remind($credentials, function($message) {
 			$message->subject('重設您的查詢平台帳戶密碼');
@@ -128,12 +123,14 @@ class UserController extends BaseController {
 				return Redirect::back()->withErrors(['error' => Lang::get($response)]);
 
 			case Password::REMINDER_SENT:
-				return Redirect::to('user/auth/password/remind/send');
+				return View::make('demo.'.$project.'.home', array('contextFile'=>'remind', 'title'=>'重設密碼信件已寄出'))
+                    ->with('context', '<div style="margin:30px auto;width:300px;color:#f00">重設密碼信件已寄出，請到您的電子郵件信箱收取信件</div>')
+                    ->nest('child_footer','demo.use.footer');
 		}
 	}
 	
 	public function resetPage($token) {
-		return View::make('demo.use.home', array('contextFile'=>'register','title'=>'重設密碼'))
+		return View::make('demo.home', array('contextFile'=>'register','title'=>'重設密碼'))
 			->nest('context', 'demo.auth_reset', array('token'=>$token))
 			->nest('child_footer','demo.use.footer');
 	}
@@ -164,7 +161,7 @@ class UserController extends BaseController {
 
 			$user->save();
 			
-			$project = $user->project;			
+			$project = DB::table('contact')->where('id', $user->id)->first()->project;			
 		});
 	
 		switch ($response){

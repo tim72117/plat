@@ -36,7 +36,7 @@
 			<?
 			echo '<p align="center">';
 			if( $contextFile!='remind' && $contextFile!='register' )
-				echo link_to('user/auth/password/remind', '忘記密碼');
+				echo link_to('auth/password/remind/use', '忘記密碼');
 			echo '</p>';
 			echo '<p align="center">';
 				if( $contextFile!='login' )

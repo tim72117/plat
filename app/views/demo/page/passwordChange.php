@@ -1,5 +1,5 @@
-
 <?=Form::open(array('url' => URL::to('user/auth/password/change'), 'method' => 'post'))?>
+    <input type="hidden" name="_token2" value="<?=dddos_token()?>" />
     <table id="editschool" width="350px" align="left" style="background-color: #fff;border: 1px solid #aaa;text-align: center;margin-left: 20px" border="0">
         <tr bgcolor="#fff">
             <td colspan="2" align="center" style="padding:20px">修改聯絡人密碼</td>
@@ -20,6 +20,5 @@
              <td colspan="2" style="color:red"><?=implode('、',array_filter($errors->all()))?></td>
          </tr>
         <tr><td colspan="2" align="center" height="50"><input type="submit" name="Submit" value="送出"></td></tr>    
-    </table>
-    <input type="hidden" name="_token2" value="<?=dddos_token()?>" />
+    </table>    
 <?=Form::close()?>

@@ -8,9 +8,9 @@ class School extends Eloquent {
 	
 }
 
-class Contact_sch_use extends Eloquent {
+class Work extends Eloquent {
 	
-	protected $table = 'contact_sch_use';
+	protected $table = 'work';
 	
 	public $timestamps = false;
 	
