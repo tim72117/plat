@@ -20,7 +20,6 @@
 			<td colspan="2" style="text-align:center"><input type="submit" value="送出"></td>
 		</tr>	
 	</table>
-	<!--<input type="hidden" name="_token1" value="<?=csrf_token()?>" />-->
 	<input type="hidden" name="_token2" value="<?=dddos_token()?>" />
 	<input type="hidden" name="project" value="<?=$project?>" />
 <?=Form::close()?>

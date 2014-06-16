@@ -10,109 +10,9 @@
 | and give it the Closure to execute when that URI is requested.
 |
 */
-/*
-//Route::group(array('domain' => 'plat.{domain}'), function() {
 
-Route::get('registGCM', function() {
-	phpinfo();
-});
-
-Route::get('sentGCM', function() {
-	exit;
-	echo Form::open(array('url' => 'sentGCM'));
-	echo Form::text('message', '');
-	echo Form::submit('Click Me!');
-	echo Form::close();
-});
-Route::post('sentGCM', function() {
-	exit;
-	$url = 'https://android.googleapis.com/gcm/send';
-	$apiKey = 'AIzaSyDNL87CW-gE2UctY7FlKKaJPgvhFGWnclc';
-	$fields = array('registration_ids'  => array('APA91bHKFB6OE0qROz5ulRZniM7-W7dsvx1QwLJc16CaV3A9E6IVUAilgDXmpWOQxLrO_RJK-45uEjzNVRpJpVpJ2bKuRgRmwxcUQF96VIuC72BWz2MdNxXscAyI1Y2w7gQL4YsJCpReJQobT0UKhE3zxA2Ss-pimg'),
-                    'data'              => array('message' => Input::get('message',''))
-              );
-	$headers = array('Content-Type: application/json',
-                     'Authorization: key='.$apiKey
-               );
-	$ch = curl_init();
-    // Set the url, number of POST vars, POST data
-    curl_setopt( $ch, CURLOPT_URL, $url );
-    curl_setopt( $ch, CURLOPT_POST, true );
-	curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, FALSE); 
-    curl_setopt( $ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-    curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode($fields));
- 
-    // 送出 post, 並接收回應, 存入 $result	
-    $result = curl_exec($ch);
-	var_dump($result);	
-	curl_close($ch);
-});
-*/
-Route::get('test', function() {
-	
+Route::get('test', function() {	
 	return;
-
-	
-	$file_path = storage_path(). '/temp/par_20140530_05-10/';
-	//$files_name = scandir( $file_path );
-	$files_name = array();
-	if( $handle = opendir( $file_path ) ) {
-		while (false !== ($file = readdir($handle))) {
-			if( $file != '.' && $file != '..' ) {
-				$filemtime = filemtime($file_path.$file);
-				$modified = date("Y-m-d H:i:s", $filemtime);
-				$files_name[$modified.' --- '.$file] = $file;
-			}
-		}		
-		closedir($handle);
-	}
-	
-	ksort($files_name);
-	$index = 1;
-	foreach($files_name as $date => $file_name){
-		if( $file_name!='.' && $file_name!='..' ){
-			$file = File::get( $file_path.$file_name );
-			$lines = explode('}', $file);		
-			
-			echo '--'.$index.'    ----   '.$date.' ----- ';
-			//echo $lines[count($lines)-2].'}';
-			$last_line = json_decode($lines[count($lines)-2].'}');
-			echo $last_line->page;
-			if( $last_line->page!='17' )
-				echo '          ----------------';
-			
-
-			$newcid = explode('.', $file_name)[0];
-			
-			echo '<br />';
-			//echo "insert into ntcse103par_pstat (page,newcid,ques,grade,sch_id,tStamp) values (".($last_line->page+1).", '".$newcid."', 'Na', 'N', '999999', '".substr($last_line->stime.($last_line->page+1), 0, 15)."')";
-			echo "update ntcse103par_pstat set page = ".($last_line->page+1)." where newcid = '".$newcid."'";
-			$index++;
-			echo '<br />';
-			echo '<br />';
-			echo '<br />';
-		}
-	}
-	exit;
-	
-	
-	
-	exit;
-	//$project = 'use';
-	//$ex = new COM("Excel.Application", NULL, CP_UTF8) or Die ("Did not instantiate Excel");
-	//$Workbook = $ex->Workbooks->Open('C:/AppServ/www/1.xls');
-	//$Worksheet = $Workbook->Worksheets(1);
-	
-	$reader = PHPExcel_IOFactory::load('C:/AppServ/www/99p.xlsx');
-	$workSheet = $reader->getActiveSheet();
-	foreach ($workSheet->getRowIterator() as $row) {
-		$cellIterator = $row->getCellIterator();
-		$cellIterator->setIterateOnlyExistingCells(false);
-		foreach ($cellIterator as $cell){
-			echo $cell->getValue();
-		}
-	}
 });
 
 	//平台-------------------------------------------------------------------------------------------------------------------------------
@@ -151,8 +51,8 @@ Route::get('test', function() {
 		Route::any('user/doc/{intent_key}', 'FileController@fileActiver');	
 		//Route::post('user/doc/upload/{content}', array('before' => 'delay|csrf|dddos', 'uses' => 'FileController@upload'));
 		
-		Route::get('page/project/{context?}', array('as' => 'project', 'before' => '', 'uses' => 'PageController@project'));
-		Route::post('page/project/{context?}', array('before' => '', 'uses' => 'PageController@project'));
+		Route::get('page/project/{context?}', array('before' => '', 'as' => 'project', 'uses' => 'PageController@project'));
+		Route::post('page/project/{context?}', array('before' => 'csrf', 'uses' => 'PageController@project'));
 		
 		Route::get('page/{context}', 'PageController@page');
 		Route::post('page/{context}', 'PageController@page');
@@ -192,8 +92,6 @@ Route::get('test', function() {
 	//編輯器-------------------------------------------------------------------------------------------------------------------------------
 	Route::post('editor/save/analysis/{root}', array('before' => 'login', 'uses' => 'EditorController@saveAnalysis'));
 
-
-
 	
 
 	Route::get('{root}/creatTable', array('before' => 'folder_ques|loginAdmin', 'uses' => 'QuesCreaterController@creatTable'))->where('root', '[a-z0-9_]+');
@@ -203,19 +101,7 @@ Route::get('test', function() {
 	Route::get('{root}/updatetime', array('before' => 'folder_ques|loginPublic', 'uses' => 'ViewerController@updatetime'))->where('root', '[a-z0-9_]+');
 	//編輯器-------------------------------------------------------------------------------------------------------------------------------
 	
-//});//domain
-
-	/*
-Route::filter('auth_logined_normal', function($route) {
-	Config::set('database.default', 'sqlsrv');
-	Config::set('database.connections.sqlsrv.database', 'ques_admin');
-	Config::set('auth.table', 'users_normal');
-	Config::set('auth.driver', 'eloquent.normal');
-	Config::set('auth.model', 'Normal');
-	if( Auth::guest() )
-		return Redirect::to('user/auth/project');
-});
-	 */
+    
 
 Route::filter('auth_logined', function($route) {
 	if( Auth::guest() )

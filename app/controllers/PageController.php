@@ -28,8 +28,7 @@ class PageController extends BaseController {
 			$this->config = Config::get('ques::setting');
 			Config::set('database.default', 'sqlsrv');
 			Config::set('database.connections.sqlsrv.database', 'ques_admin');
-			$this->project = Auth::user()->project;
-            Config::set('demo.project', $this->project);
+			$this->project = Auth::user()->getProject();
 		});
 	}
 	

@@ -22,7 +22,7 @@ class Contact extends Eloquent {
 	
 	public $timestamps = true;
 	
-	protected $fillable = array('active', 'sch_id', 'sname', 'department', 'department_class', 'title', 'tel', 'fax', 'email2', 'created_by', 'created_ip');//, 'schpeo', 'senior1', 'senior2', 'tutor', 'parent'
+	protected $fillable = array('project', 'active', 'department', 'title', 'tel', 'fax', 'email2', 'created_by', 'created_ip');//, 'sch_id', 'sname', 'department_class', 'schpeo', 'senior1', 'senior2', 'tutor', 'parent'
 	
 	protected $guarded = array('id');
 	
@@ -50,7 +50,7 @@ class Contact extends Eloquent {
     public function Contact($attributes = array()) {
         parent::__construct($attributes);
         if( Auth::check() ){
-            $this->setTable('contact_'.Auth::user()->getProject());
+            //$this->setTable('contact_'.Auth::user()->getProject());
         }
     }
 	

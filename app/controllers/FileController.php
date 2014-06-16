@@ -31,7 +31,7 @@ class FileController extends BaseController {
 			$this->csrf_token = csrf_token();
 			$this->dddos_token = dddos_token();
             
-            $this->project = Auth::user()->project;
+            $this->project = Auth::user()->getProject();
 		});
 	}
 	
@@ -157,9 +157,9 @@ class FileController extends BaseController {
 		}
 		
 		if( $preparers->count() > 0 ){
-			/*/
-			//| 停止請求
-			/*/
+			/*
+			| 停止請求
+			*/
 			$html .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_end'), 'files' => true));	
 			foreach($preparers as $preparer){	
 				$html .= Form::checkbox('doc[]', $preparer->preparer_doc_id, true);

@@ -45,7 +45,7 @@ class UserController extends BaseController {
 	}	
 
 	public function loginPage($project) {
-    
+
         if( Auth::check() ){
             if( Auth::user()->getProject() == $project ) return Redirect::route('project');
         }
@@ -53,7 +53,7 @@ class UserController extends BaseController {
 		$contents = View::make('demo.'.$project.'.home', array('contextFile'=>'login', 'title'=>'使用者登入'))
 			->nest('child_tab',   'demo.'.$project.'.tabs')
 			->nest('context',     'demo.login', array('project'=>$project))	
-			->nest('news',        'demo.'.$project.'.news', array('sql_post'=>array(),'sql_note'=>array()))	
+			->nest('news',        'demo.'.$project.'.news')	
 			->nest('child_footer','demo.'.$project.'.footer');		
 		$response = Response::make($contents, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
@@ -83,9 +83,7 @@ class UserController extends BaseController {
 
 		if( $validator->fails() ){
 			throw new app\library\files\v0\ValidateException($validator);
-		}
-		
-		$auth_input = Input::only('email', 'password', 'project');		
+		}		
 				
 		if( Auth::once(array('email'=>$input['email'], 'password'=>$input['password'])) ){     
             
@@ -94,7 +92,6 @@ class UserController extends BaseController {
             $user->setProject($input['project']);
             
             if( $user->active != 1 || is_null($user->contact) || $user->contact->active != 1 ){
-                Auth::logout();
                 $validator->getMessageBag()->add('login_error', '帳號尚未開通');
                 throw new app\library\files\v0\ValidateException($validator);
             }
@@ -136,7 +133,7 @@ class UserController extends BaseController {
 	}
 	
 	public function resetPage($token) {
-		return View::make('demo.use.home', array('sql_post'=>array(),'sql_note'=>array(), 'contextFile'=>'register','title'=>'重設密碼'))
+		return View::make('demo.use.home', array('contextFile'=>'register','title'=>'重設密碼'))
 			->nest('context', 'demo.auth_reset', array('token'=>$token))
 			->nest('child_footer','demo.use.footer');
 	}
@@ -182,11 +179,7 @@ class UserController extends BaseController {
 	}
 	
 	public function passwordChangePage() {
-		$project = Auth::user()->project;
-		$dddos_error = Input::old('dddos_error');
-		$csrf_error = Input::old('csrf_error');
-		View::share('dddos_error',$dddos_error);
-		View::share('csrf_error',$csrf_error);
+		$project = Auth::user()->getProject();
 		$contents = View::make('demo.'.$project.'.main')
 			->with('request', '')
 			->nest('context','demo.page.passwordChange');
@@ -200,18 +193,18 @@ class UserController extends BaseController {
 	public function passwordChange() {		
 		$input = Input::only('passwordold', 'password', 'password_confirmation');
 		$rulls = array(
-			'passwordold' => $this->auth_rull['password'],
-			'password' => $this->auth_rull['password_confirmation'],
+			'passwordold'            => $this->auth_rull['password'],
+			'password'               => $this->auth_rull['password_confirmation'],
 			'password_confirmation'  => $this->auth_rull['password'],
 		);
 		$rulls_message = array(
 			'passwordold.required' => '舊密碼必填',
-			'passwordold.regex' => '舊密碼格式錯誤',
-			'password.required' => '新密碼必填',
-			'password.regex' => '新密碼格式錯誤',
+			'passwordold.regex'    => '舊密碼格式錯誤',
+			'password.required'    => '新密碼必填',
+			'password.regex'       => '新密碼格式錯誤',
 			'password_confirmation.required' => '確認新密碼必填',	
-			'password_confirmation.regex' => '確認新密碼格式錯誤',
-			'password.confirmed' => '確認新密碼必須相同',	
+			'password_confirmation.regex'    => '確認新密碼格式錯誤',
+			'password.confirmed'             => '確認新密碼必須相同',	
 		);
 		$validator = Validator::make($input, $rulls, $rulls_message);
 		
@@ -254,10 +247,9 @@ class UserController extends BaseController {
 			$context =  View::make('demo.'.$project.'.register');			
 		}
 		
-		$contents = View::make('demo.'.$project.'.home', array('sql_post'=>array(),'sql_note'=>array(), 'contextFile'=>'register','title'=>'註冊帳號'))
+		$contents = View::make('demo.'.$project.'.home', array('contextFile'=>'register','title'=>'註冊帳號'))
 			->with('context', $context)
-			->nest('child_tab','demo.'.$project.'.tabs')
-			//->nest('context', $context, array('project'=>$project))				
+			->nest('child_tab','demo.'.$project.'.tabs')			
 			->nest('child_footer','demo.'.$project.'.footer');		
 		
 		$response = Response::make($contents, 200);

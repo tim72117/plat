@@ -134,6 +134,14 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 
 	
 	public $fileProvider;
+    
+ 	public function getProject(){
+        return Session::get('user.project');
+	}   
+	
+	public function setProject($project){
+        Session::put('user.project', $project);
+	}
 	
 	public function get_file_provider() {
 		$this->fileProvider = new FileProvider();
@@ -142,23 +150,11 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 	public function docsHasRequester() {
 		return $this->hasMany('VirtualFile', 'user_id');//->has('requester','=',0);
 	}
-	
-	//public $project;
-	
-	public function setProject($project){
-        Session::put('user.project', $project);
+
+	public function contact() {
+		return $this->hasOne('Contact', 'user_id', 'id')->where('contact.project',$this->getProject());
 	}
     
- 	public function getProject(){
-        return Session::get('user.project');
-	}   
-	
-	public function contact() {
-		$instance = new Contact;
-		$instance->setTable('contact_'.$this->getProject());
-		return new HasOne($instance->newQuery(), $this, $instance->getTable().'.id', 'id');
-	}
-	
 	public function schools() {
 		//return $this->hasMany('Contact_sch_use','user_id','id');
 		return $this->belongsToMany('School', 'Contact_sch_use', 'user_id', 'sch_id');
