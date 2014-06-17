@@ -52,10 +52,12 @@
 <?
 Config::set('demo.project', 'use');
 
-$group = Cache::remember('sch_profile.group', 10, function() {
-    return Group::with(array('users.contact'=>function($query){
-        return $query->select('id','title','tel','fax');//,'schpeo','senior1','senior2','tutor','parent');
-    }),'users.schools')->find(1);
+$group = Cache::remember('sch_profile.group25', 10, function() {
+    return Group::with(array(
+        'users.contact' => function($query){
+            return $query->select('id', 'title', 'tel', 'fax');//,'schpeo','senior1','senior2','tutor','parent');
+        },
+        'users.schools'))->find(1);
 });
 
 $users = $group->users->map(function($user){    
