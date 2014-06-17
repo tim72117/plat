@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html xmlns:ng="http://angularjs.org" ng-app>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>後期中等教育資料庫查詢平台</title>
@@ -10,30 +11,27 @@
 <link href="<?=asset('demo/use/css/use100_content.css')?>" rel="stylesheet" type="text/css" />
 
 <script type="text/javascript">
- 	$(document).ready(function(){	//選單功能
-		$('a').click(function(){
-			//$("#pageLoad").load($(this).attr("href"));
-			// Prevent browsers default behavior to follow the link when clicked
-			//return false;
-		});
-		$('#pageLoad').on('click','.pagebtn',function(){
-			$("#pageLoad").load($(this).attr("src"));
-		});
-		$('.queryLogBtn').click(function(){
-			$('.queryLog').height('50%');
-		});
-		$('.context').click(function(){
-			$('.queryLog').height(0);
-		});
+$(document).ready(function(){	//選單功能
 
-        $('.shareBtn').click(function(){
-            if( $('.share').css('left')=='0px' ){
-                $('.share').animate({left:-501}); 
-            }else{
-                $('.share').animate({left:0}); 
-            }
-		});
-  	});
+    $('.queryLogBtn').click(function(){
+        if( $('.queryLog').css('height')==='0px' ){
+            $('.queryLog').animate({height: '50%'}); 
+        }else{            
+            $('.queryLog').animate({height: '0%'}); 
+        }
+    });
+    $('.context').click(function(){
+        $('.queryLog').height(0);
+    });
+
+    $('.shareBtn').click(function(){
+        if( $('.share').css('left')==='0px' ){
+            $('.share').animate({left: -501}); 
+        }else{
+            $('.share').animate({left: 0}); 
+        }
+    });
+});
 </script>
 
 
@@ -104,16 +102,16 @@
 			</div>
 		</div>
 
-		<div style="height: 100%;overflow-y: hidden;margin:0 0 0 200px" class="context">
-			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:16px;text-align: left;margin-top:0; position:  relative">			
-                
-                <div><?=$context?></div>
-                
-                <div style="width:500px;position: absolute;top:0;background-color: #fff;border-right: 1px solid #ddd;height: 100%;left:-501px;font-size:16px;overflow: auto" class="share">
-                    <div style="margin:10px"><?=$request?></div>
-                </div>
-	
-			</div>			
+		<div style="height: 100%;overflow-y: hidden;margin:0 0 0 200px; position: relative" class="context">
+            
+            <div style="width:500px;position: absolute;top:0;background-color: #fff;border-right: 1px solid #ddd;height: 100%;left:-501px;font-size:16px;overflow: auto" class="share">
+                <div style="margin:10px"><?=$request?></div>
+            </div>
+            
+			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:16px;text-align: left;margin-top:0">		              
+                <div style="margin:10px"><?=$context?></div>
+			</div>		
+            
 		</div>
 		
 		<div class="queryLog" style="position: absolute;bottom:0;height:0;width:100%;background-color: #fff;overflow-y: scroll;border-top:1px solid #000">			

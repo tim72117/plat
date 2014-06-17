@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html xmlns:ng="http://angularjs.org" ng-app>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>師資培育資料庫查詢平台</title>
@@ -101,16 +102,16 @@ $(document).ready(function(){	//選單功能
 			</div>
 		</div>
 
-		<div style="height: 100%;overflow-y: hidden;margin:0 0 0 200px" class="context">
-			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:16px;text-align: left;margin-top:0; position:  relative">			
-                
-                <div><?=$context?></div>
-                
-                <div style="width:500px;position: absolute;top:0;background-color: #fff;border-right: 1px solid #ddd;height: 100%;left:-501px;font-size:16px;overflow: auto" class="share">
-                    <div style="margin:10px"><?=$request?></div>
-                </div>
-	
-			</div>			
+		<div style="height: 100%;overflow-y: hidden;margin:0 0 0 200px; position: relative" class="context">
+            
+            <div style="width:500px;position: absolute;top:0;background-color: #fff;border-right: 1px solid #ddd;height: 100%;left:-501px;font-size:16px;overflow: auto" class="share">
+                <div style="margin:10px"><?=$request?></div>
+            </div>
+            
+			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:16px;text-align: left;margin-top:0">		              
+                <div style="margin:10px"><?=$context?></div>
+			</div>		
+            
 		</div>
 		
 		<div class="queryLog" style="position: absolute;bottom:0;height:0;width:100%;background-color: #fff;overflow-y: scroll;border-top:1px solid #000">			
