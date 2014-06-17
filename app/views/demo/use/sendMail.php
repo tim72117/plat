@@ -9,7 +9,7 @@ $users = DB::table('contact')
 		//->leftJoin('password_reminders','users.email','=','password_reminders.email')
 		//->whereNull('password_reminders.email')
 		->where('contact.project','=','use')
-        ->whereIn('users.email',array('ssvs220@mail.ssvs.tp.edu.tw','hanawu@mail.dlit.edu.tw'))		
+        ->whereIn('users.email',array('luks@ylsh.mlc.edu.tw'))		
         ->select('users.email','contact.sname')
 		->get();
 

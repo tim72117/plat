@@ -1,4 +1,3 @@
-
 <style>
 .sch-profile td {
     border-bottom: 1px solid #999;
@@ -26,14 +25,7 @@
         <th>開通</th>
 		<th>email</th>
         <th>職稱</th>
-        <th width="150">電話</th>
-        <th width="100">傳真</th>
-        <th width="30">學校人員</th>
-        <th width="30">高一、專一新生</th>
-        <th width="30">高二、專一學生</th>
-        <th width="30">高二、專二導師</th>
-        <th width="30">高二、專二家長</th>
-        
+        <th width="20" ng-repeat="group in groups">{{group.name}}</th>
     </tr>
     <tr ng-repeat="user in users | orderBy:predicate:reverse | filter:{schools:searchText}">
         <td>{{user.id | number}}</td>        
@@ -42,13 +34,7 @@
         <td>{{user.active}}</td>	
 		<td>{{user.email}}</td>
         <td>{{user.title}}</td>
-        <td>{{user.tel}}</td>
-        <td>{{user.fax}}</td>
-        <!--<td>{{user.schpeo}}</td>
-        <td>{{user.senior1}}</td>
-        <td>{{user.senior2}}</td>
-        <td>{{user.tutor}}</td>
-        <td>{{user.parent}}</td>-->
+        <td ng-repeat="group in groups"><input type="checkbox" /></td>
     </tr>
     
 <?
@@ -56,7 +42,7 @@ Config::set('demo.project', 'use');
 
 
 
-$group = Cache::remember('sch_profile.group00tt', 10, function() {
+$group = Cache::remember('sch_profile.group9999', 10, function() {
     return Group::with(array(
         'users.contact' => function($query){
             return $query->select('id', 'user_id', 'title', 'tel', 'fax');//,'schpeo','senior1','senior2','tutor','parent');
@@ -76,13 +62,10 @@ $users = $group->users->map(function($user){
         'title'   => array_get($user->contact, 'title'),
         'tel'     => array_get($user->contact, 'tel'),
         'fax'     => array_get($user->contact, 'fax'),
-        //'schpeo'  => array_get($user->contact, 'schpeo'),
-        //'senior1' => array_get($user->contact, 'senior1'),
-        //'senior2' => array_get($user->contact, 'senior2'),
-        //'tutor'   => array_get($user->contact, 'tutor'),
-        //'parent'  => array_get($user->contact, 'parent'),
     );   
 })->toJSON();
+
+$groups = Group::all()->toArray();
 
 $fileProvider = app\library\files\v0\FileProvider::make();
 ?>
@@ -95,6 +78,7 @@ $fileProvider = app\library\files\v0\FileProvider::make();
 <script>
 function Ctrl($scope) {
     $scope.users = angular.fromJson(<?=json_encode($users)?>);
+    $scope.groups = angular.fromJson(<?=json_encode($groups)?>);
     $scope.predicate = 'id';
 }
 </script>
