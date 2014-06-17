@@ -1,30 +1,21 @@
 <?php
 
 
-Config::set('demo.project', 'use');
-
-/*
-$group = Group::with(array('users' => function($query){
-		return $query->where('users.id', '=', 1);//->where('users.project', 'use');
-	}
-))->where('id', 3)->first();
-$users = $group->users;
-*/
 
 set_time_limit(0);
 
-$users = DB::table('users')
-		->leftJoin('contact_use','users.id','=','contact_use.id')
-		->leftJoin('password_reminders','users.email','=','password_reminders.email')
-		->where('users.email','=','ericeyogo@shute.kh.edu.tw')
-		->whereNull('password_reminders.email')
-		//->where('users.password','=','')
-        ->select('users.email','contact_use.sname')
+$users = DB::table('contact')
+		->leftJoin('users','users.id','=','contact.user_id')
+		//->leftJoin('password_reminders','users.email','=','password_reminders.email')
+		//->whereNull('password_reminders.email')
+		->where('contact.project','=','use')
+        ->whereIn('users.email',array('ssvs220@mail.ssvs.tp.edu.tw','hanawu@mail.dlit.edu.tw'))		
+        ->select('users.email','contact.sname')
 		->get();
 
 foreach($users as $index => $user){
 	
-	echo $index.' - '.$user->email.'<br />';
+	echo 'start: '.$index.' - '.$user->email.'<br />';
 	echo $user->sname.'<br />';
 	
 	$credentials = array('email' => $user->email);
@@ -32,9 +23,11 @@ foreach($users as $index => $user){
 	Config::set('auth.reminder.email', 'emails.auth.reminder_use_reset');
 	
 	if( false )
-	Password::remind($credentials, function($message){
+	echo Password::remind($credentials, function($message){
         $message->subject('重新設定後期中等教育資料庫查詢平台密碼');
     });
+    
+    echo 'finish<br />';
 }
 
 

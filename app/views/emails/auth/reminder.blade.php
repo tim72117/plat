@@ -10,6 +10,9 @@
 			要重設密碼，只需點擊下方連結。此連結會帶你前往一個可以讓你建立新密碼的網頁
 			<br />
 			{{ link_to('user/auth/password/reset/'.$token, '重設您的密碼>', array(), $secure = true) }}
+            <br />
+            <br />
+            {{ URL::to('user/auth/password/reset/'.$token) }}
 		</div>
 		
 		<br />

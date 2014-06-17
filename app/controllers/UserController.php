@@ -227,21 +227,28 @@ class UserController extends BaseController {
 			$user = require app_path().'\views\demo\\'.$project.'\registerValidator.php';
 			if( $user ){			
 				
-                $context =  View::make('demo.'.$project.'.registerPrint', array('user'=>$user))->render();
-                $html2pdf = new HTML2PDF('L', 'A4', 'en', true, 'UTF-8', array(0, 5, 0, 5));
-                $html2pdf->pdf->SetAuthor('國立臺灣師範大學 教育研究與評鑑中心');
-                $html2pdf->pdf->SetTitle('後期中等教育整合資料庫國民中學承辦人員帳號使用權申請表');
-                $html2pdf->setDefaultFont('kaiu');
-                $html2pdf->writeHTML($context, false);
-                return Response::make($html2pdf->Output('register.pdf'), 200, array('content-type'=>'application/pdf'));
-                //$context = '註冊成功';
+                //$context =  View::make('demo.'.$project.'.registerPrint', array('user'=>$user))->render();
+                //$html2pdf = new HTML2PDF('L', 'A4', 'en', true, 'UTF-8', array(0, 5, 0, 5));
+                //$html2pdf->pdf->SetAuthor('國立臺灣師範大學 教育研究與評鑑中心');
+                //$html2pdf->pdf->SetTitle('後期中等教育整合資料庫國民中學承辦人員帳號使用權申請表');
+                //$html2pdf->setDefaultFont('kaiu');
+                //$html2pdf->writeHTML($context, false);
+                //return Response::make($html2pdf->Output('register.pdf'), 200, array('content-type'=>'application/pdf'));
+                $context = '註冊成功'.'   <a href="'.asset('files/CERE-ISMS-D-031_查詢平台帳號使用權申請、變更、註銷表_v2.0(1030305修定).pdf').'">下載申請表</a><br />';;
+                //$file = new app\library\files\v0\CommFile(508);
+                //$file_fullPath = $file->download(true);
+                //return call_user_func_array('Response::download', $file_fullPath);	
                 
 			}else{
 				return Redirect::back();
 			}
 		}else{
 			Session::flash('register', true);
-			$context =  View::make('demo.'.$project.'.register');			
+            if( $project=='use' ){
+                $context =  View::make('demo.'.$project.'.register');		
+            }else{
+                $context =  View::make('demo.'.$project.'.register_stop');	
+            }
 		}
 		
 		$contents = View::make('demo.'.$project.'.home', array('contextFile'=>'register','title'=>'註冊帳號'))

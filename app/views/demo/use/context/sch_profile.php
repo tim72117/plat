@@ -52,7 +52,9 @@
 <?
 Config::set('demo.project', 'use');
 
-$group = Cache::remember('sch_profile.group25', 10, function() {
+
+
+$group = Cache::remember('sch_profile.group51', 10, function() {
     return Group::with(array(
         'users.contact' => function($query){
             return $query->select('id', 'title', 'tel', 'fax');//,'schpeo','senior1','senior2','tutor','parent');
@@ -77,50 +79,7 @@ $users = $group->users->map(function($user){
     );   
 })->toJSON();
 
-
-
-if( false )
-foreach($group->users as $user){
-    
-    $users['id']      = $user->id;
-    
-    if( !is_null($user->contact) ){
-        $users['title']   = $user->contact->title;
-        $users['tel']     = $user->contact->tel;
-        $users['fax']     = $user->contact->fax;
-        $users['schpeo']  = $user->contact->schpeo;
-        $users['senior1'] = $user->contact->senior1;
-        $users['senior2'] = $user->contact->senior2;
-        $users['parent']  = $user->contact->parent;
-    }
-    
-    echo '<tr>';
-    echo '<td>'.$user->id.'</td>';
-    echo '<td>';
-    foreach($user->schools as $school){
-        echo $school->sname;
-    }
-    echo '</td>';
-    echo '<td>'.$user->username.'</td>';
-    
-    if( !is_null($user->contact) ){
-
-    echo '<td>'.$user->contact->title.'</td>';
-    echo '<td>'.$user->contact->tel.'</td>';
-    echo '<td>'.$user->contact->fax.'</td>';
-    echo '<td>'.$user->contact->schpeo.'</td>';
-    echo '<td>'.$user->contact->senior1.'</td>';
-    echo '<td>'.$user->contact->senior2.'</td>';
-    echo '<td>'.$user->contact->tutor.'</td>';
-    echo '<td>'.$user->contact->parent.'</td>';
-        
-    }else{
-        echo '<td colspan="8"></td>';
-    }
-
-    echo '</tr>';
-
-}
+$fileProvider = app\library\files\v0\FileProvider::make();
 ?>
 
     

@@ -49,24 +49,18 @@ $user = new User;
 $user->username    = $input['name'];
 $user->email       = $input['email'];
 
+
+
 $contact = new Contact(array(
-    'active'           => 0,
-    'sch_id'           => $input['sch_id'],
+    'project'          => 'use',    
+    'active'           => 0,    
     'sname'            => School::find($input['sch_id'])->sname,    
     'department'       => $input['department'],
-    'department_class' => $input['department_class'],
     'title'            => $input['title'],
     'tel'              => $input['tel'],
     'fax'              => $input['fax'],
-    'schpeo'           => Input::get('operational.schpeo', '0'),
-    'senior1'          => Input::get('operational.senior1','0'),
-    'senior2'          => Input::get('operational.senior2','0'),
-    'tutor'            => Input::get('operational.tutor',  '0'),
-    'parent'           => Input::get('operational.parent', '0'),
     'created_ip'       => Request::getClientIp(),
 ));		
-
-$contact->setTable('contact_use');	
 
 $user->valid();
 
@@ -78,7 +72,14 @@ $user->setProject('use');
 
 $contact = $user->contact()->save($contact);
 
-$user->schools()->attach($input['sch_id']);		
+$user->schools()->attach($input['sch_id'],array(
+    'department_class' => $input['department_class'],
+    'schpeo'           => Input::get('operational.schpeo', '0'),
+    'senior1'          => Input::get('operational.senior1','0'),
+    'senior2'          => Input::get('operational.senior2','0'),
+    'tutor'            => Input::get('operational.tutor',  '0'),
+    'parent'           => Input::get('operational.parent', '0'),
+));		
 
 if( is_null($contact->getKey()) ){
 
