@@ -36,20 +36,11 @@ class CustomFile extends CommFile {
 	 */	
 	public function import() {		
 		
-		$id_doc_new = $this->upload(false);	
-		$intent_key = Request::segment(3);
-
-		$returner = Redirect::to('user/doc/'.Input::get('intent_key'));
+		$doc_id_new = $this->upload(false);	
 		
-		if( $id_doc_new && is_numeric($id_doc_new) ){
-			Session::flash('upload_file_id', $id_doc_new);		
-		}
+        Session::flash('upload_file_id', $doc_id_new);		
 		
-		if( is_object($id_doc_new) && get_class($id_doc_new)=='Illuminate\Validation\Validator' ){
-			$returner->withErrors($id_doc_new);
-		}		
-		
-		return Redirect::to('user/doc/'.Input::get('intent_key'));	
+        return Redirect::back();
 
 	}
 	

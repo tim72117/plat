@@ -9,9 +9,15 @@ class FileActiver {
 	public $file_list;
 	public $intent_key;
 	public $file_id;
+    
+    public static function active($intent_key) {
+        
+        $intent = Session::get('file')[$intent_key];
+        
+        return $intent;        
+    }
 	
-	public function accept($intent_key) {
-		
+	public function accept($intent_key) {	
 		
 			
 		$this->intent_key = $intent_key;
@@ -21,15 +27,12 @@ class FileActiver {
 		
 		if( is_null($this->file_id) && $active=='upload' ){
 			$file = new $intent['fileClass']($this->file_id);
+            
 			$file_id = $file->$active(true);
-			if( $file_id && is_numeric($file_id) ){
-				Session::flash('upload_file_id', $file_id);		
-			}
-			$returner = Redirect::to('page/upload');
-			if( is_object($file_id) && get_class($file_id)=='Illuminate\Validation\Validator' ){
-				$returner->withErrors($file_id);
-			}	
-			return $returner;	
+			
+			Session::flash('upload_file_id', $file_id);		
+
+			return Redirect::back();
 		}
 		
 		if( $active=='download' ){
