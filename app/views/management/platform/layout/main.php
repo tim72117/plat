@@ -491,7 +491,7 @@ a.button {
 	
 </div>
 
-<div style="width:55px;height:100%;background-color: #000;border-right: 1px solid #333;position:fixed;z-index:200">
+<div style="width:55px;height:100%;background-color: #000;border-right: 1px solid #333;position:fixed;z-index:200;display:none">
 	
 	<div style="height:80px"></div>
 	<div class="button folder" style="background-size: 48px 48px;background-repeat: no-repeat;background-image: url(images/folder_sticker.png);width:48px;height:48px"></div>
@@ -623,7 +623,7 @@ a.button {
 	
 </div>	
 -->	
-	<div id="uploadbox" style="width:200px;height:200px;padding:2px;position: absolute;background-color: #fff;left:1px;bottom:1px;border: 1px solid #aaa;z-index:10;display:none"><button>上傳</button></div>
+	<div id="uploadbox" style="width:200px;height:200px;padding:2px;position: absolute;background-color: #fff;left:1px;bottom:1px;border: 1px solid #aaa;z-index:20;"><button>上傳</button></div>
 
 	
 </body>

@@ -32,12 +32,57 @@ class ViewerController extends BaseController {
 		return View::make('management.ques.codebook')->nest('child_tab','management.tabs',array('pagename'=>'index'));
 	}
 	
+	public function spss() {
+		View::share('config',$this->config);
+		return View::make('management.ques.spss')->nest('child_tab','management.tabs',array('pagename'=>'index'));
+	}
+	
 	public function updatetime() {
 		$newpage = new app\library\page;		
 		$newpage->root = $this->dataroot.$this->root;
 		$newpage->init($this->config);
 		return Response::json(array('changetime'=>(string)$newpage->pageinfo->changetime,'databasetime'=>(string)$newpage->pageinfo->databasetime));
 	}	
+	
+	public function report() {
+		Config::set('database.default', 'sqlsrv');
+		Config::set('database.connections.sqlsrv.database', 'ques_admin');
+		$reports = DB::table('report')->where('root', $this->root)->select('id','contact','text','explorer','solve','time')->orderBy('time','desc')->get();
+		$out = '';
+		foreach($reports as $report){
+			$out .= '<tr>';
+			$out .= '<td>'.$report->time.'</td>';
+			$out .= '<td>'.strip_tags($report->contact).'</td>';
+			$out .= '<td>'.strip_tags($report->text).'</td>';			
+			$out .= '<td align="center">'.Form::checkbox('solve', $report->id, $report->solve, array('class'=>'solve')).'</td>';
+			$out .= '<td>'.$report->explorer.'</td>';
+			$out .= '</tr>';
+		}
+		return View::make('management.ques.layout.main', array(
+			'reports' => $out
+		))->nest('child_tab','management.tabs',array('pagename'=>'index'));		
+	}
+	
+	public function report_solve() {
+		Config::set('database.default', 'sqlsrv');
+		Config::set('database.connections.sqlsrv.database', 'ques_admin');
+		$input = Input::only('id','checked');
+		$rulls = array(
+			'id' => 'required|integer',
+			'checked' => 'required|in:true,false',			
+		);
+		$validator = Validator::make($input, $rulls);
+	
+		if( $validator->fails() ){
+			return '';
+		}
+		$solve = DB::table('report')->where('id', $input['id'])->update(array('solve'=>$input['checked']));
+		if( $solve ){
+			return $input['checked'];
+		}else{
+			return '';
+		}		
+	}
 	
 	public function sharePage($root,$page) {
 		View::share('config',$this->config);

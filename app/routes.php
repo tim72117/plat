@@ -11,20 +11,12 @@
 |
 */
 
-
-
-//Route::group(array('domain' => 'plat.{domain}'), function() {
-
-	Route::get('test', function() {
-		return View::make('tr_qtree', array('auth'=>'empty', 'root'=>''));
-	});
+Route::get('test', function() {	
+	return;
+});
 
 	//平台-------------------------------------------------------------------------------------------------------------------------------
-	Route::get('login', array('before' => 'delay', 'uses' => 'MagController@platformLoginPage'));
-	Route::post('loginAuth', array('before' => 'delay|csrf|dddos', 'uses' => 'MagController@platformLoginAuth'));
-	
-	Route::get('registerPage', array('before' => 'delay', 'uses' => 'MagController@platformRegisterPage'));	
-	Route::post('register', array('before' => 'delay|csrf|dddos', 'uses' => 'MagController@platformRegister'));		 
+
 
 	Route::group(array('before' => 'auth_logined'), function() {
 		Route::get('/', function() {
@@ -38,22 +30,67 @@
 		Route::get('{root}/demo', array('before' => 'folder_ques', 'uses' => 'HomeController@demo'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/show', array('before' => 'folder_ques|loginAdmin', 'uses' => 'ViewerController@showData'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/codebook', array('before' => 'folder_ques', 'uses' => 'ViewerController@codebook'))->where('root', '[a-z0-9_]+');
+		Route::get('platform/{root}/spss', array('before' => 'folder_ques', 'uses' => 'ViewerController@spss'))->where('root', '[a-z0-9_]+');
 		Route::get('platform/{root}/traffic', array('before' => 'folder_ques', 'uses' => 'ViewerController@traffic'))->where('root', '[a-z0-9_]+');
-		Route::get('platform/{root}/report', array('before' => 'folder_ques', 'uses' => 'MagController@report'))->where('root', '[a-z0-9_]+');
+		Route::get('platform/{root}/report', array('before' => 'folder_ques', 'uses' => 'ViewerController@report'))->where('root', '[a-z0-9_]+');
+		Route::get('platform/{root}/report_solve', array('before' => 'folder_ques', 'uses' => 'ViewerController@report_solve'))->where('root', '[a-z0-9_]+');
 		
 		Route::get('fileManager/{active_uniqid}', 'FileController@fileManager');
-		Route::get('fileBulider/{active_uniqid}', 'FileController@fileBulider');
+		Route::get('fileActiver/{active_uniqid}', 'FileController@fileActiver');
+		
+		Route::post('user/email/change', array('before' => 'delay|csrf', 'uses' => 'MagController@emailChange'));
+
 	});
 	
 	
 	
-	//平台-------------------------------------------------------------------------------------------------------------------------------
+	Route::group(array('before' => 'auth_logined_project'), function() {
+		
+		Route::get('user/fileManager', 'FileController@fileManager');
+		Route::get('user/doc', 'PageController@home');
+		Route::any('user/doc/{intent_key}', 'FileController@fileActiver');	
+		//Route::post('user/doc/upload/{content}', array('before' => 'delay|csrf|dddos', 'uses' => 'FileController@upload'));
+		
+		Route::get('page/project/{context?}', array('before' => '', 'as' => 'project', 'uses' => 'PageController@project'));
+		Route::post('page/project/{context?}', array('before' => 'csrf', 'uses' => 'PageController@project'));
+		
+		Route::get('page/{context}', 'PageController@page');
+		Route::post('page/{context}', 'PageController@page');
+		
+		Route::get('user/auth/logout', 'UserController@logout');
+		
+		Route::get('user/auth/password/change', array('before' => 'delay', 'uses' => 'UserController@passwordChangePage'));
+		Route::post('user/auth/password/change', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@passwordChange'));		
+		
+	});
+	
+	Route::get('auth/password/remind/{project}', 'UserController@remindPage');
+	Route::post('auth/password/remind/{project}', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@remind'));
+	
+	Route::get('user/auth/password/reset/{token}', 'UserController@resetPage');
+	Route::post('user/auth/password/reset/{token}', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@reset'));
+	
+	
+	
+	Route::get('user/auth/project', 'UserController@project');
+	Route::get('user/auth/{project}', array('before' => 'delay', 'uses' => 'UserController@loginPage'))->where('project', '[a-z]+');
+	Route::post('user/auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@login'));
+	
+	Route::get('login', array('before' => 'delay', 'uses' => 'MagController@platformLoginPage'));	
+	Route::post('loginAuth', array('before' => 'delay|csrf|dddos', 'uses' => 'MagController@platformLoginAuth'));
+	
+	Route::get('registerPage', array('before' => 'delay|loginRegister', 'uses' => 'MagController@platformRegisterPage'));	
+	Route::post('register', array('before' => 'delay|csrf|dddos|loginRegister', 'uses' => 'MagController@platformRegister'));	
+	
+	Route::get('user/auth/register/{project}', 'UserController@register');
+	Route::post('user/auth/register/{project}', 'UserController@register');
+	
+	
+	//平台---------------------------------------------------------------------------------------------------------------------------------
 	
 		
 	//編輯器-------------------------------------------------------------------------------------------------------------------------------
 	Route::post('editor/save/analysis/{root}', array('before' => 'login', 'uses' => 'EditorController@saveAnalysis'));
-
-
 
 	
 
@@ -64,13 +101,20 @@
 	Route::get('{root}/updatetime', array('before' => 'folder_ques|loginPublic', 'uses' => 'ViewerController@updatetime'))->where('root', '[a-z0-9_]+');
 	//編輯器-------------------------------------------------------------------------------------------------------------------------------
 	
-//});//domain
+    
 
 Route::filter('auth_logined', function($route) {
-	Config::set('database.default', 'sqlsrv');
-	Config::set('database.connections.sqlsrv.database', 'ques_admin');
 	if( Auth::guest() )
 		return Redirect::to('login');
+	
+	if( Auth::user()->id>19 ){
+		return Redirect::to('user/auth/project');
+	}
+});
+
+Route::filter('auth_logined_project', function($route) {
+	if( Auth::guest() )
+		return Redirect::to('user/auth/project');
 });
 
 Route::filter('maintenance', function($route) {
@@ -84,7 +128,11 @@ Route::filter('loginOwner', function($route) {
 });
 
 Route::filter('loginAdmin', function($route) {
-	//return '無權限存取';
+	return '無權限存取';
+});
+
+Route::filter('loginRegister', function($route) {
+	return '無權限存取';
 });
 
 Route::filter('loginPublic', function($route) {
@@ -94,7 +142,7 @@ Route::filter('folder_ques', function($route) {//找不到根目錄
 	$root = $route->getParameter('root');
 	$folder = ques_path().'/ques/data/'.$root;
 	if( !is_dir($folder) )
-		return Response::view('ques.nopage', array(), 404);
+		return Response::view('nopage', array(), 404);
 });
 
 Route::filter('login', function($route) {
@@ -103,39 +151,4 @@ Route::filter('login', function($route) {
 		return Redirect::to($root);
 });
 
-Route::filter('delay', function() {
-	usleep(500000);
-});
 
-Route::filter('dddos', function() {	
-	if (Session::get('dddos') != Input::get('_token2')){
-		//throw new Illuminate\Session\TokenMismatchException;
-		return Redirect::back();
-	}
-	Session::forget('dddos');
-	
-	$ip = Request::server('REMOTE_ADDR');
-	$ip_time = Cache::get($ip, array('block'=>false,'time'=>array()));
-	array_push($ip_time['time'],date("Y/n/d H:i:s"));	
-
-	$ip_time_re = array_reverse($ip_time['time']);
-	if( count($ip_time_re)>2 ){
-		if( $ip_time['block'] ){
-			$ip_time['block'] = (strtotime($ip_time_re[0])-strtotime($ip_time_re[1])<30);
-		}else{
-			$ip_time['block'] = (strtotime($ip_time_re[0])-strtotime($ip_time_re[1])<10) && (strtotime($ip_time_re[1])-strtotime($ip_time_re[2])<10);
-		}
-	}
-	Cache::put($ip, $ip_time, 10);
-
-	if( $ip_time['block'] )
-		return Redirect::back()->withInput(array('dddos_error'=>true));
-});
-
-App::error(function($exception) {//找不到子頁面
-	//return Response::view('ques.nopage', array(), 404);
-});
-
-App::missing(function($exception) {
-    //return Response::view('ques.nopage', array(), 404);
-});

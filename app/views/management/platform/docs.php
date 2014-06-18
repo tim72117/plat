@@ -1,7 +1,11 @@
 <?php
 $user = new app\library\files\v0\User();
 $packageDocs = $user->get_file_provider()->lists();
+$create_lists = $user->get_file_provider()->create_list();
 
+foreach($create_lists as $create_list){
+	echo '<div class="intent button" intent_key="'.$create_list['intent_key'].'">'.$create_list['active'].'</div>';
+}
 
 foreach($packageDocs as $packageDoc){
 	?>
@@ -28,15 +32,19 @@ foreach($packageDocs as $packageDoc){
 				echo '<a href="fileManager/'.$active['intent_key'].'">'.$active['active'].'</a> - ';
 				echo '</div>';
 			}
-			?>
+			?>				
+			</div>
+			<div style="margin:50px" class="detial-small">
+
 			</div>
 		</div>
 	</div>
 	<?
 }
 
-$uid = Auth::user()->getAuthIdentifier();
-$docs = DB::table('doc')->where('owner',$uid)->select('title','folder','ctime')->get();
+//$uid = Auth::user()->getAuthIdentifier();
+//$docs = DB::table('doc')->where('owner',$uid)->select('title','folder','ctime')->get();
+if( false )
 foreach($docs as $doc){
 	?>
 		<div class="question" style="border-bottom: 0px solid #eee;margin:3px auto;width:800px">
@@ -94,13 +102,25 @@ while( $entry = $CurrentWorkingDirectory->read() ){
 <script>				
 $(function(){	
 	
-	$('.button.intent').click(function(){
+	$('.button.intent').click(function(event){
 		event.stopPropagation();
-		$.getJSON('fileBulider/'+$(this).attr('intent_key'),function(data){
-			var shadow = $('<div class="shadow" style="width:100%;height:100%;position:fixed;background-color:rgba(0,0,0,0.5);top:0;z-index:3000"></div>').appendTo('body');
-			$('body').css({overflow:'hidden','margin-right': '15px'});
-			$('.tabs-box').css({'margin-right': '15px'});
-			shadow.append('<div class="shadowDialog" style="width:500px;height:300px;background-color:#fff;margin:10% auto;border: 1px solid #333">'+data+'</div>');
+		var buttonSelf = $(this);
+		$.getJSON('fileActiver/'+$(this).attr('intent_key'),function(data){		
+
+			switch(data.viewType){
+				case 'dialog':
+					var shadow = $('<div class="shadow" style="width:100%;height:100%;position:fixed;background-color:rgba(0,0,0,0.5);top:0;z-index:3000"></div>').appendTo('body');
+					$('body').css({overflow:'hidden','margin-right': '15px'});
+					$('.tabs-box').css({'margin-right': '15px'});
+					shadow.append('<div class="shadowDialog" style="width:500px;height:300px;background-color:#fff;margin:10% auto;border: 1px solid #333">'+data.html+'</div>');
+				break;
+				case 'detial-small':
+					eval(data.script);
+				break;
+			}
+			
+		}).error(function(e){
+			console.log(e);
 		});
 	});
 	
@@ -125,6 +145,10 @@ $(function(){
 			$('.question.open .inbox .detial-small .container').highcharts().reflow();
 		});
 	});
+	
+	function listen(){
+		
+	}
 
 	$('.count').click(function(event){	
 		event.stopPropagation();

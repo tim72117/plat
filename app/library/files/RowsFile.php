@@ -16,6 +16,7 @@ class RowsFile extends CommFile {
 	public static $intent = array(
 		'import',
 		'export',
+		'receives',
 		'get_columns',
 	);
 	

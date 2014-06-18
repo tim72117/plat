@@ -14,6 +14,10 @@ class FileController extends BaseController {
 	|
 	*/
 	protected $dataroot = '';
+	protected $fileAcitver;
+	protected $csrf_token;
+	protected $dddos_token;
+    protected $project;
 	
 	public function __construct(){
 		$this->dataroot = app_path().'/views/ques/data/';
@@ -23,6 +27,11 @@ class FileController extends BaseController {
 			$this->config = Config::get('ques::setting');
 			Config::set('database.default', 'sqlsrv');
 			Config::set('database.connections.sqlsrv.database', 'ques_admin');
+			
+			$this->csrf_token = csrf_token();
+			$this->dddos_token = dddos_token();
+            
+            $this->project = Auth::user()->getProject();
 		});
 	}
 	
@@ -31,14 +40,164 @@ class FileController extends BaseController {
 		$fileManager->accept($intent_key);
 	}
 	
-	public function fileBulider($intent_key) {
-		//$fileManager = new app\library\files\v0\FileManager();
-		//$fileManager->accept($intent_key);
-		$intent = Session::get('file')[$intent_key];
-		$file_id = $intent['file_id'];
-		$active = $intent['active'];
-		return Response::json(array($active));
+	public function fileActiver($intent_key) {
+		if( !Session::has('file.'.$intent_key) )
+			return $this->timeOut();
+		
+		$this->fileAcitver = new app\library\files\v0\FileActiver();
+		$view_name = $this->fileAcitver->accept($intent_key);
+		View::share('fileAcitver',$this->fileAcitver);
+		//$intent = Session::get('file')[$intent_key];
+		//$file_id = $intent['file_id'];
+
+		if( is_object($view_name) && get_class($view_name)=='Symfony\Component\HttpFoundation\BinaryFileResponse' ){	
+			return $view_name;
+		}
+		if( is_object($view_name) && get_class($view_name)=='Illuminate\Http\RedirectResponse' ){	
+			return $view_name;
+		}
+		
+		$virtualFile = VirtualFile::find($this->fileAcitver->file_id);
+		
+		if( is_null($virtualFile->requester) ){	
+			$data_request = $this->fileRequest($intent_key);
+			//$data_request = '';
+		}else{
+			$data_request = '';
+		}
+		
+		$view = View::make('demo.'.$this->project.'.main')->nest('context',$view_name)->with('request', $data_request);
+		//$active = $intent['active'];
+		$response = Response::make($view, 200);
+		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+		$response->header('Pragma', 'no-cache');
+		$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
+		
+		//$this->showQuery();
+		return $response;
+		
+		return $view;
+		return Response::json($view);
 	}
+	
+	public function fileRequest($intent_key) {
+		
+		$user = Auth::user();
+		/*
+		| 送出請求
+		*/
+		$html = '';
+		$html_share = '';
+		$preparers = Requester::with('docPreparer.user')->where('requester_doc_id','=',$this->fileAcitver->file_id)->where('running',true)->get();
+		$preparers_user_id = array_pluck($preparers->lists('doc_preparer'),'user_id');
+		//$group = Group::with('users')->where('user_id', $user->id)->get();
+		//$html .= $preparers->count();
+		
+		
+		/*
+		$groups = Group::with(array('docsTarget' => function($query) use ($fileAcitver) {
+			$query->leftJoin('auth_requester','docs.id','=','auth_requester.id_doc')->where('auth_requester.id_requester',$fileAcitver->file_id);
+		}))->where('id_user',$user->id)->get();
+		 */		
+		$user->load('groups.users');
+		if( $user->groups->count() > 0 ){
+			$html .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_to'), 'files' => true));
+			
+			foreach($user->groups as $group){
+				$html .= Form::checkbox('group[]', $group->id, false);
+				$html .= $group->description;
+				
+				if( $group->users->count()>0 )
+				$html .= '<br />';
+				
+				foreach($group->users as $user_in_group){
+					if( !in_array($user_in_group->id, $preparers_user_id) && $user_in_group->active==true && $user_in_group->id!=$user->id ){
+						$html .= Form::checkbox('user[]', $user_in_group->id, false);
+						$html .= $user_in_group->username;
+					}
+				}
+				$html .= '<br /><br />';
+			}
+
+			$html .= Form::submit('Request!');
+			$html .= Form::hidden('intent_key', $intent_key);
+			$html .= Form::hidden('_token1', $this->csrf_token);
+			$html .= Form::hidden('_token2', $this->dddos_token);
+			$html .= Form::close();
+			
+			
+			
+			//share
+			$html_share .= '-------------------------------------------------';
+			$html_share .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'share_to'), 'files' => true));
+			
+			foreach($user->groups as $group){
+				$html_share .= Form::checkbox('group[]', $group->id, false);
+				$html_share .= $group->description;
+				
+				if( $group->users->count()>0 )
+				$html_share .= '<br />';
+				
+				foreach($group->users as $user_in_group){
+					if( !in_array($user_in_group->id, $preparers_user_id) && $user_in_group->active==true && $user_in_group->id!=$user->id ){
+						$html_share .= Form::checkbox('user[]', $user_in_group->id, false);
+						$html_share .= $user_in_group->username;
+					}
+				}
+				$html_share .= '<br /><br />';
+			}
+
+			$html_share .= Form::submit('Share!');
+			$html_share .= Form::hidden('intent_key', $intent_key);
+			$html_share .= Form::hidden('_token1', $this->csrf_token);
+			$html_share .= Form::hidden('_token2', $this->dddos_token);
+			$html_share .= Form::close();
+			
+			
+		}
+		
+		if( $preparers->count() > 0 ){
+			/*
+			| 停止請求
+			*/
+			$html .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_end'), 'files' => true));	
+			foreach($preparers as $preparer){	
+				$html .= Form::checkbox('doc[]', $preparer->preparer_doc_id, true);
+				$html .= $preparer->docPreparer->user->username;			
+			}
+			$html .= Form::submit('Request end!');
+			$html .= Form::hidden('intent_key', $intent_key);
+			$html .= Form::hidden('_token1', $this->csrf_token);
+			$html .= Form::hidden('_token2', $this->dddos_token);
+			$html .= Form::close();
+		}
+		
+		return $html.$html_share;
+	}
+	
+	public function upload($intent_key) {
+		$fileClass = 'app\\library\\files\\v0\\CommFile';
+		$file = new $fileClass();
+		$file_id = $file->upload();
+		if( $file_id ){		
+			$context = Session::get('file')[$intent_key];
+			$intent = array('active'=>'open','file_id'=>$context['file_id'],'fileClass'=>$fileClass);
+			return Redirect::to('user/doc/'.$intent_key)->withInput(array('file_id'=>$file_id));
+		}		
+	}
+	
+	public function timeOut() {
+		return View::make('demo.timeout');
+	}
+	
+	
+	public function showQuery() {
+		$queries = DB::getQueryLog();
+		foreach($queries as $query){
+			var_dump($query);echo '<br /><br />';
+		}
+	}
+	//public function 
 	
 
 	
