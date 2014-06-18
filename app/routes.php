@@ -15,37 +15,10 @@ Route::get('test', function() {
 	return;
 });
 
-	//平台-------------------------------------------------------------------------------------------------------------------------------
-
-
-	Route::group(array('before' => 'auth_logined'), function() {
-		Route::get('/', function() {
-			return View::make('management.ques.root')->nest('child_tab','management.tabs',array('pagename'=>'index'));
-		});
-		Route::get('platform', 'MagController@platformHome');
-		Route::get('platformLogout', 'MagController@platformLogout');
-		
-		Route::post('upload', 'MagController@upload');
-		
-		Route::get('{root}/demo', array('before' => 'folder_ques', 'uses' => 'HomeController@demo'))->where('root', '[a-z0-9_]+');
-		Route::get('platform/{root}/show', array('before' => 'folder_ques|loginAdmin', 'uses' => 'ViewerController@showData'))->where('root', '[a-z0-9_]+');
-		Route::get('platform/{root}/codebook', array('before' => 'folder_ques', 'uses' => 'ViewerController@codebook'))->where('root', '[a-z0-9_]+');
-		Route::get('platform/{root}/spss', array('before' => 'folder_ques', 'uses' => 'ViewerController@spss'))->where('root', '[a-z0-9_]+');
-		Route::get('platform/{root}/traffic', array('before' => 'folder_ques', 'uses' => 'ViewerController@traffic'))->where('root', '[a-z0-9_]+');
-		Route::get('platform/{root}/report', array('before' => 'folder_ques', 'uses' => 'ViewerController@report'))->where('root', '[a-z0-9_]+');
-		Route::get('platform/{root}/report_solve', array('before' => 'folder_ques', 'uses' => 'ViewerController@report_solve'))->where('root', '[a-z0-9_]+');
-		
-		Route::get('fileManager/{active_uniqid}', 'FileController@fileManager');
-		Route::get('fileActiver/{active_uniqid}', 'FileController@fileActiver');
-		
-		Route::post('user/email/change', array('before' => 'delay|csrf', 'uses' => 'MagController@emailChange'));
-
-	});
-	
-	
-	
-	Route::group(array('before' => 'auth_logined_project'), function() {
-		
+    Route::get('/', function(){ return Redirect::to('user/auth/management'); });
+	//平台-------------------------------------------------------------------------------------------------------------------------------	
+	Route::group(array('before' => 'auth_logined'), function() {        
+        
 		Route::get('user/fileManager', 'FileController@fileManager');
 		Route::get('user/doc', 'PageController@home');
 		Route::any('user/doc/{intent_key}', 'FileController@fileActiver');	
@@ -53,6 +26,8 @@ Route::get('test', function() {
 		
 		Route::get('page/project/{context?}', array('before' => '', 'as' => 'project', 'uses' => 'PageController@project'));
 		Route::post('page/project/{context?}', array('before' => 'csrf', 'uses' => 'PageController@project'));
+        
+        Route::get('ques/project/{context}/{root}', array('before' => '', 'uses' => 'ViewerController@project'));
 		
 		Route::get('page/{context}', 'PageController@page');
 		Route::post('page/{context}', 'PageController@page');
@@ -69,18 +44,11 @@ Route::get('test', function() {
 	
 	Route::get('user/auth/password/reset/{token}', 'UserController@resetPage');
 	Route::post('user/auth/password/reset/{token}', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@reset'));
-	
-	
-	
-	Route::get('user/auth/project', 'UserController@project');
-	Route::get('user/auth/{project}', array('before' => 'delay', 'uses' => 'UserController@loginPage'))->where('project', '[a-z]+');
+
+	Route::get('project', 'UserController@project');
+    Route::get('user/auth/{project}', function($project){ return Redirect::to('project/'.$project); });
+	Route::get('project/{project}', array('before' => 'delay', 'uses' => 'UserController@loginPage'))->where('project', '[a-z]+');
 	Route::post('user/auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@login'));
-	
-	Route::get('login', array('before' => 'delay', 'uses' => 'MagController@platformLoginPage'));	
-	Route::post('loginAuth', array('before' => 'delay|csrf|dddos', 'uses' => 'MagController@platformLoginAuth'));
-	
-	Route::get('registerPage', array('before' => 'delay|loginRegister', 'uses' => 'MagController@platformRegisterPage'));	
-	Route::post('register', array('before' => 'delay|csrf|dddos|loginRegister', 'uses' => 'MagController@platformRegister'));	
 	
 	Route::get('user/auth/register/{project}', 'UserController@register');
 	Route::post('user/auth/register/{project}', 'UserController@register');
@@ -101,20 +69,14 @@ Route::get('test', function() {
 	Route::get('{root}/updatetime', array('before' => 'folder_ques|loginPublic', 'uses' => 'ViewerController@updatetime'))->where('root', '[a-z0-9_]+');
 	//編輯器-------------------------------------------------------------------------------------------------------------------------------
 	
-    
+ 
 
 Route::filter('auth_logined', function($route) {
 	if( Auth::guest() )
-		return Redirect::to('login');
-	
-	if( Auth::user()->id>19 ){
-		return Redirect::to('user/auth/project');
-	}
-});
-
-Route::filter('auth_logined_project', function($route) {
-	if( Auth::guest() )
-		return Redirect::to('user/auth/project');
+		return Redirect::to('project');
+    
+    if( is_null(Auth::user()->getProject()) )
+        Auth::logout();
 });
 
 Route::filter('maintenance', function($route) {
@@ -128,10 +90,6 @@ Route::filter('loginOwner', function($route) {
 });
 
 Route::filter('loginAdmin', function($route) {
-	return '無權限存取';
-});
-
-Route::filter('loginRegister', function($route) {
 	return '無權限存取';
 });
 

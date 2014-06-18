@@ -37,10 +37,20 @@ body {
 	cursor: pointer;
 	float: left;
 }
-
-		
+.register-block {
+	width: 250px;
+	height: 40px;
+	font-size: 15px;
+	padding: 5px;
+	box-sizing: border-box;
+	margin-top: 5px;
+}		
+.submit-btn {
+    width:300px;height:40px;margin:20px 0 0 0;padding:10px;text-align: center;font-size:15px;color:#fff
+}
 		
 </style>
+
 <script>
 
 </script>
@@ -70,7 +80,7 @@ body {
 			
 		<div class="onepcssgrid-1000" style="margin-top:40px">
 			<div class="onerow">
-				<?=$child_main?>
+				<?=$context?>
 			</div>
 		</div>
 		

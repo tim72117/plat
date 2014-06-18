@@ -305,17 +305,7 @@ function read($xmlfile,&$table_array){
 
 
 ?>
-<!doctype html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-TW" lang="zh-TW">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta http-equiv="X-UA-Compatible" content="IE=10" />
-<meta http-equiv="X-UA-Compatible" content="IE=9" />
-<meta http-equiv="X-UA-Compatible" content="IE=8" />
-<title>問卷CodeBook</title>
-
-<script type="text/javascript" src="<?=asset('jquery-1.10.2.min.js')?>"></script>
-<!--[if lt IE 9]><script src="js/html5shiv.js"></script><![endif]-->
 
 <link href="../css/text.css" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="<?=asset('css/onepcssgrid.css')?>" />
@@ -327,9 +317,11 @@ function read($xmlfile,&$table_array){
 td { border:1px solid #000; }
 th { border:1px solid #000; }
 -->
-body {
-	font-family: '微軟正黑體';
-	font-size: 14px;
+.codebook th {
+	font-size: 12px;
+}
+.codebook td {
+	font-size: 12px;
 }
 .ruletip {
 	color:#ff80ff;
@@ -351,18 +343,9 @@ $(document).ready(function(){
 });		
 </script>
 </head>
-<body>
-	
-<div class="onepcssgrid-1000" style="margin-top:0">
-	<div class="onerow" style="border-top: 0px solid #bebebe;border-bottom: 0px solid #fff; background-color:#fff">
-		<div class="colfull">
-			<?=$child_tab?>
-		</div>
-	</div>
-	<div style="clear:both"></div>
-</div>
 
-<table cellspacing="0" cellpadding="0" border="0">
+
+<table class="codebook" cellspacing="0" cellpadding="0" border="0">
 <?
 $q_count = 0;
 $tr_color_array = array('text_head'=>'#ccffcc','checkbox_head'=>'#ccffcc','list'=>'#ccffcc','scale_head'=>'#ccffcc','scale'=>'#f0f0f0','text'=>'#ddd');
@@ -419,5 +402,3 @@ foreach($table_array as $table){
 echo $outtable;
 ?>
 </table>
-</body>
-</html>
