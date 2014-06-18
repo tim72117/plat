@@ -1,4 +1,5 @@
 <?php
+use Illuminate\Filesystem\Filesystem;
 class FileController extends BaseController {
 
 	/*
@@ -41,18 +42,20 @@ class FileController extends BaseController {
 	}
 	
 	public function fileActiver($intent_key) {
-		if( !Session::has('file.'.$intent_key) )
-			return $this->timeOut();
+		if( !Session::has('file.'.$intent_key) ){
+            return $this->timeOut();
+        }
 		
 		$this->fileAcitver = new app\library\files\v0\FileActiver();
 		$view_name = $this->fileAcitver->accept($intent_key);
-		View::share('fileAcitver',$this->fileAcitver);
+		View::share('fileAcitver', $this->fileAcitver);
 		//$intent = Session::get('file')[$intent_key];
 		//$file_id = $intent['file_id'];
 
 		if( is_object($view_name) && get_class($view_name)=='Symfony\Component\HttpFoundation\BinaryFileResponse' ){	
 			return $view_name;
 		}
+        //待處理 - 可移除
 		if( is_object($view_name) && get_class($view_name)=='Illuminate\Http\RedirectResponse' ){	
 			return $view_name;
 		}
@@ -61,7 +64,6 @@ class FileController extends BaseController {
 		
 		if( is_null($virtualFile->requester) ){	
 			$data_request = $this->fileRequest($intent_key);
-			//$data_request = '';
 		}else{
 			$data_request = '';
 		}
@@ -79,6 +81,48 @@ class FileController extends BaseController {
 		return $view;
 		return Response::json($view);
 	}
+    
+    public function fileAjaxGet($intent_key) {
+        $file = Files::find(Session::get('table.'.$intent_key));
+        
+        return Response::make(View::make($file->file))->header('Content-Type', "application/json");;
+        //View::make($file->file);
+        return Response::json(array(View::make($file->file)->render()));
+    }
+    
+    public function fileAjaxPost($intent_key, $method) {
+        $file = VirtualFile::find(Session::get('file')[$intent_key]['file_id']);
+
+        $fileLoader = new Illuminate\Config\FileLoader(new Filesystem, app_path().'/views/demo/use/controller');
+        $ajax = new Illuminate\Config\Repository($fileLoader, '');
+
+        $func = $ajax->get($file->isFile->controller.'.'.$method);
+        //call_user_func($func);
+        if( is_callable($func) )
+            return Response::json(call_user_func($func));
+    }
+    
+    public function fileOpen($intent_key) {
+		if( !Session::has('file.'.$intent_key) ){
+            return $this->timeOut();
+        }
+        
+		$intent = app\library\files\v0\FileActiver::active($intent_key);
+        
+        switch($intent['active']) {
+            case 'download':
+                $file = new $intent['fileClass']($intent['file_id']);
+                $file_fullPath = $file->$intent['active'](true);
+                return call_user_func_array('Response::download', $file_fullPath);
+            case 'open':
+                Session::set('table.'.$intent_key, $intent['file_id']);
+                //Session::flash('table.'.$intent_key, $intent['file_id']);
+                $view = View::make('demo.use.main')->nest('context', 'demo.use.page.table', array('intent_key'=>$intent_key))->with('request', '');
+                $response = Response::make($view, 200);
+                return $response;
+        }
+        
+    }
 	
 	public function fileRequest($intent_key) {
 		

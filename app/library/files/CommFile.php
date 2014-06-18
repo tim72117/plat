@@ -54,24 +54,25 @@ class CommFile {
 	
 	public function rename() {	}
 	
-	public function open($file_id) {  }
+	public function open($file_id) { 
+        return $this->download();
+    }
 	
-	public function upload($visible = true) {	
-		
+	public function upload($visible = true) {		
 
-		if (Input::hasFile('file_upload')){
+		if( Input::hasFile('file_upload') ){
 			
 			$file = Input::file('file_upload');
-			$mime = $file->getMimeType();
+			//$mime = $file->getMimeType();
 			$name_real = $file->getClientOriginalName();
 			$id_user = Auth::user()->id;
 			
+            //未處理
 			if( is_null($this->doc_id) ){
 				$doc_id = $id_user;
 			}else{
 				$doc_id = $this->doc_id;
 			}
-			
 
 			
 			$validator = Validator::make(
@@ -81,36 +82,25 @@ class CommFile {
 			);
 			
 			if( $validator->fails() ){
-				return $validator;
-			}
-			
+                throw new ValidateException($validator);
+			}			
 			
 			$storage_path = storage_path().'/file_upload';
 			$name = hash_file('md5', $file->getRealPath());			
 			
 			$parts = array_slice(str_split($hash = md5($id_user), 2), 0, 2);
 			$path = join('/', $parts);
+			    
 			
-			
-			$filesystem = new Filesystem();
-			
-			if( !DB::table('files')->where('file', $path.'/'.$name)->exists() ){
+			if( !Files::where('file', $path.'/'.$name)->exists() ){
 				
+                $filesystem = new Filesystem();   
+                
 				try	
 				{				
 					$filesystem->makeDirectory(dirname($storage_path.'/'.$path.'/'.$name), 0777, true, true);									
 
-					$file->move($storage_path.'/'.$path, $name);				
-
-					/*
-					$file_id = DB::table('files')->insertGetId(array(
-						'title'   =>   $name_real,
-						'type'    =>   3,
-						'owner'   =>   $doc_id,
-						'file'    =>   $path.'/'.$name,
-					));	
-					 * 
-					 */
+					$file->move($storage_path.'/'.$path, $name);
 					
 					$file = new Files(array(
 						'title'   =>   $name_real,
@@ -118,6 +108,7 @@ class CommFile {
 						'owner'   =>   $doc_id,
 						'file'    =>   $path.'/'.$name,
 					));
+
 					$file->save();
 
 					//$file_id = DB::table('auth')->insertGetId(array(
@@ -145,8 +136,6 @@ class CommFile {
                 DB::table('log_file')->insert(array('file_id'=>$file->id,'active'=>'reUpload'));
                 
 				return $file->id;
-				$validator->getMessageBag()->add('file_upload', '檔案已上傳');
-				return $validator;
 				
 			}
 			
@@ -155,9 +144,15 @@ class CommFile {
 	
 	public function download() {
 		$storage_path = storage_path().'/file_upload';
+        
 		$file = Files::find($this->doc_id);
+        
 		$file_path = $file->file;
-		return array('path'=>$storage_path.'/'.$file_path,'name'=>$file->title);
+        
+        if( !file_exists($storage_path.'/'.$file_path) )
+            throw new FileFailedException;
+        
+        return array('path'=>$storage_path.'/'.$file_path,'name'=>$file->title);
 	}
 	
 	public function save_as() { }

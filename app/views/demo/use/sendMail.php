@@ -15,8 +15,7 @@ $users = DB::table('contact')
 
 foreach($users as $index => $user){
 	
-	echo 'start: '.$index.' - '.$user->email.'<br />';
-	echo $user->sname.'<br />';
+	echo 'start: '.$index.' - '.$user->sname.' - '.$user->email.' - status: ';
 	
 	$credentials = array('email' => $user->email);
 	
