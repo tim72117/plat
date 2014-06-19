@@ -13,6 +13,7 @@ class FileController extends BaseController {
 	|	Route::get('/', 'HomeController@showWelcome');
 	|
 	*/
+    protected $layout = 'demo.layout-main';
 	protected $dataroot = '';
 	protected $fileAcitver;
 	protected $csrf_token;
@@ -67,17 +68,9 @@ class FileController extends BaseController {
 		}
 		
 		$view = View::make('demo.'.$this->project.'.main')->nest('context',$view_name)->with('request', $data_request);
-		//$active = $intent['active'];
-		$response = Response::make($view, 200);
-		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
-		$response->header('Pragma', 'no-cache');
-		$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
 		
-		//$this->showQuery();
-		return $response;
-		
-		return $view;
-		return Response::json($view);
+        $this->layout->content = $view;
+        
 	}
 	
 	public function fileRequest($intent_key) {

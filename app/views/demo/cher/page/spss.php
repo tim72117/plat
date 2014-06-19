@@ -358,14 +358,7 @@ $(document).ready(function(){
 </head>
 <body>
 	
-<div class="onepcssgrid-1000" style="margin-top:0">
-	<div class="onerow" style="border-top: 0px solid #bebebe;border-bottom: 0px solid #fff; background-color:#fff">
-		<div class="colfull">
-			<?=$child_tab?>
-		</div>
-	</div>
-	<div style="clear:both"></div>
-</div>
+
 
 <table cellspacing="0" cellpadding="0" border="0">
 <?

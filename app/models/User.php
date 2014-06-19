@@ -147,6 +147,7 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 		$this->fileProvider = new FileProvider();
 		return $this->fileProvider;
 	}
+    
 	public function docsHasRequester() {
 		return $this->hasMany('VirtualFile', 'user_id');//->has('requester','=',0);
 	}
@@ -155,12 +156,20 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 		return $this->hasOne('Contact', 'user_id', 'id')->where('contact.project',$this->getProject());
 	}
     
+	public function works() {
+		return $this->hasMany('Work', 'user_id');
+	}
+    
 	public function schools() {
 		return $this->belongsToMany('School', 'Work', 'user_id', 'sch_id');
 	}
 	
 	public function groups() {
 		return $this->hasMany('Group', 'user_id', 'id');
+	}    
+    
+	public function inGroups() {
+		return $this->belongsToMany('Group', 'user_in_group', 'user_id', 'group_id');
 	}
 
 }

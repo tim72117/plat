@@ -1,4 +1,4 @@
-<?=Form::open(array('url' => URL::to('user/auth/password/change'), 'method' => 'post'))?>
+<?=Form::open(array('url' => URL::to('auth/password/change'), 'method' => 'post'))?>
     <input type="hidden" name="_token2" value="<?=dddos_token()?>" />
     <table id="editschool" width="350px" align="left" style="background-color: #fff;border: 1px solid #aaa;text-align: center;margin-left: 20px" border="0">
         <tr bgcolor="#fff">

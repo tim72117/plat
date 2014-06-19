@@ -1,12 +1,12 @@
-<!DOCTYPE html>
-<html xmlns:ng="http://angularjs.org" ng-app>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+@extends('layout-main')
+
+@section('head')
 <title>後期中等教育資料庫查詢平台</title>
 
 <script type="text/javascript" src="<?=asset('js/jquery-1.10.2.min.js')?>"></script>
 <script type="text/javascript" src="<?=asset('js/angular.min.js')?>"></script>
-<!--[if lt IE 9]><script src="js/html5shiv.js"></script><![endif]-->
+<!--[if lt IE 9]><script src="<?=asset('js/html5shiv.js')?>"></script><![endif]-->
 
 <link href="<?=asset('demo/use/css/use100_content.css')?>" rel="stylesheet" type="text/css" />
 
@@ -34,16 +34,14 @@ $(document).ready(function(){	//選單功能
 });
 </script>
 
+@stop
 
-
-</head>
-
-<body>
+@section('body')
 
 <div style="width: 100%;height: 100%;max-height:100%">
 
-	<div style="width:100%;height: 110px;position: absolute;z-index:10;background-color: #fff">
-		<div style="background-color: #ffffff;width:100%;height:80px"><img src="<?=asset('demo/use/images/title.jpg')?>" width="500" height="80"></div>
+	<div style="width:100%;height: 30px;position: absolute;z-index:10;background-color: #fff">
+		<div style="background-color: #ffffff;width:100%;height:0px"></div>
 		<div style="background-color: #458A00;width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #ddd;color:#fff" align="right">			
 			<div style="float:left">
 				<? if( Auth::user()->id==1 ){ ?>
@@ -57,13 +55,13 @@ $(document).ready(function(){	//選單功能
 				<? } ?>
 				<a href="<?=URL::to('page/project')?>" style="margin-right:10px" class="login-bar">回首頁</a>
 				<a href="<?=URL::to('page/project/profile')?>" style="margin-right:10px" class="login-bar">個人資料</a>
-				<a href="<?=URL::to('user/auth/password/change')?>" style="margin-right:10px" class="login-bar">更改密碼</a>
-				<a href="<?=URL::to('user/auth/logout')?>" style="margin-right:10px" class="login-bar">登出</a>
+				<a href="<?=URL::to('auth/password/change')?>" style="margin-right:10px" class="login-bar">更改密碼</a>
+				<a href="<?=URL::to('auth/logout')?>" style="margin-right:10px" class="login-bar">登出</a>
 			</div>
         </div>
 	</div>
 	
-	<div class="border-box" style="height:100%;width:100%;background-color: #fff;padding-top:110px">
+	<div class="border-box" style="height:100%;width:100%;background-color: #fff;padding-top:30px">
 		
 		<div style="height:100%;overflow-y: hidden;float:left">
 			<div style="width: 350px;height:100%;background-color: #fff;border-right: 1px solid #ddd;overflow-y: auto;margin-top:0">
@@ -73,7 +71,7 @@ $(document).ready(function(){	//選單功能
 					檔案夾
 				</div>
 				
-				<h2>【 後期中等教育資料庫查詢平台 】</h2>
+				<h2>【 資料庫查詢平台 】</h2>
 				<div>				
 				<?
 				$user = Auth::user();
@@ -129,5 +127,4 @@ $(document).ready(function(){	//選單功能
 	
 </div>	
 
-</body>
-</html>
+@stop
