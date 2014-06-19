@@ -22,20 +22,21 @@ class ViewerController extends BaseController {
 			Config::addNamespace('ques', ques_path().'/ques/data/'.$this->root);
 			View::addNamespace('ques', ques_path());
 			$this->config = Config::get('ques::setting');
-			Config::set('database.default', $this->config['connections']);
+			Config::set('database.default', 'sqlsrv');
 			Config::set('database.connections.sqlsrv.database', $this->config['database']);
+            $this->project = Auth::user()->getProject();
 		});
 	}
-	
-	public function codebook() {
-		View::share('config',$this->config);
-		return View::make('management.ques.codebook')->nest('child_tab','management.tabs',array('pagename'=>'index'));
-	}
-	
-	public function spss() {
-		View::share('config',$this->config);
-		return View::make('management.ques.spss')->nest('child_tab','management.tabs',array('pagename'=>'index'));
-	}
+    
+    public function project($context) {
+        View::share('config',$this->config);
+        $contents = View::make('demo.'.$this->project.'.main')->nest('context','demo.'.$this->project.'.page.'.$context)->with('request', '');
+        $response = Response::make($contents, 200);
+		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+		$response->header('Pragma', 'no-cache');
+		$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
+		return $response;
+    }
 	
 	public function updatetime() {
 		$newpage = new app\library\page;		
@@ -43,25 +44,6 @@ class ViewerController extends BaseController {
 		$newpage->init($this->config);
 		return Response::json(array('changetime'=>(string)$newpage->pageinfo->changetime,'databasetime'=>(string)$newpage->pageinfo->databasetime));
 	}	
-	
-	public function report() {
-		Config::set('database.default', 'sqlsrv');
-		Config::set('database.connections.sqlsrv.database', 'ques_admin');
-		$reports = DB::table('report')->where('root', $this->root)->select('id','contact','text','explorer','solve','time')->orderBy('time','desc')->get();
-		$out = '';
-		foreach($reports as $report){
-			$out .= '<tr>';
-			$out .= '<td>'.$report->time.'</td>';
-			$out .= '<td>'.strip_tags($report->contact).'</td>';
-			$out .= '<td>'.strip_tags($report->text).'</td>';			
-			$out .= '<td align="center">'.Form::checkbox('solve', $report->id, $report->solve, array('class'=>'solve')).'</td>';
-			$out .= '<td>'.$report->explorer.'</td>';
-			$out .= '</tr>';
-		}
-		return View::make('management.ques.layout.main', array(
-			'reports' => $out
-		))->nest('child_tab','management.tabs',array('pagename'=>'index'));		
-	}
 	
 	public function report_solve() {
 		Config::set('database.default', 'sqlsrv');
@@ -82,11 +64,6 @@ class ViewerController extends BaseController {
 		}else{
 			return '';
 		}		
-	}
-	
-	public function sharePage($root,$page) {
-		View::share('config',$this->config);
-		return View::make('ques.other_page')->nest('child', 'ques.share.'.$page);
 	}
 	
 	public function showData() {
@@ -115,16 +92,6 @@ class ViewerController extends BaseController {
 		$this->page = Input::get('page',0);
 		$this->init();
 		return $this->build();
-	}
-	
-	public function traffic()  {	
-		View::share('config',$this->config);
-		if( Input::has('json') ){
-			//echo View::make('ques_mag.traffic_json');exit;
-			return View::make('management.ques.traffic_json');
-		}else{
-			return View::make('management.ques.traffic')->nest('child_tab','management.tabs',array('pagename'=>'index'));
-		}		
 	}
 	
 	public function init() {

@@ -1,8 +1,4 @@
 <?php
-//use Illuminate\Auth\Guard as AuthGuard,
-//	Illuminate\Auth\EloquentUserProvider,
-//	Illuminate\Hashing\BcryptHasher;
-
 class UserController extends BaseController {
 
 	/*
@@ -17,6 +13,7 @@ class UserController extends BaseController {
 	|	Route::get('/', 'HomeController@showWelcome');
 	|
 	*/
+    protected $layout = 'demo.layout-main';
 	protected $dataroot = '';
 	protected $auth_rull = array(
 			'username'              => 'required|regex:/[0-9a-zA-Z!@_]/|between:3,20',
@@ -41,7 +38,7 @@ class UserController extends BaseController {
 	public function logout() {
 		$project = Auth::user()->getProject();
 		Auth::logout();
-		return Redirect::to('user/auth/'.$project);
+		return Redirect::to('project/'.$project);
 	}	
 
 	public function loginPage($project) {
@@ -176,15 +173,13 @@ class UserController extends BaseController {
 	}
 	
 	public function passwordChangePage() {
-		$project = Auth::user()->getProject();
-		$contents = View::make('demo.'.$project.'.main')
-			->with('request', '')
-			->nest('context','demo.page.passwordChange');
-		$response = Response::make($contents, 200);
-		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
-		$response->header('Pragma', 'no-cache');
-		$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
-		return $response;
+		
+        $project = Auth::user()->getProject();
+        
+		$contents = View::make('demo.'.$project.'.main')->nest('context','demo.page.passwordChange')->with('request', '');
+        
+        $this->layout->content = $contents;
+        
 	}
 	
 	public function passwordChange() {		

@@ -1,8 +1,8 @@
 
 
 
-<?=Form::open(array('url' => 'user/auth/login', 'method' => 'post'))?>		
-	<table style="width:300px;margin:0 auto">
+<?=Form::open(array('url' => 'auth/login', 'method' => 'post'))?>		
+	<table style="width:400px;margin:0 auto">
 		<tr>
 			<th>電子郵件信箱</th>
 			<td><?=Form::text('email', Input::old('email',''), array('placeholder' => '電子郵件信箱','class' => 'register-block'))?></td>

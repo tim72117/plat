@@ -7,23 +7,16 @@
 <meta http-equiv="X-UA-Compatible" content="IE=8" />
 <title>後期中等教育資料庫資料查詢平台</title>
 
-<script type="text/javascript" src="//ssllogo.twca.com.tw/twcaseal_v3.js" charset="utf-8"></script>
+<script type="text/javascript" src="<?=asset('js/twcaseal_v3.js')?>" charset="utf-8"></script>
 
 <link href="<?=asset('demo/use/css/use100.css')?>" rel="stylesheet" type="text/css">
-	
-
-<script type = "text/javascript">
-
-</script>
-
-
 
 </head>
-	
-
 
 <body bgcolor="white" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginwidth="0" marginheight="0" class="intd">
+    
 <p align="center"><img src="<?=asset('demo/use/images/title.jpg')?>" width="558" height="114"></p>
+
 <table cellpadding="3" cellspacing="2" border="0" width="50%" align="center">
 	<tr>
 	  <td class="header1" align="center"><?=$title?></td>

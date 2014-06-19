@@ -19,6 +19,7 @@ class PageController extends BaseController {
 	*/
 	protected $dataroot = '';
 	protected $project;
+    protected $layout = 'demo.layout-main';
 	
 	public function __construct(){
 		$this->dataroot = app_path().'/views/ques/data/';
@@ -32,26 +33,25 @@ class PageController extends BaseController {
 		});
 	}
 	
-	public function project($context = null) {
-		if( $context==null ){
-			$contents = View::make('demo.'.$this->project.'.main')->nest('context','demo.'.$this->project.'.page.intro')->with('request', '');
-		}else{
-			$contents = View::make('demo.'.$this->project.'.main')->nest('context','demo.'.$this->project.'.page.'.$context)->with('request', '');
-		}	
-		$response = Response::make($contents, 200);
-		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
-		$response->header('Pragma', 'no-cache');
-		$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
-		return $response;
+	public function project($context = 'intro') {     
+       
+        $contents = View::make('demo.'.$this->project.'.main')->nest('context','demo.'.$this->project.'.page.'.$context)->with('request', '');	
+			
+        $this->layout->content = $contents;
+        
+		//$response = Response::make($this->layout, 200);
+		//$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+		//$response->header('Pragma', 'no-cache');
+		//$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
+		//return $response;
 	}
 	
 	public function page($context) {		
+        
 		$contents = View::make('demo.'.$this->project.'.main')->nest('context','demo.page.'.$context)->with('request', '');
-		$response = Response::make($contents, 200);
-		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
-		$response->header('Pragma', 'no-cache');
-		$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
-		return $response;
+        
+		$this->layout->content = $contents;
+        
 	}
 
 

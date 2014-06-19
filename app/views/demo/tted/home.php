@@ -7,14 +7,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=8" />
 <title>師資培育資料庫資料查詢平台</title>
 
-<!--<script type="text/javascript" src="//ssllogo.twca.com.tw/twcaseal_v3.js" charset="utf-8"></script>-->
+<script type="text/javascript" src="<?=asset('js/twcaseal_v3.js')?>" charset="utf-8"></script>
 
 <link href="<?=asset('demo/use/css/use100.css')?>" rel="stylesheet" type="text/css">
-	
-<script type = "text/javascript">
-
-</script>
-    
+	    
 </head>
     
 <body bgcolor="white" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginwidth="0" marginheight="0" class="intd">
