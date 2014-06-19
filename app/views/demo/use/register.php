@@ -53,8 +53,8 @@
     	<th width="100" height="60" valign="middle" align="center">承辦業務</th>
 		<td width="600" align="center" colspan="3">
 			<?=Form::checkbox('operational[schpeo]',  1, false, array('id'=>'operational[0]','size'=>20)).Form::label('operational[0]', '學校人員')?>
-			<?=Form::checkbox('operational[senior1]', 1, false, array('id'=>'operational[1]','size'=>20)).Form::label('operational[1]', '高一、專一新生')?>
-			<?=Form::checkbox('operational[senior2]', 1, false, array('id'=>'operational[2]','size'=>20)).Form::label('operational[2]', '高二、專一學生')?>
+			<?=Form::checkbox('operational[senior1]', 1, false, array('id'=>'operational[1]','size'=>20)).Form::label('operational[1]', '高一、專一學生')?>
+			<?=Form::checkbox('operational[senior2]', 1, false, array('id'=>'operational[2]','size'=>20)).Form::label('operational[2]', '高二、專二學生')?>
 			<?=Form::checkbox('operational[tutor]',   1, false, array('id'=>'operational[3]','size'=>20)).Form::label('operational[3]', '高二、專二導師')?>
 			<?=Form::checkbox('operational[parent]',  1, false, array('id'=>'operational[4]','size'=>20)).Form::label('operational[4]', '高二、專二家長')?>
          </td>
