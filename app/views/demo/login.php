@@ -1,7 +1,7 @@
 
 
 
-<?=Form::open(array('url' => 'user/auth/login', 'method' => 'post'))?>		
+<?=Form::open(array('url' => 'auth/login', 'method' => 'post'))?>		
 	<table style="width:400px;margin:0 auto">
 		<tr>
 			<th>電子郵件信箱</th>

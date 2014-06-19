@@ -33,10 +33,10 @@ Route::get('test', function() {
 		Route::get('page/{context}', 'PageController@page');
 		Route::post('page/{context}', 'PageController@page');
 		
-		Route::get('user/auth/logout', 'UserController@logout');
+		Route::get('auth/logout', array('as' => 'logout', 'uses' => 'UserController@logout'));
 		
-		Route::get('user/auth/password/change', array('before' => 'delay', 'uses' => 'UserController@passwordChangePage'));
-		Route::post('user/auth/password/change', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@passwordChange'));		
+		Route::get('auth/password/change', array('before' => '', 'uses' => 'UserController@passwordChangePage'));
+		Route::post('auth/password/change', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@passwordChange'));		
 		
 	});
 	
@@ -47,7 +47,7 @@ Route::get('test', function() {
 	Route::post('user/auth/password/reset/{token}', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@reset'));	
     
 	Route::get('project/{project}', array('before' => '', 'uses' => 'UserController@loginPage'))->where('project', '[a-z]+');
-	Route::post('user/auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@login'));
+	Route::post('auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@login'));
 	
 	Route::get('user/auth/register/{project}', 'UserController@register')->where('project', '[a-z]+');
 	Route::post('user/auth/register/{project}', 'UserController@register')->where('project', '[a-z]+');	
