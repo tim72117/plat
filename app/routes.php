@@ -15,7 +15,7 @@ Route::get('test', function() {
 	return;
 });
 
-    Route::get('/', function(){ return Redirect::to('user/auth/management'); });
+    Route::get('/', function(){ return Redirect::to('user/auth/cher'); });
     Route::get('project', 'UserController@project');
     Route::get('user/auth/{project}', function($project){ return Redirect::to('project/'.$project); });
 	//平台-------------------------------------------------------------------------------------------------------------------------------	
