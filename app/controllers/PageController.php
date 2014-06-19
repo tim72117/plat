@@ -17,9 +17,9 @@ class PageController extends BaseController {
 	|	Route::get('/', 'HomeController@showWelcome');
 	|
 	*/
-	protected $dataroot = '';
-	protected $project;
     protected $layout = 'demo.layout-main';
+	protected $dataroot = '';
+	protected $project;    
 	
 	public function __construct(){
 		$this->dataroot = app_path().'/views/ques/data/';
@@ -39,11 +39,12 @@ class PageController extends BaseController {
 			
         $this->layout->content = $contents;
         
-		//$response = Response::make($this->layout, 200);
-		//$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
-		//$response->header('Pragma', 'no-cache');
-		//$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
-		//return $response;
+        $response = Response::make($this->layout, 200);
+        $response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+        $response->header('Pragma', 'no-cache');
+        $response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
+        return $response;
+        
 	}
 	
 	public function page($context) {		
@@ -51,6 +52,12 @@ class PageController extends BaseController {
 		$contents = View::make('demo.'.$this->project.'.main')->nest('context','demo.page.'.$context)->with('request', '');
         
 		$this->layout->content = $contents;
+        
+        $response = Response::make($this->layout, 200);
+        $response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+        $response->header('Pragma', 'no-cache');
+        $response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
+        return $response;
         
 	}
 
