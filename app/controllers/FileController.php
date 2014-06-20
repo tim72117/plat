@@ -85,44 +85,68 @@ class FileController extends BaseController {
 		/*
 		| 送出請求
 		*/
+       
 		$html = '';
-		$html_share = '';
-		$preparers = Requester::with('docPreparer.user')->where('requester_doc_id','=',$this->fileAcitver->file_id)->where('running',true)->get();
-		$preparers_user_id = array_pluck($preparers->lists('doc_preparer'),'user_id');
-		//$group = Group::with('users')->where('user_id', $user->id)->get();
-		//$html .= $preparers->count();
-		
-		
-		/*
-		$groups = Group::with(array('docsTarget' => function($query) use ($fileAcitver) {
-			$query->leftJoin('auth_requester','docs.id','=','auth_requester.id_doc')->where('auth_requester.id_requester',$fileAcitver->file_id);
-		}))->where('id_user',$user->id)->get();
-		 */		
+        $html_request = '';
+        $html_request_end = '';
+		$html_share = '';        
+		$preparers = Requester::with('docPreparer.user')->where('requester_doc_id', '=', $this->fileAcitver->file_id)->where('running', true)->get();   
+        $preparers_user_id = array();
+        foreach($preparers->lists('doc_preparer', 'id') as $doc_preparer_id => $doc_preparer){
+            $preparers_user_id[$doc_preparer_id] = $doc_preparer->user_id;
+        }
+      
+        
+        
 		$user->load('groups.users');
 		if( $user->groups->count() > 0 ){
-			$html .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_to'), 'files' => true));
-			
+			$html .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_to'), 'files' => true));			
+            
 			foreach($user->groups as $group){
-				$html .= Form::checkbox('group[]', $group->id, false);
-				$html .= $group->description;
-				
-				if( $group->users->count()>0 )
-				$html .= '<br />';
-				
+                                
+				$html_request .= '<div ng-hide="group'.$group->id.'" ng-init="group'.$group->id.'=true">';
 				foreach($group->users as $user_in_group){
-					if( !in_array($user_in_group->id, $preparers_user_id) && $user_in_group->active==true && $user_in_group->id!=$user->id ){
-						$html .= Form::checkbox('user[]', $user_in_group->id, false);
-						$html .= $user_in_group->username;
-					}
+					if( in_array($user_in_group->id, $preparers_user_id) ){
+                        $preparer_doc_id = array_search($user_in_group->id, $preparers_user_id);
+                        $html_request_end .= '<div>';
+                        $html_request_end .= Form::checkbox('doc[]', $preparer_doc_id, true);
+                        $html_request_end .= $user_in_group->username;
+                        $html_request_end .= '</div>';
+                    }elseif( $user_in_group->active==true && $user_in_group->id!=$user->id ){
+                        $html_request .= '<div>';
+						$html_request .= Form::checkbox('user[]', $user_in_group->id, false);
+						$html_request .= $user_in_group->username;
+                        $html_request .= '</div>';
+                    }
 				}
-				$html .= '<br /><br />';
+                $html_request .= '</div>';
+                
+                $html .= '<div>';                
+				$html .= Form::checkbox('group[]', $group->id, false);
+                $html .= '<input ng-click="group'.$group->id.'=!group'.$group->id.'" type="button" value="名單" />';
+				$html .= $group->description;                
+                $html .= '</div>';
+                
 			}
-
+            $html .= $html_request;
 			$html .= Form::submit('Request!');
 			$html .= Form::hidden('intent_key', $intent_key);
-			$html .= Form::hidden('_token1', $this->csrf_token);
-			$html .= Form::hidden('_token2', $this->dddos_token);
 			$html .= Form::close();
+            
+            if( $preparers->count() > 0 ){
+                /*
+                /| 停止請求
+                */
+                $html .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_end')));	
+                foreach($preparers as $preparer){	
+                    //$html .= Form::checkbox('doc[]', $preparer->preparer_doc_id, true);
+                    //$html .= $preparer->docPreparer->user->username.$preparer->docPreparer->user->id;			
+                }
+                $html .= $html_request_end;
+                $html .= Form::submit('Request end!');
+                $html .= Form::hidden('intent_key', $intent_key);
+                $html .= Form::close();
+            }
 			
 			
 			
@@ -148,30 +172,15 @@ class FileController extends BaseController {
 
 			$html_share .= Form::submit('Share!');
 			$html_share .= Form::hidden('intent_key', $intent_key);
-			$html_share .= Form::hidden('_token1', $this->csrf_token);
-			$html_share .= Form::hidden('_token2', $this->dddos_token);
 			$html_share .= Form::close();
 			
 			
 		}
+        
+	
 		
-		if( $preparers->count() > 0 ){
-			/*
-			| 停止請求
-			*/
-			$html .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_end'), 'files' => true));	
-			foreach($preparers as $preparer){	
-				$html .= Form::checkbox('doc[]', $preparer->preparer_doc_id, true);
-				$html .= $preparer->docPreparer->user->username;			
-			}
-			$html .= Form::submit('Request end!');
-			$html .= Form::hidden('intent_key', $intent_key);
-			$html .= Form::hidden('_token1', $this->csrf_token);
-			$html .= Form::hidden('_token2', $this->dddos_token);
-			$html .= Form::close();
-		}
-		
-		return $html.$html_share;
+        
+        return $html.$html_share;
 	}
 	
 	public function upload($intent_key) {
