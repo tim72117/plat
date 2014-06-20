@@ -12,7 +12,8 @@ $user = Auth::user();
 $fileProvider = app\library\files\v0\FileProvider::make();
 echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px">';
 echo '<a href="'.URL::to($fileProvider->download(16)).'">102學年度高二學生中獎名單(公告).pdf</a><br />';
-echo '<a href="'.URL::to($fileProvider->download(17)).'">102學年度導師問卷普查 中獎名單公告.pdf</a>';
+echo '<a href="'.URL::to($fileProvider->download(17)).'">102學年度導師問卷普查 中獎名單公告.pdf<br /></a>';
+echo '<a href="'.URL::to($fileProvider->download(2)).'">102學年度國三畢業生基本資料範例表格下載</a>';
 echo '</div>';	
 
 if( $user->schools->count()>1 ){
