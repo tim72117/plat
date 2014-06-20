@@ -24,6 +24,11 @@ Route::get('test', function() {
 		Route::get('user/fileManager', 'FileController@fileManager');
 		Route::get('user/doc', 'PageController@home');
 		Route::any('user/doc/{intent_key}', 'FileController@fileActiver');	
+        
+        Route::any('file/{intent_key}', 'FileController@fileOpen');	
+
+        Route::get('ajax/{intent_key}', 'FileController@fileAjaxGet');	
+        Route::post('ajax/{intent_key}/{method}', 'FileController@fileAjaxPost');
 		
 		Route::get('page/project/{context?}', array('before' => '', 'as' => 'project', 'uses' => 'PageController@project'));
 		Route::post('page/project/{context?}', array('before' => 'csrf', 'uses' => 'PageController@project'));
