@@ -157,18 +157,10 @@ class CustomFile extends CommFile {
 	}
 	
 	public function request_end() {
-		
-		$this->doc = VirtualFile::find($this->doc_id);
-		
-		//$struct = json_decode($this->doc->struct);
-		
-		//$this->doc->save();
 
-		//未完成 file 轉移
-		$docs_id = Input::get('doc');
-		$docs = VirtualFile::with('requester')->whereIn('id', $docs_id)->get();
-		foreach($docs as $doc){
-			$requester = $doc->requester;
+		$docs_id = array_unique(Input::get('doc'));
+		$requesters = Requester::whereIn('id', $docs_id)->get();
+		foreach($requesters as $requester){
 			if( $requester->requester_doc_id==$this->doc_id ){
 				//$doc->requester->delete();
 				//$doc->delete();
@@ -176,9 +168,7 @@ class CustomFile extends CommFile {
 				$requester->save();
 			}
 		}
-		
-		//echo $this->doc->struct = json_encode($struct);
-		//exit;
+
 		return Redirect::to('user/doc/'.Input::get('intent_key'));	
 	}
 	
