@@ -68,6 +68,10 @@ if( Session::has('upload_file_id') ){
 
 	$data = ($workSheet->toArray(null,true,true,true));
 
+    $userinfo_all = DB::table('use_103.dbo.gra103_userinfo')->lists('newcid');
+    $userinfo_all_keys = array_flip($userinfo_all);
+
+    
 	//檢查每筆資料並存入上傳陣列
 	for($i=2;$i<=$RowHigh;$i++)
 	{
@@ -138,11 +142,12 @@ if( Session::has('upload_file_id') ){
 		}
 	
 		//檢查身分證字號，無誤則串出Newcid至$value[4]
-		if ((!empty($value[2])) && (check_id_number($value[2]))) $value[4] =createnewcid($value[2]); 
+		if( !empty($value[2]) && check_id_number($value[2]) ) 
+            $value[4] =createnewcid($value[2]); 
 		
 
 		//檢查錯誤資訊
-		if ($error_flag == 1){
+		if( $error_flag == 1 ){
 		
 			//判斷一筆資料是否皆為空白	
 			if ((empty($value[0]))&&(empty($value[1]))&&(empty($value[2]))&&(empty($value[3])))
@@ -174,11 +179,21 @@ if( Session::has('upload_file_id') ){
 			}
 		}else{
 			
+    
+            
 			//更新或寫入資料
-			$DB = DB::table('use_103.dbo.gra103_userinfo')
-						->where('stdidnumber', $value[2])
-						->get();
-			if ($DB) {
+            
+            //echo $userinfo->exists();
+                    /*
+            					$queries = DB::getQueryLog();
+					foreach($queries as $key => $query){
+						echo $key.' - ';var_dump($query);echo '<br /><br />';
+					}
+                     * 
+                     */
+                    
+			
+            if( array_key_exists($value[4], $userinfo_all_keys) ) {
 				//gra103_userinfo
 				$newdate = date("Y-m-d H:i:s");	
 				DB::table('use_103.dbo.gra103_userinfo')
@@ -189,14 +204,16 @@ if( Session::has('upload_file_id') ){
 				//gra103_userinfo	
 				DB::table('use_103.dbo.gra103_userinfo')
 						->insert(array('shid' => $value[0],'name' => $value[1],'sex' => $value[3],'newcid' => $value[4],'stdidnumber' => $value[2],'created_by' => $user->id,'file_id' => $file_id));	
+                
+                $userinfo_all_keys[$value[4]] = '';
 						
 			}
 			
 		}
 
-}
+    }
 
-
+    
 }else{//if( Session::has('upload_file_id') ){ 
 
 	if($errors){
