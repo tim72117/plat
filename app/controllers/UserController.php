@@ -158,7 +158,7 @@ class UserController extends BaseController {
 
 			$user->save();
 			
-			$project = DB::table('contact')->where('id', $user->id)->first()->project;			
+			$project = DB::table('contact')->where('user_id', $user->id)->first()->project;			
 		});
 	
 		switch ($response){

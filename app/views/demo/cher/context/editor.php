@@ -54,12 +54,12 @@ function Ctrl($scope, $http) {
 
 </script>
 
-<div ng-controller="Ctrl" class="page" style="border:0px dashed #A0A0A4;border-top:0;border-bottom:0;z-index:1;padding-left:200px;padding-right:200px">    
+<div ng-controller="Ctrl" class="page" style="border:0;z-index:1;padding-left:200px;padding-right:200px;background-color: #eee">    
     <a ng-click="add()">add</a>
     <div ng-repeat="ques in quess" class="main">
         <div class="question_box new" id="newid" uqid="newid" parrent="" layer="0" style="">
 
-            <div class="qtype_box changed" style="padding-right:0px;background-color:#58b5e1">
+            <div class="qtype_box changed" style="padding-right:0px;background-color:#fff">
                 <table style="width:100%">
                     <tr>
                         <td>
