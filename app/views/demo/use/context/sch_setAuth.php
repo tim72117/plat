@@ -34,42 +34,28 @@ page:{{ page+1 }}
         <th width="20">開通</th>
 		<th>email</th>
         <th>職稱</th>
-        <th width="150"><input ng-model="hidetel" ng-click="hidetel=true" type="checkbox" />電話</th>
-        <th width="100">傳真</th>
-        <th width="30">學校人員</th>
-        <th width="30">高一、專一新生</th>
-        <th width="30">高二、專一學生</th>
-        <th width="30">高二、專二導師</th>
-        <th width="30">高二、專二家長</th>
-        
+        <th width="180"><input ng-model="hidetel" ng-click="hidetel=true" type="checkbox" />電話</th>        
     </tr>
     <tr ng-repeat="user in users | orderBy:predicate:reverse | filter:searchText | startFrom:page*20 | limitTo:20">
         <td>{{ user.id | number }}</td>        
         <td><div ng-repeat="school in user.schools">{{ school.id }} - {{ school.sname }}</div></td>
         <td>{{ user.name }}</td>
-        <td>{{ user.active }}</td>	
+        <td><input ng-click="auth(user,$event)" type="checkbox" ng-checked="{{ user.active }}" /></td>	
         <td>{{ user.email }}<a class="sorter" herf="" ng-click="user.emailbk=false;" ng-hide="!user.email2">+</a><div ng-hide="user.emailbk" ng-init="user.emailbk=true">{{ user.email2 }}</div></td>
         <td>{{ user.title }}</td>
         <td ng-hide="hidetel">{{ user.tel }}</td>
-        <td>{{ user.fax }}</td>
-        <!--<td>{{user.schpeo}}</td>
-        <td>{{user.senior1}}</td>
-        <td>{{user.senior2}}</td>
-        <td>{{user.tutor}}</td>
-        <td>{{user.parent}}</td>-->
     </tr>
     
 <?
+$cacheName = 'school-Profiile-users';
 
-$contacts = Cache::remember('school.Profiile.users', 10, function() {
+$contacts = Cache::remember($cacheName, 10, function() {
     return Contact::with(array(
         'user' => function($query){
             return $query->select('id', 'active', 'username', 'email');
         },
         'user.schools'))->where('user_id', '>', '19')->where('project', '=', 'use')->select('user_id', 'title', 'tel', 'fax', 'email2')->get();
 });
-
-
 
 $profiles = $contacts->map(function($contact){       
     return array(
@@ -86,8 +72,11 @@ $profiles = $contacts->map(function($contact){
         'email2'  => $contact->email2,                     
     );   
 });
+ 
+
 
 $fileProvider = app\library\files\v0\FileProvider::make();
+$intent_key = $fileProvider->doc_intent_key('open', $file_id, 'app\\library\\files\\v0\\CustomFile');
 ?>
 
     
@@ -105,17 +94,30 @@ angular.module('app', [])
     };
 }).controller('Ctrl', Ctrl);
 
-function Ctrl($scope) {
+function Ctrl($scope, $http) {
     $scope.users = angular.fromJson(<?=$profiles->toJSON()?>);
     $scope.predicate = 'id';
     $scope.page = 0;
     
     $scope.next = function() {
         $scope.page++;
-    }
+    };
     
     $scope.prev = function() {
         $scope.page--;
-    }
+    };
+    $scope.auth = function(user, event) {
+        $(event.target).prop('disabled', true);
+        var data = { project:'use', user_id: user.id, active: event.target.checked, cacheName: '<?=$cacheName?>' };
+        $http({method: 'POST', url: '<?=asset('ajax/'.$intent_key.'/active')?>', data:data})
+        .success(function(data, status, headers, config) {
+            if( data.saveStatus )
+                $(event.target).prop('disabled', false);
+            console.log(data);
+        })
+        .error(function(e){
+            console.log(e);
+        });
+    };
 }
 </script>

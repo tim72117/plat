@@ -5,6 +5,10 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
     @yield('head')
+    
+    <script>
+    var app = angular.module('app', []);
+    </script>
 
 </head>
 
