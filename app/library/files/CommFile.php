@@ -58,6 +58,7 @@ class CommFile {
         return $this->download();
     }
 	
+
 	public function upload($visible = true) {	
 
 		if( Input::hasFile('file_upload') ){

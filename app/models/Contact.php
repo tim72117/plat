@@ -82,7 +82,9 @@ class Contact extends Eloquent {
 		return parent::save($options);
 	}
 	
-
+    public function user() {
+		return $this->hasOne('User', 'id', 'user_id');
+	}
 	
 }
 

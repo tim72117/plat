@@ -153,7 +153,11 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 	}
 
 	public function contact() {
-		return $this->hasOne('Contact', 'user_id', 'id')->where('contact.project',$this->getProject());
+		return $this->hasOne('Contact', 'user_id', 'id')->where('contact.project', $this->getProject());
+	}
+    
+	public function contacts() {        
+		return $this->hasOne('Contact', 'user_id', 'id');
 	}
     
 	public function works() {

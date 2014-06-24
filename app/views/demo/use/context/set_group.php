@@ -25,32 +25,37 @@
         <th>開通</th>
 		<th>email</th>
         <th>職稱</th>
-        <th width="20" ng-repeat="group in groups">{{group.name}}</th>
+        <th width="20" ng-repeat="group in groups">{{group.description}}</th>
     </tr>
     <tr ng-repeat="user in users | orderBy:predicate:reverse | filter:{schools:searchText}">
         <td>{{user.id | number}}</td>        
         <td><div ng-repeat="school in user.schools">{{school.id}} - {{school.sname}}</div></td>
         <td>{{user.name}}</td>
-        <td>{{user.active}}</td>	
+        <td><input ng-click="auth(user,$event)" type="checkbox" ng-checked="user.active" /></td>	
 		<td>{{user.email}}</td>
         <td>{{user.title}}</td>
-        <td ng-repeat="group in groups"><input type="checkbox" /></td>
+        <td ng-repeat="group in groups"><input type="checkbox" ng-checked="user.groups.indexOf(group.id)>=0" /></td>
     </tr>
     
 <?
-Config::set('demo.project', 'use');
-
-
-
-$group = Cache::remember('sch_profile.group9999', 10, function() {
+$group = Cache::remember('sch_profile.group9009ff0f9029', 10, function() {
     return Group::with(array(
+        'users' => function($query){
+            return $query->take(300);
+        },
+        'users.inGroups' => function($query){
+            //return $query->take(300);
+        },        
         'users.contact' => function($query){
             return $query->select('id', 'user_id', 'title', 'tel', 'fax');//,'schpeo','senior1','senior2','tutor','parent');
         },
         'users.schools'))->find(1);
 });
 
-$users = $group->users->map(function($user){   
+$groups = Group::all()->toArray();
+var_dump(array_fetch($groups, 'id'));
+
+$users = $group->users->take(30)->map(function($user){   
     return array(
         'id'      => (int)$user->id,
         'active'  => $user->active,
@@ -62,10 +67,13 @@ $users = $group->users->map(function($user){
         'title'   => array_get($user->contact, 'title'),
         'tel'     => array_get($user->contact, 'tel'),
         'fax'     => array_get($user->contact, 'fax'),
+        'groups'   => array_fetch($user->inGroups->toArray(), 'id')//array_only($user->groups->toArray(), array('id'))//$user->groups->map(function($group){
+                     //    return array_only($group->toArray(), array('id'));
+                     //})->all(),
     );   
-})->toJSON();
+})->toArray();
 
-$groups = Group::all()->toArray();
+//var_dump($users);
 
 $fileProvider = app\library\files\v0\FileProvider::make();
 ?>

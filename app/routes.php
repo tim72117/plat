@@ -24,6 +24,11 @@ Route::get('test', function() {
 		Route::get('user/fileManager', 'FileController@fileManager');
 		Route::get('user/doc', 'PageController@home');
 		Route::any('user/doc/{intent_key}', 'FileController@fileActiver');	
+        
+        Route::any('file/{intent_key}', 'FileController@fileOpen');	
+
+        Route::get('ajax/{intent_key}', 'FileController@fileAjaxGet');	
+        Route::post('ajax/{intent_key}/{method}', 'FileController@fileAjaxPost');
 		
 		Route::get('page/project/{context?}', array('before' => '', 'as' => 'project', 'uses' => 'PageController@project'));
 		Route::post('page/project/{context?}', array('before' => 'csrf', 'uses' => 'PageController@project'));
@@ -66,12 +71,41 @@ Route::get('test', function() {
 	
  
 
-Route::filter('auth_logined', function($route) {
+Route::filter('auth_logined', function() {
 	if( Auth::guest() )
 		return Redirect::to('project');
     
-    if( is_null(Auth::user()->getProject()) )
+    if( is_null(Auth::user()->getProject())  ){
         Auth::logout();
+        return Redirect::to('project');        
+    }
+
+    if( Auth::check() ){
+        $user = Auth::user();
+        $limit = DB::table('limit')->where('user_id', $user->id)->select('ip')->first();
+        if( !is_null($limit) ){
+            $ipAllows = explode(",",$limit->ip);
+            $ipPass = false;
+            $myIp = Request::getClientIp();
+            foreach($ipAllows as $ipAllow ){
+                $ipRange = explode("-", $ipAllow);
+                if( count($ipRange)>1 ){
+                    $ipLongs = array_map(function($ip){
+                        return ip2long($ip);
+                    }, $ipRange);
+                    $ipLongs[0]<=ip2long($myIp) && $ipLongs[1]>=ip2long($myIp) && $ipPass = true;
+                }else{                
+                    $myIp == $ipRange[0] && $ipPass = true;
+                }
+            }
+
+            if( !$ipPass ){
+                $project = $user->getProject();
+                Auth::logout();
+                return Redirect::to('project/'.$project)->withErrors(array('limit'=>'您無法存取這個網站'));
+            }
+        }
+    }
 });
 
 Route::filter('maintenance', function($route) {
