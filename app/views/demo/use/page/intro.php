@@ -39,7 +39,7 @@ $docs = VirtualFile::with('requester.docRequester')->has('requester')->where('us
 
 
 foreach($docs as $doc){
-	echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px">';
+	echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px;color:#f00">';
 	echo '<p style="margin:0">您有一個檔案上傳的請求 "'.$doc->isFile->title.'" 來自於：'.$doc->requester->docRequester->user->username;
 	if( $doc->requester->running ){
 		echo '<p style="margin:5px 0 0 0">'.$doc->requester->description.'</p>';
@@ -51,11 +51,11 @@ foreach($docs as $doc){
 }
 
 
-$shares = Sharer::with('fromUser','fromDoc')->where('shared_user_id', $user->id)->get();
+$shares = Sharer::with('fromDoc.user')->where('shared_user_id', $user->id)->get();
 
 foreach($shares as $share){
-	echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px">';
-	echo $share->fromUser->username.'分享一個檔案給你：'.$share->fromDoc->isFile->title;
+	echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px;color:#f00">';
+	echo $share->fromDoc->user->username.'分享一個檔案給你：'.$share->fromDoc->isFile->title;
 	if( !$share->accept ){
 		echo Form::open(array('url' => $user->get_file_provider()->get_doc_active_url('get_share', $share->from_doc_id), 'style'=>'width:0;display:inline-block;margin:0'));
 		echo Form::submit('同意', array('style'=>'margin:0;line-height:15px'));

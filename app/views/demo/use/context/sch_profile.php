@@ -13,8 +13,6 @@
 }
 </style>
 <div ng-controller="Ctrl">
-    
-學校: <input ng-model="searchText.schools" />
 
 <input ng-click="prev()" type="button" value="prev" />
 page:{{ page+1 }}
@@ -22,17 +20,18 @@ page:{{ page+1 }}
 
 <table cellpadding="3" cellspacing="0" border="0" width="1400" class="sch-profile" style="margin:10px 0 0 10px">
     <tr>
-        <th width="30">
-            <a class="sorter" herf="" ng-click="predicate = '-id'; reverse=false">編號</a>
+        <th width="60">
             <a class="sorter" herf="" ng-click="predicate = 'id'; reverse=false">^</a>
+            <a class="sorter" herf="" ng-click="predicate = '-id'; reverse=false">編號</a>            
         </th>		
         <th width="350">
-            <a class="sorter" herf="" ng-click="predicate = '-schools'; reverse=false">學校</a>
             <a class="sorter" herf="" ng-click="predicate = 'schools'; reverse=false">^</a>
+            <a class="sorter" herf="" ng-click="predicate = '-schools'; reverse=false">學校</a>            
+            <div><input ng-model="searchText.schools" /></div>
         </th>
-        <th width="80">姓名</th>
-        <th width="20">開通</th>
+        <th width="80">姓名</th>        
 		<th>email</th>
+        <th width="20">開通</th>
         <th>職稱</th>
         <th width="150"><input ng-model="hidetel" ng-click="hidetel=true" type="checkbox" />電話</th>
         <th width="100">傳真</th>
@@ -46,9 +45,9 @@ page:{{ page+1 }}
     <tr ng-repeat="user in users | orderBy:predicate:reverse | filter:searchText | startFrom:page*20 | limitTo:20">
         <td>{{ user.id | number }}</td>        
         <td><div ng-repeat="school in user.schools">{{ school.id }} - {{ school.sname }}</div></td>
-        <td>{{ user.name }}</td>
-        <td>{{ user.active }}</td>	
+        <td>{{ user.name }}</td>        	
         <td>{{ user.email }}<a class="sorter" herf="" ng-click="user.emailbk=false;" ng-hide="!user.email2">+</a><div ng-hide="user.emailbk" ng-init="user.emailbk=true">{{ user.email2 }}</div></td>
+        <td>{{ user.active }}</td>
         <td>{{ user.title }}</td>
         <td ng-hide="hidetel">{{ user.tel }}</td>
         <td>{{ user.fax }}</td>
@@ -109,13 +108,17 @@ function Ctrl($scope) {
     $scope.users = angular.fromJson(<?=$profiles->toJSON()?>);
     $scope.predicate = 'id';
     $scope.page = 0;
+    $scope.limit = 20;
+    $scope.max = $scope.users.length;
     
     $scope.next = function() {
-        $scope.page++;
-    }
+        if( ($scope.page+1)*$scope.limit < $scope.max )
+            $scope.page++;
+    };
     
     $scope.prev = function() {
-        $scope.page--;
-    }
+        if( $scope.page > 0 )
+            $scope.page--;
+    };
 }
 </script>

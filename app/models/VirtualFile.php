@@ -43,7 +43,7 @@ class Sharer extends Eloquent {
 	
 	protected $fillable = array('from_doc_id', 'shared_user_id', 'accept');
 	
-	public function fromUser() {
+	public function toUser() {
 		return $this->hasOne('User','id','shared_user_id');
 	}
 	
