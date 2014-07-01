@@ -8,6 +8,8 @@ app/tests
 vendor/*
 !vendor/autoload.php
 !vendor/composer
+public/*
+!public/css
 bootstrap
 artisan
 composer.lock
@@ -15,4 +17,6 @@ CONTRIBUTING.md
 phpunit.xml
 README.md
 server.php
+.gitattributes
+.gitignore
 Thumbs.db

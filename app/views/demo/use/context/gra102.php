@@ -6,7 +6,6 @@
 # function: 上傳103學年度國三畢業生基本資料	
 #
 ##########################################################################################
-
 $fileProvider = app\library\files\v0\FileProvider::make();
 	
 function num2alpha($n)  //數字轉英文(0=>A、1=>B、26=>AA...)
@@ -250,7 +249,8 @@ if ($null_row_flag == 1)
   </tr>
 	<tr>
 		<td colspan="8" align="left" style="padding-left:10px">相關檔案: 
-			<a href="<?=URL::to($fileProvider->download(2))?>">範例表格下載</a><br />
+			<a href="<?=URL::to($fileProvider->download(2))?>">範例表格下載</a>、
+            <a href="<?=URL::to($fileProvider->download(21))?>">查詢平臺操作說明</a><br />
 			<?
 			//表單資料
 			echo "</br>"."</br>";
@@ -315,3 +315,74 @@ if ($null_row_flag == 1)
 	?>
 </table>	
 </div>
+
+<div ng-controller="Ctrl">
+    
+    <input ng-click="prev()" type="button" value="prev" />
+    <input ng-model="page" size="2" /> / {{ pages }}
+    <input ng-click="next()" type="button" value="next" />
+    <input ng-click="all()" type="button" value="顯示全部" />
+
+    <table cellpadding="3" cellspacing="0" border="0" width="1400" class="sch-profile" style="margin:10px 0 0 10px">
+        <tr>
+            <th width="40">編號</th>
+            <th width="80">學校代號<input ng-model="searchText.shid" /></th>
+            <th width="100">姓名<input ng-model="searchText.name" /></th>
+            <th width="20">姓別<input ng-model="searchText.sex" size="2" /></th> 
+            <th width="80">身分證<input ng-model="searchText.stdidnumber" /></th>
+            <th></th>
+        </tr>
+        <tr ng-repeat="student in students | orderBy:predicate:reverse | filter:searchText | startFrom:(page-1)*20 | limitTo:limit">
+            <td>{{ student.cid }}</td>    
+            <td>{{ student.shid }}</td>
+            <td>{{ student.name }}</td>
+            <td>{{ student.sex }}</td> 
+            <td>{{ student.stdidnumber }}</td> 
+        </tr>
+
+    </table>
+    
+</div>
+
+<?
+$students = Cache::remember('gra102-upload-student12324.'.$user->id, 5, function() use($user) {
+    return DB::table('use_103.dbo.gra103_userinfo')->where('created_by', $user->id)->select('shid', 'name', 'sex', DB::raw('\'*****\'+SUBSTRING(stdidnumber, 6, 5) AS stdidnumber'))->get();
+});
+?>
+
+<script>
+angular.module('app', [])
+.filter('startFrom', function() {
+    return function(input, start) {         
+        return input.slice(start);
+    };
+}).controller('Ctrl', Ctrl);
+
+function Ctrl($scope) {
+    $scope.students = angular.fromJson(<?=json_encode($students)?>);
+    //$scope.schools = angular.fromJson(<?//=json_encode($schools_list)?>);
+    console.log($scope.schools);
+    $scope.predicate = 'cid';
+    $scope.page = 1;
+    $scope.limit = 20;
+    $scope.sorter = 'sorter';
+    $scope.max = $scope.students.length;
+    $scope.pages = Math.ceil($scope.max/$scope.limit);
+    
+    $scope.next = function() {
+        if( $scope.page < $scope.pages )
+            $scope.page++;
+    };
+    
+    $scope.prev = function() {
+        if( $scope.page > 1 )
+            $scope.page--;
+    };
+    
+    $scope.all = function() {
+        $scope.page = 1;
+        $scope.limit = $scope.max;
+        $scope.pages = 1;
+    };
+}
+</script>
