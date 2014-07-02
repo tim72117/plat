@@ -38,7 +38,7 @@ function checkstdid($sch_id){
 	}
 }
 
-$user = auth::user();
+$user = Auth::user();
 $error_text = '';
 $null_text = '';
 $null_row_flag = 0; 
@@ -325,19 +325,15 @@ if ($null_row_flag == 1)
 
     <table cellpadding="3" cellspacing="0" border="0" width="1400" class="sch-profile" style="margin:10px 0 0 10px">
         <tr>
-            <th width="40">編號</th>
             <th width="80">學校代號<input ng-model="searchText.shid" /></th>
-            <th width="100">姓名<input ng-model="searchText.name" /></th>
-            <th width="20">姓別<input ng-model="searchText.sex" size="2" /></th> 
-            <th width="80">身分證<input ng-model="searchText.stdidnumber" /></th>
+            <th width="80">上傳人數<input ng-model="searchText.count_std" size="4" /></th>
+            <th width="400">檔案名稱<div><input ng-model="searchText.title" /></div></th> 
             <th></th>
         </tr>
-        <tr ng-repeat="student in students | orderBy:predicate:reverse | filter:searchText | startFrom:(page-1)*20 | limitTo:limit">
-            <td>{{ student.cid }}</td>    
+        <tr ng-repeat="student in students | orderBy:predicate:reverse | filter:searchText | startFrom:(page-1)*20 | limitTo:limit">  
             <td>{{ student.shid }}</td>
-            <td>{{ student.name }}</td>
-            <td>{{ student.sex }}</td> 
-            <td>{{ student.stdidnumber }}</td> 
+            <td>{{ student.count_std }}</td> 
+            <td>{{ student.title }}</td>            
         </tr>
 
     </table>
@@ -345,8 +341,12 @@ if ($null_row_flag == 1)
 </div>
 
 <?
-$students = Cache::remember('gra102-upload-student12324.'.$user->id, 5, function() use($user) {
-    return DB::table('use_103.dbo.gra103_userinfo')->where('created_by', $user->id)->select('shid', 'name', 'sex', DB::raw('\'*****\'+SUBSTRING(stdidnumber, 6, 5) AS stdidnumber'))->get();
+$students = Cache::remember('gra102-upload-students-count-1.'.$user->id, 1, function() use($user) {
+    return DB::table('use_103.dbo.gra103_userinfo AS userinfo')
+            ->leftJoin('files', 'userinfo.file_id', '=', 'files.id')
+            ->where('userinfo.created_by', $user->id)
+            ->groupBy('userinfo.shid', 'userinfo.file_id', 'files.title')
+            ->select('userinfo.shid', 'userinfo.file_id', 'files.title', DB::raw('count(shid) AS count_std'))->get();
 });
 ?>
 
@@ -360,8 +360,6 @@ angular.module('app', [])
 
 function Ctrl($scope) {
     $scope.students = angular.fromJson(<?=json_encode($students)?>);
-    //$scope.schools = angular.fromJson(<?//=json_encode($schools_list)?>);
-    console.log($scope.schools);
     $scope.predicate = 'cid';
     $scope.page = 1;
     $scope.limit = 20;
