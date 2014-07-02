@@ -15,7 +15,7 @@ $returns_sc = Cache::remember('q_102grad11.seniorTwo102.school.'.$cacheSchool, 6
     return DB::table('use_102.dbo.seniorTwo102_一般生各校回收率')->whereIn('sch_id', $schools)->get();
 });
 
-$students = Cache::remember('q_102grad11-seniorTwo102-student-'.$cacheSchool, 60, function() use($schools) {
+$students = Cache::remember('q_102grad11-seniorTwo102-student--'.$cacheSchool, 60, function() use($schools) {
     return DB::table('use_102.dbo.seniorTwo102_userinfo AS userinfo')
             ->leftJoin('use_102.dbo.seniorTwo102_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
             ->whereIn('userinfo.shid', $schools)
@@ -88,8 +88,12 @@ page:{{ page+1 }}
         <td>{{ student.shid }}</td>
         <td>{{ student.clsname }}</td>
         <td>{{ student.stdnumber }}</td>
+<<<<<<< Updated upstream
         <td>{{ student.stdname }}</td>              
         <td>{{ student.page }}</td>        
+=======
+        <td>{{ student.stdname }}</td>                  
+>>>>>>> Stashed changes
     </tr>
    
 </table>
