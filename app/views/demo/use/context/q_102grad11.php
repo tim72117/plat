@@ -88,12 +88,7 @@ page:{{ page+1 }}
         <td>{{ student.shid }}</td>
         <td>{{ student.clsname }}</td>
         <td>{{ student.stdnumber }}</td>
-<<<<<<< Updated upstream
-        <td>{{ student.stdname }}</td>              
-        <td>{{ student.page }}</td>        
-=======
         <td>{{ student.stdname }}</td>                  
->>>>>>> Stashed changes
     </tr>
    
 </table>

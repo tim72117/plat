@@ -54,8 +54,8 @@ Route::get('test', function() {
 	Route::get('project/{project}', array('before' => '', 'uses' => 'UserController@loginPage'))->where('project', '[a-z]+');
 	Route::post('auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@login'));
 	
-	Route::get('user/auth/register/{project}', 'UserController@register')->where('project', '[a-z]+');
-	Route::post('user/auth/register/{project}', 'UserController@register')->where('project', '[a-z]+');	
+	Route::get('user/auth/register/{project}', 'RegisterController@register')->where('project', '[a-z]+');
+	Route::post('user/auth/register/{project}', 'RegisterController@register')->where('project', '[a-z]+');	
 	//平台---------------------------------------------------------------------------------------------------------------------------------
 	
 		
