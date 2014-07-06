@@ -1,11 +1,11 @@
 
 <div style="margin:30px auto 0 auto;width:450px">
 	
-	<div style="margin-left:20px;width:50px;line-height: 60px;font-size:12px;color:#888;float:left">
+	<div style="margin-left:20px;width:50px;line-height: 80px;font-size:12px;color:#888;float:left">
 		聯絡我們
 	</div>
 	
-	<div style="margin-left:10px;line-height:60px;height:60px;color:#aaa;float:left">|</div>
+	<div style="margin-left:10px;line-height:80px;height:80px;color:#aaa;float:left">|</div>
 
 	<div style="margin-left:10px;width:350px;line-height: 20px;font-size:12px;color:#888;float:left">
 		Tel:（02）7734-3669、（02）7734-3654、（02）7734-3686
@@ -13,6 +13,8 @@
 		Fax:（02）3343-3910
 		<br />
 		E-mail: <a href="mailto:USEdatabase@deps.ntnu.edu.tw">USEdatabase@deps.ntnu.edu.tw</a>
+        <br />
+        地址: 臺北市和平東路一段129號教育學院大樓一樓
 	</div>
 	
 	<div style="clear:both"></div>
