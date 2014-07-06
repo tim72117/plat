@@ -13,22 +13,21 @@
 }
 </style>
 <div ng-controller="Ctrl">
-    
-學校: <input ng-model="searchText.schools" />
 
 <input ng-click="prev()" type="button" value="prev" />
-page:{{ page+1 }}
+<input ng-model="page" size="2" /> / {{ pages }}
 <input ng-click="next()" type="button" value="next" />
 
 <table cellpadding="3" cellspacing="0" border="0" width="1400" class="sch-profile" style="margin:10px 0 0 10px">
     <tr>
-        <th width="30">
+        <th width="60">
             <a class="sorter" herf="" ng-click="predicate = '-id'; reverse=false">編號</a>
             <a class="sorter" herf="" ng-click="predicate = 'id'; reverse=false">^</a>
         </th>		
         <th width="350">
             <a class="sorter" herf="" ng-click="predicate = '-schools'; reverse=false">學校</a>
             <a class="sorter" herf="" ng-click="predicate = 'schools'; reverse=false">^</a>
+            <input ng-model="searchText.schools" />
         </th>
         <th width="80">姓名</th>
         <th width="20">開通</th>
@@ -36,7 +35,7 @@ page:{{ page+1 }}
         <th>職稱</th>
         <th width="180"><input ng-model="hidetel" ng-click="hidetel=true" type="checkbox" />電話</th>        
     </tr>
-    <tr ng-repeat="user in users | orderBy:predicate:reverse | filter:searchText | startFrom:page*20 | limitTo:20">
+    <tr ng-repeat="user in users | orderBy:predicate:reverse | filter:searchText | startFrom:(page-1)*20 | limitTo:20">
         <td>{{ user.id | number }}</td>        
         <td><div ng-repeat="school in user.schools">{{ school.id }} - {{ school.sname }}</div></td>
         <td>{{ user.name }}</td>
@@ -44,6 +43,7 @@ page:{{ page+1 }}
         <td>{{ user.email }}<a class="sorter" herf="" ng-click="user.emailbk=false;" ng-hide="!user.email2">+</a><div ng-hide="user.emailbk" ng-init="user.emailbk=true">{{ user.email2 }}</div></td>
         <td>{{ user.title }}</td>
         <td ng-hide="hidetel">{{ user.tel }}</td>
+        <td ng-repeat="column in columns">{{ user[column] }}</td> 
     </tr>
     
 <?
@@ -72,8 +72,6 @@ $profiles = $contacts->map(function($contact){
         'email2'  => $contact->email2,                     
     );   
 });
- 
-
 
 $fileProvider = app\library\files\v0\FileProvider::make();
 $intent_key = $fileProvider->doc_intent_key('open', $file_id, 'app\\library\\files\\v0\\CustomFile');
@@ -96,16 +94,23 @@ angular.module('app', [])
 
 function Ctrl($scope, $http) {
     $scope.users = angular.fromJson(<?=$profiles->toJSON()?>);
+    $scope.columns = ["title1","2"];
     $scope.predicate = 'id';
-    $scope.page = 0;
+    $scope.page = 1;
+    $scope.limit = 20;
+    $scope.max = $scope.users.length;
+    $scope.pages = Math.ceil($scope.max/$scope.limit);
     
     $scope.next = function() {
-        $scope.page++;
+        if( $scope.page < $scope.pages )
+            $scope.page++;
     };
     
     $scope.prev = function() {
-        $scope.page--;
+        if( $scope.page > 1 )
+            $scope.page--;
     };
+    
     $scope.auth = function(user, event) {
         $(event.target).prop('disabled', true);
         var data = { project:'use', user_id: user.id, active: event.target.checked, cacheName: '<?=$cacheName?>' };

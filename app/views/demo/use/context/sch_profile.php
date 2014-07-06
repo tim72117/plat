@@ -15,7 +15,7 @@
 <div ng-controller="Ctrl">
 
 <input ng-click="prev()" type="button" value="prev" />
-page:{{ page+1 }}
+<input ng-model="page" size="2" /> / {{ pages }}
 <input ng-click="next()" type="button" value="next" />
 
 <table cellpadding="3" cellspacing="0" border="0" width="1400" class="sch-profile" style="margin:10px 0 0 10px">
@@ -29,8 +29,12 @@ page:{{ page+1 }}
             <a class="sorter" herf="" ng-click="predicate = '-schools'; reverse=false">學校</a>            
             <div><input ng-model="searchText.schools" /></div>
         </th>
-        <th width="80">姓名</th>        
-		<th>email</th>
+        <th width="80">姓名
+            <div><input ng-model="searchText.name" /></div>
+        </th>        
+		<th>email
+            <div><input ng-model="searchText.email" /></div>
+        </th>
         <th width="20">開通</th>
         <th>職稱</th>
         <th width="150"><input ng-model="hidetel" ng-click="hidetel=true" type="checkbox" />電話</th>
@@ -42,7 +46,7 @@ page:{{ page+1 }}
         <th width="30">高二、專二家長</th>
         
     </tr>
-    <tr ng-repeat="user in users | orderBy:predicate:reverse | filter:searchText | startFrom:page*20 | limitTo:20">
+    <tr ng-repeat="user in users | orderBy:predicate:reverse | filter:searchText | startFrom:(page-1)*20 | limitTo:20">
         <td>{{ user.id | number }}</td>        
         <td><div ng-repeat="school in user.schools">{{ school.id }} - {{ school.sname }}</div></td>
         <td>{{ user.name }}</td>        	
@@ -60,7 +64,7 @@ page:{{ page+1 }}
     
 <?
 
-$contacts = Cache::remember('school.Profiile.users', 10, function() {
+$contacts = Cache::remember('school-Profiile-users', 10, function() {
     return Contact::with(array(
         'user' => function($query){
             return $query->select('id', 'active', 'username', 'email');
@@ -104,20 +108,27 @@ angular.module('app', [])
     };
 }).controller('Ctrl', Ctrl);
 
-function Ctrl($scope) {
+function Ctrl($scope, $filter) {
     $scope.users = angular.fromJson(<?=$profiles->toJSON()?>);
     $scope.predicate = 'id';
-    $scope.page = 0;
+    $scope.page = 1;
     $scope.limit = 20;
     $scope.max = $scope.users.length;
+    $scope.pages = Math.ceil($scope.max/$scope.limit);
+     
+    $scope.$watchCollection('searchText', function(query) {
+        $scope.max = $filter("filter")($scope.users, query).length;
+        $scope.pages = Math.ceil($scope.max/$scope.limit);
+        $scope.page = 1;
+    });               
     
     $scope.next = function() {
-        if( ($scope.page+1)*$scope.limit < $scope.max )
+        if( $scope.page < $scope.pages )
             $scope.page++;
     };
     
     $scope.prev = function() {
-        if( $scope.page > 0 )
+        if( $scope.page > 1 )
             $scope.page--;
     };
 }

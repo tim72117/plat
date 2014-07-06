@@ -1,46 +1,23 @@
 <?php
 
-
-
 set_time_limit(0);
 
-$users = DB::table('contact')
-		->leftJoin('users','users.id','=','contact.user_id')
-		//->leftJoin('password_reminders','users.email','=','password_reminders.email')
-		//->whereNull('password_reminders.email')
-		->where('contact.project','=','use')
-		->where('users.active','=',0)
-		->where('users.password','=','')
-        ->whereIn('users.id',array(21,
-34,
-39,
-66,
-109,
-130,
-133,
-171,
-172,
-193,
-217,
-219,
-242,
-385,
-412,
-447,
-541,
-621,
-628,
-644,
-647,
-682,
-707,
-737,
-752,
-805,
-881))		
-        ->select('users.email','contact.sname')
-		->get();
+Config::set('mail.host', '192.168.0.77');
+Config::set('mail.port', 25);
+Config::set('mail.encryption', '');
 
+$users = DB::table('user_in_group')	    
+		->leftJoin('users','users.id','=','user_in_group.user_id')
+		->leftJoin('contact','contact.user_id','=','user_in_group.user_id')					
+        //->where('email','tim72117@gmail.com')
+        ->where('group_id','=', 1)
+		->select('users.email','contact.sname')
+        ->skip(780)
+        ->take(100)
+		->get();
+    
+
+if( false )
 foreach($users as $index => $user){
 	
 	echo 'start: '.$index.' - '.$user->sname.' - '.$user->email.' - status: ';
