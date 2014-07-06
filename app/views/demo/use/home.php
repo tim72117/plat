@@ -41,12 +41,10 @@
 				echo link_to('auth/password/remind/use', '忘記密碼');
 			echo '</p>';
 			echo '<p align="center">';
-				if( $contextFile!='login' && $contextFile!='register' )
-					echo link_to('user/auth/use', '登入');
 
-				if( $contextFile=='login' ){
-					echo link_to('user/auth/register/use', '帳號申請');
-				}
+			if( $contextFile=='login' ){
+				echo link_to('user/auth/register/use', '帳號申請');
+			}
 			echo '</p>';
 			?>
 			<!--\ <a href="isms_sel_acc" target="_blank">帳號註銷</a> <br>

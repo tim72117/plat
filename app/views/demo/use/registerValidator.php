@@ -1,12 +1,14 @@
 <?
-//use Input, Validator, Contact, User, Request, Password;		
-$input = Input::only('email','name','title','department','department_class','tel','fax','sch_id','operational');	
+	
+$input = Input::only('email','name','title','scope','department_class','tel','fax','sch_id','operational');	
 
 $rulls = array(
     'email'               => 'required|email|unique:users',
-    'department'          => 'required|max:50',
     'department_class'    => 'required|in:0,1,2',
     'sch_id'              => 'required|alpha_num|max:6',
+    'scope'               => 'required',
+    'scope.plat'          => 'in:1',
+    'scope.das'           => 'in:1',
     'operational'         => 'required',
     'operational.schpeo'  => 'in:1',
     'operational.senior1' => 'in:1',
@@ -17,17 +19,18 @@ $rulls = array(
 
 $rulls_message = array(
     'email.required'            => '電子郵件必填',
-    'department.required'       => '單位必填',
     'department_class.required' => '單位級別必填',	
     'sch_id.required'           => '學校名稱、代號必填',	
+    'scope.required'            => '申請權限必填',	
     'operational.required'      => '承辦業務必填',	
 
     'email.email'            => '電子郵件格式錯誤',
     'email.unique'           => '電子郵件已被註冊',
-    'department.max'         => '單位不能超過50個字',
     'department_class.in'    => '單位級別格式錯誤',	
     'sch_id.alpha_num'       => '學校名稱、代號格式錯誤',	
     'sch_id.max'             => '代號不能格式錯誤',	
+    'scope.plat.in'          => '申請權限格式錯誤',
+    'scope.das.in'           => '申請權限格式錯誤',
     'operational.schpeo.in'  => '承辦業務格式錯誤',
     'operational.senior1.in' => '承辦業務格式錯誤',
     'operational.senior2.in' => '承辦業務格式錯誤',
@@ -40,37 +43,54 @@ $validator = Validator::make($input, $rulls, $rulls_message);
 if( $validator->fails() ){	
     throw new app\library\files\v0\ValidateException($validator);
 }
-		
-
-	
 
 		
 $user = new User;
 $user->username    = $input['name'];
 $user->email       = $input['email'];
-
-
-
-$contact = new Contact(array(
-    'project'          => 'use',    
-    'active'           => 0,    
-    'sname'            => School::find($input['sch_id'])->sname,    
-    'department'       => $input['department'],
-    'title'            => $input['title'],
-    'tel'              => $input['tel'],
-    'fax'              => $input['fax'],
-    'created_ip'       => Request::getClientIp(),
-));		
-
 $user->valid();
 
-$contact->valid();
+if( Input::get('scope.plat') == 1 ){
+    $contact_use = new Contact(array(
+        'project'          => 'use',    
+        'active'           => 0,    
+        'sname'            => School::find($input['sch_id'])->sname,
+        'title'            => $input['title'],
+        'tel'              => $input['tel'],
+        'fax'              => $input['fax'],
+        'created_ip'       => Request::getClientIp(),
+    ));
 
-$user->save();	
+    $contact_use->valid();
+}
 
-$user->setProject('use');
+if( Input::get('scope.das') == 1 ){
+    $contact_das = new Contact(array(
+        'project'          => 'das',    
+        'active'           => 0,    
+        'sname'            => School::find($input['sch_id'])->sname,
+        'title'            => $input['title'],
+        'tel'              => $input['tel'],
+        'fax'              => $input['fax'],
+        'created_ip'       => Request::getClientIp(),
+    ));
 
-$contact = $user->contact()->save($contact);
+    $contact_das->valid();
+}
+
+$user->save();
+
+
+
+if( Input::get('scope.plat') == 1 ){
+    $user->setProject('use');
+    $user->contact()->save($contact_use);
+}
+
+if( Input::get('scope.das') == 1 ){
+    $user->setProject('das');
+    $user->contact()->save($contact_das);
+}
 
 $user->schools()->attach($input['sch_id'],array(
     'department_class' => $input['department_class'],
@@ -81,19 +101,9 @@ $user->schools()->attach($input['sch_id'],array(
     'parent'           => Input::get('operational.parent', '0'),
 ));		
 
-if( is_null($contact->getKey()) ){
-
-    return false;
-
-}else{			
     
-    $credentials = array('email' => $input['email']);
+$credentials = array('email' => $input['email']);
 
-    Password::remind($credentials);
+Password::remind($credentials);
 
-    return $user;
-}		
-
-	
-
-
+return $user;
