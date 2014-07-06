@@ -34,6 +34,8 @@ class FileController extends BaseController {
 			$this->dddos_token = dddos_token();
             
             $this->project = Auth::user()->getProject();
+            Blade::setContentTags('<%', '%>');
+            Blade::setEscapedContentTags('<%%', '%%>'); 
 		});
 	}
 	
@@ -64,12 +66,12 @@ class FileController extends BaseController {
 		$virtualFile = VirtualFile::find($this->fileAcitver->file_id);
 		
 		if( is_null($virtualFile->requester) ){	
-			$data_request = $this->fileRequest($intent_key);
+			$authorize = $this->fileRequest($intent_key);
 		}else{
-			$data_request = '';
+			$authorize = '';
 		}
 		
-		$view = View::make('demo.'.$this->project.'.main')->nest('context',$view_name)->with('request', $data_request);
+		$view = View::make('demo.'.$this->project.'.main')->nest('context',$view_name)->with('authorize', $authorize);
 		
         $this->layout->content = $view;
         
@@ -134,16 +136,16 @@ class FileController extends BaseController {
         $html_request = '';
         $html_request_end = '';
 		$html_share = '';        
-		$preparers = Requester::with('docPreparer.user')->where('requester_doc_id', '=', $this->fileAcitver->file_id)->where('running', true)->get();   
-        $preparers_user_id = array();
-        foreach($preparers->lists('doc_preparer', 'id') as $doc_preparer_id => $doc_preparer){
-            $preparers_user_id[$doc_preparer_id] = $doc_preparer->user_id;
-        }
-      
-        
         
 		$user->load('groups.users');
 		if( $user->groups->count() > 0 ){
+            
+            $preparers = Requester::with('docPreparer.user')->where('requester_doc_id', '=', $this->fileAcitver->file_id)->where('running', true)->get();
+            $preparers_user_id = array();
+            foreach($preparers->lists('doc_preparer', 'id') as $doc_preparer_id => $doc_preparer){
+                $preparers_user_id[$doc_preparer_id] = $doc_preparer->user_id;
+            }
+        
 			$html .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_to'), 'files' => true));			
             
 			foreach($user->groups as $group){
@@ -195,28 +197,47 @@ class FileController extends BaseController {
 			
 			
 			//share
-			$html_share .= '-------------------------------------------------';
+            $html_share .= '-------------------------------------------------';
+            $html_share_to = '';
+            $html_share_end = '';
+            
+            $shared = Sharer::where('from_doc_id', '=', $this->fileAcitver->file_id)->lists('shared_user_id');
+            
 			$html_share .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'share_to'), 'files' => true));
-			
-			foreach($user->groups as $group){
-				$html_share .= Form::checkbox('group[]', $group->id, false);
-				$html_share .= $group->description;
-				
-				if( $group->users->count()>0 )
-				$html_share .= '<br />';
-				
-				foreach($group->users as $user_in_group){
-					if( !in_array($user_in_group->id, $preparers_user_id) && $user_in_group->active==true && $user_in_group->id!=$user->id ){
-						$html_share .= Form::checkbox('user[]', $user_in_group->id, false);
-						$html_share .= $user_in_group->username;
-					}
-				}
-				$html_share .= '<br /><br />';
-			}
 
-			$html_share .= Form::submit('Share!');
-			$html_share .= Form::hidden('intent_key', $intent_key);
-			$html_share .= Form::close();
+			foreach($user->groups as $group){				
+				
+				$html_share_to .= '<table ng-hide="share_group'.$group->id.'" ng-init="share_group'.$group->id.'=true">';				
+				foreach($group->users as $user_in_group){
+					if( in_array($user_in_group->id, $shared)  ){
+                        $html_share_end .= '<div>';
+						$html_share_end .= Form::checkbox('doc[]', $user_in_group->id, false);
+						$html_share_end .= $user_in_group->username;
+                        $html_share_end .= '</div>';
+					}elseif( $user_in_group->active==true && $user_in_group->id!=$user->id ){
+                        $html_share_to .= '<tr><td>';
+						$html_share_to .= Form::checkbox('user[]', $user_in_group->id, false);
+						$html_share_to .= $user_in_group->username;
+                        $html_share_to .= '</td></tr>';
+                    }
+				}
+                $html_share_to .= '</table>';
+                
+                $html_share .= '<div>';
+                $html_share .= Form::checkbox('group[]', $group->id, false);
+                $html_share .= '<input ng-click="share_group'.$group->id.'=!share_group'.$group->id.'" type="button" value="名單" />';
+				$html_share .= $group->description;
+				$html_share .= '</div>';
+                
+			}
+            $html_share .= $html_share_to;
+            $html_share .= Form::submit('Share!');
+            $html_share .= Form::hidden('intent_key', $intent_key);
+            $html_share .= Form::close();
+            
+            if( count($shared) > 0 ){
+                $html_share .= $html_share_end;
+            }
 			
 			
 		}
@@ -224,7 +245,7 @@ class FileController extends BaseController {
 	
 		
         
-        return $html.$html_share;
+        return array('request'=>$html ,'share'=>$html_share);
 	}
 	
 	public function upload($intent_key) {

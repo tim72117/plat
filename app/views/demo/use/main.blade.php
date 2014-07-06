@@ -24,10 +24,10 @@ $(document).ready(function(){	//選單功能
     });
 
     $('.shareBtn').click(function(){
-        if( $('.share').css('left')==='0px' ){
-            $('.share').animate({left: -501}); 
+        if( $('.authorize').css('left')==='0px' ){
+            $('.authorize').animate({left: -501}); 
         }else{
-            $('.share').animate({left: 0}); 
+            $('.authorize').animate({left: 0}); 
         }
     });
 });
@@ -99,6 +99,7 @@ function request() {
 					}
 				}
 
+
 				?>
 				</div>
 				
@@ -107,8 +108,30 @@ function request() {
 
 		<div style="height: 100%;overflow-y: hidden;margin:0 0 0 200px; position: relative" class="context">
             
-            <div style="width:500px;position: absolute;top:0;background-color: #fff;border-right: 1px solid #ddd;height: 100%;left:-501px;font-size:16px;overflow: auto" class="share">
-                <div ng-controller="request" style="margin:10px"><?=$request ?></div>
+            <div style="width:500px;position: absolute;top:0;background-color: #fff;border-right: 1px solid #ddd;height: 100%;left:-0px;font-size:16px;overflow: auto" class="authorize">
+                <div ng-controller="request" style="margin:10px"><?=$authorize['request']?></div>
+                <div ng-controller="share" style="margin:10px">
+                    <table>
+                        <tr ng-repeat="share in shares">
+                            <td>{{ share.id }}</td>
+                        </tr>
+                    </table>
+
+                        <?//=$authorize['share']?></div>
+                <script>
+                    var myapp = angular.module('myapp', [])
+                            .controller('share', share);
+                    function share($scope, $filter) {
+                        $scope.shares = [{id:1},{id:2}];
+                    }
+                    
+                    myapp.config(function($interpolateProvider) {
+                        alert();
+                        $interpolateProvider.startSymbol('<\%');
+                        $interpolateProvider.endSymbol('%>');
+                    });
+                    console.log(myapp);
+                </script>
             </div>
             
 			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:16px;text-align: left;margin-top:0">		              
