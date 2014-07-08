@@ -11,7 +11,7 @@
 
 $count_report = DB::table('report')->where('solve','False')->groupBy('root')->select(DB::raw('root,count(root) AS count'))->lists('count','root');
 		
-$docs = DB::table('doc_ques')->select('qid','title','year','dir','edit','ver')->orderBy('ver')->get();
+$docs = DB::table('ques_doc')->select('qid','title','year','dir','edit','ver')->orderBy('ver')->get();
 
 $docsTable = '';
 foreach($docs as $doc){
