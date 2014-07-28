@@ -64,16 +64,19 @@ function checkstdnumber($stdnumber){
 	}
 }
 
-$user = auth::user();
+$user = Auth::user();
 $error_flag = 0;
 $null_text = '';
 $null_row_flag = 0; 
 $s=0;
 
-foreach (auth::user()->works as $users)
-	{
-		$sch_id =  $users->sch_id; //上傳寫入時使用此shid，不使用excel之提交shid
-	}
+$work_schools = $user->schools->lists('sname','id');
+$sch_id = Input::get('sch_id', Session::get('user.work.sch_id'));  
+if( array_key_exists($sch_id, $work_schools) ){
+    Session::put('user.work.sch_id', $sch_id);
+}else{
+    Session::put('user.work.sch_id', array_keys($work_schools)[0]);
+}
 
 //上傳判斷
 if( Session::has('upload_file_id') ){ 
@@ -359,19 +362,38 @@ if( Session::has('upload_file_id') ){
 				//103seniorOne_userinfo	
 				DB::table('use_103.dbo.seniorOne103_userinfo')
 						->where('newcid', $value['newcid'])
-						->update(array('shid' => $sch_id,'depcode' => $value['depcode'],'stdnumber' => $value['stdname'],
-									   'stdname' => $value['stdidnumber'],'stdidnumber' => $value['stdsex'],'birth' => $value['birth'],
-									   'clsname' => $value['clsname'],'teaname' => $value['teaname'],'teaemail' => $value['teaemail'],
-									   'workstd' => $value['workstd'],'created_by' => $user->id,'file_id' => $file_id,'update_at'=>$newdate));
+						->update(array( 'shid'      => Session::get('user.work.sch_id'),
+                                        'depcode'   => $value['depcode'],
+                                        'stdnumber' => $value['stdname'],
+									    'stdname'   => $value['stdidnumber'],
+                                        'stdidnumber' => $value['stdsex'],
+                                        'birth'      => $value['birth'],
+									    'clsname'    => $value['clsname'],
+                                        'teaname'    => $value['teaname'],
+                                        'teaemail'   => $value['teaemail'],
+									    'workstd'    => $value['workstd'],
+                                        'created_by' => $user->id,
+                                        'file_id'    => $file_id,
+                                        'update_at'  => $newdate));
 			}else{
 				
 				//103seniorOne_userinfo	
 				DB::table('use_103.dbo.seniorOne103_userinfo')
-						->insert(array('newcid' => $value['newcid'],'shid' => $sch_id,'depcode' => $value['depcode'],
-									   'stdnumber' => $value['stdname'],'stdname' => $value['stdidnumber'],'stdidnumber' => $value['stdsex'],
-									   'birth' => $value['birth'],'clsname' => $value['clsname'],'teaname' => $value['teaname'],
-									   'teaemail' => $value['teaemail'],'workstd' => $value['workstd'],'created_by' => $user->id,
-									   'file_id' => $file_id,'created_at'=>$newdate,'update_at'=>$newdate));	
+						->insert(array( 'newcid'    => $value['newcid'],
+                                        'shid'      => Session::get('user.work.sch_id'),
+                                        'depcode'   => $value['depcode'],
+									    'stdnumber' => $value['stdname'],
+                                        'stdname'   => $value['stdidnumber'],
+                                        'stdidnumber' => $value['stdsex'],
+									    'birth'      => $value['birth'],
+                                        'clsname'    => $value['clsname'],
+                                        'teaname'    => $value['teaname'],
+									    'teaemail'   => $value['teaemail'],
+                                        'workstd'    => $value['workstd'],
+                                        'created_by' => $user->id,
+									    'file_id'    => $file_id,
+                                        'created_at' =>$newdate,
+                                        'update_at'  =>$newdate));	
                 
                 $userinfo_all_keys[$value['newcid']] = '';
 						
@@ -407,6 +429,9 @@ if ($null_row_flag == 1)
 	}
 }
 	
+
+
+
 ?>
 
 
@@ -424,7 +449,13 @@ if ($null_row_flag == 1)
 			<p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p><br/>
  
 			<?
-			//表單資料
+			//表單資料      
+            echo '<div style="margin:10px 0 0 0;border: 1px solid #aaa;padding:10px;width:800px">';
+            echo '選擇您承辦業務的學校代碼';
+            echo Form::open(array('url' => URL::to($fileProvider->get_doc_active_url('open', $file_id)), 'method' => 'post'));
+            echo Form::select('sch_id', $work_schools, Session::get('user.work.sch_id'), array('onchange'=>'this.form.submit()')); 
+            echo Form::close();
+            
 			echo "</br>";
 			$intent_key = $fileAcitver->intent_key;
 			echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true));
@@ -436,7 +467,7 @@ if ($null_row_flag == 1)
 			echo Form::hidden('_token2', dddos_token());
 			echo Form::close();
 
-			echo "</br>";
+			echo '</div>';
 			?>		
 		</td>
 	</tr>
