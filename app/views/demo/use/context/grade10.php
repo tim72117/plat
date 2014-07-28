@@ -99,7 +99,7 @@ if( Session::has('upload_file_id') ){
 
 	$data = ($workSheet->toArray(null,true,true,true));
 
-    $userinfo_all = DB::table('use_103.dbo.103seniorOne_userinfo')->lists('newcid');
+    $userinfo_all = DB::table('use_103.dbo.seniorOne103_userinfo')->lists('newcid');
     $userinfo_all_keys = array_flip($userinfo_all);
 
    
@@ -357,7 +357,7 @@ if( Session::has('upload_file_id') ){
 			
             if( array_key_exists($value['newcid'], $userinfo_all_keys) ) {
 				//103seniorOne_userinfo	
-				DB::table('use_103.dbo.103seniorOne_userinfo')
+				DB::table('use_103.dbo.seniorOne103_userinfo')
 						->where('newcid', $value['newcid'])
 						->update(array('shid' => $sch_id,'depcode' => $value['depcode'],'stdnumber' => $value['stdname'],
 									   'stdname' => $value['stdidnumber'],'stdidnumber' => $value['stdsex'],'birth' => $value['birth'],
@@ -366,7 +366,7 @@ if( Session::has('upload_file_id') ){
 			}else{
 				
 				//103seniorOne_userinfo	
-				DB::table('use_103.dbo.103seniorOne_userinfo')
+				DB::table('use_103.dbo.seniorOne103_userinfo')
 						->insert(array('newcid' => $value['newcid'],'shid' => $sch_id,'depcode' => $value['depcode'],
 									   'stdnumber' => $value['stdname'],'stdname' => $value['stdidnumber'],'stdidnumber' => $value['stdsex'],
 									   'birth' => $value['birth'],'clsname' => $value['clsname'],'teaname' => $value['teaname'],
@@ -524,7 +524,7 @@ if ($null_row_flag == 1)
 
 <?
 $students = Cache::remember('gra102-upload-students-count-1.'.$user->id, 1, function() use($user) {
-    return DB::table('use_103.dbo.103seniorOne_userinfo AS userinfo')
+    return DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
             ->leftJoin('files', 'userinfo.file_id', '=', 'files.id')
             ->where('userinfo.created_by', $user->id)
             ->groupBy('userinfo.shid', 'userinfo.file_id', 'files.title')
