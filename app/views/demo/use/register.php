@@ -138,7 +138,6 @@ $schools = DB::table('pub_school')->where('year', 102)->orderBy('schtype', 'desc
 ?>
 function register($scope) {
     $scope.schools = angular.fromJson(<?=json_encode($schools)?>);
-    console.log($scope.schools);
 };
 </script>
 <style>
