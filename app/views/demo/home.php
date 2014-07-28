@@ -1,15 +1,18 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-TW" lang="zh-TW">
+<html xml:lang="zh-TW" lang="zh-TW">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=10" />
 <meta http-equiv="X-UA-Compatible" content="IE=9" />
 <meta http-equiv="X-UA-Compatible" content="IE=8" />
 <title>資料查詢平台</title>
 
-<!--<script type="text/javascript" src="//ssllogo.twca.com.tw/twcaseal_v3.js" charset="utf-8"></script>-->
+<script src="<?=asset('js/twcaseal_v3.js')?>"></script>
+<!--[if lt IE 9]>
+<script src="<?=asset('js/html5shiv.js')?>"></script>
+<![endif]-->
 
-<link href="<?=asset('demo/use/css/use100.css')?>" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="<?=asset('demo/use/css/use100.css')?>">
 	
 <script type = "text/javascript">
 

@@ -24,10 +24,6 @@
                 <div class="img" style="top:248px;left:0;width:128px;height:128px;background-image: url('<?=asset('images/register/email.png')?>')"><div style="margin-top:138px">到您註冊的信箱收取更改密碼的信件</div></div>
                 <div class="img" style="top:248px;left:256px;width:128px;height:128px;background-image: url('<?=asset('images/register/letter.png')?>')"><div style="margin-top:138px">主管簽核後，將申請表正本寄給我們</div></div>
                 <div class="img" style="top:426px;left:64px;width:256px;height:128px;background-image: url('<?=asset('images/register/key.png')?>')"><div style="margin-top:138px">我們收到您的申請表後，確認您已經完成修改密碼，即為您開通帳號</div></div>
-                <!--<img src="<?=asset('images/register/printer.png')?>" style="position: absolute;left:256px" /><span>列印申請表</span><br />
-                <img src="<?=asset('images/register/letter.png')?>" style="position: absolute" /><span>將申請表正本寄給我們</span><br />
-                <img src="<?=asset('images/register/email.png')?>" style="position: absolute" /><span>到您註冊的信箱收取更改密碼的信件</span><br />
-                <img src="<?=asset('images/register/key.png')?>" style="position: absolute" /><span>修改密碼</span>-->
             </div>
         </td>
         <td>
@@ -66,7 +62,10 @@
                 <tr>
                     <th align="right" height="40" valign="middle">單位名稱</th>
                     <td align="left">
-                        <select ng-model="sch_id" ng-options="(school.id+' - '+school.sname) group by school.cityname for school in schools | filter:class track by school.id" name="sch_id" style="padding:10px;width:400px">
+                        <div id="schools">
+                            <div ng-repeat="sch_id in sch_ids" style="float:left;border:1px solid #888;margin-right:3px;margin-top:3px"><span class="muti-select-lab">{{ sch_id.name }}</span></div>
+                        </div>                        
+                        <select ng-model="sch_id" ng-options="(school.id+' - '+school.sname) group by school.cityname for school in schools | filter:class track by school.id" ng-change="change()" name="sch_id" style="padding:5px;width:400px">
                             <option value="">----------------------------選擇您服務的單位----------------------------</option>
                         </select>
                     </td>
@@ -138,7 +137,14 @@ $schools = DB::table('pub_school')->where('year', 102)->orderBy('schtype', 'desc
 ?>
 function register($scope) {
     $scope.schools = angular.fromJson(<?=json_encode($schools)?>);
+
+    $scope.sch_ids = [];
+    $scope.change = function(){
+        $scope.sch_ids.push({id:$scope.sch_id.id, name:$scope.sch_id.sname});
+    };
+
 };
+
 </script>
 <style>
 th,td,p {
@@ -149,6 +155,22 @@ div.img {
     background-repeat:no-repeat;
     background-position:center center;    
     text-align:center
+}
+.muti-select-lab{
+    line-height: 20px;
+}
+.muti-select-lab:after {			
+	content: '';
+	display: block;
+    background-color: rgba(0,0,0,0.2);
+	background-image: url('<?=asset('images/register/cancel.png')?>'); 
+	background-size: 16px 16px;
+	background-repeat: no-repeat;
+	background-position: center;
+	height: 20px;
+	width: 20px;
+    margin-left: 3px;
+	float: right;		
 }
 </style>
 </div>
