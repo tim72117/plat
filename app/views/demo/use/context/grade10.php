@@ -135,7 +135,7 @@ if( Session::has('upload_file_id') ){
 							$value['shid'] = '';
 							$error_flag = 1;
 							$msg.= "未填入學校代碼 ； "."</br>";
-							$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+							$this_row.='<td>'.'</td>';
 							}
 					break;
 					//////////////////////////////////////////////////////////
@@ -155,7 +155,7 @@ if( Session::has('upload_file_id') ){
 							$value['depcode'] = '';
 							$error_flag = 1;
 							$msg.="未填入科別代碼 ； "."</br>";
-							$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';}
+							$this_row.='<td>'.'</td>';}
 					break;
 					//////////////////////////////////////////////////////////
 					case '2'://學號
@@ -173,7 +173,7 @@ if( Session::has('upload_file_id') ){
 							$value['stdnumber'] = '';
 							$error_flag = 1;
 							$msg.="未填入學號 ； "."</br>";	
-							$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';}
+							$this_row.='<td>'.'</td>';}
 					break;
 					//////////////////////////////////////////////////////////
 					case '3'://學生姓名
@@ -191,7 +191,7 @@ if( Session::has('upload_file_id') ){
 							$value['stdname'] = '';
 							$error_flag = 1;
 								$msg.= "未填入學生姓名 ； "."</br>";
-							$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';}
+							$this_row.='<td>'.'</td>';}
 					break;
 					//////////////////////////////////////////////////////////
 					case '4'://身分證字號
@@ -210,7 +210,7 @@ if( Session::has('upload_file_id') ){
 								$error_flag = 1;
 								$value['stdidnumber']='';
 							 	$msg.="未填入身分證字號 ； "."</br>";
-								$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+								$this_row.='<td>'.'</td>';
 							 }
 						
 					break;
@@ -233,7 +233,7 @@ if( Session::has('upload_file_id') ){
 								$value['stdsex']='';
 								$error_flag = 1;
 								$msg.="未填入性別代碼 ； "."</br>";
-								$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+								$this_row.='<td>'.'</td>';
 							 }	
 					break;
 					//////////////////////////////////////////////////////////
@@ -245,7 +245,7 @@ if( Session::has('upload_file_id') ){
 							$error_flag = 1;
 							$value['birth'] = '';
 							$msg.= "未填入生日 ； "."</br>";
-							$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+							$this_row.='<td>'.'</td>';
 							}
 					break;
 					//////////////////////////////////////////////////////////
@@ -257,7 +257,7 @@ if( Session::has('upload_file_id') ){
 							$error_flag = 1;
 							$value['clsname'] = '';
 							$msg.= "未填入班級 ； "."</br>";
-							$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+							$this_row.='<td>'.'</td>';
 						}
 					break;
 					//////////////////////////////////////////////////////////
@@ -276,7 +276,7 @@ if( Session::has('upload_file_id') ){
 							$value['teaname'] = '';
 							$error_flag = 1;
 								$msg.= "未填入導師姓名 ； "."</br>";
-							$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';}
+							$this_row.='<td>'.'</td>';}
 					break;
 					//////////////////////////////////////////////////////////
 					case '9'://導師信箱
@@ -293,19 +293,25 @@ if( Session::has('upload_file_id') ){
 							$value['teaemail'] = '';
 							$error_flag = 1;
 							$msg.="未填入導師信箱 ； "."</br>";
-							$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+							$this_row.='<td>'.'</td>';
 							}
 					break;
 					//////////////////////////////////////////////////////////
 					case '10'://建教生
 						if (!empty($data[$i][num2alpha($j)])){
-							$value['workstd'] = $data[$i][num2alpha($j)];
-							$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
+							if ($data[$i][num2alpha($j)] !='1' && $data[$i][num2alpha($j)]!='0'){
+								$error_flag = 1;
+								$msg.="建教生代碼錯誤 ； "."</br>";	
+								$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+							}else{
+								$value['workstd'] = $data[$i][num2alpha($j)];
+								$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
+							}
 						}else{
 							$error_flag = 1;
 							$value['workstd'] = '';
 							$msg .= "未填入是否為建教生 ； "."</br>";
-							$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+							$this_row.='<td>'.'</td>';
 							}
 					break;
 					default:
