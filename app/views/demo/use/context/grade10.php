@@ -33,7 +33,8 @@ function checkname($name){
 }
 
 function checkstdid($sch_id){
-	if (preg_match("/[a-zA-Z0-9]{6,}/",$sch_id)) {
+	if ((preg_match("/[a-zA-Z0-9]{6,}/",$sch_id)) && ($sch_id == Session::get('user.work.sch_id'))) {
+		
 		return true;	
 	}else{
 		return false;
@@ -298,7 +299,7 @@ if( Session::has('upload_file_id') ){
 					break;
 					//////////////////////////////////////////////////////////
 					case '10'://建教生
-						if (!empty($data[$i][num2alpha($j)])){
+						if (strlen(($data[$i][num2alpha($j)]))!=0){
 							if ($data[$i][num2alpha($j)] !='1' && $data[$i][num2alpha($j)]!='0'){
 								$error_flag = 1;
 								$msg.="建教生代碼錯誤 ； "."</br>";	
@@ -370,9 +371,9 @@ if( Session::has('upload_file_id') ){
 						->where('newcid', $value['newcid'])
 						->update(array( 'shid'      => Session::get('user.work.sch_id'),
                                         'depcode'   => $value['depcode'],
-                                        'stdnumber' => $value['stdname'],
-									    'stdname'   => $value['stdidnumber'],
-                                        'stdidnumber' => $value['stdsex'],
+                                        'stdnumber' => $value['stdnumber'],
+									    'stdname'   => $value['stdname'],
+                                        'stdidnumber' => $value['stdidnumber'],
                                         'birth'      => $value['birth'],
 									    'clsname'    => $value['clsname'],
                                         'teaname'    => $value['teaname'],
@@ -388,9 +389,9 @@ if( Session::has('upload_file_id') ){
 						->insert(array( 'newcid'    => $value['newcid'],
                                         'shid'      => Session::get('user.work.sch_id'),
                                         'depcode'   => $value['depcode'],
-									    'stdnumber' => $value['stdname'],
-                                        'stdname'   => $value['stdidnumber'],
-                                        'stdidnumber' => $value['stdsex'],
+									    'stdnumber' => $value['stdnumber'],
+                                        'stdname'   => $value['stdname'],
+                                        'stdidnumber' => $value['stdidnumber'],
 									    'birth'      => $value['birth'],
                                         'clsname'    => $value['clsname'],
                                         'teaname'    => $value['teaname'],
@@ -449,7 +450,7 @@ if ($null_row_flag == 1)
   </tr>
 	<tr>
 		<td colspan="8" align="left" style="padding-left:10px">相關檔案: 
-			<a href="<?=URL::to($fileProvider->download(2))?>">範例表格下載</a>、
+			<a href="<?=URL::to($fileProvider->download(564))?>">範例表格下載</a>、
             <a href="<?=URL::to($fileProvider->download(21))?>">查詢平臺操作說明</a><br /><br />
 			<p style="color:#F00">詳細說明請參考上方《範例表格下載》、《 查詢平臺操作》檔案。</p>
 			<p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p><br/>
@@ -560,10 +561,11 @@ if ($null_row_flag == 1)
 </div>
 
 <?
-$students = Cache::remember('gra102-upload-students-count-1.'.$user->id, 1, function() use($user) {
+$students = Cache::remember('seniorOne103-upload-students-count-1.'.$user->id.'.'.Session::get('user.work.sch_id'), 1, function() use($user) {
     return DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
             ->leftJoin('files', 'userinfo.file_id', '=', 'files.id')
             ->where('userinfo.created_by', $user->id)
+			->where('shid', Session::get('user.work.sch_id'))
             ->groupBy('userinfo.shid', 'userinfo.file_id', 'files.title')
             ->select('userinfo.shid', 'userinfo.file_id', 'files.title', DB::raw('count(shid) AS count_std'))->get();
 });
