@@ -23,6 +23,7 @@ class ViewerController extends BaseController {
 			Config::addNamespace('ques', ques_path().'/ques/data/'.$this->root);
 			View::addNamespace('ques', ques_path());
 			$this->config = Config::get('ques::setting');
+            //var_dump($this->config);exit;
             
             $this->doc = DB::table('ques_doc')->where('dir', $this->root)->first();
 
@@ -35,7 +36,8 @@ class ViewerController extends BaseController {
     
     public function project($context) {
         
-        View::share('config',$this->config);
+        View::share('config', $this->config);
+        View::share('doc', $this->doc);
         
         $contents = View::make('demo.cher.main')->nest('context','demo.cher.page.'.$context)->with('request', '');
         
