@@ -46,6 +46,10 @@ class UserController extends BaseController {
         if( Auth::check() ){
             if( Auth::user()->getProject() == $project ) return Redirect::route('project');
         }
+        
+        if( $project=='das' ){
+            return Redirect::to('project/use');
+        }
 		
 		$contents = View::make('demo.'.$project.'.home', array('contextFile'=>'login', 'title'=>'使用者登入'))
 			->nest('child_tab',   'demo.'.$project.'.tabs')

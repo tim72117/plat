@@ -36,6 +36,8 @@
             <div><input ng-model="searchText.email" /></div>
         </th>
         <th width="20">開通</th>
+        <th width="20">密碼</th>
+        <th width="20">停權</th>
         <th>職稱</th>
         <th width="150"><input ng-model="hidetel" ng-click="hidetel=true" type="checkbox" />電話</th>
         <th width="100">傳真</th>
@@ -52,6 +54,8 @@
         <td>{{ user.name }}</td>        	
         <td>{{ user.email }}<a class="sorter" herf="" ng-click="user.emailbk=false;" ng-hide="!user.email2">+</a><div ng-hide="user.emailbk" ng-init="user.emailbk=true">{{ user.email2 }}</div></td>
         <td>{{ user.active }}</td>
+        <td>{{ user.password }}</td>
+        <td>{{ user.disabled }}</td>
         <td>{{ user.title }}</td>
         <td ng-hide="hidetel">{{ user.tel }}</td>
         <td>{{ user.fax }}</td>
@@ -67,7 +71,7 @@
 $contacts = Cache::remember('school-Profiile-users', 10, function() {
     return Contact::with(array(
         'user' => function($query){
-            return $query->select('id', 'active', 'username', 'email');
+            return $query->select('id', 'active', 'username', 'email', 'password', 'disabled');
         },
         'user.schools'))->where('user_id', '>', '19')->where('project', '=', 'use')->select('user_id', 'title', 'tel', 'fax', 'email2')->get();
 });
@@ -78,6 +82,8 @@ $profiles = $contacts->map(function($contact){
     return array(
         'id'      => (int)$contact->user_id,
         'active'  => $contact->user->active,
+        'password'  => $contact->user->password=='' ? 0 : 1,
+        'disabled'  => $contact->user->disabled ? 1 : 0,
 		'email'   => $contact->user->email,
         'schools' => $contact->user->schools->map(function($school){                        
                         return array_only($school->toArray(), array('id', 'sname'));

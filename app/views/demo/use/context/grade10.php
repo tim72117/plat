@@ -381,7 +381,7 @@ if( Session::has('upload_file_id') ){
 									    'workstd'    => $value['workstd'],
                                         'created_by' => $user->id,
                                         'file_id'    => $file_id,
-                                        'update_at'  => $newdate));
+                                        'updated_at'  => $newdate));
 			}else{
 				
 				//103seniorOne_userinfo	
@@ -400,7 +400,7 @@ if( Session::has('upload_file_id') ){
                                         'created_by' => $user->id,
 									    'file_id'    => $file_id,
                                         'created_at' =>$newdate,
-                                        'update_at'  =>$newdate));	
+                                        'updated_at'  =>$newdate));	
                 
                 $userinfo_all_keys[$value['newcid']] = '';
 						
