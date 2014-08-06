@@ -11,7 +11,7 @@
 
 $count_report = DB::table('report')->where('solve','False')->groupBy('root')->select(DB::raw('root,count(root) AS count'))->lists('count','root');
 		
-$docs = DB::table('ques_doc')->select('qid','title','year','dir','edit','ver')->orderBy('ver')->get();
+$docs = DB::table('ques_doc')->select('qid','title','year','dir','edit','ver')->orderBy('ver')->orderBy('year', 'desc')->get();
 
 $docsTable = '';
 foreach($docs as $doc){
@@ -22,9 +22,7 @@ foreach($docs as $doc){
 	
 	$docsTable .= '<tr>';
 	$docsTable .= '<td>'.$doc->title.'</td>';
-	$docsTable .= '<td><a href="http://ques.cher.ntnu.edu.tw/'.$doc->dir.'">'.$doc->dir.'</a></td>';
 	$docsTable .= '<td><a href="platform/'.$doc->dir.'/demo">demo</a></td>';
-	$docsTable .= '<td><a href="platform/'.$doc->dir.'/show">showdata</a></td>';
 	$docsTable .= '<td><a href="'.asset('ques/project/codebook/'.$doc->dir).'">codebook</a></td>';  
 	$docsTable .= '<td><a href="'.asset('ques/project/spss/'.$doc->dir).'">spss</a></td>';  
 	$docsTable .= '<td><a href="'.asset('ques/project/traffic/'.$doc->dir).'">receives</a></td>';  
@@ -54,9 +52,7 @@ foreach($docs as $doc){
 <table>	
 	<tr>
 		<th width="400">問卷名稱</th>
-		<th width="200">目錄</th>
 		<th width="90">預覽問卷</th>
-		<th width="90">填答值</th> 
 		<th width="100">codebook</th>
 		<th width="60">spss</th>
 		<th width="80">回收數</th>

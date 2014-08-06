@@ -1,7 +1,6 @@
 <?php
-Config::set('database.default', 'sqlsrv');
-Config::set('database.connections.sqlsrv.database', 'ques_admin');
-$reports = DB::table('report')->where('root', $config['rootdir'])->select('id','contact','text','explorer','solve','time')->orderBy('time','desc')->get();
+
+$reports = DB::table('report')->where('root', $doc->dir)->select('id','contact','text','explorer','solve','time')->orderBy('time','desc')->get();
 $out = '';
 foreach($reports as $report){
     $out .= '<tr>';

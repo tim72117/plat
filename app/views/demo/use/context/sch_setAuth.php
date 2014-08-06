@@ -41,7 +41,7 @@
         <td>{{ user.id | number }}</td>        
         <td><div ng-repeat="school in user.schools">{{ school.id }} - {{ school.sname }}</div></td>
         <td>{{ user.name }}</td>
-        <td><input ng-click="auth(user,$event)" type="checkbox" ng-checked="{{ user.active }}" /></td>	
+        <td><input ng-click="auth(user,$event)" type="checkbox" ng-checked="{{ user.active }}" ng-disabled="{{ user.disabled=='X' }}" /></td>	
         <td>{{ user.password }}</td>
         <td>{{ user.disabled }}</td>
         <td>{{ user.email }}<a class="sorter" herf="" ng-click="user.emailbk=false;" ng-hide="!user.email2">+</a><div ng-hide="user.emailbk" ng-init="user.emailbk=true">{{ user.email2 }}</div></td>
@@ -65,8 +65,8 @@ $profiles = $contacts->map(function($contact){
     return array(
         'id'      => (int)$contact->user_id,
         'active'  => $contact->user->active,
-        'password'  => $contact->user->password=='' ? 0 : 1,
-        'disabled'  => $contact->user->disabled ? 1 : 0,
+        'password'  => $contact->user->password=='' ? 'X' : '',
+        'disabled'  => $contact->user->disabled ? 'X' : '',
 		'email'   => $contact->user->email,
         'schools' => $contact->user->schools->map(function($school){                        
                         return array_only($school->toArray(), array('id', 'sname'));
@@ -98,7 +98,7 @@ angular.module('app', [])
     };
 }).controller('Ctrl', Ctrl);
 
-function Ctrl($scope, $http) {
+function Ctrl($scope, $http, $filter) {
     $scope.users = angular.fromJson(<?=$profiles->toJSON()?>);
     $scope.columns = ["title1","2"];
     $scope.predicate = 'id';
@@ -106,6 +106,12 @@ function Ctrl($scope, $http) {
     $scope.limit = 20;
     $scope.max = $scope.users.length;
     $scope.pages = Math.ceil($scope.max/$scope.limit);
+
+    $scope.$watchCollection('searchText', function(query) {
+        $scope.max = $filter("filter")($scope.users, query).length;
+        $scope.pages = Math.ceil($scope.max/$scope.limit);
+        $scope.page = 1;
+    });  
     
     $scope.next = function() {
         if( $scope.page < $scope.pages )

@@ -29,7 +29,8 @@
             <a class="sorter" herf="" ng-click="predicate = '-schools'; reverse=false">學校</a>            
             <div><input ng-model="searchText.schools" /></div>
         </th>
-        <th width="80">姓名
+        <th width="80">
+            <a class="sorter" herf="" ng-click="predicate = '-name'; reverse=false">姓名</a>           
             <div><input ng-model="searchText.name" /></div>
         </th>        
 		<th>email
@@ -39,13 +40,13 @@
         <th width="20">密碼</th>
         <th width="20">停權</th>
         <th>職稱</th>
-        <th width="150"><input ng-model="hidetel" ng-click="hidetel=true" type="checkbox" />電話</th>
+        <th width="200"><input ng-model="hidetel" ng-click="hidetel=true" type="checkbox" />電話</th>
         <th width="100">傳真</th>
-        <th width="30">學校人員</th>
-        <th width="30">高一、專一新生</th>
-        <th width="30">高二、專一學生</th>
-        <th width="30">高二、專二導師</th>
-        <th width="30">高二、專二家長</th>
+        <!--<th width="10">學校人員</th>
+        <th width="10">高一、專一新生</th>
+        <th width="10">高二、專一學生</th>
+        <th width="10">高二、專二導師</th>
+        <th width="10">高二、專二家長</th>-->
         
     </tr>
     <tr ng-repeat="user in users | orderBy:predicate:reverse | filter:searchText | startFrom:(page-1)*20 | limitTo:20">
@@ -82,8 +83,8 @@ $profiles = $contacts->map(function($contact){
     return array(
         'id'      => (int)$contact->user_id,
         'active'  => $contact->user->active,
-        'password'  => $contact->user->password=='' ? 0 : 1,
-        'disabled'  => $contact->user->disabled ? 1 : 0,
+        'password'  => $contact->user->password=='' ? 'X' : '',
+        'disabled'  => $contact->user->disabled ? 'X' : '',
 		'email'   => $contact->user->email,
         'schools' => $contact->user->schools->map(function($school){                        
                         return array_only($school->toArray(), array('id', 'sname'));
