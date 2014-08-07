@@ -69,7 +69,7 @@ class FileController extends BaseController {
 			$data_request = '';
 		}
 		
-		$view = View::make('demo.'.$this->project.'.main')->nest('context',$view_name)->with('request', $data_request);
+		$view = View::make('demo.use.main')->nest('context', $view_name)->with('request', $data_request);
 		
         $this->layout->content = $view;
         
