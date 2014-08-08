@@ -52,7 +52,8 @@ $user->valid();
 
 if( Input::get('scope.plat') == 1 ){
     $contact_use = new Contact(array(
-        'project'          => 'use',    
+        'project'          => 'use', 
+        'main'             => 1,
         'active'           => 0,    
         'sname'            => School::find($input['sch_id'])->sname,
         'title'            => $input['title'],
