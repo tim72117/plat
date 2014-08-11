@@ -9,9 +9,7 @@
 
 <script src="<?=asset('js/twcaseal_v3.js')?>"></script>
 <script src="<?=asset('js/angular.min.js')?>"></script>
-<!--[if lt IE 9]>
-<script src="<?=asset('js/html5shiv.js')?>"></script>
-<![endif]-->
+<!--[if lt IE 9]><script src="<?=asset('js/html5shiv.js')?>"></script><![endif]-->
 
 <link rel="stylesheet" href="<?=asset('demo/use/css/use100.css')?>" />
 

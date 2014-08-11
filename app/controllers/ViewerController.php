@@ -23,17 +23,23 @@ class ViewerController extends BaseController {
 			Config::addNamespace('ques', ques_path().'/ques/data/'.$this->root);
 			View::addNamespace('ques', ques_path());
 			$this->config = Config::get('ques::setting');
-			Config::set('database.default', 'sqlsrv');
-			Config::set('database.connections.sqlsrv.database', $this->config['database']);
+            //var_dump($this->config);exit;
+            
+            $this->doc = DB::table('ques_doc')->where('dir', $this->root)->first();
+
+			Config::set('database.default', 'sqlsrv_ques');
+			//Config::set('database.connections.sqlsrv_ques.database', $this->doc->database);
+
             $this->project = Auth::user()->getProject();
 		});
 	}
     
     public function project($context) {
         
-        View::share('config',$this->config);
+        View::share('config', $this->config);
+        View::share('doc', $this->doc);
         
-        $contents = View::make('demo.'.$this->project.'.main')->nest('context','demo.'.$this->project.'.page.'.$context)->with('request', '');
+        $contents = View::make('demo.cher.main')->nest('context','demo.cher.page.'.$context)->with('request', '');
         
         $this->layout->content = $contents;
         

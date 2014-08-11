@@ -38,6 +38,12 @@
     </tr>
     
 <?
+$users = DB::table('contact')->leftJoin('user_in_group', 'contact.user_id', '=', 'user_in_group.user_id')->where('contact.project', 'use')->whereNull('user_in_group.user_id')->select('contact.user_id')->get();
+foreach($users as $user) {
+    echo $user->user_id;
+    echo '<br />';
+}
+
 $group = Cache::remember('sch_profile.group9009ff0f9029', 10, function() {
     return Group::with(array(
         'users' => function($query){

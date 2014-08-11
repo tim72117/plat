@@ -71,7 +71,7 @@ class FileController extends BaseController {
 			$authorize = '';
 		}
 		
-		$view = View::make('demo.'.$this->project.'.main')->nest('context',$view_name)->with('authorize', $authorize);
+		$view = View::make('demo.use.main')->with('authorize', $authorize)->nest('context', $view_name);
 		
         $this->layout->content = $view;
         

@@ -46,6 +46,10 @@ class UserController extends BaseController {
         if( Auth::check() ){
             if( Auth::user()->getProject() == $project ) return Redirect::route('project');
         }
+        
+        if( $project=='das' ){
+            return Redirect::to('project/use');
+        }
 		
 		$contents = View::make('demo.'.$project.'.home', array('contextFile'=>'login', 'title'=>'使用者登入'))
 			->nest('child_tab',   'demo.'.$project.'.tabs')
@@ -84,14 +88,16 @@ class UserController extends BaseController {
 				
 		if( Auth::once(array('email'=>$input['email'], 'password'=>$input['password'])) ){     
             
-            $user = Auth::user();
+            $user = Auth::user();            
             
-            $user->setProject($input['project']);
+            $projects = DB::table('contact')->where('user_id', $user->id)->where('active', true)->orderBy('main', 'desc')->lists('project');
             
-            if( $user->active != 1 || is_null($user->contact) || $user->contact->active != 1 ){
+            if( $user->active != 1 || !in_array($input['project'], $projects) ){
                 $validator->getMessageBag()->add('login_error', '帳號尚未開通');
                 throw new app\library\files\v0\ValidateException($validator);
             }
+            
+            $user->setProject($input['project']);
                 
             Auth::login($user, true);
             

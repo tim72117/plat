@@ -18,7 +18,7 @@ if( $fileAuth && $fileAuth->all ){
     $schools_list = $schools;
 }
 
-$cacheSchool = json_encode($schools).'123222222ff223';
+$cacheSchool = json_encode($schools).'12322';
 
 $returns_sc = Cache::remember('q_102grad11-seniorTwo102-school.'.$cacheSchool, 60, function() use($schools) {
     return DB::table('use_102.dbo.seniorTwo102_一般生各校回收率')->whereIn('sch_id', $schools)->get();
@@ -28,7 +28,8 @@ $students = Cache::remember('q_102grad11-seniorTwo102-student--'.$cacheSchool, 6
     return DB::table('use_102.dbo.seniorTwo102_userinfo AS userinfo')
             ->leftJoin('use_102.dbo.seniorTwo102_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
             ->whereIn('userinfo.shid', $schools)
-            ->where('userinfo.newadd', 0)
+            ->whereNotNull('userinfo.stdname')
+            //->where('userinfo.newadd', 0)
             ->select('userinfo.shid', 'userinfo.stdnumber', 'userinfo.stdname', 'userinfo.clsname', DB::raw('ROW_NUMBER() OVER (ORDER BY userinfo.stdnumber) AS cid'))
             ->orderBy('userinfo.stdnumber')
             ->get();

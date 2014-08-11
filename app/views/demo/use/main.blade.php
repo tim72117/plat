@@ -1,13 +1,17 @@
-
+<?
+$project = DB::table('projects')->where('code', Auth::user()->getProject())->first();
+?>
 @extends('layout-main')
 
 @section('head')
-<title>後期中等教育資料庫查詢平台</title>
-<script type="text/javascript" src="<?=asset('js/jquery-1.10.2.min.js')?>"></script>
-<script type="text/javascript" src="<?=asset('js/angular.min.js')?>"></script>
-<!--[if lt IE 9]><script src="js/html5shiv.js"></script><![endif]-->
+<title><?=$project->name?></title>
 
-<link href="<?=asset('demo/use/css/use100_content.css')?>" rel="stylesheet" type="text/css" />
+<!--[if lt IE 9]><script src="<?=asset('js/html5shiv.js')?>"></script><![endif]-->
+
+<script src="<?=asset('js/jquery-1.10.2.min.js')?>"></script>
+<script src="<?=asset('js/angular.min.js')?>"></script>
+
+<link rel="stylesheet" href="<?=asset('demo/use/css/use100_content.css')?>" />
 
 <script type="text/javascript">
 $(document).ready(function(){	//選單功能
@@ -45,8 +49,8 @@ function request() {
 
 <div style="width: 100%;height: 100%;max-height:100%">
 
-	<div style="width:100%;height: 110px;position: absolute;z-index:10;background-color: #fff">
-		<div style="background-color: #ffffff;width:100%;height:80px"><img src="<?=asset('demo/use/images/title.jpg')?>" width="500" height="80"></div>
+	<div style="width:100%;height: 30px;position: absolute;z-index:10;background-color: #fff">
+		<div style="background-color: #ffffff;width:100%;height:0px"></div>
 		<div style="background-color: #458A00;width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #ddd;color:#fff" align="right">			
 			<div style="float:left">
 				<? if( Auth::user()->id==1 ){ ?>
@@ -66,7 +70,7 @@ function request() {
         </div>
 	</div>
 	
-	<div class="border-box" style="height:100%;width:100%;background-color: #fff;padding-top:110px">
+	<div class="border-box" style="height:100%;width:100%;background-color: #fff;padding-top:30px">
 		
 		<div style="height:100%;overflow-y: hidden;float:left">
 			<div style="width: 350px;height:100%;background-color: #fff;border-right: 1px solid #ddd;overflow-y: auto;margin-top:0">
@@ -76,7 +80,7 @@ function request() {
 					檔案夾
 				</div>
 				
-				<h2>【 後期中等教育資料庫查詢平台 】</h2>
+				<h2>【 <?=$project->name?> 】</h2>
 				<div>				
 				<?
 				$user = Auth::user();
@@ -109,11 +113,11 @@ function request() {
 		<div style="height: 100%;overflow-y: hidden;margin:0 0 0 200px; position: relative" class="context">
             
             <div style="width:500px;position: absolute;top:0;background-color: #fff;border-right: 1px solid #ddd;height: 100%;left:-0px;font-size:16px;overflow: auto" class="authorize">
-                <div ng-controller="request" style="margin:10px"><?=$authorize['request']?></div>
+                <div ng-controller="request" style="margin:10px"><?=isset($authorize)?$authorize['request']:''?></div>
                 <div ng-controller="share" style="margin:10px">
                     <table>
                         <tr ng-repeat="share in shares">
-                            <td>{{ share.id }}</td>
+                            
                         </tr>
                     </table>
 
