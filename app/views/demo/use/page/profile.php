@@ -24,8 +24,6 @@ if( is_null($user->contact) ){
 
 if( Request::isMethod('post') ){
 
-	$user->username = Input::get('username');
-
 	$user->contact->title = Input::get('title');
 	$user->contact->tel = Input::get('tel');
 	$user->contact->fax = Input::get('fax');
@@ -51,11 +49,11 @@ if( Request::isMethod('post') ){
 
         <tr>
             <th width="175" align="left" style="padding:20px">E-mail <span style="color:#f00">(登入帳號)</span></th>		
-            <td width="175" align="left" style="padding:20px"><?=$user->email?></td>    	
+            <td width="175" align="left" style="padding:20px"><?=$user->email?></td>
         </tr>
         <tr>
-            <th width="175" align="left" style="padding:0 0 0 20px">姓名</th>
-            <td width="175" align="left" style="padding:0 0 0 20px"><?=Form::text('username', $user->username, array('size'=>20, 'class'=>'register-block'))?></td>
+            <th width="175" align="left" style="padding:20px">姓名</th>
+            <td width="175" align="left" style="padding:20px"><?=$user->username?></td>
         </tr>
         <tr>
             <th width="175" align="left" style="padding:0 0 0 20px">職稱</th>
