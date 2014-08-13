@@ -66,11 +66,11 @@ class CommFile {
 			$file = Input::file('file_upload');
 			//$mime = $file->getMimeType();
 			$name_real = $file->getClientOriginalName();
-			$id_user = Auth::user()->id;
+			$user_id = Auth::user()->id;
 			
             //未處理
 			if( is_null($this->doc_id) ){
-				$doc_id = $id_user;
+				$doc_id = $user_id;
 			}else{
 				$doc_id = $this->doc_id;
 			}
@@ -89,7 +89,7 @@ class CommFile {
 			$storage_path = storage_path().'/file_upload';
 			$name = hash_file('md5', $file->getRealPath());			
 			
-			$parts = array_slice(str_split($hash = md5($id_user), 2), 0, 2);
+			$parts = array_slice(str_split($hash = md5($user_id), 2), 0, 2);
 			$path = join('/', $parts);
 			    
 			
@@ -104,16 +104,17 @@ class CommFile {
 					$file->move($storage_path.'/'.$path, $name);
 					
 					$file = new Files(array(
-						'title'   =>   $name_real,
-						'type'    =>   3,
-						'owner'   =>   $doc_id,
-						'file'    =>   $path.'/'.$name,
+						'title'      =>   $name_real,
+						'type'       =>   3,
+						'owner'      =>   $doc_id,
+						'file'       =>   $path.'/'.$name,
+                        'created_by' =>   $user_id,
 					));
 
 					$file->save();
 
 					//$file_id = DB::table('auth')->insertGetId(array(
-					//	'id_user'   =>   $id_user,
+					//	'id_user'   =>   $user_id,
 					//	'id_doc'    =>   $id_doc,
 					//	'visible'   =>   $visible,
 					//));	

@@ -65,12 +65,16 @@ class FileProvider {
 		
         $groups_id = $this->user->inGroups->lists('id');
         
-        $request_doc_ids = DB::table('requester_to_group')->whereIn('group_id', $groups_id)->groupBy('doc_id')->lists('doc_id');
+        $request_doc_ids = DB::table('requester_to_group')->where(function($query) use($groups_id){
+            empty($groups_id) ? $query->whereNull('group_id') : $query->whereIn('group_id', $groups_id);            
+        })->groupBy('doc_id')->lists('doc_id');
         
         $request_docs = DB::table('docs')
 				->leftJoin('files','docs.file_id','=','files.id')
 				->leftJoin('doc_type','files.type','=','doc_type.id')
-                ->whereIn('docs.id', $request_doc_ids)
+                ->where(function($query) use($request_doc_ids){
+                    empty($request_doc_ids) ? $query->whereNull('docs.id') : $query->whereIn('docs.id', $request_doc_ids);            
+                })              
                 ->select('docs.id', 'files.title', 'doc_type.class')
                 ->get();
 
