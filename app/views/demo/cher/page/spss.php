@@ -15,49 +15,85 @@ class tdobj{
 	var $length = '';
 }
 
-$dataroot = ques_path().'/ques/data/'.$config['rootdir'];
+if( $doc->host=='1' ){
+    
+    $table_array = array();
+    $doc_pages = DB::table('ques_admin.dbo.ques_page')->where('qid', $doc->qid)->select('xml', 'page')->get(); 
 
-$pageinfo_file = $dataroot.'/data/pageinfo.xml';
-if( !file_exists($pageinfo_file) ){
-	header('Location: ./');
-	echo 'error pageinfo.xml';
-	exit; 
-};
-$pageinfo = simplexml_load_file($pageinfo_file);
-$page_array = $pageinfo->p;
+    $item_text_array = array();
+    
+    $page = 0;
+    foreach($doc_pages as $doc_page){
+        $question_array = simplexml_load_string($doc_page->xml);
+        $item_text_array[$page] = readTextTemp($question_array);
+        $page++;
+    }
+    
+    $page = 0;
+    foreach($doc_pages as $doc_page){
+        $question_array = simplexml_load_string($doc_page->xml);
+        
+        $tdobj = new tdobj();
+        $tdobj->objtype = "title";
+        $tdobj->page = $page+1;
+        array_push($table_array,$tdobj);
+
+        $item_text_array_temp = $item_text_array[$page];
+        
+        readSPSS($question_array,$table_array,$item_text_array_temp,$page);
+
+        $page++;
+    }
+    
+}else{    
+
+    $dataroot = ques_path().'/ques/data/'.$config['rootdir'];
+
+    $pageinfo_file = $dataroot.'/data/pageinfo.xml';
+    if( !file_exists($pageinfo_file) ){
+        header('Location: ./');
+        echo 'error pageinfo.xml';
+        exit; 
+    };
+    $pageinfo = simplexml_load_file($pageinfo_file);
+    $page_array = $pageinfo->p;
 
 
-$item_text_array = array();
+    $item_text_array = array();
 
 
-$page = 0;
-foreach($page_array as $xmlfile) {
-	$xmlfile_real = $dataroot.'/data/'.$xmlfile->xmlfile;
-	$item_text_array[$page] = readTextTemp($xmlfile_real);
-	$page++;
-}	
+    $page = 0;
+    foreach($page_array as $xmlfile) {
+        $xmlfile_real = $dataroot.'/data/'.$xmlfile->xmlfile;
+        if( is_file($xmlfile) ){	
+            $question_array = simplexml_load_file($xmlfile); 
+            $item_text_array[$page] = readTextTemp($question_array);
+        }
+        $page++;
+    }	
 
 
-$table_array = array();
-$page = 0;
-foreach($page_array as $xmlfile) {
-	$tdobj = new tdobj();
-	$tdobj->objtype = "title";
-	$tdobj->page = $page+1;
-	array_push($table_array,$tdobj);
-	$xmlfile_real = $dataroot.'/data/'.$xmlfile->xmlfile;
+    $table_array = array();
+    $page = 0;
+    foreach($page_array as $xmlfile) {
+        $tdobj = new tdobj();
+        $tdobj->objtype = "title";
+        $tdobj->page = $page+1;
+        array_push($table_array,$tdobj);
+        $xmlfile_real = $dataroot.'/data/'.$xmlfile->xmlfile;
 
-	$item_text_array_temp = $item_text_array[$page];
-	readSPSS($xmlfile_real,$table_array,$item_text_array_temp,$page);
-	$page++;
-}	
+        $item_text_array_temp = $item_text_array[$page];
+        
+        if( is_file($xmlfile) ){	
+            $question_array = simplexml_load_file($xmlfile_real);
+            readSPSS($question_array,$table_array,$item_text_array_temp,$page);
+        }
+        $page++;
+    }	
 
+}
 
-function readSPSS($xmlfile,&$table_array,$item_text_array_temp,$page) {
-	if( !is_file($xmlfile) )
-		return false;
-	
-	$question_array = simplexml_load_file($xmlfile); 
+function readSPSS($question_array,&$table_array,$item_text_array_temp,$page) {
 	
 	foreach($question_array as $question){
 		$id = $question->id;
@@ -250,11 +286,8 @@ function readSPSS($xmlfile,&$table_array,$item_text_array_temp,$page) {
 }
 
 
-function readTextTemp($xmlfile){
-	if( !is_file($xmlfile) )
-		return false;
+function readTextTemp($question_array){
 	
-	$question_array = simplexml_load_file($xmlfile); 	
 	$item_text_array_temp = array();
 	
 	$item_parent_array = $question_array->xpath("//item[@sub]/parent::answer/parent::*");

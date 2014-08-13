@@ -27,7 +27,7 @@ class ViewerController extends BaseController {
             
             $this->doc = DB::table('ques_doc')->where('dir', $this->root)->first();
 
-			Config::set('database.default', 'sqlsrv_ques');
+			//Config::set('database.default', 'sqlsrv_ques');
 			//Config::set('database.connections.sqlsrv_ques.database', $this->doc->database);
 
             $this->project = Auth::user()->getProject();

@@ -37,7 +37,7 @@ function read_sql($doc_page, &$table_array) {
             buildQuestion($question,$question_array,$table_array);
     }
 }
-if( $doc->dir=='103grade10' ){
+if( $doc->host=='1' ){
     $table_array = array();
     $doc_pages = DB::table('ques_admin.dbo.ques_page')->where('qid', $doc->qid)->select('xml', 'page')->get(); 
 
