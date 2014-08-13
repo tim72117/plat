@@ -1,6 +1,5 @@
 <?php
-use Illuminate\Filesystem\Filesystem;
-class FileController extends BaseController {
+class ShareController extends BaseController {
 
 	/*
 	|--------------------------------------------------------------------------
@@ -14,11 +13,7 @@ class FileController extends BaseController {
 	|	Route::get('/', 'HomeController@showWelcome');
 	|
 	*/
-    protected $layout = 'demo.layout-main';
-	protected $dataroot = '';
-	protected $fileAcitver;
-	
-	public function __construct(){
+	public function __construct() {
 		$this->dataroot = app_path().'/views/ques/data/';
 		$this->beforeFilter(function($route){
 			$this->root = $route->getParameter('root');
@@ -26,90 +21,101 @@ class FileController extends BaseController {
 			$this->config = Config::get('ques::setting');
 			Config::set('database.default', 'sqlsrv');
 			Config::set('database.connections.sqlsrv.database', 'ques_admin');
+			$this->project = Auth::user()->getProject();
 		});
 	}
-	
-	public function fileManager($intent_key) {
-		$fileManager = new app\library\files\v0\FileManager();
-		$fileManager->accept($intent_key);
-	}
     
-    public function fileDownload($intent_key) {
-        $this->fileAcitver = new app\library\files\v0\FileActiver();
+    public function share($intent_key) {
+        $user = Auth::user();
         
-        return $this->fileAcitver->accept($intent_key);
-    }
-	
-	public function fileActiver($intent_key) {
-		if( !Session::has('file.'.$intent_key) ){
-            return $this->timeOut();
-        }
-		
-		$this->fileAcitver = new app\library\files\v0\FileActiver();
-		$view_name = $this->fileAcitver->accept($intent_key);		
+        $user->load('groups.users');
         
-        if( Request::isMethod('post') ) {
-            return Redirect::back();
-        }
-		
-        View::share('fileAcitver', $this->fileAcitver);
-		$view = View::make('demo.use.main')->with('intent_key', $intent_key)->nest('context', $view_name)->nest('share', 'demo.use.share');
-		
-        $this->layout->content = $view;
+        if( $user->groups->count() == 0 ){
+            return false;
+        }     
         
-        $response = Response::make($this->layout, 200);
-        $response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
-        $response->header('Pragma', 'no-cache');
-        $response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
-        return $response;
-        
-	}
-    
-    public function fileAjaxGet($intent_key) {
-        $file = Files::find(Session::get('table.'.$intent_key));
-        
-        return Response::make(View::make($file->file))->header('Content-Type', "application/json");;
-        //View::make($file->file);
-        return Response::json(array(View::make($file->file)->render()));
-    }
-    
-    public function fileAjaxPost($intent_key, $method) {
-        $file = VirtualFile::find(Session::get('file')[$intent_key]['file_id']);
+        $intent = app\library\files\v0\FileActiver::active($intent_key);
+        $doc_id = $intent['file_id'];
+            
+        $default_groups = DB::table('requester_to_group')->where('doc_id', $doc_id)->lists('group_id');
+        $preparers = Requester::with('docPreparer.user')->where('requester_doc_id', '=', $doc_id)->where('running', true)->get();
 
-        $fileLoader = new Illuminate\Config\FileLoader(new Filesystem, app_path().'/views/demo/use/controller');
-        $ajax = new Illuminate\Config\Repository($fileLoader, '');
+        $preparers_user_id = array();
+        foreach($preparers->lists('doc_preparer', 'id') as $doc_preparer_id => $doc_preparer){
+            $preparers_user_id[$doc_preparer_id] = $doc_preparer->user_id;
+        }
 
-        $func = $ajax->get($file->isFile->controller.'.'.$method);
-        //call_user_func($func);
-        if( is_callable($func) )
-            return Response::json(call_user_func($func));
+        $shared_user_id = Sharer::where('from_doc_id', '=', $doc_id)->lists('shared_user_id', 'id');
+
+        $groups = array();
+        
+        foreach($user->groups as $group){
+
+            $request_to = array();
+            $requested = array();
+            $shared = array();
+
+            foreach($group->users as $user_in_group){
+
+                if( in_array($user_in_group->id, $preparers_user_id) ){
+                    $preparer_doc_id = array_search($user_in_group->id, $preparers_user_id);
+                    //array_push($requested, array('doc_id'=>$preparer_doc_id, 'name'=>$user_in_group->username));
+                }elseif( $user_in_group->active==true && $user_in_group->id!=$user->id ){
+                    //array_push($request_to, array('user_id'=>$user_in_group->id, 'name'=>$user_in_group->username));
+                }
+
+                $shared[$user_in_group->id] = array(
+                    'name'      => $user_in_group->username,
+                    'shared'    => in_array($user_in_group->id, $shared_user_id),
+                    'shared_id' => array_search($user_in_group->id, $shared_user_id),
+                );                
+
+            }
+
+            array_push($groups, array('id'=>$group->id, 'name'=>$group->description, 'request_to'=> $request_to, 'shared'=> $shared, 'default'=>in_array($group->id, $default_groups)));
+
+        }
+
+        return Response::json(array('groups'=>$groups));
+        
     }
     
-    public function fileOpen($intent_key) {
-		if( !Session::has('file.'.$intent_key) ){
-            return $this->timeOut();
+    public function shareSave($intent_key, $method) {
+        switch($method) {
+            case 'share':
+                $intent = app\library\files\v0\FileActiver::active($intent_key);
+                $shared = Input::get('shared');
+                if( !$shared['shared'] && $shared['shared_id'] ) {
+                    Sharer::find($shared['shared_id'])->delete();
+                    return Response::json(array('share_id'=>false));
+                }
+                
+                if( $shared['shared'] ) {
+                    $shared_new = Sharer::create(array(
+                        'from_doc_id'    => $intent['file_id'],
+                        'shared_user_id' => Input::get('user_id'),
+                        'accept'         => false,
+                    ));
+                    return Response::json(array('share_id'=>$shared_new->id));
+                }
+                //if( Input::get('shared') )
+                //Sharer::
+                return array(Input::get('user_id'), Input::get('shared'), $intent['file_id']);;
+            break;
         }
-        
-		$intent = app\library\files\v0\FileActiver::active($intent_key);
-        
-        switch($intent['active']) {
-            case 'download':
-                $file = new $intent['fileClass']($intent['file_id']);
-                $file_fullPath = $file->$intent['active'](true);
-                return call_user_func_array('Response::download', $file_fullPath);
-            case 'open':
-                Session::set('table.'.$intent_key, $intent['file_id']);
-                //Session::flash('table.'.$intent_key, $intent['file_id']);
-                $view = View::make('demo.use.main')->nest('context', 'demo.use.page.table', array('intent_key'=>$intent_key))->with('request', '');
-                $response = Response::make($view, 200);
-                return $response;
-        }
-        
+    }
+    
+    public function sharePost($intent_key) {
+        $intent = app\library\files\v0\FileActiver::active($intent_key);
+        $doc_id = $intent['file_id'];
+        $active = 'set_default_to_group';
+        $file = new $intent['fileClass']($doc_id);
+		return $file->$active();
     }
 	
-	public function fileRequest($intent_key) {
-		
-		$user = Auth::user();
+	public function request($intent_key, $doc_id) {     
+
+        $user = Auth::user();
 		/*
 		| 送出請求
 		*/
@@ -122,7 +128,7 @@ class FileController extends BaseController {
 		$user->load('groups.users');
 		if( $user->groups->count() > 0 ){
             
-            $preparers = Requester::with('docPreparer.user')->where('requester_doc_id', '=', $this->fileAcitver->file_id)->where('running', true)->get();
+            $preparers = Requester::with('docPreparer.user')->where('requester_doc_id', '=', $doc_id)->where('running', true)->get();
             $preparers_user_id = array();
             foreach($preparers->lists('doc_preparer', 'id') as $doc_preparer_id => $doc_preparer){
                 $preparers_user_id[$doc_preparer_id] = $doc_preparer->user_id;
@@ -183,7 +189,7 @@ class FileController extends BaseController {
             $html_share_to = '';
             $html_share_end = '';
             
-            $shared = Sharer::where('from_doc_id', '=', $this->fileAcitver->file_id)->lists('shared_user_id');
+            $shared = Sharer::where('from_doc_id', '=', $doc_id)->lists('shared_user_id');
             
 			$html_share .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'share_to'), 'files' => true));
 
@@ -228,33 +234,8 @@ class FileController extends BaseController {
 		
         
         return array('request'=>$html ,'share'=>$html_share);
+        
 	}
-	
-	public function upload($intent_key) {
-		$fileClass = 'app\\library\\files\\v0\\CommFile';
-		$file = new $fileClass();
-		$file_id = $file->upload();
-		if( $file_id ){		
-			$context = Session::get('file')[$intent_key];
-			$intent = array('active'=>'open','file_id'=>$context['file_id'],'fileClass'=>$fileClass);
-			return Redirect::to('user/doc/'.$intent_key)->withInput(array('file_id'=>$file_id));
-		}		
-	}
-	
-	public function timeOut() {
-		return View::make('demo.timeout');
-	}
-	
-	
-	public function showQuery() {
-		$queries = DB::getQueryLog();
-		foreach($queries as $query){
-			var_dump($query);echo '<br /><br />';
-		}
-	}
-	//public function 
-	
 
-	
 
 }

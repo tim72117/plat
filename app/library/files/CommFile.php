@@ -158,7 +158,7 @@ class CommFile {
         if( !file_exists($storage_path.'/'.$file_path) )
             throw new FileFailedException;
         
-        return array('path'=>$storage_path.'/'.$file_path,'name'=>$file->title);
+        return array('path'=>$storage_path.'/'.$file_path, 'name'=>$file->title);
 	}
 	
 	public function save_as() { }
