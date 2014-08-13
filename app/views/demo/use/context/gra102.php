@@ -345,6 +345,7 @@ $students = Cache::remember('gra102-upload-students-count-1.'.$user->id, 1, func
     return DB::table('use_103.dbo.gra103_userinfo AS userinfo')
             ->leftJoin('files', 'userinfo.file_id', '=', 'files.id')
             ->where('userinfo.created_by', $user->id)
+            ->orWhere('userinfo.upload_by', $user->id)
             ->groupBy('userinfo.shid', 'userinfo.file_id', 'files.title')
             ->select('userinfo.shid', 'userinfo.file_id', 'files.title', DB::raw('count(shid) AS count_std'))->get();
 });
