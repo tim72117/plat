@@ -3,7 +3,9 @@
 foreach (auth::user()->works as $users)
 	{
 		$sch_id =  $users->sch_id; 
+		
 	}
+	echo $sch_id."hello";
 ?>
 
 <!---
@@ -15,7 +17,7 @@ foreach (auth::user()->works as $users)
 </style>
 -->
 
-<? if ($sch_id = 9999){ //若為教評中心人士(sch_id=9999)，則出現選擇學校選單?>
+<? if ($sch_id == 000000){ //若為教評中心人士(sch_id=9999)，則出現選擇學校選單?>
 <table width="100%" align="center" >
 	<tr>
 		<td class="header2">
