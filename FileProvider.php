@@ -37,7 +37,7 @@ class FileProvider {
 				->select('docs.id','title','doc_type.class','auth_requester.requester_doc_id')->get();
 		
 		
-		$packageDocs = array();
+		$packageDocs = array('docs'=>array(), 'request'=>array());
 		
 		foreach($docs as $doc){
 			$fileClass = 'app\\library\\files\\v0\\'.$doc->class;
@@ -58,7 +58,7 @@ class FileProvider {
 					$intent_key = $this->doc_intent_key($active, $doc->id, $fileClass);
 					array_push($packageDoc['actives'], array('intent_key'=>$intent_key, 'active'=>$active));					
 				}
-				array_push($packageDocs, $packageDoc);
+				array_push($packageDocs['docs'], $packageDoc);
 			}	
 
 		}
@@ -81,8 +81,8 @@ class FileProvider {
         foreach($request_docs as $request_doc){
             $fileClass = 'app\\library\\files\\v0\\'.$request_doc->class;
             if( class_exists($fileClass) ){
-                array_push($packageDocs, array('title'=>$request_doc->title, 'actives'=>array(array('intent_key'=>$this->doc_intent_key('open', $request_doc->id, $fileClass), 'active'=>'open'))));
-                array_push($packageDocs, array('title'=>$request_doc->title, 'actives'=>array(array('intent_key'=>$this->doc_intent_key('import', $request_doc->id, $fileClass), 'active'=>'import'))));
+                array_push($packageDocs['request'], array('title'=>$request_doc->title, 'actives'=>array(array('intent_key'=>$this->doc_intent_key('open', $request_doc->id, $fileClass), 'active'=>'open'))));
+                array_push($packageDocs['request'], array('title'=>$request_doc->title, 'actives'=>array(array('intent_key'=>$this->doc_intent_key('import', $request_doc->id, $fileClass), 'active'=>'import'))));
             }
         }
 
