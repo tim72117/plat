@@ -197,12 +197,31 @@ if( Session::has('upload_file_id') ){
 				$newdate = date("Y-m-d H:i:s");	
 				DB::table('use_103.dbo.gra103_userinfo')
 						->where('newcid', $value[4])
-						->update(array('shid' => $value[0],'name' => $value[1],'sex' => $value[3],'newcid' => $value[4],'stdidnumber' => $value[2],'created_by' => $user->id,'file_id' => $file_id,'update_at'=>$newdate));
+						->update(array(
+                            'shid'        => $value[0],
+                            'name'        => $value[1],
+                            'sex'         => $value[3],
+                            'stdidnumber' => $value[2],
+                            'created_by'  => $user->id,
+                            'file_id'     => $file_id,
+                            'update_at'   => date('Y/n/d H:i:s'),
+                            'created_at'  => date('Y/n/d H:i:s'),
+                        ));
 			}else{
 				
 				//gra103_userinfo	
 				DB::table('use_103.dbo.gra103_userinfo')
-						->insert(array('shid' => $value[0],'name' => $value[1],'sex' => $value[3],'newcid' => $value[4],'stdidnumber' => $value[2],'created_by' => $user->id,'file_id' => $file_id));	
+						->insert(array(
+                            'newcid'      => $value[4],
+                            'shid'        => $value[0],
+                            'name'        => $value[1],
+                            'sex'         => $value[3],                            
+                            'stdidnumber' => $value[2],
+                            'created_by'  => $user->id,
+                            'file_id'     => $file_id,
+                            'update_at'   => date('Y/n/d H:i:s'),
+                            'created_at'  => date('Y/n/d H:i:s'),
+                        ));
                 
                 $userinfo_all_keys[$value[4]] = '';
 						
