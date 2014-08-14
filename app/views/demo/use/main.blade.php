@@ -123,18 +123,39 @@ function share($scope, $filter, $http) {
 		<div style="height:100%;overflow-y: hidden;float:left">
 			<div style="width: 350px;height:100%;background-color: #fff;border-right: 1px solid #ddd;overflow-y: auto;margin-top:0">
 
-				
+				<h2>【 <?=$project->name?> 】</h2>
+                
 				<div style="font-size:18px;margin-top:10px;margin-left:10px">
 					檔案夾
 				</div>
 				
-				<h2>【 <?=$project->name?> 】</h2>
-				<div>				
-				<?
 				
+				<div>	
+                    
+                <h2>【 我的檔案 】</h2>
+				<?				
 				
-				
-				foreach($packageDocs as $packageDoc){
+				foreach($packageDocs['docs'] as $packageDoc){
+					foreach($packageDoc['actives'] as $active){		
+
+						if( $active['active']=='open' ){
+							echo '<div class="inbox" style="clear:both;overflow: hidden;cursor:default;margin-top:10px">';
+							echo '<div class="count button page-menu '.($intent_key==$active['intent_key']?'active':'').'" folder="" style="font-size:16px;text-decoration: none;float:left;margin-left:10px">';
+							//echo '<div class="intent button" intent_key="'.$active['intent_key'].'">'.$active['active'].'</div>';
+							echo '<a href="'.URL::to('user/doc/'.$active['intent_key']).'">'.$packageDoc['title'].'</a>';
+							echo '</div>';
+							echo '</div>';
+						}
+
+					}
+				}
+                
+                ?>
+                
+                <h2>【 待上傳資料 】</h2>                
+                <?
+                
+				foreach($packageDocs['request'] as $packageDoc){
 					foreach($packageDoc['actives'] as $active){		
 
 						if( $active['active']=='open' ){
