@@ -81,9 +81,8 @@ class FileProvider {
         foreach($request_docs as $request_doc){
             $fileClass = 'app\\library\\files\\v0\\'.$request_doc->class;
             if( class_exists($fileClass) ){
-                $intent_key = $this->doc_intent_key('open', $request_doc->id, $fileClass);
-                $packageDoc = array('title'=>$request_doc->title, 'actives'=>array(array('intent_key'=>$intent_key, 'active'=>'open')));
-                array_push($packageDocs, $packageDoc);
+                array_push($packageDocs, array('title'=>$request_doc->title, 'actives'=>array(array('intent_key'=>$this->doc_intent_key('open', $request_doc->id, $fileClass), 'active'=>'open'))));
+                array_push($packageDocs, array('title'=>$request_doc->title, 'actives'=>array(array('intent_key'=>$this->doc_intent_key('import', $request_doc->id, $fileClass), 'active'=>'import'))));
             }
         }
 
