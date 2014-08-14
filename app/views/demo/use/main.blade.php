@@ -1,5 +1,8 @@
 <?
-$project = DB::table('projects')->where('code', Auth::user()->getProject())->first();
+$user = Auth::user();
+$packageDocs = $user->get_file_provider()->lists();				
+$intent_key = is_null(@$fileAcitver) ? null : $fileAcitver->intent_key;
+$project = DB::table('projects')->where('code', $user->getProject())->first();
 ?>
 @extends('layout-main')
 
@@ -26,19 +29,64 @@ $(document).ready(function(){	//選單功能
     $('.context').click(function(){
         $('.queryLog').height(0);
     });
-
-    $('.shareBtn').click(function(){
-        if( $('.share').css('left')==='0px' ){
-            $('.share').animate({left: -501}); 
-        }else{
-            $('.share').animate({left: 0}); 
-        }
-    });
+    
+   
 });
 
 function request() {
     
 }
+<? if( isset($intent_key) ){ ?>
+var intent_url = '<?=asset('share/'.$intent_key)?>';
+<? }else{ ?>
+var intent_url = ''; 
+<? } ?>
+
+angular.module('myapp', [])
+    .controller('share', share);
+function share($scope, $filter, $http) {
+    $scope.shares = [{id:1},{id:2}];
+    $scope.groups = {};
+    $scope.set_groups = {};
+
+    $scope.get = function() {
+        if( $('.authorize').css('left')==='0px' ){
+            $('.authorize').animate({left: -501}); 
+        }else{            
+            $http({method: 'GET', url: intent_url, data:{}})
+            .success(function(data, status, headers, config) {
+                $scope.groups = data.groups;
+                console.log(data);
+                $('.authorize').animate({left: 0});
+            })
+            .error(function(e){
+                console.log(e);
+            });
+        }
+    };
+    
+    $scope.share = function(user_id, shared) {
+        console.log(shared);
+        $http({method: 'POST', url: intent_url+'/share', data:{user_id: user_id, shared: shared}})
+        .success(function(data, status, headers, config) {
+            shared.shared_id = data.share_id;
+            console.log(shared);
+        })
+        .error(function(e){
+            console.log(e);
+        });
+    };
+    
+    $scope.setDefalut = function() {
+        $http({method: 'POST', url: intent_url, data:{groups: $scope.set_groups}})
+        .success(function(data, status, headers, config) {
+            console.log(data);
+        })
+        .error(function(e){
+            console.log(e);
+        });
+    };
+}  
 </script>
 
 @stop
@@ -47,7 +95,7 @@ function request() {
 
 @section('body')
 
-<div style="width: 100%;height: 100%;max-height:100%">
+<div style="width: 100%;height: 100%;max-height:100%" ng-controller="share">
 
 	<div style="width:100%;height: 30px;position: absolute;z-index:10;background-color: #fff">
 		<div style="background-color: #ffffff;width:100%;height:0px"></div>
@@ -59,7 +107,7 @@ function request() {
 			</div>
 			<div style="float:right">
 				<? if( Auth::user()->id==1 ){ ?>
-                <span style="margin-right:10px;cursor: pointer" class="login-bar shareBtn">share</span>
+                <span style="margin-right:10px;cursor: pointer" class="login-bar shareBtn" ng-click="get()">share</span>
 				<span style="margin-right:10px;cursor: pointer" class="login-bar queryLogBtn">queryLog</span>
 				<? } ?>
 				<a href="<?=URL::to('page/project')?>" style="margin-right:10px" class="login-bar">回首頁</a>
@@ -83,10 +131,8 @@ function request() {
 				<h2>【 <?=$project->name?> 】</h2>
 				<div>				
 				<?
-				$user = Auth::user();
-				$packageDocs = $user->get_file_provider()->lists();
 				
-                $intent_key = is_null(@$fileAcitver) ? '' : $fileAcitver->intent_key;
+				
 				
 				foreach($packageDocs as $packageDoc){
 					foreach($packageDoc['actives'] as $active){		
@@ -103,6 +149,7 @@ function request() {
 					}
 				}
 
+
 				?>
 				</div>
 				
@@ -111,8 +158,17 @@ function request() {
 
 		<div style="height: 100%;overflow-y: hidden;margin:0 0 0 200px; position: relative" class="context">
             
-            <div style="width:500px;position: absolute;top:0;background-color: #fff;border-right: 1px solid #ddd;height: 100%;left:-501px;font-size:16px;overflow: auto" class="share">
-                <div ng-controller="request" style="margin:10px"><?=$request ?></div>
+            <div style="width:500px;position: absolute;top:0;background-color: #fff;border-right: 1px solid #ddd;height: 100%;left:-501px;font-size:16px;overflow: auto" class="authorize">
+                <div ng-controller="request" style="margin:10px">
+                    <?=$share?>
+                </div>
+                <div style="margin:10px">
+                    <table>
+                        <tr ng-repeat="share in shares">
+                            
+                        </tr>
+                    </table>
+                </div>
             </div>
             
 			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:16px;text-align: left;margin-top:0">		              
