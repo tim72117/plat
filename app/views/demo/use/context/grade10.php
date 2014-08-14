@@ -299,7 +299,8 @@ if( Session::has('upload_file_id') ){
 					break;
 					//////////////////////////////////////////////////////////
 					case '10'://建教生
-						if (strlen(($data[$i][num2alpha($j)]))!=0){
+					if (!empty($data[$i][num2alpha($j)])){
+						if (strlen($data[$i][num2alpha($j)])!=0){
 							if ($data[$i][num2alpha($j)] !='1' && $data[$i][num2alpha($j)]!='0'){
 								$error_flag = 1;
 								$msg.="建教生代碼錯誤 ； "."</br>";	
@@ -307,7 +308,7 @@ if( Session::has('upload_file_id') ){
 							}else{
 								$value['workstd'] = $data[$i][num2alpha($j)];
 								$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
-							}
+							}}
 						}else{
 							$error_flag = 1;
 							$value['workstd'] = '';
