@@ -24,7 +24,7 @@ Route::get('test', function() {
 		Route::get('user/fileManager', 'FileController@fileManager');
 		Route::get('user/doc', 'PageController@home');
 		Route::any('user/doc/{intent_key}', 'FileController@fileActiver');
-        Route::any('doc/download/{intent_key}', 'FileController@fileDownload');
+        Route::get('doc/download/{intent_key}', 'FileController@fileDownload');
         
         Route::any('file/{intent_key}', 'FileController@fileOpen');	
 

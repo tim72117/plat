@@ -183,13 +183,6 @@ function share($scope, $filter, $http) {
                 <div ng-controller="request" style="margin:10px">
                     <?=$share?>
                 </div>
-                <div style="margin:10px">
-                    <table>
-                        <tr ng-repeat="share in shares">
-                            
-                        </tr>
-                    </table>
-                </div>
             </div>
             
 			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:16px;text-align: left;margin-top:0">		              
