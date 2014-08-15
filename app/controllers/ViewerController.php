@@ -39,7 +39,7 @@ class ViewerController extends BaseController {
         View::share('config', $this->config);
         View::share('doc', $this->doc);
         
-        $contents = View::make('demo.cher.main')->nest('context','demo.cher.page.'.$context)->with('request', '');
+        $contents = View::make('demo.use.main')->nest('context','demo.cher.page.'.$context)->with('request', '')->nest('share', 'demo.use.share');
         
         $this->layout->content = $contents;
         
