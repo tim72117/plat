@@ -10,7 +10,8 @@ class FileProvider {
 	public function __construct(){
 		$this->intent_hash_table = Session::get('intent_hash_table', array());	
 		$this->files = Session::get('file', array());	
-		$this->user_id = Auth::user()->id;
+        $this->user = Auth::user();
+		$this->user_id = $this->user->id;
 	}
 	
 	public static function make() {
@@ -36,7 +37,7 @@ class FileProvider {
 				->select('docs.id','title','doc_type.class','auth_requester.requester_doc_id')->get();
 		
 		
-		$packageDocs = array();
+		$packageDocs = array('docs'=>array(), 'request'=>array());
 		
 		foreach($docs as $doc){
 			$fileClass = 'app\\library\\files\\v0\\'.$doc->class;
@@ -50,18 +51,42 @@ class FileProvider {
 			
 			if( class_exists($fileClass) ){
 
-				$actives = $fileClass::get_intent();				
+				$actives = $fileClass::get_intent();               
 				
 				$packageDoc = array('title'=>$doc->title.$file_from, 'actives'=>array());
 				foreach($actives as $active){
 					$intent_key = $this->doc_intent_key($active, $doc->id, $fileClass);
 					array_push($packageDoc['actives'], array('intent_key'=>$intent_key, 'active'=>$active));					
 				}
-				array_push($packageDocs, $packageDoc);
+				array_push($packageDocs['docs'], $packageDoc);
 			}	
 
 		}
 		
+        $groups_id = $this->user->inGroups->lists('id');
+        
+        $request_doc_ids = DB::table('requester_to_group')->where(function($query) use($groups_id){
+            empty($groups_id) ? $query->whereNull('group_id') : $query->whereIn('group_id', $groups_id);            
+        })->groupBy('doc_id')->lists('doc_id');
+        
+        $request_docs = DB::table('docs')
+				->leftJoin('files','docs.file_id','=','files.id')
+				->leftJoin('doc_type','files.type','=','doc_type.id')
+                ->where(function($query) use($request_doc_ids){
+                    empty($request_doc_ids) ? $query->whereNull('docs.id') : $query->whereIn('docs.id', $request_doc_ids);            
+                })              
+                ->select('docs.id', 'files.title', 'doc_type.class')
+                ->get();
+
+        foreach($request_docs as $request_doc){
+            $fileClass = 'app\\library\\files\\v0\\'.$request_doc->class;
+            if( class_exists($fileClass) ){
+                array_push($packageDocs['request'], array('title'=>$request_doc->title, 'actives'=>array(array('intent_key'=>$this->doc_intent_key('open', $request_doc->id, $fileClass), 'active'=>'open'))));
+                array_push($packageDocs['request'], array('title'=>$request_doc->title, 'actives'=>array(array('intent_key'=>$this->doc_intent_key('import', $request_doc->id, $fileClass), 'active'=>'import'))));
+            }
+        }
+
+        
 		return $packageDocs;
 	}
 	
@@ -72,7 +97,7 @@ class FileProvider {
 	
 	public function download($file_id) {
 		$intent_key = $this->doc_intent_key('download', $file_id, 'app\\library\\files\\v0\\CommFile');		
-		return 'user/doc/'.$intent_key;	
+		return 'doc/download/'.$intent_key;	
 	}
 	
 	public function doc_intent_key($active, $doc_id, $fileClass) {
@@ -94,7 +119,7 @@ class FileProvider {
 	public function get_active_url($intent_key, $active) {
 		$intent_active = Session::get('file')[$intent_key];
 		$intent_active['active'] = $active;
-		$intent_hash = md5(serialize($intent_active));		
+		$intent_hash = md5(serialize($intent_active));
 		return 'user/doc/'.$this->intent_hash_table[$intent_hash];
 	}
 	

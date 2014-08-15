@@ -2,7 +2,7 @@
 
 ##########################################################################################
 #
-# filename: grade10.php
+# filename: upload_103grade10.php
 # function: 上傳103學年高一專一新生基本資料	
 #
 ##########################################################################################
@@ -379,7 +379,9 @@ if( Session::has('upload_file_id') ){
 									    'clsname'    => $value['clsname'],
                                         'teaname'    => $value['teaname'],
                                         'teaemail'   => $value['teaemail'],
+										'stdsex'	=> $value['stdsex'],
 									    'workstd'    => $value['workstd'],
+										'updated_by' => $user->id,
                                         'created_by' => $user->id,
                                         'file_id'    => $file_id,
                                         'updated_at'  => $newdate));
@@ -397,9 +399,11 @@ if( Session::has('upload_file_id') ){
                                         'clsname'    => $value['clsname'],
                                         'teaname'    => $value['teaname'],
 									    'teaemail'   => $value['teaemail'],
+										'stdsex'	=> $value['stdsex'],
                                         'workstd'    => $value['workstd'],
                                         'created_by' => $user->id,
 									    'file_id'    => $file_id,
+										'updated_by' => $user->id,
                                         'created_at' =>$newdate,
                                         'updated_at'  =>$newdate));	
                 
@@ -526,6 +530,8 @@ if ($null_row_flag == 1)
 		$query->orderBy('updated_at','desc');
 	}))->find($fileAcitver->file_id);
 
+echo '['.$fileAcitver->file_id.']';
+echo '['.Session::get('user.work.sch_id').']';
 	foreach($virtualFile->hasFiles as $key => $file){
 		echo '<tr>';
 		echo '   <td colspan="8" class="header1" align="left" style="padding-left:10px;border-bottom:0px solid black;border-left:0px solid black;">';

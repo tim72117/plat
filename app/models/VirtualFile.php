@@ -5,7 +5,7 @@ class Files extends Eloquent {
 	
 	public $timestamps = true;
 	
-	protected $fillable = array('title', 'type', 'owner', 'file');
+	protected $fillable = array('title', 'type', 'owner', 'file', 'created_by');
 	
 }
 

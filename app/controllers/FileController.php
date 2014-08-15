@@ -17,9 +17,6 @@ class FileController extends BaseController {
     protected $layout = 'demo.layout-main';
 	protected $dataroot = '';
 	protected $fileAcitver;
-	protected $csrf_token;
-	protected $dddos_token;
-    protected $project;
 	
 	public function __construct(){
 		$this->dataroot = app_path().'/views/ques/data/';
@@ -29,11 +26,6 @@ class FileController extends BaseController {
 			$this->config = Config::get('ques::setting');
 			Config::set('database.default', 'sqlsrv');
 			Config::set('database.connections.sqlsrv.database', 'ques_admin');
-			
-			$this->csrf_token = csrf_token();
-			$this->dddos_token = dddos_token();
-            
-            $this->project = Auth::user()->getProject();
 		});
 	}
 	
@@ -41,6 +33,12 @@ class FileController extends BaseController {
 		$fileManager = new app\library\files\v0\FileManager();
 		$fileManager->accept($intent_key);
 	}
+    
+    public function fileDownload($intent_key) {
+        $this->fileAcitver = new app\library\files\v0\FileActiver();
+        
+        return $this->fileAcitver->accept($intent_key);
+    }
 	
 	public function fileActiver($intent_key) {
 		if( !Session::has('file.'.$intent_key) ){
@@ -48,28 +46,14 @@ class FileController extends BaseController {
         }
 		
 		$this->fileAcitver = new app\library\files\v0\FileActiver();
-		$view_name = $this->fileAcitver->accept($intent_key);
-		View::share('fileAcitver', $this->fileAcitver);
-		//$intent = Session::get('file')[$intent_key];
-		//$file_id = $intent['file_id'];
-
-		if( is_object($view_name) && get_class($view_name)=='Symfony\Component\HttpFoundation\BinaryFileResponse' ){	
-			return $view_name;
-		}
-        //待處理 - 可移除
-		if( is_object($view_name) && get_class($view_name)=='Illuminate\Http\RedirectResponse' ){	
-			return $view_name;
-		}
+		$view_name = $this->fileAcitver->accept($intent_key);		
+        
+        if( Request::isMethod('post') ) {
+            return Redirect::back();
+        }
 		
-		$virtualFile = VirtualFile::find($this->fileAcitver->file_id);
-		
-		if( is_null($virtualFile->requester) ){	
-			$data_request = $this->fileRequest($intent_key);
-		}else{
-			$data_request = '';
-		}
-		
-		$view = View::make('demo.use.main')->nest('context', $view_name)->with('request', $data_request);
+        View::share('fileAcitver', $this->fileAcitver);
+		$view = View::make('demo.use.main')->with('intent_key', $intent_key)->nest('context', $view_name)->nest('share', 'demo.use.share');
 		
         $this->layout->content = $view;
         
@@ -123,110 +107,6 @@ class FileController extends BaseController {
         
     }
 	
-	public function fileRequest($intent_key) {
-		
-		$user = Auth::user();
-		/*
-		| 送出請求
-		*/
-       
-		$html = '';
-        $html_request = '';
-        $html_request_end = '';
-		$html_share = '';        
-		$preparers = Requester::with('docPreparer.user')->where('requester_doc_id', '=', $this->fileAcitver->file_id)->where('running', true)->get();   
-        $preparers_user_id = array();
-        foreach($preparers->lists('doc_preparer', 'id') as $doc_preparer_id => $doc_preparer){
-            $preparers_user_id[$doc_preparer_id] = $doc_preparer->user_id;
-        }
-      
-        
-        
-		$user->load('groups.users');
-		if( $user->groups->count() > 0 ){
-			$html .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_to'), 'files' => true));			
-            
-			foreach($user->groups as $group){
-                                
-				$html_request .= '<div ng-hide="group'.$group->id.'" ng-init="group'.$group->id.'=true">';
-				foreach($group->users as $user_in_group){
-					if( in_array($user_in_group->id, $preparers_user_id) ){
-                        $preparer_doc_id = array_search($user_in_group->id, $preparers_user_id);
-                        $html_request_end .= '<div>';
-                        $html_request_end .= Form::checkbox('doc[]', $preparer_doc_id, true);
-                        $html_request_end .= $user_in_group->username;
-                        $html_request_end .= '</div>';
-                    }elseif( $user_in_group->active==true && $user_in_group->id!=$user->id ){
-                        $html_request .= '<div>';
-						$html_request .= Form::checkbox('user[]', $user_in_group->id, false);
-						$html_request .= $user_in_group->username;
-                        $html_request .= '</div>';
-                    }
-				}
-                $html_request .= '</div>';
-                
-                $html .= '<div>';                
-				$html .= Form::checkbox('group[]', $group->id, false);
-                $html .= '<input ng-click="group'.$group->id.'=!group'.$group->id.'" type="button" value="名單" />';
-				$html .= $group->description;                
-                $html .= '</div>';
-                
-			}
-            $html .= $html_request;
-			$html .= Form::submit('Request!');
-			$html .= Form::hidden('intent_key', $intent_key);
-			$html .= Form::close();
-            
-            if( $preparers->count() > 0 ){
-                /*
-                /| 停止請求
-                */
-                $html .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'request_end')));	
-                foreach($preparers as $preparer){	
-                    //$html .= Form::checkbox('doc[]', $preparer->preparer_doc_id, true);
-                    //$html .= $preparer->docPreparer->user->username.$preparer->docPreparer->user->id;			
-                }
-                $html .= $html_request_end;
-                $html .= Form::submit('Request end!');
-                $html .= Form::hidden('intent_key', $intent_key);
-                $html .= Form::close();
-            }
-			
-			
-			
-			//share
-			$html_share .= '-------------------------------------------------';
-			$html_share .= Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'share_to'), 'files' => true));
-			
-			foreach($user->groups as $group){
-				$html_share .= Form::checkbox('group[]', $group->id, false);
-				$html_share .= $group->description;
-				
-				if( $group->users->count()>0 )
-				$html_share .= '<br />';
-				
-				foreach($group->users as $user_in_group){
-					if( !in_array($user_in_group->id, $preparers_user_id) && $user_in_group->active==true && $user_in_group->id!=$user->id ){
-						$html_share .= Form::checkbox('user[]', $user_in_group->id, false);
-						$html_share .= $user_in_group->username;
-					}
-				}
-				$html_share .= '<br /><br />';
-			}
-
-			$html_share .= Form::submit('Share!');
-			$html_share .= Form::hidden('intent_key', $intent_key);
-			$html_share .= Form::close();
-			
-			
-		}
-        
-	
-		
-        
-        return $html.$html_share;
-	}
-	
 	public function upload($intent_key) {
 		$fileClass = 'app\\library\\files\\v0\\CommFile';
 		$file = new $fileClass();
@@ -240,8 +120,7 @@ class FileController extends BaseController {
 	
 	public function timeOut() {
 		return View::make('demo.timeout');
-	}
-	
+	}	
 	
 	public function showQuery() {
 		$queries = DB::getQueryLog();

@@ -197,12 +197,31 @@ if( Session::has('upload_file_id') ){
 				$newdate = date("Y-m-d H:i:s");	
 				DB::table('use_103.dbo.gra103_userinfo')
 						->where('newcid', $value[4])
-						->update(array('shid' => $value[0],'name' => $value[1],'sex' => $value[3],'newcid' => $value[4],'stdidnumber' => $value[2],'created_by' => $user->id,'file_id' => $file_id,'update_at'=>$newdate));
+						->update(array(
+                            'shid'        => $value[0],
+                            'name'        => $value[1],
+                            'sex'         => $value[3],
+                            'stdidnumber' => $value[2],
+                            'created_by'  => $user->id,
+                            'file_id'     => $file_id,
+                            'update_at'   => date('Y/n/d H:i:s'),
+                            'created_at'  => date('Y/n/d H:i:s'),
+                        ));
 			}else{
 				
 				//gra103_userinfo	
 				DB::table('use_103.dbo.gra103_userinfo')
-						->insert(array('shid' => $value[0],'name' => $value[1],'sex' => $value[3],'newcid' => $value[4],'stdidnumber' => $value[2],'created_by' => $user->id,'file_id' => $file_id));	
+						->insert(array(
+                            'newcid'      => $value[4],
+                            'shid'        => $value[0],
+                            'name'        => $value[1],
+                            'sex'         => $value[3],                            
+                            'stdidnumber' => $value[2],
+                            'created_by'  => $user->id,
+                            'file_id'     => $file_id,
+                            'update_at'   => date('Y/n/d H:i:s'),
+                            'created_at'  => date('Y/n/d H:i:s'),
+                        ));
                 
                 $userinfo_all_keys[$value[4]] = '';
 						
@@ -242,30 +261,27 @@ if ($null_row_flag == 1)
 
 
 
-<div style="margin:10px 0 0 10px;width:800px">	
-<table width="100%" cellpadding="3" cellspacing="3" border="0">
+<div style="width:800px">	
+<table width="100%" cellpadding="1" cellspacing="1" border="0">
 	<tr bgcolor="#CAFFCA">
-		<td height="32" colspan="8" align="center" class="header1" >上傳102學年度國三畢業生基本資料</td>
-  </tr>
+		<td height="32" align="center" class="header1" >上傳102學年度國三畢業生基本資料</td>
+    </tr>
 	<tr>
-		<td colspan="8" align="left" style="padding-left:10px">相關檔案: 
+		<td align="left" style="padding:10px">相關檔案: 
 			<a href="<?=URL::to($fileProvider->download(2))?>">範例表格下載</a>、
-            <a href="<?=URL::to($fileProvider->download(21))?>">查詢平臺操作說明</a><br />
+            <a href="<?=URL::to($fileProvider->download(21))?>">查詢平臺操作說明</a>
+            <div style="padding-top:5px">
 			<?
-			//表單資料
-			echo "</br>"."</br>";
 			$intent_key = $fileAcitver->intent_key;
 			echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true));
 			echo Form::file('file_upload');
-			echo "</br>"."</br>";
 			echo Form::submit('上傳檔案');
 			echo Form::hidden('intent_key', $intent_key);
 			echo Form::hidden('_token1', csrf_token());
 			echo Form::hidden('_token2', dddos_token());
 			echo Form::close();
-
-			echo "</br>";
-			?>		
+			?>	
+            </div>
 		</td>
 	</tr>
 </table>
@@ -291,64 +307,83 @@ if ($null_row_flag == 1)
 
 <? } ?>
 
-
-<table width="100%" cellpadding="3" cellspacing="3" border="0">
-	<tr bgcolor="#EEEEEE">	
-		<td colspan="8" align="center">已上傳的名單</td>
-        
-	</tr>
-	<?
-	//列出已上傳的名單
-	//列出已上傳的名單
-	$virtualFile = VirtualFile::with(array('hasFiles'=>function($query){
-		$query->orderBy('updated_at','desc');
-	}))->find($fileAcitver->file_id);
-
-	foreach($virtualFile->hasFiles as $key => $file){
-		echo '<tr>';
-		echo '   <td colspan="8" class="header1" align="left" style="padding-left:10px;border-bottom:0px solid black;border-left:0px solid black;">';
-		echo "     檔案".($key+1).'　上傳於：'. date('Y-m-d h:i:s A',strtotime($file->updated_at))."　檔名：".$file->title.'<br />';
-		echo '   </td>';
-		echo '</tr>';
-	}
-	
-	?>
-</table>	
 </div>
 
+<style>
+.files {
+    border-bottom: 1px solid #999;
+}  
+</style>
 <div ng-controller="Ctrl">
-    
+
     <input ng-click="prev()" type="button" value="prev" />
     <input ng-model="page" size="2" /> / {{ pages }}
     <input ng-click="next()" type="button" value="next" />
     <input ng-click="all()" type="button" value="顯示全部" />
-
-    <table cellpadding="3" cellspacing="0" border="0" width="1400" class="sch-profile" style="margin:10px 0 0 10px">
+    <p><span style="color:#f00">***</span>教育研究與評鑑中心重新上傳</p>
+    <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 10px">
         <tr>
-            <th width="80">學校代號<input ng-model="searchText.shid" /></th>
-            <th width="80">上傳人數<input ng-model="searchText.count_std" size="4" /></th>
-            <th width="400">檔案名稱<div><input ng-model="searchText.title" /></div></th> 
+            <th width="180">上傳時間</th>
+            <th width="500">檔案名稱</th>             
+            <th width="80">學校代號</th>
+            <th width="80">上傳人數</th>
             <th></th>
         </tr>
-        <tr ng-repeat="student in students | orderBy:predicate:reverse | filter:searchText | startFrom:(page-1)*20 | limitTo:limit">  
-            <td>{{ student.shid }}</td>
-            <td>{{ student.count_std }}</td> 
-            <td>{{ student.title }}</td>            
-        </tr>
-
+        <tbody ng-repeat="file in files | orderBy:predicate:true | startFrom:(page-1)*20 | limitTo:limit">
+            <tr>  
+                <td rowspan="{{ file.schools.length }}" class="files">{{ file.created_at }}</td>
+                <td rowspan="{{ file.schools.length }}" class="files">{{ file.title }}<span style="color:#f00">{{ file.reload ? '***' : '' }}</span></td>                
+                <td>{{ file.schools[0].shid }}</td>
+                <td>{{ file.schools[0].count_std }}</td>
+            </tr>
+            <tr ng-repeat="school in file.schools" ng-show="$index > 0">  
+                <td>{{ school.shid }}</td>
+                <td>{{ school.count_std }}</td>
+            </tr>
+        </tbody>
     </table>
-    
+
 </div>
 
 <?
-$students = Cache::remember('gra102-upload-students-count-1.'.$user->id, 1, function() use($user) {
+
+$file_id = $fileAcitver->file_id;
+$user_id = $user->id;
+
+$file_reload = DB::table('use_103.dbo.gra103_userinfo')->where('upload_by', $user_id)->where('created_by', 6)->lists('file_id');
+   
+$file_my = array();
+
+VirtualFile::find($file_id)->hasFiles->sortByDesc('created_at')->each(function($file) use($user_id, $file_reload, &$file_my){
+    if( $file->created_by==$user_id ){        
+        $file_my[$file->id] = array('title' => $file->title, 'created_at' => $file->created_at->toDateTimeString(), 'reload'=>false);
+    }
+    if( in_array($file->id, $file_reload) ){
+        $file_my[$file->id] = array('title' => $file->title, 'created_at' => $file->created_at->toDateTimeString(), 'reload'=>true);
+    }    
+});
+
+$files_key = array_keys($file_my);
+
+$students = Cache::remember('102grade9-upload-students-count-1.'.$user_id, 1, function() use($user_id, $files_key) {
     return DB::table('use_103.dbo.gra103_userinfo AS userinfo')
             ->leftJoin('files', 'userinfo.file_id', '=', 'files.id')
-            ->where('userinfo.created_by', $user->id)
-            ->orWhere('userinfo.upload_by', $user->id)
-            ->groupBy('userinfo.shid', 'userinfo.file_id', 'files.title')
-            ->select('userinfo.shid', 'userinfo.file_id', 'files.title', DB::raw('count(shid) AS count_std'))->get();
+            ->where(function($query) use($user_id, $files_key) {
+                $query->where('userinfo.created_by', $user_id);
+                if( !empty($files_key) ){
+                    $query->whereIn('userinfo.file_id', $files_key);
+                }
+            })      
+            ->orWhere('userinfo.upload_by', $user_id)
+            ->groupBy('userinfo.shid', 'userinfo.file_id')
+            ->select('userinfo.shid', 'userinfo.file_id', DB::raw('count(shid) AS count_std'))->get();
 });
+
+foreach($students as $student) {
+    $file_my[$student->file_id] = array_add($file_my[$student->file_id], 'schools', array());
+    array_push($file_my[$student->file_id]['schools'], array('shid'=>$student->shid, 'count_std'=>$student->count_std));
+}
+
 ?>
 
 <script>
@@ -360,12 +395,11 @@ angular.module('app', [])
 }).controller('Ctrl', Ctrl);
 
 function Ctrl($scope) {
-    $scope.students = angular.fromJson(<?=json_encode($students)?>);
-    $scope.predicate = 'cid';
+    $scope.files = angular.fromJson(<?=json_encode(array_values($file_my))?>);
+    $scope.predicate = 'created_at';
     $scope.page = 1;
     $scope.limit = 20;
-    $scope.sorter = 'sorter';
-    $scope.max = $scope.students.length;
+    $scope.max = $scope.files.length;
     $scope.pages = Math.ceil($scope.max/$scope.limit);
     
     $scope.next = function() {

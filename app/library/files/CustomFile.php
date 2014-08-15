@@ -23,6 +23,7 @@ class CustomFile extends CommFile {
 		'request_end',
 		'share_to',
 		'get_share',
+        'set_default_to_group',
 		'open',
 	);
 	
@@ -36,23 +37,31 @@ class CustomFile extends CommFile {
 	 */	
 	public function import() {		
 		
-		$doc_id_new = $this->upload(false);	
+		$file_id = $this->upload(false);	
 		
-        Session::flash('upload_file_id', $doc_id_new);		
+        Session::flash('upload_file_id', $file_id);		
+        
+        $file = VirtualFile::find($this->doc_id)->isFile->file;
 		
-        return Redirect::back();
+		if( is_null($file) )
+			throw new FileFailedException;  
+        
+		return $file;
 
 	}
 	
 	public function export() {	}
 	
-	public function open($file_id) {		
-		View::share('file_id',$file_id);
-		$doc = VirtualFile::where('docs.id',$file_id)->File()->first();
-		if( is_null($doc) )
-			throw new FileFailedException;
-		//var_dump(VirtualFile::has('isFile')->where('docs.id',$file_id)->first());exit;
-		return $doc->file;
+	public function open($file_id) {
+        
+		View::share('file_id', $file_id);
+        
+		$file = VirtualFile::find($file_id)->isFile->file;
+        
+		if( is_null($file) )
+			throw new FileFailedException;  
+        
+		return $file;
 	}	
 	
 	private function get_users($groups = array(), $users = array()) {
@@ -212,6 +221,24 @@ class CustomFile extends CommFile {
 		
 		return Redirect::back();
 	}
+    
+    public function set_default_to_group() {
+        $groups_set = Input::get('groups');
+        $group_seted = DB::table('requester_to_group')->where('doc_id', $this->doc_id)->whereIn('group_id', array_keys($groups_set))->lists('group_id');
+        foreach($groups_set as $group_id => $group_set){
+            if( $group_set ){
+                if( !in_array($group_id, $group_seted) ){
+                    DB::table('requester_to_group')->insert(array('doc_id'=>$this->doc_id, 'group_id'=>$group_id, 'updated_at'=>date('Y/n/d H:i:s'), 'created_at'=>date('Y/n/d H:i:s')));
+                }
+            }else{
+                if( in_array($group_id, $group_seted) ){
+                    DB::table('requester_to_group')->where('doc_id', $this->doc_id)->where('group_id', $group_id)->delete();
+                }
+            }
+        }       
+        
+        return Response::json($groups_set);
+    }
 	
 	/**
 	 * @return array
