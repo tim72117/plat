@@ -33,7 +33,7 @@ function checkname($name){
 }
 
 function checkstdid($sch_id){
-	if ((preg_match("/[a-zA-Z0-9]{6,}/",$sch_id)) && ($sch_id == Session::get('user.work.sch_id'))) {
+	if ((preg_match("/[a-zA-Z0-9]{6,}/",$sch_id)) && ($sch_id = Session::get('user.work.sch_id'))) {
 		
 		return true;	
 	}else{
@@ -103,9 +103,9 @@ if( Session::has('upload_file_id') ){
 
 	$data = ($workSheet->toArray(null,true,true,true));
 
-    $userinfo_all = DB::table('use_103.dbo.seniorOne103_userinfo')->lists('newcid');
-    $userinfo_all_keys = array_flip($userinfo_all);
-
+    $userinfo_all = DB::table('use_103.dbo.seniorOne103_userinfo')->lists('created_by','newcid');//lists(value,key)
+    //$userinfo_all_keys = array_flip($userinfo_all);
+	$userinfo_all_keys = $userinfo_all;
    
 	
 	//檢查每筆資料並存入上傳陣列
@@ -200,6 +200,7 @@ if( Session::has('upload_file_id') ){
 							if (check_id_number($data[$i][num2alpha($j)])==false) {
 								$error_flag = 1;
 								$msg.="身分證字號錯誤 ； "."</br>";
+								$value['stdidnumber']='';
 								$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
 								}
 							else {
@@ -324,8 +325,24 @@ if( Session::has('upload_file_id') ){
 		 
 		 
 		//檢查身分證字號，無誤則串出Newcid至$value['newcid']
-		if( !empty($value['stdidnumber']) && check_id_number($value['stdidnumber']) ) 
-            $value['newcid'] =createnewcid($value['stdidnumber']); 
+		if( !empty($value['stdidnumber']) && check_id_number($value['stdidnumber']) ) {		
+			$value['newcid'] = createnewcid($value['stdidnumber']);
+			
+			//判斷是否已存在該筆學生資料	
+			if( array_key_exists($value['newcid'], $userinfo_all_keys) )
+			{ 
+				//echo $userinfo_all[$value['newcid']];//該筆資料的上傳者id
+				//echo $user->contact->user_id.'+++';//上傳者id
+				
+				if (($userinfo_all[$value['newcid']] != $user->contact->user_id)&&($user->contact->user_id)>19){
+				//$user->contact->user_id 超過19 ： 非中心人員
+				$error_flag = 1;
+			 	$msg = '此學生資料已由他人上傳，'.'</br>'.'欲更新資料請與本中心聯繫。';
+				$value['newcid'] = '';
+				}
+			 }
+			
+		}
 		
 
 		//檢查錯誤資訊
@@ -382,7 +399,7 @@ if( Session::has('upload_file_id') ){
 										'stdsex'	=> $value['stdsex'],
 									    'workstd'    => $value['workstd'],
 										'updated_by' => $user->id,
-                                        'created_by' => $user->id,
+                                        //'created_by' => $user->id,
                                         'file_id'    => $file_id,
                                         'updated_at'  => $newdate));
 			}else{
@@ -403,7 +420,7 @@ if( Session::has('upload_file_id') ){
                                         'workstd'    => $value['workstd'],
                                         'created_by' => $user->id,
 									    'file_id'    => $file_id,
-										'updated_by' => $user->id,
+										//'updated_by' => $user->id,
                                         'created_at' =>$newdate,
                                         'updated_at'  =>$newdate));	
                 
@@ -461,12 +478,17 @@ if ($null_row_flag == 1)
 			<p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p><br/>
  
 			<?
-			//表單資料      
+			//表單資料    
+			//echo 'hello'. Session::get('user.work.sch_id');  
+			//echo '<pre>', print_r($user->contact), '</pre>';
+
+			
+
             echo '<div style="margin:10px 0 0 0;border: 1px solid #aaa;padding:10px;width:800px">';
-            echo '選擇您承辦業務的學校代碼';
-            echo Form::open(array('url' => URL::to($fileProvider->get_doc_active_url('open', $file_id)), 'method' => 'post'));
-            echo Form::select('sch_id', $work_schools, Session::get('user.work.sch_id'), array('onchange'=>'this.form.submit()')); 
-            echo Form::close();
+           // echo '選擇您承辦業務的學校代碼';
+           // echo Form::open(array('url' => URL::to($fileProvider->get_doc_active_url('open', $file_id)), 'method' => 'post'));
+           // echo Form::select('sch_id', $work_schools, Session::get('user.work.sch_id'), array('onchange'=>'this.form.submit()')); 
+           // echo Form::close();
             
 			echo "</br>";
 			$intent_key = $fileAcitver->intent_key;
@@ -517,21 +539,22 @@ if ($null_row_flag == 1)
 
 </div>
 
+<!---
 <div style="margin:20px 0 0 10px;width:800px" ng-controller="Ctrl">
 <table width="100%" cellpadding="3" cellspacing="3" border="0">
 	<tr bgcolor="#EEEEEE">	
 		<td colspan="8" align="center">已上傳的名單</td>
         
 	</tr>
-	<?
+	<? /*
 	//列出已上傳的名單
 	//列出已上傳的名單
 	$virtualFile = VirtualFile::with(array('hasFiles'=>function($query){
 		$query->orderBy('updated_at','desc');
 	}))->find($fileAcitver->file_id);
 
-echo '['.$fileAcitver->file_id.']';
-echo '['.Session::get('user.work.sch_id').']';
+//echo '['.$fileAcitver->file_id.']';
+//echo '['.Session::get('user.work.sch_id').']';
 	foreach($virtualFile->hasFiles as $key => $file){
 		echo '<tr>';
 		echo '   <td colspan="8" class="header1" align="left" style="padding-left:10px;border-bottom:0px solid black;border-left:0px solid black;">';
@@ -540,9 +563,10 @@ echo '['.Session::get('user.work.sch_id').']';
 		echo '</tr>';
 	}
 	
-	?>
+	*/?>
 </table>	
 </div>
+--->
 
 <div style="margin:20px 0 0 10px;width:800px" ng-controller="Ctrl">
     
@@ -577,6 +601,7 @@ $students = Cache::remember('seniorOne103-upload-students-count-1.'.$user->id.'.
             ->select('userinfo.shid', 'userinfo.file_id', 'files.title', DB::raw('count(shid) AS count_std'))->get();
 });
 ?>
+
 
 <script>
 angular.module('app', [])
