@@ -1,11 +1,13 @@
 <?
+$fileProvider = app\library\files\v0\FileProvider::make();
 //抓取使用者之sch_id
 foreach (auth::user()->works as $users)
 	{
 		$sch_id =  $users->sch_id; 
 		
 	}
-	echo $sch_id."hello";
+	echo $sch_id.", hello";
+	
 ?>
 
 <!---
@@ -16,7 +18,7 @@ foreach (auth::user()->works as $users)
 		{color: #000000; background: #B69866; font-weight: bold; font-family: Tahoma, Verdana; font-size: 12px;}
 </style>
 -->
-
+<? //$sch_id = 000000; ?>
 <? if ($sch_id == 000000){ //若為教評中心人士(sch_id=9999)，則出現選擇學校選單?>
 <table width="100%" align="center" >
 	<tr>
@@ -72,6 +74,8 @@ foreach (auth::user()->works as $users)
 //若是自行選擇學校，則sch_id取該選擇學校之id；若無則取使用者所屬之學校id
 if (Input::has('uid')){
 	$sch_id = Input::get('uid');}
+
+echo Input::get('uid');
 	
 $data= DB::table('tted_edu_102.dbo.newedu101_pstat as a')
             ->join('tted_edu_102.dbo.newedu101_userinfo as b', 'a.newcid', '=','b.newcid')

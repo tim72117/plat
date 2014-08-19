@@ -11,55 +11,95 @@
 	 	
 		$sql1 = new mod_db();
 */		
-		$obj1=$sql1->objects("SELECT [uid],[uname],[totalnum],[returnnum],[return_percent] 
+$sch_id = '0004';
+
+$obj1= DB::table('tted_edu_102.dbo.fieldwork102_公私立回收率')
+			->where('uid','=',$sch_id)
+			->select('uid','uname','totalnum','returnnum','return_percent')
+			->get();
+			
+/*		$obj1=$sql1->objects("SELECT [uid],[uname],[totalnum],[returnnum],[return_percent] 
 							FROM [tted_edu_102].[dbo].[fieldwork102_公私立回收率] where uid='$sch_id'");
-		
-		
+*/		
+/*
+$obj2= DB::table('tted_edu_102.dbo.fieldwork102_公私立回收率')
+			->where('uid','=',$sch_id)
+			->select('count(s.newcid) as cy_srrturn','uname','totalnum','returnnum','return_percent')
+			->get();
+/*					
 		$obj2=$sql1->objects("SELECT count(s.newcid) as cy_srrturn,(SELECT COUNT(newcid) FROM [tted_edu_102].[dbo].[fieldwork102_userinfo] where stdname is not null) as cy_total
 								FROM [tted_edu_102].[dbo].[fieldwork102_userinfo] s left join [tted_edu_102].[dbo].[fieldwork102_pstat] p on s.newcid=p.newcid where p.page >='8'");
-	
+*/
+
+$obj3= DB::table('tted_edu_102.dbo.graduation102_公私立回收率')
+			->where('uid','=',$sch_id)
+			->select('uid','uname','totalnum','returnnum','return_percent')
+			->get();
+/*				
 		$obj3=$sql1->objects("SELECT [uid],[uname],[totalnum],[returnnum],[return_percent] 
 							FROM [tted_edu_102].[dbo].[graduation102_公私立回收率] where uid='$sch_id'");
+*/		
 		
-		
-		$obj4=$sql1->objects("SELECT count(s.newcid) as cy_srrturn,(SELECT COUNT(newcid) FROM [tted_edu_102].[dbo].[graduation102_userinfo] where stdname is not null) as cy_total
+/*		$obj4=$sql1->objects("SELECT count(s.newcid) as cy_srrturn,(SELECT COUNT(newcid) FROM [tted_edu_102].[dbo].[graduation102_userinfo] where stdname is not null) as cy_total
 								FROM [tted_edu_102].[dbo].[graduation102_userinfo] s left join [tted_edu_102].[dbo].[graduation102_pstat] p on s.newcid=p.newcid where p.page >='16'");
-								
-		$obj5=$sql1->objects("SELECT [uid],[uname],[totalnum],[returnnum],[return_percent] 
+*/
+$obj5= DB::table('tted_edu_102.dbo.newedu101_公私立回收率')
+			->where('uid','=',$sch_id)
+			->select('uid','uname','totalnum','returnnum','return_percent')
+			->get();								
+
+/*		$obj5=$sql1->objects("SELECT [uid],[uname],[totalnum],[returnnum],[return_percent] 
 							FROM [tted_edu_102].[dbo].[newedu101_公私立回收率] where uid='$sch_id'");
 		
-		
+/*		
 		$obj6=$sql1->objects("SELECT count(s.newcid) as cy_srrturn,(SELECT COUNT(newcid) FROM [tted_edu_102].[dbo].[newedu101_userinfo] where stdname is not null) as cy_total
 								FROM [tted_edu_102].[dbo].[newedu101_userinfo] s left join [tted_edu_102].[dbo].[newedu101_pstat] p on s.newcid=p.newcid where p.page >=9");
 		$sql1->disconnect();
+*/
 		
+foreach ($obj1 as $obj1){
 	//fieldwork學校回收率
 		$fieldwork_totalnum = $obj1->totalnum;//總量
 		$fieldwork_returnnum = $obj1->returnnum;//回填量
 		$fieldwork_return_percent = round(($fieldwork_returnnum/$fieldwork_totalnum)*100,2); //回收率
+}
+/*
+foreach ($obj2 as $obj2){
+	//fieldwork學校回收率
 	//fieldwork全國回收率	
 		$fieldwork_cy_total = $obj2->cy_total;
 		$fieldwork_cy_sreturn = $obj2->cy_srrturn;
 		$fieldwork_cy_return_percent = round(($fieldwork_cy_sreturn/$fieldwork_cy_total)*100,2);//全國回收率
-	
+}
+*/
+foreach ($obj3 as $obj3){
 	//graduation102學校回收率
 		$graduation102_totalnum = $obj3->totalnum;//總量
 		$graduation102_returnnum = $obj3->returnnum;//回填量
 		$graduation102_return_percent = round(($graduation102_returnnum/$graduation102_totalnum)*100,2); //回收率
+}
+/*
+foreach ($obj4 as $obj4){
 	//graduation102全國回收率	
 		$graduation102_cy_total = $obj4->cy_total;
 		$graduation102_cy_sreturn = $obj4->cy_srrturn;
 		$graduation102_cy_return_percent = round(($graduation102_cy_sreturn/$graduation102_cy_total)*100,2);//全國回收率
-		
+}
+*/
+foreach ($obj5 as $obj5){
 	//newedu101學校回收率
 		$newedu101_totalnum = $obj5->totalnum;//總量
 		$newedu101_returnnum = $obj5->returnnum;//回填量
 		$newedu101_return_percent = round(($newedu101_returnnum/$newedu101_totalnum)*100,2); //回收率
+}
+/*
+foreach ($obj5 as $obj6){
 	//newedu101全國回收率	
 		$newedu101_cy_total = $obj6->cy_total;
 		$newedu101_cy_sreturn = $obj6->cy_srrturn;
-		$newedu101_cy_return_percent = round(($newedu101_cy_sreturn/$newedu101_cy_total)*100,2);//全國回收率*/
-		
+		$newedu101_cy_return_percent = round(($newedu101_cy_sreturn/$newedu101_cy_total)*100,2);//全國回收率
+}
+*/		
 ?>
 <html>
 <head>
@@ -126,9 +166,9 @@ font-weight : bold;
 
 							<tr>
 								<td width="20%" align="center"><span class="style9">總計</span></td>
-								<td width="20%" align="center"><span class="style9"><? //echo $fieldwork_totalnum; ?></span></td>
-								<td width="20%" align="center"><span class="style9"><? //echo $fieldwork_returnnum; ?></span></td>
-								<td width="20%" align="center"><span class="style9"><font color="red"><? //if($fieldwork_return_percent==0) echo "----"; else echo "$fieldwork_return_percent%"; ?></font></span></td>
+								<td width="20%" align="center"><span class="style9"><? echo $fieldwork_totalnum; ?></span></td>
+								<td width="20%" align="center"><span class="style9"><? echo $fieldwork_returnnum; ?></span></td>
+								<td width="20%" align="center"><span class="style9"><font color="red"><? if($fieldwork_return_percent==0) echo "----"; else echo "$fieldwork_return_percent%"; ?></font></span></td>
                                 <td width="20%" align="center"><span class="style9"><font color="red"><? //if($fieldwork_cy_return_percent==0) echo "----"; else echo "$fieldwork_cy_return_percent%"; ?></font></span></td>
 							</tr>
 					  </table>
@@ -149,9 +189,9 @@ font-weight : bold;
 							</tr>
 							<tr>
 								<td width="20%" align="center"><span class="style9">總計</span></td>
-								<td width="20%" align="center"><span class="style9"><? //echo $graduation102_totalnum; ?></span></td>
-								<td width="20%" align="center"><span class="style9"><? //echo $graduation102_returnnum; ?></span></td>
-								<td width="20%" align="center"><span class="style9"><font color="red"><? //if($graduation102_return_percent==0) echo "----"; else echo "$graduation102_return_percent%"; ?></font></span></td>
+								<td width="20%" align="center"><span class="style9"><? echo $graduation102_totalnum; ?></span></td>
+								<td width="20%" align="center"><span class="style9"><? echo $graduation102_returnnum; ?></span></td>
+								<td width="20%" align="center"><span class="style9"><font color="red"><? if($graduation102_return_percent==0) echo "----"; else echo "$graduation102_return_percent%"; ?></font></span></td>
                                 <td width="20%" align="center"><span class="style9"><font color="red"><? //if($graduation102_cy_return_percent==0) echo "----"; else echo "$graduation102_cy_return_percent%"; ?></font></span></td>
 							</tr>
 					  </table>
@@ -172,9 +212,9 @@ font-weight : bold;
 							</tr>
 							<tr>
 								<td width="20%" align="center"><span class="style9">總計</span></td>
-								<td width="20%" align="center"><span class="style9"><? //echo $newedu101_totalnum; ?></span></td>
-								<td width="20%" align="center"><span class="style9"><? //echo $newedu101_returnnum; ?></span></td>
-								<td width="20%" align="center"><span class="style9"><font color="red"><? //if($newedu101_return_percent==0) echo "----"; else echo "$newedu101_return_percent%"; ?></font></span></td>
+								<td width="20%" align="center"><span class="style9"><? echo $newedu101_totalnum; ?></span></td>
+								<td width="20%" align="center"><span class="style9"><? echo $newedu101_returnnum; ?></span></td>
+								<td width="20%" align="center"><span class="style9"><font color="red"><? if($newedu101_return_percent==0) echo "----"; else echo "$newedu101_return_percent%"; ?></font></span></td>
                                 <td width="20%" align="center"><span class="style9"><font color="red"><? //if($newedu101_cy_return_percent==0) echo "----"; else echo "$newedu101_cy_return_percent%"; ?></font></span></td>
 							</tr>
 					  </table>
