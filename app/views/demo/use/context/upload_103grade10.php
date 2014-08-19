@@ -295,11 +295,9 @@ if( Session::has('upload_file_id') ){
 								$value['teaemail'] = $data[$i][num2alpha($j)];
 								$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
 							}}
-						else{
-							$value['teaemail'] = '';
-							$error_flag = 1;
-							$msg.="未填入導師信箱 ； "."</br>";
-							$this_row.='<td>'.'</td>';
+						else{//允許不填入導師信箱
+								$value['teaemail'] = $data[$i][num2alpha($j)];
+								$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
 							}
 					break;
 					//////////////////////////////////////////////////////////
