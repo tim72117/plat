@@ -466,22 +466,21 @@ if ($null_row_flag == 1)
 
 
 
-<div style="margin:10px 0 0 10px;width:800px">	
-<table width="100%" cellpadding="3" cellspacing="3" border="0">
+<div style="margin:10px 0 0 10px;width:1200px">	
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
 	<tr bgcolor="#CAFFCA">
-		<td height="32" colspan="8" align="center" class="header1" >上傳103學年度高一(專一)新生基本資料</td>
-  </tr>
+        <td height="32" align="center" class="header1" >上傳103學年度高一(專一)新生基本資料</td>
+    </tr>
 	<tr>
-		<td colspan="8" align="left" style="padding-left:10px">相關檔案: 
-			<a href="<?=URL::to($fileProvider->download(564))?>">範例表格下載</a>、
-            <a href="<?=URL::to($fileProvider->download(21))?>">查詢平臺操作說明</a><br /><br />
-			<p style="color:#F00">詳細說明請參考上方《範例表格下載》、《 查詢平臺操作》檔案。</p>
-			<p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p><br/>
- 
+		<td align="left" style="padding-left:10px">
+			<p style="color:#F00">詳細說明請參考《<a href="<?=URL::to($fileProvider->download(564))?>">範例表格下載</a>》、《 <a href="<?=URL::to($fileProvider->download(21))?>">查詢平臺操作說明</a>》檔案。</p>
+			<p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p>
+		</td>
+    <tr>
+        <td valign="top">
+            <div style="margin:0 0 0 0;border: 1px solid #aaa;padding:10px;width:600px">
 			<?
-			//表單資料    
-            echo '<div style="margin:10px 0 0 0;border: 1px solid #aaa;padding:10px;width:800px">';
-            
+			//表單資料               
 			echo "</br>";
 			$intent_key = $fileAcitver->intent_key;
 			echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true));
@@ -492,10 +491,30 @@ if ($null_row_flag == 1)
 			echo Form::hidden('_token1', csrf_token());
 			echo Form::hidden('_token2', dddos_token());
 			echo Form::close();
-
-			echo '</div>';
-			?>		
-		</td>
+			?>	
+                
+                <div ng-controller="Ctrl">
+                    <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 10px">
+                        <tr>
+                            <th width="250" colspan="2">                            
+                                <input ng-click="prev()" type="button" value="prev" />
+                                <input ng-model="page" size="2" /> / {{ pages }}
+                                <input ng-click="next()" type="button" value="next" />
+                                <input ng-click="all()" type="button" value="顯示全部" />
+                            </th>
+                        </tr>
+                        <tr>
+                            <th width="250">上傳時間</th>
+                            <th width="500">檔案名稱</th>             
+                        </tr>
+                        <tr ng-repeat="file in files | orderBy:predicate:true | startFrom:(page-1)*limit | limitTo:limit">  
+                            <td class="files" style="font-size:12px">{{ file.created_at }}</td>
+                            <td class="files" style="font-size:12px">{{ file.title }}</td>                
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </td>
 	</tr>
 </table>
 </div>
@@ -531,34 +550,45 @@ if ($null_row_flag == 1)
 
 </div>
 
+<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:600px">
+    <div ng-controller="studentCtrl">
 
-
-<div ng-controller="Ctrl">
-
-    <input ng-click="prev()" type="button" value="prev" />
-    <input ng-model="page" size="2" /> / {{ pages }}
-    <input ng-click="next()" type="button" value="next" />
-    <input ng-click="all()" type="button" value="顯示全部" />
-    <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 10px">
-        <tr>
-            <th width="250">上傳時間</th>
-            <th width="500">檔案名稱</th>             
-            <th></th>
-        </tr>
-        <tbody ng-repeat="file in files | orderBy:predicate:true | startFrom:(page-1)*20 | limitTo:limit">
-            <tr>  
-                <td class="files">{{ file.created_at }}</td>
-                <td class="files">{{ file.title }}</td>                
+        <input ng-click="prev()" type="button" value="prev" />
+        <input ng-model="page" size="2" /> / {{ pages }}
+        <input ng-click="next()" type="button" value="next" />
+        <input ng-click="all()" type="button" value="顯示全部" />
+        <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 10px">
+            <tr>
+                <th width="100">學生姓名</th>
+                <th width="100">班級</th>
+                <th width="100">科別</th>   
+                <th width="100">導師姓名</th>
+                <th width="50">性別</th>
+                <th width="50">建教生</th>  
+                <th width="80">填答頁數</th>  
+                <th></th>
             </tr>
-        </tbody>
-    </table>
+            <tbody ng-repeat="student in students | startFrom:(page-1)*limit | limitTo:limit">
+                <tr>  
+                    <td class="files">{{ student.stdname }}</td>
+                    <td class="files">{{ student.clsname }}</td>
+                    <td class="files">{{ student.depcode }}</td>
+                    <td class="files">{{ student.teaname }}</td>
+                    <td class="files" align="center">{{ student.stdsex }}</td>
+                    <td class="files" align="center">{{ student.workstd }}</td>
+                    <td class="files" align="center">{{ student.page }}</td>
+                </tr>
+            </tbody>
+        </table>
 
+    </div>
 </div>
-
 <?
-
-
 $files = DB::table('ques_admin.dbo.files')->where('owner', $doc_id)->where('created_by', $user_id)->select('created_at', 'title')->get();
+$students = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
+        ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
+        ->where('userinfo.created_by', 126)
+        ->select('stdname', 'clsname', 'depcode', 'teaname', 'stdsex', 'workstd', 'pstat.page')->get();
 ?>
 
 
@@ -573,9 +603,40 @@ angular.module('app', [])
 function Ctrl($scope) {
     $scope.files = angular.fromJson(<?=json_encode($files)?>);
     $scope.predicate = 'created_at';
+    $scope.page = 1;    
+    $scope.limit = 5;
+    $scope.max = $scope.files.length;
+    $scope.pages = Math.ceil($scope.max/$scope.limit);
+    
+    $scope.next = function() {
+        if( $scope.page < $scope.pages )
+            $scope.page++;
+    };
+    
+    $scope.prev = function() {
+        if( $scope.page > 1 )
+            $scope.page--;
+    };
+    
+    $scope.all = function() {
+        $scope.page = 1;
+        $scope.limit = $scope.max;
+        $scope.pages = 1;
+    };
+}
+
+angular.module('app', [])
+.filter('startFrom', function() {
+    return function(input, start) {         
+        return input.slice(start);
+    };
+}).controller('studentCtrl', studentCtrl);
+
+function studentCtrl($scope) {
+    $scope.students = angular.fromJson(<?=json_encode($students)?>);
     $scope.page = 1;
     $scope.limit = 20;
-    $scope.max = $scope.files.length;
+    $scope.max = $scope.students.length;
     $scope.pages = Math.ceil($scope.max/$scope.limit);
     
     $scope.next = function() {
