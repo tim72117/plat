@@ -52,14 +52,13 @@ class CustomFile extends CommFile {
 	
 	public function export() {	}
 	
-	public function open($file_id) {
+	public function open() {
+                
+		$file = VirtualFile::find($this->doc_id)->isFile->file;
         
-		View::share('file_id', $file_id);
-        
-		$file = VirtualFile::find($file_id)->isFile->file;
-        
-		if( is_null($file) )
-			throw new FileFailedException;  
+		if( is_null($file) ){
+            throw new FileFailedException;
+        }
         
 		return $file;
 	}	

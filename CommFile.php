@@ -54,7 +54,7 @@ class CommFile {
 	
 	public function rename() {	}
 	
-	public function open($file_id) { 
+	public function open() { 
         return $this->download();
     }
 	
