@@ -70,7 +70,7 @@ $null_text = '';
 $null_row_flag = 0; 
 $error_data = '';
 
-$doc_id = $fileAcitver->file_id;
+$doc_id = $fileAcitver->doc_id;
 $user_id = $user->id;
 
 $s=0;

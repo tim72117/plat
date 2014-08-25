@@ -96,8 +96,9 @@ $profiles = $contacts->map(function($contact){
     );   
 });
 
-$fileProvider = app\library\files\v0\FileProvider::make();
-$intent_key = $fileProvider->doc_intent_key('open', $file_id, 'app\\library\\files\\v0\\CustomFile');
+//$fileProvider = app\library\files\v0\FileProvider::make();
+//$intent_key = $fileProvider->doc_intent_key('open', $file_id, 'app\\library\\files\\v0\\CustomFile');
+$intent_key = $fileAcitver->intent_key;
 ?>
 
     

@@ -37,7 +37,7 @@ class FileController extends BaseController {
     public function fileDownload($intent_key) {
         $this->fileAcitver = new app\library\files\v0\FileActiver();
         
-        return $this->fileAcitver->accept($intent_key);
+        return $this->fileAcitver->openFile($intent_key);
     }
 	
 	public function fileActiver($intent_key) {
