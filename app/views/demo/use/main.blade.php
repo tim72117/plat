@@ -4,7 +4,7 @@ $packageDocs = $user->get_file_provider()->lists();
 $intent_key = is_null(@$fileAcitver) ? null : $fileAcitver->intent_key;
 $project = DB::table('projects')->where('code', $user->getProject())->first();
 ?>
-@extends('layout-main')
+@extends('demo.layout-main')
 
 @section('head')
 <title><?=$project->name?></title>
