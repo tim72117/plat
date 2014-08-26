@@ -119,7 +119,7 @@ class FileProvider {
 		$create_list = array();
 		$fileClasss = array('QuesFile','RowsFile');		
 		foreach($fileClasss as $fileClass){
-			$intent = array('active'=>'create','file_id'=>null,'fileClass'=>$fileClass);	
+			$intent = array('active'=>'create','doc_id'=>null,'fileClass'=>$fileClass);	
 			$intent_key = $this->get_intent_id($intent);
 			array_push($create_list, array('intent_key'=>$intent_key, 'active'=>$fileClass.'_create'));
 					

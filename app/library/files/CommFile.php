@@ -34,7 +34,7 @@ class CommFile {
 		'download',
 	);	
 	
-	public function __construct($doc_id){
+	public function __construct($doc_id = null){
 		$this->doc_id = $doc_id;
 	}
 	

@@ -92,6 +92,7 @@ class FileController extends BaseController {
         
 		$intent = app\library\files\v0\FileActiver::active($intent_key);
         
+        //帶修正 dev-row
         switch($intent['active']) {
             case 'download':
                 $file = new $intent['fileClass']($intent['file_id']);
@@ -107,17 +108,6 @@ class FileController extends BaseController {
         
     }
 	
-	public function upload($intent_key) {
-		$fileClass = 'app\\library\\files\\v0\\CommFile';
-		$file = new $fileClass();
-		$file_id = $file->upload();
-		if( $file_id ){		
-			$context = Session::get('file')[$intent_key];
-			$intent = array('active'=>'open','file_id'=>$context['file_id'],'fileClass'=>$fileClass);
-			return Redirect::to('user/doc/'.$intent_key)->withInput(array('file_id'=>$file_id));
-		}		
-	}
-	
 	public function timeOut() {
 		return View::make('demo.timeout');
 	}	
@@ -128,9 +118,5 @@ class FileController extends BaseController {
 			var_dump($query);echo '<br /><br />';
 		}
 	}
-	//public function 
-	
-
-	
 
 }
