@@ -26,6 +26,10 @@ class FileController extends BaseController {
 			$this->config = Config::get('ques::setting');
 			Config::set('database.default', 'sqlsrv');
 			Config::set('database.connections.sqlsrv.database', 'ques_admin');
+            
+            if( !Session::has('file.'.$route->getParameter('intent_key')) ){
+                return $this->timeOut();
+            }
 		});
 	}
 	
@@ -40,17 +44,10 @@ class FileController extends BaseController {
         return $this->fileAcitver->openFile($intent_key);
     }
 	
-	public function fileActiver($intent_key) {
-		if( !Session::has('file.'.$intent_key) ){
-            return $this->timeOut();
-        }
+	public function fileGet($intent_key) {		
 		
 		$this->fileAcitver = new app\library\files\v0\FileActiver();
 		$view_name = $this->fileAcitver->accept($intent_key);		
-        
-        if( Request::isMethod('post') ) {
-            return Redirect::back();
-        }
 		
         View::share('fileAcitver', $this->fileAcitver);
 		$view = View::make('demo.use.main')->with('intent_key', $intent_key)->nest('context', $view_name)->nest('share', 'demo.use.share');
@@ -61,9 +58,17 @@ class FileController extends BaseController {
         $response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
         $response->header('Pragma', 'no-cache');
         $response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
-        return $response;
-        
+        return $response;        
 	}
+    
+    public function filePost($intent_key) {
+        
+		$this->fileAcitver = new app\library\files\v0\FileActiver();
+        
+		$this->fileAcitver->accept($intent_key);
+        
+        return Redirect::back();        
+    }
     
     public function fileAjaxGet($intent_key) {
         $file = Files::find(Session::get('table.'.$intent_key));

@@ -26,13 +26,13 @@ class FileActiver {
 		$active = $intent['active'];
 		
 		if( is_null($this->doc_id) && $active=='upload' ){
-			$file = new $intent['fileClass']($this->doc_id);
+			$file = new $intent['fileClass'](0);
             
 			$file_id = $file->$active(true);
 			
 			Session::flash('upload_file_id', $file_id);		
 
-			return Redirect::back();
+			return true;
 		}
 		
 		if( $intent['fileClass']=='app\\library\\files\\v0\\CustomFile' ){
