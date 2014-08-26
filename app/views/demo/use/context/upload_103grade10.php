@@ -587,7 +587,7 @@ if ($null_row_flag == 1)
 $files = DB::table('ques_admin.dbo.files')->where('owner', $doc_id)->where('created_by', $user_id)->select('created_at', 'title')->get();
 $students = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
-        ->where('userinfo.created_by', 126)
+        ->where('userinfo.created_by', $user_id)
         ->select('stdname', 'clsname', 'depcode', 'teaname', 'stdsex', 'workstd', 'pstat.page')->get();
 ?>
 

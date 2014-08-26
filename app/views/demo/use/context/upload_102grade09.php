@@ -381,8 +381,10 @@ $students = Cache::remember('102grade9-upload-students-count-1.'.$user_id, 1, fu
 });
 
 foreach($students as $student) {
-    $file_my[$student->file_id] = array_add($file_my[$student->file_id], 'schools', array());
-    array_push($file_my[$student->file_id]['schools'], array('shid'=>$student->shid, 'count_std'=>$student->count_std));
+    if( isset($file_my[$student->file_id]) ){
+        $file_my[$student->file_id] = array_add($file_my[$student->file_id], 'schools', array());
+        array_push($file_my[$student->file_id]['schools'], array('shid'=>$student->shid, 'count_std'=>$student->count_std));
+    }
 }
 
 ?>
