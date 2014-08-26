@@ -96,16 +96,8 @@ class FileProvider {
 	}
 	
 	public function download($file_id) {
-		$intent_key = $this->doc_intent_key('download', $file_id, 'app\\library\\files\\v0\\CommFile');		
+		$intent_key = $this->file_intent_key('download', $file_id);		
 		return 'doc/download/'.$intent_key;	
-	}
-	
-	public function doc_intent_key($active, $doc_id, $fileClass) {
-		$intent = array('active'=>$active,'file_id'=>$doc_id,'fileClass'=>$fileClass);
-		$intent_key = $this->get_intent_id($intent);					
-		$this->files[$intent_key] = $intent;
-		$this->save_intent();
-		return $intent_key;
 	}
 	
 	public function get_doc_active_url($active, $doc_id) {
@@ -127,7 +119,7 @@ class FileProvider {
 		$create_list = array();
 		$fileClasss = array('QuesFile','RowsFile');		
 		foreach($fileClasss as $fileClass){
-			$intent = array('active'=>'create','file_id'=>null,'fileClass'=>$fileClass);	
+			$intent = array('active'=>'create','doc_id'=>null,'fileClass'=>$fileClass);	
 			$intent_key = $this->get_intent_id($intent);
 			array_push($create_list, array('intent_key'=>$intent_key, 'active'=>$fileClass.'_create'));
 					
@@ -140,7 +132,23 @@ class FileProvider {
 	private function auth_file() {
 		
 	}
+    
+    public function file_intent_key($active, $file_id) {
+        $intent = array('active'=>$active, 'file_id'=>$file_id, 'fileClass'=>'app\\library\\files\\v0\\CommFile');
+        $intent_key = $this->get_intent_id($intent);
+        $this->files[$intent_key] = $intent;
+        $this->save_intent();
+		return $intent_key;
+    }
 	
+	public function doc_intent_key($active, $doc_id, $fileClass) {
+		$intent = array('active'=>$active, 'doc_id'=>$doc_id, 'fileClass'=>$fileClass);
+		$intent_key = $this->get_intent_id($intent);					
+		$this->files[$intent_key] = $intent;
+		$this->save_intent();
+		return $intent_key;
+	}
+    
 	public function get_intent_hash_table() {
 		return $this->intent_hash_table;
 	}

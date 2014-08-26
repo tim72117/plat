@@ -26,6 +26,11 @@ class FileController extends BaseController {
 			$this->config = Config::get('ques::setting');
 			Config::set('database.default', 'sqlsrv');
 			Config::set('database.connections.sqlsrv.database', 'ques_admin');
+            
+            if( !Session::has('file.'.$route->getParameter('intent_key')) ){
+                return $this->timeOut();
+            }
+            
             DB::connection()->disableQueryLog();
 		});
 	}
@@ -38,20 +43,13 @@ class FileController extends BaseController {
     public function fileDownload($intent_key) {
         $this->fileAcitver = new app\library\files\v0\FileActiver();
         
-        return $this->fileAcitver->accept($intent_key);
+        return $this->fileAcitver->openFile($intent_key);
     }
 	
-	public function fileActiver($intent_key) {
-		if( !Session::has('file.'.$intent_key) ){
-            return $this->timeOut();
-        }
+	public function fileGet($intent_key) {		
 		
 		$this->fileAcitver = new app\library\files\v0\FileActiver();
 		$view_name = $this->fileAcitver->accept($intent_key);		
-        
-        if( Request::isMethod('post') ) {
-            return Redirect::back();
-        }
 		
         View::share('fileAcitver', $this->fileAcitver);
 		$view = View::make('demo.use.main')->with('intent_key', $intent_key)->nest('context', $view_name)->nest('share', 'demo.use.share');
@@ -62,9 +60,17 @@ class FileController extends BaseController {
         $response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
         $response->header('Pragma', 'no-cache');
         $response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
-        return $response;
-        
+        return $response;        
 	}
+    
+    public function filePost($intent_key) {
+        
+		$this->fileAcitver = new app\library\files\v0\FileActiver();
+        
+		$this->fileAcitver->accept($intent_key);
+        
+        return Redirect::back();        
+    }
     
     public function fileAjaxGet($intent_key) {
         $file = Files::find(Session::get('table.'.$intent_key));
@@ -93,6 +99,7 @@ class FileController extends BaseController {
         
 		$intent = app\library\files\v0\FileActiver::active($intent_key);
         
+        //帶修正 dev-row
         switch($intent['active']) {
             case 'download':
                 $file = new $intent['fileClass']($intent['file_id']);
@@ -108,17 +115,6 @@ class FileController extends BaseController {
         
     }
 	
-	public function upload($intent_key) {
-		$fileClass = 'app\\library\\files\\v0\\CommFile';
-		$file = new $fileClass();
-		$file_id = $file->upload();
-		if( $file_id ){		
-			$context = Session::get('file')[$intent_key];
-			$intent = array('active'=>'open','file_id'=>$context['file_id'],'fileClass'=>$fileClass);
-			return Redirect::to('user/doc/'.$intent_key)->withInput(array('file_id'=>$file_id));
-		}		
-	}
-	
 	public function timeOut() {
 		return View::make('demo.timeout');
 	}	
@@ -129,9 +125,5 @@ class FileController extends BaseController {
 			var_dump($query);echo '<br /><br />';
 		}
 	}
-	//public function 
-	
-
-	
 
 }

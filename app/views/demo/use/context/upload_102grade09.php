@@ -348,14 +348,14 @@ if ($null_row_flag == 1)
 
 <?
 
-$file_id = $fileAcitver->file_id;
+$doc_id = $fileAcitver->doc_id;
 $user_id = $user->id;
 
 $file_reload = DB::table('use_103.dbo.gra103_userinfo')->where('upload_by', $user_id)->where('created_by', 6)->lists('file_id');
    
 $file_my = array();
 
-VirtualFile::find($file_id)->hasFiles->sortByDesc('created_at')->each(function($file) use($user_id, $file_reload, &$file_my){
+VirtualFile::find($doc_id)->hasFiles->sortByDesc('created_at')->each(function($file) use($user_id, $file_reload, &$file_my){
     if( $file->created_by==$user_id ){        
         $file_my[$file->id] = array('title' => $file->title, 'created_at' => $file->created_at->toDateTimeString(), 'reload'=>false);
     }
