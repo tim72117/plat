@@ -26,6 +26,7 @@ class FileController extends BaseController {
 			$this->config = Config::get('ques::setting');
 			Config::set('database.default', 'sqlsrv');
 			Config::set('database.connections.sqlsrv.database', 'ques_admin');
+            DB::connection()->disableQueryLog();
 		});
 	}
 	

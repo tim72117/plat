@@ -69,7 +69,8 @@ if( Session::has('upload_file_id') ){
 
     $userinfo_all = DB::table('use_103.dbo.gra103_userinfo')->lists('newcid');
     $userinfo_all_keys = array_flip($userinfo_all);
-
+    unset($userinfo_all);
+    unset($reader);
     
 	//檢查每筆資料並存入上傳陣列
 	for($i=2;$i<=$RowHigh;$i++)

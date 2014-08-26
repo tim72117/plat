@@ -103,7 +103,7 @@ if( Session::has('upload_file_id') ){
 	$data = ($workSheet->toArray(null,true,true,true));
 
     $userinfo_all_keys = DB::table('use_103.dbo.seniorOne103_userinfo')->lists('created_by', 'newcid');
-   
+    unset($reader);
 	
 	//檢查每筆資料並存入上傳陣列
 	for($i=2;$i<=$RowHigh;$i++) //處理每列資料
