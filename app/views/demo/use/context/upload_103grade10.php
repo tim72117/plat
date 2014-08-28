@@ -103,7 +103,7 @@ if( Session::has('upload_file_id') ){
 	$data = ($workSheet->toArray(null,true,true,true));
 
     $userinfo_all_keys = DB::table('use_103.dbo.seniorOne103_userinfo')->lists('created_by', 'newcid');
-   
+    unset($reader);
 	
 	//檢查每筆資料並存入上傳陣列
 	for($i=2;$i<=$RowHigh;$i++) //處理每列資料
@@ -564,12 +564,13 @@ if ($null_row_flag == 1)
                 <th width="100">科別</th>   
                 <th width="100">導師姓名</th>
                 <th width="50">性別</th>
-                <th width="50">建教生</th>  
+                <th width="60">建教生</th>  
                 <th width="80">填答頁數</th>  
+                <th width="80">刪除</th>  
                 <th></th>
             </tr>
             <tbody ng-repeat="student in students | startFrom:(page-1)*limit | limitTo:limit">
-                <tr>  
+                <tr ng-style="deleteStyle(student)">  
                     <td class="files">{{ student.stdname }}</td>
                     <td class="files">{{ student.clsname }}</td>
                     <td class="files">{{ student.depcode }}</td>
@@ -577,6 +578,7 @@ if ($null_row_flag == 1)
                     <td class="files" align="center">{{ student.stdsex }}</td>
                     <td class="files" align="center">{{ student.workstd }}</td>
                     <td class="files" align="center">{{ student.page }}</td>
+                    <td class="files"><input type="button" value="刪除" ng-click="delete(student)" ng-disabled="student.deleted==='1'" /></td>
                 </tr>
             </tbody>
         </table>
@@ -587,8 +589,8 @@ if ($null_row_flag == 1)
 $files = DB::table('ques_admin.dbo.files')->where('owner', $doc_id)->where('created_by', $user_id)->select('created_at', 'title')->get();
 $students = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
-        ->where('userinfo.created_by', 126)
-        ->select('stdname', 'clsname', 'depcode', 'teaname', 'stdsex', 'workstd', 'pstat.page')->get();
+        ->where('userinfo.created_by', $user_id)
+        ->select('stdname', 'clsname', 'depcode', 'teaname', 'stdsex', 'workstd', 'pstat.page', 'userinfo.cid', DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted'))->get();
 ?>
 
 
@@ -632,7 +634,7 @@ angular.module('app', [])
     };
 }).controller('studentCtrl', studentCtrl);
 
-function studentCtrl($scope) {
+function studentCtrl($scope, $http) {
     $scope.students = angular.fromJson(<?=json_encode($students)?>);
     $scope.page = 1;
     $scope.limit = 20;
@@ -654,5 +656,24 @@ function studentCtrl($scope) {
         $scope.limit = $scope.max;
         $scope.pages = 1;
     };
+    
+    $scope.deleteStyle = function(student) {
+        return {
+            'text-decoration': student.deleted==='1'? 'line-through' : '',
+            'background-color':  student.deleted==='1'? '#eee' : ''
+        };
+    };
+    
+    $scope.delete = function(student) {
+        $http({method: 'POST', url: '<?=asset('ajax/'.$intent_key.'/delete')?>', data:{cid:student.cid} })
+        .success(function(data, status, headers, config) {
+            if( data.saveStatus ){
+                student.deleted = '1';
+            }
+        })
+        .error(function(e){
+            console.log(e);
+        });
+    };    
 }
 </script>
