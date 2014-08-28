@@ -11,7 +11,7 @@ $project = DB::table('projects')->where('code', $user->getProject())->first();
 
 <!--[if lt IE 9]><script src="<?=asset('js/html5shiv.js')?>"></script><![endif]-->
 
-<script src="<?=asset('js/jquery-1.10.2.min.js')?>"></script>
+<script src="<?=asset('js/jquery-1.11.1.min.js')?>"></script>
 <script src="<?=asset('js/angular.min.js')?>"></script>
 
 <link rel="stylesheet" href="<?=asset('demo/use/css/use100_content.css')?>" />
@@ -36,27 +36,20 @@ $(document).ready(function(){	//選單功能
 function request() {
     
 }
-<? if( isset($intent_key) ){ ?>
-var intent_url = '<?=asset('share/'.$intent_key)?>';
-<? }else{ ?>
-var intent_url = ''; 
-<? } ?>
-
-angular.module('myapp', [])
-    .controller('share', share);
+angular.module('myapp', []).controller('share', share);
 function share($scope, $filter, $http) {
     $scope.shares = [{id:1},{id:2}];
     $scope.groups = {};
     $scope.set_groups = {};
+    $scope.shareds = [];
 
     $scope.get = function() {
         if( $('.authorize').css('left')==='0px' ){
             $('.authorize').animate({left: -501}); 
         }else{            
-            $http({method: 'GET', url: intent_url, data:{}})
+            $http({method: 'GET', url: '<?=asset( 'share/' . value($intent_key) )?>', data:{}})
             .success(function(data, status, headers, config) {
                 $scope.groups = data.groups;
-                console.log(data);
                 $('.authorize').animate({left: 0});
             })
             .error(function(e){
@@ -67,10 +60,9 @@ function share($scope, $filter, $http) {
     
     $scope.share = function(user_id, shared) {
         console.log(shared);
-        $http({method: 'POST', url: intent_url+'/share', data:{user_id: user_id, shared: shared}})
+        $http({method: 'POST', url: '<?=asset( 'share/' . value($intent_key) . '/share' )?>', data:{user_id: user_id, shared: shared}})
         .success(function(data, status, headers, config) {
             shared.shared_id = data.share_id;
-            console.log(shared);
         })
         .error(function(e){
             console.log(e);
@@ -78,7 +70,7 @@ function share($scope, $filter, $http) {
     };
     
     $scope.setDefalut = function() {
-        $http({method: 'POST', url: intent_url, data:{groups: $scope.set_groups}})
+        $http({method: 'POST', url: '<?=asset( 'share/' . value($intent_key) )?>', data:{groups: $scope.set_groups}})
         .success(function(data, status, headers, config) {
             console.log(data);
         })

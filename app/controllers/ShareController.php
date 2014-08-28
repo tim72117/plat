@@ -35,7 +35,7 @@ class ShareController extends BaseController {
         }     
         
         $intent = app\library\files\v0\FileActiver::active($intent_key);
-        $doc_id = $intent['file_id'];
+        $doc_id = $intent['doc_id'];
             
         $default_groups = DB::table('requester_to_group')->where('doc_id', $doc_id)->lists('group_id');
         $preparers = Requester::with('docPreparer.user')->where('requester_doc_id', '=', $doc_id)->where('running', true)->get();
@@ -92,7 +92,7 @@ class ShareController extends BaseController {
                 
                 if( $shared['shared'] ) {
                     $shared_new = Sharer::create(array(
-                        'from_doc_id'    => $intent['file_id'],
+                        'from_doc_id'    => $intent['doc_id'],
                         'shared_user_id' => Input::get('user_id'),
                         'accept'         => false,
                     ));
@@ -100,14 +100,14 @@ class ShareController extends BaseController {
                 }
                 //if( Input::get('shared') )
                 //Sharer::
-                return array(Input::get('user_id'), Input::get('shared'), $intent['file_id']);;
+                return array(Input::get('user_id'), Input::get('shared'), $intent['doc_id']);;
             break;
         }
     }
     
     public function sharePost($intent_key) {
         $intent = app\library\files\v0\FileActiver::active($intent_key);
-        $doc_id = $intent['file_id'];
+        $doc_id = $intent['doc_id'];
         $active = 'set_default_to_group';
         $file = new $intent['fileClass']($doc_id);
 		return $file->$active();

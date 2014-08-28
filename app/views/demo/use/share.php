@@ -4,11 +4,11 @@
     
     <label for="request_group{{ group.id }}">{{ group.name }}</label>   
     
-    <input ng-click="group[group.id] = !group[group.id]" type="button" value="{{ group.name }}" />
+    <input ng-click="group[group.id] = !group[group.id] ; shareds=group.shared" type="button" value="{{ group.name }}" />
     
-    <div ng-hide="group[group.id]" ng-init="group[group.id]=true">
+    <div ng-hide="group[group.id]" ng-init="group[group.id]=true ; shareds = []">
         <table>
-            <tr ng-repeat="(user_id, shared) in group.shared">
+            <tr ng-repeat="(user_id, shared) in shareds">
                 <td>
                     <input type="checkbox" id="{{ group.id }}_request_{{ user_id }}">
                     <label for="{{ group.id }}_request_{{ user_id }}">request</label>
