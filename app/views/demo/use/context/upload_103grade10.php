@@ -120,6 +120,7 @@ if( Session::has('upload_file_id') ){
 				switch($j){
 					case '0'://學校代碼
 						if( !empty($data[$i][num2alpha($j)]) ){
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if( !checkstdid($data[$i][num2alpha($j)]) ) {
 								$error_flag = 1;
 								$msg.="學校代碼錯誤 ； "."</br>";
@@ -142,7 +143,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '1'://科別
 						if( !empty($data[$i][num2alpha($j)]) ){
-							
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if (checkdepcode($data[$i][num2alpha($j)])==false) {
 								$error_flag = 1;
 								$msg.="科別代碼錯誤 ； "."</br>";
@@ -161,6 +162,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '2'://學號
 						if( !empty($data[$i][num2alpha($j)]) ) {
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if( checkstdnumber($data[$i][num2alpha($j)])==false ) {
 								$error_flag = 1;
 								$msg.="學號錯誤 ； "."</br>";	
@@ -179,6 +181,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '3'://學生姓名
 						if( !empty($data[$i][num2alpha($j)]) ){
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if( checkname($data[$i][num2alpha($j)])==false ) {
 								$error_flag = 1;
 									$msg.="學生姓名非中文 ； "."</br>";	
@@ -201,6 +204,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '4'://身分證字號
 						if (!empty($data[$i][num2alpha($j)])){
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if (check_id_number($data[$i][num2alpha($j)])==false) {
 								$error_flag = 1;
 								$msg.="身分證字號錯誤 ； "."</br>";
@@ -223,6 +227,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '5'://性別代碼
 						if (!empty($data[$i][num2alpha($j)])){
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if (($data[$i][num2alpha($j)]!=1)&&($data[$i][num2alpha($j)]!=2)) {
 								$error_flag = 1;
 								$msg.="性別代碼錯誤 ； "."</br>";	
@@ -245,6 +250,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '6'://出生年月日
 						if (!empty($data[$i][num2alpha($j)])){
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							$value['birth'] = $data[$i][num2alpha($j)];
 							$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
 						}else{
@@ -269,6 +275,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '8'://導師姓名
 						if (!empty($data[$i][num2alpha($j)])){
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if (checkname($data[$i][num2alpha($j)])==false) {
 								$error_flag = 1;
 									$msg.="導師姓名非中文 ； "."</br>";	
@@ -287,6 +294,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '9'://導師信箱
 						if (!empty($data[$i][num2alpha($j)])){
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if (checkemail($data[$i][num2alpha($j)])==false) {
 								$error_flag = 1;
 								$msg.="導師信箱格式錯誤 ； "."</br>";	
@@ -303,6 +311,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '10'://建教生                        
 					if( !is_null($data[$i][num2alpha($j)]) ) {
+						$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 						if( strlen($data[$i][num2alpha($j)])!=0 ){
 							if ($data[$i][num2alpha($j)] !='1' && $data[$i][num2alpha($j)]!='0'){
 								$error_flag = 1;
