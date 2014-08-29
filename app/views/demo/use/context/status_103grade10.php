@@ -92,7 +92,7 @@ angular.module('app', [])
     };
 }).controller('Ctrl', Ctrl);
 
-function Ctrl($scope, $http) {
+function Ctrl($scope, $http, $filter) {
     $scope.page = 0;
     $scope.pages = 0;
     $scope.limit = 20;  
@@ -163,6 +163,12 @@ function Ctrl($scope, $http) {
             console.log(e);
         });
     };    
+    
+    $scope.$watchCollection('searchText', function(query) {
+        $scope.stu.max = $filter("filter")($scope.students, query).length;
+        $scope.stu.pages = Math.ceil($scope.stu.max/$scope.stu.limit);
+        $scope.stu.page = 1;
+    });  
     
     $scope.stu.next = function() {
         if( $scope.stu.page < $scope.stu.pages )
