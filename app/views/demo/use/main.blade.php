@@ -179,7 +179,7 @@ function share($scope, $filter, $http) {
 
 		<div style="height: 100%;overflow-y: hidden;margin:0 0 0 200px; position: relative" class="context">
             
-            <div style="width:500px;position: absolute;top:0;background-color: #fff;border-right: 1px solid #ddd;height: 100%;left:-501px;font-size:16px;overflow: auto" class="authorize">
+            <div style="width:500px;position: absolute;top:0;background-color: #fff;border-right: 1px solid #ddd;height: 100%;left:-501px;font-size:16px;overflow: auto;z-index: 1000" class="authorize">
                 <div ng-controller="request" style="margin:10px">
                     <?=$share?>
                 </div>
