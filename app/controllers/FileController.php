@@ -98,13 +98,11 @@ class FileController extends BaseController {
         }
         
 		$intent = app\library\files\v0\FileActiver::active($intent_key);
-<<<<<<< Updated upstream
-=======
+
         $doc_id = $intent['doc_id'];
         $file = new $intent['fileClass']($doc_id);
         $active = $intent['active'];
         return $file->$active();
->>>>>>> Stashed changes
         
         //帶修正 dev-row
         switch($intent['active']) {
