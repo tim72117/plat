@@ -1,5 +1,66 @@
+
+<script src="../js/angular.min.js"></script>
+
+<div ng-app="app">
+
+    <div ng-controller="newTableController" ng-switch on="page" style="border: 0px solid #999;position: absolute;top: 10px;bottom: 0">
+
+        <div ng-switch-when="1" style="border: 1px solid #999;position: absolute;top: 0;bottom: 40px;width:800px">
+            <div ng-repeat="table in tables" style="margin:2px">
+                <input type="text" placeholder="欄位名稱" class="input" value="{{ table.name }}" />
+                <input type="text" placeholder="欄位描述" class="input" value="{{ table.description }}" />
+                <select class="input"><option>欄位類型</option></select>
+                <select class="input"><option>過濾規則</option></select>
+            </div>    
+            <div style="margin:2px">
+                <input type="text" placeholder="欄位名稱" class="input" ng-model="column.name" />
+                <input type="text" placeholder="欄位描述" class="input" ng-model="column.description" />
+                <select class="input"><option>欄位類型</option></select>
+                <select class="input"><option>過濾規則</option></select>        
+                <input type="button" value="新增" ng-click="add()" style="padding: 3px" />
+            </div>   
+        </div>
+        
+        <div ng-switch-when="2" style="border: 1px solid #999;position: absolute;top: 0;bottom: 40px;width:800px">
+            <div ng-repeat="table in tables" style="margin:2px">
+                <input type="text" placeholder="欄位名稱" class="input" value="{{ table.name }}" />
+                <input type="text" placeholder="欄位描述" class="input" value="{{ table.description }}" />
+                <select class="input"><option>欄位類型</option></select>
+                <select class="input"><option>過濾規則</option></select>
+            </div>    
+        </div>
+        
+        <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
+            <div class="page-tag" ng-click="page=1" ng-class="page==1 ? 'selected' : ''" style="margin:0 0 5px 5px;">資料表</div>
+            <div class="page-tag" ng-click="page=2" ng-class="page==2 ? 'selected' : ''" style="margin:0 0 5px 5px;left:85px">資料表</div>
+        </div>
+        
+    </div>
+    
+    
+
+</div>
+
 <style>
-.sch-profile td {
+.page-tag {
+    position: absolute;
+    top: -1px;
+    width: 80px;
+    height: 25px;
+    border: 1px solid #999;
+    font-size: 13px;
+    line-height: 25px;
+    text-align: center;
+    cursor: default
+}
+.page-tag.selected {
+    border-top-color: #fff
+}
+.page-tag:not(.selected):hover {
+    border-color: #555 #555 #555 #555;
+    cursor: pointer
+}
+.lists:not(:last-child) td {
     border-bottom: 1px solid #999;
 }    
 .sorter {
@@ -10,103 +71,160 @@
     color: #00f;
     background-color: #fff;
 }
+.input {
+    box-sizing: border-box;
+    padding: 5px;    
+    margin: 0;
+}
 </style>
 
-<div ng-app="app" ng-controller="Ctrl">
-編號學校: <input ng-model="searchText.schools"  ng-init="pagen = 0" />
-<input ng-model="limit" />
-<span ng-repeat="pages in [1,2]">
-    <span ng-click="changePage(pages)">{{pages}}</span>
-</span>
-<table cellpadding="3" cellspacing="0" border="0" width="1200" class="sch-profile" style="margin:10px 0 0 10px">
-    <tr>
-        <th width="40">
-            <a class="sorter" herf="" ng-click="predicate = '-id'; reverse=false">編號</a>
-            <a class="sorter" herf="" ng-click="predicate = 'id'; reverse=false">^</a>
-        </th>
-        <th width="150">
-            <a class="sorter" herf="" ng-click="predicate = '-schools'; reverse=false">學校</a>
-            <a class="sorter" herf="" ng-click="predicate = 'schools'; reverse=false">^</a>
-        </th>
-        <th width="150" ng-click="addName()">姓名{{pagen}}</th>
-        <th width="150">職稱</th>
-        <th width="150">電話</th>
-        <th width="100">傳真</th>
-        <th width="30">學校人員</th>
-        <th width="30">高一、專一新生</th>
-        <th width="30">高二、專一學生</th>
-        <th width="30">高二、專二導師</th>
-        <th width="30">高二、專二家長</th>
-        
-    </tr>
-    <tr ng-repeat="user in users track by $index | orderBy:predicate:reverse | filter:searchText" class="usersinfo">
-        <td>{{$index}}.{{user.id | fullname:5}}</td>
-        <td>{{user.schools}}</td>
-        <td>{{user.name}}</td>
-        <td>{{user.title}}</td>
-        <td>{{user.tel}}</td>
-        <td>{{user.fax}}</td>
-        <td>{{user.schpeo}}</td>
-        <td>{{user.senior1}}</td>
-        <td>{{user.senior2}}</td>
-        <td>{{user.tutor}}</td>
-        <td>{{user.parent}}</td>
-    </tr>
-    
-    
-        
-</table>
-
-</div>
-
-<div ng-init="users = []"></div>
-
 <script>
-$(function(){
-    $('.usersinfo').append('<td>{{user.parent}}</td>');
-});
-
-
-
-
-/*
-function Ctrl($scope, $http) {
-    //$scope.users = angular.fromJson();
-    
-    $http({method: 'GET', url: '<?=asset('ajax/'.$intent_key)?>'})
-    .success(function(data, status, headers, config) {
-        $scope.users = data;
-        console.log(data[0]);
-    });
-    $scope.addName = function(){
-        $scope.users.push({id:1,title:2});
+angular.module('app', [])
+.filter('startFrom', function() {
+    return function(input, start) {         
+        return input.slice(start);
     };
-    
-    $scope.changePage = function(p){
-        $scope.pagen = p;
+}).controller('Ctrl', Ctrl).controller('newTableController', newTableController);
+
+function newTableController($scope) {
+    $scope.tables = [
+        {
+            name: '姓名',
+            description : '姓名'
+        },
+        {
+            name: '姓名',
+            description : '姓名'
+        }
+    ];
+    $scope.column = {};
+    $scope.add = function() {
+        $scope.tables.push({
+            name: $scope.column.name,
+            description : $scope.column.description
+        });
+        $scope.column.name = null;
+        $scope.column.description = null;
     };
-
-
-    if( false )
-    $.getJSON( "<?=asset('ajax/'.$intent_key)?>", function( data ) {
-        //$scope.users = data;
-        //$scope.$apply();
-    });
-    $scope.predicate = 'id';
+    $scope.page = 1;
+    $scope.pageC = function() {
+        alert();
+    };
 }
-*/
-   function Ctrl($scope, $http) {
-       
-   }
-    angular.module('app', [])
-    .controller('Ctrl', Ctrl)
-    .filter('fullname', function() {
-        //alert(start);
-        return function(start) {
-            //start = parseInt(start, 10);
-            //alert(start);
-            return 1;
-        };
-    });
 
+function Ctrl($scope, $http, $filter) {
+    $scope.page = 0;
+    $scope.pages = 0;
+    $scope.limit = 20;  
+    $scope.schools = [];
+            
+    var getSchools = function() {
+        $scope.schools = [];
+        $http({method: 'POST', url: '<?//=asset('ajax/'.$fileAcitver->intent_key.'/schools')?>', data:{} })
+        .success(function(data, status, headers, config) {
+            console.log(data);
+            $scope.schools = data.schools;
+            $scope.page = 1;
+            $scope.max = $scope.schools.length;
+            $scope.pages = Math.ceil($scope.max/$scope.limit);
+            $scope.school_selected = '';
+            $scope.total_rate = data.total_rate;
+            $scope.finish = data.finish;
+        })
+        .error(function(e){
+            console.log(e);
+        });
+    };
+    $scope.reflash = getSchools;
+    //getSchools();
+    
+    $scope.stu = {page:0, pages:0, limit:20};
+    $scope.students = [];
+    
+    $scope.next = function() {
+        if( $scope.page < $scope.pages )
+            $scope.page++;
+    };
+    
+    $scope.prev = function() {
+        if( $scope.page > 1 )
+            $scope.page--;
+    };
+    
+    $scope.all = function() {
+        $scope.page = 1;
+        $scope.limit = $scope.max;
+        $scope.pages = 1;
+    };
+    
+    $scope.selectedStyle = function(school, target) {
+        if( target==='tr' ){
+            return {                
+                'background-color':  school.shid===$scope.school_selected ? '#f5f5f5' : ''
+            };
+        }
+        if( target==='td' ){
+            return {                
+                'border-right': school.shid===$scope.school_selected ? '1px solid #f5f5f5' : '1px solid #aaa'
+            };
+        }
+    };
+    
+    $scope.open = function(shid, name) {        
+        $http({method: 'POST', url: '<?//=asset('ajax/'.$fileAcitver->intent_key.'/list')?>', data:{shid:shid} })
+        .success(function(data, status, headers, config) {
+            $scope.school_name = name;
+            $scope.school_selected = shid;
+            $scope.students = data;            
+            $scope.stu.page = 1;
+            $scope.stu.max = $scope.students.length;
+            $scope.stu.pages = Math.ceil($scope.stu.max/$scope.stu.limit);
+        })
+        .error(function(e){
+            console.log(e);
+        });
+    };    
+    
+    $scope.$watchCollection('searchText', function(query) {
+        $scope.stu.max = $filter("filter")($scope.students, query).length;
+        $scope.stu.pages = Math.ceil($scope.stu.max/$scope.stu.limit);
+        $scope.stu.page = 1;
+    });  
+    
+    $scope.stu.next = function() {
+        if( $scope.stu.page < $scope.stu.pages )
+            $scope.stu.page++;
+    };
+    
+    $scope.stu.prev = function() {
+        if( $scope.stu.page > 1 )
+            $scope.stu.page--;
+    };
+    
+    $scope.stu.all = function() {
+        $scope.stu.page = 1;
+        $scope.stu.limit = $scope.stu.max;
+        $scope.stu.pages = 1;
+    };
+    
+    $scope.deleteStyle = function(student) {
+        return {
+            'text-decoration': student.deleted==='1'? 'line-through' : '',
+            'background-color':  student.deleted==='1' ? '#eee' : ''
+        };
+    };
+    
+    $scope.delete = function(student) {        
+        $http({method: 'POST', url: '<?//=asset('ajax/'.$fileAcitver->intent_key.'/delete')?>', data:{cid:student.cid} })
+        .success(function(data, status, headers, config) {
+            if( data.saveStatus ){
+                student.deleted = '1';
+                student.confirm = 0;
+            }
+        })
+        .error(function(e){
+            console.log(e);
+        });
+    };  
+}
 </script>
