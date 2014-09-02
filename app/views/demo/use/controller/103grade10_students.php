@@ -27,14 +27,14 @@ return array(
         $total_rate = array('finish' => 0, 'total' => 0);
         $sh = array_map(function($sh) use(&$total_rate){
             $rate = number_format($sh->finish*100/$sh->total, 2);
-            $total_rate['finish'] += $sh->finish;
-            $total_rate['total'] += $sh->total;
+            !empty($sh->sname) && $total_rate['finish'] += $sh->finish;
+            !empty($sh->sname) && $total_rate['total'] += $sh->total;
             empty($sh->sname) && $sh->sname = '未上傳學生資料(已填問卷)';
             return array('sname' => $sh->sname, 'shid' => $sh->shid, 'rate' => $rate, 'total' => $sh->total);
         }, $total);
         return array(
             'total_rate' => number_format($total_rate['finish']*100/$total_rate['total'], 2),
-            'finish' => $total_rate['finish'],
+            'total' => $total_rate['total'],
             'schools' => $sh
         );
     }

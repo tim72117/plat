@@ -34,7 +34,7 @@
     <tr> 
         <th>全國(已上傳學生資料)</th>    
         <th align="right">{{ total_rate }}</th>  
-        <th align="right">{{ finish }}</th>  
+        <th align="right">{{ total }}</th>  
         <th style="border-right:1px solid #aaa"></th> 
     </tr>
     <tr ng-repeat="school in schools | filter:searchSchoolText | startFrom:(page-1)*20 | limitTo:limit" ng-style="selectedStyle(school,'tr')" class="lists">
@@ -108,7 +108,7 @@ function Ctrl($scope, $http, $filter) {
             $scope.pages = Math.ceil($scope.max/$scope.limit);
             $scope.school_selected = '';
             $scope.total_rate = data.total_rate;
-            $scope.finish = data.finish;
+            $scope.total = data.total;
         })
         .error(function(e){
             console.log(e);
