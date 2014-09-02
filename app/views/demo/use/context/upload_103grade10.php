@@ -120,6 +120,7 @@ if( Session::has('upload_file_id') ){
 				switch($j){
 					case '0'://學校代碼
 						if( !empty($data[$i][num2alpha($j)]) ){
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if( !checkstdid($data[$i][num2alpha($j)]) ) {
 								$error_flag = 1;
 								$msg.="學校代碼錯誤 ； "."</br>";
@@ -142,7 +143,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '1'://科別
 						if( !empty($data[$i][num2alpha($j)]) ){
-							
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if (checkdepcode($data[$i][num2alpha($j)])==false) {
 								$error_flag = 1;
 								$msg.="科別代碼錯誤 ； "."</br>";
@@ -161,6 +162,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '2'://學號
 						if( !empty($data[$i][num2alpha($j)]) ) {
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if( checkstdnumber($data[$i][num2alpha($j)])==false ) {
 								$error_flag = 1;
 								$msg.="學號錯誤 ； "."</br>";	
@@ -179,6 +181,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '3'://學生姓名
 						if( !empty($data[$i][num2alpha($j)]) ){
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if( checkname($data[$i][num2alpha($j)])==false ) {
 								$error_flag = 1;
 									$msg.="學生姓名非中文 ； "."</br>";	
@@ -201,6 +204,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '4'://身分證字號
 						if (!empty($data[$i][num2alpha($j)])){
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if (check_id_number($data[$i][num2alpha($j)])==false) {
 								$error_flag = 1;
 								$msg.="身分證字號錯誤 ； "."</br>";
@@ -223,6 +227,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '5'://性別代碼
 						if (!empty($data[$i][num2alpha($j)])){
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if (($data[$i][num2alpha($j)]!=1)&&($data[$i][num2alpha($j)]!=2)) {
 								$error_flag = 1;
 								$msg.="性別代碼錯誤 ； "."</br>";	
@@ -245,6 +250,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '6'://出生年月日
 						if (!empty($data[$i][num2alpha($j)])){
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							$value['birth'] = $data[$i][num2alpha($j)];
 							$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
 						}else{
@@ -269,6 +275,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '8'://導師姓名
 						if (!empty($data[$i][num2alpha($j)])){
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if (checkname($data[$i][num2alpha($j)])==false) {
 								$error_flag = 1;
 									$msg.="導師姓名非中文 ； "."</br>";	
@@ -287,6 +294,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '9'://導師信箱
 						if (!empty($data[$i][num2alpha($j)])){
+							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if (checkemail($data[$i][num2alpha($j)])==false) {
 								$error_flag = 1;
 								$msg.="導師信箱格式錯誤 ； "."</br>";	
@@ -302,7 +310,9 @@ if( Session::has('upload_file_id') ){
 					break;
 					//////////////////////////////////////////////////////////
 					case '10'://建教生                        
+
 					if( isset($data[$i]) && !is_null($data[$i][num2alpha($j)]) ) {
+						$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 						if( strlen($data[$i][num2alpha($j)])!=0 ){
 							if ($data[$i][num2alpha($j)] !='1' && $data[$i][num2alpha($j)]!='0'){
 								$error_flag = 1;
@@ -478,7 +488,7 @@ if ($null_row_flag == 1)
 		</td>
     <tr>
         <td valign="top">
-            <div style="margin:0 0 0 0;border: 1px solid #aaa;padding:10px;width:600px">
+            <div style="margin:0 0 0 0;border: 1px solid #aaa;padding:10px;width:800px">
 			<?
 			//表單資料               
 			echo "</br>";
@@ -518,7 +528,7 @@ if ($null_row_flag == 1)
 	</tr>
 </table>
 </div>
-<div style="margin:10px 0 0 10px;width:1200px">	
+<div style="margin:10px 0 0 10px;width:800px">	
 <? if( $error_data != '' || $null_row_flag==1 ){ ?>
 
 <table width="99%" cellpadding="3" cellspacing="0" border="1">
@@ -550,7 +560,36 @@ if ($null_row_flag == 1)
 
 </div>
 
-<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:600px">
+<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:800px">
+    <div ng-controller="studentCtrl">
+		<p>本校回收率暨全國回收率查詢</p>
+        <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 10px">
+            <tr>
+                <th width="100">學生姓名</th>
+                <th width="100">回收率</th>
+                <th width="100">筆數</th>   
+                <th></th>
+            </tr>
+            <tbody ng-repeat="student in students | startFrom:(page-1)*limit | limitTo:limit">
+                <tr ng-style="deleteStyle(student)">  
+                    <td width="100" align="center">本校</td>
+                    <td class="files">{{ student.clsname }}</td>
+                    <td class="files">{{ student.depcode }}</td>
+                </tr>
+                <tr ng-style="deleteStyle(student)">  
+                    <td width="100" align="center">全國</td>
+                    <td class="files">{{ student.clsname }}</td>
+                    <td class="files">{{ student.depcode }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+</br>
+
+<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:800px">
     <div ng-controller="studentCtrl">
 
         <input ng-click="prev()" type="button" value="prev" />
@@ -563,20 +602,29 @@ if ($null_row_flag == 1)
                 <th width="100">班級</th>
                 <th width="100">科別</th>   
                 <th width="100">導師姓名</th>
+                <th width="100">學號</th>
+                <th width="80">生日</th>
                 <th width="50">性別</th>
-                <th width="50">建教生</th>  
-                <th width="80">填答頁數</th>  
+                <th width="80">建教生</th>  
+                <th width="160" allgn="center">填答頁數</th>  
+                <th width="80" align="center">刪除</th>  
                 <th></th>
             </tr>
             <tbody ng-repeat="student in students | startFrom:(page-1)*limit | limitTo:limit">
-                <tr>  
+                <tr ng-style="deleteStyle(student)">  
                     <td class="files">{{ student.stdname }}</td>
                     <td class="files">{{ student.clsname }}</td>
                     <td class="files">{{ student.depcode }}</td>
                     <td class="files">{{ student.teaname }}</td>
+                    <td class="files">{{ student.stdidnumber }}</td>
+                    <td class="files">{{ student.birth }}</td>
                     <td class="files" align="center">{{ student.stdsex }}</td>
                     <td class="files" align="center">{{ student.workstd }}</td>
-                    <td class="files" align="center">{{ student.page }}</td>
+                    <td class="files" align="center">{{ student.page==20 ?student.page+'(已填畢)' : student.page  }}</td>
+                    <td class="files" align="center">
+                        <input type="button" value="刪除" ng-click="student.confirm=1" ng-init="student.confirm=0" ng-hide="student.confirm" ng-disabled="student.deleted==='1'" />
+                        <input type="button" value="確認" ng-click="deleting=1;delete(student)" ng-init="deleting=0" ng-hide="!student.confirm" ng-disabled="deleting" style="color:#f00" />
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -588,7 +636,7 @@ $files = DB::table('ques_admin.dbo.files')->where('owner', $doc_id)->where('crea
 $students = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
         ->where('userinfo.created_by', $user_id)
-        ->select('stdname', 'clsname', 'depcode', 'teaname', 'stdsex', 'workstd', 'pstat.page')->get();
+        ->select('stdname', 'clsname', 'depcode', 'teaname', 'stdidnumber', 'birth', 'stdsex', 'workstd', 'pstat.page', 'userinfo.cid', DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted'))->get();
 ?>
 
 
@@ -632,7 +680,7 @@ angular.module('app', [])
     };
 }).controller('studentCtrl', studentCtrl);
 
-function studentCtrl($scope) {
+function studentCtrl($scope, $http) {
     $scope.students = angular.fromJson(<?=json_encode($students)?>);
     $scope.page = 1;
     $scope.limit = 20;
@@ -654,5 +702,25 @@ function studentCtrl($scope) {
         $scope.limit = $scope.max;
         $scope.pages = 1;
     };
+    
+    $scope.deleteStyle = function(student) {
+        return {
+            'text-decoration': student.deleted==='1'? 'line-through' : '',
+            'background-color':  student.deleted==='1'? '#eee' : ''
+        };
+    };
+    
+    $scope.delete = function(student) {        
+        $http({method: 'POST', url: '<?=asset('ajax/'.$intent_key.'/delete')?>', data:{cid:student.cid} })
+        .success(function(data, status, headers, config) {
+            if( data.saveStatus ){
+                student.deleted = '1';
+                student.confirm = 0;
+            }
+        })
+        .error(function(e){
+            console.log(e);
+        });
+    };    
 }
 </script>
