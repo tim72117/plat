@@ -26,18 +26,18 @@
         </th>
     </tr>
     <tr>        
-        <th width="350">學校</th>
+        <th width="350">學校<input ng-model="searchSchoolText.sname" size="20" /></th>
         <th width="50" align="right">回收率</th>  
         <th width="50" align="right">學生數</th> 
         <th width="50" align="center" style="border-right:1px solid #aaa">名單</th>
     </tr>
     <tr> 
-        <th>全國</th>    
+        <th>全國(已上傳學生資料)</th>    
         <th align="right">{{ total_rate }}</th>  
         <th align="right">{{ finish }}</th>  
         <th style="border-right:1px solid #aaa"></th> 
     </tr>
-    <tr ng-repeat="school in schools | startFrom:(page-1)*20 | limitTo:limit" ng-style="selectedStyle(school,'tr')" class="lists">
+    <tr ng-repeat="school in schools | filter:searchSchoolText | startFrom:(page-1)*20 | limitTo:limit" ng-style="selectedStyle(school,'tr')" class="lists">
         <td>{{ school.sname }}</td>    
         <td align="right">{{ school.rate }}</td>  
         <td align="right">{{ school.total }}</td>   
@@ -73,7 +73,7 @@
     </tr>
     <tr ng-repeat="student in students | filter:searchText | startFrom:(stu.page-1)*20 | limitTo:stu.limit" ng-style="deleteStyle(student)" class="lists">
         <td>{{ student.stdname }}</td>  
-        <td>{{ student.stdidnumber }}*****</td> 
+        <td>{{ student.stdidnumber }}****</td> 
         <td align="center">
             <input type="button" value="刪除" ng-click="student.confirm=1" ng-init="student.confirm=0" ng-hide="student.confirm" ng-disabled="student.deleted==='1'" />
             <input type="button" value="確認" ng-click="deleting=1;delete(student)" ng-init="deleting=0" ng-hide="!student.confirm" ng-disabled="deleting" style="color:#f00" />

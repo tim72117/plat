@@ -555,7 +555,7 @@ if ($null_row_flag == 1)
 
 </div>
 
-<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:850px">
+<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:900px">
     <div ng-controller="studentCtrl">
 
         <input ng-click="prev()" type="button" value="上一頁" />
@@ -566,9 +566,15 @@ if ($null_row_flag == 1)
             <tr>
                 <th width="50">編號</th>
                 <th width="100">科別</th>  
-                <th width="100">學號</th>
-                <th width="110">學生姓名</th>
-                <th width="100">身分證</th>
+                <th width="100">學號
+                    <input ng-model="searchText.stdnumber" size="6" />
+                </th>
+                <th width="110">學生姓名
+                    <input ng-model="searchText.stdname" size="3" />
+                </th>
+                <th width="100">身分證
+                    <input ng-model="searchText.stdidnumber" size="10" />
+                </th>
                 <th width="50">性別</th>
                 <th width="80">生日</th>
                 <th width="100">班級</th>                
@@ -578,7 +584,7 @@ if ($null_row_flag == 1)
                 <th width="80" align="center">刪除</th>  
                 <th></th>
             </tr>
-            <tbody ng-repeat="student in students | startFrom:(page-1)*limit | limitTo:limit">
+            <tbody ng-repeat="student in students | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
                 <tr ng-style="deleteStyle(student)">  
                     <td class="files">{{ (page-1)*limit+$index+1 }}</td>
                     <td class="files">{{ student.depcode }}</td>

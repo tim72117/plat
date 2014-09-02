@@ -5,7 +5,7 @@ return array(
         $input = Input::only('shid');
         $list = DB::table('use_103.dbo.seniorOne103_userinfo')
             ->where('shid', $input['shid'])
-            ->select('stdname', 'cid', DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted ,SUBSTRING(stdidnumber,1,5) AS stdidnumber'))->get();
+            ->select('stdname', 'cid', DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted ,SUBSTRING(stdidnumber,1,6) AS stdidnumber'))->get();
         return $list;
     }, 
     'delete' => function() {
@@ -29,7 +29,7 @@ return array(
             $rate = number_format($sh->finish*100/$sh->total, 2);
             $total_rate['finish'] += $sh->finish;
             $total_rate['total'] += $sh->total;
-            empty($sh->sname) && $sh->sname = '未上傳';
+            empty($sh->sname) && $sh->sname = '未上傳學生資料(已填問卷)';
             return array('sname' => $sh->sname, 'shid' => $sh->shid, 'rate' => $rate, 'total' => $sh->total);
         }, $total);
         return array(
