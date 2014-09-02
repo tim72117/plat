@@ -76,7 +76,7 @@
         <td>{{ student.stdidnumber }}****</td> 
         <td align="center">
             <input type="button" value="刪除" ng-click="student.confirm=1" ng-init="student.confirm=0" ng-hide="student.confirm" ng-disabled="student.deleted==='1'" />
-            <input type="button" value="確認" ng-click="deleting=1;delete(student)" ng-init="deleting=0" ng-hide="!student.confirm" ng-disabled="deleting" style="color:#f00" />
+            <input type="button" value="確認" ng-click="deleting=1;deleteStudent(student)" ng-init="deleting=0" ng-hide="!student.confirm" ng-disabled="deleting" style="color:#f00" />
         </td>
     </tr>
 </table>
@@ -193,7 +193,7 @@ function Ctrl($scope, $http, $filter) {
         };
     };
     
-    $scope.delete = function(student) {        
+    $scope.deleteStudent = function(student) {        
         $http({method: 'POST', url: '<?=asset('ajax/'.$fileAcitver->intent_key.'/delete')?>', data:{cid:student.cid} })
         .success(function(data, status, headers, config) {
             if( data.saveStatus ){
