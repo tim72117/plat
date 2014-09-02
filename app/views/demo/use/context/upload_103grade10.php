@@ -478,9 +478,6 @@ if ($null_row_flag == 1)
 
 <div style="margin:10px 0 0 10px;width:1200px">	
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-	<tr bgcolor="#CAFFCA">
-        <td height="32" align="center" class="header1" >上傳103學年度高一(專一)新生基本資料</td>
-    </tr>
 	<tr>
 		<td align="left" style="padding-left:10px">
 			<p style="color:#F00">詳細說明請參考《<a href="<?=URL::to($fileProvider->download(564))?>">範例表格下載</a>》、《 <a href="<?=URL::to($fileProvider->download(21))?>">查詢平臺操作說明</a>》檔案。</p>
@@ -491,11 +488,9 @@ if ($null_row_flag == 1)
             <div style="margin:0 0 0 0;border: 1px solid #aaa;padding:10px;width:800px">
 			<?
 			//表單資料               
-			echo "</br>";
 			$intent_key = $fileAcitver->intent_key;
 			echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true));
 			echo Form::file('file_upload');
-			echo "</br>"."</br>";
 			echo Form::submit('上傳檔案');
 			echo Form::hidden('intent_key', $intent_key);
 			echo Form::hidden('_token1', csrf_token());
@@ -504,12 +499,12 @@ if ($null_row_flag == 1)
 			?>	
                 
                 <div ng-controller="Ctrl">
-                    <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 10px">
+                    <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 0">
                         <tr>
                             <th width="250" colspan="2">                            
-                                <input ng-click="prev()" type="button" value="prev" />
+                                <input ng-click="prev()" type="button" value="上一頁" />
                                 <input ng-model="page" size="2" /> / {{ pages }}
-                                <input ng-click="next()" type="button" value="next" />
+                                <input ng-click="next()" type="button" value="下一頁" />
                                 <input ng-click="all()" type="button" value="顯示全部" />
                             </th>
                         </tr>
@@ -560,51 +555,24 @@ if ($null_row_flag == 1)
 
 </div>
 
-<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:800px">
-    <div ng-controller="studentCtrl">
-		<p>本校回收率暨全國回收率查詢</p>
-        <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 10px">
-            <tr>
-                <th width="100">學生姓名</th>
-                <th width="100">回收率</th>
-                <th width="100">筆數</th>   
-                <th></th>
-            </tr>
-            <tbody ng-repeat="student in students | startFrom:(page-1)*limit | limitTo:limit">
-                <tr ng-style="deleteStyle(student)">  
-                    <td width="100" align="center">本校</td>
-                    <td class="files">{{ student.clsname }}</td>
-                    <td class="files">{{ student.depcode }}</td>
-                </tr>
-                <tr ng-style="deleteStyle(student)">  
-                    <td width="100" align="center">全國</td>
-                    <td class="files">{{ student.clsname }}</td>
-                    <td class="files">{{ student.depcode }}</td>
-                </tr>
-            </tbody>
-        </table>
-
-    </div>
-</div>
-
-</br>
-
-<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:800px">
+<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:850px">
     <div ng-controller="studentCtrl">
 
-        <input ng-click="prev()" type="button" value="prev" />
+        <input ng-click="prev()" type="button" value="上一頁" />
         <input ng-model="page" size="2" /> / {{ pages }}
-        <input ng-click="next()" type="button" value="next" />
+        <input ng-click="next()" type="button" value="下一頁" />
         <input ng-click="all()" type="button" value="顯示全部" />
         <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 10px">
             <tr>
-                <th width="100">學生姓名</th>
-                <th width="100">班級</th>
-                <th width="100">科別</th>   
-                <th width="100">導師姓名</th>
+                <th width="50">編號</th>
+                <th width="100">科別</th>  
                 <th width="100">學號</th>
-                <th width="80">生日</th>
+                <th width="110">學生姓名</th>
+                <th width="100">身分證</th>
                 <th width="50">性別</th>
+                <th width="80">生日</th>
+                <th width="100">班級</th>                
+                <th width="110">導師姓名</th>
                 <th width="80">建教生</th>  
                 <th width="160" allgn="center">填答頁數</th>  
                 <th width="80" align="center">刪除</th>  
@@ -612,15 +580,17 @@ if ($null_row_flag == 1)
             </tr>
             <tbody ng-repeat="student in students | startFrom:(page-1)*limit | limitTo:limit">
                 <tr ng-style="deleteStyle(student)">  
-                    <td class="files">{{ student.stdname }}</td>
-                    <td class="files">{{ student.clsname }}</td>
+                    <td class="files">{{ (page-1)*limit+$index+1 }}</td>
                     <td class="files">{{ student.depcode }}</td>
-                    <td class="files">{{ student.teaname }}</td>
-                    <td class="files">{{ student.stdidnumber }}</td>
-                    <td class="files">{{ student.birth }}</td>
+                    <td class="files">{{ student.stdnumber }}</td>
+                    <td class="files">{{ student.stdname }}</td>
+                    <td class="files">{{ student.stdidnumber }}*****</td>
                     <td class="files" align="center">{{ student.stdsex }}</td>
+                    <td class="files">{{ student.birth }}</td>
+                    <td class="files">{{ student.clsname }}</td>                    
+                    <td class="files">{{ student.teaname }}</td>
                     <td class="files" align="center">{{ student.workstd }}</td>
-                    <td class="files" align="center">{{ student.page==20 ?student.page+'(已填畢)' : student.page  }}</td>
+                    <td class="files" align="center">{{ student.page==='20' ?student.page+'(已填畢)' : student.page  }}</td>
                     <td class="files" align="center">
                         <input type="button" value="刪除" ng-click="student.confirm=1" ng-init="student.confirm=0" ng-hide="student.confirm" ng-disabled="student.deleted==='1'" />
                         <input type="button" value="確認" ng-click="deleting=1;delete(student)" ng-init="deleting=0" ng-hide="!student.confirm" ng-disabled="deleting" style="color:#f00" />
@@ -636,7 +606,8 @@ $files = DB::table('ques_admin.dbo.files')->where('owner', $doc_id)->where('crea
 $students = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
         ->where('userinfo.created_by', $user_id)
-        ->select('stdname', 'clsname', 'depcode', 'teaname', 'stdidnumber', 'birth', 'stdsex', 'workstd', 'pstat.page', 'userinfo.cid', DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted'))->get();
+        ->select('stdname', 'clsname', 'depcode', 'teaname', 'stdnumber', 'birth', 'stdsex', 'workstd', 'pstat.page', 'userinfo.cid',
+            DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted, SUBSTRING(stdidnumber,1,5) AS stdidnumber'))->get();
 ?>
 
 

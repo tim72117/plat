@@ -81,7 +81,7 @@ class FileController extends BaseController {
     }
     
     public function fileAjaxPost($intent_key, $method) {
-        $file = VirtualFile::find(Session::get('file')[$intent_key]['file_id']);
+        $file = VirtualFile::find(Session::get('file')[$intent_key]['doc_id']);
 
         $fileLoader = new Illuminate\Config\FileLoader(new Filesystem, app_path().'/views/demo/use/controller');
         $ajax = new Illuminate\Config\Repository($fileLoader, '');
