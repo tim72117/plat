@@ -555,7 +555,69 @@ if ($null_row_flag == 1)
 
 </div>
 
+<?
+$count_1 = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
+        ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
+        ->where('userinfo.created_by', $user_id)
+        ->count();
+		
+$count_2 = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
+        ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
+        ->count();
+
+$count_3 = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
+        ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
+        ->where('userinfo.created_by', $user_id)
+		->where('page','=',20)
+        ->count();
+
+$count_4 = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
+        ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
+		->where('page','=',20)
+        ->count();		
+
+$count_a = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
+    ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
+    ->whereNotNull('pstat.newcid')
+    ->select(DB::raw(
+        'SUM(CASE WHEN userinfo.created_by = '.$user_id.' and pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
+        'SUM(CASE WHEN userinfo.created_by = '.$user_id.' THEN 1 ELSE 0 END) AS mystd,' . 
+        'SUM(CASE WHEN pstat.page = 20 THEN 1 ELSE 0 END) AS allfinish,' .
+        ' count(*) AS allstds'))->first();
+var_dump($count_a);
+
+$return_school = round(($count_3/$count_1)*100,2);
+$return_country = round(($count_4/$count_2)*100,2);
+		
+?>
+
+<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:800px">
+		<p>本校回收率暨全國回收率查詢</p>
+        <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 10px">
+            <tr>
+                <th width="100">學生姓名</th>
+                <th width="100">回收率</th>
+                <th width="100">筆數</th>   
+                <th></th>
+            </tr>
+                <tr>  
+                    <td width="100" align="center">本校</td>
+                    <td ><?=$return_school.' %'; ?></td>
+                    <td><?=$count_1; ?></td>
+                </tr>
+                <tr>  
+                    <td width="100" align="center">全國</td>
+                    <td><?=$return_country.' %'; ?></td>
+                    <td><?=$count_2; ?></td>
+                </tr>
+            </tbody>
+        </table>
+</div>
+
+</br>
+
 <div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:900px">
+
     <div ng-controller="studentCtrl">
 
         <input ng-click="prev()" type="button" value="上一頁" />
