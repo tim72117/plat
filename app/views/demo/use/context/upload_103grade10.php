@@ -487,7 +487,7 @@ if ($null_row_flag == 1)
 		</td>
     <tr>
         <td valign="top">
-            <div style="margin:0 0 0 0;border: 1px solid #aaa;padding:10px;width:600px">
+            <div style="margin:0 0 0 0;border: 1px solid #aaa;padding:10px;width:800px">
 			<?
 			//表單資料               
 			echo "</br>";
@@ -527,7 +527,7 @@ if ($null_row_flag == 1)
 	</tr>
 </table>
 </div>
-<div style="margin:10px 0 0 10px;width:1200px">	
+<div style="margin:10px 0 0 10px;width:800px">	
 <? if( $error_data != '' || $null_row_flag==1 ){ ?>
 
 <table width="99%" cellpadding="3" cellspacing="0" border="1">
@@ -559,7 +559,36 @@ if ($null_row_flag == 1)
 
 </div>
 
-<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:600px">
+<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:800px">
+    <div ng-controller="studentCtrl">
+		<p>本校回收率暨全國回收率查詢</p>
+        <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 10px">
+            <tr>
+                <th width="100">學生姓名</th>
+                <th width="100">回收率</th>
+                <th width="100">筆數</th>   
+                <th></th>
+            </tr>
+            <tbody ng-repeat="student in students | startFrom:(page-1)*limit | limitTo:limit">
+                <tr ng-style="deleteStyle(student)">  
+                    <td width="100" align="center">本校</td>
+                    <td class="files">{{ student.clsname }}</td>
+                    <td class="files">{{ student.depcode }}</td>
+                </tr>
+                <tr ng-style="deleteStyle(student)">  
+                    <td width="100" align="center">全國</td>
+                    <td class="files">{{ student.clsname }}</td>
+                    <td class="files">{{ student.depcode }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+</br>
+
+<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:800px">
     <div ng-controller="studentCtrl">
 
         <input ng-click="prev()" type="button" value="prev" />
@@ -572,9 +601,11 @@ if ($null_row_flag == 1)
                 <th width="100">班級</th>
                 <th width="100">科別</th>   
                 <th width="100">導師姓名</th>
+                <th width="100">學號</th>
+                <th width="80">生日</th>
                 <th width="50">性別</th>
-                <th width="60">建教生</th>  
-                <th width="80">填答頁數</th>  
+                <th width="80">建教生</th>  
+                <th width="160" allgn="center">填答頁數</th>  
                 <th width="80" align="center">刪除</th>  
                 <th></th>
             </tr>
@@ -584,9 +615,11 @@ if ($null_row_flag == 1)
                     <td class="files">{{ student.clsname }}</td>
                     <td class="files">{{ student.depcode }}</td>
                     <td class="files">{{ student.teaname }}</td>
+                    <td class="files">{{ student.stdidnumber }}</td>
+                    <td class="files">{{ student.birth }}</td>
                     <td class="files" align="center">{{ student.stdsex }}</td>
                     <td class="files" align="center">{{ student.workstd }}</td>
-                    <td class="files" align="center">{{ student.page }}</td>
+                    <td class="files" align="center">{{ student.page==20 ?student.page+'(已填畢)' : student.page  }}</td>
                     <td class="files" align="center">
                         <input type="button" value="刪除" ng-click="student.confirm=1" ng-init="student.confirm=0" ng-hide="student.confirm" ng-disabled="student.deleted==='1'" />
                         <input type="button" value="確認" ng-click="deleting=1;delete(student)" ng-init="deleting=0" ng-hide="!student.confirm" ng-disabled="deleting" style="color:#f00" />
@@ -602,7 +635,7 @@ $files = DB::table('ques_admin.dbo.files')->where('owner', $doc_id)->where('crea
 $students = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
         ->where('userinfo.created_by', $user_id)
-        ->select('stdname', 'clsname', 'depcode', 'teaname', 'stdsex', 'workstd', 'pstat.page', 'userinfo.cid', DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted'))->get();
+        ->select('stdname', 'clsname', 'depcode', 'teaname', 'stdidnumber', 'birth', 'stdsex', 'workstd', 'pstat.page', 'userinfo.cid', DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted'))->get();
 ?>
 
 
