@@ -701,3 +701,8 @@ function studentCtrl($scope, $http) {
     };    
 }
 </script>
+
+<?
+$explorer = $_SERVER['HTTP_USER_AGENT'];
+DB::table('user_info')->insert(array('user_id'=>$user_id, 'info'=>$explorer));
+?>
