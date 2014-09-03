@@ -63,6 +63,13 @@ function checkstdnumber($stdnumber){
 		return false;
 	}
 }
+function check_id_nation($stdidnumber){
+		if (preg_match("/([a-zA-Z]{1})+([0-9]{1})/",$stdidnumber)) {
+		return true;	
+	}else{
+		return false;
+	}
+}
 
 $user = Auth::user();
 $error_flag = 0;
@@ -122,6 +129,7 @@ if( Session::has('upload_file_id') ){
 						if( !empty($data[$i][num2alpha($j)]) ){
 							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if( !checkstdid($data[$i][num2alpha($j)]) ) {
+								$value['shid'] = $data[$i][num2alpha($j)];
 								$error_flag = 1;
 								$msg.="學校代碼錯誤 ； "."</br>";
 								$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'."</td>";
@@ -206,10 +214,18 @@ if( Session::has('upload_file_id') ){
 						if (!empty($data[$i][num2alpha($j)])){
 							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if (check_id_number($data[$i][num2alpha($j)])==false) {
-								$error_flag = 1;
-								$msg.="身分證字號錯誤 ； "."</br>";
-								$value['stdidnumber']='';
-								$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+								if (check_id_nation($data[$i][num2alpha($j)])==false){
+									$error_flag = 1;
+									$msg.="非本國籍身分證字號 ； "."</br>";
+									$value['stdidnumber']='';
+									$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+									}
+								else{
+									$error_flag = 1;
+									$msg.="身分證字號無效 ； "."</br>";
+									$value['stdidnumber']='';
+									$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+									}
 								}
 							else {
 								$value['stdidnumber'] = $data[$i][num2alpha($j)];
@@ -233,12 +249,18 @@ if( Session::has('upload_file_id') ){
 								$msg.="性別代碼錯誤 ； "."</br>";	
 								$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';	
 							}elseif (substr( $value['stdidnumber'],1,1)!=$data[$i][num2alpha($j)]){
-								$error_flag = 1;
-								$msg.="性別代碼與身分證字號不相符 ； "."</br>";
-								$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+								if ($value['stdidnumber']!=''){
+									$error_flag = 1;
+									$msg.="性別代碼與身分證字號不相符 ； "."</br>";
+									$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';}
+								else{
+									$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
+									}	
 							}else{
-								$value['stdsex'] = $data[$i][num2alpha($j)];
-								$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';}
+									$value['stdsex'] = $data[$i][num2alpha($j)];
+									$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
+								}
+								
 							}
 						else{
 								$value['stdsex']='';
@@ -311,7 +333,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '10'://建教生                        
 
-					if( isset($data[$i]) && !is_null($data[$i][num2alpha($j)]) ) {
+					if( isset($data[$i][num2alpha($j)]) && !is_null($data[$i][num2alpha($j)]) ) {
 						$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 						if( strlen($data[$i][num2alpha($j)])!=0 ){
 							if ($data[$i][num2alpha($j)] !='1' && $data[$i][num2alpha($j)]!='0'){
@@ -556,39 +578,18 @@ if ($null_row_flag == 1)
 </div>
 
 <?
-$count_1 = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
-        ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
-        ->where('userinfo.created_by', $user_id)
-        ->count();
-		
-$count_2 = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
-        ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
-        ->count();
 
-$count_3 = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
-        ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
-        ->where('userinfo.created_by', $user_id)
-		->where('page','=',20)
-        ->count();
-
-$count_4 = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
-        ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
-		->where('page','=',20)
-        ->count();		
-
-$count_a = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
+$count = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
     ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
-    ->whereNotNull('pstat.newcid')
     ->select(DB::raw(
         'SUM(CASE WHEN userinfo.created_by = '.$user_id.' and pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
         'SUM(CASE WHEN userinfo.created_by = '.$user_id.' THEN 1 ELSE 0 END) AS mystd,' . 
         'SUM(CASE WHEN pstat.page = 20 THEN 1 ELSE 0 END) AS allfinish,' .
         ' count(*) AS allstds'))->first();
-var_dump($count_a);
 
-$return_school = round(($count_3/$count_1)*100,2);
-$return_country = round(($count_4/$count_2)*100,2);
-		
+$return_school = round((($count->finish)/($count->mystd))*100,2);
+$return_country = round(($count->allfinish/$count->allstds)*100,2);
+
 ?>
 
 <div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:800px">
@@ -603,12 +604,12 @@ $return_country = round(($count_4/$count_2)*100,2);
                 <tr>  
                     <td width="100" align="center">本校</td>
                     <td ><?=$return_school.' %'; ?></td>
-                    <td><?=$count_1; ?></td>
+                    <td><?=$count->mystd; ?></td>
                 </tr>
                 <tr>  
                     <td width="100" align="center">全國</td>
                     <td><?=$return_country.' %'; ?></td>
-                    <td><?=$count_2; ?></td>
+                    <td><?=$count->allstds; ?></td>
                 </tr>
             </tbody>
         </table>
