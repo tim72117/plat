@@ -216,7 +216,7 @@ if( Session::has('upload_file_id') ){
 							if (check_id_number($data[$i][num2alpha($j)])==false) {
 								if (check_id_nation($data[$i][num2alpha($j)])==false){
 									$error_flag = 1;
-									$msg.="非本國籍身分證字號 ； "."</br>";
+									$msg.="非本國籍身分證字號，不列入調查對象 ； "."</br>";
 									$value['stdidnumber']='';
 									$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
 									}
@@ -244,30 +244,34 @@ if( Session::has('upload_file_id') ){
 					case '5'://性別代碼
 						if (!empty($data[$i][num2alpha($j)])){
 							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
-							if (($data[$i][num2alpha($j)]!=1)&&($data[$i][num2alpha($j)]!=2)) {
+							if (($data[$i][num2alpha($j)]!=1)&&($data[$i][num2alpha($j)]!=2)){
 								$error_flag = 1;
 								$msg.="性別代碼錯誤 ； "."</br>";	
-								$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';	
-							}elseif (substr( $value['stdidnumber'],1,1)!=$data[$i][num2alpha($j)]){
-								if ($value['stdidnumber']!=''){
-									$error_flag = 1;
-									$msg.="性別代碼與身分證字號不相符 ； "."</br>";
-									$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';}
-								else{
-									$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
-									}	
-							}else{
-									$value['stdsex'] = $data[$i][num2alpha($j)];
-									$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
+								$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
 								}
-								
+							else{
+								if ($value['stdidnumber']!=''){
+									if (substr( $value['stdidnumber'],1,1)!=$data[$i][num2alpha($j)]){
+										$error_flag = 1;
+										$msg.="性別代碼與身分證字號不相符 ； "."</br>";
+										$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+									}
+									else{
+										$value['stdsex'] = $data[$i][num2alpha($j)];
+										$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
+									}
+								}
+								else{
+										$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
+									}
+								}	
 							}
 						else{
 								$value['stdsex']='';
 								$error_flag = 1;
 								$msg.="未填入性別代碼 ； "."</br>";
 								$this_row.='<td>'.'</td>';
-							 }	
+							}	
 					break;
 					//////////////////////////////////////////////////////////
 					case '6'://出生年月日
@@ -545,7 +549,7 @@ if ($null_row_flag == 1)
 	</tr>
 </table>
 </div>
-<div style="margin:10px 0 0 10px;width:800px">	
+<div style="margin:10px 0 0 10px;width:1200px">	
 <? if( $error_data != '' || $null_row_flag==1 ){ ?>
 
 <table width="99%" cellpadding="3" cellspacing="0" border="1">
