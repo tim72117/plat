@@ -10,7 +10,21 @@
   -moz-border-radius: 9;
   border-radius: 9px;
   padding: 10px 20px 10px 20px;
-  text-decoration: none;
+  margin-top:15px;
+  margin-right:150px;
+}
+.high-light2 {
+  background: #cef2eb;
+  background-image: -webkit-linear-gradient(top, #cef2eb, #a1f0e0);
+  background-image: -moz-linear-gradient(top, #cef2eb, #a1f0e0);
+  background-image: -ms-linear-gradient(top, #cef2eb, #a1f0e0);
+  background-image: -o-linear-gradient(top, #cef2eb, #a1f0e0);
+  background-image: linear-gradient(to bottom, #cef2eb, #a1f0e0);
+  -webkit-border-radius: 9;
+  -moz-border-radius: 9;
+  border-radius: 9px;
+  padding: 12.5px 22.5px 12.5px 22.5px;
+  border:0 solid;
 }
 </style>
 <?
@@ -81,6 +95,13 @@ function checkstdnumber($stdnumber){
 function check_id_nation($stdidnumber){
 		if (preg_match("/([a-zA-Z]{1})+([0-9]{1})/",$stdidnumber)) {
 		return true;	
+	}else{
+		return false;
+	}
+}
+function check_birth($birth){
+		if (preg_match("/[0-9]{6}/",$birth)) {
+		return true;
 	}else{
 		return false;
 	}
@@ -292,8 +313,21 @@ if( Session::has('upload_file_id') ){
 					case '6'://出生年月日
 						if (!empty($data[$i][num2alpha($j)])){
 							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
-							$value['birth'] = $data[$i][num2alpha($j)];
-							$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
+							if (check_birth($data[$i][num2alpha($j)])==false){
+								$error_flag = 1;
+								$msg.= "生日非數字格式 ； "."</br>";
+								$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+								}
+							else{
+								if((strlen($data[$i][num2alpha($j)]))!=6){
+									$error_flag = 1;
+									$msg.= "生日非6碼數字 ； "."</br>";
+									$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';}
+								else{
+									$value['birth'] = $data[$i][num2alpha($j)];
+									$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
+									}
+								}
 						}else{
 							$error_flag = 1;
 							$value['birth'] = '';
@@ -522,19 +556,20 @@ if ($null_row_flag == 1)
             <div style="margin:0 0 0 0;border: 1px solid #aaa;padding:10px;width:800px">
 			<p style="color:#F00">詳細說明請參考《<a href="<?=URL::to($fileProvider->download(564))?>">範例表格下載</a>》、《 <a href="<?=URL::to($fileProvider->download(21))?>">查詢平臺操作說明</a>》檔案。</p>
 			<p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p> 
-             <div class="high-light">
+              <HR color="#F0F0F0">              
 			<?
 			//表單資料               
 			$intent_key = $fileAcitver->intent_key;
 			echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true));
-			echo Form::file('file_upload',array('style' => 'width:400px'));
-			echo Form::submit('上傳檔案',array('style' => 'width:80px;height:30px'));
+			echo Form::file('file_upload',array('style' => 'position:absolute;top:-1000px','id'=>'file_upload'));
+			echo Form::label('file_upload','選擇檔案', array('class' => 'high-light'));
+			echo Form::submit('上傳檔案',array('class' => 'high-light2'));
 			echo Form::hidden('intent_key', $intent_key);
 			echo Form::hidden('_token1', csrf_token());
 			echo Form::hidden('_token2', dddos_token());
 			echo Form::close();
 			?>	
-            </div>
+              <HR color="#F0F0F0">  
                 <div ng-controller="Ctrl">
                     <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 0">
                         <tr>
