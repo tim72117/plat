@@ -1,3 +1,18 @@
+<style>
+.high-light {
+  background: #cef2eb;
+  background-image: -webkit-linear-gradient(top, #cef2eb, #a1f0e0);
+  background-image: -moz-linear-gradient(top, #cef2eb, #a1f0e0);
+  background-image: -ms-linear-gradient(top, #cef2eb, #a1f0e0);
+  background-image: -o-linear-gradient(top, #cef2eb, #a1f0e0);
+  background-image: linear-gradient(to bottom, #cef2eb, #a1f0e0);
+  -webkit-border-radius: 9;
+  -moz-border-radius: 9;
+  border-radius: 9px;
+  padding: 10px 20px 10px 20px;
+  text-decoration: none;
+}
+</style>
 <?
 
 ##########################################################################################
@@ -499,31 +514,27 @@ if ($null_row_flag == 1)
 
 
 ?>
-
-
-
 <div style="margin:10px 0 0 10px;width:1200px">	
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-	<tr>
-		<td align="left" style="padding-left:10px">
-			<p style="color:#F00">詳細說明請參考《<a href="<?=URL::to($fileProvider->download(564))?>">範例表格下載</a>》、《 <a href="<?=URL::to($fileProvider->download(21))?>">查詢平臺操作說明</a>》檔案。</p>
-			<p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p>
-		</td>
+
     <tr>
         <td valign="top">
             <div style="margin:0 0 0 0;border: 1px solid #aaa;padding:10px;width:800px">
+			<p style="color:#F00">詳細說明請參考《<a href="<?=URL::to($fileProvider->download(564))?>">範例表格下載</a>》、《 <a href="<?=URL::to($fileProvider->download(21))?>">查詢平臺操作說明</a>》檔案。</p>
+			<p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p> 
+             <div class="high-light">
 			<?
 			//表單資料               
 			$intent_key = $fileAcitver->intent_key;
 			echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true));
-			echo Form::file('file_upload');
-			echo Form::submit('上傳檔案');
+			echo Form::file('file_upload',array('style' => 'width:400px'));
+			echo Form::submit('上傳檔案',array('style' => 'width:80px;height:30px'));
 			echo Form::hidden('intent_key', $intent_key);
 			echo Form::hidden('_token1', csrf_token());
 			echo Form::hidden('_token2', dddos_token());
 			echo Form::close();
 			?>	
-                
+            </div>
                 <div ng-controller="Ctrl">
                     <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 0">
                         <tr>
@@ -591,32 +602,37 @@ $count = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         'SUM(CASE WHEN pstat.page = 20 THEN 1 ELSE 0 END) AS allfinish,' .
         ' count(*) AS allstds'))->first();
 
-$return_school = round((($count->finish)/($count->mystd))*100,2);
-$return_country = round(($count->allfinish/$count->allstds)*100,2);
+//校別與全國回收率
+if (($count->allstds)==0){
+	$return_school = 0;
+	$return_country = 0;
+	}
+else {
+	$return_country = round(($count->allfinish/$count->allstds)*100,2);
+	if (($count->mystd)==0){
+		$return_school = 0;
+		}
+	else{
+		$return_school = round((($count->finish)/($count->mystd))*100,2);
+		}
+}
 
 ?>
 
 <div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:800px">
-		<p>本校回收率暨全國回收率查詢</p>
         <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 10px">
-            <tr>
-                <th width="100">學生姓名</th>
-                <th width="100">回收率</th>
-                <th width="100">筆數</th>   
-                <th></th>
-            </tr>
                 <tr>  
                     <td width="100" align="center">本校</td>
-                    <td ><?=$return_school.' %'; ?></td>
-                    <td><?=$count->mystd; ?></td>
+                    <td width="200">回收率：<?=$return_school.' %'; ?></td>
+                    <td width="200">學生人數：<?=$count->mystd; ?></td>
                 </tr>
                 <tr>  
-                    <td width="100" align="center">全國</td>
-                    <td><?=$return_country.' %'; ?></td>
-                    <td><?=$count->allstds; ?></td>
+                    <td align="center">全國</td>
+                    <td>回收率：<?=$return_country.' %'; ?></td>
+                    <td>學生人數：<?=$count->allstds; ?></td>
                 </tr>
-            </tbody>
         </table>
+        
 </div>
 
 </br>
