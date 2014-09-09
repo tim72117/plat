@@ -1,39 +1,42 @@
 
 
-<div style="margin:20px 100px;width:800px">
+<div style="margin:10px 0 0 0;width:800px">
 <?
 
 $user = Auth::user();
 
-//if( $user->id==1 ){
-	echo '<div style="border: 1px solid #aaa;padding:10px;width:800px">後期中等教育資料查詢平台進行系統轉移，登入後請盡速確認承辦人個人資料。</div>';
-//}
+
+echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;color:#f00">後期中等教育資料查詢平台進行系統轉移，登入後請盡速確認承辦人個人資料。';
+
+$browser = get_browser(null, true);
+if( true || $browser['browser']=='IE' && $browser['version']<8 ) {
+    echo '<p style="color:#f00">';
+    echo '本系統不支援IE7以下版本，請更新您的瀏覽器版本</p>';
+    echo '<p>' . 
+         '<a href="http://windows.microsoft.com/zh-tw/internet-explorer/download-ie" target="_blank">下載IE瀏覽器' .
+         '<img src="'.asset('images/browser_internet-explorer-20.png').'" height="20" border="0" style="margin-bottom:-4px" /></a>' .
+         '、' .
+         '<a href="http://www.google.com/intl/zh-TW/chrome/" target="_blank">下載Chrome瀏覽器' .
+         '<img src="'.asset('images/browser_chrome-20.png').'" height="20" border="0" style="margin-bottom:-4px" /></a>' .
+         '、' .
+         '<a href="http://mozilla.com.tw/firefox/new/" target="_blank">下載Firefox瀏覽器' .
+         '<img src="'.asset('images/browser_firefox.png').'" height="20" border="0" style="margin-bottom:-4px" /></a>';    
+    echo '</p>';
+}
+
+echo '</div>';
+
 	
 $fileProvider = app\library\files\v0\FileProvider::make();
 echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px">';
 echo '<a href="'.URL::to($fileProvider->download(16)).'">102學年度高二學生中獎名單(公告).pdf</a><br />';
-echo '<a href="'.URL::to($fileProvider->download(17)).'">102學年度導師問卷普查 中獎名單公告.pdf<br /></a>';
-echo '<a href="'.URL::to($fileProvider->download(2)).'">102學年度國三畢業生基本資料範例表格下載</a>';
+echo '<a href="'.URL::to($fileProvider->download(17)).'">102學年度導師問卷普查 中獎名單公告.pdf</a><br />';
+echo '<a href="'.URL::to($fileProvider->download(2)).'">102學年度國三畢業生基本資料範例表格下載</a><br />';
+echo '<a href="'.URL::to($fileProvider->download(559)).'">103年後期中等教育學校承辦人說明會0729(說明會後修訂版)</a><br />';
+echo '<a href="'.URL::to($fileProvider->download(612)).'">103年高一學生調查說帖</a><br />';
+echo '<a href="'.URL::to($fileProvider->download(638)).'">103高一學生線上問卷填答事前資訊準備表</a><br />';
+echo '<a href="'.URL::to($fileProvider->download(706)).'">103高一專一學生問卷_公告版</a>';
 echo '</div>';	
-
-if( $user->schools->count()>1 ){
-	
-	$sch_id = Input::get('sch_id', Session::get('sch_id'));
-	Session::put('sch_id', $sch_id);
-	echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px">';
-	echo '選擇您承辦業務的學校代碼';
-	echo Form::open(array('url' => 'page/project'));
-	echo Form::select('sch_id', $user->schools->lists('sname','id'), $sch_id); 
-	echo Form::submit('Click Me!');
-	echo Form::close();
-	echo '</div>';
-	
-}elseif( $user->schools->count()>0 ){	
-	Session::put('sch_id', $user->schools[0]->id);
-}
-
-
-
 
 $docs = VirtualFile::with('requester.docRequester')->has('requester')->where('user_id',$user->id)->get();
 
