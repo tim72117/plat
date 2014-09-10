@@ -563,6 +563,7 @@ if ($null_row_flag == 1)
 			echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true));
 			echo Form::file('file_upload',array('style' => 'position:absolute;top:-1000px','id'=>'file_upload'));
 			echo Form::label('file_upload','選擇檔案', array('class' => 'high-light'));
+            echo '<span id="file_upload_name"></span>';
 			echo Form::submit('上傳檔案',array('class' => 'high-light2'));
 			echo Form::hidden('intent_key', $intent_key);
 			echo Form::hidden('_token1', csrf_token());
@@ -736,6 +737,9 @@ $students = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
 
 
 <script>
+$('#file_upload').change(function(){
+    $('#file_upload_name').text($(this).val());
+});
 angular.module('app', [])
 .filter('startFrom', function() {
     return function(input, start) {         
