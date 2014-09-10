@@ -1,3 +1,49 @@
+<style>
+.high-light {
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    color: #ffffff;
+    background: #188f18;
+    padding: 10px 10px 10px 10px;
+    border: solid #104d10 4px;
+    margin-left:10px;    
+    display: inline-block;
+    text-align: center;
+    font-size: 13px;
+    width: 400px;
+    height: 20px;
+    line-height: 20px;
+    box-sizing: content-box;
+}
+.high-light:hover {
+    background: #85cca1;
+    text-decoration: none;
+    cursor: pointer;
+}
+.high-light2 {
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    color: #ffffff;
+    background: #188f18;
+    padding: 10px 10px 10px 10px;
+    border: solid #104d10 4px;    
+    display: inline-block;
+    text-align: center;
+    font-size: 13px;
+    width: 100px;
+    height: 20px;
+    line-height: 20px;
+    box-sizing: content-box;
+    margin-left: 10px;
+}
+.high-light2:hover {
+    background: #85cca1;
+    text-decoration: none;
+    cursor: pointer;
+}
+</style>
 <?
 
 ##########################################################################################
@@ -63,6 +109,20 @@ function checkstdnumber($stdnumber){
 		return false;
 	}
 }
+function check_id_nation($stdidnumber){
+		if (preg_match("/([a-zA-Z]{1})+([0-9]{1})/",$stdidnumber)) {
+		return true;	
+	}else{
+		return false;
+	}
+}
+function check_birth($birth){
+		if (preg_match("/[0-9]{6}/",$birth)) {
+		return true;
+	}else{
+		return false;
+	}
+}
 
 $user = Auth::user();
 $error_flag = 0;
@@ -122,6 +182,7 @@ if( Session::has('upload_file_id') ){
 						if( !empty($data[$i][num2alpha($j)]) ){
 							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if( !checkstdid($data[$i][num2alpha($j)]) ) {
+								$value['shid'] = $data[$i][num2alpha($j)];
 								$error_flag = 1;
 								$msg.="學校代碼錯誤 ； "."</br>";
 								$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'."</td>";
@@ -206,10 +267,18 @@ if( Session::has('upload_file_id') ){
 						if (!empty($data[$i][num2alpha($j)])){
 							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 							if (check_id_number($data[$i][num2alpha($j)])==false) {
-								$error_flag = 1;
-								$msg.="身分證字號錯誤 ； "."</br>";
-								$value['stdidnumber']='';
-								$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+								if (check_id_nation($data[$i][num2alpha($j)])==false){
+									$error_flag = 1;
+									$msg.="非本國籍身分證字號，不列入調查對象 ； "."</br>";
+									$value['stdidnumber']='';
+									$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+									}
+								else{
+									$error_flag = 1;
+									$msg.="身分證字號無效 ； "."</br>";
+									$value['stdidnumber']='';
+									$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+									}
 								}
 							else {
 								$value['stdidnumber'] = $data[$i][num2alpha($j)];
@@ -228,31 +297,54 @@ if( Session::has('upload_file_id') ){
 					case '5'://性別代碼
 						if (!empty($data[$i][num2alpha($j)])){
 							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
-							if (($data[$i][num2alpha($j)]!=1)&&($data[$i][num2alpha($j)]!=2)) {
+							if (($data[$i][num2alpha($j)]!=1)&&($data[$i][num2alpha($j)]!=2)){
 								$error_flag = 1;
 								$msg.="性別代碼錯誤 ； "."</br>";	
-								$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';	
-							}elseif (substr( $value['stdidnumber'],1,1)!=$data[$i][num2alpha($j)]){
-								$error_flag = 1;
-								$msg.="性別代碼與身分證字號不相符 ； "."</br>";
 								$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
-							}else{
-								$value['stdsex'] = $data[$i][num2alpha($j)];
-								$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';}
+								}
+							else{
+								if ($value['stdidnumber']!=''){
+									if (substr( $value['stdidnumber'],1,1)!=$data[$i][num2alpha($j)]){
+										$error_flag = 1;
+										$msg.="性別代碼與身分證字號不相符 ； "."</br>";
+										$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+									}
+									else{
+										$value['stdsex'] = $data[$i][num2alpha($j)];
+										$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
+									}
+								}
+								else{
+										$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
+									}
+								}	
 							}
 						else{
 								$value['stdsex']='';
 								$error_flag = 1;
 								$msg.="未填入性別代碼 ； "."</br>";
 								$this_row.='<td>'.'</td>';
-							 }	
+							}	
 					break;
 					//////////////////////////////////////////////////////////
 					case '6'://出生年月日
 						if (!empty($data[$i][num2alpha($j)])){
 							$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
-							$value['birth'] = $data[$i][num2alpha($j)];
-							$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
+							if (check_birth($data[$i][num2alpha($j)])==false){
+								$error_flag = 1;
+								$msg.= "生日非數字格式 ； "."</br>";
+								$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';
+								}
+							else{
+								if((strlen($data[$i][num2alpha($j)]))!=6){
+									$error_flag = 1;
+									$msg.= "生日非6碼數字 ； "."</br>";
+									$this_row.='<td scope=col>'.'<p>'.'<font color="red">'.$data[$i][num2alpha($j)].'</p>'.'</font>'.'</td>';}
+								else{
+									$value['birth'] = $data[$i][num2alpha($j)];
+									$this_row.='<td scope=col>'.$data[$i][num2alpha($j)].'</td>';
+									}
+								}
 						}else{
 							$error_flag = 1;
 							$value['birth'] = '';
@@ -311,7 +403,7 @@ if( Session::has('upload_file_id') ){
 					//////////////////////////////////////////////////////////
 					case '10'://建教生                        
 
-					if( isset($data[$i]) && !is_null($data[$i][num2alpha($j)]) ) {
+					if( isset($data[$i][num2alpha($j)]) && !is_null($data[$i][num2alpha($j)]) ) {
 						$data[$i][num2alpha($j)] = str_replace(" ","",$data[$i][num2alpha($j)]);
 						if( strlen($data[$i][num2alpha($j)])!=0 ){
 							if ($data[$i][num2alpha($j)] !='1' && $data[$i][num2alpha($j)]!='0'){
@@ -468,36 +560,34 @@ if ($null_row_flag == 1)
 			$null_text .= $null_row[$s]."筆及其他數筆資料為空白資料列，請注意。".'</td></tr>';
 	}
 }
-	
 
-
-
-  ?>
-
-
-
+?>
 <div style="margin:10px 0 0 10px;width:1200px">	
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-	<tr>
-		<td align="left" style="padding-left:10px">
-			<p style="color:#F00">詳細說明請參考《<a href="<?=URL::to($fileProvider->download(564))?>">範例表格下載</a>》、《 <a href="<?=URL::to($fileProvider->download(21))?>">查詢平臺操作說明</a>》檔案。</p>
-			<p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p>
-		</td>
+
     <tr>
         <td valign="top">
             <div style="margin:0 0 0 0;border: 1px solid #aaa;padding:10px;width:800px">
+			<p style="color:#F00">詳細說明請參考《<a href="<?=URL::to($fileProvider->download(564))?>">範例表格下載</a>》、《 <a href="<?=URL::to($fileProvider->download(21))?>">查詢平臺操作說明</a>》檔案。</p>
+			<p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p> 
+              <HR color="#F0F0F0">              
 			<?
 			//表單資料               
 			$intent_key = $fileAcitver->intent_key;
 			echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true));
-			echo Form::file('file_upload');
-			echo Form::submit('上傳檔案');
+			echo Form::file('file_upload',array('style' => 'position:absolute;top:-1000px','id'=>'file_upload'));
+            //echo '<table width="800" border="0" cellspacing="5" cellpadding="5">'; //對齊按鈕用table
+			//echo '<tr>'.'<td>';
+			echo Form::label('file_upload', '選擇檔案', array('class' => 'high-light', 'id' => 'file_upload_name'));
+			//echo '</td>'.'<td width="200">';
+			echo Form::submit('上傳檔案',array('class' => 'high-light2'));
+			//echo '</td>'.'</tr>'.'</table>';
 			echo Form::hidden('intent_key', $intent_key);
 			echo Form::hidden('_token1', csrf_token());
 			echo Form::hidden('_token2', dddos_token());
 			echo Form::close();
 			?>	
-                
+              <HR color="#F0F0F0">  
                 <div ng-controller="Ctrl">
                     <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 0">
                         <tr>
@@ -523,7 +613,7 @@ if ($null_row_flag == 1)
 	</tr>
 </table>
 </div>
-<div style="margin:10px 0 0 10px;width:800px">	
+<div style="margin:10px 0 0 10px;width:1200px">	
 <? if( $error_data != '' || $null_row_flag==1 ){ ?>
 
 <table width="99%" cellpadding="3" cellspacing="0" border="1">
@@ -555,13 +645,59 @@ if ($null_row_flag == 1)
 
 </div>
 
-<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:900px">
+<?
+
+$count = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
+    ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
+    ->select(DB::raw(
+        'SUM(CASE WHEN userinfo.created_by = '.$user_id.' and pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
+        'SUM(CASE WHEN userinfo.created_by = '.$user_id.' THEN 1 ELSE 0 END) AS mystd,' . 
+        'SUM(CASE WHEN pstat.page = 20 THEN 1 ELSE 0 END) AS allfinish,' .
+        ' count(*) AS allstds'))->first();
+
+//校別與全國回收率
+if (($count->allstds)==0){
+	$return_school = 0;
+	$return_country = 0;
+	}
+else {
+	$return_country = round(($count->allfinish/$count->allstds)*100,2);
+	if (($count->mystd)==0){
+		$return_school = 0;
+		}
+	else{
+		$return_school = round((($count->finish)/($count->mystd))*100,2);
+		}
+}
+
+?>
+
+<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:800px">
+        <table cellpadding="0" cellspacing="0" border="0" class="sch-profile" style="margin:0">
+                <tr>  
+                    <td width="80" align="left">本校</td>
+                    <td width="200">回收率：<?=$return_school.' %'; ?></td>
+                    <td width="200">學生人數：<?=$count->mystd; ?></td>
+                </tr>
+                <tr>  
+                    <td align="left">全國</td>
+                    <td>回收率：<?=$return_country.' %'; ?></td>
+                    <td>學生人數：<?=$count->allstds; ?></td>
+                </tr>
+        </table>
+        
+</div>
+
+
+<div style="margin:10px 0 0 10px;border: 1px solid #aaa;padding:10px;width:900px">
+
     <div ng-controller="studentCtrl">
 
         <input ng-click="prev()" type="button" value="上一頁" />
         <input ng-model="page" size="2" /> / {{ pages }}
         <input ng-click="next()" type="button" value="下一頁" />
         <input ng-click="all()" type="button" value="顯示全部" />
+        <input ng-click="download()" type="button" value="下載CSV檔" />
         <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 10px">
             <tr>
                 <th width="50">編號</th>
@@ -612,12 +748,16 @@ $files = DB::table('ques_admin.dbo.files')->where('owner', $doc_id)->where('crea
 $students = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
         ->where('userinfo.created_by', $user_id)
-        ->select('stdname', 'clsname', 'depcode', 'teaname', 'stdnumber', 'birth', 'stdsex', 'workstd', 'pstat.page', 'userinfo.cid',
-            DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted, SUBSTRING(stdidnumber,1,5) AS stdidnumber'))->get();
+        ->select('depcode', 'stdnumber', 'stdname',
+            DB::raw('SUBSTRING(stdidnumber,1,5) AS stdidnumber'), 'stdsex', 'birth', 'clsname', 'teaname', 'workstd', 'pstat.page',
+            DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted'), 'userinfo.cid')->get();
 ?>
 
 
 <script>
+$('#file_upload').change(function(){
+    $('#file_upload_name').text($(this).val());
+});
 angular.module('app', [])
 .filter('startFrom', function() {
     return function(input, start) {         
@@ -699,10 +839,17 @@ function studentCtrl($scope, $http) {
             console.log(e);
         });
     };    
+    
+    $scope.download = function() {        
+        jQuery.fileDownload('/doc/toExcel', {
+            httpMethod: "POST",
+            data: {students: $scope.students}
+        });        
+    };
+
 }
 </script>
-
+<script src="/js/jquery.fileDownload.js"></script>
 <?
 $explorer = $_SERVER['HTTP_USER_AGENT'];
 DB::table('user_info')->insert(array('user_id'=>$user_id, 'info'=>$explorer));
-?>
