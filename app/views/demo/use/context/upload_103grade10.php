@@ -1,33 +1,47 @@
 <style>
 .high-light {
-  -webkit-border-radius: 10;
-  -moz-border-radius: 10;
-  border-radius: 10px;
-  color: #ffffff;
-  background: #188f18;
-  padding: 10px 20px 10px 20px;
-  border: solid #104d10 4px;
-  font-size:16px;
-  margin-left:50px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    color: #ffffff;
+    background: #188f18;
+    padding: 10px 10px 10px 10px;
+    border: solid #104d10 4px;
+    margin-left:10px;    
+    display: inline-block;
+    text-align: center;
+    font-size: 13px;
+    width: 400px;
+    height: 20px;
+    line-height: 20px;
+    box-sizing: content-box;
 }
 .high-light:hover {
     background: #85cca1;
-  text-decoration: none;
+    text-decoration: none;
+    cursor: pointer;
 }
 .high-light2 {
-  -webkit-border-radius: 10;
-  -moz-border-radius: 10;
-  border-radius: 10px;
-  color: #ffffff;
-  background: #188f18;
-  padding: 12.5px 22.5px 12.5px 22.5px;
-  border: solid #104d10 4px;
-  font-size:16px;
-  margin-right:50px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    color: #ffffff;
+    background: #188f18;
+    padding: 10px 10px 10px 10px;
+    border: solid #104d10 4px;    
+    display: inline-block;
+    text-align: center;
+    font-size: 13px;
+    width: 100px;
+    height: 20px;
+    line-height: 20px;
+    box-sizing: content-box;
+    margin-left: 10px;
 }
 .high-light2:hover {
-  background: #85cca1;
-  text-decoration: none;
+    background: #85cca1;
+    text-decoration: none;
+    cursor: pointer;
 }
 </style>
 <?
@@ -565,14 +579,12 @@ if ($null_row_flag == 1)
 			$intent_key = $fileAcitver->intent_key;
 			echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true));
 			echo Form::file('file_upload',array('style' => 'position:absolute;top:-1000px','id'=>'file_upload'));
-            echo '<table width="800" border="0" cellspacing="5" cellpadding="5">'; //對齊按鈕用table
-			echo '<tr>'.'<td width="200">';
-			echo Form::label('file_upload','選擇檔案', array('class' => 'high-light'));
-			echo '</td>'.'<td>';
-			echo '<span id="file_upload_name"></span>';
-			echo '</td>'.'<td width="200">';
+            //echo '<table width="800" border="0" cellspacing="5" cellpadding="5">'; //對齊按鈕用table
+			//echo '<tr>'.'<td>';
+			echo Form::label('file_upload', '選擇檔案', array('class' => 'high-light', 'id' => 'file_upload_name'));
+			//echo '</td>'.'<td width="200">';
 			echo Form::submit('上傳檔案',array('class' => 'high-light2'));
-			echo '</td>'.'</tr>'.'</table>';
+			//echo '</td>'.'</tr>'.'</table>';
 			echo Form::hidden('intent_key', $intent_key);
 			echo Form::hidden('_token1', csrf_token());
 			echo Form::hidden('_token2', dddos_token());
@@ -664,14 +676,14 @@ else {
 ?>
 
 <div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:800px">
-        <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 10px">
+        <table cellpadding="0" cellspacing="0" border="0" class="sch-profile" style="margin:0">
                 <tr>  
-                    <td width="100" align="center">本校</td>
+                    <td width="80" align="left">本校</td>
                     <td width="200">回收率：<?=$return_school.' %'; ?></td>
                     <td width="200">學生人數：<?=$count->mystd; ?></td>
                 </tr>
                 <tr>  
-                    <td align="center">全國</td>
+                    <td align="left">全國</td>
                     <td>回收率：<?=$return_country.' %'; ?></td>
                     <td>學生人數：<?=$count->allstds; ?></td>
                 </tr>
@@ -679,9 +691,8 @@ else {
         
 </div>
 
-</br>
 
-<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:900px">
+<div style="margin:10px 0 0 10px;border: 1px solid #aaa;padding:10px;width:900px">
 
     <div ng-controller="studentCtrl">
 
@@ -689,6 +700,7 @@ else {
         <input ng-model="page" size="2" /> / {{ pages }}
         <input ng-click="next()" type="button" value="下一頁" />
         <input ng-click="all()" type="button" value="顯示全部" />
+        <input ng-click="download()" type="button" value="下載CSV檔" />
         <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 10px">
             <tr>
                 <th width="50">編號</th>
@@ -739,8 +751,9 @@ $files = DB::table('ques_admin.dbo.files')->where('owner', $doc_id)->where('crea
 $students = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
         ->where('userinfo.created_by', $user_id)
-        ->select('stdname', 'clsname', 'depcode', 'teaname', 'stdnumber', 'birth', 'stdsex', 'workstd', 'pstat.page', 'userinfo.cid',
-            DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted, SUBSTRING(stdidnumber,1,5) AS stdidnumber'))->get();
+        ->select('depcode', 'stdnumber', 'stdname',
+            DB::raw('SUBSTRING(stdidnumber,1,5) AS stdidnumber'), 'stdsex', 'birth', 'clsname', 'teaname', 'workstd', 'pstat.page',
+            DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted'), 'userinfo.cid')->get();
 ?>
 
 
@@ -829,5 +842,14 @@ function studentCtrl($scope, $http) {
             console.log(e);
         });
     };    
+    
+    $scope.download = function() {        
+        jQuery.fileDownload('/doc/toExcel', {
+            httpMethod: "POST",
+            data: {students: $scope.students}
+        });        
+    };
+
 }
 </script>
+<script src="/js/jquery.fileDownload.js"></script>
