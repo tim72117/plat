@@ -1,30 +1,33 @@
 <style>
 .high-light {
-  background: #cef2eb;
-  background-image: -webkit-linear-gradient(top, #cef2eb, #a1f0e0);
-  background-image: -moz-linear-gradient(top, #cef2eb, #a1f0e0);
-  background-image: -ms-linear-gradient(top, #cef2eb, #a1f0e0);
-  background-image: -o-linear-gradient(top, #cef2eb, #a1f0e0);
-  background-image: linear-gradient(to bottom, #cef2eb, #a1f0e0);
-  -webkit-border-radius: 9;
-  -moz-border-radius: 9;
-  border-radius: 9px;
+  -webkit-border-radius: 10;
+  -moz-border-radius: 10;
+  border-radius: 10px;
+  color: #ffffff;
+  background: #188f18;
   padding: 10px 20px 10px 20px;
-  margin-top:15px;
-  margin-right:150px;
+  border: solid #104d10 4px;
+  font-size:16px;
+  margin-left:50px;
+}
+.high-light:hover {
+    background: #85cca1;
+  text-decoration: none;
 }
 .high-light2 {
-  background: #cef2eb;
-  background-image: -webkit-linear-gradient(top, #cef2eb, #a1f0e0);
-  background-image: -moz-linear-gradient(top, #cef2eb, #a1f0e0);
-  background-image: -ms-linear-gradient(top, #cef2eb, #a1f0e0);
-  background-image: -o-linear-gradient(top, #cef2eb, #a1f0e0);
-  background-image: linear-gradient(to bottom, #cef2eb, #a1f0e0);
-  -webkit-border-radius: 9;
-  -moz-border-radius: 9;
-  border-radius: 9px;
+  -webkit-border-radius: 10;
+  -moz-border-radius: 10;
+  border-radius: 10px;
+  color: #ffffff;
+  background: #188f18;
   padding: 12.5px 22.5px 12.5px 22.5px;
-  border:0 solid;
+  border: solid #104d10 4px;
+  font-size:16px;
+  margin-right:50px;
+}
+.high-light2:hover {
+  background: #85cca1;
+  text-decoration: none;
 }
 </style>
 <?
@@ -562,9 +565,14 @@ if ($null_row_flag == 1)
 			$intent_key = $fileAcitver->intent_key;
 			echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true));
 			echo Form::file('file_upload',array('style' => 'position:absolute;top:-1000px','id'=>'file_upload'));
+            echo '<table width="800" border="0" cellspacing="5" cellpadding="5">'; //對齊按鈕用table
+			echo '<tr>'.'<td width="200">';
 			echo Form::label('file_upload','選擇檔案', array('class' => 'high-light'));
-            echo '<span id="file_upload_name"></span>';
+			echo '</td>'.'<td>';
+			echo '<span id="file_upload_name"></span>';
+			echo '</td>'.'<td width="200">';
 			echo Form::submit('上傳檔案',array('class' => 'high-light2'));
+			echo '</td>'.'</tr>'.'</table>';
 			echo Form::hidden('intent_key', $intent_key);
 			echo Form::hidden('_token1', csrf_token());
 			echo Form::hidden('_token2', dddos_token());
