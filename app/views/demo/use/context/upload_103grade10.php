@@ -626,38 +626,31 @@ if ($null_row_flag == 1)
 </div>
 
 <?
-$shid_use = "";//顯示學生名單用之使用者學校代碼
-$shid_use_count = count(Session::get('user.work.sch_id'));
-	for ($i = 0 ; $i < $shid_use_count ; $i++){
-		$shid_use.="'".Session::get('user.work.sch_id')["$i"]."',";
-		}
-$shid_use =  substr($shid_use,0,-1);//刪除最末端的逗號
+if( Session::has('user.work.sch_id') ){
+    
+    $shid_use = implode('\',\'', Session::get('user.work.sch_id'));
 
-$count = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
-    ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
-    ->select(DB::raw(
-        'SUM(CASE WHEN userinfo.shid in ('.$shid_use.') and userinfo.deleted_at IS NULL and pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
-        'SUM(CASE WHEN userinfo.shid in ('.$shid_use.') and userinfo.deleted_at IS NULL THEN 1 ELSE 0 END) AS mystd,' . 
-        'SUM(CASE WHEN pstat.page = 20 THEN 1 ELSE 0 END) AS allfinish,' .
-        ' count(*) AS allstds'))->first();
+    $count = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
+        ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
+        ->select(DB::raw(
+            'SUM(CASE WHEN userinfo.shid IN (\''.$shid_use.'\') AND userinfo.deleted_at IS NULL AND pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
+            'SUM(CASE WHEN userinfo.shid IN (\''.$shid_use.'\') AND userinfo.deleted_at IS NULL THEN 1 ELSE 0 END) AS mystd,' . 
+            'SUM(CASE WHEN pstat.page = 20 THEN 1 ELSE 0 END) AS allfinish,' .
+            'count(*) AS allstds'))->first();
 
-//校別與全國回收率
-if (($count->allstds)==0){
-	$return_school = 0;
-	$return_country = 0;
-	}
-else {
-	$return_country = round(($count->allfinish/$count->allstds)*100,2);
-	if (($count->mystd)==0){
-		$return_school = 0;
-	}
-	else{
-		$return_school = round((($count->finish)/($count->mystd))*100,2);
-	}
-}
-
+    //校別與全國回收率
+    if (($count->allstds)==0){
+        $return_school = 0;
+        $return_country = 0;
+    }else{
+        $return_country = round(($count->allfinish/$count->allstds)*100,2);
+        if (($count->mystd)==0){
+            $return_school = 0;
+        }else{
+            $return_school = round((($count->finish)/($count->mystd))*100,2);
+        }
+    }
 ?>
-
 <div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:800px">
         <table cellpadding="0" cellspacing="0" border="0" class="sch-profile" style="margin:0">
                 <tr>  
@@ -673,6 +666,7 @@ else {
         </table>
         
 </div>
+<? } ?>
 
 
 <div style="margin:10px 0 0 10px;border: 1px solid #aaa;padding:10px;width:900px">
@@ -846,4 +840,4 @@ function studentCtrl($scope, $http, $filter) {
 <script src="/js/jquery.fileDownload.js"></script>
 <?
 $explorer = $_SERVER['HTTP_USER_AGENT'];
-//DB::table('user_info')->insert(array('user_id'=>$user_id, 'info'=>$explorer));
+DB::table('user_info')->insert(array('user_id'=>$user_id, 'info'=>$explorer));
