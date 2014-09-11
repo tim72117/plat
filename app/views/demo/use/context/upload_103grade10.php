@@ -53,8 +53,6 @@
 #
 ##########################################################################################
 $fileProvider = app\library\files\v0\FileProvider::make();
-
-
 	
 function num2alpha($n){  //數字轉英文(0=>A、1=>B、26=>AA...)
     for($r = ""; $n >= 0; $n = intval($n / 26) - 1)
@@ -137,6 +135,7 @@ $s=0;
 
 $work_schools = $user->schools->lists('id');
 Session::put('user.work.sch_id', $work_schools);
+
 
 //上傳判斷
 if( Session::has('upload_file_id') ){ 
@@ -651,7 +650,7 @@ $count = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
     ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
     ->select(DB::raw(
         'SUM(CASE WHEN userinfo.created_by = '.$user_id.' and pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
-        'SUM(CASE WHEN userinfo.created_by = '.$user_id.' THEN 1 ELSE 0 END) AS mystd,' . 
+        'SUM(CASE WHEN userinfo.created_by = '.$user_id.' and userinfo.deleted_at is not null THEN 1 ELSE 0 END) AS mystd,' . 
         'SUM(CASE WHEN pstat.page = 20 THEN 1 ELSE 0 END) AS allfinish,' .
         ' count(*) AS allstds'))->first();
 
@@ -744,13 +743,15 @@ else {
     </div>
 </div>
 <?
+
 $files = DB::table('ques_admin.dbo.files')->where('owner', $doc_id)->where('created_by', $user_id)->select('created_at', 'title')->get();
 $students = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
-        ->where('userinfo.created_by', $user_id)
+		->whereIn('shid',Session::get('user.work.sch_id'))
         ->select('depcode', 'stdnumber', 'stdname',
             DB::raw('SUBSTRING(stdidnumber,1,5) AS stdidnumber'), 'stdsex', 'birth', 'clsname', 'teaname', 'workstd', 'pstat.page',
             DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted'), 'userinfo.cid')->get();
+
 ?>
 
 
