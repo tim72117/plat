@@ -626,12 +626,18 @@ if ($null_row_flag == 1)
 </div>
 
 <?
+$shid_use = "";//顯示學生名單用之使用者學校代碼
+$shid_use_count = count(Session::get('user.work.sch_id'));
+	for ($i = 0 ; $i < $shid_use_count ; $i++){
+		$shid_use.="'".Session::get('user.work.sch_id')["$i"]."',";
+		}
+$shid_use =  substr($shid_use,0,-1);//刪除最末端的逗號
 
 $count = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
     ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
     ->select(DB::raw(
-        'SUM(CASE WHEN userinfo.created_by = '.$user_id.' and pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
-        'SUM(CASE WHEN userinfo.created_by = '.$user_id.' and userinfo.deleted_at IS NOT NULL THEN 1 ELSE 0 END) AS mystd,' . 
+        'SUM(CASE WHEN userinfo.shid in ('.$shid_use.') and userinfo.deleted_at IS NULL and pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
+        'SUM(CASE WHEN userinfo.shid in ('.$shid_use.') and userinfo.deleted_at IS NULL THEN 1 ELSE 0 END) AS mystd,' . 
         'SUM(CASE WHEN pstat.page = 20 THEN 1 ELSE 0 END) AS allfinish,' .
         ' count(*) AS allstds'))->first();
 
