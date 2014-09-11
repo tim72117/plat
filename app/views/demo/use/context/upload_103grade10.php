@@ -1,4 +1,11 @@
 <style>
+.upload-button {
+    margin-left: 10px;
+    display: inline-block;
+    text-align: center;    
+    line-height: 20px;
+    height: 42px;
+}
 .high-light {
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
@@ -6,42 +13,17 @@
     color: #ffffff;
     background: #188f18;
     padding: 10px 10px 10px 10px;
-    border: solid #104d10 4px;
-    margin-left:10px;    
-    display: inline-block;
-    text-align: center;
-    font-size: 13px;
-    width: 400px;
+    border: 1px solid #aaa;    
+    display: block;    
     height: 20px;
-    line-height: 20px;
     box-sizing: content-box;
+    font-size: 16px;
 }
 .high-light:hover {
     background: #85cca1;
     text-decoration: none;
     cursor: pointer;
-}
-.high-light2 {
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
-    border-radius: 10px;
-    color: #ffffff;
-    background: #188f18;
-    padding: 10px 10px 10px 10px;
-    border: solid #104d10 4px;    
-    display: inline-block;
-    text-align: center;
-    font-size: 13px;
-    width: 100px;
-    height: 20px;
-    line-height: 20px;
-    box-sizing: content-box;
-    margin-left: 10px;
-}
-.high-light2:hover {
-    background: #85cca1;
-    text-decoration: none;
-    cursor: pointer;
+    color: #000;
 }
 </style>
 <?
@@ -563,10 +545,9 @@ if ($null_row_flag == 1)
 ?>
 <div style="margin:10px 0 0 10px;width:1200px">	
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-
     <tr>
         <td valign="top">
-            <div style="margin:0 0 0 0;border: 1px solid #aaa;padding:10px;width:800px">
+            <div style="margin:0;border: 1px solid #aaa;padding:10px;width:800px">
 			<p style="color:#F00">詳細說明請參考《<a href="<?=URL::to($fileProvider->download(564))?>">範例表格下載</a>》、《 <a href="<?=URL::to($fileProvider->download(21))?>">查詢平臺操作說明</a>》檔案。</p>
 			<p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p> 
               <HR color="#F0F0F0">              
@@ -575,12 +556,12 @@ if ($null_row_flag == 1)
 			$intent_key = $fileAcitver->intent_key;
 			echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true));
 			echo Form::file('file_upload',array('style' => 'position:absolute;top:-1000px','id'=>'file_upload'));
-            //echo '<table width="800" border="0" cellspacing="5" cellpadding="5">'; //對齊按鈕用table
-			//echo '<tr>'.'<td>';
-			echo Form::label('file_upload', '選擇檔案', array('class' => 'high-light', 'id' => 'file_upload_name'));
-			//echo '</td>'.'<td width="200">';
-			echo Form::submit('上傳檔案',array('class' => 'high-light2'));
-			//echo '</td>'.'</tr>'.'</table>';
+            echo '<div class="upload-button">';
+			echo Form::label('file_upload', '選擇檔案', array('class' => 'high-light', 'id' => 'file_upload_name', 'style' => 'min-width: 200px'));
+            echo '</div>';
+            echo '<div class="upload-button">';
+			echo Form::submit('上傳檔案',array('class' => 'high-light', 'style' => 'width:100px'));
+            echo '</div>';
 			echo Form::hidden('intent_key', $intent_key);
 			echo Form::hidden('_token1', csrf_token());
 			echo Form::hidden('_token2', dddos_token());
@@ -650,7 +631,7 @@ $count = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
     ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
     ->select(DB::raw(
         'SUM(CASE WHEN userinfo.created_by = '.$user_id.' and pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
-        'SUM(CASE WHEN userinfo.created_by = '.$user_id.' and userinfo.deleted_at is not null THEN 1 ELSE 0 END) AS mystd,' . 
+        'SUM(CASE WHEN userinfo.created_by = '.$user_id.' and userinfo.deleted_at IS NOT NULL THEN 1 ELSE 0 END) AS mystd,' . 
         'SUM(CASE WHEN pstat.page = 20 THEN 1 ELSE 0 END) AS allfinish,' .
         ' count(*) AS allstds'))->first();
 
@@ -663,10 +644,10 @@ else {
 	$return_country = round(($count->allfinish/$count->allstds)*100,2);
 	if (($count->mystd)==0){
 		$return_school = 0;
-		}
+	}
 	else{
 		$return_school = round((($count->finish)/($count->mystd))*100,2);
-		}
+	}
 }
 
 ?>
@@ -696,7 +677,7 @@ else {
         <input ng-model="page" size="2" /> / {{ pages }}
         <input ng-click="next()" type="button" value="下一頁" />
         <input ng-click="all()" type="button" value="顯示全部" />
-        <input ng-click="download()" type="button" value="下載CSV檔" />
+        <input ng-click="download()" type="button" value="下載學生名單" />
         <table cellpadding="2" cellspacing="0" border="0" class="sch-profile" style="margin:10px 0 0 10px">
             <tr>
                 <th width="50">編號</th>
@@ -721,7 +702,7 @@ else {
             </tr>
             <tbody ng-repeat="student in students | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
                 <tr ng-style="deleteStyle(student)">  
-                    <td class="files">{{ (page-1)*limit+$index+1 }}</td>
+                    <td class="files">{{ student.cid }}</td>
                     <td class="files">{{ student.depcode }}</td>
                     <td class="files">{{ student.stdnumber }}</td>
                     <td class="files">{{ student.stdname }}</td>
@@ -743,15 +724,15 @@ else {
     </div>
 </div>
 <?
-
 $files = DB::table('ques_admin.dbo.files')->where('owner', $doc_id)->where('created_by', $user_id)->select('created_at', 'title')->get();
 $students = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
-		->whereIn('shid',Session::get('user.work.sch_id'))
+		->whereIn('shid', Session::get('user.work.sch_id'))
         ->select('depcode', 'stdnumber', 'stdname',
             DB::raw('SUBSTRING(stdidnumber,1,5) AS stdidnumber'), 'stdsex', 'birth', 'clsname', 'teaname', 'workstd', 'pstat.page',
-            DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted'), 'userinfo.cid')->get();
-
+            DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted'),
+            DB::raw('ROW_NUMBER() OVER (ORDER BY userinfo.cid) AS cid'))->get();
+Session::put('seniorOne103_userinfo.my', $students);
 ?>
 
 
@@ -798,7 +779,7 @@ angular.module('app', [])
     };
 }).controller('studentCtrl', studentCtrl);
 
-function studentCtrl($scope, $http) {
+function studentCtrl($scope, $http, $filter) {
     $scope.students = angular.fromJson(<?=json_encode($students)?>);
     $scope.page = 1;
     $scope.limit = 20;
@@ -821,6 +802,12 @@ function studentCtrl($scope, $http) {
         $scope.pages = 1;
     };
     
+    $scope.$watchCollection('searchText', function(query) {
+        $scope.max = $filter("filter")($scope.students, query).length;
+        $scope.pages = Math.ceil($scope.max/$scope.limit);
+        $scope.page = 1;
+    });  
+    
     $scope.deleteStyle = function(student) {
         return {
             'text-decoration': student.deleted==='1'? 'line-through' : '',
@@ -841,11 +828,11 @@ function studentCtrl($scope, $http) {
         });
     };    
     
-    $scope.download = function() {        
-        jQuery.fileDownload('/doc/toExcel', {
+    $scope.download = function() {          
+        jQuery.fileDownload('/ajax/download/<?=$intent_key?>/download', {
             httpMethod: "POST",
-            data: {students: $scope.students}
-        });        
+            failCallback: function (responseHtml, url) { console.log(responseHtml); }
+        });   
     };
 
 }
@@ -853,4 +840,4 @@ function studentCtrl($scope, $http) {
 <script src="/js/jquery.fileDownload.js"></script>
 <?
 $explorer = $_SERVER['HTTP_USER_AGENT'];
-DB::table('user_info')->insert(array('user_id'=>$user_id, 'info'=>$explorer));
+//DB::table('user_info')->insert(array('user_id'=>$user_id, 'info'=>$explorer));

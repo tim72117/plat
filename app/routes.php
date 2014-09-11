@@ -49,7 +49,7 @@ Route::get('test', function() {
 		Route::get('auth/password/change', array('before' => '', 'uses' => 'UserController@passwordChangePage'));
 		Route::post('auth/password/change', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@passwordChange'));	
         
-        Route::post('doc/toExcel', 'FileTransferController@toExcel');
+        Route::post('ajax/download/{intent_key}/{method}', 'FileController@fileAjaxDownload');
 		
 	});
 	
