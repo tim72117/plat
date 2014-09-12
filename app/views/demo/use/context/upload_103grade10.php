@@ -702,7 +702,7 @@ if( Session::has('user.work.sch_id') ){
             </tr>
             <tbody ng-repeat="student in students | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
                 <tr ng-style="deleteStyle(student)">  
-                    <td class="files">{{ student.cid }}</td>
+                    <td class="files">{{ student.row_index }}</td>
                     <td class="files">{{ student.depcode }}</td>
                     <td class="files">{{ student.stdnumber }}</td>
                     <td class="files">{{ student.stdname }}</td>
@@ -728,10 +728,10 @@ $files = DB::table('ques_admin.dbo.files')->where('owner', $doc_id)->where('crea
 $students = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
 		->whereIn('shid', Session::get('user.work.sch_id'))
-        ->select('depcode', 'stdnumber', 'stdname',
+        ->select('depcode', 'stdnumber', 'stdname', 'cid',
             DB::raw('SUBSTRING(stdidnumber,1,5) AS stdidnumber'), 'stdsex', 'birth', 'clsname', 'teaname', 'workstd', 'pstat.page',
             DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted'),
-            DB::raw('ROW_NUMBER() OVER (ORDER BY userinfo.cid) AS cid'))->get();
+            DB::raw('ROW_NUMBER() OVER (ORDER BY userinfo.cid) AS row_index'))->get();
 Session::put('seniorOne103_userinfo.my', $students);
 ?>
 
