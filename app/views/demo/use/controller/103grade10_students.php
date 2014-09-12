@@ -37,5 +37,49 @@ return array(
             'total' => $total_rate['total'],
             'schools' => $sh
         );
+    },
+    'search' => function() { 
+        $stdidnumber = Input::get('stdidnumber');
+        $student = DB::table('use_103.dbo.seniorOne103_userinfo')
+            ->where('stdidnumber', $stdidnumber)
+            ->select('stdname', 'cid', DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted ,SUBSTRING(stdidnumber,1,6) AS stdidnumber'))->get();
+        return array('saveStatus'=>true, 'student' => $student);
+    },
+    'ques' => function() { 
+        $cid = Input::get('cid');
+        $page_newcid = [];
+        
+        $student = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')            
+            ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'pstat.newcid', '=', 'userinfo.newcid');
+        
+        for($page=1;$page<20;$page++){
+            $student->leftJoin('use_103.dbo.seniorOne103_page'.$page, 'seniorOne103_page'.$page.'.newcid', '=', 'userinfo.newcid');
+            array_push($page_newcid, DB::raw('CASE WHEN seniorOne103_page'.$page.'.newcid IS NULL THEN 0 ELSE 1 END AS page'.$page));             
+        }
+            
+        array_push($page_newcid, 'pstat.page AS pages');   
+        array_push($page_newcid, 'userinfo.stdname');   
+        $ques = $student->where('userinfo.cid', $cid)
+            ->select($page_newcid)->first();        
+        
+        return array('saveStatus'=>true, 'student' => $ques);
+    },
+    'quesDelete' => function() { 
+        $input = Input::only('cid', 'page', 'pageStop');
+        
+        $userinfo_query = DB::table('use_103.dbo.seniorOne103_userinfo')->where('cid', $input['cid']);
+        $ques = '';
+        if( $userinfo_query->exists() ){
+            $userinfo = $userinfo_query->select('newcid')->first();
+            
+            $ques = DB::table('use_103.dbo.seniorOne103_page'.$input['page'])->where('newcid', $userinfo->newcid)->first();
+            
+            if( $input['page'] < $input['pageStop'] ){
+                $input['pageStop'] = $input['page'];
+            }
+                
+        }       
+        
+        return array('saveStatus'=>true, 'pageStop'=>$input['pageStop'],'input' => $input);
     }
 );

@@ -14,13 +14,13 @@
 
 <div ng-controller="Ctrl">
 
-<div style="margin:0 0 0 0;display:inline-block;position: relative;background-color: #fff;border: 1px solid #aaa;border-right-width: 0;z-index: 2">
+<div style="margin:0 0 0 0;display:inline-block;position: relative;background-color: #fff;border: 1px solid #aaa;border-right-width: 0;z-index: 2;width:510px">
 <table cellpadding="3" cellspacing="0" border="0" width="500" class="sch-profile" style="margin:0 0 0 10px">
     <tr>
         <th colspan="4" style="border-right:1px solid #aaa">
-            <input ng-click="prev()" type="button" value="prev" />
+            <input ng-click="prev()" type="button" value="上一頁" />
             {{ page }}/{{ pages }}
-            <input ng-click="next()" type="button" value="next" />
+            <input ng-click="next()" type="button" value="下一頁" />
             <input ng-click="all()" type="button" value="顯示全部" />
             <input ng-click="reflash()" type="button" value="更新" />
         </th>
@@ -33,8 +33,8 @@
     </tr>
     <tr> 
         <th>全國(已上傳學生資料)</th>    
-        <th align="right">{{ total_rate }}</th>  
-        <th align="right">{{ total }}</th>  
+        <th align="right">{{ total_rate }}</th>
+        <th align="right">{{ total }}</th>
         <th style="border-right:1px solid #aaa"></th> 
     </tr>
     <tr ng-repeat="school in schools | filter:searchSchoolText | startFrom:(page-1)*20 | limitTo:limit" ng-style="selectedStyle(school,'tr')" class="lists">
@@ -49,13 +49,19 @@
 </table>
 </div>
     
-<div style="margin:0 0 0 -1px;display:inline-block;position: absolute;background-color: #f5f5f5;border: 1px solid #aaa;z-index: 1">
+<div style="margin:0 0 0 0;display:inline-block;position: absolute;background-color: #f5f5f5;border: 1px solid #aaa;z-index: 1;width:400px;left:520px">
 <table cellpadding="3" cellspacing="0" border="0" width="350" class="sch-profile" style="margin:0 10px 10px 30px">
     <tr>
         <th colspan="2">
-            <input ng-click="stu.prev()" type="button" value="prev" />
+            <input type="text" ng-model="stu.searchText" placeholder="搜尋學生(身分證)" size="12" style="padding:5px" />
+            <input type="button" value="搜尋" ng-click="stu.search()" />
+        </th>        
+    </tr>
+    <tr>
+        <th colspan="2">
+            <input ng-click="stu.prev()" type="button" value="上一頁" />
             {{ stu.page }}/{{ stu.pages }}
-            <input ng-click="stu.next()" type="button" value="next" />
+            <input ng-click="stu.next()" type="button" value="下一頁" />
             <input ng-click="stu.all()" type="button" value="顯示全部" />
         </th>        
     </tr>
@@ -69,7 +75,8 @@
         <th width="170">身分證
             <input ng-model="searchText.stdidnumber" />
         </th>
-        <th width="80" align="center">刪除</th>
+        <th width="80" align="center">刪除上傳名單</th>
+        <th width="80" align="center"></th>
     </tr>
     <tr ng-repeat="student in students | filter:searchText | startFrom:(stu.page-1)*20 | limitTo:stu.limit" ng-style="deleteStyle(student)" class="lists">
         <td>{{ student.stdname }}</td>  
@@ -78,10 +85,29 @@
             <input type="button" value="刪除" ng-click="student.confirm=1" ng-init="student.confirm=0" ng-hide="student.confirm" ng-disabled="student.deleted==='1'" />
             <input type="button" value="確認" ng-click="deleting=1;deleteStudent(student)" ng-init="deleting=0" ng-hide="!student.confirm" ng-disabled="deleting" style="color:#f00" />
         </td>
+        <td class="files" align="center">
+            <input type="button" value="問卷" ng-click="ques(student)" />
+        </td>
     </tr>
 </table>
 </div>
-
+    
+<div style="margin:0 0 0 0;display:inline-block;position: absolute;background-color: #f5f5f5;border: 1px solid #aaa;z-index: 1;left:921px">
+    <table cellpadding="3" cellspacing="0" border="0" width="120" class="sch-profile" style="margin:10px 0 10px 10px">
+    <tr>        
+        <th colspan="2">{{ ques.stdname }}</th>
+    </tr>
+    <tr>        
+        <th width="60">頁數{{ ques.pageStop }}</th>
+        <th align="center">刪除</th>
+    </tr>
+    <tr ng-repeat="page in ques.pages">        
+        <th>{{ page.page }}</th>
+        <th align="center"><input type="button" value="刪除" ng-click="quesDelete(page)" ng-disabled="!page.write" /></th>
+    </tr>
+    </table>
+</div>
+    
 </div>
 
 <script>
@@ -205,5 +231,54 @@ function Ctrl($scope, $http, $filter) {
             console.log(e);
         });
     };  
+    
+    $scope.stu.search = function() {
+        if( $scope.stu.searchText!=='' ){
+            $http({method: 'POST', url: '/ajax/<?=$fileAcitver->intent_key?>/search', data:{stdidnumber:$scope.stu.searchText} })
+            .success(function(data, status, headers, config) {
+                if( data.saveStatus ){
+                    $scope.students = data.student;
+                }
+            })
+            .error(function(e){
+                console.log(e);
+            });
+        }
+    };
+    
+    $scope.ques = {};
+    $scope.ques.pages = [];
+    $scope.ques = function(student) {
+        $http({method: 'POST', url: '/ajax/<?=$fileAcitver->intent_key?>/ques', data:{cid:student.cid} })
+        .success(function(data, status, headers, config) {
+            if( data.saveStatus ){
+                $scope.ques.pages = [];
+                $scope.ques.stdname = data.student.stdname;
+                $scope.ques.cid = student.cid;
+                $scope.ques.pageStop = data.student.pages===null ? 0 : data.student.pages-1;
+                for(i=1 ; i<data.student.pages ; i++ ){
+                    $scope.ques.pages[$scope.ques.pages.length] = {page:i, write:data.student['page'+i]};
+                }
+                console.log(data);
+            }
+        })
+        .error(function(e){
+            console.log(e);
+        });
+    };
+    
+    $scope.quesDelete = function(page) {        
+        $http({method: 'POST', url: '/ajax/<?=$fileAcitver->intent_key?>/quesDelete', data:{cid:$scope.ques.cid, page:page.page, pageStop:$scope.ques.pageStop} })
+        .success(function(data, status, headers, config) {
+            if( data.saveStatus ){
+                console.log(data);
+                page.write = 0;
+                $scope.ques.pageStop = data.pageStop;
+            }
+        })
+        .error(function(e){
+            console.log(e);
+        });
+    };
 }
 </script>
