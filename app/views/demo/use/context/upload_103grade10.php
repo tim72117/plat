@@ -712,7 +712,7 @@ if( Session::has('user.work.sch_id') ){
                     <td class="files">{{ student.clsname }}</td>                    
                     <td class="files">{{ student.teaname }}</td>
                     <td class="files" align="center">{{ student.workstd }}</td>
-                    <td class="files" align="center">{{ student.page==='20' ?student.page+'(已填畢)' : student.page  }}</td>
+                    <td class="files" align="center">{{ (student.page==='18'||student.page==='19') ?student.page+'(已填畢)' : student.page  }}</td>
                     <td class="files" align="center">
                         <input type="button" value="刪除" ng-click="student.confirm=1" ng-init="student.confirm=0" ng-hide="student.confirm" ng-disabled="student.deleted==='1'" />
                         <input type="button" value="確認" ng-click="deleting=1;deleteStudent(student)" ng-init="deleting=0" ng-hide="!student.confirm" ng-disabled="deleting" style="color:#f00" />
