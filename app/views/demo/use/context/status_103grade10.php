@@ -103,7 +103,7 @@
     </tr>
     <tr ng-repeat="page in ques.pages">        
         <th>{{ page.page }}</th>
-        <th align="center"><input type="button" value="刪除" ng-click="quesDelete(page)" ng-disabled="!page.write" /></th>
+        <th align="center"><input type="button" value="刪除" ng-click="quesDelete(page)" ng-disabled="page.write==='0'" /></th>
     </tr>
     </table>
 </div>
@@ -246,8 +246,7 @@ function Ctrl($scope, $http, $filter) {
         }
     };
     
-    $scope.ques = {};
-    $scope.ques.pages = [];
+    $scope.ques = {pages:[]};
     $scope.ques = function(student) {
         $http({method: 'POST', url: '/ajax/<?=$fileAcitver->intent_key?>/ques', data:{cid:student.cid} })
         .success(function(data, status, headers, config) {
@@ -255,11 +254,10 @@ function Ctrl($scope, $http, $filter) {
                 $scope.ques.pages = [];
                 $scope.ques.stdname = data.student.stdname;
                 $scope.ques.cid = student.cid;
-                $scope.ques.pageStop = data.student.pages===null ? 0 : data.student.pages-1;
-                for(i=1 ; i<data.student.pages ; i++ ){
+                $scope.ques.pageStop = data.student.pages;
+                for(i=1 ; i<20 ; i++ ){
                     $scope.ques.pages[$scope.ques.pages.length] = {page:i, write:data.student['page'+i]};
                 }
-                console.log(data);
             }
         })
         .error(function(e){
@@ -270,9 +268,8 @@ function Ctrl($scope, $http, $filter) {
     $scope.quesDelete = function(page) {        
         $http({method: 'POST', url: '/ajax/<?=$fileAcitver->intent_key?>/quesDelete', data:{cid:$scope.ques.cid, page:page.page, pageStop:$scope.ques.pageStop} })
         .success(function(data, status, headers, config) {
-            if( data.saveStatus ){
-                console.log(data);
-                page.write = 0;
+            if( data.saveStatus ){                
+                page.write = '0';
                 $scope.ques.pageStop = data.pageStop;
             }
         })
