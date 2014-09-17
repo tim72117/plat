@@ -11,3 +11,7 @@ dev-editor	:        問卷編制軟體
 dev-row	        :        rawdata 檔案建立、匯入、瀏覽、分享
 
 dev-news        :         最新消息編輯
+
+dev-msg          :         訊息發布功能
+
+demo               :         開發主分支  
