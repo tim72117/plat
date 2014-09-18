@@ -517,11 +517,6 @@ if( Session::has('upload_file_id') ){
     }//
 
     
-}else{//if( Session::has('upload_file_id') ){ 
-
-	if($errors){
-		echo implode('、',array_filter($errors->all()));}
-
 }
 
 //判斷是否出現空白資料列
@@ -552,6 +547,11 @@ if ($null_row_flag == 1)
 			<p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p> 
               <HR color="#F0F0F0">              
 			<?
+            if( !Session::has('upload_file_id') ){                
+                if( $errors && count($errors->all())>0 ){
+                    echo '<p style="background-color:#f00;padding:5px;color:#fff">'.implode('、',array_filter($errors->all())).'</p>';                    
+                }
+            }
 			//表單資料               
 			$intent_key = $fileAcitver->intent_key;
 			echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true));
