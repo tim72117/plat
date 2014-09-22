@@ -116,8 +116,8 @@ $user_id = $user->id;
 $s=0;
 
 $work_schools = $user->schools->lists('id');
+$work_schools_name = $user->schools->lists('sname');
 Session::put('user.work.sch_id', $work_schools);
-
 
 //上傳判斷
 if( Session::has('upload_file_id') ){ 
@@ -629,8 +629,24 @@ if ($null_row_flag == 1)
 if( Session::has('user.work.sch_id') ){
     
     $shid_use = implode('\',\'', Session::get('user.work.sch_id'));
+	
+}
+//echo $shid_use;
+//var_dump(Session::get('user.work.sch_id'));
 
-    $count = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
+/*for ($k = 0; $k<count(Session::get('user.work.sch_id'));$k++){
+	
+	echo $work_schools_name[$k]."(科系代碼：".(Session::get('user.work.sch_id')[$k]).")";
+	$count = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
+        ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
+        ->select(DB::raw(
+            'SUM(CASE WHEN userinfo.shid IN (\''.(Session::get('user.work.sch_id')[$k]).'\') AND userinfo.deleted_at IS NULL AND pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
+            'SUM(CASE WHEN userinfo.shid IN (\''.(Session::get('user.work.sch_id')[$k]).'\') AND userinfo.deleted_at IS NULL THEN 1 ELSE 0 END) AS mystd,' . 
+            'SUM(CASE WHEN pstat.page = 20 THEN 1 ELSE 0 END) AS allfinish,' .
+            'count(*) AS allstds'))->first();
+	
+
+/*    $count = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
         ->select(DB::raw(
             'SUM(CASE WHEN userinfo.shid IN (\''.$shid_use.'\') AND userinfo.deleted_at IS NULL AND pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
@@ -650,14 +666,37 @@ if( Session::has('user.work.sch_id') ){
             $return_school = round((($count->finish)/($count->mystd))*100,2);
         }
     }
+*/
 ?>
 <div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:800px">
         <table cellpadding="0" cellspacing="0" border="0" class="sch-profile" style="margin:0">
                 <tr>  
-                    <td width="80" align="left">本校</td>
-                    <td width="200">回收率：<?=$return_school.' %'; ?></td>
-                    <td width="200">學生人數：<?=$count->mystd; ?></td>
+<? for ($k = 0; $k<count(Session::get('user.work.sch_id'));$k++){
+	$count = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
+        ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
+        ->select(DB::raw(
+            'SUM(CASE WHEN userinfo.shid IN (\''.(Session::get('user.work.sch_id')[$k]).'\') AND userinfo.deleted_at IS NULL AND pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
+            'SUM(CASE WHEN userinfo.shid IN (\''.(Session::get('user.work.sch_id')[$k]).'\') AND userinfo.deleted_at IS NULL THEN 1 ELSE 0 END) AS mystd,' . 
+            'SUM(CASE WHEN pstat.page = 20 THEN 1 ELSE 0 END) AS allfinish,' .
+            'count(*) AS allstds'))->first();		
+    //計算校別與全國回收率，並預設無學生資料時回收率為0
+    if (($count->allstds)==0){
+        $return_school = 0;
+        $return_country = 0;
+    }else{
+        $return_country = round(($count->allfinish/$count->allstds)*100,2);
+        if (($count->mystd)==0){
+            $return_school = 0;
+        }else{
+            $return_school = round((($count->finish)/($count->mystd))*100,2);
+        }
+    }
+?>					
+					<td width="450" align="left"><?=$work_schools_name[$k]." (科系代碼：".(Session::get('user.work.sch_id')[$k]).")"; ?></td>
+                    <td width="175">回收率：<?=$return_school.' %'; ?></td>
+                    <td width="175">學生人數：<?=$count->mystd; ?></td>
                 </tr>
+<? } ?>
                 <tr>  
                     <td align="left">全國</td>
                     <td>回收率：<?=$return_country.' %'; ?></td>
@@ -666,7 +705,7 @@ if( Session::has('user.work.sch_id') ){
         </table>
         
 </div>
-<? } ?>
+<? //} ?>
 
 
 <div style="margin:10px 0 0 10px;border: 1px solid #aaa;padding:10px;width:900px">
