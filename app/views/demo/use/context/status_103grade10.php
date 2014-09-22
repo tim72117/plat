@@ -49,16 +49,16 @@
 </table>
 </div>
     
-<div style="margin:0 0 0 0;display:inline-block;position: absolute;background-color: #f5f5f5;border: 1px solid #aaa;z-index: 1;width:400px;left:520px">
-<table cellpadding="3" cellspacing="0" border="0" width="350" class="sch-profile" style="margin:0 10px 10px 30px">
+<div style="margin:0 0 0 0;display:inline-block;position: absolute;background-color: #f5f5f5;border: 1px solid #aaa;z-index: 1;width:540px;left:520px">
+<table cellpadding="3" cellspacing="0" border="0" class="sch-profile" style="margin:0 10px 10px 30px">
     <tr>
-        <th colspan="2">
+        <th colspan="5">
             <input type="text" ng-model="stu.searchText" placeholder="搜尋學生(身分證)" size="12" style="padding:5px" />
             <input type="button" value="搜尋" ng-click="stu.search()" />
         </th>        
     </tr>
     <tr>
-        <th colspan="2">
+        <th colspan="5">
             <input ng-click="stu.prev()" type="button" value="上一頁" />
             {{ stu.page }}/{{ stu.pages }}
             <input ng-click="stu.next()" type="button" value="下一頁" />
@@ -66,20 +66,22 @@
         </th>        
     </tr>
     <tr>        
-        <th colspan="3">{{ school_name }}</th>
+        <th colspan="5">{{ school_name }}</th>
     </tr>
     <tr>        
         <th width="100">姓名
             <input ng-model="searchText.stdname" size="3" />
         </th>
+        <th width="100">姓名(國中)</th>
         <th width="170">身分證
             <input ng-model="searchText.stdidnumber" />
         </th>
         <th width="80" align="center">刪除上傳名單</th>
-        <th width="80" align="center"></th>
+        <th width="80" align="center">問卷</th>
     </tr>
     <tr ng-repeat="student in students | filter:searchText | startFrom:(stu.page-1)*20 | limitTo:stu.limit" ng-style="deleteStyle(student)" class="lists">
         <td>{{ student.stdname }}</td>  
+        <td>{{ student.name }}</td>  
         <td>{{ student.stdidnumber }}****</td> 
         <td align="center">
             <input type="button" value="刪除" ng-click="student.confirm=1" ng-init="student.confirm=0" ng-hide="student.confirm" ng-disabled="student.deleted==='1'" />
@@ -92,7 +94,7 @@
 </table>
 </div>
     
-<div style="margin:0 0 0 0;display:inline-block;position: absolute;background-color: #f5f5f5;border: 1px solid #aaa;z-index: 1;left:921px">
+<div style="margin:0 0 0 0;display:inline-block;position: absolute;background-color: #f5f5f5;border: 1px solid #aaa;z-index: 1;left:1065px">
     <table cellpadding="3" cellspacing="0" border="0" width="120" class="sch-profile" style="margin:10px 0 10px 10px">
     <tr>        
         <th colspan="2">{{ ques.stdname }}</th>

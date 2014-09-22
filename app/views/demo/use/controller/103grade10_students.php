@@ -3,9 +3,10 @@
 return array(
     'list' => function() {
         $input = Input::only('shid');
-        $list = DB::table('use_103.dbo.seniorOne103_userinfo')
-            ->where('shid', $input['shid'])
-            ->select('stdname', 'cid', DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted ,SUBSTRING(stdidnumber,1,6) AS stdidnumber'))->get();
+        $list = DB::table('use_103.dbo.seniorOne103_userinfo AS s10')
+            ->leftJoin('use_103.dbo.gra103_userinfo AS s09', 's10.newcid' , '=', 's09.newcid')
+            ->where('s10.shid', $input['shid'])
+            ->select('s10.stdname', 's09.name', 's10.cid', DB::raw('CASE WHEN s10.deleted_at IS NULL THEN 0 ELSE 1 END AS deleted ,SUBSTRING(s10.stdidnumber,1,6) AS stdidnumber'))->get();
         return $list;
     }, 
     'delete' => function() {
