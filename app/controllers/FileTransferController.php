@@ -15,26 +15,37 @@ class FileTransferController extends BaseController {
 	*/
    
     public function toExcel() {
-        
-        echo "\xEF\xBB\xBF";
+
+        $output = '';
+        $output .= "\xEF\xBB\xBF";
         
         $students = Input::get('students');
         
-        echo implode(",", array_keys($students[0]));
-        echo "\n";
+        //$output .= implode(",", array_keys($students[0]));
+        //$output .=  "\n"; 
         
-        foreach($students as $student){            
-            echo implode(",", $student);
-            echo "\n";
+        echo count($students);
+        return '';
+        foreach($students as $student){   
+            //$output .= 1;
+            //$output .= implode(",", $student);
+            //$output .= "\n";
         }
         
+        //echo $students[0]['cid']; 
+        
+        //File::put('c:/test.csv', $output);
+        $output .= "\n";
         $headers = array(
+            'Set-Cookie' => 'fileDownload=true; path=/',
+            'Cache-Control' => 'max-age=60, must-revalidate',
             'Content-Encoding' => 'UTF-8',
             'Content-Type' => 'text/csv; charset=UTF-8',
+            //'Content-Length' => mb_strlen($output),
             'Content-Disposition' => 'attachment; filename="ExportFileName.csv"',
         );
 
-        return Response::make(rtrim('', "\n"), 200, $headers);
+        return Response::make($output, 200, $headers);
         
     }
 	

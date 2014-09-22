@@ -37,5 +37,53 @@ return array(
             'total' => $total_rate['total'],
             'schools' => $sh
         );
+    },
+    'search' => function() { 
+        $stdidnumber = Input::get('stdidnumber');
+        $student = DB::table('use_103.dbo.seniorOne103_userinfo')
+            ->where('stdidnumber', $stdidnumber)
+            ->select('stdname', 'cid', DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted ,SUBSTRING(stdidnumber,1,6) AS stdidnumber'))->get();
+        return array('saveStatus'=>true, 'student' => $student);
+    },
+    'ques' => function() { 
+        $cid = Input::get('cid');
+        $page_newcid = [];
+        
+        $student = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')            
+            ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'pstat.newcid', '=', 'userinfo.newcid');
+        
+        for($page=1;$page<20;$page++){
+            $student->leftJoin('use_103.dbo.seniorOne103_page'.$page, 'seniorOne103_page'.$page.'.newcid', '=', 'userinfo.newcid');
+            array_push($page_newcid, DB::raw('CASE WHEN seniorOne103_page'.$page.'.newcid IS NULL THEN 0 ELSE 1 END AS page'.$page));             
+        }
+            
+        array_push($page_newcid, DB::raw('CASE WHEN pstat.page IS NULL THEN 0 ELSE pstat.page END AS pages'));   
+        array_push($page_newcid, 'userinfo.stdname');   
+        
+        $ques = $student->where('userinfo.cid', $cid)->select($page_newcid)->first();        
+        
+        return array('saveStatus'=>true, 'student' => $ques);
+    },
+    'quesDelete' => function() { 
+        $input = Input::only('cid', 'page');
+        
+        $userinfo_query = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')->where('cid', $input['cid']);
+
+        if( $userinfo_query->exists() ){
+            $userinfo = $userinfo_query->select('userinfo.newcid', DB::raw('CASE WHEN pstat.page IS NULL THEN 0 ELSE pstat.page END AS page'))->first();
+            $pageStop = $userinfo->page;
+            
+            DB::transaction(function() use($input, $userinfo, &$pageStop){
+                DB::table('use_103.dbo.seniorOne103_page'.$input['page'])->where('newcid', $userinfo->newcid)->delete();
+                
+                if( $input['page'] < $userinfo->page ){
+                    $pageStop = $input['page'];
+                    DB::table('use_103.dbo.seniorOne103_pstat')->where('newcid', $userinfo->newcid)->update(['page' => $input['page']]);
+                }
+            });
+                
+        }       
+        
+        return array('saveStatus'=>true, 'pageStop'=>$pageStop);
     }
 );
