@@ -12,16 +12,17 @@ return array(
     },  
     'download' => function() {
         $students = Session::get('seniorOne103_userinfo.my');
-        $output = "\xEF\xBB\xBF";
+        //$output = "\xEF\xBB\xBF";
+        $output = '';
         $output .= implode(",", array_keys((array)$students[0]));
         $output .=  "\n"; 
-        foreach($students as $student){   
-            $output .= implode(",", (array)$student);
+        foreach($students as $student){               
+            $output .= iconv("UTF-8", "big5//IGNORE", implode(",", (array)$student));
             $output .= "\n";
         }
         $headers = array(
-            'Content-Encoding' => 'UTF-8',
-            'Content-Type' => 'text/csv; charset=UTF-8',
+            //'Content-Encoding' => 'UTF-8',
+            'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="ExportFileName.csv"',
         );
 

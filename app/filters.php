@@ -37,7 +37,7 @@ App::error(function(app\library\files\v0\TokenMismatchException $exception) {
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 App::error(function(ModelNotFoundException $e)
 {
-    return Response::make('Not Found', 404);
+    //return Response::make('Not Found', 404);
 });
 
 App::error(function(PDOException $exception) {

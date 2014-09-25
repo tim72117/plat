@@ -26,6 +26,9 @@ if( true || $browser['browser']=='IE' && $browser['version']<8 ) {
 
 echo '</div>';
 
+$news = DB::table('news')->where('project', 1)->get();
+
+var_dump($news);
 	
 $fileProvider = app\library\files\v0\FileProvider::make();
 echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px">';
@@ -36,6 +39,7 @@ echo '<a href="'.URL::to($fileProvider->download(559)).'">103年後期中等教�
 echo '<a href="'.URL::to($fileProvider->download(612)).'">103年高一學生調查說帖</a><br />';
 echo '<a href="'.URL::to($fileProvider->download(638)).'">103高一學生線上問卷填答事前資訊準備表</a><br />';
 echo '<a href="'.URL::to($fileProvider->download(706)).'">103高一專一學生問卷_公告版</a>';
+
 echo '</div>';	
 
 $docs = VirtualFile::with('requester.docRequester')->has('requester')->where('user_id',$user->id)->get();
