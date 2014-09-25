@@ -41,9 +41,10 @@ return array(
     },
     'search' => function() { 
         $stdidnumber = Input::get('stdidnumber');
-        $student = DB::table('use_103.dbo.seniorOne103_userinfo')
-            ->where('stdidnumber', $stdidnumber)
-            ->select('stdname', 'cid', DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted ,SUBSTRING(stdidnumber,1,6) AS stdidnumber'))->get();
+        $student = DB::table('use_103.dbo.seniorOne103_userinfo AS s10')
+            ->leftJoin('use_103.dbo.gra103_userinfo AS s09', 's10.newcid' , '=', 's09.newcid')
+            ->where('s10.stdidnumber', $stdidnumber)
+            ->select('s10.stdname', 's09.name', 's10.cid', DB::raw('CASE WHEN s10.deleted_at IS NULL THEN 0 ELSE 1 END AS deleted ,SUBSTRING(s10.stdidnumber,1,6) AS stdidnumber'))->get();
         return array('saveStatus'=>true, 'student' => $student);
     },
     'ques' => function() { 
