@@ -675,9 +675,9 @@ if( Session::has('user.work.sch_id') ){
 	$count = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
         ->select(DB::raw(
-            'SUM(CASE WHEN userinfo.shid IN (\''.(Session::get('user.work.sch_id')[$k]).'\') AND userinfo.deleted_at IS NULL AND pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
+            'SUM(CASE WHEN userinfo.shid IN (\''.(Session::get('user.work.sch_id')[$k]).'\') AND userinfo.deleted_at IS NULL AND pstat.page = 19 OR pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
             'SUM(CASE WHEN userinfo.shid IN (\''.(Session::get('user.work.sch_id')[$k]).'\') AND userinfo.deleted_at IS NULL THEN 1 ELSE 0 END) AS mystd,' . 
-            'SUM(CASE WHEN pstat.page = 20 THEN 1 ELSE 0 END) AS allfinish,' .
+            'SUM(CASE WHEN pstat.page = 19 OR pstat.page = 20 THEN 1 ELSE 0 END) AS allfinish,' .
             'count(*) AS allstds'))->first();		
     //計算校別與全國回收率，並預設無學生資料時回收率為0
     if (($count->allstds)==0){
