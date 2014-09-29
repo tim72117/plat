@@ -14,20 +14,13 @@ class UserController extends BaseController {
 	|
 	*/
     protected $layout = 'demo.layout-main';
-	protected $dataroot = '';
 	protected $auth_rull = array(
 			'username'              => 'required|regex:/[0-9a-zA-Z!@_]/|between:3,20',
 			'password'              => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:6,20',
 			'password_confirmation' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:6,20|confirmed');
 	
 	public function __construct(){
-		$this->dataroot = app_path().'/views/ques/data/';
 		$this->beforeFilter(function($route){
-			$this->root = $route->getParameter('root');
-			Config::addNamespace('ques', app_path().'/views/ques/data/'.$this->root);
-			$this->config = Config::get('ques::setting');
-			Config::set('database.default', 'sqlsrv');
-			Config::set('database.connections.sqlsrv.database', 'ques_admin');
 		});
 	}
 	

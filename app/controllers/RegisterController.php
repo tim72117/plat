@@ -19,8 +19,6 @@ class RegisterController extends BaseController {
 	public function __construct() {
         
 		$this->beforeFilter(function($route){
-			Config::set('database.default', 'sqlsrv');
-			Config::set('database.connections.sqlsrv.database', 'ques_admin');
 		});
         
 	}

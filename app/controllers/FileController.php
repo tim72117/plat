@@ -15,18 +15,10 @@ class FileController extends BaseController {
 	|
 	*/
     protected $layout = 'demo.layout-main';
-	protected $dataroot = '';
 	protected $fileAcitver;
 	
 	public function __construct(){
-		$this->dataroot = app_path().'/views/ques/data/';
-		$this->beforeFilter(function($route){
-			$this->root = $route->getParameter('root');
-			Config::addNamespace('ques', app_path().'/views/ques/data/'.$this->root);
-			$this->config = Config::get('ques::setting');
-			Config::set('database.default', 'sqlsrv');
-			Config::set('database.connections.sqlsrv.database', 'ques_admin');
-            
+		$this->beforeFilter(function($route){            
             if( !Session::has('file.'.$route->getParameter('intent_key')) ){
                 return $this->timeOut();
             }

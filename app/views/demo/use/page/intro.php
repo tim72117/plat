@@ -26,9 +26,9 @@ if( true || $browser['browser']=='IE' && $browser['version']<8 ) {
 
 echo '</div>';
 
-$news = DB::table('news')->where('project', 1)->get();
+//$news = DB::table('news')->where('project', 1)->get();
 
-var_dump($news);
+//var_dump($news);
 	
 $fileProvider = app\library\files\v0\FileProvider::make();
 echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px">';

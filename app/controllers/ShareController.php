@@ -14,14 +14,7 @@ class ShareController extends BaseController {
 	|
 	*/
 	public function __construct() {
-		$this->dataroot = app_path().'/views/ques/data/';
 		$this->beforeFilter(function($route){
-			$this->root = $route->getParameter('root');
-			Config::addNamespace('ques', app_path().'/views/ques/data/'.$this->root);
-			$this->config = Config::get('ques::setting');
-			Config::set('database.default', 'sqlsrv');
-			Config::set('database.connections.sqlsrv.database', 'ques_admin');
-			$this->project = Auth::user()->getProject();
 		});
 	}
     
