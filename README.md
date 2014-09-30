@@ -1,5 +1,3 @@
-dev-routes	:        修正路徑，進行Share重製及介面工作
-
 hotfix	        :        緊急修正作業
 
 dev-return	:        提供查詢各計畫回收率Model 包含Cache
