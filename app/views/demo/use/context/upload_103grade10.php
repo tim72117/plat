@@ -739,7 +739,7 @@ $students = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         ->select('depcode', 'stdnumber', 'stdname', 'cid',
             DB::raw('SUBSTRING(stdidnumber,1,5) AS stdidnumber'), 'stdsex', 'birth', 'clsname', 'teaname', 'workstd', 'pstat.page',
             DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted'),
-            DB::raw('ROW_NUMBER() OVER (ORDER BY userinfo.cid) AS row_index'))->get();
+            DB::raw('ROW_NUMBER() OVER (ORDER BY userinfo.deleted_at,userinfo.cid) AS row_index'))->get();
 ?>
 
 
