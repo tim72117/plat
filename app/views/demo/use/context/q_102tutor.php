@@ -1,6 +1,6 @@
 <?php
 $user = Auth::user();
-$fileAuth = json_decode(VirtualFile::find($file_id)->struct);
+$fileAuth = json_decode(VirtualFile::find($fileAcitver->doc_id)->struct);
 
 $total = Cache::remember('q_102tutor.total1', 60, function() {
     return DB::table('use_102.dbo.tuto102_全國回收率')->first();
@@ -57,7 +57,7 @@ array_walk($students, function(&$item){ settype($item->cid, "integer");settype($
 <?
 if( $fileAuth && $fileAuth->all ){ 
     $fileProvider = app\library\files\v0\FileProvider::make();
-    echo Form::open(array('url' => URL::to($fileProvider->get_doc_active_url('open', $file_id)), 'method' => 'post'));
+    echo Form::open(array('url' => URL::to($fileProvider->get_doc_active_url('open', $fileAcitver->doc_id)), 'method' => 'post'));
     echo '<select ng-model="mySchool" ng-init="mySchool.id=\''.$schools[0].'\'" ng-options="school.id+\' - \'+school.sname for school in schools track by school.id" onchange="this.form.submit()" name="school">';
     echo '<option value="">-----------------------------選擇學校-----------------------------</option>';
     echo '</select>';
