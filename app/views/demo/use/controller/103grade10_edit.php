@@ -11,7 +11,15 @@ return array(
         return array('saveStatus'=>true, 'user_id' => $input['cid']);
     },  
     'download' => function() {
-        $students = Session::get('seniorOne103_userinfo.my');
+        $students = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
+            ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
+            ->whereIn('shid', Session::get('user.work.sch_id'))
+            ->whereNull('deleted_at')
+            ->select('depcode', 'stdnumber', 'stdname', 'cid',
+                DB::raw('SUBSTRING(stdidnumber,1,5) AS stdidnumber'), 'stdsex', 'birth', 'clsname', 'teaname', 'workstd', 'pstat.page',
+                DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted'),
+                DB::raw('ROW_NUMBER() OVER (ORDER BY userinfo.cid) AS row_index'))->get();
+        
         //$output = "\xEF\xBB\xBF";
         $output = '';
         $output .= implode(",", array_keys((array)$students[0]));
