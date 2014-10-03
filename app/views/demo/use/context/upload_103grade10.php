@@ -526,13 +526,15 @@ if ($null_row_flag == 1)
 	{	
 		$null_text .= '<tr><td colspan="12" align="left">※ 第';
 		for ($r=0;$r<$s-1;$r++){
-			$null_text .= $null_row[$r]."、"; } //第1~($s-1)筆
+			$null_text .= $null_row[$r]."、";             
+        } //第1~($s-1)筆
 			$null_text .= $null_row[$r]."筆資料為空白列，請注意。".'</td></tr>';
 	}
 	else
 	{	$null_text .='<tr><td colspan="12" align="left">※ 第';
 		for ($s=0;$s<5;$s++){
-			$null_text .= $null_row[$s]."、"; } //第1~5筆
+			$null_text .= $null_row[$s]."、";             
+        } //第1~5筆
 			$null_text .= $null_row[$s]."筆及其他數筆資料為空白資料列，請注意。".'</td></tr>';
 	}
 }
@@ -593,12 +595,12 @@ if ($null_row_flag == 1)
 	</tr>
 </table>
 </div>
-<div style="margin:10px 0 0 10px;width:1200px">	
-<? if( $error_data != '' || $null_row_flag==1 ){ ?>
 
-<table width="99%" cellpadding="3" cellspacing="0" border="1">
-	<tr bgcolor="#CAFFCA"><td colspan="12" align="center">以下資料有誤，請協助修改後重新上傳</td></tr> 
-	<tr bgcolor="#EEEEEE">		
+<? if( $error_data != '' || $null_row_flag==1 ){ ?>
+<div style="margin:10px 0 0 10px;width:1000px;background-color:#faa;padding:20px">	
+<div style="background-color:#faa;color:#f00;text-align: center;padding:0 0 10px 0">以下資料有誤，請協助修改後重新上傳</div>
+<table width="99%" cellpadding="3" cellspacing="0" border="1" style="background-color:#fff;font-size:12px">
+    <tr bgcolor="#EEEEEE" style="font-size:12px">		
 		<th width="7%" class="title" scope="col" align="center">學校代號</th>
 		<th width="7%" class="title" scope="col" align="center">科別</th>
 		<th width="7%" class="title" scope="col" align="center">學號</th>
@@ -619,11 +621,12 @@ if ($null_row_flag == 1)
 
 ?>
 </table>
-</br>
+    
+</div>
 
 <? } ?>
 
-</div>
+
 
 <?
 if( Session::has('user.work.sch_id') ){
@@ -631,54 +634,20 @@ if( Session::has('user.work.sch_id') ){
     $shid_use = implode('\',\'', Session::get('user.work.sch_id'));
 	
 }
-//echo $shid_use;
-//var_dump(Session::get('user.work.sch_id'));
 
-/*for ($k = 0; $k<count(Session::get('user.work.sch_id'));$k++){
-	
-	echo $work_schools_name[$k]."(科系代碼：".(Session::get('user.work.sch_id')[$k]).")";
-	$count = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
-        ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
-        ->select(DB::raw(
-            'SUM(CASE WHEN userinfo.shid IN (\''.(Session::get('user.work.sch_id')[$k]).'\') AND userinfo.deleted_at IS NULL AND pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
-            'SUM(CASE WHEN userinfo.shid IN (\''.(Session::get('user.work.sch_id')[$k]).'\') AND userinfo.deleted_at IS NULL THEN 1 ELSE 0 END) AS mystd,' . 
-            'SUM(CASE WHEN pstat.page = 20 THEN 1 ELSE 0 END) AS allfinish,' .
-            'count(*) AS allstds'))->first();
-	
-
-/*    $count = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
-        ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
-        ->select(DB::raw(
-            'SUM(CASE WHEN userinfo.shid IN (\''.$shid_use.'\') AND userinfo.deleted_at IS NULL AND pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
-            'SUM(CASE WHEN userinfo.shid IN (\''.$shid_use.'\') AND userinfo.deleted_at IS NULL THEN 1 ELSE 0 END) AS mystd,' . 
-            'SUM(CASE WHEN pstat.page = 20 THEN 1 ELSE 0 END) AS allfinish,' .
-            'count(*) AS allstds'))->first();
-
-    //校別與全國回收率
-    if (($count->allstds)==0){
-        $return_school = 0;
-        $return_country = 0;
-    }else{
-        $return_country = round(($count->allfinish/$count->allstds)*100,2);
-        if (($count->mystd)==0){
-            $return_school = 0;
-        }else{
-            $return_school = round((($count->finish)/($count->mystd))*100,2);
-        }
-    }
-*/
 ?>
-<div style="margin:0 0 0 10px;border: 1px solid #aaa;padding:10px;width:800px">
+<div style="margin:10px 0 0 10px;border: 1px solid #aaa;padding:10px;width:800px">
         <table cellpadding="0" cellspacing="0" border="0" class="sch-profile" style="margin:0">
                 <tr>  
 <? for ($k = 0; $k<count(Session::get('user.work.sch_id'));$k++){
 	$count = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
         ->select(DB::raw(
-            'SUM(CASE WHEN userinfo.shid IN (\''.(Session::get('user.work.sch_id')[$k]).'\') AND userinfo.deleted_at IS NULL AND pstat.page = 19 OR pstat.page = 20 THEN 1 ELSE 0 END) AS finish,' .
+            'SUM(CASE WHEN userinfo.shid IN (\''.(Session::get('user.work.sch_id')[$k]).'\') AND userinfo.deleted_at IS NULL AND pstat.page in (19,20) THEN 1 ELSE 0 END) AS finish,' .
             'SUM(CASE WHEN userinfo.shid IN (\''.(Session::get('user.work.sch_id')[$k]).'\') AND userinfo.deleted_at IS NULL THEN 1 ELSE 0 END) AS mystd,' . 
-            'SUM(CASE WHEN pstat.page = 19 OR pstat.page = 20 THEN 1 ELSE 0 END) AS allfinish,' .
-            'count(*) AS allstds'))->first();		
+            'SUM(CASE WHEN pstat.page in (19,20) THEN 1 ELSE 0 END) AS allfinish,' .
+            'count(*) AS allstds'))->first();
+
     //計算校別與全國回收率，並預設無學生資料時回收率為0
     if (($count->allstds)==0){
         $return_school = 0;
@@ -688,7 +657,7 @@ if( Session::has('user.work.sch_id') ){
         if (($count->mystd)==0){
             $return_school = 0;
         }else{
-            $return_school = round((($count->finish)/($count->mystd))*100,2);
+            $return_school = round(($count->finish/$count->mystd)*100,2);
         }
     }
 ?>					
@@ -736,10 +705,10 @@ if( Session::has('user.work.sch_id') ){
                 <th width="110">導師姓名</th>
                 <th width="80">建教生</th>  
                 <th width="160" allgn="center">填答頁數</th>  
-                <th width="80" align="center">刪除</th>  
+                <th width="80" align="center">刪除<input type="checkbox" ng-model="stateFilter.deleted" ng-true-value="1" ng-false-value="0" /></th>  
                 <th></th>
             </tr>
-            <tbody ng-repeat="student in students | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
+            <tbody ng-repeat="student in students | filter:searchText | filter:stateFilter | startFrom:(page-1)*limit | limitTo:limit">
                 <tr ng-style="deleteStyle(student)">  
                     <td class="files">{{ student.row_index }}</td>
                     <td class="files">{{ student.depcode }}</td>
@@ -770,8 +739,7 @@ $students = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         ->select('depcode', 'stdnumber', 'stdname', 'cid',
             DB::raw('SUBSTRING(stdidnumber,1,5) AS stdidnumber'), 'stdsex', 'birth', 'clsname', 'teaname', 'workstd', 'pstat.page',
             DB::raw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END AS deleted'),
-            DB::raw('ROW_NUMBER() OVER (ORDER BY userinfo.cid) AS row_index'))->get();
-Session::put('seniorOne103_userinfo.my', $students);
+            DB::raw('ROW_NUMBER() OVER (ORDER BY userinfo.deleted_at,userinfo.cid) AS row_index'))->get();
 ?>
 
 
@@ -792,7 +760,7 @@ function Ctrl($scope) {
     $scope.page = 1;    
     $scope.limit = 5;
     $scope.max = $scope.files.length;
-    $scope.pages = Math.ceil($scope.max/$scope.limit);
+    $scope.pages = Math.ceil($scope.max/$scope.limit);    
     
     $scope.next = function() {
         if( $scope.page < $scope.pages )
@@ -824,6 +792,7 @@ function studentCtrl($scope, $http, $filter) {
     $scope.limit = 20;
     $scope.max = $scope.students.length;
     $scope.pages = Math.ceil($scope.max/$scope.limit);
+    $scope.stateFilter = {deleted: '0'};
     
     $scope.next = function() {
         if( $scope.page < $scope.pages )
@@ -842,6 +811,12 @@ function studentCtrl($scope, $http, $filter) {
     };
     
     $scope.$watchCollection('searchText', function(query) {
+        $scope.max = $filter("filter")($scope.students, query).length;
+        $scope.pages = Math.ceil($scope.max/$scope.limit);
+        $scope.page = 1;
+    });  
+    
+    $scope.$watchCollection('stateFilter', function(query) {
         $scope.max = $filter("filter")($scope.students, query).length;
         $scope.pages = Math.ceil($scope.max/$scope.limit);
         $scope.page = 1;
