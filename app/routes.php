@@ -47,7 +47,7 @@ Route::get('test', function() {
 		Route::get('auth/logout', array('as' => 'logout', 'uses' => 'UserController@logout'));
 		
 		Route::get('auth/password/change', array('before' => '', 'uses' => 'UserController@passwordChangePage'));
-		Route::post('auth/password/change', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@passwordChange'));	
+        Route::post('auth/password/change', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@passwordChange'));	
         
         Route::post('ajax/download/{intent_key}/{method}', 'FileController@fileAjaxDownload');
 		
@@ -63,7 +63,7 @@ Route::get('test', function() {
 	Route::post('auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@login'));
 	
 	Route::get('user/auth/register/{project}', 'RegisterController@register')->where('project', '[a-z]+');
-	Route::post('user/auth/register/{project}', 'RegisterController@register')->where('project', '[a-z]+');	
+	Route::post('user/auth/register/{project}', array('before' => 'csrf', 'uses' => 'RegisterController@register'))->where('project', '[a-z]+');	
 	//平台---------------------------------------------------------------------------------------------------------------------------------
 	
 		

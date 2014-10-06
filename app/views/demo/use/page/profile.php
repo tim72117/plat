@@ -23,6 +23,30 @@ if( is_null($user->contact) ){
 }
 
 if( Request::isMethod('post') ){
+    
+    $input = Input::only('title', 'tel', 'fax', 'email2');	
+    
+    $rulls = array(
+        'title'  => 'required|max:10',
+        'tel'    => 'required|regex:/^[0-9-#]+$/',
+        'fax'    => 'regex:/^[0-9-#]+$/',
+        'email2' => 'email',
+    );
+    
+    $rulls_message = array(
+    'title.required'  => '職稱必填',
+    'tel.required'    => '聯絡電話必填',	
+    'title.max'       => '職稱格式錯誤',
+    'tel.regex'       => '聯絡電話格式錯誤',	
+    'fax.regex'       => '傳真電話格式錯誤',	
+    'email2.email'    => '備用信箱格式錯誤',				
+);
+    
+    $validator = Validator::make($input, $rulls, $rulls_message);
+
+    if( $validator->fails() ){	
+        throw new app\library\files\v0\ValidateException($validator);
+    }
 
 	$user->contact->title = Input::get('title');
 	$user->contact->tel = Input::get('tel');

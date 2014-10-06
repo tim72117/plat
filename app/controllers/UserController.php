@@ -15,9 +15,9 @@ class UserController extends BaseController {
 	*/
     protected $layout = 'demo.layout-main';
 	protected $auth_rull = array(
-			'username'              => 'required|regex:/[0-9a-zA-Z!@_]/|between:3,20',
-			'password'              => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:6,20',
-			'password_confirmation' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:6,20|confirmed');
+			'username'              => 'required|regex:/^[0-9a-zA-Z!@_]+$/|between:3,20',
+			'password'              => 'required|regex:/^[0-9a-zA-Z!@#$%^&*]+$/|between:6,20',
+			'password_confirmation' => 'required|regex:/^[0-9a-zA-Z!@#$%^&*]+$/|between:6,20|confirmed');
 	
 	public function __construct(){
 		$this->beforeFilter(function($route){
@@ -198,7 +198,7 @@ class UserController extends BaseController {
 		$validator = Validator::make($input, $rulls, $rulls_message);
 		
 		if( $validator->fails() ){
-			return Redirect::back()->withErrors($validator);
+			throw new app\library\files\v0\ValidateException($validator);
 		}
 		$user = Auth::User();
 		

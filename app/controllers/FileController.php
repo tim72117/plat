@@ -126,7 +126,7 @@ class FileController extends BaseController {
     }
 	
 	public function timeOut() {
-		return View::make('demo.timeout');
+        return Response::view('demo.timeout', array(), 404);
 	}	
 	
 	public function showQuery() {
