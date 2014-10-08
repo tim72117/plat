@@ -15,9 +15,7 @@ $docs = DB::table('ques_doc')->select('qid','title','year','dir','edit','ver')->
 
 $docsTable = '';
 foreach($docs as $doc){
-	$pageinfo_path = ques_path().'/ques/data/'.$doc->dir.'/data/pageinfo.xml';
-	if( is_file($pageinfo_path) )
-		$pageinfo = simplexml_load_file( $pageinfo_path );
+
 	$reports_num = isset($count_report[$doc->dir]) ? $count_report[$doc->dir] : 0;
 	
 	$docsTable .= '<tr>';
@@ -28,10 +26,6 @@ foreach($docs as $doc){
 	$docsTable .= '<td><a href="'.asset('ques/project/spss/'.$doc->dir).'">spss</a></td>';  
 	$docsTable .= '<td><a href="'.asset('ques/project/traffic/'.$doc->dir).'">receives</a></td>';  
 	$docsTable .= '<td><a href="'.asset('ques/project/report/'.$doc->dir).'">report</a>( '.$reports_num.' )</td>';  
-	if( is_file($pageinfo_path) ){
-		$docsTable .= '<td>'.$pageinfo->changetime.'</td>';
-		$docsTable .= '<td '.(strtotime($pageinfo->changetime) > strtotime($pageinfo->databasetime) ? 'style="color:#f00"' : '').'>'.$pageinfo->databasetime.'</td>';
-	}
 	$docsTable .= '</tr>';
 }
 

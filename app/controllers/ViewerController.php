@@ -14,21 +14,12 @@ class ViewerController extends BaseController {
 	|
 	*/
     protected $layout = 'demo.layout-main';
-	protected $dataroot = '';
 	
 	public function __construct(){
-		$this->dataroot = ques_path().'/ques/data/';
 		$this->beforeFilter(function($route){
 			$this->root = $route->getParameter('root');
-			Config::addNamespace('ques', ques_path().'/ques/data/'.$this->root);
-			View::addNamespace('ques', ques_path());
-			$this->config = Config::get('ques::setting');
-            //var_dump($this->config);exit;
-            
+			            
             $this->doc = DB::table('ques_doc')->where('dir', $this->root)->first();
-
-			//Config::set('database.default', 'sqlsrv_ques');
-			//Config::set('database.connections.sqlsrv_ques.database', $this->doc->database);
 
             $this->project = Auth::user()->getProject();
 		});
@@ -36,7 +27,10 @@ class ViewerController extends BaseController {
     
     public function project($context) {
         
-        View::share('config', $this->config);
+        $fileAcitver = new app\library\files\v0\FileActiver();	
+		
+        View::share('fileAcitver', $fileAcitver);
+        
         View::share('doc', $this->doc);
         
         $contents = View::make('demo.use.main')->nest('context','demo.cher.page.'.$context)->with('request', '')->nest('share', 'demo.use.share');
