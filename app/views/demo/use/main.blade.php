@@ -3,18 +3,19 @@ $user = Auth::user();
 $packageDocs = $user->get_file_provider()->lists();				
 $intent_key = is_null(@$fileAcitver) ? null : $fileAcitver->intent_key;
 $project = DB::table('projects')->where('code', $user->getProject())->first();
+Session::put('doc.intent_key', $intent_key);
 ?>
 @extends('demo.layout-main')
 
 @section('head')
 <title><?=$project->name?></title>
 
-<!--[if lt IE 9]><script src="<?=asset('js/html5shiv.js')?>"></script><![endif]-->
+<!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
+<script src="/js/jquery-1.11.1.min.js"></script>
+<script src="/js/angular.min.js"></script>
+<!--<script src="/js/angular-animate.min.js"></script>-->
 
-<script src="<?=asset('js/jquery-1.11.1.min.js')?>"></script>
-<script src="<?=asset('js/angular.min.js')?>"></script>
-
-<link rel="stylesheet" href="<?=asset('demo/use/css/use100_content.css')?>" />
+<link rel="stylesheet" href="/demo/use/css/use100_content.css" />
 
 <script type="text/javascript">
 $(document).ready(function(){	//選單功能
@@ -32,80 +33,53 @@ $(document).ready(function(){	//選單功能
     
    
 });
-
-function request() {
+angular.module('myapp', []).controller('menu', menu);
+function menu($scope, $filter, $http) {
     
 }
-angular.module('myapp', []).controller('share', share);
-function share($scope, $filter, $http) {
-    $scope.shares = [{id:1},{id:2}];
-    $scope.groups = {};
-    $scope.set_groups = {};
-    $scope.shareds = [];
-
-    $scope.get = function() {
-        if( $('.authorize').css('left')==='0px' ){
-            $('.authorize').animate({left: -501}); 
-        }else{            
-            $http({method: 'GET', url: '<?=asset( 'share/' . value($intent_key) )?>', data:{}})
-            .success(function(data, status, headers, config) {
-                $scope.groups = data.groups;
-                $('.authorize').animate({left: 0});
-            })
-            .error(function(e){
-                console.log(e);
-            });
-        }
-    };
-    
-    $scope.share = function(user_id, shared) {
-        console.log(shared);
-        $http({method: 'POST', url: '<?=asset( 'share/' . value($intent_key) . '/share' )?>', data:{user_id: user_id, shared: shared}})
-        .success(function(data, status, headers, config) {
-            shared.shared_id = data.share_id;
-        })
-        .error(function(e){
-            console.log(e);
-        });
-    };
-    
-    $scope.setDefalut = function() {
-        $http({method: 'POST', url: '<?=asset( 'share/' . value($intent_key) )?>', data:{groups: $scope.set_groups}})
-        .success(function(data, status, headers, config) {
-            console.log(data);
-        })
-        .error(function(e){
-            console.log(e);
-        });
-    };
-}  
 </script>
-
 @stop
 
-
-
 @section('body')
-
 <div style="width: 100%;height: 100%;max-height:100%" ng-controller="share">
 
 	<div style="width:100%;height: 30px;position: absolute;z-index:10;background-color: #fff">
 		<div style="background-color: #ffffff;width:100%;height:0px"></div>
 		<div style="background-color: #458A00;width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #ddd;color:#fff" align="right">			
-			<div style="float:left">
-				<? if( Auth::user()->id==1 ){ ?>
-				<a href="<?=URL::to('page/upload')?>" style="margin-left:10px" class="login-bar">上傳檔案</a>
-				<? } ?>
-			</div>
+            <? if( Auth::user()->id<20 ){ ?>
+            <div style="position:absolute;left:370px;z-index:3000" ng-controller="menu">
+                <div style="position:absolute;left:0">
+                    <div style="width:120px;text-align: center;box-sizing: border-box" class="menu" ng-click="show=!show">建立檔案</div>
+                    <div style="width:120px;text-align: center;position:absolute;height:40px;line-height: 40px;box-sizing: border-box;top:29px" class="menu-item" ng-init="show=true" ng-hide="show">
+                        <div><a href="/page/table">rawdata</a></div>
+                    </div>
+                    <div style="width:120px;text-align: center;position:absolute;height:40px;line-height: 40px;box-sizing: border-box;top:68px" class="menu-item" ng-init="show=true" ng-hide="show">
+                        <div><a href="/editor/main">問卷</a></div>
+                    </div>
+                </div>
+                
+            </div>
+            <div style="position:absolute;left:500px">
+                <div style="width:100px;text-align: center;box-sizing: border-box" class="button-share">
+                    <a href="<?=URL::to('page/files')?>" style="display: block;color:inherit">我的檔案</a>
+                </div>                
+            </div>
+            <? if( isset($fileAcitver->intent_key) ){ ?>
+            <div style="position:absolute;left:250px">
+                <div style="width:80px;text-align: center;box-sizing: border-box" class="button-share" ng-click="getGroupForApp()">分享</div>
+            </div>
+            <? }} ?>
+            <div style="position:absolute;left:602px" ng-hide="hideShareFile" ng-init="hideShareFile=true" id="shareFile">
+                <div style="width:80px;text-align: center;box-sizing: border-box" class="button-share" ng-click="getSharedFile()">共用</div>
+            </div>
 			<div style="float:right">
-				<? if( Auth::user()->id==1 ){ ?>
-                <span style="margin-right:10px;cursor: pointer" class="login-bar shareBtn" ng-click="get()">share</span>
+				<? if( Auth::user()->id==1 ){ ?>                
 				<span style="margin-right:10px;cursor: pointer" class="login-bar queryLogBtn">queryLog</span>
 				<? } ?>
-				<a href="<?=URL::to('page/project')?>" style="margin-right:10px" class="login-bar">回首頁</a>
-				<a href="<?=URL::to('page/project/profile')?>" style="margin-right:10px" class="login-bar">個人資料</a>
-				<a href="<?=URL::to('auth/password/change')?>" style="margin-right:10px" class="login-bar">更改密碼</a>
-				<a href="<?=URL::to('auth/logout')?>" style="margin-right:10px" class="login-bar">登出</a>
+				<a href="/page/project" style="margin-right:10px" class="login-bar">回首頁</a>
+				<a href="/page/project/profile" style="margin-right:10px" class="login-bar">個人資料</a>
+				<a href="/auth/password/change" style="margin-right:10px" class="login-bar">更改密碼</a>
+				<a href="/auth/logout" style="margin-right:10px" class="login-bar">登出</a>
 			</div>
         </div>
 	</div>
@@ -113,28 +87,22 @@ function share($scope, $filter, $http) {
 	<div class="border-box" style="height:100%;width:100%;background-color: #fff;padding-top:30px">
 		
 		<div style="height:100%;overflow-y: hidden;float:left">
-			<div style="width: 350px;height:100%;background-color: #fff;border-right: 1px solid #ddd;overflow-y: auto;margin-top:0">
+			<div style="width: 350px;height:100%;background-color: #fff;border-right: 1px solid #aaa;overflow-y: auto;margin-top:0">
 
-				<h2>【 <?=$project->name?> 】</h2>
-                
-				<div style="font-size:18px;margin-top:10px;margin-left:10px">
-					檔案夾
-				</div>
-				
+				<h2>【 <?=$project->name?> 】</h2>			
 				
 				<div>	
                     
-                <h2>【 我的檔案 】</h2>
+<!--                <h2>【 我的檔案 】</h2>-->
 				<?				
-				
+
 				foreach($packageDocs['docs'] as $packageDoc){
 					foreach($packageDoc['actives'] as $active){		
 
 						if( $active['active']=='open' ){
 							echo '<div class="inbox" style="clear:both;overflow: hidden;cursor:default;margin-top:10px">';
-							echo '<div class="count button page-menu '.($intent_key==$active['intent_key']?'active':'').'" folder="" style="font-size:16px;text-decoration: none;float:left;margin-left:10px">';
-							//echo '<div class="intent button" intent_key="'.$active['intent_key'].'">'.$active['active'].'</div>';
-							echo '<a href="'.URL::to('user/doc/'.$active['intent_key']).'">'.$packageDoc['title'].'</a>';
+							echo '<div class="count button page-menu '.(Request::path()==$active['link']?'active':'').'" folder="" style="font-size:16px;text-decoration: none;float:left;margin-left:10px">';
+							echo '<a href="/'.$active['link'].'">'.$packageDoc['title'].'</a>';
 							echo '</div>';
 							echo '</div>';
 						}
@@ -150,11 +118,10 @@ function share($scope, $filter, $http) {
 				foreach($packageDocs['request'] as $packageDoc){
 					foreach($packageDoc['actives'] as $active){		
 
-						if( $active['active']=='open' ){
+						if( $active['active']=='open' || $active['active']=='import'  ){
 							echo '<div class="inbox" style="clear:both;overflow: hidden;cursor:default;margin-top:10px">';
-							echo '<div class="count button page-menu '.($intent_key==$active['intent_key']?'active':'').'" folder="" style="font-size:16px;text-decoration: none;float:left;margin-left:10px">';
-							//echo '<div class="intent button" intent_key="'.$active['intent_key'].'">'.$active['active'].'</div>';
-							echo '<a href="'.URL::to('user/doc/'.$active['intent_key']).'">'.$packageDoc['title'].'</a>';
+							echo '<div class="count button page-menu '.(Request::path()==$active['link']?'active':'').'" folder="" style="font-size:16px;text-decoration: none;float:left;margin-left:10px">';
+							echo '<a href="/'.$active['link'].'">'.$packageDoc['title'].'</a>';
 							echo '</div>';
 							echo '</div>';
 						}
@@ -171,10 +138,8 @@ function share($scope, $filter, $http) {
 
 		<div style="height: 100%;overflow-y: hidden;margin:0 0 0 200px; position: relative" class="context">
             
-            <div style="width:500px;position: absolute;top:0;background-color: #fff;border-right: 1px solid #ddd;height: 100%;left:-501px;font-size:16px;overflow: auto;z-index: 1000" class="authorize">
-                <div ng-controller="request" style="margin:10px">
-                    <?=$share?>
-                </div>
+            <div style="width:500px;position: absolute;top:-100%;background-color: #fff;left:0;height: 95%;border: 1px solid #aaa;font-size:16px;margin-left:-1px;overflow: auto;z-index: 9" ng-style="{width:advanced_status.boxWidth}" class="authorize">
+                <div style="margin:20px;position: absolute;top:0;bottom: 0;left:0;right:0" ng-switch on="shareBox.type"><?=$share?></div>
             </div>
             
 			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:16px;text-align: left;margin-top:0">		              

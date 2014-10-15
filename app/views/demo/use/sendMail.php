@@ -32,7 +32,7 @@ foreach($users as $index => $user){
     //Config::set('mail.username', 'usedatabase.smtp@gmail.com');
     //Config::set('mail.password', 'edulyw928');
 	
-	//if( false )
+	if( false )
 	echo Password::remind($credentials, function($message) use($user){
         $message->subject('重新設定後期中等教育資料庫查詢平台密碼');
         DB::table('mail')->insert(array('user_id' => $user->id));

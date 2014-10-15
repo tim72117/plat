@@ -8,9 +8,19 @@
 <!--        <div style="">
             <div style="border: 1px solid #999;width:80px;text-align: center">存檔</div>
         </div>-->
+
+        <div style="height:80px;position: absolute;top: 35px;z-index:3">
+            <div style="position: absolute;left:5px;top:0;;bottom:0;width:440px;border: 1px solid #999;background-color: #fff;padding:20px;box-shadow: 0 10px 20px rgba(0,0,0,0.5);" ng-show="tableNameBox">
+                <input type="text" placeholder="輸入資料表名稱" class="input define" style="width:220px" ng-model="tables.title" />
+                <div style="top:20px;left:250px" class="btn default box green" ng-class="{wait:wait}" ng-click="addDoc();tableNameBox=false">確定</div>
+                <div style="top:20px;left:360px" class="btn default box white" ng-class="{wait:wait}" ng-click="tableNameBox=false">取消</div>
+            </div>
+        </div>
         
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
-            <div ng-click="addRows()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>
+            <div ng-click="tableNameBox=true" class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">存檔</div>
+<!--            <div ng-click="addRows()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>-->
+            <div ng-click="sendRequest()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;" ng-show="tables.file_id">發送請求</div>
             <div ng-repeat="($tindex, table) in tables" class="page-tag top" ng-click="select(table)" ng-class="{selected:table.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
             <div ng-click="addTable()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (tables.length)*85+150 }}px"></div>
         </div>       
@@ -35,25 +45,25 @@
             </div>
             <div ng-repeat="($tindex, table) in tables" ng-if="table.selected">
                 <div ng-repeat="column in table.columns" style="margin:2px">
-                    <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="column.name" autofocus="{{column.autofocus || 'false'}}" />
+                    <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="column.name" ng-class="{empty:column.name===''}" autofocus="{{column.autofocus || 'false'}}" />
                     <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="column.description" />
                     <select class="input define"><option>欄位類型</option></select>
                     <select class="input define"><option>過濾規則</option></select>
                     <input type="button" value="刪除" ng-click="remove($index, $tindex)" style="padding: 3px" />
                 </div>    
                 <div style="margin:2px">
-                    <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="newColumn.name" />
+                    <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="newColumn.name" ng-init="newColumn.name=''" />
                     <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="newColumn.description" />
                     <select class="input define"><option>欄位類型</option></select>
                     <select class="input define"><option>過濾規則</option></select>        
-                    <input type="button" value="新增" ng-click="add($tindex)" style="padding: 3px" />
+                    <input type="button" value="新增" ng-click="addColumn()" style="padding: 3px" />
                 </div>   
             </div>
         </div>
         
         <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
-            <div class="page-tag" ng-click="tool=1" ng-class="tool==1 ? 'selected' : ''" style="margin:0 0 5px 5px;">資料表</div>
-            <div class="page-tag" ng-click="tool=2" ng-class="tool==2 ? 'selected' : ''" style="margin:0 0 5px 5px;left:85px">欄位定義</div>
+            <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool==1}" style="margin:0 0 5px 5px;">資料表</div>
+            <div class="page-tag" ng-click="tool=2" ng-class="{selected:tool==2}" style="margin:0 0 5px 5px;left:85px">欄位定義</div>
         </div>
         
         
@@ -121,19 +131,19 @@
     font-size: 13px;
     font-family: 微軟正黑體
 }
+.input.empty {
+    background-color: rgba(200,200,200,0.1);   
+    border-color: #888;
+}
 </style>
 
 <?
-if( isset($fileAcitver) ){
-    $fileProvider = app\library\files\v0\FileProvider::make();
-    $intent_key_get_columns = $fileProvider->get_intent_key_by_active($fileAcitver->intent_key, 'get_columns');
-    $intent_key_get_rows = $fileProvider->get_intent_key_by_active($fileAcitver->intent_key, 'get_rows');
-}
+
 ?>
 <script>
 angular.module('app', [])
 .filter('startFrom', function() {
-    return function(input, start) {   
+    return function(input, start) {     
         if( angular.isArray(input) ){
             return input.slice(start);
         }
@@ -141,24 +151,34 @@ angular.module('app', [])
 }).controller('newTableController', newTableController);
 
 function newTableController($scope, $http, $filter) {
-    $scope.tool = 1;
+    $scope.tool = 2;
     $scope.page = 1;
     $scope.limit = 40;
     $scope.newColumn = {};
-    $scope.tables = [{columns: [], rows: []}];
+    $scope.tables = [{selected : true, columns: [], rows: []}, {columns: [], rows: []}];
+    $scope.rows = [];
+    for(i=0;i<2;i++){
+        var rows = [];
+        var columns = [];
+        for(j=1;j<i*10+10;j++){            
+            rows.push(j);
+            columns.push({name: 'column'+j});
+        }
+        
+        $scope.tables.push({columns: columns, rows: rows});
+    }
     
     $scope.addTable = function() {
         $scope.tables.push({columns: [], rows: []});
     };
 
-    $scope.add = function(tindex) {
-        $scope.tables[tindex].columns.push({
+    $scope.addColumn = function(tindex) {
+        $filter('filter')($scope.tables, {selected: true})[0].columns.push({
             name: $scope.newColumn.name,
             description : $scope.newColumn.description
         });
-        $scope.newColumn.name = null;
-        $scope.newColumn.description = null;
-        $scope.columns[$scope.columns.length-1].autofocus = 'false';
+        $scope.newColumn.name = '';
+        $scope.newColumn.description = '';
     };
     
     $scope.remove = function(index, tindex) {
@@ -166,33 +186,58 @@ function newTableController($scope, $http, $filter) {
     };
     
     $scope.select = function(table) {   
-        angular.forEach($filter('filter')($scope.tables, {selected: true}), function(table){
+        var tables = $filter('filter')($scope.tables, {selected: true});
+        if( !$scope.checkEmpty(tables) )
+            return false;
+        angular.forEach(tables, function(table){
             table.selected = false;
         });
         table.selected = true;
-    }; 
+    };  
     
-    $http({method: 'POST', url: '/file/open/<?=value($intent_key_get_columns)?>', data:{} })
-    .success(function(data, status, headers, config) {
-        //console.log(data);
-        $scope.tables = data;
-        $scope.tables[0].selected = true;
-        $scope.update();
-    }).error(function(e){
-        console.log(e);
-    });
+    $scope.checkEmpty = function(tables) {    
+        var emptyColumns = $filter('filter')(tables[0].columns, function(column){return !/^\w+$/.test(column.name);});     
+        return !emptyColumns.length>0;
+    };
     
+    $scope.addDoc = function() {   
+        var tables = $filter('filter')($scope.tables, {selected: true});
+        if( !$scope.checkEmpty(tables) )
+            return false;
+        var tables = [];
+        angular.forEach($scope.tables, function(table, index){
+            tables.push({columns: table.columns});
+        });
+        //if(false)
+        $http({method: 'POST', url: '/page/rowsDoc/create', data:{tables: tables, title: $scope.tables.title} })
+        .success(function(data, status, headers, config) { 
+            $scope.tables.file_id = data.file_id;
+            console.log(data);         
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+    
+    $scope.addRows = function() {
+        var columns = $scope.tables[$scope.isselected].columns;
+        for(i=0;i<10;i++){
+            var rows = {id:i, data:[]};
+            for(cindex in columns){            
+                rows.data.push('column'+cindex);
+            }
+            $scope.tables[$scope.isselected].rows.push(rows);
+        }    
+        console.log(rows);
+    };
+       
     $scope.update = function(){
-        //console.log($scope.page);       
-        $http({method: 'POST', url: '/file/open/<?=value($intent_key_get_rows)?>?page='+($scope.page), data:{} })
+        console.log($scope.page);       
+        $http({method: 'POST', url: '', data:{} })
         .success(function(data, status, headers, config) {            
             $scope.pages = data.last_page;
             $scope.page = data.current_page;
-            var table = $filter('filter')($scope.tables, {selected: true})[0];
-          
-            table.rows = [];
             angular.forEach(data.data, function(row, index){
-                table.rows.push(row);
+                $scope.rows.push(row);
             });            
             
             //mbScrollbar.recalculate($scope);
@@ -201,6 +246,9 @@ function newTableController($scope, $http, $filter) {
         });
     };
     
+    $scope.sendRequest = function(){
+        angular.element('[ng-controller=share]').scope().getGroupForRequest();
+    };
     
 }
 </script>

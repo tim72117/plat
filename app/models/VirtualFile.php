@@ -35,22 +35,49 @@ class Requester extends Eloquent {
 	
 }
 
-class Sharer extends Eloquent {
-	
-	protected $table = 'share';
-	
-	public $timestamps = true;
-	
-	protected $fillable = array('from_doc_id', 'shared_user_id', 'accept');
-	
-	public function toUser() {
-		return $this->hasOne('User','id','shared_user_id');
+class RequestFile extends Eloquent {
+    
+    protected $table = 'files_requested';
+    
+    public $timestamps = true;
+    
+    protected $fillable = array('share_file_id', 'target', 'target_id', 'created_by', 'description');//'schedule', 
+    
+	public function isFile() {
+		return $this->hasOne('Files', 'id', 'file_id');
 	}
-	
-	public function fromDoc() {
-		return $this->hasOne('VirtualFile','id','from_doc_id');
+    
+}
+
+class ShareFile extends Eloquent {
+    
+    protected $table = 'share_file_to';
+    
+    public $timestamps = true;
+    
+    protected $fillable = array('target', 'target_id', 'file_id', 'created_by', 'power');
+    
+	public function isFile() {
+		return $this->hasOne('Files', 'id', 'file_id');
 	}
-	
+    
+}
+
+class ShareApp extends Eloquent {
+    
+    protected $table = 'share_app_to';
+    
+    public $timestamps = true;
+    
+    protected $fillable = array('target', 'target_id', 'from_doc_id', 'to_doc_id', 'active', 'from_doc_id');
+    
+    public function target($target) {
+        return $this->where('target', $target);
+    }
+    
+    public function doc() {
+        return $this->hasOne('VirtualFile', 'id', 'from_doc_id');
+    }
 }
 	
 class VirtualFile extends Eloquent {

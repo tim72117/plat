@@ -12,7 +12,7 @@
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
             <div ng-click="addRows()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>
             <div ng-repeat="($tindex, table) in tables" class="page-tag top" ng-click="select(table)" ng-class="{selected:table.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
-            <div ng-click="addTable()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (tables.length)*85+150 }}px"></div>
+<!--            <div ng-click="addTable()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (tables.length)*85+150 }}px"></div>-->
         </div>       
         
         <div ng-switch-when="1" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0; right:0; overflow: scroll">  
@@ -53,7 +53,7 @@
         
         <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
             <div class="page-tag" ng-click="tool=1" ng-class="tool==1 ? 'selected' : ''" style="margin:0 0 5px 5px;">資料表</div>
-            <div class="page-tag" ng-click="tool=2" ng-class="tool==2 ? 'selected' : ''" style="margin:0 0 5px 5px;left:85px">欄位定義</div>
+<!--            <div class="page-tag" ng-click="tool=2" ng-class="tool==2 ? 'selected' : ''" style="margin:0 0 5px 5px;left:85px">欄位定義</div>-->
         </div>
         
         
@@ -124,10 +124,9 @@
 </style>
 
 <?
-if( isset($fileAcitver) ){
-    $fileProvider = app\library\files\v0\FileProvider::make();
-    $intent_key_get_columns = $fileProvider->get_intent_key_by_active($fileAcitver->intent_key, 'get_columns');
-    $intent_key_get_rows = $fileProvider->get_intent_key_by_active($fileAcitver->intent_key, 'get_rows');
+if( isset($link) ){
+    $intent_key_get_columns = $link['get_columns'];
+    $intent_key_get_import_rows = $link['get_import_rows'];
 }
 ?>
 <script>
@@ -184,7 +183,7 @@ function newTableController($scope, $http, $filter) {
     
     $scope.update = function(){
         //console.log($scope.page);       
-        $http({method: 'POST', url: '/file/open/<?=value($intent_key_get_rows)?>?page='+($scope.page), data:{} })
+        $http({method: 'POST', url: '/file/open/<?=value($intent_key_get_import_rows)?>?page='+($scope.page), data:{} })
         .success(function(data, status, headers, config) {            
             $scope.pages = data.last_page;
             $scope.page = data.current_page;

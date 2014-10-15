@@ -23,8 +23,12 @@ class PageController extends BaseController {
 	}
 	
 	public function project($context = 'intro') {     
+        
+        $fileAcitver = new app\library\files\v0\FileActiver();	
+		
+        View::share('fileAcitver', $fileAcitver);
        
-        $contents = View::make('demo.use.main')->nest('context','demo.'.$this->project.'.page.'.$context)->with('request', '')->with('share', '');	
+        $contents = View::make('demo.use.main')->nest('context','demo.'.$this->project.'.page.'.$context)->nest('share', 'demo.use.share');	
 			
         $this->layout->content = $contents;
         
@@ -36,9 +40,13 @@ class PageController extends BaseController {
         
 	}
 	
-	public function page($context) {		
+	public function page($context) {
         
-		$contents = View::make('demo.use.main')->nest('context','demo.page.'.$context)->with('request', '')->with('share', '');
+        $fileAcitver = new app\library\files\v0\FileActiver();	
+		
+        View::share('fileAcitver', $fileAcitver);
+        
+		$contents = View::make('demo.use.main')->nest('context','demo.page.'.$context)->nest('share', 'demo.use.share');
         
 		$this->layout->content = $contents;
         

@@ -58,18 +58,15 @@ foreach($docs as $doc){
 }
 
 
-$shares = Sharer::with('fromDoc.user')->where('shared_user_id', $user->id)->get();
+$inGroup = $user->inGroups->lists('id');
+$shares = ShareApp::query()->where(['target' => 'group', 'active' => true])->whereIn('target_id', $inGroup)->get();
+
 
 foreach($shares as $share){
-	echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px;color:#f00">';
-	//echo $share->fromDoc->user->username;
-    echo '國立臺灣師範大學教育評鑑與研究中心分享一個檔案給你：'.$share->fromDoc->isFile->title;
-	if( !$share->accept ){
-		echo Form::open(array('url' => $user->get_file_provider()->get_doc_active_url('get_share', $share->from_doc_id), 'style'=>'width:0;display:inline-block;margin:0'));
-		echo Form::submit('同意', array('style'=>'margin:0;line-height:15px'));
-		echo Form::close();
-	}
-	echo '</div>';
+    VirtualFile::firstOrCreate(['user_id' => $user->id, 'file_id' => $share->doc->file_id]);
+    echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px;color:#f00">';
+    echo '國立臺灣師範大學教育評鑑與研究中心分享一個檔案給你：'.$share->doc->isFile->title;
+    echo '</div>';
 }
 
 ?>

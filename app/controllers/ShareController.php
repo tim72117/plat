@@ -13,12 +13,154 @@ class ShareController extends BaseController {
 	|	Route::get('/', 'HomeController@showWelcome');
 	|
 	*/
-	public function __construct() {
-		$this->beforeFilter(function($route){
-		});
-	}
+    public function __construct() {
+        $this->beforeFilter(function($route){
+            if( !is_null($route->getParameter('intent_key')) ) {
+                $intent = app\library\files\v0\FileActiver::active($route->getParameter('intent_key'));
+                $this->doc_id = $intent['doc_id'];
+            }
+        });
+    }
     
-    public function share($intent_key) {
+    public function myGroup() {
+        $user = Auth::user();
+        
+        $user->load('groups.users');
+        
+        $groups = $user->groups->map(function($group){
+            return ['id' => $group->id, 'description' => $group->description , 'users' => $group->users->map(function($user){
+                return ['id' => $user->id, 'username' => $user->username];
+            })->toArray()];
+        });
+        
+        return $groups;
+    }
+    
+    public function getShared() {
+
+        $shared = ShareApp::query()->where(['from_doc_id'=> $this->doc_id, 'target' => 'group', 'active' => true])->lists('target_id');
+        
+        $myGroups = $this->myGroup()->toArray();
+        
+        foreach($myGroups as $key => $myGroup){
+            if( in_array($myGroup['id'], $shared) ){
+                $myGroups[$key]['selected'] = true;
+            }
+        }
+        
+        return Response::json($myGroups);
+    }
+    
+    public function getMyGroup() {
+        return Response::json($this->myGroup()->toArray());
+    }
+    
+    public function shareAppTo() {
+        $groups = Input::get('groups');
+
+        foreach($groups as $group){
+            
+            $this->shareToTarget($group, 'group');
+            
+            if( !isset($group['selected']) || !$group['selected'] ){
+                $this->shareToUsers($group['users'], 'user');
+            }
+        }
+        //return Response::json($groups);
+    }
+    
+    public function shareToUsers($users) {
+        foreach($users as $user){
+            $this->shareToTarget($user, 'user');
+        }
+    }
+    
+    public function shareToTarget($target, $targetName) {
+
+        if( isset($target['selected']) && $target['selected'] ){
+            ShareApp::updateOrCreate(['target' => $targetName, 'target_id' => $target['id'], 'from_doc_id' => $this->doc_id], ['active' => true]);
+        }else{
+            $share = ShareApp::firstOrNew(['target' => $targetName, 'target_id' => $target['id'], 'from_doc_id' => $this->doc_id]);
+            $share->exists && $share->update(['active' => false]);
+        }
+        
+    }
+    
+    public function shareFileTo() {
+        $input = Input::only('groups', 'files');
+        $useri = Auth::user();
+        $myGroups = $useri->groups;
+        $myFiles = ShareFile::where('created_by', 1)->get();        
+        
+        foreach($input['files'] as $shareFile ){
+
+            $file = ShareFile::find($shareFile['id']);            
+            $columns = isset($shareFile['columns']) ? array_fetch($shareFile['columns'], 'name') : [];
+
+            if( isset($file->power) ) {
+                $power = json_decode($file->power);
+                foreach($columns as $index => $column){
+                    if( !in_array($column, $power) )
+                        unset($columns[$index]);                        
+                }
+            }
+            
+            foreach($input['groups'] as $group){
+                if( isset($group['selected']) && $group['selected'] && $myGroups->contains($group['id']) && $myFiles->contains($shareFile['id']) ){
+                    ShareFile::updateOrCreate(['target' => 'group', 'target_id' => $group['id'], 'file_id' => $file->file_id, 'created_by' => $useri->id])->update(['power' => json_encode($columns)]);                    
+                }
+                if( (!isset($group['selected']) || !$group['selected']) && $myFiles->contains($shareFile['id']) ){
+                    foreach($group['users'] as $user){
+                        ShareFile::updateOrCreate(['target' => 'user', 'target_id' => $user['id'], 'file_id' => $file->file_id, 'created_by' => $useri->id])->update(['power' => json_encode($columns)]);
+                    }
+                }
+            }
+        }
+        
+        return $input;
+    }
+    
+    public function requestTo() {
+        
+        $input = Input::only('groups', 'file_id', 'description');
+        $user = Auth::user();
+        $myGroups = $user->groups;
+        $file = ShareFile::find($input['file_id'], ['created_by']);
+        
+        if( $file && $file->created_by == $user->id ) {
+            
+            foreach($input['groups'] as $group) {
+                
+                if( isset($group['selected']) && $group['selected'] && $myGroups->contains($group['id']) ) {
+                    RequestFile::updateOrCreate(['target' => 'group', 'target_id' => $group['id'], 'share_file_id' => $input['file_id'], 'created_by' => $user->id], ['description' => $input['description']]);
+                }
+                
+            }
+            
+        }
+
+        return Response::json(Input::all());
+    }
+    
+    //----------------------------------------------------------------------------------------------------------------------unuse
+    
+    
+    public function getRequested() {
+        
+        $default_groups = DB::table('requester_to_group')->where('doc_id', $this->doc_id)->lists('group_id');
+        
+        $myGroups = $this->myGroup()->toArray();
+        
+        foreach($myGroups as $key => $myGroup){
+            if( in_array($myGroup['id'], $default_groups) ){
+                $myGroups[$key]['requested'] = 'requested';
+            }
+        }
+        
+        return $myGroups;
+    }
+    
+    public function getRequest($intent_key) {
         $user = Auth::user();
         
         $user->load('groups.users');
@@ -71,39 +213,6 @@ class ShareController extends BaseController {
 
         return Response::json(array('groups'=>$groups));
         
-    }
-    
-    public function shareSave($intent_key, $method) {
-        switch($method) {
-            case 'share':
-                $intent = app\library\files\v0\FileActiver::active($intent_key);
-                $shared = Input::get('shared');
-                if( !$shared['shared'] && $shared['shared_id'] ) {
-                    Sharer::find($shared['shared_id'])->delete();
-                    return Response::json(array('share_id'=>false));
-                }
-                
-                if( $shared['shared'] ) {
-                    $shared_new = Sharer::create(array(
-                        'from_doc_id'    => $intent['doc_id'],
-                        'shared_user_id' => Input::get('user_id'),
-                        'accept'         => false,
-                    ));
-                    return Response::json(array('share_id'=>$shared_new->id));
-                }
-                //if( Input::get('shared') )
-                //Sharer::
-                return array(Input::get('user_id'), Input::get('shared'), $intent['doc_id']);;
-            break;
-        }
-    }
-    
-    public function sharePost($intent_key) {
-        $intent = app\library\files\v0\FileActiver::active($intent_key);
-        $doc_id = $intent['doc_id'];
-        $active = 'set_default_to_group';
-        $file = new $intent['fileClass']($doc_id);
-		return $file->$active();
     }
 
 }

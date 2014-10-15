@@ -19,7 +19,7 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 	 *
 	 * @var array
 	 */
-	protected $hidden = array('password','rules','rulls_message','remember_token');
+	protected $hidden = array('password','rules','rulls_message','remember_token','pivot');
 
 	/**
 	 * Get the unique identifier for the user.
@@ -172,7 +172,8 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 	}
 	
 	public function groups() {
-		return $this->hasMany('Group', 'user_id', 'id');
+		//return $this->hasMany('Group', 'user_id', 'id');
+        return $this->belongsToMany('Group', 'user_own_group', 'user_id', 'group_id');
 	}    
     
 	public function inGroups() {

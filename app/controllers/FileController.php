@@ -31,17 +31,11 @@ class FileController extends BaseController {
 		$fileManager = new app\library\files\v0\FileManager();
 		$fileManager->accept($intent_key);
 	}
-    
-    public function fileDownload($intent_key) {
-        $this->fileAcitver = new app\library\files\v0\FileActiver();
-        
-        return $this->fileAcitver->openFile($intent_key);
-    }
 	
-	public function fileGet($intent_key) {		
+	public function appGet($intent_key) {		
 		
 		$this->fileAcitver = new app\library\files\v0\FileActiver();
-		$view_name = $this->fileAcitver->accept($intent_key);		
+		$view_name = $this->fileAcitver->accept($intent_key);	
 		
         View::share('fileAcitver', $this->fileAcitver);
 		$view = View::make('demo.use.main')->with('intent_key', $intent_key)->nest('context', $view_name)->nest('share', 'demo.use.share');
@@ -55,7 +49,7 @@ class FileController extends BaseController {
         return $response;        
 	}
     
-    public function filePost($intent_key) {
+    public function appPost($intent_key) {
         
 		$this->fileAcitver = new app\library\files\v0\FileActiver();
         
@@ -64,7 +58,7 @@ class FileController extends BaseController {
         return Redirect::back();        
     }
     
-    public function fileAjaxGet($intent_key) {
+    public function appAjaxGet($intent_key) {
         $file = Files::find(Session::get('table.'.$intent_key));
         
         return Response::make(View::make($file->file))->header('Content-Type', "application/json");;
@@ -72,7 +66,7 @@ class FileController extends BaseController {
         return Response::json(array(View::make($file->file)->render()));
     }
     
-    public function fileAjaxPost($intent_key, $method) {
+    public function appAjaxPost($intent_key, $method) {
         $file = VirtualFile::find(Session::get('file')[$intent_key]['doc_id']);
 
         $fileLoader = new Illuminate\Config\FileLoader(new Filesystem, app_path().'/views/demo/use/controller');
@@ -95,12 +89,15 @@ class FileController extends BaseController {
         if( is_callable($func) ) {
             return call_user_func($func);
         }
+    }    
+    
+    public function fileDownload($intent_key) {
+        $this->fileAcitver = new app\library\files\v0\FileActiver();
+        
+        return $this->fileAcitver->openFile($intent_key);
     }
     
-    public function fileOpen($intent_key) {
-		if( !Session::has('file.'.$intent_key) ){
-            return $this->timeOut();
-        }
+    public function fileOpen($intent_key) {       
         
 		$intent = app\library\files\v0\FileActiver::active($intent_key);
 
@@ -108,20 +105,6 @@ class FileController extends BaseController {
         $file = new $intent['fileClass']($doc_id);
         $active = $intent['active'];
         return $file->$active();
-        
-        //帶修正 dev-row
-        switch($intent['active']) {
-            case 'download':
-                $file = new $intent['fileClass']($intent['file_id']);
-                $file_fullPath = $file->$intent['active'](true);
-                return call_user_func_array('Response::download', $file_fullPath);
-            case 'open':
-                Session::set('table.'.$intent_key, $intent['file_id']);
-                //Session::flash('table.'.$intent_key, $intent['file_id']);
-                $view = View::make('demo.use.main')->nest('context', 'demo.use.page.table', array('intent_key'=>$intent_key))->with('request', '');
-                $response = Response::make($view, 200);
-                return $response;
-        }
         
     }
 	
