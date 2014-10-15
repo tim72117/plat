@@ -52,15 +52,15 @@ class FileProvider {
 
 		}
 		
-        $myGroups = $this->user->inGroups->lists('id');
+        $myGroups = $this->user->inGroups->lists('id');                  
         
         $request_doc_ids = DB::table('requester_to_group')->where(function($query) use($myGroups){
             empty($myGroups) ? $query->whereNull('group_id') : $query->whereIn('group_id', $myGroups);            
         })->groupBy('doc_id')->lists('doc_id');
-        
+
         $request_docs = DB::table('docs')
-				->leftJoin('files','docs.file_id','=','files.id')
-				->leftJoin('doc_type','files.type','=','doc_type.id')
+                ->leftJoin('files','docs.file_id','=','files.id')
+                ->leftJoin('doc_type','files.type','=','doc_type.id')
                 ->where(function($query) use($request_doc_ids){
                     empty($request_doc_ids) ? $query->whereNull('docs.id') : $query->whereIn('docs.id', $request_doc_ids);            
                 })              
@@ -74,19 +74,16 @@ class FileProvider {
                 array_push($packageDocs['request'], array('title'=>$request_doc->title, 'actives'=>array(array('intent_key'=>$this->doc_intent_key('import', $request_doc->id, $fileClass), 'active'=>'import'))));
             }
         }
-        
+
         $requested_files = RequestFile::where(function($query) use($myGroups){
-            $query->where('target', 'group')->whereIn('target_id', $myGroups);
+            empty($myGroups) ? $query->whereNull('id') : $query->where('target', 'group')->whereIn('target_id', $myGroups);
         })->get();
-        
+
         foreach($requested_files as $requested_file){
             $fileClass = 'app\\library\\files\\v0\\RowsFile';
             array_push($packageDocs['request'], array('title'=>$requested_file->description, 'actives'=>array(array('link'=>'file/import/'.$this->doc_intent_key('import', $requested_file->id, $fileClass), 'active'=>'import'))));
         }
-        
-        //var_dump($file_requested->toArray());
-
-        
+                
 		return $packageDocs;
 	}
 	

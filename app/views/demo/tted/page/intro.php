@@ -1,36 +1,30 @@
 
 
-<div style="margin:20px 100px;width:800px">
+<div style="margin:10px 0 0 0;width:800px">
 <?
 
 $user = Auth::user();
 
-//if( $user->id==1 ){
-	echo '<div style="border: 1px solid #aaa;padding:10px;width:800px">師資培育資料庫查詢平台進行系統轉移，登入後請盡速確認承辦人個人資料。</div>';
-//}
-	
-$fileProvider = app\library\files\v0\FileProvider::make();
-echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px">';
 
-echo '</div>';	
+echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;color:#f00">教育部中小學師資資料庫整合平台進行系統轉移，登入後請盡速確認承辦人個人資料。';
 
-if( $user->schools->count()>1 ){
-	
-	$sch_id = Input::get('sch_id', Session::get('sch_id'));
-	Session::put('sch_id', $sch_id);
-	echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px">';
-	echo '選擇您承辦業務的學校代碼';
-	echo Form::open(array('url' => 'page/project'));
-	echo Form::select('sch_id', $user->schools->lists('sname','id'), $sch_id); 
-	echo Form::submit('Click Me!');
-	echo Form::close();
-	echo '</div>';
-	
-}elseif( $user->schools->count()>0 ){	
-	Session::put('sch_id', $user->schools[0]->id);
+$browser = get_browser(null, true);
+if( true || $browser['browser']=='IE' && $browser['version']<8 ) {
+    echo '<p style="color:#f00">';
+    echo '本系統不支援IE7以下版本，請更新您的瀏覽器版本</p>';
+    echo '<p>' . 
+         '<a href="http://windows.microsoft.com/zh-tw/internet-explorer/download-ie" target="_blank">下載IE瀏覽器' .
+         '<img src="'.asset('images/browser_internet-explorer-20.png').'" height="20" border="0" style="margin-bottom:-4px" /></a>' .
+         '、' .
+         '<a href="http://www.google.com/intl/zh-TW/chrome/" target="_blank">下載Chrome瀏覽器' .
+         '<img src="'.asset('images/browser_chrome-20.png').'" height="20" border="0" style="margin-bottom:-4px" /></a>' .
+         '、' .
+         '<a href="http://mozilla.com.tw/firefox/new/" target="_blank">下載Firefox瀏覽器' .
+         '<img src="'.asset('images/browser_firefox.png').'" height="20" border="0" style="margin-bottom:-4px" /></a>';    
+    echo '</p>';
 }
 
-
+echo '</div>';
 
 
 $docs = VirtualFile::with('requester.docRequester')->has('requester')->where('user_id',$user->id)->get();
@@ -49,18 +43,19 @@ foreach($docs as $doc){
 }
 
 
-$shares = Sharer::with('fromDoc.user')->where('shared_user_id', $user->id)->get();
+$inGroup = $user->inGroups->lists('id');
 
-foreach($shares as $share){
-	echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px;color:#f00">';
-	//echo $share->fromDoc->user->username;
-    echo '國立臺灣師範大學教育評鑑與研究中心分享一個檔案給你：'.$share->fromDoc->isFile->title;
-	if( !$share->accept ){
-		echo Form::open(array('url' => $user->get_file_provider()->get_doc_active_url('get_share', $share->from_doc_id), 'style'=>'width:0;display:inline-block;margin:0'));
-		echo Form::submit('同意', array('style'=>'margin:0;line-height:15px'));
-		echo Form::close();
-	}
-	echo '</div>';
+
+if( count($inGroup)>0 ) {
+    $shares = ShareApp::query()->where(['target' => 'group', 'active' => true])->whereIn('target_id', $inGroup)->get();
+
+
+    foreach($shares as $share){
+        VirtualFile::firstOrCreate(['user_id' => $user->id, 'file_id' => $share->doc->file_id]);
+        echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px;color:#f00">';
+        echo '國立臺灣師範大學教育評鑑與研究中心分享一個檔案給你：'.$share->doc->isFile->title;
+        echo '</div>';
+    }
 }
 
 ?>

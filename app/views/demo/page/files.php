@@ -20,10 +20,11 @@ if( Session::has('upload_file_id') ){
 
 $inGroups = $user->inGroups->fetch('id')->toArray();
 
+
 $shareFiles = ShareFile::with('isFile')->where(function($query) use($user){
     $query->where('target', 'user')->where('target_id', $user->id);
 })->orWhere(function($query) use($user, $inGroups){
-    $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $user->id);
+    count($inGroups)>0 && $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $user->id);
 })->orderBy('created_at', 'desc')->get();
 
 $files = $shareFiles->map(function($shareFile) use($fileProvider){
@@ -44,6 +45,7 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
         'type' => $shareFile->isFile->type
     ];
 })->toJson();
+
 ?>
 <div style="margin:0;border: 1px solid #aaa;padding:10px;position:absolute;top:20px;left:20px;right:20px;bottom:20px;overflow-y: auto">
 
