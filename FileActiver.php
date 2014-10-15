@@ -39,7 +39,12 @@ class FileActiver {
 			$file = new $intent['fileClass']($this->doc_id);
 			return $file->$active();
 		}
-
+        
+		if( $intent['fileClass']=='app\\library\\files\\v0\\RowsFile' ){
+            $file = new $intent['fileClass']($this->doc_id);
+			return $file->$active($this->doc_id);
+		}
+		
 	}
     
     public function openFile($intent_key) {

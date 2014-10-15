@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use Input, Auth, DB, Validator, VirtualFile, Files, Illuminate\Filesystem\Filesystem, Illuminate\Support\MessageBag;
+use Input, Auth, DB, Validator, VirtualFile, Files, ShareFile, Illuminate\Filesystem\Filesystem, Illuminate\Support\MessageBag;
 class CommFile {
 	
 	/**
@@ -24,7 +24,7 @@ class CommFile {
 	 * @var active
 	 */
 	public static $intent = array(
-		'create',
+		'createFile',
 		'delete',
 		'rename',
 		'save',
@@ -46,8 +46,49 @@ class CommFile {
 	 * @param string
 	 * @return
 	 */
-	public function create() {
-		echo 'create';
+	public function createFile($original_path, $name, $title) {
+        
+		$user_id = Auth::user()->id;	
+        
+        $storage_path = storage_path().'/file_upload';
+        
+        $parts = array_slice(str_split($hash = md5($user_id), 2), 0, 2);
+		
+        $path = join('/', $parts);
+        
+        $filesystem = new Filesystem();   
+            
+        try	
+        {				
+            $filesystem->makeDirectory(dirname($storage_path.'/'.$path.'/'.$name), 0777, true, true);									
+
+            $filesystem->move($original_path . $name, $storage_path.'/'.$path. '/' . $name);
+        }
+        catch (\Exception $e)
+        {
+            throw $e;
+        } 
+        
+        $file = Files::updateOrCreate([                
+            'type'       =>   5,
+            'owner'      =>   0,
+            'file'       =>   $path.'/'.$name,
+            'created_by' =>   $user_id,
+        ],[
+            'title'      =>   $title,
+        ]);
+        
+        $shareFile = ShareFile::updateOrCreate([
+            'target'     => 'user',
+            'target_id'  => $user_id,
+            'file_id'    => $file->id,
+            'created_by' => $user_id,
+        ],[
+            'power'      => json_encode([]),
+        ]); 
+        
+        return $shareFile->id;
+            
 	}
 	
 	public function delete() {	}
@@ -78,8 +119,10 @@ class CommFile {
 			
 			$validator = Validator::make(
 					array('file_upload' => Input::file('file_upload')),
-					array('file_upload' => 'required|mimes:xls,xlsx,pdf'),
-					array('file_upload.mimes' => '檔案格式錯誤')
+					array('file_upload' => 'required|max:8000'),
+					[
+                        'file_upload.max' => '檔案太大',
+                    ]
 			);
 			
 			if( $validator->fails() ){
