@@ -184,6 +184,12 @@ function newTableController($scope, $http, $filter) {
     
     $scope.update = function(){
         //console.log($scope.page);       
+        var table = $filter('filter')($scope.tables, {selected: true})[0];
+        table.rows = [{}];
+        for( i=0;i<40;i++ ){
+            table.rows.push({});
+        }
+        
         $http({method: 'POST', url: '/file/open/<?=value($intent_key_get_rows)?>?page='+($scope.page), data:{} })
         .success(function(data, status, headers, config) {            
             $scope.pages = data.last_page;
