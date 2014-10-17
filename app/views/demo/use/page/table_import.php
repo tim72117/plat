@@ -10,7 +10,10 @@
         </div>-->
         
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
-            <div ng-click="addRows()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>
+            <input type="file" id="upload-file" style="display:none" />
+            <label for="upload-file">
+                <div ng-click="addRows()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>
+            </label>    
             <div ng-repeat="($tindex, table) in tables" class="page-tag top" ng-click="select(table)" ng-class="{selected:table.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
 <!--            <div ng-click="addTable()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (tables.length)*85+150 }}px"></div>-->
         </div>       
@@ -182,7 +185,14 @@ function newTableController($scope, $http, $filter) {
     });
     
     $scope.update = function(){
-        //console.log($scope.page);       
+        //console.log($scope.page); 
+        
+        var table = $filter('filter')($scope.tables, {selected: true})[0];
+        table.rows = [{}];
+        for( i=0;i<40;i++ ){
+            table.rows.push({});
+        }
+        
         $http({method: 'POST', url: '/file/open/<?=value($intent_key_get_import_rows)?>?page='+($scope.page), data:{} })
         .success(function(data, status, headers, config) {            
             $scope.pages = data.last_page;

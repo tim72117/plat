@@ -20,7 +20,7 @@
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
             <div ng-click="tableNameBox=true" class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">存檔</div>
 <!--            <div ng-click="addRows()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>-->
-            <div ng-click="sendRequest()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;" ng-show="tables.file_id">發送請求</div>
+            <div ng-click="sendRequest()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;background-color: #559A10;color:#fff" ng-show="tables.file_id">發送請求</div>
             <div ng-repeat="($tindex, table) in tables" class="page-tag top" ng-click="select(table)" ng-class="{selected:table.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
             <div ng-click="addTable()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (tables.length)*85+150 }}px"></div>
         </div>       
@@ -155,9 +155,9 @@ function newTableController($scope, $http, $filter) {
     $scope.page = 1;
     $scope.limit = 40;
     $scope.newColumn = {};
-    $scope.tables = [{selected : true, columns: [], rows: []}, {columns: [], rows: []}];
+    $scope.tables = [{selected : true, columns: [], rows: []}];
     $scope.rows = [];
-    for(i=0;i<2;i++){
+    for(i=0;i<0;i++){
         var rows = [];
         var columns = [];
         for(j=1;j<i*10+10;j++){            
@@ -231,7 +231,14 @@ function newTableController($scope, $http, $filter) {
     };
        
     $scope.update = function(){
-        console.log($scope.page);       
+        console.log($scope.page);  
+        
+        var table = $filter('filter')($scope.tables, {selected: true})[0];
+        table.rows = [{}];
+        for( i=0;i<40;i++ ){
+            table.rows.push({});
+        }
+        
         $http({method: 'POST', url: '', data:{} })
         .success(function(data, status, headers, config) {            
             $scope.pages = data.last_page;

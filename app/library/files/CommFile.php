@@ -84,7 +84,7 @@ class CommFile {
             'file_id'    => $file->id,
             'created_by' => $user_id,
         ],[
-            'power'      => json_encode([]),
+            //'power'      => json_encode([]),
         ]); 
         
         return $shareFile->id;

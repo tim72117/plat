@@ -263,6 +263,7 @@ function share($scope, $filter, $http) {
         $http({method: 'POST', url: '/share/files', data:{groups: groups, files: files}})
         .success(function(data, status, headers, config) {
             $scope.wait = false;
+            $scope.shareClose();
             console.log(data);
         })
         .error(function(e){
@@ -325,6 +326,7 @@ function share($scope, $filter, $http) {
         //if(false)
         $http({method: 'POST', url: '/share/request/new', data:{groups: groups, file_id: file_id, description: requestDescription}})
         .success(function(data, status, headers, config) {
+            $scope.shareClose();
             console.log(data);
         })
         .error(function(e){
