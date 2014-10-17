@@ -55,6 +55,10 @@ class RowsFile extends CommFile {
         
         $scheme = (object)['database'=>'', 'tables'=>$tables];
         
+        foreach($scheme->tables as $index => $table) {
+            $scheme->tables[$index]->name;
+        }
+        
         $name = hash('md5', json_encode($scheme));       
         
         $filesystem->put( storage_path() . '/rows/temp/' . $name, json_encode($scheme) );
@@ -92,8 +96,8 @@ class RowsFile extends CommFile {
 
             foreach($scheme->tables as $index => $table){
                 foreach($table->columns as $index => $column){
-                    //if( !in_array($column->name, $power) )
-                        //unset($columns_json->columns[$index]);
+                    if( !in_array($column->name, $power) )
+                        unset($table->columns[$index]);
                 }
             }
         }
@@ -115,7 +119,9 @@ class RowsFile extends CommFile {
         
         $database = $scheme->database;
         
-        $columns =  DB::connection('sqlsrv_')->table($database.'.dbo.seniorOne103_userinfo')->paginate(50);//->forPage(2000, 20)->get();
+        $table = $scheme->table;
+        
+        $columns =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->paginate(50);//->forPage(2000, 20)->get();
         
         return Response::json($columns);
     }	
@@ -124,7 +130,7 @@ class RowsFile extends CommFile {
         
         $requested_file_id = $this->doc_id;
         
-        $columns =  DB::connection('sqlsrv_')->table('use_103.dbo.seniorOne103_userinfo')->where('created_by', Auth::user()->id)->paginate(50);//->forPage(2000, 20)->get();
+        $columns =  DB::connection('sqlsrv')->table('ques_admin.dbo.contact')->paginate(50);//->forPage(2000, 20)->get();
         
         return Response::json($columns);
     }
