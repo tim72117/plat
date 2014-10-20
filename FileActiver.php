@@ -18,7 +18,7 @@ class FileActiver {
         return $intent;        
     }
 	
-	public function accept($intent_key) {			
+	public function accept($intent_key, $method = null) {			
 			
 		$this->intent_key = $intent_key;
 		$intent = Session::get('file')[$intent_key];
@@ -42,7 +42,7 @@ class FileActiver {
         
 		if( $intent['fileClass']=='app\\library\\files\\v0\\RowsFile' ){
             $file = new $intent['fileClass']($this->doc_id);
-			return $file->$active($this->doc_id);
+			return $file->$method($this->doc_id);
 		}
 		
 	}
