@@ -843,7 +843,7 @@ function studentCtrl($scope, $http, $filter) {
     };    
     
     $scope.download = function() {          
-        jQuery.fileDownload('/ajax/download/<?=$intent_key?>/download', {
+        jQuery.fileDownload('ajax/download', {
             httpMethod: "POST",
             failCallback: function (responseHtml, url) { console.log(responseHtml); }
         });   

@@ -174,7 +174,7 @@ function newTableController($scope, $http, $filter) {
         table.selected = true;
     }; 
     
-    $http({method: 'POST', url: '/file/open/<?=value($intent_key_get_columns)?>', data:{} })
+    $http({method: 'POST', url: 'get_columns', data:{} })
     .success(function(data, status, headers, config) {
         //console.log(data);
         $scope.tables = data;

@@ -58,7 +58,10 @@ class FileProvider {
 
         foreach($requested_files as $requested_file){
             $fileClass = 'app\\library\\files\\v0\\RowsFile';
-            array_push($packageDocs['request'], array('title'=>$requested_file->description, 'actives'=>array(array('link'=>'file/import/'.$this->doc_intent_key('import', $requested_file->id, $fileClass), 'active'=>'import'))));
+            array_push($packageDocs['request'], [
+                'title'=>$requested_file->description,
+                'actives'=>array(array('link'=>'file/'.$this->doc_intent_key('', $requested_file->id, $fileClass).'/import', 'active'=>'import'))
+            ]);
         }
                 
 		return $packageDocs;
@@ -71,7 +74,7 @@ class FileProvider {
 	
 	public function download($file_id) {
 		$intent_key = $this->file_intent_key('download', $file_id);		
-		return 'file/download/'.$intent_key;	
+		return 'file/'.$intent_key.'/download';	
 	}
 	
 	public function get_doc_active_url($active, $doc_id) {

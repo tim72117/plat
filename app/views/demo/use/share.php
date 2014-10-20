@@ -139,7 +139,7 @@ function share($scope, $filter, $http) {
         $scope.advanced_status.has = false;
         
         $scope.switchUI(function(){
-            $http({method: 'GET', url: 'myGroup', data:{}})
+            $http({method: 'GET', url: 'my/group', data:{}})
             .success(function(data, status, headers, config) {
                 $scope.groups = data;
                 $('.authorize').animate({top: 0});
@@ -164,7 +164,7 @@ function share($scope, $filter, $http) {
         $scope.advanced_status.has = $filter('filter')($scope.files, {type: 5}).length > 0;
         
         $scope.switchUI(function(){
-            $http({method: 'GET', url: '/my/getGroup', data:{}})
+            $http({method: 'GET', url: '/my/group', data:{}})
             .success(function(data, status, headers, config) {
                 $scope.groups = data;
                 $scope.users = [];                
@@ -301,7 +301,7 @@ function share($scope, $filter, $http) {
         $scope.shareBox.type = 'share';
         $scope.shareBox.target = 'request';
         
-        $http({method: 'GET', url: '/my/getGroup', data:{}})
+        $http({method: 'GET', url: '/my/group', data:{}})
         .success(function(data, status, headers, config) {
             $scope.groups = data;
             $scope.users = [];                

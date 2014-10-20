@@ -29,14 +29,14 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::post('share/files', 'ShareController@shareFileTo');    
     Route::post('share/request/new', 'ShareController@requestTo');
     
-    Route::get('my/getGroup', 'ShareController@getMyGroup');
-    Route::get('app/{intent_key}/myGroup', 'ShareController@getShared'); 
+    Route::get('my/group', 'ShareController@getMyGroup');
+    Route::get('app/{intent_key}/my/group', 'ShareController@getShared'); 
     Route::post('app/{intent_key}/share', 'ShareController@shareAppTo');
 
-    Route::get('file/download/{intent_key}', 'FileController@fileDownload');
-    Route::any('file/open/{intent_key}', 'FileController@fileOpen');
-    Route::post('ajax/download/{intent_key}/{method}', 'FileController@fileAjaxDownload');
-    Route::get('file/import/{intent_key}', 'FileController@appGet');
+    Route::get('file/{intent_key}/download', 'FileController@fileDownload');
+    Route::get('file/{intent_key}/{method}', 'FileController@appGet');
+    Route::get('file/{intent_key}/open', 'FileController@appGet'); 
+    Route::post('file/{intent_key}/{method}', 'FileController@fileOpen');
 
     Route::get('page/project/{context?}', array('before' => '', 'as' => 'project', 'uses' => 'PageController@project'));
     Route::post('page/project/{context?}', array('before' => 'csrf', 'uses' => 'PageController@project'));

@@ -172,7 +172,7 @@ function newTableController($scope, $http, $filter) {
         table.selected = true;
     }; 
     
-    $http({method: 'POST', url: '/file/open/<?=value($intent_key_get_columns)?>', data:{} })
+    $http({method: 'POST', url: 'get_columns', data:{} })
     .success(function(data, status, headers, config) {
         //console.log(data);
         $scope.tables = data;
@@ -190,7 +190,7 @@ function newTableController($scope, $http, $filter) {
             table.rows.push({});
         }
         
-        $http({method: 'POST', url: '/file/open/<?=value($intent_key_get_rows)?>?page='+($scope.page), data:{} })
+        $http({method: 'POST', url: 'get_rows?page='+($scope.page), data:{} })
         .success(function(data, status, headers, config) {            
             $scope.pages = data.last_page;
             $scope.page = data.current_page;

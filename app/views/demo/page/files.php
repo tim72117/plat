@@ -32,7 +32,7 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
     if( $shareFile->isFile->type==5 ){        
         $link['get_columns'] = $fileProvider->doc_intent_key('get_columns', $shareFile->id, 'app\\library\\files\\v0\\RowsFile');
         $link['get_rows'] = $fileProvider->doc_intent_key('get_rows', $shareFile->id, 'app\\library\\files\\v0\\RowsFile');
-        $link['open'] = 'my/doc/'.$fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\RowsFile');
+        $link['open'] = 'file/'.$fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\RowsFile').'/open';
     }else{
         $link['open'] = $fileProvider->download($shareFile->file_id);
     }

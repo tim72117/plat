@@ -32,10 +32,10 @@ class FileController extends BaseController {
 		$fileManager->accept($intent_key);
 	}
 	
-	public function appGet($intent_key) {		
+	public function appGet($intent_key, $method = null) {		
 		
 		$this->fileAcitver = new app\library\files\v0\FileActiver();
-		$view_name = $this->fileAcitver->accept($intent_key);	
+		$view_name = $this->fileAcitver->accept($intent_key, $method);	
 		
         View::share('fileAcitver', $this->fileAcitver);
 		$view = View::make('demo.use.main')->with('intent_key', $intent_key)->nest('context', $view_name)->nest('share', 'demo.use.share');
@@ -73,23 +73,11 @@ class FileController extends BaseController {
         $ajax = new Illuminate\Config\Repository($fileLoader, '');
 
         $func = $ajax->get($file->isFile->controller.'.'.$method);
-        //call_user_func($func);
-        if( is_callable($func) )
-            return Response::json(call_user_func($func));
-    }
-    
-    public function fileAjaxDownload($intent_key, $method) {
-        $file = Apps::find(Session::get('file')[$intent_key]['doc_id']);
-
-        $fileLoader = new Illuminate\Config\FileLoader(new Filesystem, app_path().'/views/demo/use/controller');
-        $ajax = new Illuminate\Config\Repository($fileLoader, '');
-
-        $func = $ajax->get($file->isFile->controller.'.'.$method);
-
+        
         if( is_callable($func) ) {
             return call_user_func($func);
         }
-    }    
+    }   
     
     public function fileDownload($intent_key) {
         $this->fileAcitver = new app\library\files\v0\FileActiver();
@@ -97,14 +85,14 @@ class FileController extends BaseController {
         return $this->fileAcitver->openFile($intent_key);
     }
     
-    public function fileOpen($intent_key) {       
+    public function fileOpen($intent_key, $method = null) {       
         
 		$intent = app\library\files\v0\FileActiver::active($intent_key);
 
         $doc_id = $intent['doc_id'];
         $file = new $intent['fileClass']($doc_id);
         $active = $intent['active'];
-        return $file->$active();
+        return $file->$method();
         
     }
 	

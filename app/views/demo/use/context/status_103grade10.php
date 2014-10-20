@@ -130,6 +130,7 @@ function Ctrl($scope, $http, $filter) {
         $scope.schools = [];
         $http({method: 'POST', url: 'ajax/schools', data:{} })
         .success(function(data, status, headers, config) {
+            console.log(data);
             $scope.schools = data.schools;
             $scope.page = 1;
             $scope.max = $scope.schools.length;
@@ -179,7 +180,7 @@ function Ctrl($scope, $http, $filter) {
     
     $scope.open = function(shid, name) {        
         $http({method: 'POST', url: 'ajax/list', data:{shid:shid} })
-        .success(function(data, status, headers, config) {
+        .success(function(data, status, headers, config) {            
             $scope.school_name = name;
             $scope.school_selected = shid;
             $scope.students = data;            
