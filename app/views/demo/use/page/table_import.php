@@ -126,12 +126,7 @@
 }
 </style>
 
-<?
-if( isset($link) ){
-    $intent_key_get_columns = $link['get_columns'];
-    $intent_key_get_import_rows = $link['get_import_rows'];
-}
-?>
+
 <script>
 angular.module('app', [])
 .filter('startFrom', function() {
@@ -176,7 +171,7 @@ function newTableController($scope, $http, $filter) {
     
     $http({method: 'POST', url: 'get_columns', data:{} })
     .success(function(data, status, headers, config) {
-        //console.log(data);
+        console.log(data);
         $scope.tables = data;
         $scope.tables[0].selected = true;
         $scope.update();
@@ -193,7 +188,7 @@ function newTableController($scope, $http, $filter) {
             table.rows.push({});
         }
         
-        $http({method: 'POST', url: '/file/open/<?=value($intent_key_get_import_rows)?>?page='+($scope.page), data:{} })
+        $http({method: 'POST', url: 'get_import_rows?page='+($scope.page), data:{} })
         .success(function(data, status, headers, config) {            
             $scope.pages = data.last_page;
             $scope.page = data.current_page;

@@ -22,7 +22,7 @@ class Contact extends Eloquent {
 	
 	public $timestamps = true;
 	
-	protected $fillable = array('project', 'main', 'active', 'sname', 'department', 'title', 'tel', 'fax', 'email2', 'created_by', 'created_ip');
+	protected $fillable = array('project', 'main', 'active', 'sname', 'department', 'title', 'tel', 'phone', 'fax', 'email2', 'country', 'district', 'address', 'created_by', 'created_ip');
 	
 	protected $guarded = array('id');
 	

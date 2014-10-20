@@ -33,20 +33,14 @@ class RowsFile extends CommFile {
 	 * @var string
 	 * @return
 	 */	
-	public function import() {
-        $requested_file_id = $this->doc_id;
-        $requestFile = RequestFile::find($requested_file_id);
-        $shareFile = ShareFile::find($requestFile->share_file_id);
+	public function import($value) {
         
-        $fileProvider = FileProvider::make();
-        $link = [
-            'get_columns'     => $fileProvider->doc_intent_key('get_columns', $shareFile->id, 'app\\library\\files\\v0\\RowsFile'),
-            'get_import_rows' => $fileProvider->doc_intent_key('get_import_rows', $requestFile->id, 'app\\library\\files\\v0\\RowsFile')
-        ];
+        $requestFile = RequestFile::find($value['requested_file_id']);
         
-        View::share('link', $link);        
+        $shareFile = ShareFile::find($this->doc_id);   
         
         return 'demo.use.page.table_import';
+        
     }
     
     public function createTable($tables, $title) {
@@ -91,13 +85,14 @@ class RowsFile extends CommFile {
 
         //$columns = DB::table('use_103.sys.columns')->whereRaw("object_id=OBJECT_ID('use_103.dbo.seniorOne103_userinfo')")->select('name', DB::raw("'' AS description"))->get('description', 'name');
         
-        if( isset($shareFile->power) ) {
+        if( $shareFile->created_by!=Auth::user()->id && isset($shareFile->power) ) {
             $power = json_decode($shareFile->power);
 
-            foreach($scheme->tables as $index => $table){
-                foreach($table->columns as $index => $column){
-                    if( !in_array($column->name, $power) )
+            foreach($scheme->tables as $index => $table) {
+                foreach($table->columns as $index => $column) {
+                    if( !in_array($column->name, $power) ) {
                         unset($table->columns[$index]);
+                    }
                 }
             }
         }

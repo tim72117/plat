@@ -42,7 +42,7 @@ class FileActiver {
         
 		if( $intent['fileClass']=='app\\library\\files\\v0\\RowsFile' ){
             $file = new $intent['fileClass']($this->doc_id);
-			return $file->$method($this->doc_id);
+			return $file->$method($intent['value']);
 		}
 		
 	}

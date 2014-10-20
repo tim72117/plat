@@ -59,8 +59,10 @@ class FileProvider {
         foreach($requested_files as $requested_file){
             $fileClass = 'app\\library\\files\\v0\\RowsFile';
             array_push($packageDocs['request'], [
-                'title'=>$requested_file->description,
-                'actives'=>array(array('link'=>'file/'.$this->doc_intent_key('', $requested_file->id, $fileClass).'/import', 'active'=>'import'))
+                'title'   => $requested_file->description,
+                'actives' => [
+                    array('link'=>'file/'.$this->doc_intent_key('', $requested_file->share_file_id, $fileClass, ['requested_file_id' => $requested_file->id]).'/import', 'active'=>'import')
+                ]
             ]);
         }
                 
@@ -69,7 +71,7 @@ class FileProvider {
 	
 	public function create() {	
 		$intent_key = $this->doc_intent_key('upload', Null, 'app\\library\\files\\v0\\CommFile');		
-		return 'app/'.$intent_key.'/upload';
+		return 'file/'.$intent_key.'/upload';
 	}
 	
 	public function download($file_id) {
@@ -125,8 +127,8 @@ class FileProvider {
 		return $intent_key;
     }
 	
-	public function doc_intent_key($active, $doc_id, $fileClass) {
-		$intent = array('active'=>$active, 'doc_id'=>$doc_id, 'fileClass'=>$fileClass);
+	public function doc_intent_key($active, $doc_id, $fileClass, $value = null) {
+		$intent = array('active'=>$active, 'doc_id'=>$doc_id, 'fileClass'=>$fileClass, 'value'=>$value);
 		$intent_key = $this->get_intent_id($intent);					
 		$this->files[$intent_key] = $intent;
 		$this->save_intent();

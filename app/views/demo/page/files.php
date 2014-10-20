@@ -18,7 +18,7 @@ if( Session::has('upload_file_id') ){
 		echo implode('、',array_filter($errors->all()));
 }
 
-$inGroups = $user->inGroups->fetch('id')->toArray();
+$inGroups = $user->inGroups->lists('id');
 
 
 $shareFiles = ShareFile::with('isFile')->where(function($query) use($user){
@@ -30,8 +30,6 @@ $shareFiles = ShareFile::with('isFile')->where(function($query) use($user){
 $files = $shareFiles->map(function($shareFile) use($fileProvider){
     $link = [];
     if( $shareFile->isFile->type==5 ){        
-        $link['get_columns'] = $fileProvider->doc_intent_key('get_columns', $shareFile->id, 'app\\library\\files\\v0\\RowsFile');
-        $link['get_rows'] = $fileProvider->doc_intent_key('get_rows', $shareFile->id, 'app\\library\\files\\v0\\RowsFile');
         $link['open'] = 'file/'.$fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\RowsFile').'/open';
     }else{
         $link['open'] = $fileProvider->download($shareFile->file_id);
