@@ -6,7 +6,7 @@ class Files extends Eloquent {
 	public $timestamps = true;
 	
 	protected $fillable = array('title', 'type', 'owner', 'file', 'created_by');
-	
+
 }
 
 class Requester extends Eloquent {
@@ -22,15 +22,15 @@ class Requester extends Eloquent {
 	}
 	
 	public function docPreparer() {
-		return $this->hasOne('VirtualFile','id','preparer_doc_id');
+		return $this->hasOne('Apps','id','preparer_doc_id');
 	}
 	
 	public function doc() {
-		return $this->belongsTo('VirtualFile','preparer_doc_id','id');//未使用未測試
+		return $this->belongsTo('Apps','preparer_doc_id','id');//未使用未測試
 	}
 	
 	public function docRequester() {
-		return $this->hasOne('VirtualFile','id','requester_doc_id');
+		return $this->hasOne('Apps','id','requester_doc_id');
 	}
 	
 }
@@ -41,7 +41,7 @@ class RequestFile extends Eloquent {
     
     public $timestamps = true;
     
-    protected $fillable = array('share_file_id', 'target', 'target_id', 'created_by', 'description');//'schedule', 
+    protected $fillable = array('share_file_id', 'target', 'target_id', 'created_by', 'description');
     
 	public function isFile() {
 		return $this->hasOne('Files', 'id', 'file_id');
@@ -75,34 +75,30 @@ class ShareApp extends Eloquent {
         return $this->where('target', $target);
     }
     
-    public function doc() {
-        return $this->hasOne('VirtualFile', 'id', 'from_doc_id');
+    public function isApp() {
+        return $this->hasOne('Apps', 'id', 'from_doc_id');
     }
+    
 }
 	
-class VirtualFile extends Eloquent {
+class Apps extends Eloquent {
 
-	/**
-	 * The database table used by the model.
-	 *
-	 * @var string
-	 */
-	protected $table = 'docs';
+	protected $table = 'apps';
 	
 	public $timestamps = true;
 	
 	protected $fillable = array('user_id', 'file_id');
 	
 	public function user() {
-		return $this->hasOne('User','id','user_id');
+		return $this->hasOne('User', 'id', 'user_id');
 	}
 	
 	public function hasFiles() {
-		return $this->hasMany('Files','owner');
+		return $this->hasMany('Files', 'owner');
 	}
 	
 	public function isFile() {
-		return $this->hasOne('Files','id','file_id');
+		return $this->hasOne('Files', 'id', 'file_id');
 	}
 	
 	public function requester() {
@@ -118,7 +114,7 @@ class VirtualFile extends Eloquent {
 	}
 	
 	public function docPreparer() {
-		return $this->belongsToMany('VirtualFile', 'auth_requester', 'requester_doc_id', 'preparer_doc_id');//未使用未測試
+		return $this->belongsToMany('Apps', 'auth_requester', 'requester_doc_id', 'preparer_doc_id');//未使用未測試
 	}
 	
 	public static function getRequester() {

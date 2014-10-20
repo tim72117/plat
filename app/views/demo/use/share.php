@@ -139,7 +139,7 @@ function share($scope, $filter, $http) {
         $scope.advanced_status.has = false;
         
         $scope.switchUI(function(){
-            $http({method: 'GET', url: '/my/getGroup/<?=value($fileAcitver->intent_key)?>', data:{}})
+            $http({method: 'GET', url: 'myGroup', data:{}})
             .success(function(data, status, headers, config) {
                 $scope.groups = data;
                 $('.authorize').animate({top: 0});
@@ -196,11 +196,6 @@ function share($scope, $filter, $http) {
     $scope.shareOpen = function() {        
         $('.authorize').animate({top: 0});
     };
-
-    if( '<?=value($fileAcitver->intent_key)?>'!=='' ){
-        //$('.authorize').animate({top: 0}); 
-        //$scope.getGroup();
-    }
     
     $scope.select = function(target) {
         target.selected = !target.selected;
@@ -239,7 +234,7 @@ function share($scope, $filter, $http) {
         //console.log($filter("filter")( $scope.groups, {selected:true}, function(actual, expected){ return 10; } ));
         $scope.wait = true;
         //if(false)
-        $http({method: 'POST', url: '/share/app/<?=value($fileAcitver->intent_key)?>', data:{groups: groups}})
+        $http({method: 'POST', url: 'share', data:{groups: groups}})
         .success(function(data, status, headers, config) {
             $scope.wait = false;
             console.log(data);

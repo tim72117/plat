@@ -11,31 +11,30 @@
 |
 */
 
-Route::get('test', function() {	
-	return;
+Route::get('test', function() {
+    return;
 });
 
 Route::get('/', function(){ return Redirect::to('user/auth/cher'); });
 Route::get('project', 'UserController@project');
 Route::get('user/auth/{project}', function($project){ return Redirect::to('project/'.$project); });
-//平台-------------------------------------------------------------------------------------------------------------------------------	
+//平台-------------------------------------------------------------------------------------------------------------------------------
 Route::group(array('before' => 'auth_logined'), function() {        
 
-    Route::get('my/doc/{intent_key}', 'FileController@appGet');
-    Route::post('my/doc/{intent_key}', 'FileController@appPost');    
-
-    Route::get('ajax/{intent_key}', 'FileController@appAjaxGet');	
-    Route::post('ajax/{intent_key}/{method}', 'FileController@appAjaxPost');
+    Route::get('app/{intent_key}/open', 'FileController@appGet');
+    Route::post('app/{intent_key}/open', 'FileController@appPost');
+    Route::get('app/{intent_key}/ajax', 'FileController@appAjaxGet');
+    Route::post('app/{intent_key}/ajax/{method}', 'FileController@appAjaxPost');
     
-    Route::post('share/files', 'ShareController@shareFileTo');
-    Route::post('share/app/{intent_key}', 'ShareController@shareAppTo');
+    Route::post('share/files', 'ShareController@shareFileTo');    
     Route::post('share/request/new', 'ShareController@requestTo');
     
     Route::get('my/getGroup', 'ShareController@getMyGroup');
-    Route::get('my/getGroup/{intent_key}', 'ShareController@getShared');    
+    Route::get('app/{intent_key}/myGroup', 'ShareController@getShared'); 
+    Route::post('app/{intent_key}/share', 'ShareController@shareAppTo');
 
     Route::get('file/download/{intent_key}', 'FileController@fileDownload');
-    Route::any('file/open/{intent_key}', 'FileController@fileOpen');	
+    Route::any('file/open/{intent_key}', 'FileController@fileOpen');
     Route::post('ajax/download/{intent_key}/{method}', 'FileController@fileAjaxDownload');
     Route::get('file/import/{intent_key}', 'FileController@appGet');
 
@@ -52,7 +51,7 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::get('auth/logout', array('as' => 'logout', 'uses' => 'UserController@logout'));
 
     Route::get('auth/password/change', array('before' => '', 'uses' => 'UserController@passwordChangePage'));
-    Route::post('auth/password/change', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@passwordChange'));	
+    Route::post('auth/password/change', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@passwordChange'));
 
 });
 
@@ -60,7 +59,7 @@ Route::get('auth/password/remind/{project}', 'UserController@remindPage')->where
 Route::post('auth/password/remind/{project}', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@remind'))->where('project', '[a-z]+');
 
 Route::get('user/auth/password/reset/{token}', 'UserController@resetPage');
-Route::post('user/auth/password/reset/{token}', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@reset'));	
+Route::post('user/auth/password/reset/{token}', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@reset'));
 
 Route::get('project/{project}', array('before' => '', 'uses' => 'UserController@loginPage'))->where('project', '[a-z]+');
 Route::post('auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@login'));
@@ -71,7 +70,7 @@ Route::post('user/auth/register/{project}', array('before' => 'csrf', 'uses' => 
 
 
 //編輯器-------------------------------------------------------------------------------------------------------------------------------
-Route::post('editor/save/analysis/{root}', array('before' => 'loginAdmin', 'uses' => 'EditorController@saveAnalysis'));	
+Route::post('editor/save/analysis/{root}', array('before' => 'loginAdmin', 'uses' => 'EditorController@saveAnalysis'));
 
 Route::get('{root}/creatTable', array('before' => 'folder_ques|loginAdmin', 'uses' => 'QuesCreaterController@creatTable'))->where('root', '[a-z0-9_]+');
 Route::get('{root}/deleteTable', array('before' => 'folder_ques|loginAdmin', 'uses' => 'QuesCreaterController@deleteTable'))->where('root', '[a-z0-9_]+');
@@ -79,12 +78,12 @@ Route::get('{root}/creatUser', array('before' => 'folder_ques|loginAdmin', 'uses
 
 Route::get('{root}/updatetime', array('before' => 'folder_ques', 'uses' => 'ViewerController@updatetime'))->where('root', '[a-z0-9_]+');
 //編輯器-------------------------------------------------------------------------------------------------------------------------------
-	
+
  
 
 Route::filter('auth_logined', function() {
-	if( Auth::guest() )
-		return Redirect::to('project');
+    if( Auth::guest() )
+        return Redirect::to('project');
     
     if( is_null(Auth::user()->getProject()) ){
         Auth::logout();
@@ -120,17 +119,17 @@ Route::filter('auth_logined', function() {
 });
 
 Route::filter('maintenance', function($route) {
-	$app = app();
+    $app = app();
     return $app->make('MagController')->callAction($app, $app['router'], 'maintenance', array());
 });
 
 Route::filter('loginAdmin', function($route) {
-	return '無權限存取';
+    return '無權限存取';
 });
 
 Route::filter('folder_ques', function($route) {//找不到根目錄
-	$root = $route->getParameter('root');
-	$folder = ques_path().'/ques/data/'.$root;
-	if( !is_dir($folder) )
-		return Response::view('nopage', array(), 404);
+    $root = $route->getParameter('root');
+    $folder = ques_path().'/ques/data/'.$root;
+    if( !is_dir($folder) )
+        return Response::view('nopage', array(), 404);
 });

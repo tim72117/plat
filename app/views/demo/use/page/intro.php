@@ -42,33 +42,15 @@ echo '<a href="'.URL::to($fileProvider->download(706)).'">103高一專一學生�
 
 echo '</div>';	
 
-$docs = VirtualFile::with('requester.docRequester')->has('requester')->where('user_id',$user->id)->get();
-
-
-foreach($docs as $doc){
-	echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px;color:#f00">';
-	echo '<p style="margin:0">您有一個檔案上傳的請求 "'.$doc->isFile->title.'" 來自於：國立臺灣師範大學教育評鑑與研究中心'.$doc->requester->docRequester->user->username;
-	if( $doc->requester->running ){
-		echo '<p style="margin:5px 0 0 0">'.$doc->requester->description.'</p>';
-	}else{
-		echo '(已完成)';
-	}
-	echo '</p>';
-	echo '</div>';
-}
-
-
 $inGroup = $user->inGroups->lists('id');
-$shares = ShareApp::query()->where(['target' => 'group', 'active' => true])->whereIn('target_id', $inGroup)->get();
-
-
-foreach($shares as $share){
-    VirtualFile::firstOrCreate(['user_id' => $user->id, 'file_id' => $share->doc->file_id]);
+$shares = ShareApp::where(['target' => 'group', 'active' => true])->where(function($query) use($inGroup){
+    empty($inGroup) ? $query->whereNull('id') : $query->whereIn('target_id', $inGroup);
+})->get()->each(function($share) use($user){
+    Apps::firstOrCreate(['user_id' => $user->id, 'file_id' => $share->isApp->file_id]);
     echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px;color:#f00">';
-    echo '國立臺灣師範大學教育評鑑與研究中心分享一個檔案給你：'.$share->doc->isFile->title;
+    echo '國立臺灣師範大學教育評鑑與研究中心分享一個檔案給你：'.$share->isApp->isFile->title;
     echo '</div>';
-}
-
+});
 ?>
 
 	

@@ -830,7 +830,7 @@ function studentCtrl($scope, $http, $filter) {
     };
     
     $scope.deleteStudent = function(student) {        
-        $http({method: 'POST', url: '<?=asset('ajax/'.$intent_key.'/delete')?>', data:{cid:student.cid} })
+        $http({method: 'POST', url: 'ajax/delete', data:{cid:student.cid} })
         .success(function(data, status, headers, config) {
             if( data.saveStatus ){
                 student.deleted = '1';

@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Response, VirtualFile, ShareFile, RequestFile, DOMDocument, Auth, Illuminate\Filesystem\Filesystem;
+use DB, View, Response, ShareFile, RequestFile, DOMDocument, Auth, Illuminate\Filesystem\Filesystem;
 
 class RowsFile extends CommFile {
 	

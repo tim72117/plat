@@ -3,7 +3,6 @@ $user = Auth::user();
 $packageDocs = $user->get_file_provider()->lists();				
 $intent_key = is_null(@$fileAcitver) ? null : $fileAcitver->intent_key;
 $project = DB::table('projects')->where('code', $user->getProject())->first();
-Session::put('doc.intent_key', $intent_key);
 ?>
 @extends('demo.layout-main')
 
@@ -61,10 +60,10 @@ function menu($scope, $filter, $http) {
             </div>
             <div style="position:absolute;left:500px">
                 <div style="width:100px;text-align: center;box-sizing: border-box" class="button-share">
-                    <a href="<?=URL::to('page/files')?>" style="display: block;color:inherit">我的檔案</a>
+                    <a href="/page/files" style="display: block;color:inherit">我的檔案</a>
                 </div>                
             </div>
-            <? if( isset($fileAcitver->intent_key) ){ ?>
+            <? if( Request::is('app/*') ){ ?>
             <div style="position:absolute;left:250px">
                 <div style="width:80px;text-align: center;box-sizing: border-box" class="button-share" ng-click="getGroupForApp()">分享</div>
             </div>

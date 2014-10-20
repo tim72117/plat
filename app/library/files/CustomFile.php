@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Response, Session, Request, Redirect, Input, VirtualFile, Requester, Sharer, Group, Auth;
+use DB, View, Response, Session, Request, Redirect, Input, Apps, Requester, Sharer, Group, Auth;
 
 class CustomFile extends CommFile {
 	
@@ -41,7 +41,7 @@ class CustomFile extends CommFile {
 		
         Session::flash('upload_file_id', $file_id);		
         
-        $file = VirtualFile::find($this->doc_id)->isFile->file;
+        $file = Apps::find($this->doc_id)->isFile->file;
 		
 		if( is_null($file) )
 			throw new FileFailedException;  
@@ -54,7 +54,7 @@ class CustomFile extends CommFile {
 	
 	public function open() {
                 
-		$file = VirtualFile::find($this->doc_id)->isFile->file;
+		$file = Apps::find($this->doc_id)->isFile->file;
         
 		if( is_null($file) ){
             throw new FileFailedException;
@@ -108,7 +108,7 @@ class CustomFile extends CommFile {
 		$inputs_unique_id = $this->get_users(Input::get('group'), Input::get('user'));
 		
 		
-		$this->doc = VirtualFile::find($this->doc_id);
+		$this->doc = Apps::find($this->doc_id);
 		
 		//$struct = json_decode($this->doc->struct);
 		
@@ -125,7 +125,7 @@ class CustomFile extends CommFile {
 					
 			}else{				
 
-				$doc_new = VirtualFile::create(array(
+				$doc_new = Apps::create(array(
 					'user_id'  =>  $newPreparer_id,
 					'file_id'  =>  $file_id,
 				));
@@ -204,11 +204,11 @@ class CustomFile extends CommFile {
 		
 		echo $this->doc_id;
 		
-		$doc = VirtualFile::find($this->doc_id);
+		$doc = Apps::find($this->doc_id);
 		
 		$user_id = Auth::user()->id;
 		
-		$doc_new = VirtualFile::create(array(
+		$doc_new = Apps::create(array(
 			'user_id'  =>  $user_id,
 			'file_id'  =>  $doc->isFile->id,
 		));

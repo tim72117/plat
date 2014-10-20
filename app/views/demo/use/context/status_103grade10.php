@@ -128,7 +128,7 @@ function Ctrl($scope, $http, $filter) {
             
     var getSchools = function() {
         $scope.schools = [];
-        $http({method: 'POST', url: '<?=asset('ajax/'.$fileAcitver->intent_key.'/schools')?>', data:{} })
+        $http({method: 'POST', url: 'ajax/schools', data:{} })
         .success(function(data, status, headers, config) {
             $scope.schools = data.schools;
             $scope.page = 1;
@@ -178,7 +178,7 @@ function Ctrl($scope, $http, $filter) {
     };
     
     $scope.open = function(shid, name) {        
-        $http({method: 'POST', url: '<?=asset('ajax/'.$fileAcitver->intent_key.'/list')?>', data:{shid:shid} })
+        $http({method: 'POST', url: 'ajax/list', data:{shid:shid} })
         .success(function(data, status, headers, config) {
             $scope.school_name = name;
             $scope.school_selected = shid;
@@ -222,7 +222,7 @@ function Ctrl($scope, $http, $filter) {
     };
     
     $scope.deleteStudent = function(student) {        
-        $http({method: 'POST', url: '<?=asset('ajax/'.$fileAcitver->intent_key.'/delete')?>', data:{cid:student.cid} })
+        $http({method: 'POST', url: 'ajax/delete', data:{cid:student.cid} })
         .success(function(data, status, headers, config) {
             if( data.saveStatus ){
                 student.deleted = '1';
@@ -236,7 +236,7 @@ function Ctrl($scope, $http, $filter) {
     
     $scope.stu.search = function() {
         if( $scope.stu.searchText!=='' ){
-            $http({method: 'POST', url: '/ajax/<?=$fileAcitver->intent_key?>/search', data:{stdidnumber:$scope.stu.searchText} })
+            $http({method: 'POST', url: 'ajax/search', data:{stdidnumber:$scope.stu.searchText} })
             .success(function(data, status, headers, config) {
                 if( data.saveStatus ){
                     $scope.students = data.student;
@@ -250,7 +250,7 @@ function Ctrl($scope, $http, $filter) {
     
     $scope.ques = {pages:[]};
     $scope.ques = function(student) {
-        $http({method: 'POST', url: '/ajax/<?=$fileAcitver->intent_key?>/ques', data:{cid:student.cid} })
+        $http({method: 'POST', url: 'ajax/ques', data:{cid:student.cid} })
         .success(function(data, status, headers, config) {
             if( data.saveStatus ){
                 $scope.ques.pages = [];
@@ -268,7 +268,7 @@ function Ctrl($scope, $http, $filter) {
     };
     
     $scope.quesDelete = function(page) {        
-        $http({method: 'POST', url: '/ajax/<?=$fileAcitver->intent_key?>/quesDelete', data:{cid:$scope.ques.cid, page:page.page, pageStop:$scope.ques.pageStop} })
+        $http({method: 'POST', url: 'ajax/quesDelete', data:{cid:$scope.ques.cid, page:page.page, pageStop:$scope.ques.pageStop} })
         .success(function(data, status, headers, config) {
             if( data.saveStatus ){                
                 page.write = '0';

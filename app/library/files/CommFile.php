@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use Input, Auth, DB, Validator, VirtualFile, Files, ShareFile, Illuminate\Filesystem\Filesystem, Illuminate\Support\MessageBag;
+use Input, Auth, DB, Validator, Files, ShareFile, Illuminate\Filesystem\Filesystem, Illuminate\Support\MessageBag;
 class CommFile {
 	
 	/**

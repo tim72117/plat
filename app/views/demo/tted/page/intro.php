@@ -27,7 +27,7 @@ if( true || $browser['browser']=='IE' && $browser['version']<8 ) {
 echo '</div>';
 
 
-$docs = VirtualFile::with('requester.docRequester')->has('requester')->where('user_id',$user->id)->get();
+$docs = Apps::with('requester.docRequester')->has('requester')->where('user_id',$user->id)->get();
 
 
 foreach($docs as $doc){
@@ -51,7 +51,7 @@ if( count($inGroup)>0 ) {
 
 
     foreach($shares as $share){
-        VirtualFile::firstOrCreate(['user_id' => $user->id, 'file_id' => $share->doc->file_id]);
+        Apps::firstOrCreate(['user_id' => $user->id, 'file_id' => $share->doc->file_id]);
         echo '<div style="border: 1px solid #aaa;padding:10px;width:800px;margin-top:5px;color:#f00">';
         echo '國立臺灣師範大學教育評鑑與研究中心分享一個檔案給你：'.$share->doc->isFile->title;
         echo '</div>';
