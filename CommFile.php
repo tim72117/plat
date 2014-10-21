@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use Input, Auth, DB, Validator, Files, ShareFile, Illuminate\Filesystem\Filesystem, Illuminate\Support\MessageBag;
+use Input, Auth, DB, Response, Validator, Files, ShareFile, Illuminate\Filesystem\Filesystem, Illuminate\Support\MessageBag;
 class CommFile {
 	
 	/**
@@ -201,6 +201,8 @@ class CommFile {
         
         if( !file_exists($storage_path.'/'.$file_path) )
             throw new FileFailedException;
+        
+        return Response::download($storage_path.'/'.$file_path, $file->title);
         
         return array('path'=>$storage_path.'/'.$file_path, 'name'=>$file->title);
 	}
