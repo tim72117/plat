@@ -52,19 +52,20 @@ class FileProvider {
 
         $myGroups = $this->user->inGroups->lists('id');
 
-        $requested_files = RequestFile::where(function($query) use($myGroups){
+        RequestFile::where(function($query) use($myGroups){
+            
             empty($myGroups) ? $query->whereNull('id') : $query->where('target', 'group')->whereIn('target_id', $myGroups);
-        })->get();
-
-        foreach($requested_files as $requested_file){
+            
+        })->get()->each(function($requestFile) use(&$packageDocs){
+            
             $fileClass = 'app\\library\\files\\v0\\RowsFile';
+            $intent_key = $this->doc_intent_key('import', $requestFile->doc_id, $fileClass, ['requested_file_id' => $requestFile->id]);
             array_push($packageDocs['request'], [
-                'title'   => $requested_file->description,
-                'actives' => [
-                    array('link'=>'file/'.$this->app_intent_key('', $requested_file->share_file_id, $fileClass, ['requested_file_id' => $requested_file->id]).'/import', 'active'=>'import')
-                ]
+                'title'   => $requestFile->description,
+                'actives' => [['link' => 'file/'.$intent_key.'/import', 'active' => 'import']]
             ]);
-        }
+            
+        });
                 
         return $packageDocs;
     }

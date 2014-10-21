@@ -173,11 +173,7 @@ class UserController extends BaseController {
 	
 	public function passwordChangePage() {
         
-        $fileAcitver = new app\library\files\v0\FileActiver();	
-		
-        View::share('fileAcitver', $fileAcitver);
-        
-		$contents = View::make('demo.use.main')->nest('context','demo.page.passwordChange')->with('request', '')->nest('share', 'demo.use.share');
+		$contents = View::make('demo.use.main')->nest('context','demo.page.passwordChange')->nest('share', 'demo.use.share');
         
         $this->layout->content = $contents;
         

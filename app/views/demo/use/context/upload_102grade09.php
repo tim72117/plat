@@ -273,13 +273,9 @@ if ($null_row_flag == 1)
             <a href="<?=URL::to($fileProvider->download(21))?>">查詢平臺操作說明</a>
             <div style="padding-top:5px">
 			<?
-			$intent_key = $fileAcitver->intent_key;
-			echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true));
+			echo Form::open(array('url' => Request::url().'/import', 'files' => true));
 			echo Form::file('file_upload');
 			echo Form::submit('上傳檔案');
-			echo Form::hidden('intent_key', $intent_key);
-			echo Form::hidden('_token1', csrf_token());
-			echo Form::hidden('_token2', dddos_token());
 			echo Form::close();
 			?>	
             </div>
@@ -348,21 +344,21 @@ if ($null_row_flag == 1)
 
 <?
 
-$doc_id = $fileAcitver->doc_id;
 $user_id = $user->id;
 
 $file_reload = DB::table('use_103.dbo.gra103_userinfo')->where('upload_by', $user_id)->where('created_by', 6)->lists('file_id');
    
 $file_my = array();
 
-VirtualFile::find($doc_id)->hasFiles->sortByDesc('created_at')->each(function($file) use($user_id, $file_reload, &$file_my){
-    if( $file->created_by==$user_id ){        
-        $file_my[$file->id] = array('title' => $file->title, 'created_at' => $file->created_at->toDateTimeString(), 'reload'=>false);
-    }
-    if( in_array($file->id, $file_reload) ){
-        $file_my[$file->id] = array('title' => $file->title, 'created_at' => $file->created_at->toDateTimeString(), 'reload'=>true);
-    }    
-});
+//Apps::find(0)->hasFiles->sortByDesc('created_at')->each(function($file) use($user_id, $file_reload, &$file_my){
+//    
+//    if( $file->created_by==$user_id ){        
+//        $file_my[$file->id] = array('title' => $file->title, 'created_at' => $file->created_at->toDateTimeString(), 'reload'=>false);
+//    }
+//    if( in_array($file->id, $file_reload) ){
+//        $file_my[$file->id] = array('title' => $file->title, 'created_at' => $file->created_at->toDateTimeString(), 'reload'=>true);
+//    }
+//});
 
 $files_key = array_keys($file_my);
 

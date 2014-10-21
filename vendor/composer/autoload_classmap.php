@@ -43,7 +43,6 @@ return array(
     'app\\library\\files\\v0\\CustomFile' => $baseDir . '/app/library/files/CustomFile.php',
     'app\\library\\files\\v0\\FileActiver' => $baseDir . '/app/library/files/FileActiver.php',
     'app\\library\\files\\v0\\FileFailedException' => $baseDir . '/app/library/files/FileFailedException.php',
-    'app\\library\\files\\v0\\FileManager' => $baseDir . '/app/library/files/FileManager.php',
     'app\\library\\files\\v0\\FileProvider' => $baseDir . '/app/library/files/FileProvider.php',
     'app\\library\\files\\v0\\QuesFile' => $baseDir . '/app/library/files/QuesFile.php',
     'app\\library\\files\\v0\\RowsFile' => $baseDir . '/app/library/files/RowsFile.php',

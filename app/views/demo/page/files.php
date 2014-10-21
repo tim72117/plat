@@ -29,8 +29,9 @@ $shareFiles = ShareFile::with('isFile')->where(function($query) use($user){
 
 $files = $shareFiles->map(function($shareFile) use($fileProvider){
     $link = [];
+    $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\RowsFile');
     if( $shareFile->isFile->type==5 ){        
-        $link['open'] = 'file/'.$fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\RowsFile').'/open';
+        $link['open'] = 'file/'.$intent_key.'/open';
     }else{
         $link['open'] = $fileProvider->download($shareFile->file_id);
     }
@@ -40,7 +41,8 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
         'created_by' => $shareFile->created_by,
         'created_at' => $shareFile->created_at->toIso8601String(),
         'link' => $link,
-        'type' => $shareFile->isFile->type
+        'type' => $shareFile->isFile->type,
+        'intent_key' => $intent_key
     ];
 })->toJson();
 

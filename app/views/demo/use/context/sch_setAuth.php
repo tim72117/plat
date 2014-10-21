@@ -95,10 +95,6 @@ $profiles = $contacts->map(function($contact){
         'group_gov' => in_array(5, $groups),
     );   
 });
-
-//$fileProvider = app\library\files\v0\FileProvider::make();
-//$intent_key = $fileProvider->doc_intent_key('open', $file_id, 'app\\library\\files\\v0\\CustomFile');
-$intent_key = $fileAcitver->intent_key;
 ?>
 
     
@@ -146,7 +142,7 @@ function Ctrl($scope, $http, $filter) {
     $scope.auth = function(user, event) {
         $(event.target).prop('disabled', true);
         var data = { project:'use', user_id: user.id, active: event.target.checked, cacheName: '<?=$cacheName?>' };
-        $http({method: 'POST', url: '<?=asset('ajax/'.$intent_key.'/active')?>', data:data})
+        $http({method: 'POST', url: 'ajax/active', data:data})
         .success(function(data, status, headers, config) {
             if( data.saveStatus )
                 $(event.target).prop('disabled', false);
@@ -159,7 +155,7 @@ function Ctrl($scope, $http, $filter) {
     $scope.disabled = function(user, event) {
         $(event.target).prop('disabled', true);
         var data = { project:'use', user_id: user.id, disabled: event.target.checked, cacheName: '<?=$cacheName?>' };
-        $http({method: 'POST', url: '<?=asset('ajax/'.$intent_key.'/disabled')?>', data:data})
+        $http({method: 'POST', url: 'ajax/disabled', data:data})
         .success(function(data, status, headers, config) {
             if( data.saveStatus ){
                 $(event.target).prop('disabled', false);
@@ -174,7 +170,7 @@ function Ctrl($scope, $http, $filter) {
     $scope.setGroup = function(user, event) {
         $(event.target).prop('disabled', true);
         var data = { group_id:event.target.value, user_id: user.id, active: event.target.checked, cacheName: '<?=$cacheName?>' };
-        $http({method: 'POST', url: '<?=asset('ajax/'.$intent_key.'/group')?>', data:data})
+        $http({method: 'POST', url: 'ajax/group', data:data})
         .success(function(data, status, headers, config) {
             if( data.saveStatus )
                 $(event.target).prop('disabled', false);
@@ -185,8 +181,7 @@ function Ctrl($scope, $http, $filter) {
     };
     
     $scope.reflash = function(user, event) {
-        var data = { cacheName: '<?=$cacheName?>' };
-        $http({method: 'POST', url: '<?=asset('ajax/'.$intent_key.'/reflash')?>', data:data})
+        $http({method: 'POST', url: 'ajax/reflash', data:{ cacheName: '<?=$cacheName?>' }})
         .success(function(data, status, headers, config) {
             if( data.saveStatus )
                 location.reload();

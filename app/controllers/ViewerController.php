@@ -27,13 +27,9 @@ class ViewerController extends BaseController {
     
     public function project($context) {
         
-        $fileAcitver = new app\library\files\v0\FileActiver();	
-		
-        View::share('fileAcitver', $fileAcitver);
-        
         View::share('doc', $this->doc);
         
-        $contents = View::make('demo.use.main')->nest('context','demo.cher.page.'.$context)->with('request', '')->nest('share', 'demo.use.share');
+        $contents = View::make('demo.use.main')->nest('context','demo.cher.page.'.$context)->nest('share', 'demo.use.share');
         
         $this->layout->content = $contents;
         

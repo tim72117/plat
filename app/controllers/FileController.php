@@ -23,13 +23,9 @@ class FileController extends BaseController {
                 return $this->timeOut();
             }
             
+            $this->intent = Session::get('file')[$route->getParameter('intent_key')];
             //DB::connection()->disableQueryLog();
 		});
-	}
-	
-	public function fileManager($intent_key) {
-		$fileManager = new app\library\files\v0\FileManager();
-		$fileManager->accept($intent_key);
 	}
 	
 	public function appGet($intent_key, $method = 'open') {		
@@ -74,16 +70,12 @@ class FileController extends BaseController {
         }
     }   
     
-    public function fileOpen($intent_key, $method = null) {       
+    public function fileOpen($intent_key, $method = null) {               
         
-        $intent = app\library\files\v0\FileActiver::active($intent_key);
+        $file = new $this->intent['fileClass']($this->intent['doc_id']);
         
-        $doc_id = $intent['doc_id'];
-        $file = new $intent['fileClass']($doc_id);
-        $active = $intent['active'];
-        
-        if( $method=='open' ) {
-            $view = View::make('demo.use.main')->with('intent_key', $intent_key)->nest('context', $file->$method())->nest('share', 'demo.use.share');
+        if( $method=='open' || $method=='import' ) {
+            $view = View::make('demo.use.main')->nest('context', $file->$method())->nest('share', 'demo.use.share');
 		
             return $this->createView($view);
         }

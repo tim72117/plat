@@ -17,6 +17,7 @@ Route::get('test', function() {
 
 Route::get('/', function(){ return Redirect::to('user/auth/cher'); });
 Route::get('project', 'UserController@project');
+Route::get('project/{project}', array('before' => '', 'uses' => 'UserController@loginPage'))->where('project', '[a-z]+');
 Route::get('user/auth/{project}', function($project){ return Redirect::to('project/'.$project); });
 //平台-------------------------------------------------------------------------------------------------------------------------------
 Route::group(array('before' => 'auth_logined'), function() {        
@@ -59,7 +60,6 @@ Route::post('auth/password/remind/{project}', array('before' => 'delay|csrf|dddo
 Route::get('user/auth/password/reset/{token}', 'UserController@resetPage');
 Route::post('user/auth/password/reset/{token}', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@reset'));
 
-Route::get('project/{project}', array('before' => '', 'uses' => 'UserController@loginPage'))->where('project', '[a-z]+');
 Route::post('auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@login'));
 
 Route::get('user/auth/register/{project}', 'RegisterController@register')->where('project', '[a-z]+');

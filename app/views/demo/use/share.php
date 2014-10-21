@@ -123,7 +123,7 @@ function share($scope, $filter, $http) {
         var rowsFiles = $filter('filter')($scope.files, {type: 5});
         $scope.advanced_status.boxWidth = 500+rowsFiles.length*300;
         angular.forEach(rowsFiles, function(rowsFile, key){
-            $http({method: 'POST', url: '/file/open/'+rowsFile.link.get_columns, data:{} })
+            $http({method: 'POST', url: '/file/'+rowsFile.intent_key+'/get_columns', data:{} })
             .success(function(data, status, headers, config) {
                 rowsFile.columns = data[0].columns;
             }).error(function(e){
