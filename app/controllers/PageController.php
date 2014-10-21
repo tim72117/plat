@@ -14,7 +14,7 @@ class PageController extends BaseController {
 	|
 	*/
     protected $layout = 'demo.layout-main';
-	protected $project;    
+	protected $project;
 	
 	public function __construct(){
 		$this->beforeFilter(function($route){

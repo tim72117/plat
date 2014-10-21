@@ -100,7 +100,7 @@ function menu($scope, $filter, $http) {
 						if( $active['active']=='open' ){
 							echo '<div class="inbox" style="clear:both;overflow: hidden;cursor:default;margin-top:10px">';
 							echo '<div class="count button page-menu '.(Request::path()==$active['link']?'active':'').'" folder="" style="font-size:16px;text-decoration: none;float:left;margin-left:10px">';
-							echo '<a href="/'.$active['link'].'">'.$packageDoc['title'].'</a>';
+							echo '<a href="/'.$active['link'].'/">'.$packageDoc['title'].'</a>';
 							echo '</div>';
 							echo '</div>';
 						}

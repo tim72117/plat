@@ -106,7 +106,7 @@ class UserController extends BaseController {
 	public function remindPage($project) {
 		return View::make('demo.'.$project.'.home', array('contextFile'=>'remind', 'title'=>'忘記密碼'))
 			->nest('context','demo.remind', array('project'=>$project))
-			->nest('child_footer','demo.use.footer');
+			->nest('child_footer','demo.'.$project.'.footer');
 	}
 
 	public function remind($project) {

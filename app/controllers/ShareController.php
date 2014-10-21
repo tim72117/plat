@@ -16,8 +16,9 @@ class ShareController extends BaseController {
     public function __construct() {
         $this->beforeFilter(function($route){
             if( !is_null($route->getParameter('intent_key')) ) {
-                $intent = app\library\files\v0\FileActiver::active($route->getParameter('intent_key'));
-                $this->doc_id = $intent['doc_id'];
+                
+                $this->intent = Session::get('file')[$route->getParameter('intent_key')];
+                
             }
         });
     }
