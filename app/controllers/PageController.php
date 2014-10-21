@@ -22,29 +22,21 @@ class PageController extends BaseController {
 		});
 	}
 	
-	public function project($context = 'intro') {     
-        
-        $fileAcitver = new app\library\files\v0\FileActiver();	
-		
-        View::share('fileAcitver', $fileAcitver);
+	public function project($context = 'intro') {
        
         $contents = View::make('demo.use.main')->nest('context','demo.'.$this->project.'.page.'.$context)->nest('share', 'demo.use.share');	
 			
         $this->layout->content = $contents;
-        
+
         $response = Response::make($this->layout, 200);
         $response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
         $response->header('Pragma', 'no-cache');
         $response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
         return $response;
-        
+
 	}
 	
 	public function page($context) {
-        
-        $fileAcitver = new app\library\files\v0\FileActiver();	
-		
-        View::share('fileAcitver', $fileAcitver);
         
 		$contents = View::make('demo.use.main')->nest('context','demo.page.'.$context)->nest('share', 'demo.use.share');
         
@@ -57,6 +49,5 @@ class PageController extends BaseController {
         return $response;
         
 	}
-
 
 }

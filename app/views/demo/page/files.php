@@ -51,7 +51,7 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
     /*
     | 上傳檔案且匯入檔案到doc
     */
-    echo Form::open(array('url' => $fileProvider->create(), 'files' => true));
+    echo Form::open(array('url' => $fileProvider->upload(), 'files' => true, 'method' => 'post'));
     echo Form::file('file_upload');
     echo Form::submit('Click Me!');
     echo Form::close();

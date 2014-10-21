@@ -32,44 +32,39 @@ class FileController extends BaseController {
 		$fileManager->accept($intent_key);
 	}
 	
-	public function appGet($intent_key, $method = null) {		
+	public function appGet($intent_key, $method = 'open') {		
 		
-		$this->fileAcitver = new app\library\files\v0\FileActiver();
-		$view_name = $this->fileAcitver->accept($intent_key, $method);	
-		
-        View::share('fileAcitver', $this->fileAcitver);
-		$view = View::make('demo.use.main')->with('intent_key', $intent_key)->nest('context', $view_name)->nest('share', 'demo.use.share');
-		
-        $this->layout->content = $view;
+		$this->fileAcitver = new app\library\files\v0\FileActiver($intent_key);
         
-        $response = Response::make($this->layout, 200);
-        $response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
-        $response->header('Pragma', 'no-cache');
-        $response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
-        return $response;        
+		$view_name = $this->fileAcitver->accept($method);
+        
+		$view = View::make('demo.use.main')->nest('context', $view_name)->nest('share', 'demo.use.share');
+		
+        return $this->createView($view);
 	}
     
-    public function appPost($intent_key) {
+    public function appPost($intent_key, $method = null) {
         
-		$this->fileAcitver = new app\library\files\v0\FileActiver();
+		$this->fileAcitver = new app\library\files\v0\FileActiver($intent_key);
         
-		$this->fileAcitver->accept($intent_key);
+		$this->fileAcitver->accept($method);
         
         return Redirect::back();        
     }
     
     public function appAjaxGet($intent_key) {
+        
         $file = Files::find(Session::get('table.'.$intent_key));
         
         return Response::make(View::make($file->file))->header('Content-Type', "application/json");;
-        //View::make($file->file);
-        return Response::json(array(View::make($file->file)->render()));
     }
     
     public function appAjaxPost($intent_key, $method) {
-        $file = Apps::find(Session::get('file')[$intent_key]['doc_id']);
+        
+        $file = Apps::find(Session::get('file')[$intent_key]['app_id']);
 
         $fileLoader = new Illuminate\Config\FileLoader(new Filesystem, app_path().'/views/demo/use/controller');
+        
         $ajax = new Illuminate\Config\Repository($fileLoader, '');
 
         $func = $ajax->get($file->isFile->controller.'.'.$method);
@@ -79,21 +74,33 @@ class FileController extends BaseController {
         }
     }   
     
-    public function fileDownload($intent_key) {
-        $this->fileAcitver = new app\library\files\v0\FileActiver();
-        
-        return $this->fileAcitver->openFile($intent_key);
-    }
-    
     public function fileOpen($intent_key, $method = null) {       
         
-		$intent = app\library\files\v0\FileActiver::active($intent_key);
-
+        $intent = app\library\files\v0\FileActiver::active($intent_key);
+        
         $doc_id = $intent['doc_id'];
         $file = new $intent['fileClass']($doc_id);
         $active = $intent['active'];
+        
+        if( $method=='open' ) {
+            $view = View::make('demo.use.main')->with('intent_key', $intent_key)->nest('context', $file->$method())->nest('share', 'demo.use.share');
+		
+            return $this->createView($view);
+        }
+        
         return $file->$method();
         
+    }
+    
+    public function createView($view) {
+        
+        $this->layout->content = $view;
+        
+        $response = Response::make($this->layout, 200);
+        $response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+        $response->header('Pragma', 'no-cache');
+        $response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
+        return $response; 
     }
 	
 	public function timeOut() {

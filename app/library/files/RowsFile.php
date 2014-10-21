@@ -64,7 +64,9 @@ class RowsFile extends CommFile {
     }
     
     public function open() {
+        
         return 'demo.use.page.table';
+        
     }
 	
 	public function export() {	}

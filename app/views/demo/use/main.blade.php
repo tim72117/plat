@@ -1,7 +1,6 @@
 <?
 $user = Auth::user();
-$packageDocs = $user->get_file_provider()->lists();				
-$intent_key = is_null(@$fileAcitver) ? null : $fileAcitver->intent_key;
+$packageDocs = $user->get_file_provider()->lists();
 $project = DB::table('projects')->where('code', $user->getProject())->first();
 ?>
 @extends('demo.layout-main')

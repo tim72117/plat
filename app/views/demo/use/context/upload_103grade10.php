@@ -110,7 +110,6 @@ $null_text = '';
 $null_row_flag = 0; 
 $error_data = '';
 
-$doc_id = $fileAcitver->doc_id;
 $user_id = $user->id;
 
 $s=0;
@@ -122,7 +121,7 @@ Session::put('user.work.sch_id', $work_schools);
 //上傳判斷
 if( Session::has('upload_file_id') ){ 
 
-	$file_id = Session::get('upload_file_id');	
+	$file_id = Session::get('upload_file_id');
 	$doc = DB::table('files')->where('id',$file_id)->pluck('file');
 	$reader = PHPExcel_IOFactory::createReaderForFile( storage_path(). '/file_upload/'. $doc );
 	$reader->setReadDataOnly(true);
@@ -555,8 +554,7 @@ if ($null_row_flag == 1)
                 }
             }
 			//表單資料               
-			$intent_key = $fileAcitver->intent_key;
-			echo Form::open(array('url' => $user->get_file_provider()->get_active_url($intent_key, 'import'), 'files' => true));
+			echo Form::open(array('url' => Request::url().'/import', 'files' => true));
 			echo Form::file('file_upload',array('style' => 'position:absolute;top:-1000px','id'=>'file_upload'));
             echo '<div class="upload-button">';
 			echo Form::label('file_upload', '選擇檔案', array('class' => 'high-light', 'id' => 'file_upload_name', 'style' => 'min-width: 200px'));
@@ -564,9 +562,6 @@ if ($null_row_flag == 1)
             echo '<div class="upload-button">';
 			echo Form::submit('上傳檔案',array('class' => 'high-light', 'style' => 'width:100px'));
             echo '</div>';
-			echo Form::hidden('intent_key', $intent_key);
-			echo Form::hidden('_token1', csrf_token());
-			echo Form::hidden('_token2', dddos_token());
 			echo Form::close();
 			?>	
               <HR color="#F0F0F0">  
@@ -732,7 +727,7 @@ if( Session::has('user.work.sch_id') ){
     </div>
 </div>
 <?
-$files = DB::table('ques_admin.dbo.files')->where('owner', $doc_id)->where('created_by', $user_id)->select('created_at', 'title')->get();
+$files = DB::table('ques_admin.dbo.files')->where('owner', 0)->where('created_by', $user_id)->select('created_at', 'title')->get();
 $students = DB::table('use_103.dbo.seniorOne103_userinfo AS userinfo')
         ->leftJoin('use_103.dbo.seniorOne103_pstat AS pstat', 'userinfo.newcid', '=', 'pstat.newcid')
 		->whereIn('shid', Session::get('user.work.sch_id'))

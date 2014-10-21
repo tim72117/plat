@@ -130,7 +130,6 @@ function Ctrl($scope, $http, $filter) {
         $scope.schools = [];
         $http({method: 'POST', url: 'ajax/schools', data:{} })
         .success(function(data, status, headers, config) {
-            console.log(data);
             $scope.schools = data.schools;
             $scope.page = 1;
             $scope.max = $scope.schools.length;

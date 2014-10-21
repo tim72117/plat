@@ -6,62 +6,22 @@ class FileActiver {
 	/**
 	 * @var array 2 dimension
 	 */
-	public $file_list;
-	public $intent_key;
-	public $doc_id;
-    public $file_id;
+	public $intent;
     
-    public static function active($intent_key) {
+    public function __construct($intent_key){
         
-        $intent = Session::get('file')[$intent_key];
+        $this->intent = Session::get('file')[$intent_key];
         
-        return $intent;        
     }
 	
-	public function accept($intent_key, $method = null) {			
-			
-		$this->intent_key = $intent_key;
-		$intent = Session::get('file')[$intent_key];
-		$this->doc_id = $intent['doc_id'];
-		$active = $intent['active'];
-		
-		if( is_null($this->doc_id) && $active=='upload' ){
-			$file = new $intent['fileClass'](0);
-            
-			$file_id = $file->$active(true);
-			
-			Session::flash('upload_file_id', $file_id);		
-
-			return true;
-		}
-		
-		if( $intent['fileClass']=='app\\library\\files\\v0\\CustomFile' ){
-			$file = new $intent['fileClass']($this->doc_id);
-			return $file->$active();
-		}
+	public function accept($method) {
         
-		if( $intent['fileClass']=='app\\library\\files\\v0\\RowsFile' ){
-            $file = new $intent['fileClass']($this->doc_id);
-			return $file->$method($intent['value']);
-		}
+        $active = $this->intent['active'];
+        
+        $file = new $this->intent['fileClass']($this->intent['app_id']);
+        
+        return $file->$method();
 		
 	}
-    
-    public function openFile($intent_key) {
-        
-        $this->intent_key = $intent_key;
-		$intent = Session::get('file')[$intent_key];
-		$this->file_id = $intent['file_id'];
-		$active = $intent['active'];
-        
-        $file = new $intent['fileClass']($this->file_id);
-		$file_fullPath = $file->$active(true);
-		return call_user_func_array('Response::download', $file_fullPath);
-    }
-	
-	public function get_post_url() {
-		return URL::to('user/doc/'.$this->intent_key);
-	}
-	
 	
 }

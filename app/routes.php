@@ -21,8 +21,8 @@ Route::get('user/auth/{project}', function($project){ return Redirect::to('proje
 //平台-------------------------------------------------------------------------------------------------------------------------------
 Route::group(array('before' => 'auth_logined'), function() {        
 
-    Route::get('app/{intent_key}/open', 'FileController@appGet');
-    Route::post('app/{intent_key}/open', 'FileController@appPost');
+    Route::get('app/{intent_key}', 'FileController@appGet');
+    Route::post('app/{intent_key}/{method}', 'FileController@appPost');
     Route::get('app/{intent_key}/ajax', 'FileController@appAjaxGet');
     Route::post('app/{intent_key}/ajax/{method}', 'FileController@appAjaxPost');
     
@@ -33,10 +33,8 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::get('app/{intent_key}/my/group', 'ShareController@getShared'); 
     Route::post('app/{intent_key}/share', 'ShareController@shareAppTo');
 
-    Route::get('file/{intent_key}/download', 'FileController@fileDownload');
-    Route::get('file/{intent_key}/{method}', 'FileController@appGet');
-    Route::get('file/{intent_key}/open', 'FileController@appGet'); 
-    Route::post('file/{intent_key}/{method}', 'FileController@fileOpen');
+    Route::post('file/{intent_key}/upload', 'FileController@appPost');    
+    Route::any('file/{intent_key}/{method}', 'FileController@fileOpen');
 
     Route::get('page/project/{context?}', array('before' => '', 'as' => 'project', 'uses' => 'PageController@project'));
     Route::post('page/project/{context?}', array('before' => 'csrf', 'uses' => 'PageController@project'));

@@ -51,7 +51,7 @@ class RequestFile extends Eloquent {
 
 class ShareFile extends Eloquent {
     
-    protected $table = 'share_file_to';
+    protected $table = 'docs';
     
     public $timestamps = true;
     
