@@ -33,9 +33,9 @@ class RowsFile extends CommFile {
 	 * @var string
 	 * @return
 	 */	
-	public function import($value) {
+	public function import() {
         
-        $requestFile = RequestFile::find($value['requested_file_id']);
+        //$requestFile = RequestFile::find($value['requested_file_id']);
         
         $shareFile = ShareFile::find($this->doc_id);   
         
@@ -77,6 +77,7 @@ class RowsFile extends CommFile {
 	public function get_columns() {	
 
         $shareFile = ShareFile::find($this->doc_id);
+        
         $file = $shareFile->isFile->file;
         
         $filesystem = new Filesystem;
@@ -108,7 +109,9 @@ class RowsFile extends CommFile {
     }	
     public function get_rows() {
         
-        $file = ShareFile::find($this->doc_id)->isFile->file;
+        $shareFile = ShareFile::find($this->doc_id);
+        
+        $file = $shareFile->isFile->file;
         
         $filesystem = new Filesystem;
         
@@ -118,7 +121,13 @@ class RowsFile extends CommFile {
         
         $table = $scheme->table;
         
-        $columns =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->paginate(50);//->forPage(2000, 20)->get();
+        if( $shareFile->created_by==Auth::user()->id ) {
+            $power = array_fetch($scheme->tables[0]->columns, 'name');
+        }else{
+            $power = json_decode($shareFile->power);
+        }        
+        
+        $columns =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
         
         return Response::json($columns);
     }	
