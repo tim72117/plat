@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, Session, Auth, Request, Apps, Requester, User, RequestFile;
+use DB, Session, Auth, Apps, RequestApp, RequestFile;
 class FileProvider {
     
     private $files = array();
@@ -50,11 +50,11 @@ class FileProvider {
 
         }
 
-        $myGroups = $this->user->inGroups->lists('id');
+        $inGroups = $this->user->inGroups->lists('id');
 
-        RequestFile::where(function($query) use($myGroups){
+        RequestFile::where(function($query) use($inGroups){
             
-            empty($myGroups) ? $query->whereNull('id') : $query->where('target', 'group')->whereIn('target_id', $myGroups);
+            empty($inGroups) ? $query->whereNull('id') : $query->where('target', 'group')->whereIn('target_id', $inGroups);
             
         })->get()->each(function($requestFile) use(&$packageDocs){
             
@@ -65,6 +65,21 @@ class FileProvider {
                 'actives' => [['link' => 'file/'.$intent_key.'/import', 'active' => 'import']]
             ]);
             
+        });
+        
+        RequestApp::where(function($query) use($inGroups){
+            
+            empty($inGroups) ? $query->whereNull('id') : $query->where('target', 'group')->whereIn('target_id', $inGroups);
+            
+        })->get()->each(function($requestApp) use(&$packageDocs){
+            
+            $fileClass = 'app\\library\\files\\v0\\CustomFile';
+            $intent_key = $this->app_intent_key('open', $requestApp->app_id, $fileClass);
+            array_push($packageDocs['request'], [
+                'title'   => $requestApp->description,
+                'actives' => [['link' => 'app/'.$intent_key.'/', 'active' => 'open']]
+            ]);
+
         });
                 
         return $packageDocs;
