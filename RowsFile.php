@@ -18,11 +18,10 @@ class RowsFile extends CommFile {
 		'import',
         'open',
 		'export',
-		'receives',
 		'get_columns',
         'get_rows',
         'get_import_rows',
-        'create',
+        'createTable',
 	);
 	
 	public static function get_intent() {

@@ -193,6 +193,7 @@ class CommFile {
 	}
 	
 	public function download() {
+        
 		$storage_path = storage_path().'/file_upload';
         
 		$file = Files::find($this->doc_id);
@@ -203,8 +204,6 @@ class CommFile {
             throw new FileFailedException;
         
         return Response::download($storage_path.'/'.$file_path, $file->title);
-        
-        return array('path'=>$storage_path.'/'.$file_path, 'name'=>$file->title);
 	}
 	
 	public function save_as() { }
