@@ -44,7 +44,8 @@ class RegisterController extends BaseController {
 			}
 		}else{
 			Session::flash('register', true);
-            if( $project=='use' ){
+            $project_info = DB::table('projects')->where('code', $project)->first();
+            if( $project_info->register ){
                 $context =  View::make('demo.'.$project.'.register');		
             }else{
                 $context =  View::make('demo.'.$project.'.register_stop');	
