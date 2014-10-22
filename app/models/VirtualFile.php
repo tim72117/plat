@@ -9,39 +9,13 @@ class Files extends Eloquent {
 
 }
 
-class Requester extends Eloquent {
-	
-	protected $table = 'auth_requester';
-	
-	public $timestamps = true;
-	
-	protected $fillable = array('preparer_doc_id', 'requester_doc_id', 'running');
-	
-	public function files() {
-		return $this->hasMany('Files','owner','preparer_doc_id');
-	}
-	
-	public function docPreparer() {
-		return $this->hasOne('Apps','id','preparer_doc_id');
-	}
-	
-	public function doc() {
-		return $this->belongsTo('Apps','preparer_doc_id','id');//未使用未測試
-	}
-	
-	public function docRequester() {
-		return $this->hasOne('Apps','id','requester_doc_id');
-	}
-	
-}
-
 class RequestFile extends Eloquent {
     
-    protected $table = 'files_requested';
+    protected $table = 'docs_requested';
     
     public $timestamps = true;
     
-    protected $fillable = array('share_file_id', 'target', 'target_id', 'created_by', 'description');
+    protected $fillable = array('file_id', 'target', 'target_id', 'created_by', 'description');
     
 	public function isFile() {
 		return $this->hasOne('Files', 'id', 'file_id');
@@ -60,24 +34,6 @@ class ShareFile extends Eloquent {
 	public function isFile() {
 		return $this->hasOne('Files', 'id', 'file_id');
 	}
-    
-}
-
-class ShareApp extends Eloquent {
-    
-    protected $table = 'share_app_to';
-    
-    public $timestamps = true;
-    
-    protected $fillable = array('target', 'target_id', 'from_doc_id', 'to_doc_id', 'active', 'from_doc_id');
-    
-    public function target($target) {
-        return $this->where('target', $target);
-    }
-    
-    public function isApp() {
-        return $this->hasOne('Apps', 'id', 'from_doc_id');
-    }
     
 }
 	
@@ -122,4 +78,36 @@ class Apps extends Eloquent {
 		return new Requester;
 	}
 
+}
+
+class RequestApp extends Eloquent {
+    
+    protected $table = 'apps_requested';
+    
+    public $timestamps = true;
+    
+    protected $fillable = array('app_id', 'target', 'target_id', 'created_by', 'description');
+    
+	public function isApp() {
+		return $this->hasOne('Apps', 'id', 'app_id');
+	}
+    
+}
+
+class ShareApp extends Eloquent {
+    
+    protected $table = 'share_app_to';
+    
+    public $timestamps = true;
+    
+    protected $fillable = array('target', 'target_id', 'from_doc_id', 'to_doc_id', 'active', 'from_doc_id');
+    
+    public function target($target) {
+        return $this->where('target', $target);
+    }
+    
+    public function isApp() {
+        return $this->hasOne('Apps', 'id', 'from_doc_id');
+    }
+    
 }
