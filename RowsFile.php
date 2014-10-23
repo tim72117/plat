@@ -107,9 +107,7 @@ class RowsFile extends CommFile {
         return Response::json($scheme->tables);
     }
     
-    private function get_scheme() {
-        
-        $shareFile = ShareFile::find($this->doc_id);
+    private function get_scheme($shareFile) {
         
         $file = $shareFile->isFile->file;
         
@@ -138,9 +136,9 @@ class RowsFile extends CommFile {
             $power = json_decode($shareFile->power);
         }        
         
-        $columns =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
+        $rows =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
         
-        return Response::json($columns);
+        return Response::json($rows);
     }	
     
     public function get_import_rows() {
@@ -177,7 +175,9 @@ class RowsFile extends CommFile {
 	
 	public function export() {
         
-        $scheme = $this->get_scheme();        
+        $shareFile = ShareFile::find($this->doc_id);
+        
+        $scheme = $this->get_scheme($shareFile);        
                 
         $database = $scheme->database;
         
@@ -189,14 +189,15 @@ class RowsFile extends CommFile {
             $power = json_decode($shareFile->power);
         }        
         
-        $columns =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
+        $rows =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
         
-        $students = [['a','b']];
+        
+        
         $output = '';
-        $output .= implode(",", array_keys((array)$students[0]));
+        $output .= implode(",", array_keys((array)$rows[0]));
         $output .=  "\n"; 
-        foreach($students as $student){               
-            $output .= iconv("UTF-8", "big5//IGNORE", implode(",", (array)$student));
+        foreach($rows as $row){               
+            $output .= iconv("UTF-8", "big5//IGNORE", implode(",", (array)$row));
             $output .= "\n";
         }
         $headers = array(
