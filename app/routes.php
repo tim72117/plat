@@ -27,14 +27,15 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::get('app/{intent_key}/ajax', 'FileController@appAjaxGet');
     Route::post('app/{intent_key}/ajax/{method}', 'FileController@appAjaxPost');
     
-    Route::post('share/files', 'ShareController@shareFileTo');    
-    Route::post('share/request/new', 'ShareController@requestTo');
+    Route::post('share/files', 'ShareController@shareFileTo');
+    Route::post('share/request/new', 'ShareController@requestFileTo');
     
     Route::get('my/group', 'ShareController@getMyGroup');
-    Route::get('app/{intent_key}/my/group', 'ShareController@getShared'); 
-    Route::post('app/{intent_key}/share', 'ShareController@shareAppTo');
+    Route::get('app/{intent_key}/my/group', 'ShareController@getShared');
+    Route::post('app/{intent_key}/share/group', 'ShareController@shareAppTo');
 
-    Route::post('file/{intent_key}/upload', 'FileController@appPost');    
+    Route::post('file/new/create', 'DocController@create');
+    Route::post('file/{intent_key}/upload', 'FileController@appPost');
     Route::any('file/{intent_key}/{method}', 'FileController@fileOpen');
 
     Route::get('page/project/{context?}', array('before' => '', 'as' => 'project', 'uses' => 'PageController@project'));
@@ -45,7 +46,7 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::get('page/{context}', 'PageController@page');
     Route::post('page/{context}', 'PageController@page');
     
-    Route::post('page/rowsDoc/create', 'DocController@create');
+    
 
     Route::get('auth/logout', array('as' => 'logout', 'uses' => 'UserController@logout'));
 

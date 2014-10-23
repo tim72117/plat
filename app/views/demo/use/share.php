@@ -234,7 +234,7 @@ function share($scope, $filter, $http) {
         //console.log($filter("filter")( $scope.groups, {selected:true}, function(actual, expected){ return 10; } ));
         $scope.wait = true;
         //if(false)
-        $http({method: 'POST', url: 'share', data:{groups: groups}})
+        $http({method: 'POST', url: 'share/group', data:{groups: groups}})
         .success(function(data, status, headers, config) {
             $scope.wait = false;
             console.log(data);
@@ -314,12 +314,12 @@ function share($scope, $filter, $http) {
     
     $scope.requestTo = function(requestDescription) {
         
-        var file_id = angular.element('[ng-controller=newTableController]').scope().tables.file_id;
+        var intent_key = angular.element('[ng-controller=newTableController]').scope().tables.intent_key;
         
         var groups = $scope.getSelectedGroup();
-        console.log({groups: groups, file_id: file_id, description: requestDescription});
+        console.log({groups: groups, intent_key: intent_key, description: requestDescription});
         //if(false)
-        $http({method: 'POST', url: '/share/request/new', data:{groups: groups, file_id: file_id, description: requestDescription}})
+        $http({method: 'POST', url: '/file/'+intent_key+'/requestTo', data:{groups: groups, description: requestDescription}})
         .success(function(data, status, headers, config) {
             $scope.shareClose();
             console.log(data);

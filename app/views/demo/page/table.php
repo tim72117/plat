@@ -20,7 +20,7 @@
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
             <div ng-click="tableNameBox=true" class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">存檔</div>
 <!--            <div ng-click="addRows()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>-->
-            <div ng-click="sendRequest()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;background-color: #559A10;color:#fff" ng-show="tables.file_id">發送請求</div>
+            <div ng-click="sendRequest()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;background-color: #559A10;color:#fff" ng-show="tables.intent_key">發送請求</div>
             <div ng-repeat="($tindex, table) in tables" class="page-tag top" ng-click="select(table)" ng-class="{selected:table.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
             <div ng-click="addTable()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (tables.length)*85+150 }}px"></div>
         </div>       
@@ -209,9 +209,9 @@ function newTableController($scope, $http, $filter) {
             tables.push({columns: table.columns});
         });
         //if(false)
-        $http({method: 'POST', url: '/page/rowsDoc/create', data:{tables: tables, title: $scope.tables.title} })
+        $http({method: 'POST', url: '/file/new/create', data:{tables: tables, title: $scope.tables.title} })
         .success(function(data, status, headers, config) { 
-            $scope.tables.file_id = data.file_id;
+            $scope.tables.intent_key = data.intent_key;
             console.log(data);         
         }).error(function(e){
             console.log(e);

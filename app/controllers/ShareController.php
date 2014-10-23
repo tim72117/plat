@@ -39,7 +39,7 @@ class ShareController extends BaseController {
     
     public function getShared() {
 
-        $shared = ShareApp::query()->where(['from_doc_id'=> $this->intent['app_id'], 'target' => 'group', 'active' => true])->lists('target_id');
+        $shared = ShareApp::query()->where(['app_id'=> $this->intent['app_id'], 'target' => 'group', 'active' => true])->lists('target_id');
         
         $myGroups = $this->myGroup()->toArray();
         
@@ -79,9 +79,9 @@ class ShareController extends BaseController {
     public function shareToTarget($target, $targetName) {
 
         if( isset($target['selected']) && $target['selected'] ){
-            ShareApp::updateOrCreate(['target' => $targetName, 'target_id' => $target['id'], 'from_doc_id' => $this->doc_id], ['active' => true]);
+            ShareApp::updateOrCreate(['target' => $targetName, 'target_id' => $target['id'], 'app_id' => $this->intent['app_id']], ['active' => true]);
         }else{
-            $share = ShareApp::firstOrNew(['target' => $targetName, 'target_id' => $target['id'], 'from_doc_id' => $this->doc_id]);
+            $share = ShareApp::firstOrNew(['target' => $targetName, 'target_id' => $target['id'], 'app_id' => $this->intent['app_id']]);
             $share->exists && $share->update(['active' => false]);
         }
         
@@ -119,28 +119,6 @@ class ShareController extends BaseController {
         }
         
         return $input;
-    }
-    
-    public function requestTo() {
-        
-        $input = Input::only('groups', 'file_id', 'description');
-        $user = Auth::user();
-        $myGroups = $user->groups;
-        $file = ShareFile::find($input['file_id'], ['created_by']);
-        
-        if( $file && $file->created_by == $user->id ) {
-            
-            foreach($input['groups'] as $group) {
-                
-                if( isset($group['selected']) && $group['selected'] && $myGroups->contains($group['id']) ) {
-                    RequestFile::updateOrCreate(['target' => 'group', 'target_id' => $group['id'], 'share_file_id' => $input['file_id'], 'created_by' => $user->id], ['description' => $input['description']]);
-                }
-                
-            }
-            
-        }
-
-        return Response::json(Input::all());
     }
     
     //----------------------------------------------------------------------------------------------------------------------unuse

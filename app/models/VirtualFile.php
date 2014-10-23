@@ -15,10 +15,10 @@ class RequestFile extends Eloquent {
     
     public $timestamps = true;
     
-    protected $fillable = array('file_id', 'target', 'target_id', 'created_by', 'description');
+    protected $fillable = array('doc_id', 'target', 'target_id', 'created_by', 'description');
     
-	public function isFile() {
-		return $this->hasOne('Files', 'id', 'file_id');
+	public function isDoc() {
+		return $this->hasOne('ShareFile', 'id', 'doc_id');
 	}
     
 }
@@ -57,25 +57,8 @@ class Apps extends Eloquent {
 		return $this->hasOne('Files', 'id', 'file_id');
 	}
 	
-	public function requester() {
-		return $this->hasOne('Requester','preparer_doc_id');
-	}
-	
-	public function preparers() {
-		return $this->hasMany('Requester','requester_doc_id');
-	}
-	
 	public function scopeFile($query) {
 		return $query->leftJoin('files','docs.file_id','=','files.id');
-	}
-	
-	public function docPreparer() {
-		return $this->belongsToMany('Apps', 'auth_requester', 'requester_doc_id', 'preparer_doc_id');//未使用未測試
-	}
-	
-	public static function getRequester() {
-
-		return new Requester;
 	}
 
 }
@@ -96,18 +79,18 @@ class RequestApp extends Eloquent {
 
 class ShareApp extends Eloquent {
     
-    protected $table = 'share_app_to';
+    protected $table = 'apps_shared';
     
     public $timestamps = true;
     
-    protected $fillable = array('target', 'target_id', 'from_doc_id', 'to_doc_id', 'active', 'from_doc_id');
+    protected $fillable = array('target', 'target_id', 'app_id', 'active');
     
     public function target($target) {
         return $this->where('target', $target);
     }
     
     public function isApp() {
-        return $this->hasOne('Apps', 'id', 'from_doc_id');
+        return $this->hasOne('Apps', 'id', 'app_id');
     }
     
 }

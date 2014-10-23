@@ -62,7 +62,7 @@ function menu($scope, $filter, $http) {
                     <a href="/page/files" style="display: block;color:inherit">我的檔案</a>
                 </div>                
             </div>
-            <? if( Request::is('app/*') ){ ?>
+            <? if( Auth::user()->id==1 && Request::is('app/*') ){ ?>
             <div style="position:absolute;left:250px">
                 <div style="width:80px;text-align: center;box-sizing: border-box" class="button-share" ng-click="getGroupForApp()">分享</div>
             </div>

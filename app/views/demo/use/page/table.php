@@ -10,7 +10,8 @@
         </div>-->
         
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
-            <div ng-click="addRows()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>
+<!--            <div ng-click="addRows()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>-->
+            <div ng-click="download()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">下載</div>
             <div ng-repeat="($tindex, table) in tables" class="page-tag top" ng-click="select(table)" ng-class="{selected:table.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
             <div ng-click="addTable()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (tables.length)*85+150 }}px"></div>
         </div>       
@@ -123,13 +124,6 @@
 }
 </style>
 
-<?
-if( isset($fileAcitver) ){
-    $fileProvider = app\library\files\v0\FileProvider::make();
-    $intent_key_get_columns = $fileProvider->get_intent_key_by_active($fileAcitver->intent_key, 'get_columns');
-    $intent_key_get_rows = $fileProvider->get_intent_key_by_active($fileAcitver->intent_key, 'get_rows');
-}
-?>
 <script>
 angular.module('app', [])
 .filter('startFrom', function() {
@@ -182,6 +176,18 @@ function newTableController($scope, $http, $filter) {
         console.log(e);
     });
     
+    $scope.download = function(){
+        jQuery.fileDownload('export', {
+            httpMethod: "POST",
+            failCallback: function (responseHtml, url) { console.log(responseHtml); }
+        }); 
+        $http({method: 'POST', url: 'export', data:{} })
+        .success(function(data, status, headers, config) {
+        }).error(function(e){
+            console.log(e);
+        }); 
+    };
+    
     $scope.update = function(){
         //console.log($scope.page);       
         var table = $filter('filter')($scope.tables, {selected: true})[0];
@@ -191,7 +197,7 @@ function newTableController($scope, $http, $filter) {
         }
         
         $http({method: 'POST', url: 'get_rows?page='+($scope.page), data:{} })
-        .success(function(data, status, headers, config) {            
+        .success(function(data, status, headers, config) {
             $scope.pages = data.last_page;
             $scope.page = data.current_page;
             var table = $filter('filter')($scope.tables, {selected: true})[0];
@@ -199,7 +205,7 @@ function newTableController($scope, $http, $filter) {
             table.rows = [];
             angular.forEach(data.data, function(row, index){
                 table.rows.push(row);
-            });            
+            });
             
             //mbScrollbar.recalculate($scope);
         }).error(function(e){
@@ -210,3 +216,4 @@ function newTableController($scope, $http, $filter) {
     
 }
 </script>
+<script src="/js/jquery.fileDownload.js"></script>

@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Response, ShareFile, RequestFile, DOMDocument, Auth, Illuminate\Filesystem\Filesystem;
+use DB, View, Response, ShareFile, RequestFile, Auth, Input, Illuminate\Filesystem\Filesystem;
 
 class RowsFile extends CommFile {
 	
@@ -16,12 +16,13 @@ class RowsFile extends CommFile {
 	
 	public static $intent = array(
 		'import',
-        'open',
-		'export',
+        'open',		
 		'get_columns',
         'get_rows',
         'get_import_rows',
         'createTable',
+        'requestTo',
+        'export',
 	);
 	
 	public static function get_intent() {
@@ -49,7 +50,8 @@ class RowsFile extends CommFile {
         $scheme = (object)['database'=>'', 'tables'=>$tables];
         
         foreach($scheme->tables as $index => $table) {
-            $scheme->tables[$index]->name;
+            //$scheme->tables[$index]->name;
+            //--------待處理
         }
         
         $name = hash('md5', json_encode($scheme));       
@@ -67,8 +69,6 @@ class RowsFile extends CommFile {
         return 'demo.use.page.table';
         
     }
-	
-	public function export() {	}
 	
 	/**
 	 * @return array
@@ -105,7 +105,19 @@ class RowsFile extends CommFile {
 
         //var_dump(DB::getQueryLog());
         return Response::json($scheme->tables);
-    }	
+    }
+    
+    private function get_scheme() {
+        
+        $shareFile = ShareFile::find($this->doc_id);
+        
+        $file = $shareFile->isFile->file;
+        
+        $filesystem = new Filesystem;
+        
+        return json_decode($filesystem->get( storage_path() . '/file_upload/' . $file ));
+    }
+    
     public function get_rows() {
         
         $shareFile = ShareFile::find($this->doc_id);
@@ -138,6 +150,63 @@ class RowsFile extends CommFile {
         $columns =  DB::connection('sqlsrv')->table('ques_admin.dbo.contact')->paginate(50);//->forPage(2000, 20)->get();
         
         return Response::json($columns);
+    }
+    
+    public function requestTo() {
+        
+        $input = Input::only('groups', 'file_id', 'description');
+        $user = Auth::user();
+        $myGroups = $user->groups;
+        $file = ShareFile::find($this->doc_id);
+        
+        if( $file && $file->created_by == $user->id ) {
+            
+            foreach($input['groups'] as $group) {
+                
+                if( isset($group['selected']) && $group['selected'] && $myGroups->contains($group['id']) ) {
+                    RequestFile::updateOrCreate(['target' => 'group', 'target_id' => $group['id'], 'doc_id' => $this->doc_id, 'created_by' => $user->id], ['description' => $input['description']]);
+                }
+                
+            }
+            
+        }
+
+        return Response::json(Input::all());
+    }
+    
+	
+	public function export() {
+        
+        $scheme = $this->get_scheme();        
+                
+        $database = $scheme->database;
+        
+        $table = $scheme->table;
+        
+        if( $shareFile->created_by==Auth::user()->id ) {
+            $power = array_fetch($scheme->tables[0]->columns, 'name');
+        }else{
+            $power = json_decode($shareFile->power);
+        }        
+        
+        $columns =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
+        
+        $students = [['a','b']];
+        $output = '';
+        $output .= implode(",", array_keys((array)$students[0]));
+        $output .=  "\n"; 
+        foreach($students as $student){               
+            $output .= iconv("UTF-8", "big5//IGNORE", implode(",", (array)$student));
+            $output .= "\n";
+        }
+        $headers = array(
+            //'Content-Encoding' => 'UTF-8',
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="ExportFileName.csv"',
+        );
+
+        return Response::make($output, 200, $headers);
+        
     }
 	
 }

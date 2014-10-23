@@ -28,9 +28,13 @@ class DocController extends BaseController {
         
         $rowsFile = new app\library\files\v0\RowsFile;
         
-        $file_id = $rowsFile->createTable($tables, $title);
+        $shareFile_id = $rowsFile->createTable($tables, $title);
         
-        return Response::json(['file_id'=>$file_id]);
+        $fileProvider = app\library\files\v0\FileProvider::make();        
+        
+        $intent_key = $fileProvider->doc_intent_key('import', $shareFile_id, 'app\\library\\files\\v0\\RowsFile');
+        
+        return Response::json(['intent_key'=>$intent_key]);
         
 	}
 
