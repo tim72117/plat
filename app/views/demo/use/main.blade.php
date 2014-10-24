@@ -14,6 +14,7 @@ $project = DB::table('projects')->where('code', $user->getProject())->first();
 <!--<script src="/js/angular-animate.min.js"></script>-->
 
 <link rel="stylesheet" href="/demo/use/css/use100_content.css" />
+<link rel="stylesheet" href="/css/main.css" />
 
 <script type="text/javascript">
 $(document).ready(function(){	//選單功能
@@ -87,10 +88,10 @@ function main($scope, $filter, $http) {
         </div>
 	</div>
 	
-    <div class="border-box" style="height:100%;width:100%;background-color: #fff;padding-top:30px" ng-controller="main">
+    <div class="border-box" style="height:100%;width:100%;background-color: #fff;position: relative" ng-controller="main">
 		
-		<div style="width: 350px;height:100%;border-right: 1px solid #aaa;overflow-y: hidden;float:left;position: relative" ng-style="{left:menuLeft}">
-			<div style="background-color: #fff;overflow-y: auto;position: absolute;top:0;right:0;bottom:30px;left:0">
+		<div style="width: 350px;border-right: 1px solid #aaa;overflow-y: hidden;box-sizing: border-box;top:30px" class="full-auto" ng-style="{left:menuLeft}">
+			<div style="background-color: #fff;overflow-y: auto;bottom:30px" class="full-auto">
 
 				<h2>【 <?=$project->name?> 】</h2>			
 				
@@ -137,16 +138,16 @@ function main($scope, $filter, $http) {
 				</div>
 				
 			</div>
-            <div style="height:30px;line-height: 30px;position: absolute;right:0;bottom:0;left:0;border-top: 1px solid #ddd;text-align: right;cursor: pointer" ng-click="close()">&#60;&#60</div>
+            <div style="height:30px;line-height: 30px;border-top: 1px solid #ddd;text-align: right;cursor: pointer;top: auto" class="full-auto" ng-click="close()">&#60;&#60</div>
 		</div>
 
-		<div style="height: 100%;overflow-y: hidden;margin:0; position: relative" class="context" ng-style="{left:menuLeft}" ng-cloak>
+		<div style="margin:0;top:30px" class="full-auto context" ng-style="{left:350+menuLeft}" ng-cloak>
             
-            <div style="width:500px;position: absolute;top:-100%;background-color: #fff;left:0;height: 95%;border: 1px solid #aaa;font-size:16px;margin-left:-1px;overflow: auto;z-index: 9" ng-style="{width:advanced_status.boxWidth}" class="authorize">
+            <div style="width:500px;position: absolute;top:-100%;background-color: #fff;left:-1px;height: 95%;border: 1px solid #aaa;font-size:16px;overflow: auto;z-index: 9" ng-style="{width:advanced_status.boxWidth}" class="authorize">
                 <div style="margin:20px;position: absolute;top:0;bottom: 0;left:0;right:0" ng-switch on="shareBox.type"><?=$share?></div>
             </div>
             
-			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:16px;text-align: left;margin-top:0">		              
+			<div style="overflow: auto;background-color: #fff;font-size:16px;text-align: left" class="full-auto">		              
                 <div style="margin:10px"><?=$context?></div>
 			</div>		
             
