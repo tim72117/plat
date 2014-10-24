@@ -31,9 +31,15 @@ $(document).ready(function(){	//選單功能
     
    
 });
-angular.module('myapp', []).controller('menu', menu);
+angular.module('myapp', []).controller('menu', menu).controller('main', main);
 function menu($scope, $filter, $http) {
     
+}
+function main($scope, $filter, $http) {
+    $scope.menuLeft = 0;
+    $scope.close = function() {
+        $scope.menuLeft = $scope.menuLeft===0 ? -300 : 0;
+    };
 }
 </script>
 @stop
@@ -54,8 +60,7 @@ function menu($scope, $filter, $http) {
                     <div style="width:120px;text-align: center;position:absolute;height:40px;line-height: 40px;box-sizing: border-box;top:68px" class="menu-item" ng-init="show=true" ng-hide="show">
                         <div><a href="/editor/main">問卷</a></div>
                     </div>
-                </div>
-                
+                </div>                
             </div>
             <div style="position:absolute;left:500px">
                 <div style="width:100px;text-align: center;box-sizing: border-box" class="button-share">
@@ -82,10 +87,10 @@ function menu($scope, $filter, $http) {
         </div>
 	</div>
 	
-	<div class="border-box" style="height:100%;width:100%;background-color: #fff;padding-top:30px">
+    <div class="border-box" style="height:100%;width:100%;background-color: #fff;padding-top:30px" ng-controller="main">
 		
-		<div style="height:100%;overflow-y: hidden;float:left">
-			<div style="width: 350px;height:100%;background-color: #fff;border-right: 1px solid #aaa;overflow-y: auto;margin-top:0">
+		<div style="width: 350px;height:100%;border-right: 1px solid #aaa;overflow-y: hidden;float:left;position: relative" ng-style="{left:menuLeft}">
+			<div style="background-color: #fff;overflow-y: auto;position: absolute;top:0;right:0;bottom:30px;left:0">
 
 				<h2>【 <?=$project->name?> 】</h2>			
 				
@@ -132,9 +137,10 @@ function menu($scope, $filter, $http) {
 				</div>
 				
 			</div>
+            <div style="height:30px;line-height: 30px;position: absolute;right:0;bottom:0;left:0;border-top: 1px solid #ddd;text-align: right;cursor: pointer" ng-click="close()">&#60;&#60</div>
 		</div>
 
-		<div style="height: 100%;overflow-y: hidden;margin:0 0 0 200px; position: relative" class="context" ng-cloak>
+		<div style="height: 100%;overflow-y: hidden;margin:0; position: relative" class="context" ng-style="{left:menuLeft}" ng-cloak>
             
             <div style="width:500px;position: absolute;top:-100%;background-color: #fff;left:0;height: 95%;border: 1px solid #aaa;font-size:16px;margin-left:-1px;overflow: auto;z-index: 9" ng-style="{width:advanced_status.boxWidth}" class="authorize">
                 <div style="margin:20px;position: absolute;top:0;bottom: 0;left:0;right:0" ng-switch on="shareBox.type"><?=$share?></div>
