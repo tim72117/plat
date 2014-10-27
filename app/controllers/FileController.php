@@ -59,7 +59,7 @@ class FileController extends BaseController {
         
         $file = Apps::find(Session::get('file')[$intent_key]['app_id']);
 
-        $fileLoader = new Illuminate\Config\FileLoader(new Filesystem, app_path().'/views/demo/use/controller');
+        $fileLoader = new Illuminate\Config\FileLoader(new Filesystem, app_path().'/views/demo');
         
         $ajax = new Illuminate\Config\Repository($fileLoader, '');
 
