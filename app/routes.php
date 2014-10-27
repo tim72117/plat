@@ -31,7 +31,7 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::post('share/request/new', 'ShareController@requestFileTo');
     
     Route::get('my/group', 'ShareController@getMyGroup');
-    Route::get('app/{intent_key}/my/group', 'ShareController@getShared');
+    Route::get('app/{intent_key}/my/group', 'ShareController@getSharedApp');
     Route::post('app/{intent_key}/share/group', 'ShareController@shareAppTo');
 
     Route::post('file/new/create', 'DocController@create');

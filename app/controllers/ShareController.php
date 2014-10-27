@@ -37,9 +37,9 @@ class ShareController extends BaseController {
         return $groups;
     }
     
-    public function getShared() {
+    public function getSharedApp() {
 
-        $shared = ShareApp::query()->where(['app_id'=> $this->intent['app_id'], 'target' => 'group', 'active' => true])->lists('target_id');
+        $shared = ShareApp::where(['app_id'=> $this->intent['app_id'], 'target' => 'group', 'active' => true])->lists('target_id');
         
         $myGroups = $this->myGroup()->toArray();
         

@@ -49,10 +49,10 @@
 <div style="position: absolute;background-color: #fff;top:0;bottom: 0;left:0;right:0" ng-switch-when="share">
     <div style="position: absolute;top:10px;bottom: 80px;width:220px;overflow-y: auto;margin:0;padding:0;left:5px">
         <div style="border:1px solid #999;margin:0;padding:5px;box-sizing: border-box;background-color: #eee">群組</div>
-        <div ng-repeat="group in groups" style="border:1px solid #999;margin-top:-1px;box-sizing: border-box" class="group-tag" ng-class="$index==group_selected ? 'selected': ''">
+        <div ng-repeat="group in groups" style="border:1px solid #999;margin-top:-1px;box-sizing: border-box" class="group-tag" ng-class="{selected:group.open}">
             <div class="dbclick-tag">
-                <div ng-click="getUsers($index)" class="load-tag" style="padding:5px">{{ group.description }}<span style="color:#aaa">({{ group.users.length }})</span></div>
-                <div ng-click="getUsers($index);select(group);selectAll(group)" class="share-btn-all" ng-class="{selected: group.selected}"></div>                
+                <div ng-click="getUsers(group)" class="load-tag" style="padding:5px">{{ group.description }}<span style="color:#aaa">({{ group.users.length }})</span></div>
+                <div ng-click="getUsers(group);select(group);selectAll(group)" class="share-btn-all" ng-class="{selected: group.selected}"></div>                
             </div>
         </div>
     </div>  
@@ -105,7 +105,6 @@ function share($scope, $filter, $http) {
     $scope.set_groups = {};
     $scope.shareds = [];
     $scope.users = [];
-    $scope.group_selected = null;
     $scope.share_type = 'share';
     $scope.shareBox = {type: 'share'};
     $scope.group_name = '';
@@ -115,9 +114,9 @@ function share($scope, $filter, $http) {
     $scope.files = [];
     
     $scope.advanced = function() {
-        $scope.advanced_status.show = true;        
+        $scope.advanced_status.show = true;
         $scope.getAdvanced();
-    };    
+    };
     
     $scope.getAdvanced = function() {
         var rowsFiles = $filter('filter')($scope.files, {type: 5});
@@ -203,7 +202,7 @@ function share($scope, $filter, $http) {
     };
     
     $scope.shareGroup = function() {
-        $scope.groups[$scope.group_selected].selected = false;
+        $filter('filter')($scope.groups, {open: true})[0].selected = false;
     };
     
     $scope.selectAll = function(group) {
@@ -213,9 +212,11 @@ function share($scope, $filter, $http) {
         }
     };    
     
-    $scope.getUsers = function(index) {
-        var group = $scope.groups[index];
-        $scope.group_selected = index;
+    $scope.getUsers = function(group) {
+        angular.forEach($filter('filter')($scope.groups, {open: true}), function(group){
+            group.open = false;
+        });
+        group.open = true;
         if( group.users.length>0 ){
             $scope.users = group.users;            
             $scope.group_description = group.description;
@@ -273,28 +274,7 @@ function share($scope, $filter, $http) {
             groups.push({id:group.id, selected:group.selected, users:users});
         });  
         return groups;
-    };
-    
-    $scope.share = function(user_id, shared) {
-        console.log(shared);
-        $http({method: 'POST', url: '<?//=asset( 'share/' . value($intent_key) . '/share' )?>', data:{user_id: user_id, shared: shared}})
-        .success(function(data, status, headers, config) {
-            shared.shared_id = data.share_id;
-        })
-        .error(function(e){
-            console.log(e);
-        });
-    };
-    
-    $scope.setDefalut = function() {
-        $http({method: 'POST', url: '<?//=asset( 'share/' . value($intent_key) )?>', data:{groups: $scope.set_groups}})
-        .success(function(data, status, headers, config) {
-            console.log(data);
-        })
-        .error(function(e){
-            console.log(e);
-        });
-    };    
+    };   
         
     $scope.getGroupForRequest = function() {
         

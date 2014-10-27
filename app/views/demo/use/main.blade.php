@@ -34,7 +34,12 @@ $(document).ready(function(){	//選單功能
 });
 angular.module('myapp', []).controller('menu', menu).controller('main', main);
 function menu($scope, $filter, $http) {
-    
+    $scope.getGroupForApp = function() {
+        angular.element('[ng-controller=share]').scope().getGroupForApp();
+    };
+    $scope.getSharedFile = function() {
+        angular.element('[ng-controller=share]').scope().getSharedFile();
+    };
 }
 function main($scope, $filter, $http) {
     $scope.menuLeft = 0;
@@ -46,19 +51,19 @@ function main($scope, $filter, $http) {
 @stop
 
 @section('body')
-<div style="width: 100%;height: 100%;max-height:100%" ng-controller="share">
+<div style="width: 100%;height: 100%;max-height:100%">
 
 	<div style="width:100%;height: 30px;position: absolute;z-index:10;background-color: #fff">
 		<div style="background-color: #ffffff;width:100%;height:0px"></div>
-		<div style="background-color: #458A00;width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #ddd;color:#fff" align="right">			
+		<div style="background-color: #458A00;width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #ddd;color:#fff" align="right" ng-controller="menu">			
             <? if( Auth::user()->id<20 ){ ?>
-            <div style="position:absolute;left:370px;z-index:3000" ng-controller="menu" ng-cloak>
+            <div style="position:absolute;left:370px;z-index:3000" ng-cloak>
                 <div style="position:absolute;left:0">
                     <div style="width:120px;text-align: center;box-sizing: border-box" class="menu" ng-click="show=!show">建立檔案</div>
-                    <div style="width:120px;text-align: center;position:absolute;height:40px;line-height: 40px;box-sizing: border-box;top:29px" class="menu-item" ng-init="show=true" ng-hide="show">
+                    <div style="width:120px;text-align: center;position:absolute;height:40px;line-height: 40px;box-sizing: border-box;top:29px" class="menu-item" ng-show="show">
                         <div><a href="/page/table">rawdata</a></div>
                     </div>
-                    <div style="width:120px;text-align: center;position:absolute;height:40px;line-height: 40px;box-sizing: border-box;top:68px" class="menu-item" ng-init="show=true" ng-hide="show">
+                    <div style="width:120px;text-align: center;position:absolute;height:40px;line-height: 40px;box-sizing: border-box;top:68px" class="menu-item" ng-show="show">
                         <div><a href="/editor/main">問卷</a></div>
                     </div>
                 </div>                
@@ -144,7 +149,7 @@ function main($scope, $filter, $http) {
 		<div style="margin:0;top:30px" class="full-auto context" ng-style="{left:350+menuLeft}" ng-cloak>
             
             <div style="width:500px;position: absolute;top:-100%;background-color: #fff;left:-1px;height: 95%;border: 1px solid #aaa;font-size:16px;overflow: auto;z-index: 9" ng-style="{width:advanced_status.boxWidth}" class="authorize">
-                <div style="margin:20px;position: absolute;top:0;bottom: 0;left:0;right:0" ng-switch on="shareBox.type"><?=$share?></div>
+                <div style="margin:20px;position: absolute;top:0;bottom: 0;left:0;right:0" ng-controller="share" ng-switch on="shareBox.type"><?=$share?></div>
             </div>
             
 			<div style="overflow: auto;background-color: #fff;font-size:16px;text-align: left" class="full-auto">		              
