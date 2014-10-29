@@ -3,7 +3,7 @@
 
 <div ng-app="app">
 
-    <div ng-controller="newTableController" ng-switch on="tool" style="border: 0px solid #999;position: absolute;top: 10px;bottom: 10px;left: 10px; right: 20px">   
+    <div ng-controller="newTableController" ng-switch on="tool" style="border: 0px solid #999;position: absolute;top: 10px;bottom: 10px;left: 10px; right: 20px" ng-paste="paste($event)">   
         
 <!--        <div style="">
             <div style="border: 1px solid #999;width:80px;text-align: center">存檔</div>
@@ -33,6 +33,11 @@
                     <div class="column" style="width: 30px;left: 2px;top:{{ ($rindex+1)*29+2 }}px;text-align: center">{{ $rindex+1 }}</div>   
                     <div class="column" ng-repeat="($cindex, column) in table.columns" style="width: 80px;left: {{ ($cindex+1)*79-48 }}px;top:{{ ($rindex+1)*29+2 }}px;padding-left:2px" contenteditable="true">{{ row[column.name] }}</div>
                 </div>
+                <div style="height:30px;position: absolute;left:2px" ng-style="{width: table.columns.length*79+30, top:(table.rows.length+1)*29+2}" class="newRow" ng-blur="cancelNewRow()">
+                    <div class="column" style="width: 30px;left: 0;top:0;visibility: visible" ng-mousedown="selectNewRow()"></div>
+                    <div class="column" ng-repeat="column in table.columns" style="width: 80px;top:0;padding-left:2px;visibility: visible" ng-style="{left:($index+1)*79-48-2}"></div> 
+                </div>
+                <div style="height:30px;position: absolute;left:2px" ng-style="{width: table.columns.length*79+30, top:(table.rows.length+1)*29+2}" class="newRow" contenteditable="true" ng-blur="cancelNewRow()"></div>
             </div>
         </div>
 
@@ -135,6 +140,14 @@
     background-color: rgba(200,200,200,0.1);   
     border-color: #888;
 }
+.newRow {
+    visibility: hidden;
+    cursor: pointer;
+}
+.newRow.selected {
+    visibility: visible;
+    background-color: rgba(0,0,255,0.1);
+}
 </style>
 
 <?
@@ -230,7 +243,7 @@ function newTableController($scope, $http, $filter) {
         console.log(rows);
     };
        
-    $scope.update = function(){
+    $scope.update = function() {
         console.log($scope.page);  
         
         var table = $filter('filter')($scope.tables, {selected: true})[0];
@@ -253,8 +266,22 @@ function newTableController($scope, $http, $filter) {
         });
     };
     
-    $scope.sendRequest = function(){
+    $scope.sendRequest = function() {
         angular.element('[ng-controller=share]').scope().getGroupForRequest();
+    };
+    
+    $scope.paste = function(event) {
+        console.log(event.originalEvent.clipboardData);
+        //event.preventDefault();
+        
+    };    
+    
+    $scope.selectNewRow = function() {
+        angular.element('.newRow').addClass('selected');
+    };
+    
+    $scope.cancelNewRow = function() {
+        angular.element('.newRow').removeClass('selected');
     };
     
 }
