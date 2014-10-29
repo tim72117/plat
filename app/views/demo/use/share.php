@@ -462,25 +462,6 @@ function share($scope, $filter, $http) {
     box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
-.btn {    
-    cursor: pointer;    
-}
-.btn.box {
-    border: 1px solid #ccc;
-}
-.btn.box:hover {
-    border: 1px solid #aaa;
-}
-.btn.default {
-    position: absolute;
-    top: 5px;
-    height: 30px;
-    width: 100px;
-    box-sizing: border-box;
-    text-align: center;
-    line-height: 30px
-}
-
 .green {
     background-color: rgba(69,170,0,0.5);    
     color: #fff;

@@ -15,6 +15,7 @@ $project = DB::table('projects')->where('code', $user->getProject())->first();
 
 <link rel="stylesheet" href="/demo/use/css/use100_content.css" />
 <link rel="stylesheet" href="/css/main.css" />
+<link rel="stylesheet" href="/css/ui.css" />
 
 <script type="text/javascript">
 $(document).ready(function(){	//選單功能
