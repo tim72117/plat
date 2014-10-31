@@ -31,13 +31,13 @@
                 <div class="column" ng-repeat="column in table.columns" style="width: 80px;left: {{ ($index+1)*79-48 }}px;top:2px;padding-left:2px">{{ column.name }}</div> 
                 <div ng-repeat="($rindex, row) in table.rows | startFrom:(page-1)*limit | limitTo:limit">
                     <div class="column" style="width: 30px;left: 2px;top:{{ ($rindex+1)*29+2 }}px;text-align: center">{{ $rindex+1 }}</div>   
-                    <div class="column" ng-repeat="($cindex, column) in table.columns" style="width: 80px;left: {{ ($cindex+1)*79-48 }}px;top:{{ ($rindex+1)*29+2 }}px;padding-left:2px" contenteditable="true">{{ row[column.name] }}</div>
+                    <div class="column" ng-repeat="($cindex, column) in table.columns" style="width: 80px;left: {{ ($cindex+1)*79-48 }}px;top:{{ ($rindex+1)*29+2 }}px;padding-left:2px">{{ row[column.name] }}</div>
                 </div>
-                <div style="height:30px;position: absolute;left:2px" ng-style="{width: table.columns.length*79+30, top:(table.rows.length+1)*29+2}" class="newRow" ng-blur="cancelNewRow()">
-                    <div class="column" style="width: 30px;left: 0;top:0;visibility: visible" ng-mousedown="selectNewRow()"></div>
-                    <div class="column" ng-repeat="column in table.columns" style="width: 80px;top:0;padding-left:2px;visibility: visible" ng-style="{left:($index+1)*79-48-2}"></div> 
+                <div style="height:30px;position: absolute;left:2px" ng-style="{width: table.columns.length*79+30, top:(table.rows.length+1)*29+2}" class="newRow" ng-blur="cancelNewRow1()">
+                    <div class="column" style="width: 30px;left: 0;top:0" ng-mousedown="selectNewRow()"></div>
+                    <div class="column" ng-repeat="column in table.columns" style="width: 80px;top:0;padding-left:2px" ng-style="{left:($index+1)*79-48-2}" contenteditable="true"></div> 
                 </div>
-                <div style="height:30px;position: absolute;left:2px" ng-style="{width: table.columns.length*79+30, top:(table.rows.length+1)*29+2}" class="newRow" contenteditable="true" ng-blur="cancelNewRow()"></div>
+                <div style="height:30px;position: absolute;left:2px;visibility: hidden" ng-style="{width: table.columns.length*79+30, top:(table.rows.length+1)*29+2}" class="" contenteditable="true"></div>
             </div>
         </div>
 
@@ -85,7 +85,7 @@
     font-size: 13px;
     line-height: 30px;
     height: 30px;
-    overflow: hidden
+    overflow: hidden;
 }    
 .page-tag {
     position: absolute;
@@ -141,11 +141,9 @@
     border-color: #888;
 }
 .newRow {
-    visibility: hidden;
     cursor: pointer;
 }
 .newRow.selected {
-    visibility: visible;
     background-color: rgba(0,0,255,0.1);
 }
 </style>
@@ -164,21 +162,21 @@ angular.module('app', [])
 }).controller('newTableController', newTableController);
 
 function newTableController($scope, $http, $filter) {
-    $scope.tool = 2;
+    $scope.tool = 1;
     $scope.page = 1;
     $scope.limit = 40;
     $scope.newColumn = {};
-    $scope.tables = [{selected : true, columns: [], rows: []}];
+    $scope.tables = [];
     $scope.rows = [];
-    for(i=0;i<0;i++){
+    for(i=0;i<1;i++){
         var rows = [];
         var columns = [];
-        for(j=1;j<i*10+10;j++){            
-            rows.push(j);
+        for(j=1;j<10;j++){
+            rows.push({'column':1});
             columns.push({name: 'column'+j});
         }
         
-        $scope.tables.push({columns: columns, rows: rows});
+        $scope.tables.push({selected: true, columns: columns, rows: rows});
     }
     
     $scope.addTable = function() {

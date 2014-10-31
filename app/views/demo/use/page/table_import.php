@@ -10,9 +10,9 @@
         </div>-->
         
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
-            <input type="file" id="upload-file" style="display:none" />
+            <input type="file" id="upload-file" style="display:none" ng-file-select="onUploadFile($files)" />
             <label for="upload-file">
-                <div ng-click="addRows()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>
+                <div class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>
             </label>    
             <div ng-repeat="($tindex, table) in tables" class="page-tag top" ng-click="select(table)" ng-class="{selected:table.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
 <!--            <div ng-click="addTable()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (tables.length)*85+150 }}px"></div>-->
@@ -126,9 +126,9 @@
 }
 </style>
 
-
+<script src="/js/angular-file-upload.min.js"></script>
 <script>
-angular.module('app', [])
+angular.module('app', ['angularFileUpload'])
 .filter('startFrom', function() {
     return function(input, start) {   
         if( angular.isArray(input) ){
@@ -137,7 +137,7 @@ angular.module('app', [])
     };
 }).controller('newTableController', newTableController);
 
-function newTableController($scope, $http, $filter) {
+function newTableController($scope, $http, $filter, $upload) {
     $scope.tool = 1;
     $scope.page = 1;
     $scope.limit = 40;
@@ -205,6 +205,26 @@ function newTableController($scope, $http, $filter) {
         });
     };
     
+    $scope.onUploadFile = function(files) {
+        console.log(files[0]);
+        $scope.upload = $upload.upload({
+            url: 'uploadRows', //upload.php script, node.js route, or servlet url
+            //method: 'POST' or 'PUT',
+            //headers: {'header-key': 'header-value'},
+            //withCredentials: true,
+            file_upload: files[0] // or list of files ($files) for html5 only
+            //fileName: 'doc.jpg' or ['1.jpg', '2.jpg', ...] // to modify the name of the file(s)
+            // customize file formData name ('Content-Disposition'), server side file variable name. 
+            //fileFormDataName: myFile, //or a list of names for multiple files (html5). Default is 'file' 
+            // customize how data is added to formData. See #40#issuecomment-28612000 for sample code
+            //formDataAppender: function(formData, key, val){}
+        }).progress(function(evt) {
+            console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
+        }).success(function(data, status, headers, config) {
+            // file is uploaded successfully
+            console.log(data);
+        });
+    };
     
 }
 </script>
