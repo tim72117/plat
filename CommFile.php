@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use Input, Auth, DB, Response, Validator, Files, ShareFile, Illuminate\Filesystem\Filesystem, Illuminate\Support\MessageBag;
+use Input, Auth, DB, Response, Validator, Files, ShareFile, Session, Illuminate\Filesystem\Filesystem, Illuminate\Support\MessageBag;
 class CommFile {
 	
 	/**
@@ -163,6 +163,8 @@ class CommFile {
 					//));	
                     
                     DB::table('log_file')->insert(array('file_id'=>$file->id,'active'=>'upload'));
+                    
+                    Session::flash('upload_file_id', $file->id);	
 
 					return $file->id;			
 
@@ -179,6 +181,8 @@ class CommFile {
 				$file->touch();
                 
                 DB::table('log_file')->insert(array('file_id'=>$file->id,'active'=>'reUpload'));
+                
+                Session::flash('upload_file_id', $file->id);		
                 
 				return $file->id;
 				
