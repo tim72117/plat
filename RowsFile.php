@@ -23,6 +23,7 @@ class RowsFile extends CommFile {
         'createTable',
         'requestTo',
         'export',
+        'upload',
 	);
 	
 	public static function get_intent() {
@@ -208,6 +209,11 @@ class RowsFile extends CommFile {
 
         return Response::make($output, 200, $headers);
         
+    }
+
+    public function uploadRows() {
+        return Input::file('file');
+        //return Input::file('file_upload');
     }
 	
 }
