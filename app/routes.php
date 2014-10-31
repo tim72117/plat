@@ -35,7 +35,7 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::post('app/{intent_key}/share/group', 'ShareController@shareAppTo');
 
     Route::post('file/new/create', 'DocController@create');
-    Route::post('file/{intent_key}/upload', 'FileController@appPost');
+    Route::post('file/{intent_key}/upload', 'FileController@fileUpload');
     Route::any('file/{intent_key}/{method}', 'FileController@fileOpen');
 
     Route::get('page/project/{context?}', array('before' => '', 'as' => 'project', 'uses' => 'PageController@project'));

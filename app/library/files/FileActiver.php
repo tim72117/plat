@@ -18,7 +18,9 @@ class FileActiver {
         
         $active = $this->intent['active'];
         
-        $file = new $this->intent['fileClass']($this->intent['app_id']);
+        $app_id = isset($this->intent['app_id']) ? $this->intent['app_id'] : null;
+        
+        $file = new $this->intent['fileClass']($app_id);
         
         return $file->$method();
 		

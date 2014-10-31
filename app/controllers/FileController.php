@@ -70,6 +70,15 @@ class FileController extends BaseController {
         }
     }   
     
+    public function fileUpload($intent_key, $method = 'upload') {
+        
+		$this->fileAcitver = new app\library\files\v0\FileActiver($intent_key);
+        
+		$this->fileAcitver->accept($method);
+        
+        return Redirect::back();        
+    }
+    
     public function fileOpen($intent_key, $method = null) {               
         
         $file = new $this->intent['fileClass']($this->intent['doc_id']);
