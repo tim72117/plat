@@ -44,6 +44,11 @@ App::error(function(PDOException $exception) {
 	//return Response::view('nopage', array(), 404);
 });
 
+App::error(function(Exception $exception)
+{
+	//return Response::view('nopage', array(), 404);
+});
+
 App::missing(function($exception) {
 	//return Response::view('nopage', array(), 404);
 });
