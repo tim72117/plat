@@ -111,6 +111,7 @@ class UserController extends BaseController {
 
 	public function remind($project) {
 		$credentials = array('email' => Input::get('email'));
+		Config::set('auth.reminder.email', 'emails.auth.reminder_'.$project);
 		$response = Password::remind($credentials, function($message) {
 			$message->subject('重設您的查詢平台帳戶密碼');
 		});
