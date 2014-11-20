@@ -122,7 +122,7 @@ class UserController extends BaseController {
 			case Password::REMINDER_SENT:
 				return View::make('demo.'.$project.'.home', array('contextFile'=>'remind', 'title'=>'重設密碼信件已寄出'))
                     ->with('context', '<div style="margin:30px auto;width:300px;color:#f00">重設密碼信件已寄出，請到您的電子郵件信箱收取信件</div>')
-                    ->nest('child_footer','demo.use.footer');
+                    ->nest('child_footer','demo.'.$project.'.footer');
 		}
 	}
 	
