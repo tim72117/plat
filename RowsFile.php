@@ -40,7 +40,7 @@ class RowsFile extends CommFile {
         
         $shareFile = ShareFile::find($this->doc_id);   
         
-        return 'demo.use.page.table_import';
+        return 'demo.page.table_import';
         
     }
     
@@ -67,7 +67,7 @@ class RowsFile extends CommFile {
     
     public function open() {
         
-        return 'demo.use.page.table';
+        return 'demo.page.table_open';
         
     }
 	
@@ -117,6 +117,19 @@ class RowsFile extends CommFile {
         return json_decode($filesystem->get( storage_path() . '/file_upload/' . $file ));
     }
     
+    public function get_power() {
+        
+        $shareFile = ShareFile::find($this->doc_id);
+        
+        $file = $shareFile->isFile->file;
+        
+        $filesystem = new Filesystem;
+        
+        $scheme = json_decode($filesystem->get( storage_path() . '/file_upload/' . $file ));
+        
+        return Response::json($scheme->power);
+    }
+    
     public function get_rows() {
         
         $shareFile = ShareFile::find($this->doc_id);
@@ -129,15 +142,30 @@ class RowsFile extends CommFile {
         
         $database = $scheme->database;
         
-        $table = $scheme->table;
+        $tables = $scheme->tables;    
         
-        if( $shareFile->created_by==Auth::user()->id ) {
-            $power = array_fetch($scheme->tables[0]->columns, 'name');
-        }else{
-            $power = json_decode($shareFile->power);
-        }        
+        $power = array();
+          
+        foreach($tables as $index => $table){
+            if( $index==0 ){
+                $rows_query = DB::table($database.'.dbo.'.$table->name.' AS t0');
+            }else{
+                $rows_query->leftJoin($database.'.dbo.'.$table->name.' AS t'.$index, 't'.$index.'.'.$table->primaryKey, '=', 't0.'.$table->primaryKey);
+            }   
+            
+            if( $shareFile->created_by==Auth::user()->id ) {
+                foreach($table->columns as $column){
+                    array_push($power, $column);
+                }                
+                //$power = array_fetch($table->columns, 'name');
+            }else{
+                //$power = json_decode($shareFile->power);
+            }
+        }
         
-        $rows =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
+        
+        $rows = $rows_query->paginate(50);
+        //$rows =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
         
         return Response::json($rows);
     }	
@@ -190,7 +218,7 @@ class RowsFile extends CommFile {
             $power = json_decode($shareFile->power);
         }        
         
-        $rows =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
+        $rows =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->get();//->paginate(50);//->forPage(2000, 20)->get();
         
         
         
