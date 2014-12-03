@@ -62,7 +62,7 @@ function main($scope, $filter, $http) {
                 <div style="position:absolute;left:0">
                     <div style="width:120px;text-align: center;box-sizing: border-box" class="menu" ng-click="show=!show">建立檔案</div>
                     <div style="width:120px;text-align: center;position:absolute;height:40px;line-height: 40px;box-sizing: border-box;top:29px" class="menu-item" ng-show="show">
-                        <div><a href="/page/table">rawdata</a></div>
+                        <div><a href="/page/table_editor">rawdata</a></div>
                     </div>
                     <div style="width:120px;text-align: center;position:absolute;height:40px;line-height: 40px;box-sizing: border-box;top:68px" class="menu-item" ng-show="show">
                         <div><a href="/editor/main">問卷</a></div>
