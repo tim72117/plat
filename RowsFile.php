@@ -70,23 +70,27 @@ class RowsFile extends CommFile {
         return 'demo.page.table_open';
         
     }
-	
-	/**
-	 * @return array
-	 */	
-	public function get_columns() {	
-
-        $shareFile = ShareFile::find($this->doc_id);
+    
+    private function get_scheme($shareFile) {
         
         $file = $shareFile->isFile->file;
         
         $filesystem = new Filesystem;
         
-        $scheme = json_decode($filesystem->get( storage_path() . '/file_upload/' . $file ));
+        return json_decode($filesystem->get( storage_path() . '/file_upload/' . $file ));
+    }
+    
+	public function get_columns() {	
+
+        $shareFile = ShareFile::find($this->doc_id);
         
-        //$database = $columns_json->database;
+        $scheme = $this->get_scheme($shareFile);
+        
+        $sheets = $scheme->sheets;
 
         //$columns = DB::table('use_103.sys.columns')->whereRaw("object_id=OBJECT_ID('use_103.dbo.seniorOne103_userinfo')")->select('name', DB::raw("'' AS description"))->get('description', 'name');
+        
+        $power = array();
         
         if( $shareFile->created_by!=Auth::user()->id && isset($shareFile->power) ) {
             $power = json_decode($shareFile->power);
@@ -99,24 +103,10 @@ class RowsFile extends CommFile {
                 }
             }
         }
-        
-        //$filesystem->put( storage_path() . '/' . $file, json_encode($columns) );
-        //
-        
 
-        //var_dump(DB::getQueryLog());
-        return Response::json($scheme->tables);
+        return Response::json(['sheets'=>$sheets]);
     }
-    
-    private function get_scheme($shareFile) {
-        
-        $file = $shareFile->isFile->file;
-        
-        $filesystem = new Filesystem;
-        
-        return json_decode($filesystem->get( storage_path() . '/file_upload/' . $file ));
-    }
-    
+
     public function get_power() {
         
         $shareFile = ShareFile::find($this->doc_id);
@@ -134,39 +124,41 @@ class RowsFile extends CommFile {
         
         $shareFile = ShareFile::find($this->doc_id);
         
-        $file = $shareFile->isFile->file;
+        $scheme = $this->get_scheme($shareFile);
         
-        $filesystem = new Filesystem;
+        $sheets = $scheme->sheets;        
         
-        $scheme = json_decode($filesystem->get( storage_path() . '/file_upload/' . $file ));
-        
-        $database = $scheme->database;
-        
-        $tables = $scheme->tables;    
+        $tables = $sheets[0]->tables;
         
         $power = array();
-          
+
         foreach($tables as $index => $table){
+            
+            $database = $table->database;
+
             if( $index==0 ){
                 $rows_query = DB::table($database.'.dbo.'.$table->name.' AS t0');
             }else{
                 $rows_query->leftJoin($database.'.dbo.'.$table->name.' AS t'.$index, 't'.$index.'.'.$table->primaryKey, '=', 't0.'.$table->primaryKey);
-            }   
-            
+            }    
+
             if( $shareFile->created_by==Auth::user()->id ) {
                 foreach($table->columns as $column){
-                    array_push($power, $column);
+                    //array_push($power, $column);
                 }                
+                //$power = array_map(function($column){return $column->name;}, $table->columns);
+
+                $power = array_merge($power, array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
                 //$power = array_fetch($table->columns, 'name');
             }else{
                 //$power = json_decode($shareFile->power);
             }
-        }
+
+        }        
         
-        
-        $rows = $rows_query->paginate(50);
+        $rows = $rows_query->select($power)->paginate(50);
         //$rows =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
-        
+        //var_dump($power);
         return Response::json($rows);
     }	
     
