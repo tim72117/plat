@@ -180,7 +180,7 @@ function newTableController($scope, $http, $filter) {
         $scope.tables.push({columns: [], rows: []});
     };
 
-    $scope.addColumn = function(tindex) {
+    $scope.addColumn = function() {
         $filter('filter')($scope.tables, {selected: true})[0].columns.push({
             name: $scope.newColumn.name,
             description : $scope.newColumn.description

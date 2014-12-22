@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 <script src="/js/ngHandsontable.min.js"></script>
 <script src="/js/handsontable.full.min.js"></script>
 <link rel="stylesheet" media="screen" href="/js/handsontable.full.min.css">
@@ -59,3 +60,59 @@ function Ctrl($scope, $filter) {
 }
 
 </script>
+=======
+<div ng-controller="MyCtrl">
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr>
+                <th ng-click="predicate = ['name','des']; reverse=true">Name(click me to order)></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="name in (names | orderBy:predicate:reverse )">
+              <td>{{name.x}}</td>
+              <td>{{name.name}}</td>
+              <td>{{name.des}}</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<script>
+angular.module('app', []).filter("emptyToEnd", function () {
+    return function (array, key) {
+        if (!angular.isArray(array)) return;
+        if (!angular.isArray(key)) return array;
+        console.log(array);
+        var present = array.filter(function (item) {
+            return item[key[0]];
+        });
+        var empty = array.filter(function (item) {
+            return (!item[key[0]] && item[key[0]]!=0);
+        });
+        var zero = array.filter(function (item) {
+            return (!item[key[0]] && item[key[0]]==0);
+        });
+        console.log(key);
+        var step = present.concat(zero);
+        return step.concat(empty);
+    };
+}).controller('MyCtrl', MyCtrl)
+function MyCtrl($scope) {
+    
+    $scope.names = [
+        {"x":1,"name":'',"des":"DNP"},
+        {"x":2,"name":'',"des":"DNP"},
+        {"x":3,"name":'',"des":"DNP"},
+        {"x":4,"name":-1,"des":1},
+        {"x":5,"name":'20',"des":1},
+        {"x":6,"name":'100',"des":1},
+        {"x":7,"name":10,"des":1},
+        {"x":8,"name":10,"des":1},
+        {"x":9,"name":'',"des":1},
+        {"x":10,"name":0,"des":1},
+        {"x":11,"name":'',"des":2}
+    ];
+}
+</script>
+<div contenteditable="true" style="width:500px;height:500px;border: 1px solid black"></div>
+>>>>>>> Stashed changes
