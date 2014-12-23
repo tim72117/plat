@@ -26,10 +26,7 @@
                 </div>
             </div>-->
           
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
-<!--
-settings="{columns: sheet.colHeaders,colHeaders: true,manualColumnResize:true , contextMenu: ['row_above', 'row_below', 'remove_row'], afterUpdateSettings   : afterUpdateSettings    }"
--->             
+            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">          
                 <hot-table                   
                     settings="{rowHeaders: true, manualColumnResize: true, minCols:50, contextMenu: ['row_above', 'row_below', 'remove_row'], afterUpdateSettings: afterUpdateSettings}"
                     columns="sheet.colHeaders"
@@ -37,19 +34,7 @@ settings="{columns: sheet.colHeaders,colHeaders: true,manualColumnResize:true , 
                     minSpareRows="1"
                     datarows="sheet.rows"
                     startCols="20"
-                    height="1000"
-                    >
-    <!--                <hot-column data="id"     ng-repeat="colHeader in colHeaders"             title="'ID'"></hot-column>
-                    <hot-column data="id"                 title="'ID'"></hot-column>
-                    <hot-column data="id"                  title="'ID'"></hot-column>
-                    <hot-column data="name.first"          title="'First Name'"  type="grayedOut"  readOnly></hot-column>
-                    <hot-column data="name.last"           title="'Last Name'"   type="grayedOut"  readOnly></hot-column>
-                    <hot-column data="address"             title="'Address'" width="150"></hot-column>
-                    <hot-column data="product.description" title="'Favorite food'" type="'autocomplete'">
-                        <hot-autocomplete datarows="description in product.options"></hot-autocomplete>
-                    </hot-column>
-                    <hot-column data="price"               title="'Price'"     type="'numeric'"  width="80"  format="'$ 0,0.00'" ></hot-column>
-                    <hot-column data="isActive"            title="'Is active'" type="'checkbox'" width="65"  checkedTemplate="'Yes'" uncheckedTemplate="'No'"></hot-column>-->
+                    height="1000">
                 </hot-table>
             </div>    
         </div>
@@ -62,16 +47,16 @@ settings="{columns: sheet.colHeaders,colHeaders: true,manualColumnResize:true , 
                 <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:89px" class="define"></div>
             </div>
             <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
-                <div ng-repeat="column in sheet.columns" style="margin:2px" id="tablett">
-                    <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="column.name" autofocus="{{column.autofocus || 'false'}}" />
-                    <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="column.description" />
+                <div ng-repeat="colHeader in sheet.colHeaders" style="margin:2px">
+                    <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="colHeader.data" autofocus="{{colHeader.autofocus || 'false'}}" />
+                    <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="colHeader.title" />
                     <select class="input define"><option>欄位類型</option></select>
                     <select class="input define"><option>過濾規則</option></select>
-                    <input type="button" value="刪除" ng-click="remove($index, $tindex)" style="padding: 3px" />
+                    <input type="button" value="刪除" ng-click="removeColumn($index, $tindex)" style="padding: 3px" />
                 </div>    
                 <div style="margin:2px">
-                    <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="newColumn.name" />
-                    <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="newColumn.description" />
+                    <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="newColumn.data" />
+                    <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="newColumn.title" />
                     <select class="input define"><option>欄位類型</option></select>
                     <select class="input define"><option>過濾規則</option></select>        
                     <input type="button" value="新增" ng-click="addColumn()" style="padding: 3px" />
@@ -98,7 +83,7 @@ angular.module('app', ['ngHandsontable'])
             return input.slice(start);
         }
     };
-}).controller('newTableController', newTableController)
+}).controller('newTableController', newTableController);
 
 .directive("scroll", function ($window) {
     return function(scope, element, attrs) {
@@ -118,30 +103,22 @@ function newTableController($scope, $http, $filter) {
     $scope.table = {sheets:[], rows: []};
     $scope.rows = [];
     $scope.action = {};
-    //$scope.sheet = {};
-    //$scope.colHeaders = [{data:1}];
-    $scope.testClick = function(){        
-        $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders.length = 0;
-        angular.extend($filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders, [{data:'cid'}]);        
-        console.log(1);
-    };
-    //$scope.settings = {columns: [{data:1,title:'f'}],colHeaders: true,manualColumnResize:true , contextMenu: ['row_above', 'row_below', 'remove_row'], afterUpdateSettings   : $scope.afterUpdateSettings    };
     
-    $scope.addTable = function() {
-        $scope.tables.push({columns: [], rows: []});
+    $scope.addSheet = function() {
+        $scope.table.sheets.push({colHeaders:[], rows:[]});
     };
 
     $scope.addColumn = function() {
-        $filter('filter')($scope.tables, {selected: true})[0].columns.push({
-            name: $scope.newColumn.name,
-            description : $scope.newColumn.description
+        $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders.push({
+            data: $scope.newColumn.data,
+            title: $scope.newColumn.title
         });
-        $scope.newColumn.name = '';
-        $scope.newColumn.description = '';
+        $scope.newColumn.data = '';
+        $scope.newColumn.title = '';
     };
     
-    $scope.remove = function(index, tindex) {
-        $scope.tables[tindex].columns.splice(index, 1); 
+    $scope.removeColumn = function(index, tindex) {
+        $scope.table.sheets[tindex].colHeaders.splice(index, 1); 
     };
     
     $scope.action.toSelect = function(sheet) {  
@@ -167,7 +144,6 @@ function newTableController($scope, $http, $filter) {
         for( sindex in data.sheets ){
             var sheet = {columns:[], colHeaders:[], rows:[]};       
             for( tindex in data.sheets[sindex].tables ){
-                //sheet.columns = sheet.columns.concat(data.sheets[sindex].tables[tindex].columns);
                 var table = data.sheets[sindex].tables[tindex];
                 for( cindex in table.columns ){               
                     sheet.colHeaders.push({
@@ -220,8 +196,13 @@ function newTableController($scope, $http, $filter) {
         }).error(function(e){
             console.log(e);
         });
-    };
+    };    
     
+    $scope.testClick = function(){        
+        $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders.length = 0;
+        angular.extend($filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders, [{data:'cid'}]);        
+        console.log(1);
+    };
     
 }
 </script>
