@@ -67,7 +67,13 @@ class RowsFile extends CommFile {
     
     public function open() {
         
-        return 'demo.page.table_open';
+        $shareFile = ShareFile::find($this->doc_id);  
+        
+        if( $shareFile->created_by==Auth::user()->id ){
+            return 'demo.page.table_editor';
+        }else{
+            return 'demo.page.table_open';
+        }       
         
     }
     
