@@ -157,6 +157,7 @@ class RowsFile extends CommFile {
                 $power = array_merge($power, array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
                 //$power = array_fetch($table->columns, 'name');
             }else{
+                $power = array_merge($power, array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
                 //$power = json_decode($shareFile->power);
             }
 
