@@ -64,15 +64,21 @@
                 <div ng-repeat="colHeader in sheet.colHeaders" style="margin:2px">
                     <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="colHeader.data" ng-class="{empty:column.name===''}" autofocus="{{column.autofocus || 'false'}}" />
                     <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="colHeader.title" />
-                    <select class="input define"><option>欄位類型</option></select>
-                    <select class="input define"><option>過濾規則</option></select>
+                    <select class="input define">
+                        <option>過濾規則</option>
+                    </select>
+                    <select class="input define" ng-model="colHeader.typesa" >
+                        <option value="">欄位類型</option>
+                        <option ng-repeat="type in types" ng-selected="colHeader.types==type.name" value="{{type.type}}">{{type.name}}</option>
+                    </select>
+                    
                     <input type="button" value="刪除" ng-click="removeColumn($index, $tindex)" style="padding: 3px" />
                 </div>    
                 <div style="margin:2px">
                     <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="newColumn.data" ng-init="newColumn.data=''" />
                     <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="newColumn.title" />
                     <select class="input define"><option>欄位類型</option></select>
-                    <select class="input define"><option>過濾規則</option></select>        
+                    <select class="input define"><option>過濾規則</option></select>
                     <input type="button" value="新增" ng-click="addColumn()" style="padding: 3px" />
                 </div>   
             </div>
@@ -100,11 +106,18 @@ angular.module('app', ['ngHandsontable'])
 }).controller('newTableController', newTableController);
 
 function newTableController($scope, $http, $filter) {
-    $scope.tool = 1;
+    $scope.tool = 2;
     $scope.page = 1;
     $scope.limit = 40;
     $scope.newColumn = {};
     $scope.table = {sheets:[]};
+    $scope.types = [{name: "數字", type: "int"}, {name: "英文", type: "varchar(50)"}, {name: "中文", type: "nvarchar(50)"}, {name: "日期", type: "date"}, {name: "是與否", type: "bit"}];
+
+
+
+
+    $scope.rule = [{name: "地址", type: "int"}, {name: "手機", type: "int"}, {name: "電話", type: "varchar(50)"}, {name: "信箱", type: "varchar(50)"},
+                    {name: "中文字", type: "varchar(50)"}, {name: "數字與符號", type: "nvarchar(50)"}, {name: "日期", type: "date"}, {name: "是與否", type: "bit"}];
     $scope.rows = [];
     $scope.action = {};
     
@@ -115,11 +128,24 @@ function newTableController($scope, $http, $filter) {
     $scope.addColumn = function() {
         $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders.push({
             data: $scope.newColumn.data,
-            title: $scope.newColumn.title
+            title: $scope.newColumn.title,
+            types: $scope.newColumn.types
         });
         $scope.newColumn.data = '';
         $scope.newColumn.title = '';
+        $scope.newColumn.types = '';
     };
+
+    $scope.test = function(){
+        //if( typeof $scope.table.sheets[0].colHeaders!='undefined' )
+        //if( typeof $scope.table.sheets[0].colHeaders[0].types!='undefined' )
+        //$scope.table.sheets[0].colHeaders[0].types = {name: "字母", type: "varchar(50)"};
+        console.log($scope.table.sheets[0].colHeaders);
+        $scope.table.sheets[0].colHeaders[0].types = '數字';
+        //return $scope.table.sheets[0].colHeaders[0].types.name=='編號';
+        //$scope.table.sheets[0].colHeaders[0] == '';
+        //return false;
+    }
     
     $scope.removeColumn = function(index, tindex) {
         $scope.table.sheets[tindex].colHeaders.splice(index, 1); 
@@ -138,15 +164,15 @@ function newTableController($scope, $http, $filter) {
     };
     
     $scope.addDoc = function() {   
-        var tables = $filter('filter')($scope.tables, {selected: true});
-        if( !$scope.checkEmpty(tables) )
-            return false;
-        var tables = [];
-        angular.forEach($scope.tables, function(table, index){
-            tables.push({columns: table.columns});
-        });
+        var sheets = $filter('filter')($scope.table.sheets, {selected: true});
+        //if( !$scope.checkEmpty(sheets) )
+        //    return false;
+        //var tables = [];
+        //angular.forEach($scope.table.sheets, function(sheet, index){
+        //    tables.push({columns: sheet.columns});
+        //});
         //if(false)
-        $http({method: 'POST', url: '/file/new/create', data:{tables: tables, title: $scope.tables.title} })
+        $http({method: 'POST', url: '/file/new/create0', data:{tables: {}, title: {}} })
         .success(function(data, status, headers, config) { 
             $scope.tables.intent_key = data.intent_key;
             console.log(data);         
