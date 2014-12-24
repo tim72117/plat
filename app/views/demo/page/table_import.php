@@ -8,13 +8,22 @@
 <!--        <div style="">
             <div style="border: 1px solid #999;width:80px;text-align: center">存檔</div>
         </div>-->
+
+        <div style="height:80px;position: absolute;top: 35px;left: 5px;z-index:200">
+            <div style="width:440px;border: 1px solid #999;background-color: #fff;padding:20px;box-shadow: 0 10px 20px rgba(0,0,0,0.5);" ng-show="imports.is_show_select">
+                <div ng-repeat="sheet in imports.sheets">
+                    <input type="radio" id="sheet_{{ $index+1 }}" name="import_sheet" ng-value="1" ng-model="sheet.selected" />
+                    <label for="sheet_{{ $index+1 }}">{{ sheet.name }}</label>                    
+                </div>                
+                <div style="top:20px;left:250px" class="btn default box green" ng-class="{wait:wait}" ng-click="importSheetData()">確定</div>
+                <div style="top:20px;left:360px" class="btn default box white" ng-class="{wait:wait}" ng-click="imports.is_show_select=false">取消</div>
+            </div>
+        </div>
         
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
-            <input type="file" id="upload-file" style="display:none" ng-file-select="onUploadFile($files)" />
-            <label for='excel_file'>Excel File</label>
-                    <input type="file" name="excel_file" accept=".xlsx" onchange="angular.element(this).scope().fileChanged(this.files);" required="true">
+            <input type="file" id="upload-file" accept=".xlsx" style="display:none" onChange="angular.element(this).scope().fileChanged(this)" />
             <label for="upload-file">
-                <div class="page-tag top" style="margin:5px 0 0 5px;left:270px;width:60px;">匯入</div>                    
+                <div class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>                    
             </label>    
             <div ng-repeat="($tindex, table) in tables" class="page-tag top" ng-click="select(table)" ng-class="{selected:table.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
 <!--            <div ng-click="addTable()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (tables.length)*85+150 }}px"></div>-->
@@ -30,22 +39,22 @@
                 </div>
             </div>-->
           
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">          
-                <hot-table                   
-                    settings="{rowHeaders: true, manualColumnResize: true, minCols:50, contextMenu: ['row_above', 'row_below', 'remove_row'], afterUpdateSettings: afterUpdateSettings}"
+            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 0;right: 0;top: 0;bottom: 0" >          
+                <hot-table                   id="sheet"
+                    settings="{rowHeaders: true, manualColumnResize: true, minCols:50, contextMenu: ['row_above', 'row_below', 'remove_row'], afterCellMetaReset: beforeAutofill(this) }"
                     columns="sheet.colHeaders"
-                    colHeaders="true"
-                    minSpareRows="1"
                     datarows="sheet.rows"
+                    colHeaders="true"
+                    minSpareRows="1"         
                     startCols="20"
-                    height="1000">
+                    startRows="20"
+                    height="setHeight()">
                 </hot-table>
             </div>    
         </div>
         
         <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
-            <div class="page-tag" ng-click="tool=1" ng-class="tool==1 ? 'selected' : ''" style="margin:0 0 5px 5px;">資料表</div>
-<!--            <div class="page-tag" ng-click="tool=2" ng-class="tool==2 ? 'selected' : ''" style="margin:0 0 5px 5px;left:85px">欄位定義</div>-->
+            <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}" style="margin:0 0 5px 5px;">資料表</div>
         </div>
         
         
@@ -55,7 +64,7 @@
 </div>
 
 <script>
-angular.module('app', ['angularFileUpload', 'ngHandsontable'])
+angular.module('app', ['ngHandsontable'])
 .filter('startFrom', function() {
     return function(input, start) {   
         if( angular.isArray(input) ){
@@ -79,21 +88,24 @@ angular.module('app', ['angularFileUpload', 'ngHandsontable'])
             });
 
             return deferred.promise;
-        }
+        };
 
 
         return service;
     }
 ]);
 
-function newTableController($scope, $http, $filter, $upload, XLSXReaderService) {
+function newTableController($scope, $http, $filter, XLSXReaderService) {
     $scope.tool = 1;
     $scope.page = 1;
     $scope.limit = 40;
     $scope.newColumn = {};
-    $scope.table = {sheets:[], rows: []};
+    $scope.table = {sheets:[]};
     $scope.rows = [];
     $scope.action = {};
+    $scope.imports = {};
+    $scope.imports.sheets = [];
+    $scope.imports.is_show_select = false;
     
     $scope.addSheet = function() {
         $scope.table.sheets.push({colHeaders:[], rows:[]});
@@ -122,23 +134,21 @@ function newTableController($scope, $http, $filter, $upload, XLSXReaderService) 
     $http({method: 'POST', url: 'get_columns', data:{} })
     .success(function(data, status, headers, config) {
         for( sindex in data.sheets ){
-            var sheet = {columns:[], colHeaders:[], rows:[]};       
+            var sheet = {colHeaders:[], rows:[]};       
             for( tindex in data.sheets[sindex].tables ){
                 var table = data.sheets[sindex].tables[tindex];
                 for( cindex in table.columns ){               
                     sheet.colHeaders.push({
                         data: table.columns[cindex].name,
                         title: table.columns[cindex].title,
-                        readOnly: false
+                        readOnly: false,
+                        renderer: function(instance, td, row, col, prop, value, cellProperties){ Handsontable.renderers.TextRenderer.apply(this, arguments);},
+                        validator: function(v,i){i(false);}
                     });
                 }
             }
             $scope.table.sheets.push(sheet);            
         }
-        //$scope.settings.columns = $scope.table.sheets[0].colHeaders;
-        //$scope.sheet = $scope.table.sheets[0];
-        //$scope.colHeaders = [{data:1}];
-        console.log($scope.table.sheets);
         
         $scope.table.sheets[0].selected = true;
         $scope.update();      
@@ -148,26 +158,13 @@ function newTableController($scope, $http, $filter, $upload, XLSXReaderService) 
     });
     
     $scope.update = function(){
-        //console.log($scope.page); 
-        
-        var table = $filter('filter')($scope.tables, {selected: true})[0];
-        table.rows = [{}];
-        for( i=0;i<40;i++ ){
-            table.rows.push({});
-        }
         
         $http({method: 'POST', url: 'get_import_rows?page='+($scope.page), data:{} })
         .success(function(data, status, headers, config) {            
             $scope.pages = data.last_page;
             $scope.page = data.current_page;
-            var table = $filter('filter')($scope.tables, {selected: true})[0];
+            var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
           
-            table.rows = [];
-            angular.forEach(data.data, function(row, index){
-                table.rows.push(row);
-            });            
-            
-            //mbScrollbar.recalculate($scope);
         }).error(function(e){
             console.log(e);
         });
@@ -195,30 +192,60 @@ function newTableController($scope, $http, $filter, $upload, XLSXReaderService) 
     };
     
     $scope.fileChanged = function(files) {
-        $scope.showPreview = true;
+
+        $scope.files = angular.element(files)[0].files[0];
+        $scope.showPreview = false;
         $scope.showJSONPreview = true;
         $scope.isProcessing = true;
-        $scope.sheets = [];
-        $scope.excelFile = files[0];
+        $scope.imports.is_show_select = true;       
         
-        XLSXReaderService.readFile($scope.excelFile, $scope.showPreview, $scope.showJSONPreview).then(function(xlsxData) {
-            console.log(xlsxData.sheets);
-            $scope.sheets = xlsxData.sheets;
+        XLSXReaderService.readFile($scope.files, $scope.showPreview, $scope.showJSONPreview).then(function(xlsxData) {
             $scope.isProcessing = false;
             
-            angular.extend($scope.table.sheets[0].rows, xlsxData.sheets.pba99);
+            $scope.imports.sheets = Object.keys(xlsxData.sheets).map(function (key) {return {name:key,data:xlsxData.sheets[key]};});
+
+            angular.element(files).val(null);            
+            
         });
-    }
+    };
+    
+    $scope.importSheetData = function() {
+
+        var sheetImport = $filter('filter')($scope.imports.sheets, {selected: 1});
+        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
+        
+        if( sheet.length<1 )
+            return false;
+        
+        sheet.rows.length = 0;
+        
+        angular.extend(sheet.rows, sheetImport[0].data);
+        
+        sheet.rows.push({});
+        
+        $scope.imports.is_show_select = false;
+    };
+    
+    $scope.setHeight = function() {
+        return angular.element('#sheet').height();
+    };
+    
+    $scope.beforeAutofill = function(g) {
+        console.log(angular.element('.htContainer').scope());
+        //console.log($scope.hotInstance = {});
+    };
+    
+    
     
 }
 </script>
-<script src="/js/angular-file-upload.min.js"></script>
+<!--<script src="/js/angular-file-upload.min.js"></script>-->
 <script src="/js/jquery.fileDownload.js"></script>
 <script src="/js/ngHandsontable.js"></script>
 <script src="/js/handsontable.full.min.js"></script>
-<script src="/js/jszip.js"></script>
+<script src="/js/jszip.min.js"></script>
 <script src="/js/xlsx.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+<script src="/js/lodash.min.js"></script>
 <script src="/js/xlsx-reader.js"></script>
 <link rel="stylesheet" media="screen" href="/js/handsontable.full.min.css">
 

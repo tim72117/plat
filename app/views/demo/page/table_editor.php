@@ -19,7 +19,6 @@
         
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
             <div ng-click="tableNameBox=true" class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">存檔</div>
-<!--            <div ng-click="addRows()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>-->
             <div ng-click="sendRequest()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;background-color: #559A10;color:#fff" ng-show="tables.intent_key">發送請求</div>
             <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
             <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (table.sheets.length)*85+150 }}px"></div>
@@ -44,10 +43,11 @@
                 <hot-table
                     settings="{rowHeaders: true, manualColumnResize: true, minCols:50, contextMenu: ['row_above', 'row_below', 'remove_row'], afterUpdateSettings: afterUpdateSettings}"
                     columns="sheet.colHeaders"
-                    colHeaders="true"
-                    minSpareRows="1"
                     datarows="sheet.rows"
+                    colHeaders="true"
+                    minSpareRows="1"         
                     startCols="20"
+                    startRows="20"
                     height="1000">
                 </hot-table>
             </div>    
@@ -79,8 +79,8 @@
         </div>
         
         <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
-            <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool==1}" style="margin:0 0 5px 5px;">資料表</div>
-            <div class="page-tag" ng-click="tool=2" ng-class="{selected:tool==2}" style="margin:0 0 5px 5px;left:85px">欄位定義</div>
+            <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}" style="margin:0 0 5px 5px;">資料表</div>
+            <div class="page-tag" ng-click="tool=2" ng-class="{selected:tool===2}" style="margin:0 0 5px 5px;left:85px">欄位定義</div>
         </div>
         
         
@@ -104,7 +104,7 @@ function newTableController($scope, $http, $filter) {
     $scope.page = 1;
     $scope.limit = 40;
     $scope.newColumn = {};
-    $scope.table = {sheets:[], rows: []};
+    $scope.table = {sheets:[]};
     $scope.rows = [];
     $scope.action = {};
     
@@ -155,22 +155,10 @@ function newTableController($scope, $http, $filter) {
         });
     };
     
-    $scope.addRows = function() {
-        var columns = $scope.tables[$scope.isselected].columns;
-        for(i=0;i<10;i++){
-            var rows = {id:i, data:[]};
-            for(cindex in columns){            
-                rows.data.push('column'+cindex);
-            }
-            $scope.tables[$scope.isselected].rows.push(rows);
-        }    
-        console.log(rows);
-    };
-    
     $http({method: 'POST', url: 'get_columns', data:{} })
     .success(function(data, status, headers, config) {
         for( sindex in data.sheets ){
-            var sheet = {columns:[], colHeaders:[], rows:[]};       
+            var sheet = {colHeaders:[], rows:null};       
             for( tindex in data.sheets[sindex].tables ){
                 var table = data.sheets[sindex].tables[tindex];
                 for( cindex in table.columns ){               
@@ -183,10 +171,6 @@ function newTableController($scope, $http, $filter) {
             }
             $scope.table.sheets.push(sheet);            
         }
-        //$scope.settings.columns = $scope.table.sheets[0].colHeaders;
-        //$scope.sheet = $scope.table.sheets[0];
-        //$scope.colHeaders = [{data:1}];
-        console.log($scope.table.sheets);
         
         $scope.table.sheets[0].selected = true;
         $scope.update();      
@@ -210,23 +194,12 @@ function newTableController($scope, $http, $filter) {
     };
        
     $scope.update = function() {
-        console.log($scope.page);  
-        
-        var table = $filter('filter')($scope.tables, {selected: true})[0];
-        table.rows = [{}];
-        for( i=0;i<40;i++ ){
-            table.rows.push({});
-        }
         
         $http({method: 'POST', url: '', data:{} })
         .success(function(data, status, headers, config) {            
             $scope.pages = data.last_page;
-            $scope.page = data.current_page;
-            angular.forEach(data.data, function(row, index){
-                $scope.rows.push(row);
-            });            
-            
-            //mbScrollbar.recalculate($scope);
+            $scope.page = data.current_page;          
+
         }).error(function(e){
             console.log(e);
         });
@@ -235,12 +208,6 @@ function newTableController($scope, $http, $filter) {
     $scope.sendRequest = function() {
         angular.element('[ng-controller=share]').scope().getGroupForRequest();
     };
-    
-    $scope.paste = function(event) {
-        console.log(event.originalEvent.clipboardData);
-        //event.preventDefault();
-        
-    };    
     
     $scope.selectNewRow = function() {
         angular.element('.newRow').addClass('selected');

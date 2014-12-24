@@ -65,8 +65,8 @@
         </div>
         
         <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
-            <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool==1}" style="margin:0 0 5px 5px;">資料表</div>
-            <div class="page-tag" ng-click="tool=2" ng-class="{selected:tool==2}" style="margin:0 0 5px 5px;left:85px" ng-show="power.edit_column">欄位定義</div>
+            <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}" style="margin:0 0 5px 5px;">資料表</div>
+            <div class="page-tag" ng-click="tool=2" ng-class="{selected:tool===2}" style="margin:0 0 5px 5px;left:85px" ng-show="power.edit_column">欄位定義</div>
         </div>
 
         
@@ -83,7 +83,7 @@ angular.module('app', ['ngHandsontable'])
             return input.slice(start);
         }
     };
-}).controller('newTableController', newTableController);
+}).controller('newTableController', newTableController)
 
 .directive("scroll", function ($window) {
     return function(scope, element, attrs) {
