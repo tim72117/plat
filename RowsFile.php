@@ -44,14 +44,14 @@ class RowsFile extends CommFile {
         
     }
     
-    public function createTable($tables, $title) {
+    public function createTable($sheets, $title) {
         
         $filesystem = new Filesystem;
         
-        $scheme = (object)['database'=>'', 'tables'=>$tables];
+        $scheme = (object)['database'=>'', 'tables'=>$sheets];
         
-        foreach($scheme->tables as $index => $table) {
-            //$scheme->tables[$index]->name;
+        foreach($scheme->$sheets as $index => $sheet) {
+            //$scheme->$sheets[$index]->name;
             //--------待處理
         }
         
