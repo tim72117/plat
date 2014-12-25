@@ -39,8 +39,8 @@
                 </div>
             </div>-->
           
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 0;right: 0;top: 0;bottom: 0" >          
-                <hot-table                   id="sheet"
+            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 0;right: 0;top: 0;bottom: 0" id="sheet">          
+                <hot-table                   
                     settings="{rowHeaders: true, manualColumnResize: true, minCols:50, contextMenu: ['row_above', 'row_below', 'remove_row'], afterCellMetaReset: beforeAutofill(this) }"
                     columns="sheet.colHeaders"
                     datarows="sheet.rows"

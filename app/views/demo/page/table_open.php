@@ -11,11 +11,11 @@
         
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
 <!--            <div ng-click="addRows()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>-->
-            <div ng-click="download()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">下載</div>
+            <div ng-click="testClick()" class="page-tag top" style="margin:5px 0 0 5px;left:10px;width:60px;">測試</div>
+            <div ng-click="download()" class="page-tag top" style="margin:5px 0 0 5px;left:80px;width:60px;">下載</div>
             <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
             <div ng-click="addTable()" class="page-tag top add-tag" ng-show="power.edit_column" style="margin:5px 0 0 5px;left:{{ (table.sheets.length)*85+150 }}px"></div>
-        </div>       
-        <div><input type="button" ng-click="testClick()" /></div>
+        </div>
         <div ng-switch-when="1" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0; right:0; overflow: hidden">  
 <!--            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
                 <div class="column" style="width: 30px;left: 2px;top: 2px"></div>   
@@ -26,7 +26,7 @@
                 </div>
             </div>-->
           
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">          
+            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 0;right: 0;top: 0;bottom: 0" id="sheet">          
                 <hot-table                   
                     settings="{rowHeaders: true, manualColumnResize: true, minCols:50, contextMenu: ['row_above', 'row_below', 'remove_row'], afterUpdateSettings: afterUpdateSettings}"
                     columns="sheet.colHeaders"
@@ -34,7 +34,7 @@
                     minSpareRows="1"
                     datarows="sheet.rows"
                     startCols="20"
-                    height="1000">
+                    height="setHeight()">
                 </hot-table>
             </div>    
         </div>
@@ -196,7 +196,11 @@ function newTableController($scope, $http, $filter) {
         }).error(function(e){
             console.log(e);
         });
-    };    
+    };  
+    
+    $scope.setHeight = function() {
+        return angular.element('#sheet').height();
+    };
     
     $scope.testClick = function(){        
         $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders.length = 0;

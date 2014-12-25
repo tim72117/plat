@@ -11,7 +11,7 @@
 
         <div style="height:80px;position: absolute;top: 35px;z-index:3">
             <div style="position: absolute;left:5px;top:0;;bottom:0;width:440px;border: 1px solid #999;background-color: #fff;padding:20px;box-shadow: 0 10px 20px rgba(0,0,0,0.5);" ng-show="tableNameBox">
-                <input type="text" placeholder="輸入資料表名稱" class="input define" style="width:220px" ng-model="tables.title" />
+                <input type="text" placeholder="輸入檔案名稱" class="input define" style="width:220px" ng-model="table.title" />
                 <div style="top:20px;left:250px" class="btn default box green" ng-class="{wait:wait}" ng-click="addDoc();tableNameBox=false">確定</div>
                 <div style="top:20px;left:360px" class="btn default box white" ng-class="{wait:wait}" ng-click="tableNameBox=false">取消</div>
             </div>
@@ -19,7 +19,7 @@
         
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
             <div ng-click="tableNameBox=true" class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">存檔</div>
-            <div ng-click="sendRequest()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;background-color: #559A10;color:#fff" ng-show="tables.intent_key">發送請求</div>
+            <div ng-click="sendRequest()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;background-color: #559A10;color:#fff" ng-show="table.intent_key">發送請求</div>
             <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
             <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (table.sheets.length)*85+150 }}px"></div>
         </div>       
@@ -158,23 +158,22 @@ function newTableController($scope, $http, $filter) {
         sheet.selected = true;
     }; 
     
-    $scope.checkEmpty = function(tables) {    
-        var emptyColumns = $filter('filter')(tables[0].columns, function(column){return !/^\w+$/.test(column.name);});     
-        return !emptyColumns.length>0;
+    $scope.checkEmpty = function(sheets) {    
+        var emptyColumns = 0;
+        angular.forEach(sheets, function(sheet, index){
+            emptyColumns += $filter('filter')(sheet.colHeaders, function(colHeader){return !/^\w+$/.test(colHeader.data);}).length;            
+        });    
+        return !emptyColumns>0;
     };
     
-    $scope.addDoc = function() {   
-        var sheets = $filter('filter')($scope.table.sheets, {selected: true});
-        //if( !$scope.checkEmpty(sheets) )
-        //    return false;
-        //var tables = [];
-        //angular.forEach($scope.table.sheets, function(sheet, index){
-        //    tables.push({columns: sheet.columns});
-        //});
+    $scope.addDoc = function() {
+        if( !$scope.checkEmpty($scope.table.sheets) )
+            return false;
+
         //if(false)
-        $http({method: 'POST', url: '/file/new/create0', data:{tables: {}, title: {}} })
+        $http({method: 'POST', url: '/file/new/create', data:{sheets: $scope.table.sheets, title: $scope.table.title} })
         .success(function(data, status, headers, config) { 
-            $scope.tables.intent_key = data.intent_key;
+            $scope.table.intent_key = data.intent_key;
             console.log(data);         
         }).error(function(e){
             console.log(e);
