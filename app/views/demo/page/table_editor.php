@@ -54,19 +54,19 @@
         </div>
 
         <div ng-switch-when="2" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;width:1200px; overflow: scroll">
-            <div style="width:650px;height:25px;padding:10px 0 2px 0">
+            <div style="width:900px;height:25px;padding:10px 0 2px 0">
                 <div style="border: 1px solid #999;height:27px;margin:0 0 0 2px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:180px" class="define">欄位名稱</div>  
                 <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:180px" class="define">欄位描述</div> 
-                <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:89px" class="define"></div>
-                <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:89px" class="define"></div>
+                <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:180px" class="define">過濾規則</div>
+                <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:200px" class="define">欄位類型</div>
+                <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:50px" class="define">唯一值</div>
             </div>
             <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
                 <div ng-repeat="colHeader in sheet.colHeaders" style="margin:2px">
                     <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="colHeader.data" ng-class="{empty:column.name===''}" autofocus="{{column.autofocus || 'false'}}" />
                     <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="colHeader.title" />
-                    <select style="width:180px" class="input define" ng-model="colHeader.rules" ng-options="value.name for (key , value) in rules">
+                    <select style="width:180px" class="input define" ng-model="colHeader.rules" ng-options="value.name for value in rules">
                         <option  value="">過濾規則</option>
-<!--                        <option ng-repeat="rule in rules" ng-value="rule">{{rule.name}}</option>-->
                     </select>
                     <select style="width:200px" class="input define" ng-model="colHeader.types">
                         <option value="">欄位類型</option>
@@ -78,8 +78,13 @@
                 <div style="margin:2px">
                     <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="newColumn.data" ng-init="newColumn.data=''" />
                     <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="newColumn.title" />
-                    <select class="input define"><option>欄位類型</option></select>
-                    <select class="input define"><option>過濾規則</option></select>
+                    <select style="width:180px" class="input define" ng-model="colHeader.rules" ng-options="value.name for value in rules">
+                        <option  value="">過濾規則</option>
+                    </select>
+                    <select style="width:200px" class="input define" ng-model="colHeader.types">
+                        <option value="">欄位類型</option>
+                        <option ng-repeat="type in colHeader.rules.type" value="{{type.type}}">{{type.name}}</option>
+                    </select>
                     <input type="button" value="新增" ng-click="addColumn()" style="padding: 3px" />
                 </div>   
             </div>
@@ -115,10 +120,10 @@ function newTableController($scope, $http, $filter) {
     $scope.types = [{name: "整數", type: "int"}, {name: "小數", type: "float"}, {name: "中、英文(數字加符號)", type: "nvarchar"},
                     {name: "英文(數字加符號)", type: "varchar"}, {name: "日期", type: "date"}, {name: "是與否", type: "bit"}, {name: "多文字(中英文、數字和符號)", type: "text"}];
 
-    $scope.rules = [{name: "地址", type: [$scope.types[2]]}, {name: "手機", type: [$scope.types[3]]}, {name: "電話", type: "varchar(50)"}, {name: "信箱", type: "varchar"},
-                    {name: "身分證", type: "varchar(50)"}, {name: "性別: 1.男 2.女", type: "bit"}, {name: "日期", type: "date"}, {name: "是與否", type: "bit"},
-                    {name: "整數", type: "int"}, {name: "小數", type: "float"}, {name: "多文字(50字以上)", type: "text"}, {name: "多文字(50字以內)", type: "nvarchar"},
-                    {name: "其他", type: "select"}];
+    $scope.rules = [{name: "地址", type: [$scope.types[2]]}, {name: "手機", type: [$scope.types[3]]}, {name: "電話", type: [$scope.types[3]]}, {name: "信箱", type: [$scope.types[3]]},
+                    {name: "身分證", type: [$scope.types[3]]}, {name: "性別: 1.男 2.女", type: [$scope.types[5]]}, {name: "日期", type: [$scope.types[4]]}, {name: "是與否", type: [$scope.types[5]]},
+                    {name: "整數", type: [$scope.types[0]]}, {name: "小數", type: [$scope.types[1]]}, {name: "多文字(50字以上)", type: [$scope.types[6]]}, {name: "多文字(50字以內)", type: [$scope.types[2]]},
+                    {name: "其他", type: [$scope.types[0], $scope.types[1], $scope.types[2], $scope.types[6]]}];
 
     $scope.rows = [];
     $scope.action = {};
@@ -235,29 +240,7 @@ function newTableController($scope, $http, $filter) {
         angular.element('.newRow').removeClass('selected');
     };
 
-    $scope.choose = function(rules) {
-        //return $scope.types;
-        console.log(rules);
-        if( rules == 'select'){
-        console.log($scope.types[0]);
-            return $scope.types[0];
-        }
-        
-        else if (rules == null){
-            //console.log(rules);
-            return [];
-            //return $filter('filter')($scope.types, {type: rules});
-        }
 
-        else  {
-            return $filter('filter')($scope.types, {type: rules});
-        }
-
-    };
-    
-    $scope.test = function(rules) {
-        console.log(rules);
-    };
 
     
 }
