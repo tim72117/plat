@@ -21,6 +21,7 @@ class RowsFile extends CommFile {
         'get_rows',
         'get_import_rows',
         'createTable',
+        'save_struct',
         'requestTo',
         'export',
         'upload',
@@ -62,6 +63,10 @@ class RowsFile extends CommFile {
         $commFile = new CommFile;
         
         return $commFile->createFile(storage_path() . '/rows/temp/', $name, $title);
+        
+    }
+    
+    public function save_struct() {
         
     }
     
