@@ -64,13 +64,13 @@
                 <div ng-repeat="colHeader in sheet.colHeaders" style="margin:2px">
                     <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="colHeader.data" ng-class="{empty:column.name===''}" autofocus="{{column.autofocus || 'false'}}" />
                     <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="colHeader.title" />
-                    <select style="width:180px" class="input define" ng-model="colHeader.rules">
+                    <select style="width:180px" class="input define" ng-model="colHeader.rules" ng-options="value.name for (key , value) in rules">
                         <option  value="">過濾規則</option>
-                        <option ng-repeat="rule in rules" value="{{rule.type}}">{{rule.name}}</option>
+<!--                        <option ng-repeat="rule in rules" ng-value="rule">{{rule.name}}</option>-->
                     </select>
                     <select style="width:200px" class="input define" ng-model="colHeader.types">
                         <option value="">欄位類型</option>
-                        <option ng-repeat="type in choose(colHeader.rules)" value="{{type.type}}">{{type.name}}</option>
+                        <option ng-repeat="type in colHeader.rules.type" value="{{type.type}}">{{type.name}}</option>
                     </select>
                     
                     <input type="button" value="刪除" ng-click="removeColumn($index, $tindex)" style="padding: 3px" />
@@ -115,7 +115,7 @@ function newTableController($scope, $http, $filter) {
     $scope.types = [{name: "整數", type: "int"}, {name: "小數", type: "float"}, {name: "中、英文(數字加符號)", type: "nvarchar"},
                     {name: "英文(數字加符號)", type: "varchar"}, {name: "日期", type: "date"}, {name: "是與否", type: "bit"}, {name: "多文字(中英文、數字和符號)", type: "text"}];
 
-    $scope.rules = [{name: "地址", type: "nvarchar(50)"}, {name: "手機", type: "varchar"}, {name: "電話", type: "varchar(50)"}, {name: "信箱", type: "varchar"},
+    $scope.rules = [{name: "地址", type: [$scope.types[2]]}, {name: "手機", type: [$scope.types[3]]}, {name: "電話", type: "varchar(50)"}, {name: "信箱", type: "varchar"},
                     {name: "身分證", type: "varchar(50)"}, {name: "性別: 1.男 2.女", type: "bit"}, {name: "日期", type: "date"}, {name: "是與否", type: "bit"},
                     {name: "整數", type: "int"}, {name: "小數", type: "float"}, {name: "多文字(50字以上)", type: "text"}, {name: "多文字(50字以內)", type: "nvarchar"},
                     {name: "其他", type: "select"}];
@@ -253,6 +253,10 @@ function newTableController($scope, $http, $filter) {
             return $filter('filter')($scope.types, {type: rules});
         }
 
+    };
+    
+    $scope.test = function(rules) {
+        console.log(rules);
     };
 
     
