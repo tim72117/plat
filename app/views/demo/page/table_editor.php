@@ -64,12 +64,13 @@
                 <div ng-repeat="colHeader in sheet.colHeaders" style="margin:2px">
                     <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="colHeader.data" ng-class="{empty:column.name===''}" autofocus="{{column.autofocus || 'false'}}" />
                     <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="colHeader.title" />
-                    <select class="input define">
-                        <option>過濾規則</option>
+                    <select style="width:180px" class="input define" ng-model="colHeader.rules">
+                        <option  value="">過濾規則</option>
+                        <option ng-repeat="rule in rules" value="{{rule.type}}">{{rule.name}}</option>
                     </select>
-                    <select class="input define" ng-model="colHeader.typesa" >
+                    <select style="width:200px" class="input define" ng-model="colHeader.types">
                         <option value="">欄位類型</option>
-                        <option ng-repeat="type in types" ng-selected="colHeader.types==type.name" value="{{type.type}}">{{type.name}}</option>
+                        <option ng-repeat="type in choose(colHeader.rules)" value="{{type.type}}">{{type.name}}</option>
                     </select>
                     
                     <input type="button" value="刪除" ng-click="removeColumn($index, $tindex)" style="padding: 3px" />
@@ -111,13 +112,14 @@ function newTableController($scope, $http, $filter) {
     $scope.limit = 40;
     $scope.newColumn = {};
     $scope.table = {sheets:[]};
-    $scope.types = [{name: "數字", type: "int"}, {name: "英文", type: "varchar(50)"}, {name: "中文", type: "nvarchar(50)"}, {name: "日期", type: "date"}, {name: "是與否", type: "bit"}];
+    $scope.types = [{name: "整數", type: "int"}, {name: "小數", type: "float"}, {name: "中、英文(數字加符號)", type: "nvarchar"},
+                    {name: "英文(數字加符號)", type: "varchar"}, {name: "日期", type: "date"}, {name: "是與否", type: "bit"}, {name: "多文字(中英文、數字和符號)", type: "text"}];
 
+    $scope.rules = [{name: "地址", type: "nvarchar(50)"}, {name: "手機", type: "varchar"}, {name: "電話", type: "varchar(50)"}, {name: "信箱", type: "varchar"},
+                    {name: "身分證", type: "varchar(50)"}, {name: "性別: 1.男 2.女", type: "bit"}, {name: "日期", type: "date"}, {name: "是與否", type: "bit"},
+                    {name: "整數", type: "int"}, {name: "小數", type: "float"}, {name: "多文字(50字以上)", type: "text"}, {name: "多文字(50字以內)", type: "nvarchar"},
+                    {name: "其他", type: "select"}];
 
-
-
-    $scope.rule = [{name: "地址", type: "int"}, {name: "手機", type: "int"}, {name: "電話", type: "varchar(50)"}, {name: "信箱", type: "varchar(50)"},
-                    {name: "中文字", type: "varchar(50)"}, {name: "數字與符號", type: "nvarchar(50)"}, {name: "日期", type: "date"}, {name: "是與否", type: "bit"}];
     $scope.rows = [];
     $scope.action = {};
     
@@ -129,24 +131,15 @@ function newTableController($scope, $http, $filter) {
         $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders.push({
             data: $scope.newColumn.data,
             title: $scope.newColumn.title,
-            types: $scope.newColumn.types
+            types: $scope.newColumn.types,
+            rule: $scope.newColumn.rules
         });
         $scope.newColumn.data = '';
         $scope.newColumn.title = '';
         $scope.newColumn.types = '';
+        $scope.newColumn.rules = '';
     };
 
-    $scope.test = function(){
-        //if( typeof $scope.table.sheets[0].colHeaders!='undefined' )
-        //if( typeof $scope.table.sheets[0].colHeaders[0].types!='undefined' )
-        //$scope.table.sheets[0].colHeaders[0].types = {name: "字母", type: "varchar(50)"};
-        console.log($scope.table.sheets[0].colHeaders);
-        $scope.table.sheets[0].colHeaders[0].types = '數字';
-        //return $scope.table.sheets[0].colHeaders[0].types.name=='編號';
-        //$scope.table.sheets[0].colHeaders[0] == '';
-        //return false;
-    }
-    
     $scope.removeColumn = function(index, tindex) {
         $scope.table.sheets[tindex].colHeaders.splice(index, 1); 
     };
@@ -241,6 +234,27 @@ function newTableController($scope, $http, $filter) {
     $scope.cancelNewRow = function() {
         angular.element('.newRow').removeClass('selected');
     };
+
+    $scope.choose = function(rules) {
+        //return $scope.types;
+        console.log(rules);
+        if( rules == 'select'){
+        console.log($scope.types[0]);
+            return $scope.types[0];
+        }
+        
+        else if (rules == null){
+            //console.log(rules);
+            return [];
+            //return $filter('filter')($scope.types, {type: rules});
+        }
+
+        else  {
+            return $filter('filter')($scope.types, {type: rules});
+        }
+
+    };
+
     
 }
 </script>
