@@ -3,7 +3,7 @@
 
 <div ng-app="app">
 
-    <div ng-controller="newTableController" ng-switch on="tool" style="border: 0px solid #999;position: absolute;top: 10px;bottom: 10px;left: 10px; right: 20px" ng-paste="paste($event)">   
+    <div ng-controller="newTableController" ng-switch on="tool" style="border: 0px solid #999;position: absolute;top: 10px;bottom: 10px;left: 10px; right: 20px">   
         
 <!--        <div style="">
             <div style="border: 1px solid #999;width:80px;text-align: center">存檔</div>
@@ -18,8 +18,7 @@
         </div>
         
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
-            <div ng-click="tableNameBox=true" class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">存檔</div>
-            <div ng-click="sendRequest()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;background-color: #559A10;color:#fff" ng-show="table.intent_key">發送請求</div>
+            <div ng-click="tableNameBox=true" class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">儲存</div>
             <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
             <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (table.sheets.length)*85+150 }}px"></div>
         </div>       
@@ -94,7 +93,7 @@
             <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}" style="margin:0 0 5px 5px;">資料表</div>
             <div class="page-tag" ng-click="tool=2" ng-class="{selected:tool===2}" style="margin:0 0 5px 5px;left:85px">欄位定義</div>
         </div>
-        
+
         
     </div>   
     
@@ -109,14 +108,17 @@ angular.module('app', ['ngHandsontable'])
             return input.slice(start);
         }
     };
-}).controller('newTableController', newTableController);
+})
+.controller('newTableController', newTableController);
 
-function newTableController($scope, $http, $filter) {
+function newTableController($scope, $http, $filter, $location) {
+    
+    var path = window.location.pathname.split('/');
     $scope.tool = 2;
     $scope.page = 1;
     $scope.limit = 40;
     $scope.newColumn = {};
-    $scope.table = {sheets:[]};
+    $scope.table = {sheets:[], intent_key:(path[1]==='file' ? path[2] : null)};
     $scope.types = [{name: "整數", type: "int"}, {name: "小數", type: "float"}, {name: "中、英文(數字加符號)", type: "nvarchar"},
                     {name: "英文(數字加符號)", type: "varchar"}, {name: "日期", type: "date"}, {name: "是與否", type: "bit"}, {name: "多文字(中英文、數字和符號)", type: "text"}];
 
@@ -126,7 +128,8 @@ function newTableController($scope, $http, $filter) {
                     {name: "其他", type: [$scope.types[0], $scope.types[1], $scope.types[2], $scope.types[6]]}];
 
     $scope.rows = [];
-    $scope.action = {};
+    $scope.action = {}; 
+    angular.element('[ng-controller=menu]').scope().hideRequestFile = $scope.table.intent_key === null;
     
     $scope.addSheet = function() {
         $scope.table.sheets.push({colHeaders:[], rows:[]});
@@ -178,33 +181,34 @@ function newTableController($scope, $http, $filter) {
         });
     };
     
-    $http({method: 'POST', url: 'get_columns', data:{} })
-    .success(function(data, status, headers, config) {
-        for( sindex in data.sheets ){
-            var sheet = {colHeaders:[], rows:null};       
-            for( tindex in data.sheets[sindex].tables ){
-                var table = data.sheets[sindex].tables[tindex];
-                for( cindex in table.columns ){               
-                    sheet.colHeaders.push({
-                        data: table.columns[cindex].name,
-                        title: table.columns[cindex].title,
-                        readOnly: false
-                    });
+    if( $scope.table.intent_key !== null ) {
+        $http({method: 'POST', url: 'get_columns', data:{} })
+        .success(function(data, status, headers, config) {
+            for( sindex in data.sheets ){
+                var sheet = {colHeaders:[], rows:null};       
+                for( tindex in data.sheets[sindex].tables ){
+                    var table = data.sheets[sindex].tables[tindex];
+                    for( cindex in table.columns ){               
+                        sheet.colHeaders.push({
+                            data: table.columns[cindex].name,
+                            title: table.columns[cindex].title,
+                            readOnly: false
+                        });
+                    }
                 }
+                $scope.table.sheets.push(sheet);            
             }
-            $scope.table.sheets.push(sheet);            
-        }
+
+            $scope.table.sheets[0].selected = true;
+            $scope.update();      
+
+        }).error(function(e){
+            console.log(e);
+        });
+    }else{
         
-        $scope.table.sheets[0].selected = true;
-        $scope.update();      
-        
-    }).error(function(e){
-        console.log(e);
-    });
-    
-    $scope.generate = function() {
         for(i=0;i<1;i++){
-            var sheet = {colHeaders:[], rows:[]};
+            var sheet = {colHeaders:[], rows:[], selected:true};
             for(j=1;j<10;j++){
                 sheet.colHeaders.push({
                     data: 'column'+j,
@@ -214,7 +218,9 @@ function newTableController($scope, $http, $filter) {
             }        
             $scope.table.sheets.push(sheet);
         }
-    };
+    }
+    
+
        
     $scope.update = function() {
         
@@ -226,11 +232,7 @@ function newTableController($scope, $http, $filter) {
         }).error(function(e){
             console.log(e);
         });
-    };
-    
-    $scope.sendRequest = function() {
-        angular.element('[ng-controller=share]').scope().getGroupForRequest();
-    };
+    };   
     
     $scope.selectNewRow = function() {
         angular.element('.newRow').addClass('selected');
@@ -245,6 +247,7 @@ function newTableController($scope, $http, $filter) {
     
 }
 </script>
+<script src="/js/angular-route.min.js"></script>
 <script src="/js/jquery.fileDownload.js"></script>
 <script src="/js/ngHandsontable.js"></script>
 <script src="/js/handsontable.full.min.js"></script>

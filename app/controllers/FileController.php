@@ -28,13 +28,13 @@ class FileController extends BaseController {
 		});
 	}
 	
-	public function appGet($intent_key, $method = 'open') {		
+	public function appGet($intent_key, $method = 'open') {
 		
 		$this->fileAcitver = new app\library\files\v0\FileActiver($intent_key);
         
 		$view_name = $this->fileAcitver->accept($method);
         
-		$view = View::make('demo.use.main')->nest('context', $view_name)->nest('share', 'demo.use.share');
+		$view = View::make('demo.use.main')->nest('context', $view_name)->nest('share', 'demo.share');
 		
         return $this->createView($view);
 	}
@@ -45,14 +45,14 @@ class FileController extends BaseController {
         
 		$this->fileAcitver->accept($method);
         
-        return Redirect::back();        
+        return Redirect::back();
     }
     
     public function appAjaxGet($intent_key) {
         
         $file = Files::find(Session::get('table.'.$intent_key));
         
-        return Response::make(View::make($file->file))->header('Content-Type', "application/json");;
+        return Response::make(View::make($file->file))->header('Content-Type', "application/json");
     }
     
     public function appAjaxPost($intent_key, $method) {
@@ -84,7 +84,7 @@ class FileController extends BaseController {
         $file = new $this->intent['fileClass']($this->intent['doc_id']);
         
         if( $method=='open' || $method=='import' ) {
-            $view = View::make('demo.use.main')->nest('context', $file->$method())->nest('share', 'demo.use.share');
+            $view = View::make('demo.use.main')->nest('context', $file->$method())->nest('share', 'demo.share');
 		
             return $this->createView($view);
         }

@@ -1,47 +1,47 @@
 <div style="position: relative" ng-switch-when="request">    
 
-<div style="border:1px solid #999;margin:0;padding:0;width:220px;box-sizing: border-box;position: absolute;left:0;top:0">
-    <div style="border-top:1px solid #999;margin-top:-1px;padding:5px;box-sizing: border-box;background-color: #eee">群組</div>
-    <div ng-repeat="group in groups" style="border-top:1px solid #999;margin-top:-1px;box-sizing: border-box" class="group-tag" ng-class="group.id==group_selected ? 'selected': ''">
-        
-<!--        <input ng-click="getUsers(group)" type="button" value="成員" style="float:right" />-->
-        <div ng-dblclick="getUsers(group)" class="dbclick-tag" style="padding:5px">
-            <span>{{ group.description }}</span>
-            <div ng-click="request(group)" class="request-btn" ng-class="group.requested"></div>                
+    <div style="border:1px solid #999;margin:0;padding:0;width:220px;box-sizing: border-box;position: absolute;left:0;top:0">
+        <div style="border-top:1px solid #999;margin-top:-1px;padding:5px;box-sizing: border-box;background-color: #eee">群組</div>
+        <div ng-repeat="group in groups" style="border-top:1px solid #999;margin-top:-1px;box-sizing: border-box" class="group-tag" ng-class="group.id==group_selected ? 'selected': ''">
+
+    <!--        <input ng-click="getUsers(group)" type="button" value="成員" style="float:right" />-->
+            <div ng-dblclick="getUsers(group)" class="dbclick-tag" style="padding:5px">
+                <span>{{ group.description }}</span>
+                <div ng-click="request(group)" class="request-btn" ng-class="group.requested"></div>                
+            </div>
+        <!--    <input type="checkbox" ng-model="set_groups[group.id]" ng-init="set_groups[group.id]=group.default" id="request_group{{ group.id }}">
+
+            <label for="request_group{{ group.id }}">{{ group.name }}</label>   
+
+
+
+            <div ng-hide="group[group.id]" ng-init="group[group.id]=true ; shareds = []">
+                <table>
+                    <tr ng-repeat="(user_id, shared) in shareds">
+                        <td>
+                            <input type="checkbox" id="{{ group.id }}_request_{{ user_id }}">
+                            <label for="{{ group.id }}_request_{{ user_id }}">request</label>
+                            <input type="checkbox" id="{{ group.id }}_share_{{ user_id }}" ng-model="shared.shared" ng-click="shared.shared=!shared.shared;share(user_id, shared)">
+                            <label for="{{ group.id }}_share_{{ user_id }}">share</label>
+                            <label for="request{{ user_id }}">{{ shared.name }}</label>
+                        </td>                
+                    </tr>
+                </table>
+            </div>-->
+
+
         </div>
-    <!--    <input type="checkbox" ng-model="set_groups[group.id]" ng-init="set_groups[group.id]=group.default" id="request_group{{ group.id }}">
-
-        <label for="request_group{{ group.id }}">{{ group.name }}</label>   
-
-
-
-        <div ng-hide="group[group.id]" ng-init="group[group.id]=true ; shareds = []">
-            <table>
-                <tr ng-repeat="(user_id, shared) in shareds">
-                    <td>
-                        <input type="checkbox" id="{{ group.id }}_request_{{ user_id }}">
-                        <label for="{{ group.id }}_request_{{ user_id }}">request</label>
-                        <input type="checkbox" id="{{ group.id }}_share_{{ user_id }}" ng-model="shared.shared" ng-click="shared.shared=!shared.shared;share(user_id, shared)">
-                        <label for="{{ group.id }}_share_{{ user_id }}">share</label>
-                        <label for="request{{ user_id }}">{{ shared.name }}</label>
-                    </td>                
-                </tr>
-            </table>
-        </div>-->
-
-
     </div>
-</div>
 
-<div style="border:1px solid #999;margin:0;padding:0;width:220px;box-sizing: border-box;position: absolute;left:222px;top:0;max-height: 497px;overflow-y: auto">
-    <div style="border-top:1px solid #999;margin-top:-1px;padding:5px;box-sizing: border-box;background-color: #eee">成員</div>
-    <div ng-repeat="user in users" style="border-top:1px solid #999;margin-top:-1px;padding:5px;box-sizing: border-box;position: relative" class="group-tag">
-        {{ user.username }}
+    <div style="border:1px solid #999;margin:0;padding:0;width:220px;box-sizing: border-box;position: absolute;left:222px;top:0;max-height: 497px;overflow-y: auto">
+        <div style="border-top:1px solid #999;margin-top:-1px;padding:5px;box-sizing: border-box;background-color: #eee">成員</div>
+        <div ng-repeat="user in users" style="border-top:1px solid #999;margin-top:-1px;padding:5px;box-sizing: border-box;position: relative" class="group-tag">
+            {{ user.username }}
+        </div>
     </div>
-</div>
-    
-<div style="border:1px solid #999;margin:0;padding:0;width:20px;box-sizing: border-box;position: absolute;left:444px;top:0;height: 500px;display: none" class="detail">
-</div>
+
+    <div style="border:1px solid #999;margin:0;padding:0;width:20px;box-sizing: border-box;position: absolute;left:444px;top:0;height: 500px;display: none" class="detail">
+    </div>
     
 
 </div>
@@ -68,16 +68,16 @@
         </div>
     </div>
     <div style="height:120px;position: absolute;bottom: 40px;z-index:3">
-        <div style="position: absolute;left:5px;top:0;;bottom:0;width:300px;border: 1px solid #999;background-color: #fff;padding:20px;box-shadow: 0 10px 20px rgba(0,0,0,0.5);" ng-show="requestDescriptionBox">
+        <div style="position: absolute;left:5px;top:0;;bottom:0;width:300px;border: 1px solid #999;background-color: #fff;padding:20px;box-shadow: 0 10px 20px rgba(0,0,0,0.5);" ng-show="status.showDescription">
             <input type="text" placeholder="輸入這份請求的描述" class="input define" style="width:220px" ng-model="requestDescription" />
-            <div style="top:60px;left:20px" class="btn default box green" ng-class="{wait:wait}" ng-click="requestTo(requestDescription);requestDescriptionBox=false">確定</div>
-            <div style="top:60px;left:130px" class="btn default box white" ng-class="{wait:wait}" ng-click="requestDescriptionBox=false">取消</div>
+            <div style="top:60px;left:20px" class="btn default box green" ng-class="{wait:wait}" ng-click="requestTo(requestDescription);status.showDescription=false">確定</div>
+            <div style="top:60px;left:130px" class="btn default box white" ng-class="{wait:wait}" ng-click="status.showDescription=false">取消</div>
         </div>
     </div>
     <div style="border:0px solid #999;position: absolute;bottom:20px;height:40px;width:400px;box-sizing: content-box">
         <div style="top:5px;left:15px" class="btn default box green" ng-class="{wait:wait}" ng-click="shareAppTo()" ng-show="shareBox.target==='app'">分享</div>
         <div style="top:5px;left:15px" class="btn default box green" ng-class="{wait:wait}" ng-click="shareFileTo()" ng-show="shareBox.target==='file'">共用</div>
-        <div style="top:5px;left:15px" class="btn default box green" ng-class="{wait:wait}" ng-click="requestDescriptionBox=true" ng-show="shareBox.target==='request'">請求</div>
+        <div style="top:5px;left:15px" class="btn default box green" ng-class="{wait:wait}" ng-click="status.showDescription=true" ng-show="shareBox.target==='request'">請求</div>
         <div style="top:5px;left:120px" class="btn default box white" ng-click="shareClose()">取消</div>
 <!--        <div style="position: absolute;top:5px;left:230px;height:30px;width:100px;box-sizing: border-box;text-align: center;line-height: 30px" class="btn white" ng-click="switchShareType()">換</div>-->
         <div style="top:5px;left:220px;font-size:12px;color:#555" class="btn default" ng-show="advanced_status.has" ng-click="advanced()">進階</div>
@@ -112,6 +112,9 @@ function share($scope, $filter, $http) {
     $scope.columns = {data:[]};    
     $scope.advanced_status = {show:false, has: false, boxWidth: 500};
     $scope.files = [];
+    $scope.status = {
+        showDescription : false
+    };
     
     $scope.advanced = function() {
         $scope.advanced_status.show = true;

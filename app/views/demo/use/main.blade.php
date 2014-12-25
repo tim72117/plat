@@ -41,6 +41,9 @@ function menu($scope, $filter, $http) {
     $scope.getSharedFile = function() {
         angular.element('[ng-controller=share]').scope().getSharedFile();
     };
+    $scope.requestFile = function() {
+        angular.element('[ng-controller=share]').scope().getGroupForRequest();
+    };
 }
 function main($scope, $filter, $http) {
     $scope.menuLeft = 0;
@@ -82,8 +85,11 @@ function main($scope, $filter, $http) {
             <div style="position:absolute;left:602px" ng-hide="hideShareFile" ng-init="hideShareFile=true" id="shareFile" ng-cloak>
                 <div style="width:80px;text-align: center;box-sizing: border-box" class="button-share" ng-click="getSharedFile()">共用</div>
             </div>
+            <div style="position:absolute;left:602px" ng-hide="hideRequestFile" ng-init="hideRequestFile=true" ng-cloak>
+                <div style="width:80px;text-align: center;box-sizing: border-box" class="button-share" ng-click="requestFile()">共用</div>
+            </div>
 			<div style="float:right">
-				<? if( Auth::user()->id==1 ){ ?>                
+				<? if( Auth::user()->id==1 ){ ?>
 				<span style="margin-right:10px;cursor: pointer" class="login-bar queryLogBtn">queryLog</span>
 				<? } ?>
 				<a href="/page/project" style="margin-right:10px" class="login-bar">回首頁</a>
@@ -149,8 +155,8 @@ function main($scope, $filter, $http) {
 
 		<div style="margin:0;top:30px" class="full-auto context" ng-style="{left:350+menuLeft}" ng-cloak>
             
-            <div style="width:500px;position: absolute;top:-100%;background-color: #fff;left:-1px;height: 95%;border: 1px solid #aaa;font-size:16px;overflow: auto;z-index: 9" ng-style="{width:advanced_status.boxWidth}" class="authorize">
-                <div style="margin:20px;position: absolute;top:0;bottom: 0;left:0;right:0" ng-controller="share" ng-switch on="shareBox.type"><?=$share?></div>
+            <div style="width:500px;position: absolute;top:-100%;background-color: #fff;left:-1px;height: 95%;border: 1px solid #aaa;font-size:16px;overflow: auto;z-index: 9" ng-controller="share" ng-style="{width:advanced_status.boxWidth}" class="authorize">
+                <div style="margin:20px;position: absolute;top:0;bottom: 0;left:0;right:0" ng-switch on="shareBox.type"><?=$share?></div>
             </div>
             
 			<div style="overflow: auto;background-color: #fff;font-size:16px;text-align: left" class="full-auto">		              
