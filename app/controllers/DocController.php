@@ -23,7 +23,7 @@ class DocController extends BaseController {
 	
 	public function create() {   
         
-        $input = Input::get('sheets', 'title');
+        $input = Input::all('sheets', 'title');
         
         $rowsFile = new app\library\files\v0\RowsFile;
         
