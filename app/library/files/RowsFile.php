@@ -67,7 +67,7 @@ class RowsFile extends CommFile {
     }
     
     public function save_struct() {
-        
+        return 1;
     }
     
     public function open() {

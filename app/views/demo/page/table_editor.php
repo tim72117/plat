@@ -18,7 +18,7 @@
         </div>
         
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
-            <div ng-click="tableNameBox=true" class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">儲存</div>
+            <div ng-click="saveDoc()" class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">儲存</div>
             <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
             <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (table.sheets.length)*85+150 }}px"></div>
         </div>       
@@ -179,6 +179,21 @@ function newTableController($scope, $http, $filter, $location) {
         }).error(function(e){
             console.log(e);
         });
+    };
+    
+    $scope.saveDoc = function() {
+        if( $scope.table.intent_key !== null ) {
+            if( !$scope.checkEmpty($scope.table.sheets) )
+                return false;
+            $http({method: 'POST', url: 'save_struct', data:{sheets: $scope.table.sheets, title: $scope.table.title} })
+            .success(function(data, status, headers, config) { 
+                console.log(data);         
+            }).error(function(e){
+                console.log(e);
+            });
+        }else{
+            $scope.tableNameBox = true;
+        }        
     };
     
     if( $scope.table.intent_key !== null ) {
