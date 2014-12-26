@@ -31,14 +31,9 @@
                     <div class="column" style="width: 30px;left: 2px;top:{{ ($rindex+1)*29+2 }}px;text-align: center">{{ $rindex+1 }}</div>   
                     <div class="column" ng-repeat="($cindex, column) in sheet.columns" ng-style="{width:80,left:($cindex+1)*79-48,top:($rindex+1)*29+2}" style="padding-left:2px" contenteditable="{{ power.edit_row }}">{{ row[column.name] }}</div>
                 </div>
-                <div style="height:30px;position: absolute;left:2px" ng-style="{width: table.columns.length*79+30, top:(table.rows.length+1)*29+2}" class="newRow" ng-blur="cancelNewRow1()">
-                    <div class="column" style="width: 30px;left: 0;top:0" ng-mousedown="selectNewRow()"></div>
-                    <div class="column" ng-repeat="column in table.columns" style="width: 80px;top:0;padding-left:2px" ng-style="{left:($index+1)*79-48-2}" contenteditable="true"></div> 
-                </div>
-                <div style="height:30px;position: absolute;left:2px;visibility: hidden" ng-style="{width: table.columns.length*79+30, top:(table.rows.length+1)*29+2}" class="" contenteditable="true"></div>
             </div>-->
             
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">           
+            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 0;right: 0;top: 0;bottom: 0" id="sheet">         
                 <hot-table
                     settings="{rowHeaders: true, manualColumnResize: true, minCols:50, contextMenu: ['row_above', 'row_below', 'remove_row'], afterUpdateSettings: afterUpdateSettings}"
                     columns="sheet.colHeaders"
@@ -47,7 +42,7 @@
                     minSpareRows="1"         
                     startCols="20"
                     startRows="20"
-                    height="1000">
+                    height="setHeight()">
                 </hot-table>
             </div>    
         </div>
@@ -62,7 +57,7 @@
             </div>
             <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
                 <div ng-repeat="colHeader in sheet.colHeaders" style="margin:2px">
-                    <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="colHeader.data" ng-class="{empty:column.name===''}" autofocus="{{column.autofocus || 'false'}}" />
+                    <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="colHeader.data" ng-class="{empty:colHeader.data===''}" autofocus="{{column.autofocus || 'false'}}" />
                     <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="colHeader.title" />
                     <select style="width:180px" class="input define" ng-model="colHeader.rules" ng-options="value.name for value in rules" ng-change="colHeader.types=colHeader.rules.types[0]">
                         <option  value="">過濾規則</option>
@@ -102,16 +97,9 @@
 
 <script>
 angular.module('app', ['ngHandsontable'])
-.filter('startFrom', function() {
-    return function(input, start) {     
-        if( angular.isArray(input) ){
-            return input.slice(start);
-        }
-    };
-})
 .controller('newTableController', newTableController);
 
-function newTableController($scope, $http, $filter, $location) {
+function newTableController($scope, $http, $filter) {
     
     var path = window.location.pathname.split('/');
     $scope.tool = 2;
@@ -205,6 +193,8 @@ function newTableController($scope, $http, $filter, $location) {
                         sheet.colHeaders.push({
                             data: table.columns[cindex].name,
                             title: table.columns[cindex].title,
+                            rules: $filter('filter')($scope.rules, {name2: table.columns[cindex].rules})[0],
+                            types: $filter('filter')($scope.rules, {name2: table.columns[cindex].rules})[0].types[0],
                             readOnly: false
                         });
                     }
@@ -234,8 +224,6 @@ function newTableController($scope, $http, $filter, $location) {
         }
     }
     
-
-       
     $scope.update = function() {
         
         $http({method: 'POST', url: '', data:{} })
@@ -248,20 +236,8 @@ function newTableController($scope, $http, $filter, $location) {
         });
     };   
     
-    $scope.selectNewRow = function() {
-        angular.element('.newRow').addClass('selected');
-    };
-    
-    $scope.cancelNewRow = function() {
-        angular.element('.newRow').removeClass('selected');
-    };
-
-
-
-    
 }
 </script>
-<script src="/js/angular-route.min.js"></script>
 <script src="/js/jquery.fileDownload.js"></script>
 <script src="/js/ngHandsontable.js"></script>
 <script src="/js/handsontable.full.min.js"></script>
@@ -326,14 +302,7 @@ function newTableController($scope, $http, $filter, $location) {
     font-size: 13px;
     font-family: 微軟正黑體
 }
-.input.empty {
-    background-color: rgba(200,200,200,0.1);   
-    border-color: #888;
-}
-.newRow {
-    cursor: pointer;
-}
-.newRow.selected {
-    background-color: rgba(0,0,255,0.1);
+.input.empty {  
+    border-color: red;
 }
 </style>

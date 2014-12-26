@@ -25,8 +25,7 @@
             <label for="upload-file">
                 <div class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>                    
             </label>    
-            <div ng-repeat="($tindex, table) in tables" class="page-tag top" ng-click="select(table)" ng-class="{selected:table.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
-<!--            <div ng-click="addTable()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (tables.length)*85+150 }}px"></div>-->
+            <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
         </div>       
         
         <div ng-switch-when="1" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0; right:0; overflow: hidden">  
@@ -65,13 +64,7 @@
 
 <script>
 angular.module('app', ['ngHandsontable'])
-.filter('startFrom', function() {
-    return function(input, start) {   
-        if( angular.isArray(input) ){
-            return input.slice(start);
-        }
-    };
-}).controller('newTableController', newTableController)
+.controller('newTableController', newTableController)
 .factory("XLSXReaderService", ['$q', '$rootScope',
     function($q, $rootScope) {
         var service = function(data) {
@@ -100,7 +93,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
     $scope.page = 1;
     $scope.limit = 40;
     $scope.newColumn = {};
-    $scope.table = {sheets:[]};
+    $scope.table = {sheets:[], rows: []};
     $scope.rows = [];
     $scope.action = {};
     $scope.imports = {};
@@ -231,7 +224,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
     };
     
     $scope.beforeAutofill = function(g) {
-        console.log(angular.element('.htContainer').scope());
+        //console.log(angular.element('.htContainer').scope());
         //console.log($scope.hotInstance = {});
     };
     
@@ -249,7 +242,6 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
 <script src="/js/xlsx-reader.js"></script>
 <link rel="stylesheet" media="screen" href="/js/handsontable.full.min.css">
 
-
 <style>
 .column {
     box-sizing: border-box;
@@ -258,7 +250,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
     font-size: 13px;
     line-height: 30px;
     height: 30px;
-    overflow: hidden
+    overflow: hidden;
 }    
 .page-tag {
     position: absolute;

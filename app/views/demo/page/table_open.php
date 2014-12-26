@@ -16,6 +16,7 @@
             <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
             <div ng-click="addTable()" class="page-tag top add-tag" ng-show="power.edit_column" style="margin:5px 0 0 5px;left:{{ (table.sheets.length)*85+150 }}px"></div>
         </div>
+
         <div ng-switch-when="1" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0; right:0; overflow: hidden">  
 <!--            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
                 <div class="column" style="width: 30px;left: 2px;top: 2px"></div>   
@@ -30,43 +31,18 @@
                 <hot-table                   
                     settings="{rowHeaders: true, manualColumnResize: true, minCols:50, contextMenu: ['row_above', 'row_below', 'remove_row'], afterUpdateSettings: afterUpdateSettings}"
                     columns="sheet.colHeaders"
-                    colHeaders="true"
-                    minSpareRows="1"
                     datarows="sheet.rows"
+                    colHeaders="true"
+                    minSpareRows="1"                    
                     startCols="20"
+                    startRows="20"
                     height="setHeight()">
                 </hot-table>
             </div>    
         </div>
-
-        <div ng-switch-when="2" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;width:1200px; overflow: scroll">
-            <div style="width:650px;height:25px;padding:10px 0 2px 0">
-                <div style="border: 1px solid #999;height:27px;margin:0 0 0 2px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:180px" class="define">欄位名稱</div>  
-                <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:180px" class="define">欄位描述</div> 
-                <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:89px" class="define"></div>
-                <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:89px" class="define"></div>
-            </div>
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
-                <div ng-repeat="colHeader in sheet.colHeaders" style="margin:2px">
-                    <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="colHeader.data" autofocus="{{colHeader.autofocus || 'false'}}" />
-                    <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="colHeader.title" />
-                    <select class="input define"><option>欄位類型</option></select>
-                    <select class="input define"><option>過濾規則</option></select>
-                    <input type="button" value="刪除" ng-click="removeColumn($index, $tindex)" style="padding: 3px" />
-                </div>    
-                <div style="margin:2px">
-                    <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="newColumn.data" />
-                    <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="newColumn.title" />
-                    <select class="input define"><option>欄位類型</option></select>
-                    <select class="input define"><option>過濾規則</option></select>        
-                    <input type="button" value="新增" ng-click="addColumn()" style="padding: 3px" />
-                </div>   
-            </div>
-        </div>
         
         <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
             <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}" style="margin:0 0 5px 5px;">資料表</div>
-            <div class="page-tag" ng-click="tool=2" ng-class="{selected:tool===2}" style="margin:0 0 5px 5px;left:85px" ng-show="power.edit_column">欄位定義</div>
         </div>
 
         
@@ -77,13 +53,7 @@
 
 <script>
 angular.module('app', ['ngHandsontable'])
-.filter('startFrom', function() {
-    return function(input, start) {   
-        if( angular.isArray(input) ){
-            return input.slice(start);
-        }
-    };
-}).controller('newTableController', newTableController)
+.controller('newTableController', newTableController)
 
 .directive("scroll", function ($window) {
     return function(scope, element, attrs) {
@@ -128,21 +98,10 @@ function newTableController($scope, $http, $filter) {
         sheet.selected = true;
     };
     
-    $http({method: 'POST', url: 'get_power', data:{} })
-    .success(function(data, status, headers, config) {
-        $scope.power = data;
-    }).error(function(e){
-        console.log(e);
-    });
-    
-    $scope.afterUpdateSettings   = function() {
-        
-    };
-    
     $http({method: 'POST', url: 'get_columns', data:{} })
     .success(function(data, status, headers, config) {
         for( sindex in data.sheets ){
-            var sheet = {columns:[], colHeaders:[], rows:[]};       
+            var sheet = {colHeaders:[], rows:[]};       
             for( tindex in data.sheets[sindex].tables ){
                 var table = data.sheets[sindex].tables[tindex];
                 for( cindex in table.columns ){               
@@ -155,10 +114,6 @@ function newTableController($scope, $http, $filter) {
             }
             $scope.table.sheets.push(sheet);            
         }
-        //$scope.settings.columns = $scope.table.sheets[0].colHeaders;
-        //$scope.sheet = $scope.table.sheets[0];
-        //$scope.colHeaders = [{data:1}];
-        console.log($scope.table.sheets);
         
         $scope.table.sheets[0].selected = true;
         $scope.update();      
@@ -167,19 +122,7 @@ function newTableController($scope, $http, $filter) {
         console.log(e);
     });
     
-    $scope.download = function(){
-        jQuery.fileDownload('export', {
-            httpMethod: "POST",
-            failCallback: function (responseHtml, url) { console.log(responseHtml); }
-        }); 
-        $http({method: 'POST', url: 'export', data:{} })
-        .success(function(data, status, headers, config) {
-        }).error(function(e){
-            console.log(e);
-        }); 
-    };
-    
-    $scope.update = function(){      
+    $scope.update = function(){
         
         $http({method: 'POST', url: 'get_rows?page='+($scope.page), data:{} })
         .success(function(data, status, headers, config) {
@@ -196,10 +139,33 @@ function newTableController($scope, $http, $filter) {
         }).error(function(e){
             console.log(e);
         });
-    };  
+    }; 
+    
+    $scope.download = function(){
+        jQuery.fileDownload('export', {
+            httpMethod: "POST",
+            failCallback: function (responseHtml, url) { console.log(responseHtml); }
+        }); 
+        $http({method: 'POST', url: 'export', data:{} })
+        .success(function(data, status, headers, config) {
+        }).error(function(e){
+            console.log(e);
+        }); 
+    }; 
     
     $scope.setHeight = function() {
         return angular.element('#sheet').height();
+    };    
+    
+    $http({method: 'POST', url: 'get_power', data:{} })
+    .success(function(data, status, headers, config) {
+        $scope.power = data;
+    }).error(function(e){
+        console.log(e);
+    });
+    
+    $scope.afterUpdateSettings   = function() {
+        
     };
     
     $scope.testClick = function(){        

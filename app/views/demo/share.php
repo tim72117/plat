@@ -297,7 +297,7 @@ function share($scope, $filter, $http) {
     
     $scope.requestTo = function(requestDescription) {
         
-        var intent_key = angular.element('[ng-controller=newTableController]').scope().tables.intent_key;
+        var intent_key = angular.element('[ng-controller=newTableController]').scope().table.intent_key;
         
         var groups = $scope.getSelectedGroup();
         console.log({groups: groups, intent_key: intent_key, description: requestDescription});
