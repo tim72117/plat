@@ -49,34 +49,27 @@ class RowsFile extends CommFile {
         
         $filesystem = new Filesystem;
         
-        $json_table = (object)['table' =>[(object)['database'=>'', 'name'=>'', 'primaryKey'=>'', 'columns'=>[]]] ];
+        $json_table = (object)['tables' =>[(object)['database'=>'', 'name'=>'', 'primaryKey'=>'', 'columns'=>[]]] ];
         $json_column =(object)['name'=>'', 'title'=>'', 'rules'=>'', 'types'=>'', 'only'=>''];
         $scheme = (object)['power'=> (object)['edit_column'=>0, 'edit_row'=>false], 'sheets' =>[]];
         
 
         foreach ($sheets as $sheet) {
-            $rand = md5(uniqid(rand(), true));
+            $rand = md5(uniqid(time(), true));
             $name = hash('md5', $rand);
-            $json_table->table[0]->database = '1';
-            $json_table->table[0]->name = $name;
-            $json_table->table[0]->primaryKey = '1';
+            $json_table->tables[0]->database = '1';
+            $json_table->tables[0]->name = $name;
+            $json_table->tables[0]->primaryKey = '1';
             foreach ($sheet['colHeaders'] as $columns) {
                 $json_column->name = $columns["data"];
                 $json_column->title = $columns["title"];
                 $json_column->only = $columns["only"];
                 $json_column->rules = $columns["rules"]["name2"];
                 $json_column->types = $columns["types"];
-                array_push($json_table->table[0]->columns, $json_column);
+                array_push($json_table->tables[0]->columns, $json_column);
             }
             array_push($scheme->sheets, $json_table);
             //var_dump($sheet['colHeaders']);exit;
-        }
-
-        var_dump($scheme);exit;
-        
-        foreach($scheme->$sheets as $index => $sheet) {
-            //$scheme->$sheets[$index]->name;
-            //--------待處理
         }
         
         $name = hash('md5', json_encode($scheme));       

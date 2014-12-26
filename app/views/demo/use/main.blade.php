@@ -61,7 +61,7 @@ function main($scope, $filter, $http) {
 		<div style="background-color: #ffffff;width:100%;height:0px"></div>
 		<div style="background-color: #458A00;width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #ddd;color:#fff" align="right" ng-controller="menu">			
             <? if( Auth::user()->id<20 ){ ?>
-            <div style="position:absolute;left:370px;z-index:3000" ng-cloak>
+            <div style="position:absolute;left:370px;z-index:300" ng-cloak>
                 <div style="position:absolute;left:0">
                     <div style="width:120px;text-align: center;box-sizing: border-box" class="menu" ng-click="show=!show">建立檔案</div>
                     <div style="width:120px;text-align: center;position:absolute;height:40px;line-height: 40px;box-sizing: border-box;top:29px" class="menu-item" ng-show="show">
