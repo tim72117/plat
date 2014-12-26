@@ -112,7 +112,7 @@ class RowsFile extends CommFile {
             $filesystem->put( storage_path() . '/file_upload/' . $file->file, json_encode($scheme) );
             
         }
-        return $shareFile;
+        return json_encode($scheme);
     }
     
     public function open() {
