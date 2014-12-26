@@ -12,13 +12,13 @@
         <div style="height:80px;position: absolute;top: 35px;z-index:3">
             <div style="position: absolute;left:5px;top:0;;bottom:0;width:440px;border: 1px solid #999;background-color: #fff;padding:20px;box-shadow: 0 10px 20px rgba(0,0,0,0.5);" ng-show="tableNameBox">
                 <input type="text" placeholder="輸入檔案名稱" class="input define" style="width:220px" ng-model="table.title" />
-                <div style="top:20px;left:250px" class="btn default box green" ng-class="{wait:wait}" ng-click="addDoc();tableNameBox=false">確定</div>
+                <div style="top:20px;left:250px" class="btn default box green" ng-class="{wait:wait}" ng-click="saveDoc();tableNameBox=false">確定</div>
                 <div style="top:20px;left:360px" class="btn default box white" ng-class="{wait:wait}" ng-click="tableNameBox=false">取消</div>
             </div>
         </div>
         
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
-            <div ng-click="saveDoc()" class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">儲存</div>
+            <div ng-click="tableNameBox=true" class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">儲存</div>
             <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
             <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (table.sheets.length)*85+150 }}px"></div>
         </div>       
@@ -170,32 +170,28 @@ function newTableController($scope, $http, $filter, $location) {
         return !emptyColumns>0;
     };
     
-    $scope.addDoc = function() {
+    $scope.saveDoc = function() {
         if( !$scope.checkEmpty($scope.table.sheets) )
             return false;
-
-        //if(false)
-        $http({method: 'POST', url: '/file/new/create', data:{sheets: $scope.table.sheets, title: $scope.table.title} })
-        .success(function(data, status, headers, config) { 
-            $scope.table.intent_key = data.intent_key;
-            console.log(data);         
-        }).error(function(e){
-            console.log(e);
-        });
-    };
-    
-    $scope.saveDoc = function() {
         if( $scope.table.intent_key !== null ) {
-            if( !$scope.checkEmpty($scope.table.sheets) )
-                return false;
+
             $http({method: 'POST', url: 'save_struct', data:{sheets: $scope.table.sheets, title: $scope.table.title} })
             .success(function(data, status, headers, config) { 
                 console.log(data);         
             }).error(function(e){
                 console.log(e);
             });
+            
         }else{
-            $scope.tableNameBox = true;
+            
+            $http({method: 'POST', url: '/file/new/create', data:{sheets: $scope.table.sheets, title: $scope.table.title} })
+            .success(function(data, status, headers, config) { 
+                $scope.table.intent_key = data.intent_key;
+                console.log(data);         
+            }).error(function(e){
+                console.log(e);
+            });
+            
         }        
     };
     
@@ -217,6 +213,7 @@ function newTableController($scope, $http, $filter, $location) {
                 $scope.table.sheets.push(sheet);            
             }
 
+            $scope.table.title = data.title;
             $scope.table.sheets[0].selected = true;
             $scope.update();      
 
