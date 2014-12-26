@@ -69,9 +69,9 @@
                     </select>
                     <select style="width:200px" class="input define" ng-model="colHeader.types">
                         <option value="">欄位類型</option>
-                        <option ng-repeat="type in colHeader.rules.type" value="{{type.type}}">{{type.name}}</option>
+                        <option ng-repeat="type in colHeader.rules.types" value="{{type.type}}">{{type.name}}</option>
                     </select>
-                    
+                    <input type="checkbox" class="input define" style="width:50px" ng-model="colHeader.only" ng-init="colHeader.only = false" />
                     <input type="button" value="刪除" ng-click="removeColumn($index, $tindex)" style="padding: 3px" />
                 </div>    
                 <div style="margin:2px">
@@ -82,8 +82,9 @@
                     </select>
                     <select style="width:200px" class="input define" ng-model="colHeader.types">
                         <option value="">欄位類型</option>
-                        <option ng-repeat="type in colHeader.rules.type" value="{{type.type}}">{{type.name}}</option>
+                        <option ng-repeat="type in colHeader.rules.types" value="{{type.type}}">{{type.name}}</option>
                     </select>
+                    <input type="checkbox" class="input define" style="width:50px" ng-model="colHeader.only" ng-init="colHeader.only = false" />
                     <input type="button" value="新增" ng-click="addColumn()" style="padding: 3px" />
                 </div>   
             </div>
@@ -119,13 +120,13 @@ function newTableController($scope, $http, $filter, $location) {
     $scope.limit = 40;
     $scope.newColumn = {};
     $scope.table = {sheets:[], intent_key:(path[1]==='file' ? path[2] : null)};
-    $scope.types = [{name: "整數", type: "int"}, {name: "小數", type: "float"}, {name: "中、英文(數字加符號)", type: "nvarchar"},
+    var types = [{name: "整數", type: "int"}, {name: "小數", type: "float"}, {name: "中、英文(數字加符號)", type: "nvarchar"},
                     {name: "英文(數字加符號)", type: "varchar"}, {name: "日期", type: "date"}, {name: "是與否", type: "bit"}, {name: "多文字(中英文、數字和符號)", type: "text"}];
 
-    $scope.rules = [{name: "地址", type: [$scope.types[2]]}, {name: "手機", type: [$scope.types[3]]}, {name: "電話", type: [$scope.types[3]]}, {name: "信箱", type: [$scope.types[3]]},
-                    {name: "身分證", type: [$scope.types[3]]}, {name: "性別: 1.男 2.女", type: [$scope.types[5]]}, {name: "日期", type: [$scope.types[4]]}, {name: "是與否", type: [$scope.types[5]]},
-                    {name: "整數", type: [$scope.types[0]]}, {name: "小數", type: [$scope.types[1]]}, {name: "多文字(50字以上)", type: [$scope.types[6]]}, {name: "多文字(50字以內)", type: [$scope.types[2]]},
-                    {name: "其他", type: [$scope.types[0], $scope.types[1], $scope.types[2], $scope.types[6]]}];
+    $scope.rules = [{name: "地址", name2: "address", types: [types[2]]}, {name: "手機", name2: "phone", types: [types[3]]}, {name: "電話", name2: "tel", types: [types[3]]}, {name: "信箱", name2: "email", types: [types[3]]},
+                    {name: "身分證", name2: "id", types: [types[3]]}, {name: "性別: 1.男 2.女", name2: "gender", types: [types[5]]}, {name: "日期", name2: "date", types: [types[4]]}, {name: "是與否", name2: "bool", types: [types[5]]},
+                    {name: "整數", name2: "int", types: [types[0]]}, {name: "小數", name2: "float", types: [types[1]]}, {name: "多文字(50字以上)", name2: "text", types: [types[6]]}, {name: "多文字(50字以內)", name2: "nvarchar", types: [types[2]]},
+                    {name: "其他", name2: "else", types: [types[0], types[1], types[2], types[6]]}];
 
     $scope.rows = [];
     $scope.action = {}; 
@@ -140,12 +141,14 @@ function newTableController($scope, $http, $filter, $location) {
             data: $scope.newColumn.data,
             title: $scope.newColumn.title,
             types: $scope.newColumn.types,
-            rule: $scope.newColumn.rules
+            rule: $scope.newColumn.rules,
+            only: $scope.newColumn.only
         });
         $scope.newColumn.data = '';
         $scope.newColumn.title = '';
         $scope.newColumn.types = '';
         $scope.newColumn.rules = '';
+        $scope.newColumn.only = '';
     };
 
     $scope.removeColumn = function(index, tindex) {
