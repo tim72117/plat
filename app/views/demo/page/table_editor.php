@@ -65,20 +65,19 @@
                     <select style="width:200px" class="input define" ng-model="colHeader.types" ng-options="value.name for value in colHeader.rules.types">
                         <option value="">欄位類型</option>
                     </select>
-                    <input type="checkbox" class="input define" style="width:50px" ng-model="colHeader.only" ng-init="colHeader.only = false" />
+                    <input type="checkbox" class="input define" style="width:50px" ng-model="colHeader.only" />
                     <input type="button" value="刪除" ng-click="removeColumn($index, $tindex)" style="padding: 3px" />
                 </div>    
                 <div style="margin:2px">
                     <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="newColumn.data" ng-init="newColumn.data=''" />
                     <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="newColumn.title" />
-                    <select style="width:180px" class="input define" ng-model="colHeader.rules" ng-options="value.name for value in rules" >
+                    <select style="width:180px" class="input define" ng-model="newColumn.rules" ng-options="value.name for value in rules" ng-change="newColumn.types=newColumn.rules.types[0]">
                         <option  value="">過濾規則</option>
                     </select>
-                    <select style="width:200px" class="input define" ng-model="colHeader.types">
+                    <select style="width:200px" class="input define" ng-model="newColumn.types" ng-options="value.name for value in newColumn.rules.types">
                         <option value="">欄位類型</option>
-                        <option ng-repeat="type in colHeader.rules.types" value="{{type.type}}">{{type.name}}</option>
                     </select>
-                    <input type="checkbox" class="input define" style="width:50px" ng-model="colHeader.only " ng-init="colHeader.only = false" />
+                    <input type="checkbox" class="input define" style="width:50px" ng-model="newColumn.only"  />
                     <input type="button" value="新增" ng-click="addColumn()" style="padding: 3px" />
                 </div>   
             </div>
@@ -128,7 +127,7 @@ function newTableController($scope, $http, $filter) {
             data: $scope.newColumn.data,
             title: $scope.newColumn.title,
             types: $scope.newColumn.types,
-            rule: $scope.newColumn.rules,
+            rules: $scope.newColumn.rules,
             only: $scope.newColumn.only
         });
         $scope.newColumn.data = '';
@@ -185,16 +184,24 @@ function newTableController($scope, $http, $filter) {
     if( $scope.table.intent_key !== null ) {
         $http({method: 'POST', url: 'get_columns', data:{} })
         .success(function(data, status, headers, config) {
+            //console.log(data.sheets);
             for( sindex in data.sheets ){
                 var sheet = {colHeaders:[], rows:null};       
                 for( tindex in data.sheets[sindex].tables ){
                     var table = data.sheets[sindex].tables[tindex];
-                    for( cindex in table.columns ){               
+                    for( cindex in table.columns ){
+                        $rule = $filter('filter')($scope.rules, {name2: table.columns[cindex].rules});
+                        //console.log($a);
+                        $type = $filter('filter')($rule[0].types, {type: table.columns[cindex].types});
+                        //console.log($b);
                         sheet.colHeaders.push({
                             data: table.columns[cindex].name,
                             title: table.columns[cindex].title,
                             rules: $filter('filter')($scope.rules, {name2: table.columns[cindex].rules})[0],
-                            types: $filter('filter')($scope.rules, {name2: table.columns[cindex].rules})[0].types[0],
+                            //types: $filter('filter')((var types), {type: table.columns[cindex].types})[0],
+                            types: $type[0],
+                            only: table.columns[cindex].only,
+
                             readOnly: false
                         });
                     }
@@ -217,6 +224,9 @@ function newTableController($scope, $http, $filter) {
                 sheet.colHeaders.push({
                     data: 'column'+j,
                     title: 'column'+j,
+                    rules: 'column'+j,
+                    types: 'column'+j,
+                    only: 'column'+j,
                     readOnly: false
                 });
             }        
