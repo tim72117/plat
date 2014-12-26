@@ -64,12 +64,12 @@
                 <div ng-repeat="colHeader in sheet.colHeaders" style="margin:2px">
                     <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="colHeader.data" ng-class="{empty:column.name===''}" autofocus="{{column.autofocus || 'false'}}" />
                     <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="colHeader.title" />
-                    <select style="width:180px" class="input define" ng-model="colHeader.rules" ng-options="value.name for value in rules">
+                    <select style="width:180px" class="input define" ng-model="colHeader.rules" ng-options="value.name for value in rules" ng-change="change(colHeader.rules)">
                         <option  value="">過濾規則</option>
                     </select>
                     <select style="width:200px" class="input define" ng-model="colHeader.types">
                         <option value="">欄位類型</option>
-                        <option ng-repeat="type in colHeader.rules.types" value="{{type.type}}">{{type.name}}</option>
+                        <option ng-repeat="type in colHeader.rules.types" ng-if="colHeader.types = colHeader.rules.types[0].type" value="{{type.type}}">{{type.name}}</option>
                     </select>
                     <input type="checkbox" class="input define" style="width:50px" ng-model="colHeader.only" ng-init="colHeader.only = false" />
                     <input type="button" value="刪除" ng-click="removeColumn($index, $tindex)" style="padding: 3px" />
@@ -77,14 +77,14 @@
                 <div style="margin:2px">
                     <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="newColumn.data" ng-init="newColumn.data=''" />
                     <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="newColumn.title" />
-                    <select style="width:180px" class="input define" ng-model="colHeader.rules" ng-options="value.name for value in rules">
+                    <select style="width:180px" class="input define" ng-model="colHeader.rules" ng-options="value.name for value in rules" >
                         <option  value="">過濾規則</option>
                     </select>
                     <select style="width:200px" class="input define" ng-model="colHeader.types">
                         <option value="">欄位類型</option>
                         <option ng-repeat="type in colHeader.rules.types" value="{{type.type}}">{{type.name}}</option>
                     </select>
-                    <input type="checkbox" class="input define" style="width:50px" ng-model="colHeader.only" ng-init="colHeader.only = false" />
+                    <input type="checkbox" class="input define" style="width:50px" ng-model="colHeader.only " ng-init="colHeader.only = false" />
                     <input type="button" value="新增" ng-click="addColumn()" style="padding: 3px" />
                 </div>   
             </div>
@@ -131,6 +131,10 @@ function newTableController($scope, $http, $filter, $location) {
     $scope.rows = [];
     $scope.action = {}; 
     angular.element('[ng-controller=menu]').scope().hideRequestFile = $scope.table.intent_key === null;
+
+    $scope.change = function(user) {
+        $scope.change = user.types[0].type;
+      };
     
     $scope.addSheet = function() {
         $scope.table.sheets.push({colHeaders:[], rows:[]});
