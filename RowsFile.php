@@ -39,7 +39,7 @@ class RowsFile extends CommFile {
         
         //$requestFile = RequestFile::find($value['requested_file_id']);
         
-        $shareFile = ShareFile::find($this->doc_id);   
+        $shareFile = ShareFile::find($this->doc_id);
         
         return 'demo.page.table_import';
         
@@ -49,29 +49,8 @@ class RowsFile extends CommFile {
         
         $filesystem = new Filesystem;
         
-        $json_table = (object)['tables' =>[(object)['database'=>'', 'name'=>'', 'primaryKey'=>'', 'columns'=>[]]] ];
-        $json_column =(object)['name'=>'', 'title'=>'', 'rules'=>'', 'types'=>'', 'only'=>''];
-        $scheme = (object)['power'=> (object)['edit_column'=>0, 'edit_row'=>false], 'sheets' =>[]];
-        
-
-        foreach ($sheets as $sheet) {
-            $rand = md5(uniqid(time(), true));
-            $name = hash('md5', $rand);
-            $json_table->tables[0]->database = '1';
-            $json_table->tables[0]->name = $name;
-            $json_table->tables[0]->primaryKey = '1';
-            foreach ($sheet['colHeaders'] as $columns) {
-                $json_column->name = $columns["data"];
-                $json_column->title = $columns["title"];
-                $json_column->only = $columns["only"];
-                $json_column->rules = $columns["rules"]["name2"];
-                $json_column->types = $columns["types"];
-                array_push($json_table->tables[0]->columns, $json_column);
-            }
-            array_push($scheme->sheets, $json_table);
-            //var_dump($sheet['colHeaders']);exit;
-        }
-        
+        $scheme = $this->create_scheme($sheets); 
+     
         $name = hash('md5', json_encode($scheme));       
         
         $filesystem->put( storage_path() . '/rows/temp/' . $name, json_encode($scheme) );
@@ -82,8 +61,58 @@ class RowsFile extends CommFile {
         
     }
     
+    private function create_scheme($sheets) {        
+        
+        $scheme = (object)['power'=> (object)['edit_column'=>0, 'edit_row'=>false], 'sheets' =>[]];
+        
+        foreach ($sheets as $sheet) {
+            $rand = md5(uniqid(time(), true));
+            $name = hash('md5', $rand);
+            $json_table = (object)[
+                'tables' =>[(object)[
+                    'database'   => '1',
+                    'name'       => $name,
+                    'primaryKey' => '1',
+                    'columns'    => []
+                ]]
+            ];
+            foreach ($sheet['colHeaders'] as $columns) {
+                array_push($json_table->tables[0]->columns, (object)[
+                    'name'  => $columns["data"],
+                    'title' => $columns["title"],
+                    'rules' => $columns["rules"]["name2"],
+                    'types' => $columns["types"],
+                    'only'  => $columns["only"]
+                ]);
+            }
+            array_push($scheme->sheets, $json_table);
+        }
+        
+        return $scheme;
+    }
+    
     public function save_struct() {
-        return 1;
+        
+        $shareFile = ShareFile::find($this->doc_id);
+        
+        if( $shareFile->created_by==Auth::user()->id ){
+            
+            $filesystem = new Filesystem;
+            
+            $input = Input::all('sheets', 'title');
+            
+            $scheme = $this->create_scheme($input['sheets']); 
+            
+            $file = $shareFile->isFile;
+            
+            $file->title = $input['title'];
+            
+            $file->save();
+            
+            $filesystem->put( storage_path() . '/file_upload/' . $file->file, json_encode($scheme) );
+            
+        }
+        return $shareFile;
     }
     
     public function open() {
@@ -119,6 +148,8 @@ class RowsFile extends CommFile {
         
         $power = array();
         
+        $title = $shareFile->isFile->title;        
+        
         if( $shareFile->created_by!=Auth::user()->id && isset($shareFile->power) ) {
             $power = json_decode($shareFile->power);
 
@@ -128,10 +159,11 @@ class RowsFile extends CommFile {
                         unset($table->columns[$index]);
                     }
                 }
-            }
+            }            
+            
         }
 
-        return Response::json(['sheets'=>$sheets]);
+        return Response::json(['sheets'=>$sheets, 'title'=>$title]);
     }
 
     public function get_power() {
