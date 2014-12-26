@@ -61,7 +61,8 @@ class RowsFile extends CommFile {
         
     }
     
-    private function create_scheme($sheets) {        
+    private function create_scheme($sheets) {  
+        //var_dump($sheets);exit;      
         
         $scheme = (object)['power'=> (object)['edit_column'=>0, 'edit_row'=>false], 'sheets' =>[]];
         
@@ -81,13 +82,13 @@ class RowsFile extends CommFile {
                     'name'  => $columns["data"],
                     'title' => $columns["title"],
                     'rules' => $columns["rules"]["name2"],
-                    'types' => $columns["types"],
+                    'types' => $columns["types"]["type"],
                     'only'  => $columns["only"]
                 ]);
             }
             array_push($scheme->sheets, $json_table);
         }
-        
+        //var_dump($scheme);exit;
         return $scheme;
     }
     
@@ -143,6 +144,8 @@ class RowsFile extends CommFile {
         $scheme = $this->get_scheme($shareFile);
         
         $sheets = $scheme->sheets;
+
+        //var_dump($scheme);
 
         //$columns = DB::table('use_103.sys.columns')->whereRaw("object_id=OBJECT_ID('use_103.dbo.seniorOne103_userinfo')")->select('name', DB::raw("'' AS description"))->get('description', 'name');
         
