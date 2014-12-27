@@ -35,10 +35,11 @@
             
             <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 0;right: 0;top: 0;bottom: 0" id="sheet">         
                 <hot-table
-                    settings="{rowHeaders: true, manualColumnResize: true, minCols:50, contextMenu: ['row_above', 'row_below', 'remove_row'], afterUpdateSettings: afterUpdateSettings}"
+                    settings="{manualColumnResize: true, minCols:50, contextMenu: ['row_above', 'row_below', 'remove_row'], afterUpdateSettings: afterUpdateSettings}"
                     columns="sheet.colHeaders"
                     datarows="sheet.rows"
                     colHeaders="true"
+                    rowHeaders="true"
                     minSpareRows="1"         
                     startCols="20"
                     startRows="20"
@@ -47,37 +48,56 @@
             </div>    
         </div>
 
-        <div ng-switch-when="2" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;width:1200px; overflow: scroll">
-            <div style="width:900px;height:25px;padding:10px 0 2px 0">
-                <div style="border: 1px solid #999;height:27px;margin:0 0 0 2px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:180px" class="define">欄位名稱</div>  
-                <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:180px" class="define">欄位描述</div> 
-                <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:180px" class="define">過濾規則</div>
-                <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:200px" class="define">欄位類型</div>
-                <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:45px" class="define">唯一</div>
+        <div ng-switch-when="2" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0;right: 0;overflow: scroll">
+            <div style="width:1000px;height:25px;padding:10px 0 2px 0">
+                <div style="border: 1px solid #999;height:30px;margin:0 0 0 3px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">欄位名稱</div>  
+                <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">欄位描述</div> 
+                <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">過濾規則</div>
+                <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:200px" class="define">欄位類型</div>
+                <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:45px" class="define">唯一</div>
+                <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:90px" class="define">連結選單</div>
             </div>
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
+            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="width:1000px;height:25px;padding:10px 0 2px 0">
                 <div ng-repeat="colHeader in sheet.colHeaders" style="margin:2px">
-                    <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="colHeader.data" ng-class="{empty:colHeader.data===''}" autofocus="{{column.autofocus || 'false'}}" />
-                    <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="colHeader.title" ng-class="{empty:colHeader.title===''}" autofocus="{{column.autofocus || 'false'}}" />
-                    <select style="width:180px" class="input define" ng-model="colHeader.rules" ng-options="value.name for value in rules" ng-change="colHeader.types=colHeader.rules.types[0]" ng-class="{empty:colHeader.rules[0] != null}" >
-                        <option  value="">過濾規則</option>
-                    </select>
-                    <select style="width:200px" class="input define" ng-model="colHeader.types" ng-options="value.name for value in colHeader.rules.types" ng-class="{empty:colHeader.types[0] != null}" >
-                        <option value="">欄位類型</option>
-                    </select>
-                    <input type="checkbox" class="input define" style="width:50px" ng-model="colHeader.unique" />
+                    <div class="input-status" ng-class="{empty:!colHeader.data}">
+                        <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="colHeader.data" />
+                    </div>
+                    <div class="input-status" ng-class="{empty:!colHeader.title}">
+                        <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="colHeader.title" />
+                    </div>    
+                    <div class="input-status" ng-class="{empty:!colHeader.rules}">
+                        <select style="width:180px" class="input define" ng-model="colHeader.rules" ng-options="rule.name for rule in rules" ng-change="colHeader.types=colHeader.rules.types[0]">
+                            <option  value="">過濾規則</option>
+                        </select>
+                    </div>
+                    <div class="input-status" ng-class="{empty:!colHeader.types}">
+                        <select style="width:200px" class="input define" ng-model="colHeader.types" ng-options="type.name for type in colHeader.rules.types" ng-class="{empty:!colHeader.types}" >
+                            <option value="">欄位類型</option>
+                        </select>
+                    </div>
+                    <div class="input-status"><input type="checkbox" class="input define" style="width:45px" ng-model="colHeader.unique" /></div>
+                    <div class="input-status">
+                        <select style="width:90px" class="input define" ng-model="colHeader.link" ng-options="sheet.name for sheet in table.sheets" ng-class="{empty:!colHeader.types}" >
+                            <option value="">資料表</option>
+                        </select>
+                    </div>
                     <input type="button" value="刪除" ng-click="removeColumn($index, $tindex)" style="padding: 3px" />
                 </div>    
                 <div style="margin:2px">
-                    <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="newColumn.data" ng-init="newColumn.data=''" />
-                    <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="newColumn.title" />
-                    <select style="width:180px" class="input define" ng-model="newColumn.rules" ng-options="value.name for value in rules" ng-change="newColumn.types=value.types[0]">
-                        <option  value="">過濾規則</option>
-                    </select>
-                    <select style="width:200px" class="input define" ng-model="newColumn.types" ng-options="value.name for value in newColumn.rules.types">
-                        <option value="">欄位類型</option>
-                    </select>
-                    <input type="checkbox" class="input define" style="width:50px" ng-model="newColumn.unique" ng-init="newColumn.unique=false" />
+                    <div class="input-status"><input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="newColumn.data" ng-init="newColumn.data=''" /></div>
+                    <div class="input-status"><input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="newColumn.title" ng-init="newColumn.title=''" /></div>
+                    <div class="input-status">
+                        <select style="width:180px" class="input define" ng-model="newColumn.rules" ng-options="rule.name for rule in rules" ng-change="newColumn.types=newColumn.rules.types[0]">
+                            <option  value="">過濾規則</option>
+                        </select>
+                    </div>    
+                    <div class="input-status">
+                        <select style="width:200px" class="input define" ng-model="newColumn.types" ng-options="type.name for type in newColumn.rules.types">
+                            <option value="">欄位類型</option>
+                        </select>
+                    </div>
+                    <div class="input-status"><input type="checkbox" class="input define" style="width:50px" ng-model="newColumn.unique" ng-init="newColumn.unique=false" /></div>
+                    <div class="input-status"><div style="width:90px"></div></div>
                     <input type="button" value="新增" ng-click="addColumn()" style="padding: 3px" />
                 </div>   
             </div>
@@ -101,11 +121,13 @@ angular.module('app', ['ngHandsontable'])
 function newTableController($scope, $http, $filter) {
     
     var path = window.location.pathname.split('/');
+    $scope.table = {sheets:[], intent_key:(path[1]==='file' ? path[2] : null)};
+    angular.element('[ng-controller=menu]').scope().hideRequestFile = $scope.table.intent_key === null;
+    
     $scope.tool = 2;
     $scope.page = 1;
     $scope.limit = 40;
-    $scope.newColumn = {};
-    $scope.table = {sheets:[], intent_key:(path[1]==='file' ? path[2] : null)};
+    $scope.newColumn = {};    
     $scope.action = {}; 
     
     var types = [
@@ -119,9 +141,7 @@ function newTableController($scope, $http, $filter) {
         {name: "是與否", key: "bool", types: [types[5]]},
         {name: "整數", key: "int", types: [types[0]]}, {name: "小數", key: "float", types: [types[1]]}, {name: "多文字(50字以上)", key: "text", types: [types[6]]}, 
         {name: "多文字(50字以內)", key: "nvarchar", types: [types[2]]},
-        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]]}];
-    
-    angular.element('[ng-controller=menu]').scope().hideRequestFile = $scope.table.intent_key === null;
+        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]]}];   
     
     $scope.addSheet = function() {
         $scope.table.sheets.push({colHeaders:[], rows:[]});
@@ -135,11 +155,10 @@ function newTableController($scope, $http, $filter) {
             rules: $scope.newColumn.rules,
             unique: $scope.newColumn.unique
         });
-        console.log($filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders);
         $scope.newColumn.data = '';
         $scope.newColumn.title = '';
-        $scope.newColumn.types = '';
-        $scope.newColumn.rules = '';
+        $scope.newColumn.types = null;
+        $scope.newColumn.rules = null;
         $scope.newColumn.unique = false;
     };
 
@@ -172,7 +191,7 @@ function newTableController($scope, $http, $filter) {
                                                                         console.log('------');*/
 
                                                                         if(/^\w+$/.test(colHeader.data) 
-                                                                           && /^\w+$/.test(colHeader.title)
+                                                                           && colHeader.title.Blength()>0 && colHeader.title.Blength()<50
                                                                            && colHeader.rules.key != null
                                                                            && /^[a-z]+$/.test(colHeader.rules.key)
                                                                            && colHeader.types.type != null
@@ -183,17 +202,18 @@ function newTableController($scope, $http, $filter) {
                                                                                 return false;
                                                                              }   
                                                                         else { 
-                                                                              //console.log(2);  
+                                                                              console.log(colHeader);  
                                                                               return true;}
                                                                            
                                                                         
                                                                         //return [0];
                                                                     }).length;            
         });    
+        console.log($scope.table.sheets);
         return !emptyColumns>0;
     };
     
-    $scope.saveDoc = function() {//console.log($scope.table.sheets);
+    $scope.saveDoc = function() {        
         if( !$scope.checkEmpty($scope.table.sheets) )
             return false;
         if( $scope.table.intent_key !== null ) {
@@ -252,7 +272,7 @@ function newTableController($scope, $http, $filter) {
         
         for(i=0;i<1;i++){
             var sheet = {colHeaders:[], rows:[], selected:true};
-            for(j=1;j<10;j++){
+            for(j=1;j<5;j++){
                 sheet.colHeaders.push({
                     data: 'column'+j,
                     title: 'column'+j,
@@ -271,19 +291,31 @@ function newTableController($scope, $http, $filter) {
         $http({method: 'POST', url: 'get_rows?page='+($scope.page), data:{} })
         .success(function(data, status, headers, config) {
             
+            $scope.pages = data.last_page;
+            $scope.page = data.current_page;
+            
             $scope.table.sheets[0].rows.length = 0;
             angular.extend($scope.table.sheets[0].rows, data.data);
             $scope.table.sheets[0].rows.push({});
-            //$scope.pages = data.last_page;
-            //$scope.page = data.current_page;
-           
-            //mbScrollbar.recalculate($scope);
+
         }).error(function(e){
             console.log(e);
         });
     };   
     
+    $scope.setHeight = function() {
+        return angular.element('#sheet').height();
+    };
+    
+    $scope.test = function(data) {
+        console.log(data);
+    };
+    
 }
+String.prototype.Blength = function() {
+    var arr = this.match(/[^\x00-\xff]/ig);
+    return  arr === null ? this.length : this.length + arr.length;
+};
 </script>
 <script src="/js/jquery.fileDownload.js"></script>
 <script src="/js/ngHandsontable.js"></script>
@@ -349,7 +381,12 @@ function newTableController($scope, $http, $filter) {
     font-size: 13px;
     font-family: 微軟正黑體
 }
-.input.empty {  
+.input-status {
+    display: inline-block;
+    border: 1px solid #fff;
+}
+.input-status.empty {  
+    background: red;
     border-color: red;
 }
 </style>

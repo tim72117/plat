@@ -40,10 +40,11 @@
           
             <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 0;right: 0;top: 0;bottom: 0" id="sheet">          
                 <hot-table                   
-                    settings="{rowHeaders: true, manualColumnResize: true, minCols:50, contextMenu: ['row_above', 'row_below', 'remove_row'], afterCellMetaReset: beforeAutofill(this) }"
+                    settings="{manualColumnResize: true, minCols:50, contextMenu: ['row_above', 'row_below', 'remove_row'], afterCellMetaReset: beforeAutofill(this) }"
                     columns="sheet.colHeaders"
                     datarows="sheet.rows"
                     colHeaders="true"
+                    rowHeaders="true"
                     minSpareRows="1"         
                     startCols="20"
                     startRows="20"
@@ -89,16 +90,30 @@ angular.module('app', ['ngHandsontable'])
 ]);
 
 function newTableController($scope, $http, $filter, XLSXReaderService) {
+    
+    $scope.table = {sheets:[], rows: []};
+    
     $scope.tool = 1;
     $scope.page = 1;
     $scope.limit = 40;
-    $scope.newColumn = {};
-    $scope.table = {sheets:[], rows: []};
-    $scope.rows = [];
+    $scope.newColumn = {};    
     $scope.action = {};
     $scope.imports = {};
     $scope.imports.sheets = [];
     $scope.imports.is_show_select = false;
+    
+    var types = [
+        {name: "整數", type: "int"}, {name: "小數", type: "float"}, {name: "中、英文(數字加符號)", type: "nvarchar"},
+        {name: "英文(數字加符號)", type: "varchar"}, {name: "日期", type: "date"}, {name: "0或1", type: "bit"}, {name: "多文字(中英文、數字和符號)", type: "text"}];
+
+    $scope.rules = [
+        {name: "地址", key: "address", types: [types[2]]}, {name: "手機", key: "phone", types: [types[3]]}, {name: "電話", key: "tel", types: [types[3]]}, 
+        {name: "信箱", key: "email", types: [types[3]]},
+        {name: "身分證", key: "id", types: [types[3]]}, {name: "性別: 1.男 2.女", key: "gender", types: [types[3]]}, {name: "日期", key: "date", types: [types[4]]}, 
+        {name: "是與否", key: "bool", types: [types[5]]},
+        {name: "整數", key: "int", types: [types[0]]}, {name: "小數", key: "float", types: [types[1]]}, {name: "多文字(50字以上)", key: "text", types: [types[6]]}, 
+        {name: "多文字(50字以內)", key: "nvarchar", types: [types[2]]},
+        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]]}];
     
     $scope.addSheet = function() {
         $scope.table.sheets.push({colHeaders:[], rows:[]});
@@ -107,10 +122,16 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
     $scope.addColumn = function() {
         $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders.push({
             data: $scope.newColumn.data,
-            title: $scope.newColumn.title
+            title: $scope.newColumn.title,
+            types: $scope.newColumn.types,
+            rules: $scope.newColumn.rules,
+            unique: $scope.newColumn.unique
         });
         $scope.newColumn.data = '';
         $scope.newColumn.title = '';
+        $scope.newColumn.types = null;
+        $scope.newColumn.rules = null;
+        $scope.newColumn.unique = false;
     };
     
     $scope.removeColumn = function(index, tindex) {
@@ -130,10 +151,15 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
             var sheet = {colHeaders:[], rows:[]};       
             for( tindex in data.sheets[sindex].tables ){
                 var table = data.sheets[sindex].tables[tindex];
-                for( cindex in table.columns ){               
+                for( cindex in table.columns ){       
+                    var rule = $filter('filter')($scope.rules, {key: table.columns[cindex].rules})[0];
+                    var type = $filter('filter')(rule.types, {type: table.columns[cindex].types})[0];
                     sheet.colHeaders.push({
                         data: table.columns[cindex].name,
                         title: table.columns[cindex].title,
+                        rules: rule,
+                        types: type,
+                        unique: table.columns[cindex].unique,
                         readOnly: false,
                         renderer: function(instance, td, row, col, prop, value, cellProperties){ Handsontable.renderers.TextRenderer.apply(this, arguments);},
                         validator: function(v,i){i(false);}
@@ -143,6 +169,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
             $scope.table.sheets.push(sheet);            
         }
         
+        $scope.table.title = data.title;
         $scope.table.sheets[0].selected = true;
         $scope.update();      
         
@@ -150,19 +177,25 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         console.log(e);
     });
     
-    $scope.update = function(){
+    $scope.update = function() {
         
         $http({method: 'POST', url: 'get_import_rows?page='+($scope.page), data:{} })
-        .success(function(data, status, headers, config) {            
+        .success(function(data, status, headers, config) {       
+            
             $scope.pages = data.last_page;
             $scope.page = data.current_page;
-            angular.extend($scope.table.sheets[0].rows, data.data);
-            console.log(data);
-            var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
+            
+            $scope.table.sheets[0].rows.length = 0;
+            angular.extend($scope.table.sheets[0].rows, data.data);      
+            $scope.table.sheets[0].rows.push({});
           
         }).error(function(e){
             console.log(e);
         });
+    };    
+    
+    $scope.setHeight = function() {
+        return angular.element('#sheet').height();
     };
     
     $scope.onUploadFile = function(files) {
@@ -219,10 +252,6 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         sheet.rows.push({});
         
         $scope.imports.is_show_select = false;
-    };
-    
-    $scope.setHeight = function() {
-        return angular.element('#sheet').height();
     };
     
     $scope.beforeAutofill = function(g) {

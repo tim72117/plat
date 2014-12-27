@@ -27,7 +27,7 @@
                 </div>
             </div>-->
           
-            <div ng-repeat="($tindex, sheet) in getSheet()" ng-if="sheet.selected" style="position: absolute;left: 0;right: 0;top: 0;bottom: 0" id="sheet">          
+            <div ng-repeat="($tindex, sheet) in getSheet()" style="position: absolute;left: 0;right: 0;top: 0;bottom: 0" id="sheet">          
                 <hot-table                   
                     settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row']}"
                     columns="sheet.colHeaders"
@@ -133,13 +133,13 @@ function newTableController($scope, $http, $filter) {
         $http({method: 'POST', url: 'get_rows?page='+($scope.page), data:{} })
         .success(function(data, status, headers, config) {
             
+            //$scope.pages = data.last_page;
+            //$scope.page = data.current_page;
+            
             $scope.table.sheets[0].rows.length = 0;
             angular.extend($scope.table.sheets[0].rows, data.data);
             $scope.table.sheets[0].rows.push({});
-            //$scope.pages = data.last_page;
-            //$scope.page = data.current_page;
-           
-            //mbScrollbar.recalculate($scope);
+
         }).error(function(e){
             console.log(e);
         });
