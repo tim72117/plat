@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Response, ShareFile, RequestFile, Auth, Input, Illuminate\Filesystem\Filesystem;
+use DB, View, Schema, Response, ShareFile, RequestFile, Auth, Input, Illuminate\Filesystem\Filesystem;
 
 class RowsFile extends CommFile {
 	
@@ -62,15 +62,15 @@ class RowsFile extends CommFile {
     }
     
     private function create_scheme($sheets) {   
-        
+        //var_dump($sheets);exit;
         $scheme = (object)['power'=> (object)['edit_column'=>0, 'edit_row'=>false], 'sheets' =>[]];
         
         foreach ($sheets as $sheet) {
             $json_table = (object)[
                 'tables' =>[(object)[
-                    'database'   => '1',
+                    'database'   => 'rowdata',
                     'name'       => md5(uniqid(time(), true)),
-                    'primaryKey' => '1',
+                    'primaryKey' => 'id',
                     'columns'    => []
                 ]]
             ];
@@ -85,6 +85,50 @@ class RowsFile extends CommFile {
             }
             array_push($scheme->sheets, $json_table);
         }
+
+
+
+        foreach ($scheme->sheets as $sheet) {
+            foreach($sheet->tables as $dbTable){
+                //var_dump($table);exit;
+                Schema::connection('sqlsrv_rowdata')->create($dbTable->name, function($table) use($dbTable) {
+
+                    $table->increments('id');
+                    
+                    foreach ($dbTable->columns as $column) {
+                        if($column->types == 'int'){
+                            $table->integer($column->name);
+                        }
+                        if($column->types == 'float'){
+                            $table->float($column->name);
+                        }
+                        if($column->types == 'nvarchar'){
+                             $table->string($column->name, 50);
+                        }
+                        if($column->types == 'varchar'){
+                             $table->string($column->name, 50);
+                        }
+                        if($column->types == 'date'){
+                             $table->date($column->name);
+                        }
+                        if($column->types == 'bit'){
+                             $table->integer($column->name);
+                        }
+                        if($column->types == 'text'){
+                             $table->text($column->name);
+                        }
+                    }
+                    
+                    $table->dateTime('created_at');
+                    $table->dateTime('deleted_at');
+                    $table->integer('created_by');
+                });
+            }
+        }
+
+        //var_dump($scheme);exit;
+
+
 
         return $scheme;
     }

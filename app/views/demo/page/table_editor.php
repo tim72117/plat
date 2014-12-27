@@ -154,29 +154,46 @@ function newTableController($scope, $http, $filter) {
         sheet.selected = true;
     }; 
     
+    //console.log(/^[a-z]+$/.test());
+
     $scope.checkEmpty = function(sheets) {    
         var emptyColumns = 0;
         angular.forEach(sheets, function(sheet, index){
             emptyColumns += $filter('filter')(sheet.colHeaders, function(colHeader)
                                                                     {
-                                                                        //console.log(colHeader);
-                                                                        if(colHeader.data != null){
-                                                                            return !/^\w+$/.test(colHeader.data);}
-                                                                        else if(colHeader.title != null){
-                                                                            return !/^\w+$/.test(colHeader.title);}
-                                                                        /*else if(colHeader.rules.name2 != null){
-                                                                        //console.log(colHeader);
-                                                                            return !/^\w+$/.test(colHeader.rules.name2);}
-                                                                        else if(colHeader.types.type != null){
-                                                                            return !/^\w+$/.test(colHeader.types.type);}*/
-                                                                        else{return true;}
+                                                                        /*console.log(colHeader);
+                                                                        console.log(colHeader.rules.key);
+                                                                        console.log(/^\w+$/.test(colHeader.data));
+                                                                        console.log(/^\w+$/.test(colHeader.title));
+                                                                        console.log(/^[a-z]+$/.test(colHeader.rules.key));
+                                                                        console.log(/^[a-z]+$/.test(colHeader.types.type));
+                                                                        console.log(colHeader.rules.key != null);
+                                                                        console.log(colHeader.types.type != null);
+                                                                        console.log('------');*/
+
+                                                                        if(/^\w+$/.test(colHeader.data) 
+                                                                           && /^\w+$/.test(colHeader.title)
+                                                                           && colHeader.rules.key != null
+                                                                           && /^[a-z]+$/.test(colHeader.rules.key)
+                                                                           && colHeader.types.type != null
+                                                                           && /^[a-z]+$/.test(colHeader.types.type)){
+                                                                                
+                                                                                //console.log(1);
+                                                                                //console.log('------');
+                                                                                return false;
+                                                                             }   
+                                                                        else { 
+                                                                              //console.log(2);  
+                                                                              return true;}
+                                                                           
+                                                                        
                                                                         //return [0];
                                                                     }).length;            
         });    
         return !emptyColumns>0;
     };
     
-    $scope.saveDoc = function() {console.log($scope.table.sheets);
+    $scope.saveDoc = function() {//console.log($scope.table.sheets);
         if( !$scope.checkEmpty($scope.table.sheets) )
             return false;
         if( $scope.table.intent_key !== null ) {
