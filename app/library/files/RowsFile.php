@@ -91,7 +91,7 @@ class RowsFile extends CommFile {
         foreach ($scheme->sheets as $sheet) {
             foreach($sheet->tables as $dbTable){
                 //var_dump($table);exit;
-                Schema::connection('sqlsrv_rowdata')->create($dbTable->name, function($table) use($dbTable) {
+                Schema::create('rowdata.dbo.'.$dbTable->name, function($table) use($dbTable) {
 
                     $table->increments('id');
                     
@@ -118,7 +118,7 @@ class RowsFile extends CommFile {
                              $table->text($column->name);
                         }
                     }
-                    
+
                     $table->dateTime('created_at');
                     $table->dateTime('deleted_at');
                     $table->integer('created_by');
