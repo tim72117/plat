@@ -58,11 +58,11 @@
             <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
                 <div ng-repeat="colHeader in sheet.colHeaders" style="margin:2px">
                     <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="colHeader.data" ng-class="{empty:colHeader.data===''}" autofocus="{{column.autofocus || 'false'}}" />
-                    <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="colHeader.title" />
-                    <select style="width:180px" class="input define" ng-model="colHeader.rules" ng-options="value.name for value in rules" ng-change="colHeader.types=colHeader.rules.types[0]">
+                    <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="colHeader.title" ng-class="{empty:colHeader.title===''}" autofocus="{{column.autofocus || 'false'}}" />
+                    <select style="width:180px" class="input define" ng-model="colHeader.rules" ng-options="value.name for value in rules" ng-change="colHeader.types=colHeader.rules.types[0]" ng-class="{empty:colHeader.rules[0] != null}" >
                         <option  value="">過濾規則</option>
                     </select>
-                    <select style="width:200px" class="input define" ng-model="colHeader.types" ng-options="value.name for value in colHeader.rules.types">
+                    <select style="width:200px" class="input define" ng-model="colHeader.types" ng-options="value.name for value in colHeader.rules.types" ng-class="{empty:colHeader.types[0] != null}" >
                         <option value="">欄位類型</option>
                     </select>
                     <input type="checkbox" class="input define" style="width:50px" ng-model="colHeader.only" />
@@ -151,7 +151,21 @@ function newTableController($scope, $http, $filter) {
     $scope.checkEmpty = function(sheets) {    
         var emptyColumns = 0;
         angular.forEach(sheets, function(sheet, index){
-            emptyColumns += $filter('filter')(sheet.colHeaders, function(colHeader){return !/^\w+$/.test(colHeader.data);}).length;            
+            emptyColumns += $filter('filter')(sheet.colHeaders, function(colHeader)
+                                                                    {
+                                                                        //console.log(colHeader);
+                                                                        if(colHeader.data != null){
+                                                                            return !/^\w+$/.test(colHeader.data);}
+                                                                        else if(colHeader.title != null){
+                                                                            return !/^\w+$/.test(colHeader.title);}
+                                                                        /*else if(colHeader.rules.name2 != null){
+                                                                        //console.log(colHeader);
+                                                                            return !/^\w+$/.test(colHeader.rules.name2);}
+                                                                        else if(colHeader.types.type != null){
+                                                                            return !/^\w+$/.test(colHeader.types.type);}*/
+                                                                        else{return true;}
+                                                                        //return [0];
+                                                                    }).length;            
         });    
         return !emptyColumns>0;
     };
