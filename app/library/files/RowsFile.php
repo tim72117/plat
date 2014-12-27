@@ -341,6 +341,41 @@ class RowsFile extends CommFile {
         return Response::make($output, 200, $headers);
         
     }
+	
+//------save test	-----------------------------------------------------------------
+	 public function save() {
+
+		$input = Input::only('sheets');
+		$shareFile = ShareFile::find($this->doc_id);
+        $scheme = $this->get_scheme($shareFile);
+					
+/*		foreach($input as $index => $data) { //run sheets
+			foreach($data as $data){ 		 //run tables
+					var_dump($data['rows']);
+					var_dump($data['colHeaders']);
+			}
+		}
+*/
+		foreach($scheme->sheets as $index => $sheets){
+			foreach($input['sheets'][$index]['rows'] as $rows){	
+				//--- 比對 colHeaders---	
+				var_dump($rows);	
+				$data = implode(",", $rows);
+			}
+			foreach($sheets as $index => $tables) {
+					foreach ($tables as $table){	
+						//--- update or insert ---
+						$insert_database =  $table->database.'.dbo.'.$table->name; //DB set
+						//DB::table($insert_database)
+						//	->insert(array( 'newcid'   		=> '222',
+						//					'stdidnumber'	=> 'a222'));	
+					}
+			}
+			var_dump($data);
+		}
+}
+
+//-----------------------------------------------------------------------------------
 
     public function uploadRows() {
         return Input::file('file');

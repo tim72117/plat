@@ -9,6 +9,7 @@
             <div style="border: 1px solid #999;width:80px;text-align: center">存檔</div>
         </div>-->
 
+		<? //---select a sheet---?>
         <div style="height:80px;position: absolute;top: 35px;left: 5px;z-index:200">
             <div style="width:440px;border: 1px solid #999;background-color: #fff;padding:20px;box-shadow: 0 10px 20px rgba(0,0,0,0.5);" ng-show="imports.is_show_select">
                 <div ng-repeat="sheet in imports.sheets">
@@ -20,6 +21,7 @@
             </div>
         </div>
         
+        <? //---sheet choice menu zone---?>
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
             <input type="file" id="upload-file" accept=".xlsx" style="display:none" onChange="angular.element(this).scope().fileChanged(this)" />
             <label for="upload-file">
@@ -53,11 +55,20 @@
             </div>    
         </div>
         
+        <? //---bottom sheet choice menu zone---?>
         <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
             <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}" style="margin:0 0 5px 5px;">資料表</div>
         </div>
+
+		<? //---save---?>
+        <div ng-click="save()" class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">儲存</div> 
+            <!---<input type="file" id="upload-file" accept=".xlsx" style="display:none" onChange="angular.element(this).scope().fileChanged(this)" />
+            <label for="upload-file">
+                <div class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">存檔</div>                    
+            </label>--->
+        </div>    
         
-        
+       <? //var_dump();?> 
     </div>   
     
 
@@ -134,6 +145,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         $scope.newColumn.unique = false;
     };
     
+    
     $scope.removeColumn = function(index, tindex) {
         $scope.table.sheets[tindex].colHeaders.splice(index, 1); 
     };
@@ -144,7 +156,23 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         });
         sheet.selected = true;
     };
-    
+	
+	//---Save---
+	$scope.save = function() {
+        console.log($scope.table.sheets); 
+		//console.log($scope.table);
+		//console.log('↓');
+		$http({method: 'POST', url: 'save', data:{sheets: $scope.table.sheets} })
+		.success(function(data, status, headers, config) {            
+            console.log('success');
+			console.log(data);
+          
+        }).error(function(){
+            console.log('false');
+        });
+    };
+    //----------
+	
     $http({method: 'POST', url: 'get_columns', data:{} })
     .success(function(data, status, headers, config) {
         for( sindex in data.sheets ){
@@ -162,7 +190,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
                         unique: table.columns[cindex].unique,
                         readOnly: false,
                         renderer: function(instance, td, row, col, prop, value, cellProperties){ Handsontable.renderers.TextRenderer.apply(this, arguments);},
-                        validator: function(v,i){i(false);}
+                        validator: function(v,i){i(false);}//v:value,i:驗證結果(TorF) {false=紅}
                     });
                 }
             }
@@ -251,7 +279,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         
         sheet.rows.push({});
         
-        $scope.imports.is_show_select = false;
+        $scope.imports.is_show_select = false;console.log($scope.table.sheets); 
     };
     
     $scope.beforeAutofill = function(g) {
