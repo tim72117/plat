@@ -45,7 +45,6 @@
         <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
             <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}" style="margin:0 0 5px 5px;">資料表</div>
         </div>
-
         
     </div>    
     
@@ -67,13 +66,27 @@ angular.module('app', ['ngHandsontable'])
 
 
 function newTableController($scope, $http, $filter) {
+    
+    $scope.table = {sheets:[], rows: []};
+    
     $scope.tool = 1;
     $scope.page = 1;
     $scope.limit = 40;
-    $scope.newColumn = {};
-    $scope.table = {sheets:[], rows: []};
-    $scope.rows = [];
+    $scope.newColumn = {};    
     $scope.action = {};
+    
+    var types = [
+        {name: "整數", type: "int"}, {name: "小數", type: "float"}, {name: "中、英文(數字加符號)", type: "nvarchar"},
+        {name: "英文(數字加符號)", type: "varchar"}, {name: "日期", type: "date"}, {name: "0或1", type: "bit"}, {name: "多文字(中英文、數字和符號)", type: "text"}];
+
+    $scope.rules = [
+        {name: "地址", key: "address", types: [types[2]]}, {name: "手機", key: "phone", types: [types[3]]}, {name: "電話", key: "tel", types: [types[3]]}, 
+        {name: "信箱", key: "email", types: [types[3]]},
+        {name: "身分證", key: "id", types: [types[3]]}, {name: "性別: 1.男 2.女", key: "gender", types: [types[3]]}, {name: "日期", key: "date", types: [types[4]]}, 
+        {name: "是與否", key: "bool", types: [types[5]]},
+        {name: "整數", key: "int", types: [types[0]]}, {name: "小數", key: "float", types: [types[1]]}, {name: "多文字(50字以上)", key: "text", types: [types[6]]}, 
+        {name: "多文字(50字以內)", key: "nvarchar", types: [types[2]]},
+        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]]}];  
     
     $scope.addSheet = function() {
         $scope.table.sheets.push({colHeaders:[], rows:[]});
@@ -82,18 +95,20 @@ function newTableController($scope, $http, $filter) {
     $scope.addColumn = function() {
         $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders.push({
             data: $scope.newColumn.data,
-            title: $scope.newColumn.title
+            title: $scope.newColumn.title,
+            types: $scope.newColumn.types,
+            rules: $scope.newColumn.rules,
+            unique: $scope.newColumn.unique
         });
         $scope.newColumn.data = '';
         $scope.newColumn.title = '';
+        $scope.newColumn.types = null;
+        $scope.newColumn.rules = null;
+        $scope.newColumn.unique = false;
     };
     
     $scope.removeColumn = function(index, tindex) {
         $scope.table.sheets[tindex].colHeaders.splice(index, 1); 
-    };
-    
-    $scope.getSheet = function() {
-        return $filter('filter')($scope.table.sheets, {selected: true});
     };
     
     $scope.action.toSelect = function(sheet) {  
@@ -101,7 +116,10 @@ function newTableController($scope, $http, $filter) {
             sheet.selected = false;
         });
         sheet.selected = true;
-        console.log(sheet);
+    };    
+    
+    $scope.getSheet = function() {
+        return $filter('filter')($scope.table.sheets, {selected: true});
     };
     
     $http({method: 'POST', url: 'get_columns', data:{} })
@@ -110,31 +128,37 @@ function newTableController($scope, $http, $filter) {
             var sheet = {colHeaders:[], rows:[{}]};       
             for( tindex in data.sheets[sindex].tables ){
                 var table = data.sheets[sindex].tables[tindex];
-                for( cindex in table.columns ){               
+                for( cindex in table.columns ){
+                    var rule = $filter('filter')($scope.rules, {key: table.columns[cindex].rules})[0];
+                    var type = $filter('filter')(rule.types, {type: table.columns[cindex].types})[0];
                     sheet.colHeaders.push({
                         data: table.columns[cindex].name,
                         title: table.columns[cindex].title,
-                        readOnly: false
+                        rules: rule,
+                        types: type,
+                        unique: table.columns[cindex].unique,
+                        readOnly: false,
                     });
                 }
             }
             $scope.table.sheets.push(sheet);            
         }
         
-        $scope.action.toSelect($scope.table.sheets[0]);
-        $scope.update();      
+        $scope.table.title = data.title;
+        $scope.table.sheets[0].selected = true;
+        $scope.update();       
         
     }).error(function(e){
         console.log(e);
     });
     
-    $scope.update = function(){
+    $scope.update = function() {
         
         $http({method: 'POST', url: 'get_rows?page='+($scope.page), data:{} })
         .success(function(data, status, headers, config) {
             
-            //$scope.pages = data.last_page;
-            //$scope.page = data.current_page;
+            $scope.pages = data.last_page;
+            $scope.page = data.current_page;
             
             $scope.table.sheets[0].rows.length = 0;
             angular.extend($scope.table.sheets[0].rows, data.data);
@@ -143,6 +167,10 @@ function newTableController($scope, $http, $filter) {
         }).error(function(e){
             console.log(e);
         });
+    };    
+    
+    $scope.setHeight = function() {
+        return angular.element('#sheet').height();
     }; 
     
     $scope.download = function(){
@@ -155,11 +183,7 @@ function newTableController($scope, $http, $filter) {
         }).error(function(e){
             console.log(e);
         }); 
-    }; 
-    
-    $scope.setHeight = function() {
-        return angular.element('#sheet').height();
-    };    
+    };   
     
     $http({method: 'POST', url: 'get_power', data:{} })
     .success(function(data, status, headers, config) {

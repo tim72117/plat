@@ -9,7 +9,6 @@
             <div style="border: 1px solid #999;width:80px;text-align: center">存檔</div>
         </div>-->
 
-		<? //---select a sheet---?>
         <div style="height:80px;position: absolute;top: 35px;left: 5px;z-index:200">
             <div style="width:440px;border: 1px solid #999;background-color: #fff;padding:20px;box-shadow: 0 10px 20px rgba(0,0,0,0.5);" ng-show="imports.is_show_select">
                 <div ng-repeat="sheet in imports.sheets">
@@ -21,8 +20,8 @@
             </div>
         </div>
         
-        <? //---sheet choice menu zone---?>
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
+            <div class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;" ng-click="saveRows()">測試</div>
             <input type="file" id="upload-file" accept=".xlsx" style="display:none" onChange="angular.element(this).scope().fileChanged(this)" />
             <label for="upload-file">
                 <div class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>                    
@@ -42,7 +41,7 @@
           
             <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 0;right: 0;top: 0;bottom: 0" id="sheet">          
                 <hot-table                   
-                    settings="{manualColumnResize: true, minCols:50, contextMenu: ['row_above', 'row_below', 'remove_row'], afterCellMetaReset: beforeAutofill(this) }"
+                    settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row'], afterCellMetaReset: beforeAutofill(this) }"
                     columns="sheet.colHeaders"
                     datarows="sheet.rows"
                     colHeaders="true"
@@ -55,20 +54,10 @@
             </div>    
         </div>
         
-        <? //---bottom sheet choice menu zone---?>
         <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
             <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}" style="margin:0 0 5px 5px;">資料表</div>
-        </div>
+        </div> 
 
-		<? //---save---?>
-        <div ng-click="save()" class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">儲存</div> 
-            <!---<input type="file" id="upload-file" accept=".xlsx" style="display:none" onChange="angular.element(this).scope().fileChanged(this)" />
-            <label for="upload-file">
-                <div class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">存檔</div>                    
-            </label>--->
-        </div>    
-        
-       <? //var_dump();?> 
     </div>   
     
 
@@ -143,8 +132,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         $scope.newColumn.types = null;
         $scope.newColumn.rules = null;
         $scope.newColumn.unique = false;
-    };
-    
+    };    
     
     $scope.removeColumn = function(index, tindex) {
         $scope.table.sheets[tindex].colHeaders.splice(index, 1); 
@@ -157,12 +145,11 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         sheet.selected = true;
     };
 	
-	//---Save---
-	$scope.save = function() {
+	$scope.saveRows = function() {
         console.log($scope.table.sheets); 
 		//console.log($scope.table);
 		//console.log('↓');
-		$http({method: 'POST', url: 'save', data:{sheets: $scope.table.sheets} })
+		$http({method: 'POST', url: 'save_import_rows', data:{sheets: $scope.table.sheets} })
 		.success(function(data, status, headers, config) {            
             console.log('success');
 			console.log(data);
@@ -171,12 +158,11 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
             console.log('false');
         });
     };
-    //----------
 	
     $http({method: 'POST', url: 'get_columns', data:{} })
     .success(function(data, status, headers, config) {
         for( sindex in data.sheets ){
-            var sheet = {colHeaders:[], rows:[]};       
+            var sheet = {colHeaders:[], rows:[{}]};       
             for( tindex in data.sheets[sindex].tables ){
                 var table = data.sheets[sindex].tables[tindex];
                 for( cindex in table.columns ){       
@@ -287,7 +273,9 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         //console.log($scope.hotInstance = {});
     };
     
-    
+    $scope.test = function() {
+        console.log($scope.table.sheets);
+    };
     
 }
 </script>

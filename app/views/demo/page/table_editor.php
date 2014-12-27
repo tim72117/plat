@@ -18,7 +18,8 @@
         </div>
         
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
-            <div ng-click="tableNameBox=true" class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">儲存</div>
+            <div ng-click="test()" class="page-tag top" style="margin:5px 0 0 5px;left:80px;width:60px;">測試</div>
+            <div ng-click="tableNameBox=true" class="page-tag top" style="margin:5px 0 0 5px;left:10px;width:60px;">儲存</div>
             <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
             <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (table.sheets.length)*85+150 }}px"></div>
         </div>       
@@ -35,7 +36,7 @@
             
             <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 0;right: 0;top: 0;bottom: 0" id="sheet">         
                 <hot-table
-                    settings="{manualColumnResize: true, minCols:50, contextMenu: ['row_above', 'row_below', 'remove_row'], afterUpdateSettings: afterUpdateSettings}"
+                    settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row'], afterUpdateSettings: afterUpdateSettings}"
                     columns="sheet.colHeaders"
                     datarows="sheet.rows"
                     colHeaders="true"
@@ -77,7 +78,7 @@
                     </div>
                     <div class="input-status"><input type="checkbox" class="input define" style="width:45px" ng-model="colHeader.unique" /></div>
                     <div class="input-status">
-                        <select style="width:90px" class="input define" ng-model="colHeader.link" ng-options="sheet.name for sheet in table.sheets" ng-class="{empty:!colHeader.types}" >
+                        <select style="width:90px" class="input define" ng-model="colHeader.link.table" ng-options="index as index for (index,sheet) in table.sheets" ng-change="setAutocomplete(colHeader)">
                             <option value="">資料表</option>
                         </select>
                     </div>
@@ -96,8 +97,8 @@
                             <option value="">欄位類型</option>
                         </select>
                     </div>
-                    <div class="input-status"><input type="checkbox" class="input define" style="width:50px" ng-model="newColumn.unique" ng-init="newColumn.unique=false" /></div>
-                    <div class="input-status"><div style="width:90px"></div></div>
+                    <div class="input-status"><input type="checkbox" class="input define" style="width:45px" ng-model="newColumn.unique" ng-init="newColumn.unique=false" /></div>
+                    <div class="input-status"><div style="width:90px" class="input define"></div></div>
                     <input type="button" value="新增" ng-click="addColumn()" style="padding: 3px" />
                 </div>   
             </div>
@@ -153,6 +154,7 @@ function newTableController($scope, $http, $filter) {
             title: $scope.newColumn.title,
             types: $scope.newColumn.types,
             rules: $scope.newColumn.rules,
+            link: {enable: false, table: null},
             unique: $scope.newColumn.unique
         });
         $scope.newColumn.data = '';
@@ -248,20 +250,31 @@ function newTableController($scope, $http, $filter) {
                     for( cindex in table.columns ){
                         var rule = $filter('filter')($scope.rules, {key: table.columns[cindex].rules})[0];
                         var type = $filter('filter')(rule.types, {type: table.columns[cindex].types})[0];
-                        sheet.colHeaders.push({
+                        var colHeader = {
                             data: table.columns[cindex].name,
                             title: table.columns[cindex].title,
                             rules: rule,
                             types: type,
+                            link: table.columns[cindex].link,
                             unique: table.columns[cindex].unique,
                             readOnly: false
-                        });
+                        };                        
+                        if( table.columns[cindex].link ) {
+                            //colHeader.type = 'dropdown';
+                            //colHeader.source = [];
+                            //console.log(data.sheets[table.columns[cindex].link].tables);
+                            //angular.forEach($scope.table.sheets[table.columns[cindex].link].rows, function(row, index){
+                                //console.log(row.f);
+                                //colHeader.source[0] = row.f;
+                            //});
+                        }
+                        sheet.colHeaders.push(colHeader);
                     }
                 }
                 $scope.table.sheets.push(sheet);            
             }
             
-            $scope.table.title = data.title;
+            $scope.table.title = data.title;console.log($scope.table.sheets);
             $scope.table.sheets[0].selected = true;
             $scope.update();      
 
@@ -294,9 +307,25 @@ function newTableController($scope, $http, $filter) {
             $scope.pages = data.last_page;
             $scope.page = data.current_page;
             
+            //console.log($filter('filter')($scope.table.sheets[0].colHeaders, {link: {enable: true}}));
+            
             $scope.table.sheets[0].rows.length = 0;
             angular.extend($scope.table.sheets[0].rows, data.data);
             $scope.table.sheets[0].rows.push({});
+            
+            angular.forEach($filter('filter')($scope.table.sheets[0].colHeaders, {link: {enable: true}}), function(colHeader, index){                
+
+                $scope.$watch('table.sheets['+colHeader.link.table+'].rows', function(rows){
+                    colHeader.type = 'dropdown';
+                    colHeader.source = [];
+                    angular.forEach(rows, function(row){
+                        if( row.f )
+                            colHeader.source.push(row.f);
+                    });
+                    
+                    console.log(data);
+                }, true);
+            });
 
         }).error(function(e){
             console.log(e);
@@ -306,9 +335,22 @@ function newTableController($scope, $http, $filter) {
     $scope.setHeight = function() {
         return angular.element('#sheet').height();
     };
+
+    $scope.test = function() {
+        console.log(1);
+    };
     
-    $scope.test = function(data) {
-        console.log(data);
+    $scope.setAutocomplete = function(colHeader) {
+        colHeader.link.enable = !!colHeader.link.table;
+        console.log(colHeader.link);
+        colHeader.type = 'dropdown';
+        colHeader.source = [];
+        //angular.forEach($scope.table.sheets[colHeader.link].rows, function(row, index){
+            //console.log(row.f);
+            //colHeader.source[0] = row.f;
+        //});
+        //colHeader.source = ["BMW", "Chrysler", "Nissan", "Suzuki", "Toyota", "Volvo"];
+        
     };
     
 }
