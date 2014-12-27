@@ -63,7 +63,7 @@ class RowsFile extends CommFile {
     
     private function create_scheme($sheets) {   
         //var_dump($sheets);exit;
-        $scheme = (object)['power'=> (object)['edit_column'=>0, 'edit_row'=>false], 'sheets' =>[]];
+        $scheme = (object)['power'=> (object)['edit_column'=>0, 'edit_row'=>false, 'edit'=>true], 'sheets' =>[]];
         
         foreach ($sheets as $sheet) {
             $json_table = (object)[
@@ -161,7 +161,9 @@ class RowsFile extends CommFile {
         
         $shareFile = ShareFile::find($this->doc_id);  
         
-        if( $shareFile->created_by==Auth::user()->id ){
+        $scheme = $this->get_scheme($shareFile);
+        
+        if( $shareFile->created_by==Auth::user()->id && $scheme->power->edit ){
             return 'demo.page.table_editor';
         }else{
             return 'demo.page.table_open';
@@ -267,21 +269,17 @@ class RowsFile extends CommFile {
         
         $rows = $rows_query->select($power)->paginate(50);
         //$rows =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
-        //var_dump($power);
+
         return Response::json($rows);
     }	
     
     public function get_import_rows() {
         
-        $requested_file_id = $this->doc_id;
+        list($rows_query, $power) = $this->get_rows_query();
         
-        $shareFile = ShareFile::find($this->doc_id);
-        
-        $scheme = $this->get_scheme($shareFile);
-        
-        $columns =  DB::connection('sqlsrv')->table('ques_admin.dbo.contact')->paginate(50);//->forPage(2000, 20)->get();
-        
-        return Response::json($scheme);
+        $rows = $rows_query->where('created_by', Auth::user()->id)->select($power)->paginate(50);
+
+        return Response::json($rows);
     }
     
     public function requestTo() {
