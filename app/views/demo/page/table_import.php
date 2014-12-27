@@ -156,6 +156,8 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         .success(function(data, status, headers, config) {            
             $scope.pages = data.last_page;
             $scope.page = data.current_page;
+            angular.extend($scope.table.sheets[0].rows, data.data);
+            console.log(data);
             var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
           
         }).error(function(e){

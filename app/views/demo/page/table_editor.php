@@ -9,7 +9,7 @@
             <div style="border: 1px solid #999;width:80px;text-align: center">存檔</div>
         </div>-->
 
-        <div style="height:80px;position: absolute;top: 35px;z-index:3">
+        <div style="height:80px;position: absolute;top: 35px;z-index:200">
             <div style="position: absolute;left:5px;top:0;;bottom:0;width:440px;border: 1px solid #999;background-color: #fff;padding:20px;box-shadow: 0 10px 20px rgba(0,0,0,0.5);" ng-show="tableNameBox">
                 <input type="text" placeholder="輸入檔案名稱" class="input define" style="width:220px" ng-model="table.title" />
                 <div style="top:20px;left:250px" class="btn default box green" ng-class="{wait:wait}" ng-click="saveDoc();tableNameBox=false">確定</div>
@@ -53,7 +53,7 @@
                 <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:180px" class="define">欄位描述</div> 
                 <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:180px" class="define">過濾規則</div>
                 <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:200px" class="define">欄位類型</div>
-                <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:50px" class="define">唯一值</div>
+                <div style="border: 1px solid #999;height:27px;margin:0 0 0 4px;box-sizing: border-box;float: left;line-height: 25px;padding-left:5px;width:45px" class="define">唯一</div>
             </div>
             <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
                 <div ng-repeat="colHeader in sheet.colHeaders" style="margin:2px">
@@ -65,19 +65,19 @@
                     <select style="width:200px" class="input define" ng-model="colHeader.types" ng-options="value.name for value in colHeader.rules.types" ng-class="{empty:colHeader.types[0] != null}" >
                         <option value="">欄位類型</option>
                     </select>
-                    <input type="checkbox" class="input define" style="width:50px" ng-model="colHeader.only" />
+                    <input type="checkbox" class="input define" style="width:50px" ng-model="colHeader.unique" />
                     <input type="button" value="刪除" ng-click="removeColumn($index, $tindex)" style="padding: 3px" />
                 </div>    
                 <div style="margin:2px">
                     <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="newColumn.data" ng-init="newColumn.data=''" />
                     <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="newColumn.title" />
-                    <select style="width:180px" class="input define" ng-model="newColumn.rules" ng-options="value.name for value in rules" ng-change="newColumn.types=newColumn.rules.types[0]">
+                    <select style="width:180px" class="input define" ng-model="newColumn.rules" ng-options="value.name for value in rules" ng-change="newColumn.types=value.types[0]">
                         <option  value="">過濾規則</option>
                     </select>
                     <select style="width:200px" class="input define" ng-model="newColumn.types" ng-options="value.name for value in newColumn.rules.types">
                         <option value="">欄位類型</option>
                     </select>
-                    <input type="checkbox" class="input define" style="width:50px" ng-model="newColumn.only"  />
+                    <input type="checkbox" class="input define" style="width:50px" ng-model="newColumn.unique" ng-init="newColumn.unique=false" />
                     <input type="button" value="新增" ng-click="addColumn()" style="padding: 3px" />
                 </div>   
             </div>
@@ -106,16 +106,21 @@ function newTableController($scope, $http, $filter) {
     $scope.limit = 40;
     $scope.newColumn = {};
     $scope.table = {sheets:[], intent_key:(path[1]==='file' ? path[2] : null)};
-    var types = [{name: "整數", type: "int"}, {name: "小數", type: "float"}, {name: "中、英文(數字加符號)", type: "nvarchar"},
-                    {name: "英文(數字加符號)", type: "varchar"}, {name: "日期", type: "date"}, {name: "是與否", type: "bit"}, {name: "多文字(中英文、數字和符號)", type: "text"}];
-
-    $scope.rules = [{name: "地址", name2: "address", types: [types[2]]}, {name: "手機", name2: "phone", types: [types[3]]}, {name: "電話", name2: "tel", types: [types[3]]}, {name: "信箱", name2: "email", types: [types[3]]},
-                    {name: "身分證", name2: "id", types: [types[3]]}, {name: "性別: 1.男 2.女", name2: "gender", types: [types[5]]}, {name: "日期", name2: "date", types: [types[4]]}, {name: "是與否", name2: "bool", types: [types[5]]},
-                    {name: "整數", name2: "int", types: [types[0]]}, {name: "小數", name2: "float", types: [types[1]]}, {name: "多文字(50字以上)", name2: "text", types: [types[6]]}, {name: "多文字(50字以內)", name2: "nvarchar", types: [types[2]]},
-                    {name: "其他", name2: "else", types: [types[0], types[1], types[2], types[6]]}];
-
-    $scope.rows = [];
     $scope.action = {}; 
+    
+    var types = [
+        {name: "整數", type: "int"}, {name: "小數", type: "float"}, {name: "中、英文(數字加符號)", type: "nvarchar"},
+        {name: "英文(數字加符號)", type: "varchar"}, {name: "日期", type: "date"}, {name: "0或1", type: "bit"}, {name: "多文字(中英文、數字和符號)", type: "text"}];
+
+    $scope.rules = [
+        {name: "地址", key: "address", types: [types[2]]}, {name: "手機", key: "phone", types: [types[3]]}, {name: "電話", key: "tel", types: [types[3]]}, 
+        {name: "信箱", key: "email", types: [types[3]]},
+        {name: "身分證", key: "id", types: [types[3]]}, {name: "性別: 1.男 2.女", key: "gender", types: [types[3]]}, {name: "日期", key: "date", types: [types[4]]}, 
+        {name: "是與否", key: "bool", types: [types[5]]},
+        {name: "整數", key: "int", types: [types[0]]}, {name: "小數", key: "float", types: [types[1]]}, {name: "多文字(50字以上)", key: "text", types: [types[6]]}, 
+        {name: "多文字(50字以內)", key: "nvarchar", types: [types[2]]},
+        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]]}];
+    
     angular.element('[ng-controller=menu]').scope().hideRequestFile = $scope.table.intent_key === null;
     
     $scope.addSheet = function() {
@@ -128,13 +133,14 @@ function newTableController($scope, $http, $filter) {
             title: $scope.newColumn.title,
             types: $scope.newColumn.types,
             rules: $scope.newColumn.rules,
-            only: $scope.newColumn.only
+            unique: $scope.newColumn.unique
         });
+        console.log($filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders);
         $scope.newColumn.data = '';
         $scope.newColumn.title = '';
         $scope.newColumn.types = '';
         $scope.newColumn.rules = '';
-        $scope.newColumn.only = '';
+        $scope.newColumn.unique = false;
     };
 
     $scope.removeColumn = function(index, tindex) {
@@ -170,7 +176,7 @@ function newTableController($scope, $http, $filter) {
         return !emptyColumns>0;
     };
     
-    $scope.saveDoc = function() {
+    $scope.saveDoc = function() {console.log($scope.table.sheets);
         if( !$scope.checkEmpty($scope.table.sheets) )
             return false;
         if( $scope.table.intent_key !== null ) {
@@ -198,31 +204,26 @@ function newTableController($scope, $http, $filter) {
     if( $scope.table.intent_key !== null ) {
         $http({method: 'POST', url: 'get_columns', data:{} })
         .success(function(data, status, headers, config) {
-            //console.log(data.sheets);
             for( sindex in data.sheets ){
-                var sheet = {colHeaders:[], rows:null};       
+                var sheet = {colHeaders:[], rows:[]};       
                 for( tindex in data.sheets[sindex].tables ){
                     var table = data.sheets[sindex].tables[tindex];
                     for( cindex in table.columns ){
-                        $rule = $filter('filter')($scope.rules, {name2: table.columns[cindex].rules});
-                        //console.log($a);
-                        $type = $filter('filter')($rule[0].types, {type: table.columns[cindex].types});
-                        //console.log($b);
+                        var rule = $filter('filter')($scope.rules, {key: table.columns[cindex].rules})[0];
+                        var type = $filter('filter')(rule.types, {type: table.columns[cindex].types})[0];
                         sheet.colHeaders.push({
                             data: table.columns[cindex].name,
                             title: table.columns[cindex].title,
-                            rules: $filter('filter')($scope.rules, {name2: table.columns[cindex].rules})[0],
-                            //types: $filter('filter')((var types), {type: table.columns[cindex].types})[0],
-                            types: $type[0],
-                            only: table.columns[cindex].only,
-
+                            rules: rule,
+                            types: type,
+                            unique: table.columns[cindex].unique,
                             readOnly: false
                         });
                     }
                 }
                 $scope.table.sheets.push(sheet);            
             }
-
+            
             $scope.table.title = data.title;
             $scope.table.sheets[0].selected = true;
             $scope.update();      
@@ -240,7 +241,7 @@ function newTableController($scope, $http, $filter) {
                     title: 'column'+j,
                     rules: 'column'+j,
                     types: 'column'+j,
-                    only: 'column'+j,
+                    unique: 'column'+j,
                     readOnly: false
                 });
             }        
@@ -250,11 +251,16 @@ function newTableController($scope, $http, $filter) {
     
     $scope.update = function() {
         
-        $http({method: 'POST', url: '', data:{} })
-        .success(function(data, status, headers, config) {            
-            $scope.pages = data.last_page;
-            $scope.page = data.current_page;          
-
+        $http({method: 'POST', url: 'get_rows?page='+($scope.page), data:{} })
+        .success(function(data, status, headers, config) {
+            
+            $scope.table.sheets[0].rows.length = 0;
+            angular.extend($scope.table.sheets[0].rows, data.data);
+            $scope.table.sheets[0].rows.push({});
+            //$scope.pages = data.last_page;
+            //$scope.page = data.current_page;
+           
+            //mbScrollbar.recalculate($scope);
         }).error(function(e){
             console.log(e);
         });

@@ -27,15 +27,16 @@
                 </div>
             </div>-->
           
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 0;right: 0;top: 0;bottom: 0" id="sheet">          
+            <div ng-repeat="($tindex, sheet) in getSheet()" ng-if="sheet.selected" style="position: absolute;left: 0;right: 0;top: 0;bottom: 0" id="sheet">          
                 <hot-table                   
-                    settings="{rowHeaders: true, manualColumnResize: true, minCols:50, contextMenu: ['row_above', 'row_below', 'remove_row'], afterUpdateSettings: afterUpdateSettings}"
+                    settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row']}"
                     columns="sheet.colHeaders"
                     datarows="sheet.rows"
                     colHeaders="true"
+                    rowHeaders="true"
                     minSpareRows="1"                    
                     startCols="20"
-                    startRows="20"
+                    startRows="20"                    
                     height="setHeight()">
                 </hot-table>
             </div>    
@@ -91,17 +92,22 @@ function newTableController($scope, $http, $filter) {
         $scope.table.sheets[tindex].colHeaders.splice(index, 1); 
     };
     
+    $scope.getSheet = function() {
+        return $filter('filter')($scope.table.sheets, {selected: true});
+    };
+    
     $scope.action.toSelect = function(sheet) {  
         angular.forEach($filter('filter')($scope.table.sheets, {selected: true}), function(sheet){
             sheet.selected = false;
         });
         sheet.selected = true;
+        console.log(sheet);
     };
     
     $http({method: 'POST', url: 'get_columns', data:{} })
     .success(function(data, status, headers, config) {
         for( sindex in data.sheets ){
-            var sheet = {colHeaders:[], rows:[]};       
+            var sheet = {colHeaders:[], rows:[{}]};       
             for( tindex in data.sheets[sindex].tables ){
                 var table = data.sheets[sindex].tables[tindex];
                 for( cindex in table.columns ){               
@@ -115,7 +121,7 @@ function newTableController($scope, $http, $filter) {
             $scope.table.sheets.push(sheet);            
         }
         
-        $scope.table.sheets[0].selected = true;
+        $scope.action.toSelect($scope.table.sheets[0]);
         $scope.update();      
         
     }).error(function(e){
@@ -127,13 +133,11 @@ function newTableController($scope, $http, $filter) {
         $http({method: 'POST', url: 'get_rows?page='+($scope.page), data:{} })
         .success(function(data, status, headers, config) {
             
+            $scope.table.sheets[0].rows.length = 0;
             angular.extend($scope.table.sheets[0].rows, data.data);
-            //$scope.table.sheets[0].selected = true;
-            console.log(data.data);
+            $scope.table.sheets[0].rows.push({});
             //$scope.pages = data.last_page;
             //$scope.page = data.current_page;
-            //$scope.action.toSelect($scope.table.sheets[0]);  
-
            
             //mbScrollbar.recalculate($scope);
         }).error(function(e){
@@ -168,6 +172,10 @@ function newTableController($scope, $http, $filter) {
         
     };
     
+    $scope.isEmptyRow = function(col) {
+        console.log(col);
+    };
+    
     $scope.testClick = function(){        
         $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders.length = 0;
         angular.extend($filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders, [{data:'cid'}]);        
@@ -177,7 +185,7 @@ function newTableController($scope, $http, $filter) {
 }
 </script>
 <script src="/js/jquery.fileDownload.js"></script>
-<script src="/js/ngHandsontable.js"></script>
+<script src="/js/ngHandsontable.min.js"></script>
 <script src="/js/handsontable.full.min.js"></script>
 <link rel="stylesheet" media="screen" href="/js/handsontable.full.min.css">
 
