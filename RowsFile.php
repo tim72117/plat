@@ -25,6 +25,7 @@ class RowsFile extends CommFile {
         'requestTo',
         'export',
         'upload',
+        'save_import_rows',
 	);
 	
 	public static function get_intent() {
@@ -80,6 +81,7 @@ class RowsFile extends CommFile {
                     'title'  => $columns["title"],
                     'rules'  => $columns["rules"]["key"],
                     'types'  => $columns["types"]["type"],
+                    'link'   => $columns["link"],
                     'unique' => $columns["unique"]
                 ]);
             }
@@ -341,9 +343,8 @@ class RowsFile extends CommFile {
         return Response::make($output, 200, $headers);
         
     }
-	
-//------save test	-----------------------------------------------------------------
-	 public function save() {
+
+	 public function save_import_rows() {
 
 		$input = Input::only('sheets');
 		$shareFile = ShareFile::find($this->doc_id);
@@ -373,9 +374,7 @@ class RowsFile extends CommFile {
 			}
 			var_dump($data);
 		}
-}
-
-//-----------------------------------------------------------------------------------
+    }
 
     public function uploadRows() {
         return Input::file('file');
