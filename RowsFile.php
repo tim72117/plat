@@ -61,34 +61,31 @@ class RowsFile extends CommFile {
         
     }
     
-    private function create_scheme($sheets) {  
-        //var_dump($sheets);exit;      
+    private function create_scheme($sheets) {   
         
         $scheme = (object)['power'=> (object)['edit_column'=>0, 'edit_row'=>false], 'sheets' =>[]];
         
         foreach ($sheets as $sheet) {
-            $rand = md5(uniqid(time(), true));
-            $name = hash('md5', $rand);
             $json_table = (object)[
                 'tables' =>[(object)[
                     'database'   => '1',
-                    'name'       => $name,
+                    'name'       => md5(uniqid(time(), true)),
                     'primaryKey' => '1',
                     'columns'    => []
                 ]]
             ];
             foreach ($sheet['colHeaders'] as $columns) {
                 array_push($json_table->tables[0]->columns, (object)[
-                    'name'  => $columns["data"],
-                    'title' => $columns["title"],
-                    'rules' => $columns["rules"]["name2"],
-                    'types' => $columns["types"]["type"],
-                    'only'  => $columns["only"]
+                    'name'   => $columns["data"],
+                    'title'  => $columns["title"],
+                    'rules'  => $columns["rules"]["key"],
+                    'types'  => $columns["types"]["type"],
+                    'unique' => $columns["unique"]
                 ]);
             }
             array_push($scheme->sheets, $json_table);
         }
-        //var_dump($scheme);exit;
+
         return $scheme;
     }
     
@@ -182,18 +179,17 @@ class RowsFile extends CommFile {
         return Response::json($scheme->power);
     }
     
-    public function get_rows() {
-        
+    private function get_rows_query() {
         $shareFile = ShareFile::find($this->doc_id);
         
         $scheme = $this->get_scheme($shareFile);
         
         $sheets = $scheme->sheets;        
         
-        $tables = $sheets[0]->tables;
+        $tables = $sheets[0]->tables; 
         
         $power = array();
-
+        
         foreach($tables as $index => $table){
             
             $database = $table->database;
@@ -217,7 +213,13 @@ class RowsFile extends CommFile {
                 //$power = json_decode($shareFile->power);
             }
 
-        }        
+        }
+        return [$rows_query, $power];
+    }
+    
+    public function get_rows() {
+
+        list($rows_query, $power) = $this->get_rows_query();
         
         $rows = $rows_query->select($power)->paginate(50);
         //$rows =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
@@ -229,9 +231,13 @@ class RowsFile extends CommFile {
         
         $requested_file_id = $this->doc_id;
         
+        $shareFile = ShareFile::find($this->doc_id);
+        
+        $scheme = $this->get_scheme($shareFile);
+        
         $columns =  DB::connection('sqlsrv')->table('ques_admin.dbo.contact')->paginate(50);//->forPage(2000, 20)->get();
         
-        return Response::json($columns);
+        return Response::json($scheme);
     }
     
     public function requestTo() {
