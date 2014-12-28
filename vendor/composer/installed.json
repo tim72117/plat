@@ -1620,25 +1620,25 @@
     },
     {
         "name": "laravel/framework",
-        "version": "v4.2.8",
-        "version_normalized": "4.2.8.0",
+        "version": "v4.2.16",
+        "version_normalized": "4.2.16.0",
         "source": {
             "type": "git",
             "url": "https://github.com/laravel/framework.git",
-            "reference": "e60ea917ab862254a6db37fa9cb8933138c1e73c"
+            "reference": "31fe6a5747bbe3c2df21dc4cc8f291e75ab6144f"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/laravel/framework/zipball/e60ea917ab862254a6db37fa9cb8933138c1e73c",
-            "reference": "e60ea917ab862254a6db37fa9cb8933138c1e73c",
+            "url": "https://api.github.com/repos/laravel/framework/zipball/31fe6a5747bbe3c2df21dc4cc8f291e75ab6144f",
+            "reference": "31fe6a5747bbe3c2df21dc4cc8f291e75ab6144f",
             "shasum": ""
         },
         "require": {
-            "classpreloader/classpreloader": "~1.0",
+            "classpreloader/classpreloader": "~1.0.2",
             "d11wtq/boris": "~1.0",
             "filp/whoops": "1.1.*",
             "ircmaxell/password-compat": "~1.0",
-            "jeremeamia/superclosure": "~1.0",
+            "jeremeamia/superclosure": "~1.0.1",
             "monolog/monolog": "~1.6",
             "nesbot/carbon": "~1.0",
             "patchwork/utf8": "1.1.*",
@@ -1700,7 +1700,7 @@
         "suggest": {
             "doctrine/dbal": "Allow renaming columns and dropping SQLite columns."
         },
-        "time": "2014-08-05 19:52:17",
+        "time": "2014-12-22 20:56:10",
         "type": "library",
         "extra": {
             "branch-alias": {
