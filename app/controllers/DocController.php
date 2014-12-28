@@ -21,13 +21,11 @@ class DocController extends BaseController {
 		});
 	}
 	
-	public function create() {   
-        
-        $input = Input::all('sheets', 'title');
+	public function create() {      
         
         $rowsFile = new app\library\files\v0\RowsFile;
         
-        $shareFile_id = $rowsFile->createTable($input['sheets'], $input['title']);
+        $shareFile_id = $rowsFile->create_table();
         
         $fileProvider = app\library\files\v0\FileProvider::make();        
         

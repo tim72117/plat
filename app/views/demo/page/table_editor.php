@@ -220,7 +220,7 @@ function newTableController($scope, $http, $filter) {
             return false;
         if( $scope.table.intent_key !== null ) {
 
-            $http({method: 'POST', url: 'save_struct', data:{sheets: $scope.table.sheets, title: $scope.table.title} })
+            $http({method: 'POST', url: 'save_table', data:{sheets: $scope.table.sheets, title: $scope.table.title} })
             .success(function(data, status, headers, config) { 
                 console.log(data);         
             }).error(function(e){
@@ -232,7 +232,8 @@ function newTableController($scope, $http, $filter) {
             $http({method: 'POST', url: '/file/new/create', data:{sheets: $scope.table.sheets, title: $scope.table.title} })
             .success(function(data, status, headers, config) { 
                 $scope.table.intent_key = data.intent_key;
-                console.log(data);         
+                console.log(data);
+                window.location = '/file/'+data.intent_key+'/open';
             }).error(function(e){
                 console.log(e);
             });
@@ -244,9 +245,10 @@ function newTableController($scope, $http, $filter) {
         $http({method: 'POST', url: 'get_columns', data:{} })
         .success(function(data, status, headers, config) {
             for( sindex in data.sheets ){
-                var sheet = {colHeaders:[], rows:[]};       
+                var sheet = {colHeaders:[], rows:[], name:null};       
                 for( tindex in data.sheets[sindex].tables ){
                     var table = data.sheets[sindex].tables[tindex];
+                    sheet.name = table.name;
                     for( cindex in table.columns ){
                         var rule = $filter('filter')($scope.rules, {key: table.columns[cindex].rules})[0];
                         var type = $filter('filter')(rule.types, {type: table.columns[cindex].types})[0];
@@ -285,7 +287,7 @@ function newTableController($scope, $http, $filter) {
         
         for(i=0;i<1;i++){
             var sheet = {colHeaders:[], rows:[], selected:true};
-            for(j=1;j<5;j++){
+            for(j=1;j<1;j++){
                 sheet.colHeaders.push({
                     data: 'column'+j,
                     title: 'column'+j,
