@@ -143,6 +143,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
             sheet.selected = false;
         });
         sheet.selected = true;
+        $scope.loadData(sheet);
     };
 	
 	$scope.saveRows = function() {
@@ -184,23 +185,24 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         }
         
         $scope.table.title = data.title;
-        $scope.table.sheets[0].selected = true;
-        $scope.update();      
+        $scope.action.toSelect($scope.table.sheets[0]); 
         
     }).error(function(e){
         console.log(e);
     });
     
-    $scope.update = function() {
+    $scope.loadData = function(sheet) {
         
-        $http({method: 'POST', url: 'get_import_rows?page='+($scope.page), data:{} })
+        var index_sheet = $scope.table.sheets.indexOf(sheet);
+        
+        $http({method: 'POST', url: 'get_import_rows?page='+($scope.page), data:{index_sheet: index_sheet} })
         .success(function(data, status, headers, config) {       
             
             $scope.pages = data.last_page;
             $scope.page = data.current_page;
             
-            $scope.table.sheets[0].rows.length = 0;
-            angular.extend($scope.table.sheets[0].rows, data.data);      
+            $scope.table.sheets[index_sheet].rows.length = 0;
+            angular.extend($scope.table.sheets[index_sheet].rows, data.data);      
             $scope.table.sheets[0].rows.push({});
           
         }).error(function(e){

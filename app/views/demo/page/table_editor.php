@@ -125,7 +125,7 @@ function newTableController($scope, $http, $filter) {
     $scope.table = {sheets:[], intent_key:(path[1]==='file' ? path[2] : null)};
     angular.element('[ng-controller=menu]').scope().hideRequestFile = $scope.table.intent_key === null;
     
-    $scope.tool = 2;
+    $scope.tool = 1;
     $scope.page = 1;
     $scope.limit = 40;
     $scope.newColumn = {};    
@@ -173,6 +173,7 @@ function newTableController($scope, $http, $filter) {
             sheet.selected = false;
         });
         sheet.selected = true;
+        $scope.loadData(sheet);
     }; 
     
     //console.log(/^[a-z]+$/.test());
@@ -276,9 +277,8 @@ function newTableController($scope, $http, $filter) {
                 $scope.table.sheets.push(sheet);            
             }
             
-            $scope.table.title = data.title;console.log($scope.table.sheets);
-            $scope.table.sheets[0].selected = true;
-            $scope.update();      
+            $scope.table.title = data.title;
+            $scope.action.toSelect($scope.table.sheets[0]);            
 
         }).error(function(e){
             console.log(e);
@@ -301,9 +301,11 @@ function newTableController($scope, $http, $filter) {
         }
     }
     
-    $scope.update = function() {
+    $scope.loadData = function(sheet) {
         
-        $http({method: 'POST', url: 'get_rows?page='+($scope.page), data:{} })
+        var index_sheet = $scope.table.sheets.indexOf(sheet);
+        
+        $http({method: 'POST', url: 'get_rows?page='+($scope.page), data:{index_sheet: index_sheet} })
         .success(function(data, status, headers, config) {
             
             $scope.pages = data.last_page;
@@ -311,11 +313,11 @@ function newTableController($scope, $http, $filter) {
             
             //console.log($filter('filter')($scope.table.sheets[0].colHeaders, {link: {enable: true}}));
             
-            $scope.table.sheets[0].rows.length = 0;
-            angular.extend($scope.table.sheets[0].rows, data.data);
-            $scope.table.sheets[0].rows.push({});
+            $scope.table.sheets[index_sheet].rows.length = 0;
+            angular.extend($scope.table.sheets[index_sheet].rows, data.data);
+            $scope.table.sheets[index_sheet].rows.push({});
             
-            angular.forEach($filter('filter')($scope.table.sheets[0].colHeaders, {link: {enable: true}}), function(colHeader, index){                
+            angular.forEach($filter('filter')($scope.table.sheets[index_sheet].colHeaders, {link: {enable: true}}), function(colHeader, index){                
 
                 $scope.$watch('table.sheets['+colHeader.link.table+'].rows', function(rows){
                     colHeader.type = 'dropdown';

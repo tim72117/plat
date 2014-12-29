@@ -94,7 +94,7 @@ class RowsFile extends CommFile {
         
         foreach ($sheets as $index => $sheet) {
             
-            $sheet_old = isset($scheme_old) ? $scheme_old->sheets[$index] : null;
+            $sheet_old = ( isset($scheme_old) && isset($scheme_old->sheets[$index]) ) ? $scheme_old->sheets[$index] : null;
        
             $name = ( isset($sheet['name']) && isset($sheet_old) && ($sheet['name'] == $sheet_old->tables[0]->name) ) ? $sheet['name'] : md5(uniqid(time(), true));
 
@@ -277,14 +277,15 @@ class RowsFile extends CommFile {
         return Response::json($scheme->power);
     }
     
-    private function get_rows_query() {
+    private function get_rows_query($index_sheet) {
+        
         $shareFile = ShareFile::find($this->doc_id);
         
         $scheme = $this->get_scheme($shareFile);
         
         $sheets = $scheme->sheets;        
         
-        $tables = $sheets[0]->tables; 
+        $tables = $sheets[$index_sheet]->tables; 
         
         $power = array();
         
@@ -311,8 +312,10 @@ class RowsFile extends CommFile {
     }
     
     public function get_rows() {
+        
+        $index_sheet = Input::only('index_sheet')['index_sheet'];
 
-        list($rows_query, $power) = $this->get_rows_query();
+        list($rows_query, $power) = $this->get_rows_query($index_sheet);
         
         $rows = $rows_query->select($power)->paginate(50);
         //$rows =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
@@ -322,7 +325,9 @@ class RowsFile extends CommFile {
     
     public function get_import_rows() {
         
-        list($rows_query, $power) = $this->get_rows_query();
+        $index_sheet = Input::only('index_sheet')['index_sheet'];
+        
+        list($rows_query, $power) = $this->get_rows_query($index_sheet);
         
         $rows = $rows_query->where('created_by', Auth::user()->id)->select($power)->paginate(50);
 
