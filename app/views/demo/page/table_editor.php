@@ -40,7 +40,7 @@
                     columns="sheet.colHeaders"
                     datarows="sheet.rows"
                     colHeaders="true"
-                    rowHeaders="true"
+                    rowHeaders="getRowsIndex"
                     minSpareRows="1"         
                     startCols="20"
                     startRows="20"
@@ -105,8 +105,10 @@
         </div>
         
         <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
-            <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}" style="margin:0 0 5px 5px;">資料表</div>
-            <div class="page-tag" ng-click="tool=2" ng-class="{selected:tool===2}" style="margin:0 0 5px 5px;left:85px">欄位定義</div>
+            <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}" style="margin:0 0 0 0;width:220px;left: 5px">
+                資料列<div style="display: inline-block;width:20px;padding:0" ng-repeat="$page in getPageList() track by $index" ng-click="loadPage($page)" ng-class="{notSelected:page!==$page}">{{ $page }}</div>
+            </div>
+            <div class="page-tag" ng-click="tool=2" ng-class="{selected:tool===2}" style="margin:0 0 0 0;left:230px">欄位定義</div>
         </div>
 
         
@@ -127,6 +129,7 @@ function newTableController($scope, $http, $filter) {
     
     $scope.tool = 1;
     $scope.page = 1;
+    $scope.pages = 0;
     $scope.limit = 40;
     $scope.newColumn = {};    
     $scope.action = {}; 
@@ -301,15 +304,22 @@ function newTableController($scope, $http, $filter) {
         }
     }
     
+    $scope.loadPage = function(page) {
+        console.log(page);
+        $scope.page = page;
+        $scope.loadData($filter('filter')($scope.table.sheets, {selected: true})[0]);
+    };
+    
     $scope.loadData = function(sheet) {
         
         var index_sheet = $scope.table.sheets.indexOf(sheet);
         
         $http({method: 'POST', url: 'get_rows?page='+($scope.page), data:{index_sheet: index_sheet} })
-        .success(function(data, status, headers, config) {
+        .success(function(data, status, headers, config) {            
             
             $scope.pages = data.last_page;
             $scope.page = data.current_page;
+            console.log($scope.page);
             
             //console.log($filter('filter')($scope.table.sheets[0].colHeaders, {link: {enable: true}}));
             
@@ -339,6 +349,10 @@ function newTableController($scope, $http, $filter) {
     $scope.setHeight = function() {
         return angular.element('#sheet').height();
     };
+    
+     $scope.getRowsIndex = function(index) {
+        return ($scope.page-1)*50+index+1;
+    };
 
     $scope.test = function() {
         console.log(1);
@@ -355,6 +369,25 @@ function newTableController($scope, $http, $filter) {
         //});
         //colHeader.source = ["BMW", "Chrysler", "Nissan", "Suzuki", "Toyota", "Volvo"];
         
+    };    
+    
+    $scope.getPageList = function() {
+        if( $scope.pages <= 7 ){
+            var page_link = [];
+            for(var i=1; i <= $scope.pages; i++) {
+                page_link.push(i);
+            }
+        }else{
+            if( $scope.page < 5 ) {
+                var page_link = [1, 2, 3, 4, 5,'...', $scope.pages];
+            }else
+            if( $scope.pages-$scope.page < 4 ){
+                var page_link = [1, '...', $scope.pages-4, $scope.pages-3, $scope.pages-2, $scope.pages-1, $scope.pages];
+            }else{
+                var page_link = [1, '...', $scope.page-1, $scope.page, $scope.page+1, '...', $scope.pages];
+            }            
+        }
+        return page_link;
     };
     
 }
@@ -434,5 +467,8 @@ String.prototype.Blength = function() {
 .input-status.empty {  
     background: red;
     border-color: red;
+}
+.notSelected {
+    color: #888;
 }
 </style>
