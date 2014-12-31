@@ -152,14 +152,28 @@ function newTableController($scope, $http, $filter) {
     };
 
     $scope.addColumn = function() {
-        $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders.push({
-            data: $scope.newColumn.data,
-            title: $scope.newColumn.title,
-            types: $scope.newColumn.types,
-            rules: $scope.newColumn.rules,
-            link: {enable: false, table: null},
-            unique: $scope.newColumn.unique
-        });
+        //console.log($scope.table.sheets);
+        var columns = 0;
+        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
+        var colHeaders = $filter('filter')(sheet.colHeaders, {data: $scope.newColumn.data});
+        angular.forEach(colHeaders, function(colHeader){
+            if(colHeader.data == $scope.newColumn.data){
+                columns = 1;
+            }
+
+        })
+        console.log(columns);
+        var property = ['id', 'created_by', 'created_at', 'deleted_at', 'updated_at'];
+        if(columns != 1 && property.indexOf($scope.newColumn.data) == -1){
+            $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders.push({
+                data: $scope.newColumn.data,
+                title: $scope.newColumn.title,
+                types: $scope.newColumn.types,
+                rules: $scope.newColumn.rules,
+                link: {enable: false, table: null},
+                unique: $scope.newColumn.unique
+            });
+        }
         $scope.newColumn.data = '';
         $scope.newColumn.title = '';
         $scope.newColumn.types = null;

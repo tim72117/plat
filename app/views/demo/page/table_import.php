@@ -103,17 +103,17 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
     $scope.imports.is_show_select = false;
     
     var types = [
-        {name: "整數", type: "int"}, {name: "小數", type: "float"}, {name: "中、英文(數字加符號)", type: "nvarchar"},
+        {name: "整數", type: "int" ,validator: /^\d+$/}, {name: "小數", type: "float" ,validator: /^[0-9]+.[0-9]+$/}, {name: "中、英文(數字加符號)", type: "nvarchar"},
         {name: "英文(數字加符號)", type: "varchar"}, {name: "日期", type: "date"}, {name: "0或1", type: "bit"}, {name: "多文字(中英文、數字和符號)", type: "text"}];
 
     $scope.rules = [
-        {name: "地址", key: "address", types: [types[2]]}, {name: "手機", key: "phone", types: [types[3]]}, {name: "電話", key: "tel", types: [types[3]]}, 
-        {name: "信箱", key: "email", types: [types[3]]},
-        {name: "身分證", key: "id", types: [types[3]]}, {name: "性別: 1.男 2.女", key: "gender", types: [types[3]]}, {name: "日期", key: "date", types: [types[4]]}, 
-        {name: "是與否", key: "bool", types: [types[5]]},
-        {name: "整數", key: "int", types: [types[0]]}, {name: "小數", key: "float", types: [types[1]]}, {name: "多文字(50字以上)", key: "text", types: [types[6]]}, 
+        {name: "地址", key: "address", types: [types[2]]}, {name: "手機", key: "phone", types: [types[3]] ,validator: /^\w+$/}, {name: "電話", key: "tel", types: [types[3]] ,validator: /^\w+$/}, 
+        {name: "信箱", key: "email", types: [types[3]] ,validator: /^[a-zA-Z0-9_]+@[a-zA-Z0-9._]+$/},
+        {name: "身分證", key: "id", types: [types[3]] ,validator: /^\w+$/}, {name: "性別: 1.男 2.女", key: "gender", types: [types[3]] ,validator: /^\w+$/}, {name: "日期", key: "date", types: [types[4]] ,validator: /^[0-9]+-[0-9]+-[0-9]+$/}, 
+        {name: "是與否", key: "bool", types: [types[5]],validator: /^[0-1]+$/},
+        {name: "整數", key: "int", types: [types[0]] ,validator: /^\d+$/}, {name: "小數", key: "float", types: [types[1]] ,validator: /^[0-9]+.[0-9]+$/}, {name: "多文字(50字以上)", key: "text", types: [types[6]]}, 
         {name: "多文字(50字以內)", key: "nvarchar", types: [types[2]]},
-        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]]}];
+        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]] ,validator: ['/^\d+$/','/^[0-9]+.[0-9]+$/']}];
     
     $scope.addSheet = function() {
         $scope.table.sheets.push({colHeaders:[], rows:[]});
@@ -147,7 +147,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
     };
 	
 	$scope.saveRows = function() {
-        console.log($scope.table.sheets); 
+        //console.log($scope.table.sheets); 
 		//console.log($scope.table);
 		//console.log('↓');
 		$http({method: 'POST', url: 'save_import_rows', data:{sheets: $scope.table.sheets} })
@@ -163,22 +163,45 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
     $http({method: 'POST', url: 'get_columns', data:{} })
     .success(function(data, status, headers, config) {
         for( sindex in data.sheets ){
-            var sheet = {colHeaders:[], rows:[{}]};       
+        //console.log(data.sheets);
+            var sheet = {colHeaders:[], rows:[{}]};  
+            //console.log(sheet);
+          //  console.log(data.sheets[sindex]);     
             for( tindex in data.sheets[sindex].tables ){
                 var table = data.sheets[sindex].tables[tindex];
                 for( cindex in table.columns ){       
                     var rule = $filter('filter')($scope.rules, {key: table.columns[cindex].rules})[0];
                     var type = $filter('filter')(rule.types, {type: table.columns[cindex].types})[0];
-                    sheet.colHeaders.push({
-                        data: table.columns[cindex].name,
-                        title: table.columns[cindex].title,
-                        rules: rule,
-                        types: type,
-                        unique: table.columns[cindex].unique,
-                        readOnly: false,
-                        renderer: function(instance, td, row, col, prop, value, cellProperties){ Handsontable.renderers.TextRenderer.apply(this, arguments);},
-                        validator: function(v,i){i(false);}//v:value,i:驗證結果(TorF) {false=紅}
-                    });
+                    console.log(type);
+                    if(rule.key == 'else') {
+                    //console.log(type);
+                        sheet.colHeaders.push({
+                        //console.log(type);
+                            //if(rule.key)
+                            data: table.columns[cindex].name,
+                            title: table.columns[cindex].title,
+                            rules: rule,
+                            types: type,
+                            unique: table.columns[cindex].unique,
+                            readOnly: false,
+                            renderer: function(instance, td, row, col, prop, value, cellProperties){ Handsontable.renderers.TextRenderer.apply(this, arguments);},
+                            validator: type.validator
+                        });
+                    }
+                    else{
+                        sheet.colHeaders.push({
+                            //if(rule.key)
+                            data: table.columns[cindex].name,
+                            title: table.columns[cindex].title,
+                            rules: rule,
+                            types: type,
+                            unique: table.columns[cindex].unique,
+                            readOnly: false,
+                            renderer: function(instance, td, row, col, prop, value, cellProperties){ Handsontable.renderers.TextRenderer.apply(this, arguments);},
+                            validator: rule.validator
+                        });
+                    }
+                    
                 }
             }
             $scope.table.sheets.push(sheet);            
