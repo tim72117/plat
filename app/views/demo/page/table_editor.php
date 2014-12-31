@@ -3,7 +3,7 @@
 
 <div ng-app="app">
 
-    <div ng-controller="newTableController" ng-switch on="tool" style="border: 0px solid #999;position: absolute;top: 10px;bottom: 10px;left: 10px; right: 20px">   
+    <div ng-controller="newTableController" style="border: 0px solid #999;position: absolute;top: 10px;bottom: 10px;left: 10px; right: 20px">   
         
 <!--        <div style="">
             <div style="border: 1px solid #999;width:80px;text-align: center">存檔</div>
@@ -24,7 +24,7 @@
             <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (table.sheets.length)*85+150 }}px"></div>
         </div>       
         
-        <div ng-switch-when="1" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0; right:0; overflow: hidden">  
+        <div ng-if="tool===1" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0; right:0; overflow: hidden">  
 <!--            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
                 <div class="column" style="width: 30px;left: 2px;top: 2px"></div>   
                 <div class="column" ng-repeat="column in sheet.colHeaders" style="width: 80px;left: {{ ($index+1)*79-48 }}px;top:2px;padding-left:2px">{{ column }}</div> 
@@ -33,15 +33,16 @@
                     <div class="column" ng-repeat="($cindex, column) in sheet.columns" ng-style="{width:80,left:($cindex+1)*79-48,top:($rindex+1)*29+2}" style="padding-left:2px" contenteditable="{{ power.edit_row }}">{{ row[column.name] }}</div>
                 </div>
             </div>-->
-            
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 0;right: 0;top: 0;bottom: 0" id="sheet">         
+
+            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 2px;right: 2px;top: 2px;bottom: 1px" id="sheet">         
                 <hot-table
-                    settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row'], afterUpdateSettings: afterUpdateSettings}"
+                    settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row'], afterInit: afterInit}"
                     columns="sheet.colHeaders"
-                    datarows="sheet.rows"
+                    datarows="getData(sheet)"
+                    dataSchema="{}" 
                     colHeaders="true"
                     rowHeaders="getRowsIndex"
-                    minSpareRows="1"         
+                    minSpareRows="0"         
                     startCols="20"
                     startRows="20"
                     height="setHeight()">
@@ -49,7 +50,7 @@
             </div>    
         </div>
 
-        <div ng-switch-when="2" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0;right: 0;overflow: scroll">
+        <div ng-show="tool===2" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0;right: 0;overflow: scroll" >
             <div style="width:1000px;height:25px;padding:10px 0 2px 0">
                 <div style="border: 1px solid #999;height:30px;margin:0 0 0 3px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">欄位名稱</div>  
                 <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">欄位描述</div> 
@@ -105,8 +106,10 @@
         </div>
         
         <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
-            <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}" style="margin:0 0 0 0;width:220px;left: 5px">
-                資料列<div style="display: inline-block;width:20px;padding:0" ng-repeat="$page in getPageList() track by $index" ng-click="loadPage($page)" ng-class="{notSelected:page!==$page}">{{ $page }}</div>
+            <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}"  style="margin:0 0 0 0;width:220px;left: 5px">
+                <div ng-repeat="sheet in table.sheets" ng-if="sheet.selected">
+                    資料列<div style="display: inline-block;width:20px;padding:0" ng-repeat="pageN in sheet.page_link track by $index" ng-click="loadPage(pageN)" ng-class="{notSelected:sheet.page!==pageN}">{{ pageN }}</div>
+                </div>    
             </div>
             <div class="page-tag" ng-click="tool=2" ng-class="{selected:tool===2}" style="margin:0 0 0 0;left:230px">欄位定義</div>
         </div>
@@ -127,10 +130,8 @@ function newTableController($scope, $http, $filter) {
     $scope.table = {sheets:[], intent_key:(path[1]==='file' ? path[2] : null)};
     angular.element('[ng-controller=menu]').scope().hideRequestFile = $scope.table.intent_key === null;
     
-    $scope.tool = 1;
-    $scope.page = 1;
-    $scope.pages = 0;
-    $scope.limit = 40;
+    $scope.tool = 2;
+    $scope.limit = 2000;
     $scope.newColumn = {};    
     $scope.action = {}; 
     
@@ -152,19 +153,11 @@ function newTableController($scope, $http, $filter) {
     };
 
     $scope.addColumn = function() {
-        //console.log($scope.table.sheets);
-        var columns = 0;
-        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
-        var colHeaders = $filter('filter')(sheet.colHeaders, {data: $scope.newColumn.data});
-        angular.forEach(colHeaders, function(colHeader){
-            if(colHeader.data == $scope.newColumn.data){
-                columns = 1;
-            }
 
-        })
-        console.log(columns);
-        var property = ['id', 'created_by', 'created_at', 'deleted_at', 'updated_at'];
-        if(columns != 1 && property.indexOf($scope.newColumn.data) == -1){
+        var colHeaders = $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders;
+        var property = ['id', 'created_by', 'created_at', 'deleted_at', 'updated_at'].concat(colHeaders.map(function(column){ return column.data; }));
+        
+        if( property.indexOf($scope.newColumn.data) < 0 ){
             $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders.push({
                 data: $scope.newColumn.data,
                 title: $scope.newColumn.title,
@@ -173,12 +166,13 @@ function newTableController($scope, $http, $filter) {
                 link: {enable: false, table: null},
                 unique: $scope.newColumn.unique
             });
+            $scope.newColumn.data = '';
+            $scope.newColumn.title = '';
+            $scope.newColumn.types = null;
+            $scope.newColumn.rules = null;
+            $scope.newColumn.unique = false;
         }
-        $scope.newColumn.data = '';
-        $scope.newColumn.title = '';
-        $scope.newColumn.types = null;
-        $scope.newColumn.rules = null;
-        $scope.newColumn.unique = false;
+
     };
 
     $scope.removeColumn = function(index, tindex) {
@@ -190,10 +184,8 @@ function newTableController($scope, $http, $filter) {
             sheet.selected = false;
         });
         sheet.selected = true;
-        $scope.loadData(sheet);
+        $scope.loadPage(sheet.page);
     }; 
-    
-    //console.log(/^[a-z]+$/.test());
 
     $scope.checkEmpty = function(sheets) {    
         var emptyColumns = 0;
@@ -229,7 +221,7 @@ function newTableController($scope, $http, $filter) {
                                                                         //return [0];
                                                                     }).length;            
         });    
-        console.log($scope.table.sheets);
+
         return !emptyColumns>0;
     };
     
@@ -263,7 +255,7 @@ function newTableController($scope, $http, $filter) {
         $http({method: 'POST', url: 'get_columns', data:{} })
         .success(function(data, status, headers, config) {
             for( sindex in data.sheets ){
-                var sheet = {colHeaders:[], rows:[], name:null};       
+                var sheet = {colHeaders:[], rows:[], name:null, pages:[], page:1};
                 for( tindex in data.sheets[sindex].tables ){
                     var table = data.sheets[sindex].tables[tindex];
                     sheet.name = table.name;
@@ -318,30 +310,57 @@ function newTableController($scope, $http, $filter) {
         }
     }
     
-    $scope.loadPage = function(page) {
-        console.log(page);
-        $scope.page = page;
-        $scope.loadData($filter('filter')($scope.table.sheets, {selected: true})[0]);
-    };
+    var part = [];
+    $scope.getData = function(sheet) {        
+        
+        part.length = 0;
+        
+        angular.extend(part, sheet.rows.slice((sheet.page-1)*$scope.limit, (sheet.page-1)*$scope.limit+$scope.limit));
+        
+        return part;        
+    };    
     
-    $scope.loadData = function(sheet) {
+    $scope.loadPage = function(page) {
         
-        var index_sheet = $scope.table.sheets.indexOf(sheet);
+        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
         
-        $http({method: 'POST', url: 'get_rows?page='+($scope.page), data:{index_sheet: index_sheet} })
+        var update = function() {
+            $scope.getPageList(sheet);
+            angular.isObject($scope.hotInstance) && $scope.hotInstance.loadData($scope.getData(sheet));            
+        };
+        
+        sheet.page = page;
+
+        if( sheet.pages[page-1] ) {
+            update();
+        }else{            
+            $scope.loadData(sheet, update);            
+        }
+
+    };  
+    
+    $scope.loadData = function(sheet, callback) {
+        
+        $http({method: 'POST', url: 'get_rows?page='+(sheet.page), data:{index: $scope.table.sheets.indexOf(sheet), limit: $scope.limit} })
         .success(function(data, status, headers, config) {            
             
-            $scope.pages = data.last_page;
-            $scope.page = data.current_page;
-            console.log($scope.page);
+            if( sheet.page!==data.current_page ) 
+                return false;
             
-            //console.log($filter('filter')($scope.table.sheets[0].colHeaders, {link: {enable: true}}));
+            if( sheet.rows.length!==data.total ){    
+                sheet.pages.length = data.last_page;
+                sheet.rows.length = data.total;
+            }            
             
-            $scope.table.sheets[index_sheet].rows.length = 0;
-            angular.extend($scope.table.sheets[index_sheet].rows, data.data);
-            $scope.table.sheets[index_sheet].rows.push({});
+            angular.forEach(data.data, function(row, index){
+                sheet.rows[data.from-1+index] = row;
+            });
             
-            angular.forEach($filter('filter')($scope.table.sheets[index_sheet].colHeaders, {link: {enable: true}}), function(colHeader, index){                
+            sheet.pages[sheet.page-1] = true;
+            
+            callback();
+
+            angular.forEach($filter('filter')(sheet.colHeaders, {link: {enable: true}}), function(colHeader, index){                
 
                 $scope.$watch('table.sheets['+colHeader.link.table+'].rows', function(rows){
                     colHeader.type = 'dropdown';
@@ -358,18 +377,23 @@ function newTableController($scope, $http, $filter) {
         }).error(function(e){
             console.log(e);
         });
-    };   
+    }; 
     
     $scope.setHeight = function() {
         return angular.element('#sheet').height();
     };
     
-     $scope.getRowsIndex = function(index) {
-        return ($scope.page-1)*50+index+1;
+    $scope.getRowsIndex = function(index) {
+        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
+        return (sheet.page-1)*$scope.limit+index+1;
     };
 
-    $scope.test = function() {
-        console.log(1);
+    $scope.test = function(data) {
+        console.log($scope.tool);
+    };
+    
+    $scope.afterInit = function() {
+        $scope.hotInstance = this;       
     };
     
     $scope.setAutocomplete = function(colHeader) {
@@ -385,23 +409,28 @@ function newTableController($scope, $http, $filter) {
         
     };    
     
-    $scope.getPageList = function() {
-        if( $scope.pages <= 7 ){
+    $scope.getPageList = function(sheet) {
+        
+        if( !sheet || sheet.pages.length<1 ) return false;
+        
+        var pages = sheet.pages.length;
+
+        if( pages <= 7 ){
             var page_link = [];
-            for(var i=1; i <= $scope.pages; i++) {
+            for(var i=1; i <= pages; i++) {
                 page_link.push(i);
             }
-        }else{
-            if( $scope.page < 5 ) {
-                var page_link = [1, 2, 3, 4, 5,'...', $scope.pages];
+        }else{            
+            if( sheet.page < 5 ) {
+                var page_link = [1, 2, 3, 4, 5,'...', pages];
             }else
-            if( $scope.pages-$scope.page < 4 ){
-                var page_link = [1, '...', $scope.pages-4, $scope.pages-3, $scope.pages-2, $scope.pages-1, $scope.pages];
+            if( pages-sheet.page < 4 ){
+                var page_link = [1, '...', pages-4, pages-3, pages-2, pages-1, pages];
             }else{
-                var page_link = [1, '...', $scope.page-1, $scope.page, $scope.page+1, '...', $scope.pages];
+                var page_link = [1, '...', sheet.page-1, sheet.page, sheet.page+1, '...', pages];
             }            
         }
-        return page_link;
+        sheet.page_link = page_link;
     };
     
 }

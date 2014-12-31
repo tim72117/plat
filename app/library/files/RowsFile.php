@@ -313,11 +313,11 @@ class RowsFile extends CommFile {
     
     public function get_rows() {
         
-        $index_sheet = Input::only('index_sheet')['index_sheet'];
+        $index = Input::only('index')['index'];
 
-        list($rows_query, $power) = $this->get_rows_query($index_sheet);
+        list($rows_query, $power) = $this->get_rows_query($index);
         
-        $rows = $rows_query->select($power)->paginate(50);
+        $rows = $rows_query->select($power)->paginate(Input::only('limit')['limit']);
         //$rows =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
 
         return Response::json($rows);
