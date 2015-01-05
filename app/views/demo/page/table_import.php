@@ -3,7 +3,7 @@
 
 <div ng-app="app">
 
-    <div ng-controller="newTableController" ng-switch on="tool" style="border: 0px solid #999;position: absolute;top: 10px;bottom: 10px;left: 10px; right: 20px">   
+    <div ng-controller="newTableController" style="border: 0px solid #999;position: absolute;top: 10px;bottom: 10px;left: 10px; right: 20px">   
         
 <!--        <div style="">
             <div style="border: 1px solid #999;width:80px;text-align: center">存檔</div>
@@ -20,16 +20,16 @@
             </div>
         </div>
         
-        <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
-            <div class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;" ng-click="saveRows()">測試</div>
+        <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">            
             <input type="file" id="upload-file" accept=".xlsx" style="display:none" onChange="angular.element(this).scope().fileChanged(this)" />
             <label for="upload-file">
-                <div class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>                    
+                <div class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">匯入</div>                    
             </label>    
+            <div class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;" ng-click="saveRows()">儲存</div>
             <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
         </div>       
         
-        <div ng-switch-when="1" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0; right:0; overflow: hidden">  
+        <div ng-if="tool===1" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0; right:0; overflow: hidden">  
 <!--            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
                 <div class="column" style="width: 30px;left: 2px;top: 2px"></div>   
                 <div class="column" ng-repeat="column in sheet.colHeaders" style="width: 80px;left: {{ ($index+1)*79-48 }}px;top:2px;padding-left:2px">{{ column }}</div> 
@@ -39,13 +39,14 @@
                 </div>
             </div>-->
           
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 0;right: 0;top: 0;bottom: 0" id="sheet">          
+            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 2px;right: 2px;top: 2px;bottom: 1px" id="sheet">          
                 <hot-table                   
-                    settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row'], afterCellMetaReset: beforeAutofill(this) }"
+                    settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row'], afterInit: afterInit}"
                     columns="sheet.colHeaders"
-                    datarows="sheet.rows"
+                    datarows="getData(sheet)"
+                    dataSchema="{}" 
                     colHeaders="true"
-                    rowHeaders="true"
+                    rowHeaders="getRowsIndex"
                     minSpareRows="1"         
                     startCols="20"
                     startRows="20"
@@ -55,7 +56,11 @@
         </div>
         
         <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
-            <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}" style="margin:0 0 5px 5px;">資料表</div>
+            <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}"  style="margin:0 0 0 0;width:220px;left: 5px">
+                <div ng-repeat="sheet in table.sheets" ng-if="sheet.selected">
+                    資料列<div style="display: inline-block;width:20px;padding:0" ng-repeat="pageN in sheet.page_link track by $index" ng-click="loadPage(pageN)" ng-class="{notSelected:sheet.page!==pageN}">{{ pageN }}</div>
+                </div>    
+            </div>
         </div> 
 
     </div>   
@@ -94,8 +99,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
     $scope.table = {sheets:[], rows: []};
     
     $scope.tool = 1;
-    $scope.page = 1;
-    $scope.limit = 40;
+    $scope.limit = 100;
     $scope.newColumn = {};    
     $scope.action = {};
     $scope.imports = {};
@@ -115,24 +119,44 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         {name: "多文字(50字以內)", key: "nvarchar", types: [types[2]]},
         {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]] ,validator: ['/^\d+$/','/^[0-9]+.[0-9]+$/']}];
     
+    $scope.afterInit = function() {
+        $scope.hotInstance = this;       
+    };
+    
+    $scope.setHeight = function() {
+        return angular.element('#sheet').height();
+    };
+    
+    $scope.getRowsIndex = function(index) {
+        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
+        return (sheet.page-1)*$scope.limit+index+1;
+    };
+    
     $scope.addSheet = function() {
         $scope.table.sheets.push({colHeaders:[], rows:[]});
     };
 
     $scope.addColumn = function() {
-        $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders.push({
-            data: $scope.newColumn.data,
-            title: $scope.newColumn.title,
-            types: $scope.newColumn.types,
-            rules: $scope.newColumn.rules,
-            unique: $scope.newColumn.unique
-        });
-        $scope.newColumn.data = '';
-        $scope.newColumn.title = '';
-        $scope.newColumn.types = null;
-        $scope.newColumn.rules = null;
-        $scope.newColumn.unique = false;
-    };    
+
+        var colHeaders = $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders;
+        var property = ['id', 'created_by', 'created_at', 'deleted_at', 'updated_at'].concat(colHeaders.map(function(column){ return column.data; }));
+        
+        if( property.indexOf($scope.newColumn.data) < 0 ){
+            $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders.push({
+                data: $scope.newColumn.data,
+                title: $scope.newColumn.title,
+                types: $scope.newColumn.types,
+                rules: $scope.newColumn.rules,
+                link: {enable: false, table: null},
+                unique: $scope.newColumn.unique
+            });
+            $scope.newColumn.data = '';
+            $scope.newColumn.title = '';
+            $scope.newColumn.types = null;
+            $scope.newColumn.rules = null;
+            $scope.newColumn.unique = false;
+        }
+    };   
     
     $scope.removeColumn = function(index, tindex) {
         $scope.table.sheets[tindex].colHeaders.splice(index, 1); 
@@ -143,18 +167,13 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
             sheet.selected = false;
         });
         sheet.selected = true;
-        $scope.loadData(sheet);
+        $scope.loadPage(sheet.page);
     };
 	
 	$scope.saveRows = function() {
-        //console.log($scope.table.sheets); 
-		//console.log($scope.table);
-		//console.log('↓');
 		$http({method: 'POST', url: 'save_import_rows', data:{sheets: $scope.table.sheets} })
 		.success(function(data, status, headers, config) {            
-            console.log('success');
-			console.log(data);
-          
+			console.log(data);          
         }).error(function(){
             console.log('false');
         });
@@ -163,21 +182,15 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
     $http({method: 'POST', url: 'get_columns', data:{} })
     .success(function(data, status, headers, config) {
         for( sindex in data.sheets ){
-        //console.log(data.sheets);
-            var sheet = {colHeaders:[], rows:[{}]};  
-            //console.log(sheet);
-          //  console.log(data.sheets[sindex]);     
+            var sheet = {colHeaders:[], rows:[], name:null, pages:[], page:1};   
             for( tindex in data.sheets[sindex].tables ){
                 var table = data.sheets[sindex].tables[tindex];
+                sheet.name = table.name;
                 for( cindex in table.columns ){       
                     var rule = $filter('filter')($scope.rules, {key: table.columns[cindex].rules})[0];
                     var type = $filter('filter')(rule.types, {type: table.columns[cindex].types})[0];
-                    console.log(type);
                     if(rule.key == 'else') {
-                    //console.log(type);
                         sheet.colHeaders.push({
-                        //console.log(type);
-                            //if(rule.key)
                             data: table.columns[cindex].name,
                             title: table.columns[cindex].title,
                             rules: rule,
@@ -190,7 +203,6 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
                     }
                     else{
                         sheet.colHeaders.push({
-                            //if(rule.key)
                             data: table.columns[cindex].name,
                             title: table.columns[cindex].title,
                             rules: rule,
@@ -214,48 +226,99 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         console.log(e);
     });
     
-    $scope.loadData = function(sheet) {
+    var part = [];
+    $scope.getData = function(sheet) {        
         
-        var index_sheet = $scope.table.sheets.indexOf(sheet);
+        part.length = 0;
         
-        $http({method: 'POST', url: 'get_import_rows?page='+($scope.page), data:{index_sheet: index_sheet} })
-        .success(function(data, status, headers, config) {       
+        angular.extend(part, sheet.rows.slice((sheet.page-1)*$scope.limit, (sheet.page-1)*$scope.limit+$scope.limit));
+        
+        return part;        
+    };    
+    
+    $scope.loadPage = function(page) {
+        
+        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
+        
+        var update = function() {
+            $scope.getPageList(sheet);console.log($scope.getData(sheet));
+            $scope.hotInstance.render();
+            $scope.hotInstance.validateCells(function(){});
+            //angular.isObject($scope.hotInstance) && $scope.hotInstance.loadData($scope.getData(sheet));            
+        };
+        
+        sheet.page = page;
+
+        if( sheet.pages[page-1] ) {
+            update();
+        }else{            
+            $scope.loadData(sheet, update);            
+        }
+
+    };  
+    
+    $scope.loadData = function(sheet, update) {
+        
+        $http({method: 'POST', url: 'get_import_rows?page='+(sheet.page), data:{index: $scope.table.sheets.indexOf(sheet), limit: $scope.limit} })
+        .success(function(data, status, headers, config) {            
             
-            $scope.pages = data.last_page;
-            $scope.page = data.current_page;
+            if( sheet.page!==data.current_page ) 
+                return false;
             
-            $scope.table.sheets[index_sheet].rows.length = 0;
-            angular.extend($scope.table.sheets[index_sheet].rows, data.data);      
-            $scope.table.sheets[0].rows.push({});
-          
+            if( sheet.rows.length!==data.total ){
+                sheet.pages.length = data.last_page;
+                sheet.rows.length = data.total;
+            }            
+            
+            angular.forEach(data.data, function(row, index){
+                sheet.rows[data.from-1+index] = row;
+            });
+            
+            sheet.pages[sheet.page-1] = true;
+            
+            update();
+
+            angular.forEach($filter('filter')(sheet.colHeaders, {link: {enable: true}}), function(colHeader, index){
+
+                $scope.$watch('table.sheets['+colHeader.link.table+'].rows', function(rows){
+                    colHeader.type = 'dropdown';
+                    colHeader.source = [];
+                    angular.forEach(rows, function(row){
+                        if( row.f )
+                            colHeader.source.push(row.f);
+                    });
+                    
+                    console.log(data);
+                }, true);
+            });
+
         }).error(function(e){
             console.log(e);
         });
     };    
     
-    $scope.setHeight = function() {
-        return angular.element('#sheet').height();
-    };
-    
-    $scope.onUploadFile = function(files) {
-        console.log(files[0]);
-        $scope.upload = $upload.upload({
-            url: 'uploadRows', //upload.php script, node.js route, or servlet url
-            //method: 'POST' or 'PUT',
-            //headers: {'header-key': 'header-value'},
-            //withCredentials: true,
-            file_upload: files[0] // or list of files ($files) for html5 only
-            //fileName: 'doc.jpg' or ['1.jpg', '2.jpg', ...] // to modify the name of the file(s)
-            // customize file formData name ('Content-Disposition'), server side file variable name. 
-            //fileFormDataName: myFile, //or a list of names for multiple files (html5). Default is 'file' 
-            // customize how data is added to formData. See #40#issuecomment-28612000 for sample code
-            //formDataAppender: function(formData, key, val){}
-        }).progress(function(evt) {
-            console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
-        }).success(function(data, status, headers, config) {
-            // file is uploaded successfully
-            console.log(data);
-        });
+    $scope.getPageList = function(sheet) {
+        
+        if( !sheet || sheet.pages.length<1 ) return false;
+        
+        var pages = sheet.pages.length;
+
+        if( pages <= 7 ){
+            var page_link = [];
+            for(var i=1; i <= pages; i++) {
+                page_link.push(i);
+            }
+        }else{            
+            if( sheet.page < 5 ) {
+                var page_link = [1, 2, 3, 4, 5,'...', pages];
+            }else
+            if( pages-sheet.page < 4 ){
+                var page_link = [1, '...', pages-4, pages-3, pages-2, pages-1, pages];
+            }else{
+                var page_link = [1, '...', sheet.page-1, sheet.page, sheet.page+1, '...', pages];
+            }            
+        }
+        sheet.page_link = page_link;
     };
     
     $scope.fileChanged = function(files) {
@@ -284,25 +347,53 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         if( sheet.length<1 )
             return false;
         
-        sheet.rows.length = 0;
+        //sheet.rows.length = 0;
+
+        angular.forEach(sheetImport[0].data, function(row, index){
+            sheet.rows.push(row);
+        });
         
-        angular.extend(sheet.rows, sheetImport[0].data);
+        sheet.page = 1;
+        sheet.pages = [true];
+        $scope.limit = sheetImport[0].data.length;
+        $scope.loadPage(1);
+        
         
         sheet.rows.push({});
         
-        $scope.imports.is_show_select = false;console.log($scope.table.sheets); 
-    };
-    
-    $scope.beforeAutofill = function(g) {
-        //console.log(angular.element('.htContainer').scope());
-        //console.log($scope.hotInstance = {});
+        $scope.imports.is_show_select = false;
     };
     
     $scope.test = function() {
-        console.log($scope.table.sheets);
+        console.log(1);
+    };
+    
+    $scope.onUploadFile = function(files) {
+        console.log(files[0]);
+        $scope.upload = $upload.upload({
+            url: 'uploadRows', //upload.php script, node.js route, or servlet url
+            //method: 'POST' or 'PUT',
+            //headers: {'header-key': 'header-value'},
+            //withCredentials: true,
+            file_upload: files[0] // or list of files ($files) for html5 only
+            //fileName: 'doc.jpg' or ['1.jpg', '2.jpg', ...] // to modify the name of the file(s)
+            // customize file formData name ('Content-Disposition'), server side file variable name. 
+            //fileFormDataName: myFile, //or a list of names for multiple files (html5). Default is 'file' 
+            // customize how data is added to formData. See #40#issuecomment-28612000 for sample code
+            //formDataAppender: function(formData, key, val){}
+        }).progress(function(evt) {
+            console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
+        }).success(function(data, status, headers, config) {
+            // file is uploaded successfully
+            console.log(data);
+        });
     };
     
 }
+String.prototype.Blength = function() {
+    var arr = this.match(/[^\x00-\xff]/ig);
+    return  arr === null ? this.length : this.length + arr.length;
+};
 </script>
 <!--<script src="/js/angular-file-upload.min.js"></script>-->
 <script src="/js/jquery.fileDownload.js"></script>
@@ -372,5 +463,16 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
 .define {
     font-size: 13px;
     font-family: 微軟正黑體
+}
+.input-status {
+    display: inline-block;
+    border: 1px solid #fff;
+}
+.input-status.empty {  
+    background: red;
+    border-color: red;
+}
+.notSelected {
+    color: #888;
 }
 </style>

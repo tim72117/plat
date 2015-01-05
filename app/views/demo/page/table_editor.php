@@ -42,7 +42,7 @@
                     dataSchema="{}" 
                     colHeaders="true"
                     rowHeaders="getRowsIndex"
-                    minSpareRows="0"         
+                    minSpareRows="1"         
                     startCols="20"
                     startRows="20"
                     height="setHeight()">
@@ -112,8 +112,8 @@
                 </div>    
             </div>
             <div class="page-tag" ng-click="tool=2" ng-class="{selected:tool===2}" style="margin:0 0 0 0;left:230px">欄位定義</div>
+            <div class="page-tag" ng-click="tool=3" ng-class="{selected:tool===3}" style="margin:0 0 0 0;left:315px">說明文件</div>
         </div>
-
         
     </div>   
     
@@ -122,31 +122,66 @@
 
 <script>
 angular.module('app', ['ngHandsontable'])
-.controller('newTableController', newTableController);
+.controller('newTableController', newTableController)
+.factory("XLSXReaderService", ['$q', '$rootScope',
+    function($q, $rootScope) {
+        var service = function(data) {
+            angular.extend(this, data);
+        };
 
-function newTableController($scope, $http, $filter) {
+        service.readFile = function(file, readCells, toJSON) {
+            var deferred = $q.defer();
+
+            XLSXReader(file, readCells, toJSON, function(data) {
+                $rootScope.$apply(function() {
+                    deferred.resolve(data);
+                });
+            });
+
+            return deferred.promise;
+        };
+
+
+        return service;
+    }
+]);
+
+function newTableController($scope, $http, $filter, XLSXReaderService) {
     
     var path = window.location.pathname.split('/');
     $scope.table = {sheets:[], intent_key:(path[1]==='file' ? path[2] : null)};
     angular.element('[ng-controller=menu]').scope().hideRequestFile = $scope.table.intent_key === null;
     
     $scope.tool = 2;
-    $scope.limit = 2000;
+    $scope.limit = 100;
     $scope.newColumn = {};    
     $scope.action = {}; 
     
     var types = [
-        {name: "整數", type: "int"}, {name: "小數", type: "float"}, {name: "中、英文(數字加符號)", type: "nvarchar"},
+        {name: "整數", type: "int" ,validator: /^\d+$/}, {name: "小數", type: "float" ,validator: /^[0-9]+.[0-9]+$/}, {name: "中、英文(數字加符號)", type: "nvarchar"},
         {name: "英文(數字加符號)", type: "varchar"}, {name: "日期", type: "date"}, {name: "0或1", type: "bit"}, {name: "多文字(中英文、數字和符號)", type: "text"}];
 
     $scope.rules = [
-        {name: "地址", key: "address", types: [types[2]]}, {name: "手機", key: "phone", types: [types[3]]}, {name: "電話", key: "tel", types: [types[3]]}, 
-        {name: "信箱", key: "email", types: [types[3]]},
-        {name: "身分證", key: "id", types: [types[3]]}, {name: "性別: 1.男 2.女", key: "gender", types: [types[3]]}, {name: "日期", key: "date", types: [types[4]]}, 
-        {name: "是與否", key: "bool", types: [types[5]]},
-        {name: "整數", key: "int", types: [types[0]]}, {name: "小數", key: "float", types: [types[1]]}, {name: "多文字(50字以上)", key: "text", types: [types[6]]}, 
+        {name: "地址", key: "address", types: [types[2]]}, {name: "手機", key: "phone", types: [types[3]] ,validator: /^\w+$/}, {name: "電話", key: "tel", types: [types[3]] ,validator: /^\w+$/}, 
+        {name: "信箱", key: "email", types: [types[3]] ,validator: /^[a-zA-Z0-9_]+@[a-zA-Z0-9._]+$/},
+        {name: "身分證", key: "id", types: [types[3]] ,validator: /^\w+$/}, {name: "性別: 1.男 2.女", key: "gender", types: [types[3]] ,validator: /^\w+$/}, {name: "日期", key: "date", types: [types[4]] ,validator: /^[0-9]+-[0-9]+-[0-9]+$/}, 
+        {name: "是與否", key: "bool", types: [types[5]],validator: /^[0-1]+$/},
+        {name: "整數", key: "int", types: [types[0]] ,validator: /^\d+$/}, {name: "小數", key: "float", types: [types[1]] ,validator: /^[0-9]+.[0-9]+$/}, {name: "多文字(50字以上)", key: "text", types: [types[6]]}, 
         {name: "多文字(50字以內)", key: "nvarchar", types: [types[2]]},
-        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]]}];   
+        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]] ,validator: ['/^\d+$/','/^[0-9]+.[0-9]+$/']}];    
+    
+    $scope.afterInit = function() {
+        $scope.hotInstance = this;       
+    };    
+    
+    $scope.setHeight = function() {
+        return angular.element('#sheet').height();
+    };
+    
+    $scope.getRowsIndex = function(index) {
+        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
+        return (sheet.page-1)*$scope.limit+index+1;
+    };
     
     $scope.addSheet = function() {
         $scope.table.sheets.push({colHeaders:[], rows:[]});
@@ -172,7 +207,6 @@ function newTableController($scope, $http, $filter) {
             $scope.newColumn.rules = null;
             $scope.newColumn.unique = false;
         }
-
     };
 
     $scope.removeColumn = function(index, tindex) {
@@ -186,44 +220,6 @@ function newTableController($scope, $http, $filter) {
         sheet.selected = true;
         $scope.loadPage(sheet.page);
     }; 
-
-    $scope.checkEmpty = function(sheets) {    
-        var emptyColumns = 0;
-        angular.forEach(sheets, function(sheet, index){
-            emptyColumns += $filter('filter')(sheet.colHeaders, function(colHeader)
-                                                                    {
-                                                                        /*console.log(colHeader);
-                                                                        console.log(colHeader.rules.key);
-                                                                        console.log(/^\w+$/.test(colHeader.data));
-                                                                        console.log(/^\w+$/.test(colHeader.title));
-                                                                        console.log(/^[a-z]+$/.test(colHeader.rules.key));
-                                                                        console.log(/^[a-z]+$/.test(colHeader.types.type));
-                                                                        console.log(colHeader.rules.key != null);
-                                                                        console.log(colHeader.types.type != null);
-                                                                        console.log('------');*/
-
-                                                                        if(/^\w+$/.test(colHeader.data) 
-                                                                           && colHeader.title.Blength()>0 && colHeader.title.Blength()<50
-                                                                           && colHeader.rules.key != null
-                                                                           && /^[a-z]+$/.test(colHeader.rules.key)
-                                                                           && colHeader.types.type != null
-                                                                           && /^[a-z]+$/.test(colHeader.types.type)){
-                                                                                
-                                                                                //console.log(1);
-                                                                                //console.log('------');
-                                                                                return false;
-                                                                             }   
-                                                                        else { 
-                                                                              console.log(colHeader);  
-                                                                              return true;}
-                                                                           
-                                                                        
-                                                                        //return [0];
-                                                                    }).length;            
-        });    
-
-        return !emptyColumns>0;
-    };
     
     $scope.saveDoc = function() {        
         if( !$scope.checkEmpty($scope.table.sheets) )
@@ -339,7 +335,7 @@ function newTableController($scope, $http, $filter) {
 
     };  
     
-    $scope.loadData = function(sheet, callback) {
+    $scope.loadData = function(sheet, update) {
         
         $http({method: 'POST', url: 'get_rows?page='+(sheet.page), data:{index: $scope.table.sheets.indexOf(sheet), limit: $scope.limit} })
         .success(function(data, status, headers, config) {            
@@ -358,7 +354,7 @@ function newTableController($scope, $http, $filter) {
             
             sheet.pages[sheet.page-1] = true;
             
-            callback();
+            update();
 
             angular.forEach($filter('filter')(sheet.colHeaders, {link: {enable: true}}), function(colHeader, index){                
 
@@ -378,36 +374,6 @@ function newTableController($scope, $http, $filter) {
             console.log(e);
         });
     }; 
-    
-    $scope.setHeight = function() {
-        return angular.element('#sheet').height();
-    };
-    
-    $scope.getRowsIndex = function(index) {
-        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
-        return (sheet.page-1)*$scope.limit+index+1;
-    };
-
-    $scope.test = function(data) {
-        console.log($scope.tool);
-    };
-    
-    $scope.afterInit = function() {
-        $scope.hotInstance = this;       
-    };
-    
-    $scope.setAutocomplete = function(colHeader) {
-        colHeader.link.enable = !!colHeader.link.table;
-        console.log(colHeader.link);
-        colHeader.type = 'dropdown';
-        colHeader.source = [];
-        //angular.forEach($scope.table.sheets[colHeader.link].rows, function(row, index){
-            //console.log(row.f);
-            //colHeader.source[0] = row.f;
-        //});
-        //colHeader.source = ["BMW", "Chrysler", "Nissan", "Suzuki", "Toyota", "Volvo"];
-        
-    };    
     
     $scope.getPageList = function(sheet) {
         
@@ -432,6 +398,61 @@ function newTableController($scope, $http, $filter) {
         }
         sheet.page_link = page_link;
     };
+
+    $scope.setAutocomplete = function(colHeader) {
+        colHeader.link.enable = !!colHeader.link.table;
+        console.log(colHeader.link);
+        colHeader.type = 'dropdown';
+        colHeader.source = [];
+        //angular.forEach($scope.table.sheets[colHeader.link].rows, function(row, index){
+            //console.log(row.f);
+            //colHeader.source[0] = row.f;
+        //});
+        //colHeader.source = ["BMW", "Chrysler", "Nissan", "Suzuki", "Toyota", "Volvo"];
+        
+    };    
+
+    $scope.checkEmpty = function(sheets) {    
+        var emptyColumns = 0;
+        angular.forEach(sheets, function(sheet, index){
+            emptyColumns += $filter('filter')(sheet.colHeaders, function(colHeader)
+                                                                    {
+                                                                        /*console.log(colHeader);
+                                                                        console.log(colHeader.rules.key);
+                                                                        console.log(/^\w+$/.test(colHeader.data));
+                                                                        console.log(/^\w+$/.test(colHeader.title));
+                                                                        console.log(/^[a-z]+$/.test(colHeader.rules.key));
+                                                                        console.log(/^[a-z]+$/.test(colHeader.types.type));
+                                                                        console.log(colHeader.rules.key != null);
+                                                                        console.log(colHeader.types.type != null);
+                                                                        console.log('------');*/
+
+                                                                        if(/^\w+$/.test(colHeader.data) 
+                                                                           && colHeader.title.Blength()>0 && colHeader.title.Blength()<50
+                                                                           && colHeader.rules.key != null
+                                                                           && /^[a-z]+$/.test(colHeader.rules.key)
+                                                                           && colHeader.types.type != null
+                                                                           && /^[a-z]+$/.test(colHeader.types.type)){
+                                                                                
+                                                                                //console.log(1);
+                                                                                //console.log('------');
+                                                                                return false;
+                                                                             }   
+                                                                        else { 
+                                                                              console.log(colHeader);  
+                                                                              return true;}
+                                                                           
+                                                                        
+                                                                        //return [0];
+                                                                    }).length;            
+        });    
+
+        return !emptyColumns>0;
+    };
+
+    $scope.test = function() {
+        console.log(1);
+    };
     
 }
 String.prototype.Blength = function() {
@@ -439,9 +460,14 @@ String.prototype.Blength = function() {
     return  arr === null ? this.length : this.length + arr.length;
 };
 </script>
+<!--<script src="/js/angular-file-upload.min.js"></script>-->
 <script src="/js/jquery.fileDownload.js"></script>
 <script src="/js/ngHandsontable.js"></script>
 <script src="/js/handsontable.full.min.js"></script>
+<script src="/js/jszip.min.js"></script>
+<script src="/js/xlsx.js"></script>
+<script src="/js/lodash.min.js"></script>
+<script src="/js/xlsx-reader.js"></script>
 <link rel="stylesheet" media="screen" href="/js/handsontable.full.min.css">
 
 <style>

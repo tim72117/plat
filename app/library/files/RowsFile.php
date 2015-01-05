@@ -325,11 +325,11 @@ class RowsFile extends CommFile {
     
     public function get_import_rows() {
         
-        $index_sheet = Input::only('index_sheet')['index_sheet'];
+        $index = Input::only('index')['index'];
         
-        list($rows_query, $power) = $this->get_rows_query($index_sheet);
+        list($rows_query, $power) = $this->get_rows_query($index);
         
-        $rows = $rows_query->where('created_by', Auth::user()->id)->select($power)->paginate(50);
+        $rows = $rows_query->where('created_by', Auth::user()->id)->select($power)->paginate(Input::only('limit')['limit']);
 
         return Response::json($rows);
     }
@@ -407,6 +407,7 @@ class RowsFile extends CommFile {
 			}
 		}
 */
+        
 		foreach($scheme->sheets as $index => $sheets){
             $table = $sheets->tables[0];
             empty($input_sheets[$index]['rows'][count($input_sheets[$index]['rows'])-1]) && array_pop($input_sheets[$index]['rows']);
