@@ -264,6 +264,7 @@ class RowsFile extends CommFile {
         return Response::json(['sheets'=>$sheets, 'title'=>$title]);
     }
 
+
     public function get_power() {
         
         $shareFile = ShareFile::find($this->doc_id);
@@ -301,13 +302,14 @@ class RowsFile extends CommFile {
 
             if( $shareFile->created_by==Auth::user()->id ) {              
                 //$power = array_map(function($column){return $column->name;}, $table->columns);
-                $power = array_merge($power, array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
+                $power = array_merge($power, array('id'), array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
                 //$power = array_fetch($table->columns, 'name');
             }else{
-                $power = array_merge($power, array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
+                $power = array_merge($power, array('id'), array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
             }
 
         }
+		
         return [$rows_query, $power];
     }
     
@@ -395,40 +397,69 @@ class RowsFile extends CommFile {
     }
 
 	 public function save_import_rows() {
+        
 
 		$input_sheets = Input::only('sheets')['sheets'];
+		//var_dump($input_sheets);
 		$shareFile = ShareFile::find($this->doc_id);
         $scheme = $this->get_scheme($shareFile);
-					
-/*		foreach($input as $index => $data) { //run sheets
-			foreach($data as $data){ 		 //run tables
-					var_dump($data['rows']);
-					var_dump($data['colHeaders']);
-			}
-		}
-*/
-        
+
 		foreach($scheme->sheets as $index => $sheets){
+			
             $table = $sheets->tables[0];
             empty($input_sheets[$index]['rows'][count($input_sheets[$index]['rows'])-1]) && array_pop($input_sheets[$index]['rows']);
+			
+			$row_update = array();
+			$row_insert = array();
+			$update_id = array();
+			$update_value = array();
+			
+			foreach($input_sheets[$index]['rows'] as $rows){
+				if (empty($rows['id'])){
+					array_push($row_insert , (array)$rows);
+					}
+				else{
+					array_push($update_id , $rows['id']);
+					array_push($update_value , (array)$rows);
+					}
+				}
+			$row_update = array_combine($update_id , $update_value);
+
             $colHeaders = array_fetch($table->columns, 'name');
-            $data = array_map(function($row) use($colHeaders) {
-                $row_insert = array_only($row, $colHeaders);
+			
+			//-------------- insert
+			$data = array_map(function($row_insert) use($colHeaders) {		
+                $row_insert = array_only($row_insert, $colHeaders);
                 $row_insert['created_by'] = Auth::user()->id;
                 $row_insert['created_at'] = date("Y-n-d H:i:s");
                 $row_insert['updated_at'] = date("Y-n-d H:i:s");
                 return $row_insert;
-            }, $input_sheets[$index]['rows']);
-            
-            $data_page_max = floor(count($input_sheets[$index]['rows']) / 50)+1;
+            }, $row_insert);
+			
+			$database = $table->database;
+			$data_page_max = floor(count($row_insert) / 50)+1;
             
             for($i=0 ; $i<$data_page_max ; $i++){
                 $data_page = array_slice($data, $i*50, 50);
                 DB::table($table->database.'.dbo.'.$table->name)->insert($data_page);
-            }
+			}
+			//-------------- update
+			$data_update = array_map(function($row_update) use($colHeaders) {		
+                $row_update = array_only($row_update, $colHeaders);
+                $row_update['updated_at'] = date("Y-n-d H:i:s");
+                return $row_update;
+            }, $row_update);
+			
+            foreach($data_update as $index => $data){
+				//var_dump($data);
+				//echo '----------------';
+				DB::table($table->database.'.dbo.'.$table->name)->where('id', $index)->update($data);
+					}
+
             
 		}
-        
+
+		
         return Response::json([]);
     }
 
