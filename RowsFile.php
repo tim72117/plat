@@ -409,25 +409,20 @@ class RowsFile extends CommFile {
             $table = $sheets->tables[0];
             empty($input_sheets[$index]['rows'][count($input_sheets[$index]['rows'])-1]) && array_pop($input_sheets[$index]['rows']);
 			
-			$row_update = array();
 			$row_insert = array();
-			$update_id = array();
-			$update_value = array();
+            $row_update = array();
 			
-			foreach($input_sheets[$index]['rows'] as $rows){
-				if (empty($rows['id'])){
-					array_push($row_insert , (array)$rows);
-					}
-				else{
-					array_push($update_id , $rows['id']);
-					array_push($update_value , (array)$rows);
-					}
-				}
-			$row_update = array_combine($update_id , $update_value);
+			foreach($input_sheets[$index]['rows'] as $row){
+                if( !empty($row) ) 
+				if( isset($row['id']) ){
+                    $row_update[$row['id']] = (array)$row;					
+				}else{                    
+                    array_push($row_insert , (array)$row); 		
+                }
+			}
 
             $colHeaders = array_fetch($table->columns, 'name');
 			
-			//-------------- insert
 			$data = array_map(function($row_insert) use($colHeaders) {		
                 $row_insert = array_only($row_insert, $colHeaders);
                 $row_insert['created_by'] = Auth::user()->id;
@@ -436,25 +431,21 @@ class RowsFile extends CommFile {
                 return $row_insert;
             }, $row_insert);
 			
-			$database = $table->database;
-			$data_page_max = floor(count($row_insert) / 50)+1;
+			$data_page_max = count($row_insert)==0 ? 0 : floor(count($row_insert) / 50)+1;
             
             for($i=0 ; $i<$data_page_max ; $i++){
                 $data_page = array_slice($data, $i*50, 50);
                 DB::table($table->database.'.dbo.'.$table->name)->insert($data_page);
 			}
-			//-------------- update
-			$data_update = array_map(function($row_update) use($colHeaders) {		
-                $row_update = array_only($row_update, $colHeaders);
-                $row_update['updated_at'] = date("Y-n-d H:i:s");
-                return $row_update;
-            }, $row_update);
 			
-            foreach($data_update as $index => $data){
-				//var_dump($data);
-				//echo '----------------';
-				DB::table($table->database.'.dbo.'.$table->name)->where('id', $index)->update($data);
-					}
+            foreach($row_update as $id => $row){
+                
+                $data = array_only($row, $colHeaders);
+                $data['updated_at'] = date("Y-n-d H:i:s");
+                
+				DB::table($table->database.'.dbo.'.$table->name)->where('id', $id)->update($data);
+                
+			}
 
             
 		}
