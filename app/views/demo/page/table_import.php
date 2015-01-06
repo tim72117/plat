@@ -41,7 +41,7 @@
           
             <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 2px;right: 2px;top: 2px;bottom: 1px" id="sheet">          
                 <hot-table                   
-                    settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row'], afterInit: afterInit}"
+                    settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row'], afterInit: afterInit, afterValidate: afterValidate, beforeValidate : beforeValidate}"
                     columns="sheet.colHeaders"
                     datarows="getData(sheet)"
                     dataSchema="{}" 
@@ -50,6 +50,7 @@
                     minSpareRows="1"         
                     startCols="20"
                     startRows="20"
+                    stretchH="all"
                     height="setHeight()">
                 </hot-table>
             </div>    
@@ -120,7 +121,8 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]] ,validator: ['/^\d+$/','/^[0-9]+.[0-9]+$/']}];
     
     $scope.afterInit = function() {
-        $scope.hotInstance = this;       
+        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
+        sheet.hotInstance = this;       
     };
     
     $scope.setHeight = function() {
@@ -169,14 +171,41 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         sheet.selected = true;
         $scope.loadPage(sheet.page);
     };
+    
+    $scope.beforeValidate = function(value, row, prop, source){
+        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
+        sheet.rows[row].valid = 0;
+    };
+    
+    $scope.afterValidate = function(isValid, value, row, prop, source){
+        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];     
+        !isValid && sheet.rows[row].valid++;
+    };
 	
 	$scope.saveRows = function() {
-		$http({method: 'POST', url: 'save_import_rows', data:{sheets: $scope.table.sheets} })
-		.success(function(data, status, headers, config) {            
-			console.log(data);          
-        }).error(function(){
-            console.log('false');
+        
+        var save = function(sheets) {
+            $http({method: 'POST', url: 'save_import_rows', data:{sheets: sheets} })
+            .success(function(data, status, headers, config) {            
+                console.log(data);          
+            }).error(function(){
+                console.log('false');
+            });
+        };
+        
+        sheetQueue = $scope.table.sheets.length;
+        angular.forEach($scope.table.sheets, function(sheet){
+            sheet.hotInstance && sheet.hotInstance.validateCells(function(){
+                sheet.hotInstance.render();
+                var sheets = $scope.table.sheets.map(function(sheet){
+                    return $filter('filter')(sheet.rows, {valid: 0});
+                });
+                
+                console.log(sheetQueue);
+
+            });            
         });
+
     };
 	
     $http({method: 'POST', url: 'get_columns', data:{} })
@@ -241,9 +270,13 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
         
         var update = function() {
-            $scope.getPageList(sheet);console.log($scope.getData(sheet));
-            $scope.hotInstance.render();
-            $scope.hotInstance.validateCells(function(){});
+            //console.log(); 
+            $scope.getData(sheet);
+            $scope.getPageList(sheet);
+            
+            sheet.hotInstance.validateCells(function(){
+                sheet.hotInstance.render();
+            });
             //angular.isObject($scope.hotInstance) && $scope.hotInstance.loadData($scope.getData(sheet));            
         };
         
@@ -347,7 +380,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         if( sheet.length<1 )
             return false;
         
-        //sheet.rows.length = 0;
+        sheet.rows.length = 0;
 
         angular.forEach(sheetImport[0].data, function(row, index){
             sheet.rows.push(row);
@@ -355,7 +388,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         
         sheet.page = 1;
         sheet.pages = [true];
-        $scope.limit = sheetImport[0].data.length;
+        //$scope.limit = sheetImport[0].data.length;
         $scope.loadPage(1);
         
         
