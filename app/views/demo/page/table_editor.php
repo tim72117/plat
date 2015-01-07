@@ -20,7 +20,7 @@
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
             <div ng-click="test()" class="page-tag top" style="margin:5px 0 0 5px;left:80px;width:60px;">測試</div>
             <div ng-click="tableNameBox=true" class="page-tag top" style="margin:5px 0 0 5px;left:10px;width:60px;">儲存</div>
-            <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">資料表{{ $tindex+1 }}</div>
+            <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">工作表{{ $tindex+1 }}</div>
             <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (table.sheets.length)*85+150 }}px"></div>
         </div>       
         
@@ -108,7 +108,7 @@
         <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
             <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}"  style="margin:0 0 0 0;width:220px;left: 5px">
                 <div ng-repeat="sheet in table.sheets" ng-if="sheet.selected">
-                    資料列<div style="display: inline-block;width:20px;padding:0" ng-repeat="pageN in sheet.page_link track by $index" ng-click="loadPage(pageN)" ng-class="{notSelected:sheet.page!==pageN}">{{ pageN }}</div>
+                    資料 分頁<div style="display: inline-block;width:20px;padding:0" ng-repeat="pageN in sheet.page_link track by $index" ng-click="loadPage(pageN)" ng-class="{notSelected:sheet.page!==pageN}">{{ pageN }}</div>
                 </div>    
             </div>
             <div class="page-tag" ng-click="tool=2" ng-class="{selected:tool===2}" style="margin:0 0 0 0;left:230px">欄位定義</div>
