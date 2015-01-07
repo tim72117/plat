@@ -193,18 +193,19 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
             });
         };
         
-        sheetQueue = $scope.table.sheets.length;
-        angular.forEach($scope.table.sheets, function(sheet){
-            sheet.hotInstance && sheet.hotInstance.validateCells(function(){
-                sheet.hotInstance.render();
-                var sheets = $scope.table.sheets.map(function(sheet){
-                    return $filter('filter')(sheet.rows, {valid: 0});
-                });
-                
-                console.log(sheetQueue);
-
-            });            
+        var sheets = $scope.table.sheets.map(function(sheet){
+            return {rows: sheet.rows};
         });
+        
+        save(sheets);
+
+        
+//        sheetQueue = $scope.table.sheets.length;
+//        angular.forEach($scope.table.sheets, function(sheet){
+//            sheet.hotInstance && sheet.hotInstance.validateCells(function(){
+//                sheet.hotInstance.render();
+//            });            
+//        });
 
     };
 	
@@ -388,7 +389,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         
         sheet.page = 1;
         sheet.pages = [true];
-        //$scope.limit = sheetImport[0].data.length;
+        $scope.limit = sheetImport[0].data.length;
         $scope.loadPage(1);
         
         
