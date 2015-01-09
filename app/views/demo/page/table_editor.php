@@ -8,23 +8,17 @@
 <!--        <div style="">
             <div style="border: 1px solid #999;width:80px;text-align: center">存檔</div>
         </div>-->
-
-        <div style="height:80px;position: absolute;top: 35px;z-index:200">
-            <div style="position: absolute;left:5px;top:0;;bottom:0;width:440px;border: 1px solid #999;background-color: #fff;padding:20px;box-shadow: 0 10px 20px rgba(0,0,0,0.5);" ng-show="tableNameBox">
-                <input type="text" placeholder="輸入檔案名稱" class="input define" style="width:220px" ng-model="table.title" />
-                <div style="top:20px;left:250px" class="btn default box green" ng-class="{wait:wait}" ng-click="saveDoc();tableNameBox=false">確定</div>
-                <div style="top:20px;left:360px" class="btn default box white" ng-class="{wait:wait}" ng-click="tableNameBox=false">取消</div>
-            </div>
+        
+        <div ng-if="tool===1">
+            <div style="height:40px;border-bottom: 0px solid #999;position: absolute;top: 0;z-index:2">
+                <div ng-click="test()" class="page-tag top" style="margin:0;left:10px;width:60px;">測試</div>
+                <div ng-click="tableNameBox=true" class="page-tag top" style="margin:0;left:15px;width:60px;">儲存</div>
+                <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:0;left:{{ ($tindex+1)*5+15 }}px;font-weight:900;font-size:14px">{{ sheet.sheetName }}</div>
+                <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:0;left:{{ (table.sheets.length)*5+20 }}px"></div>
+            </div>   
         </div>
         
-        <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
-            <div ng-click="test()" class="page-tag top" style="margin:5px 0 0 5px;left:80px;width:60px;">測試</div>
-            <div ng-click="tableNameBox=true" class="page-tag top" style="margin:5px 0 0 5px;left:10px;width:60px;">儲存</div>
-            <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px;font-weight:900;font-size:14px">{{ sheet.sheetName }}</div>
-            <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (table.sheets.length)*85+150 }}px"></div>
-        </div>       
-        
-        <div ng-if="tool===1" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0; right:0; overflow: hidden">  
+        <div ng-if="tool===1" style="border: 1px solid #999;position: absolute;top: 25px;bottom: 40px;left: 0; right:0; overflow: hidden">  
 <!--            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
                 <div class="column" style="width: 30px;left: 2px;top: 2px"></div>   
                 <div class="column" ng-repeat="column in sheet.colHeaders" style="width: 80px;left: {{ ($index+1)*79-48 }}px;top:2px;padding-left:2px">{{ column }}</div> 
@@ -50,18 +44,36 @@
             </div>    
         </div>
 
-        <div ng-show="tool===2" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0;right: 0;overflow: scroll" >
-            <div style="width:1000px;height:25px;padding:10px 0 2px 0">
+        <div ng-if="tool===2">
+            <div style="height:80px;position: absolute;top: 35px;z-index:200">
+                <div style="position: absolute;left:5px;top:0;;bottom:0;width:440px;border: 1px solid #999;background-color: #fff;padding:20px;box-shadow: 0 10px 20px rgba(0,0,0,0.5);" ng-show="tableNameBox">
+                    <input type="text" placeholder="輸入檔案名稱" class="input define" style="width:220px" ng-model="table.title" />
+                    <div style="top:20px;left:250px" class="btn default box green" ng-class="{wait:wait}" ng-click="saveDoc();tableNameBox=false">確定</div>
+                    <div style="top:20px;left:360px" class="btn default box white" ng-class="{wait:wait}" ng-click="tableNameBox=false">取消</div>
+                </div>
+            </div>
+            <div style="height:40px;border-bottom: 0px solid #999;position: absolute;top: 0;z-index:2">
+                <div ng-click="test()" class="page-tag top" style="margin:0;left:10px;width:60px;">測試</div>
+                <div ng-click="tableNameBox=true;alert();" class="page-tag top" style="margin:0;left:15px;width:60px;">儲存</div>
+                <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:0;left:{{ ($tindex+1)*5+15 }}px;font-weight:900;font-size:14px">{{ sheet.sheetName }}</div>
+                <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:0;left:{{ (table.sheets.length)*5+20 }}px"></div>
+            </div>   
+        </div>
+
+        <div ng-show="tool===2" style="border: 1px solid #999;position: absolute;top: 25px;bottom: 40px;left: 0;right: 0;overflow: scroll">
+            <div style="width:1000px;height:25px;padding:10px 0 0 5px;font-weight: bold;font-size: 14px">表單設定</div>
+            <div style="width:1000px;height:25px;padding:3px 0 2px 0">
                 <div style="border: 1px solid #999;height:30px;margin:0 0 0 3px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">表格名稱</div>  
                 <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:65px" class="define">不可編輯</div> 
             </div>
             <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="width:1000px;height:25px;padding:10px 2px 10px 2px">
-                    <div class="input-status" ng-class="{empty:!sheet.sheetName}">
-                        <input type="text" placeholder="表格名稱" class="input define" style="width:180px" ng-model="sheet.sheetName" />
-                    </div>
-                    <div class="input-status"><input type="checkbox" class="input define" style="width:45px" ng-model="sheet.editable" ng-class="{empty:!sheet.editable}" /></div>
+                <div class="input-status" ng-class="{empty:!sheet.sheetName}">
+                    <input type="text" placeholder="表格名稱" class="input define" style="width:180px" ng-model="sheet.sheetName" />
+                </div>
+                <div class="input-status"><input type="checkbox" class="input define" style="width:45px" ng-model="sheet.editable" /></div>
             </div>
-            <div style="width:1000px;height:25px;padding:10px 0 2px 0">
+            <div style="width:1000px;height:25px;padding:15px 0 0 5px;font-weight: bold;font-size: 14px">欄位設定</div>
+            <div style="width:1000px;height:25px;padding:3px 0 2px 0">
                 <div style="border: 1px solid #999;height:30px;margin:0 0 0 3px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">欄位名稱</div>  
                 <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">欄位描述</div> 
                 <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">過濾規則</div>
@@ -69,7 +81,7 @@
                 <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:45px" class="define">唯一</div>
                 <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:90px" class="define">連結選單</div>
             </div>
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="width:1000px;height:25px;padding:10px 0 2px 0">
+            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="width:1000px;height:25px;padding:5px 0 2px 0">
                 <div ng-repeat="colHeader in sheet.colHeaders" style="margin:2px">
 
                     <div class="input-status" ng-class="{empty:!colHeader.data}">
@@ -96,7 +108,7 @@
                     </div>
                     <input type="button" value="刪除" ng-click="removeColumn($index, $tindex)" style="padding: 3px" />
                 </div>    
-                <div style="margin:2px">
+                <div style="margin:10px 2px 2px 2px">
                     <div class="input-status"><input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="newColumn.data" ng-init="newColumn.data=''" /></div>
                     <div class="input-status"><input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="newColumn.title" ng-init="newColumn.title=''" /></div>
                     <div class="input-status">
@@ -122,8 +134,9 @@
                     資料 分頁<div style="display: inline-block;width:20px;padding:0" ng-repeat="pageN in sheet.page_link track by $index" ng-click="loadPage(pageN)" ng-class="{notSelected:sheet.page!==pageN}">{{ pageN }}</div>
                 </div>    
             </div>
-            <div class="page-tag" ng-click="tool=2" ng-class="{selected:tool===2}" style="margin:0 0 0 0;left:230px">欄位定義</div>
-            <div class="page-tag" ng-click="tool=3" ng-class="{selected:tool===3}" style="margin:0 0 0 0;left:315px">說明文件</div>
+            <div class="page-tag" ng-click="tool=2" ng-class="{selected:tool===2}" style="margin:0 0 0 0;left:10px">欄位定義</div>
+            <div class="page-tag" ng-click="tool=3" ng-class="{selected:tool===3}" style="margin:0 0 0 0;left:15px">選項定義</div>
+            <div class="page-tag" ng-click="tool=4" ng-class="{selected:tool===4}" style="margin:0 0 0 0;left:20px">說明文件</div>
         </div>
         
     </div>   
@@ -196,6 +209,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
     
     $scope.addSheet = function() {
         $scope.table.sheets.push({colHeaders:[], rows:[]});
+        $scope.action.toSelect($scope.table.sheets[$scope.table.sheets.length-1]);
     };
 
     $scope.addColumn = function() {
@@ -232,14 +246,14 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         $scope.loadPage(sheet.page);
     }; 
     
-    $scope.saveDoc = function() {        
+    $scope.saveDoc = function() {        console.log(3);
         if( !$scope.checkEmpty($scope.table.sheets) )
             return false;
         if( $scope.table.intent_key !== null ) {
 
             $http({method: 'POST', url: 'save_table', data:{sheets: $scope.table.sheets, title: $scope.table.title} })
             .success(function(data, status, headers, config) { 
-                console.log(data);         
+                console.log(1);         
             }).error(function(e){
                 console.log(e);
             });
@@ -249,7 +263,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
             $http({method: 'POST', url: '/file/new/create', data:{sheets: $scope.table.sheets, title: $scope.table.title} })
             .success(function(data, status, headers, config) { 
                 $scope.table.intent_key = data.intent_key;
-                console.log(data);
+                console.log(2);
                 window.location = '/file/'+data.intent_key+'/open';
             }).error(function(e){
                 console.log(e);
@@ -429,7 +443,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         var emptyColumns = 0;
         angular.forEach(sheets, function(sheet, index){
 
-            if( heet.sheetName.length == 0 ) {
+            if( !sheet.sheetName || sheet.sheetName.length === 0 ) {
                 emptyColumns += 1 ;
             }
 
@@ -487,9 +501,10 @@ String.prototype.Blength = function() {
     overflow: hidden;
 }    
 .page-tag {
-    position: absolute;
+    position: relative;
+    float: left;
     top: -1px;
-    width: 80px;
+    padding: 0 10px 0 10px;
     height: 25px;
     border: 1px solid #999;
     font-size: 13px;
