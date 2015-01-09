@@ -100,7 +100,7 @@ class RowsFile extends CommFile {
 
             $sheet_new = (object)[
                 'sheetName' => $sheet['sheetName'],
-                'editable' => $sheet['editable'],
+                'editable' => isset($sheet['editable']) ? $sheet['editable'] : false,
                 'tables' =>[(object)[
                     'database'   => 'rowdata',
                     'name'       => $name,
