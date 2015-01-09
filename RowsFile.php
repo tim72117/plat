@@ -96,9 +96,11 @@ class RowsFile extends CommFile {
             
             $sheet_old = ( isset($scheme_old) && isset($scheme_old->sheets[$index]) ) ? $scheme_old->sheets[$index] : null;
        
-            $name = ( isset($sheet['name']) && isset($sheet_old) && ($sheet['name'] == $sheet_old->tables[0]->name) ) ? $sheet['name'] : md5(uniqid(time(), true));
+            $name = ( isset($sheet['tablename']) && isset($sheet_old) && ($sheet['tablename'] == $sheet_old->tables[0]->name) ) ? $sheet['tablename'] : md5(uniqid(time(), true));
 
             $sheet_new = (object)[
+                'sheetName' => $sheet['sheetName'],
+                'editable' => $sheet['editable'],
                 'tables' =>[(object)[
                     'database'   => 'rowdata',
                     'name'       => $name,
