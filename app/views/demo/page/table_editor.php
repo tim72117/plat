@@ -20,7 +20,7 @@
         <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">
             <div ng-click="test()" class="page-tag top" style="margin:5px 0 0 5px;left:80px;width:60px;">測試</div>
             <div ng-click="tableNameBox=true" class="page-tag top" style="margin:5px 0 0 5px;left:10px;width:60px;">儲存</div>
-            <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">工作表{{ $tindex+1 }}</div>
+            <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px;font-weight:900;font-size:14px">{{ sheet.sheetName }}</div>
             <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:5px 0 0 5px;left:{{ (table.sheets.length)*85+150 }}px"></div>
         </div>       
         
@@ -52,6 +52,16 @@
 
         <div ng-show="tool===2" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0;right: 0;overflow: scroll" >
             <div style="width:1000px;height:25px;padding:10px 0 2px 0">
+                <div style="border: 1px solid #999;height:30px;margin:0 0 0 3px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">表格名稱</div>  
+                <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:65px" class="define">不可編輯</div> 
+            </div>
+            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="width:1000px;height:25px;padding:10px 2px 10px 2px">
+                    <div class="input-status" ng-class="{empty:!sheet.sheetName}">
+                        <input type="text" placeholder="表格名稱" class="input define" style="width:180px" ng-model="sheet.sheetName" />
+                    </div>
+                    <div class="input-status"><input type="checkbox" class="input define" style="width:45px" ng-model="sheet.editable" ng-class="{empty:!sheet.editable}" /></div>
+            </div>
+            <div style="width:1000px;height:25px;padding:10px 0 2px 0">
                 <div style="border: 1px solid #999;height:30px;margin:0 0 0 3px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">欄位名稱</div>  
                 <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">欄位描述</div> 
                 <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">過濾規則</div>
@@ -61,6 +71,7 @@
             </div>
             <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="width:1000px;height:25px;padding:10px 0 2px 0">
                 <div ng-repeat="colHeader in sheet.colHeaders" style="margin:2px">
+
                     <div class="input-status" ng-class="{empty:!colHeader.data}">
                         <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="colHeader.data" />
                     </div>
@@ -168,7 +179,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         {name: "是與否", key: "bool", types: [types[5]],validator: /^[0-1]+$/},
         {name: "整數", key: "int", types: [types[0]] ,validator: /^\d+$/}, {name: "小數", key: "float", types: [types[1]] ,validator: /^[0-9]+.[0-9]+$/}, {name: "多文字(50字以上)", key: "text", types: [types[6]]}, 
         {name: "多文字(50字以內)", key: "nvarchar", types: [types[2]]},
-        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]] ,validator: ['/^\d+$/','/^[0-9]+.[0-9]+$/']}];    
+        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]]}];
     
     $scope.afterInit = function() {
         $scope.hotInstance = this;       
@@ -251,10 +262,12 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         $http({method: 'POST', url: 'get_columns', data:{} })
         .success(function(data, status, headers, config) {
             for( sindex in data.sheets ){
-                var sheet = {colHeaders:[], rows:[], name:null, pages:[], page:1};
+                var sheet = {colHeaders:[], rows:[], sheetName:null, editable:null, tablename:null, pages:[], page:1};
+                sheet.sheetName = data.sheets[sindex].sheetName;
+                sheet.editable = data.sheets[sindex].editable;
                 for( tindex in data.sheets[sindex].tables ){
                     var table = data.sheets[sindex].tables[tindex];
-                    sheet.name = table.name;
+                    sheet.tablename = table.name;
                     for( cindex in table.columns ){
                         var rule = $filter('filter')($scope.rules, {key: table.columns[cindex].rules})[0];
                         var type = $filter('filter')(rule.types, {type: table.columns[cindex].types})[0];
@@ -283,7 +296,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
             }
             
             $scope.table.title = data.title;
-            $scope.action.toSelect($scope.table.sheets[0]);            
+            $scope.action.toSelect($scope.table.sheets[0]);
 
         }).error(function(e){
             console.log(e);
@@ -412,39 +425,32 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         
     };    
 
-    $scope.checkEmpty = function(sheets) {    
+    $scope.checkEmpty = function(sheets) {
         var emptyColumns = 0;
         angular.forEach(sheets, function(sheet, index){
-            emptyColumns += $filter('filter')(sheet.colHeaders, function(colHeader)
-                                                                    {
-                                                                        /*console.log(colHeader);
-                                                                        console.log(colHeader.rules.key);
-                                                                        console.log(/^\w+$/.test(colHeader.data));
-                                                                        console.log(/^\w+$/.test(colHeader.title));
-                                                                        console.log(/^[a-z]+$/.test(colHeader.rules.key));
-                                                                        console.log(/^[a-z]+$/.test(colHeader.types.type));
-                                                                        console.log(colHeader.rules.key != null);
-                                                                        console.log(colHeader.types.type != null);
-                                                                        console.log('------');*/
 
-                                                                        if(/^\w+$/.test(colHeader.data) 
-                                                                           && colHeader.title.Blength()>0 && colHeader.title.Blength()<50
-                                                                           && colHeader.rules.key != null
-                                                                           && /^[a-z]+$/.test(colHeader.rules.key)
-                                                                           && colHeader.types.type != null
-                                                                           && /^[a-z]+$/.test(colHeader.types.type)){
-                                                                                
-                                                                                //console.log(1);
-                                                                                //console.log('------');
-                                                                                return false;
-                                                                             }   
-                                                                        else { 
-                                                                              console.log(colHeader);  
-                                                                              return true;}
-                                                                           
-                                                                        
-                                                                        //return [0];
-                                                                    }).length;            
+            if( heet.sheetName.length == 0 ) {
+                emptyColumns += 1 ;
+            }
+
+            else {
+                emptyColumns += $filter('filter')(sheet.colHeaders, function(colHeader) {
+                    
+                    if( /^\w+$/.test(colHeader.data ) 
+                        && colHeader.title.Blength()>0 && colHeader.title.Blength()<50
+                        && colHeader.rules.key != null
+                        && /^[a-z]+$/.test(colHeader.rules.key)
+                        && colHeader.types.type != null
+                        && /^[a-z]+$/.test(colHeader.types.type)){
+                        return false;
+                    }   
+                    else { 
+                        console.log(colHeader);  
+                        return true;
+                    }
+
+                }).length;     
+            }       
         });    
 
         return !emptyColumns>0;

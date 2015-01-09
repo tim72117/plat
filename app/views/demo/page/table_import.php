@@ -26,7 +26,7 @@
                 <div class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">匯入</div>                    
             </label>    
             <div class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;" ng-click="saveRows()">儲存</div>
-            <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px">工作表{{ $tindex+1 }}</div>
+            <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px;font-weight:900;font-size:14px">{{ sheet.sheetName }}</div>
         </div>       
         
         <div ng-if="tool===1" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0; right:0; overflow: hidden">  
@@ -118,7 +118,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         {name: "是與否", key: "bool", types: [types[5]],validator: /^[0-1]+$/},
         {name: "整數", key: "int", types: [types[0]] ,validator: /^\d+$/}, {name: "小數", key: "float", types: [types[1]] ,validator: /^[0-9]+.[0-9]+$/}, {name: "多文字(50字以上)", key: "text", types: [types[6]]}, 
         {name: "多文字(50字以內)", key: "nvarchar", types: [types[2]]},
-        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]] ,validator: ['/^\d+$/','/^[0-9]+.[0-9]+$/']}];
+        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]]}];
     
     $scope.afterInit = function() {
         var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
@@ -212,10 +212,12 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
     $http({method: 'POST', url: 'get_columns', data:{} })
     .success(function(data, status, headers, config) {
         for( sindex in data.sheets ){
-            var sheet = {colHeaders:[], rows:[], name:null, pages:[], page:1};   
+            var sheet = {colHeaders:[], rows:[], editable:null, sheetName:null, pages:[], page:1};
+            sheet.sheetName = data.sheets[sindex].sheetName;
+            sheet.editable = data.sheets[sindex].editable;
             for( tindex in data.sheets[sindex].tables ){
                 var table = data.sheets[sindex].tables[tindex];
-                sheet.name = table.name;
+                sheet.tablename = table.name;
                 for( cindex in table.columns ){       
                     var rule = $filter('filter')($scope.rules, {key: table.columns[cindex].rules})[0];
                     var type = $filter('filter')(rule.types, {type: table.columns[cindex].types})[0];
@@ -226,7 +228,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
                             rules: rule,
                             types: type,
                             unique: table.columns[cindex].unique,
-                            readOnly: false,
+                            readOnly: sheet.editable,
                             renderer: function(instance, td, row, col, prop, value, cellProperties){ Handsontable.renderers.TextRenderer.apply(this, arguments);},
                             validator: type.validator
                         });
@@ -238,7 +240,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
                             rules: rule,
                             types: type,
                             unique: table.columns[cindex].unique,
-                            readOnly: false,
+                            readOnly: sheet.editable,
                             renderer: function(instance, td, row, col, prop, value, cellProperties){ Handsontable.renderers.TextRenderer.apply(this, arguments);},
                             validator: rule.validator
                         });
