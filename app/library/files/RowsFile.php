@@ -317,6 +317,8 @@ class RowsFile extends CommFile {
     
     public function get_rows() {
         
+        //權限未設定
+        
         $index = Input::only('index')['index'];
 
         list($rows_query, $power) = $this->get_rows_query($index);
@@ -363,29 +365,26 @@ class RowsFile extends CommFile {
 	
 	public function export() {
         
-        $shareFile = ShareFile::find($this->doc_id);
+        //權限未設定
+
+        $index = Input::only('index')['index'];
+
+        list($rows_query, $power) = $this->get_rows_query($index);        
         
-        $scheme = $this->get_scheme($shareFile);        
-                
-        $database = $scheme->database;
+//        if( $shareFile->created_by==Auth::user()->id ) {
+//            $power = array_fetch($scheme->tables[0]->columns, 'name');
+//        }else{
+//            $power = json_decode($shareFile->power);
+//        }        
         
-        $table = $scheme->table;
-        
-        if( $shareFile->created_by==Auth::user()->id ) {
-            $power = array_fetch($scheme->tables[0]->columns, 'name');
-        }else{
-            $power = json_decode($shareFile->power);
-        }        
-        
-        $rows =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->get();//->paginate(50);//->forPage(2000, 20)->get();
-        
-        
+        $rows = $rows_query->select($power)->get();
         
         $output = '';
         $output .= implode(",", array_keys((array)$rows[0]));
         $output .=  "\n"; 
-        foreach($rows as $row){               
-            $output .= iconv("UTF-8", "big5//IGNORE", implode(",", (array)$row));
+        foreach($rows as $row){          
+            $row_text = preg_replace( "/\s/", "" , implode("\",=\"", (array)$row) );
+            $output .= "\"".iconv("UTF-8", "big5//IGNORE", $row_text)."\"";
             $output .= "\n";
         }
         $headers = array(
