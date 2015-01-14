@@ -126,7 +126,7 @@ class UserController extends BaseController {
 		}
 	}
 	
-	public function resetPage($token) {
+	public function resetPage($project, $token) {
 		return View::make('demo.home', array('contextFile'=>'register','title'=>'重設密碼'))
 			->nest('context', 'demo.auth_reset', array('token'=>$token))
 			->nest('child_footer','demo.'.$project.'.footer');

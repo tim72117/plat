@@ -58,7 +58,7 @@ Route::group(array('before' => 'auth_logined'), function() {
 Route::get('auth/password/remind/{project}', 'UserController@remindPage')->where('project', '[a-z]+');
 Route::post('auth/password/remind/{project}', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@remind'))->where('project', '[a-z]+');
 
-Route::get('user/auth/password/reset/{token}', 'UserController@resetPage');
+Route::get('user/auth/password/reset/{project}/{token}', 'UserController@resetPage');
 Route::post('user/auth/password/reset/{token}', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@reset'));
 
 Route::post('auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@login'));
