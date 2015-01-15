@@ -29,11 +29,20 @@ $shareFiles = ShareFile::with('isFile')->where(function($query) use($user){
 
 $files = $shareFiles->map(function($shareFile) use($fileProvider){
     $link = [];
-    $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\RowsFile');
-    if( $shareFile->isFile->type==5 ){        
-        $link['open'] = 'file/'.$intent_key.'/open';
-    }else{
-        $link['open'] = $fileProvider->download($shareFile->file_id);
+    
+    switch($shareFile->isFile->type) {
+        case 1:
+            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\QuesFile');
+            $link['open'] = 'file/'.$intent_key.'/open';
+        break;
+        case 5:
+            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\RowsFile');
+            $link['open'] = 'file/'.$intent_key.'/open';
+        break;
+        default: 
+            $intent_key = '';
+            $link['open'] = $fileProvider->download($shareFile->file_id);            
+        break;    
     }
     return [
         'id' => $shareFile->id,
@@ -66,6 +75,10 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
         <input ng-click="all()" type="button" value="顯示全部" />
         <input ng-model="searchText.stdidnumber" size="10" />
         
+        <div style="position: relative;height:25px;margin:10px 0 0 10px">
+            <div class="btn box default" style="width:80px;line-height:25px;background-color: #eee;color:#555" ng-if="info.pickeds.length>0" ng-click="deleteFile()">刪除</div>
+        </div>
+        
         <div style="display: table;padding:10px;width:100%;box-sizing: border-box">
             <div style="display: table-row;background-color: #eee;line-height: 40px">
                 <div style="display: table-cell;width:50px"></div>
@@ -75,7 +88,7 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
             </div>
             <div ng-repeat="file in files | filter:searchText | startFrom:(page-1)*limit | limitTo:limit" style="display: table-row;line-height: 40px">
                 <div style="display: table-cell;border-bottom: 1px solid #ccc"><input type="checkbox" ng-model="file.selected" ng-click="test()" /></div>
-                <div style="display: table-cell;border-bottom: 1px solid #ccc"><a href="/{{ file.link.open }}">{{ file.title }}</a></div>
+                <div style="display: table-cell;border-bottom: 1px solid #ccc"><img ng-src="/images/{{ getImage(file.type) }}" style="margin-bottom:-4px" /><a href="/{{ file.link.open }}">{{ file.title }}</a></div>
                 <div style="display: table-cell;border-bottom: 1px solid #ccc;width:80px">{{ file.created_by }}</div>
                 <div style="display: table-cell;border-bottom: 1px solid #ccc;width:300px">{{ diff(file.created_at) }}</div>
             </div>
@@ -92,14 +105,16 @@ angular.module('app', [])
     };
 }).controller('fileController', fileController);
 
-function fileController($scope, $filter, $interval) {
+function fileController($scope, $filter, $interval, $http) {
     $scope.files = angular.fromJson(<?=$files?>);
     $scope.predicate = 'created_at';
     $scope.page = 1;    
     $scope.limit = 15;
     $scope.max = $scope.files.length;
     $scope.pages = Math.ceil($scope.max/$scope.limit);
-    $scope.timenow = new Date();    
+    $scope.timenow = new Date();
+    $scope.info = {pickeds:0};
+    $scope.types = {1: 'document-list-24.png', 3: 'document-24.png', 5: 'table-24.png'};
     
     $interval(function() {
         $scope.timenow = new Date();
@@ -120,6 +135,10 @@ function fileController($scope, $filter, $interval) {
         }
     };   
     
+    $scope.getImage = function(type) {
+        return $scope.types[type];
+    };
+    
     $scope.next = function() {
         if( $scope.page < $scope.pages )
             $scope.page++;
@@ -137,12 +156,38 @@ function fileController($scope, $filter, $interval) {
     };
 
     $scope.$watchCollection('files | filter:{selected:true}', function (files) {
+        $scope.info.pickeds = files;
         angular.element('#shareFile').scope().hideShareFile = files.length <= 0;        
     });
     
+    $scope.deleteFile = function() {
+        var files = $scope.info.pickeds.map(function(file){
+            $http({method: 'POST', url: '/file/'+file.intent_key+'/delete', data:{} })
+            .success(function(data, status, headers, config) {
+                console.log(data);
+            }).error(function(e){
+                console.log(e);
+            });
+            return file.intent_key;
+        });
+
+        angular.forEach($scope.info.pickeds, function(file){
+            $scope.files.splice($scope.files.indexOf(file), 1);
+        });        
+    };
+    
     $scope.test = function() {
         //console.log($scope.files);
-    };    
+    };
+    
+    $scope.loadFile = function() {
+        $http({method: 'POST', url: '/file/'+rowsFile.intent_key+'/get_columns', data:{} })
+        .success(function(data, status, headers, config) {
+            
+        }).error(function(e){
+            console.log(e);
+        });
+    };
     
     angular.element('#shareFile').scope().hideShareFile = false;
 }

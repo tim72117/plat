@@ -13,28 +13,12 @@ class QuesCreaterController extends BaseController {
 	|	Route::get('/', 'HomeController@showWelcome');
 	|
 	*/
-	protected $dataroot = '';
-	
+    
 	public function __construct(){
-		$this->dataroot = ques_path().'/ques/data/';
 		$this->beforeFilter(function($route){
-			$this->root = $route->getParameter('root');
-			Config::addNamespace('ques', ques_path().'/ques/data/'.$this->root);
-			$this->config = Config::get('ques::setting');
-			Config::set('database.default', 'sqlsrv');
-			Config::set('database.connections.sqlsrv.database', $this->config['database']);
+            Config::set('database.default', 'sqlsrv');
+			Config::set('database.connections.sqlsrv.database', 'ques_admin');
 		});
-	}
-	
-	public function test($root) {
-		return $root;
-	}
-				
-	public function home() {
-		$data = DB::table('ntcse102par_2_pstat')->first();
-		var_dump($data);
-		return 1;
-		//return View::make('management.index');
 	}
 	
 	public function deleteTable($root) {
@@ -54,83 +38,93 @@ class QuesCreaterController extends BaseController {
 		return 'end';
 	}
 	
-	public function creatTable($root) {
-		$tablename = $this->config['tablename'];
+	public function creatTable() {		
+        
+        $qid = Session::get('qid');
+        
+        $ques_doc = DB::table('ques_doc')->where('qid', $qid)->select('database', 'table', 'edit')->first();
+        
+        if( !$ques_doc->edit )
+            return '';
+        
+        $tablename = $ques_doc->table;
+        
+        $ques_pages = DB::table('ques_page')->where('qid', $qid)->orderBy('page')->select('page', 'xml')->get();    
+        
+        Config::set('database.default', 'sqlsrv');
+        Config::set('database.connections.sqlsrv.database', $ques_doc->database);
+        DB::reconnect('sqlsrv');
 		
-		$newpage = new app\library\page;		
-		$newpage->root = $this->dataroot.$this->root;
-		$newpage->init($this->config);
-		
-		$newpage->pageinfo->databasetime = date("Y/n/d H:i:s");
-		$newpage->pageinfo->asXML( $newpage->root.'/data/pageinfo.xml' );	
-		
-		
-		for($i=0;$i<$newpage->allpage;$i++){			
-			$page = $i+1;
-			$newpage->page = $i;
-			
-			$newpage->loadxml();
-			$question_array = $newpage->question_array;
-			
+        foreach($ques_pages as $ques_page){			
+			$page = $ques_page->page;
+
+            $question_array = simplexml_load_string($ques_page->xml);            
+						
 			Schema::hasTable($tablename.'_page'.$page) && Schema::drop($tablename.'_page'.$page);
-			Schema::create($tablename.'_page'.$page, function($table) use($question_array,$page){
+            
+			Schema::create($tablename.'_page'.$page, function($table) use($question_array, $page){
+                
 				$table->string('newcid', 50)->primary();
-				foreach($question_array as $question){
-					if ($question->getName()=="question" || $question->getName()=="question_sub")
-					switch($question->type){
-						case "checkbox":
-							foreach($question->answer->item as $item){
-								$attr = $item->attributes();	
-								$table->string((string)$attr["name"], 2)->nullable();
-							}
-						break;
-						case "scale":
-							$size = strlen(count($question->answer->degree))+1;
-							foreach($question->answer->item as $item){
-								$attr = $item->attributes();
-								$table->string((string)$attr["name"], $size)->nullable();
-							}
-						break;
-						case "radio":
-							$size = strlen(count($question->answer->item))+1;
-							$table->string((string)$question->answer->name, $size)->nullable();
-						break;
-						case "select":
-							$answerAttr = $question->answer->attributes();
-							$code = $answerAttr['code'];
-							if($code=='auto'){
-								$size = strlen(count($question->answer->item))+1;
-							}elseif($code=='manual'){
-								$size = 0;
-								foreach($question->answer->item as $item){
-									$itemAttr = $item->attributes();
-									if(	strlen($itemAttr['value']) > $size )
-										$size = strlen($itemAttr['value']);
-								}
-								$size++;
-							}
-							$table->string((string)$question->answer->name, $size)->nullable();
-						break;
-						case "text":
-							foreach($question->answer->item as $item){
-								$attr = $item->attributes();
-								$table->string((string)$attr['name'], $attr['size'])->nullable();
-								if( isset($attr['confirm']) ){
-									$table->string((string)$attr['name'].'_confirm', $attr['size'])->nullable();
-									$table->string((string)$attr['name'].'_isconfirm', 1)->nullable();
-								}
-							}
-						break;
-						case "textarea":
-							$table->text((string)$question->answer->name)->nullable();
-						break;
-						case "text_phone":
-							foreach($question->answer->item as $item){
-								$attr = $item->attributes();
-								$table->string((string)$attr["name"], $attr["size"])->nullable();
-							}
-						break;
-					}
+                
+				foreach($question_array as $question){                    
+					if ($question->getName()=="question" || $question->getName()=="question_sub"){                        
+                        switch($question->type){
+
+                            case "checkbox":
+                                foreach($question->answer->item as $item){
+                                    $attr = $item->attributes();	
+                                    $table->string((string)$attr["name"], 2)->nullable();
+                                }
+                            break;
+                            case "scale":
+                                $size = strlen(count($question->answer->degree))+1;
+                                foreach($question->answer->item as $item){
+                                    $attr = $item->attributes();
+                                    $table->string((string)$attr["name"], $size)->nullable();
+                                }
+                            break;
+                            case "radio":
+                                $size = strlen(count($question->answer->item))+1;
+                                $table->string((string)$question->answer->name, $size)->nullable();
+                            break;
+                            case "select":
+                                $answerAttr = $question->answer->attributes();
+                                $code = $answerAttr['code'];
+                                if($code=='auto'){
+                                    $size = strlen(count($question->answer->item))+1;
+                                }elseif($code=='manual'){
+                                    $size = 0;
+                                    foreach($question->answer->item as $item){
+                                        $itemAttr = $item->attributes();
+                                        if(	strlen($itemAttr['value']) > $size )
+                                            $size = strlen($itemAttr['value']);
+                                    }
+                                    $size++;
+                                }
+                                $table->string((string)$question->answer->name, $size)->nullable();
+                            break;
+                            case "text":
+                                foreach($question->answer->item as $item){
+                                    $attr = $item->attributes();
+                                    $table->string((string)$attr['name'], $attr['size'])->nullable();
+                                    if( isset($attr['confirm']) ){
+                                        $table->string((string)$attr['name'].'_confirm', $attr['size'])->nullable();
+                                        $table->string((string)$attr['name'].'_isconfirm', 1)->nullable();
+                                    }
+                                }
+                            break;
+                            case "textarea":
+                                $table->text((string)$question->answer->name)->nullable();
+                            break;
+                            case "text_phone":
+                                foreach($question->answer->item as $item){
+                                    $attr = $item->attributes();
+                                    $table->string((string)$attr["name"], $attr["size"])->nullable();
+                                }
+                            break;
+
+                        }
+                    }
 				}
 				$table->dateTime('ctime'.$page)->nullable();
 				$table->dateTime('stime'.$page)->nullable();
@@ -140,7 +134,7 @@ class QuesCreaterController extends BaseController {
 			
 		}
 		
-		DB::table($tablename.'_pstat')->update(array('page'=>0, 'tStamp'=>NULL));
+		DB::table($tablename.'_pstat')->update(array('page'=>1, 'updated_at'=>NULL));
 		/*
 		Schema::hasTable($tablename.'_pstat') && Schema::drop($tablename.'_pstat');
 		Schema::create($tablename.'_pstat', function($table){
@@ -153,7 +147,7 @@ class QuesCreaterController extends BaseController {
 		
 		//$this->creatUser();
 		
-		return Redirect::to('http://192.168.0.8/'.$root);
+		return Redirect::back();
 	}	
 	
 	public function creatUser() {

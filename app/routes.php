@@ -53,6 +53,8 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::get('auth/password/change', array('before' => '', 'uses' => 'UserController@passwordChangePage'));
     Route::post('auth/password/change', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@passwordChange'));
 
+    Route::get('editor/creatTable', array('before' => 'loginAdmin', 'uses' => 'QuesCreaterController@creatTable'));
+
 });
 
 Route::get('auth/password/remind/{project}', 'UserController@remindPage')->where('project', '[a-z]+');
@@ -65,20 +67,7 @@ Route::post('auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserC
 
 Route::get('user/auth/register/{project}', 'RegisterController@register')->where('project', '[a-z]+');
 Route::post('user/auth/register/{project}', array('before' => 'csrf', 'uses' => 'RegisterController@register'))->where('project', '[a-z]+');
-//平台---------------------------------------------------------------------------------------------------------------------------------
-
-
-//編輯器-------------------------------------------------------------------------------------------------------------------------------
-Route::post('editor/save/analysis/{root}', array('before' => 'loginAdmin', 'uses' => 'EditorController@saveAnalysis'));
-
-Route::get('{root}/creatTable', array('before' => 'folder_ques|loginAdmin', 'uses' => 'QuesCreaterController@creatTable'))->where('root', '[a-z0-9_]+');
-Route::get('{root}/deleteTable', array('before' => 'folder_ques|loginAdmin', 'uses' => 'QuesCreaterController@deleteTable'))->where('root', '[a-z0-9_]+');
-Route::get('{root}/creatUser', array('before' => 'folder_ques|loginAdmin', 'uses' => 'QuesCreaterController@creatUser'))->where('root', '[a-z0-9_]+');
-
-Route::get('{root}/updatetime', array('before' => 'folder_ques', 'uses' => 'ViewerController@updatetime'))->where('root', '[a-z0-9_]+');
-//編輯器-------------------------------------------------------------------------------------------------------------------------------
-
- 
+//平台--------------------------------------------------------------------------------------------------------------------------------- 
 
 Route::filter('auth_logined', function() {
     if( Auth::guest() )
