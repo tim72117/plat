@@ -26,6 +26,7 @@ class RowsFile extends CommFile {
         'export',
         'upload',
         'save_import_rows',
+        'delete',
 	);
 	
 	public static function get_intent() {
@@ -454,10 +455,12 @@ class RowsFile extends CommFile {
 		
         return Response::json([]);
     }
-
-    public function uploadRows() {
-        return Input::file('file');
-        //return Input::file('file_upload');
+    
+    public function delete() {
+        $shareFile = ShareFile::find($this->doc_id);
+        $shareFile->isFile->delete();
+        $shareFile->delete();
+        return $shareFile->id;
     }
 	
 }
