@@ -174,7 +174,7 @@ class UserController extends BaseController {
 	
 	public function passwordChangePage() {
         
-		$contents = View::make('demo.use.main')->nest('context','demo.page.passwordChange')->nest('share', 'demo.use.share');
+		$contents = View::make('demo.use.main')->nest('context','demo.page.passwordChange')->nest('share', 'demo.share');
         
         $this->layout->content = $contents;
         
