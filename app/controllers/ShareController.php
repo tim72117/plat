@@ -29,9 +29,10 @@ class ShareController extends BaseController {
         $user->load('groups.users');
         
         $groups = $user->groups->map(function($group){
-            return ['id' => $group->id, 'description' => $group->description , 'users' => $group->users->map(function($user){
-                return ['id' => $user->id, 'username' => $user->username];
-            })->toArray()];
+            $users = array_values(array_filter($group->users->map(function($user){
+                return !$user->disabled&&$user->active ? ['id' => $user->id, 'username' => $user->username] : false;
+            })->toArray()));
+            return ['id' => $group->id, 'description' => $group->description , 'users' => $users];
         });
         
         return $groups;

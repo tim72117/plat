@@ -1,4 +1,8 @@
 <div ng-controller="mailer">
+    title
+    <input type="text" ng-model="title" size="100" />
+    <br />
+    <br />
     <textarea ng-model="context" cols="100" rows="20"></textarea>
     <div ng-repeat="group in groups">
         <input type="checkbox" ng-model="group.selected" id="group{{ group.id }}" ng-change="get_users()" />
@@ -6,6 +10,7 @@
     </div>
     <input type="button" value="儲存" ng-click="mail_save()">
     <input type="button" value="送出" ng-click="mail_send()">
+    <input type="button" value="重寄" ng-click="mail_reset()">
     <div ng-repeat="user in users" style="width:200px">
         <span>{{ user.username }}</span>
         <span ng-if="user.sending&&!user.sended" style="float:right;color:blue">sending</span>
@@ -21,6 +26,8 @@ function mailer($scope, $filter, $http, $interval) {
     $scope.users = [];
     $scope.context = '';
     
+    var stop;
+    
     $http({method: 'GET', url: '/my/group', data:{}})
     .success(function(data, status, headers, config) {
         $scope.groups = data;
@@ -29,6 +36,16 @@ function mailer($scope, $filter, $http, $interval) {
     .error(function(e){
         console.log(e);
     });
+    
+    $scope.mail_reset = function() {
+        angular.forEach($filter('filter')($scope.groups, {selected: true}), function(group){
+            angular.forEach(group.users, function(user){
+                user.sended = false;
+                user.sending = false;
+                stop = null;
+            });
+        });
+    };
     
     $scope.get_users = function() {
         $scope.users = [];
@@ -53,9 +70,8 @@ function mailer($scope, $filter, $http, $interval) {
         .error(function(e){
             console.log(e);
         });   
-    };
+    };    
     
-    var stop;
     $scope.sendStart = function(send) {   
         send($filter('filter')($scope.users, {sended: '!true', sending: '!true'})[0]); 
         stop = $interval(function() {           
@@ -75,6 +91,7 @@ function mailer($scope, $filter, $http, $interval) {
             user.sending = true;
             $http({method: 'POST', url: 'ajax/send', data:{
                 id: user.id,
+                title: $scope.title,
                 context: $scope.context
             }})
             .success(function(data, status, headers, config) {

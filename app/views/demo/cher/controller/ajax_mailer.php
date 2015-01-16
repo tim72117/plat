@@ -7,7 +7,7 @@ return array(
         
         Mail::send('emails.empty', array('context'=>Input::get('context')), function($message) use($user)
         {
-            $message->to($user->email, 'John Smith')->subject('Welcome!');
+            $message->to($user->email)->subject(Input::get('title'));
         });
         return Response::json(['data'=>$user]);
     },
