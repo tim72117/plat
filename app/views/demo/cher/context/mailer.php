@@ -12,7 +12,7 @@
     <input type="button" value="送出" ng-click="mail_send()">
     <input type="button" value="重寄" ng-click="mail_reset()">
     <div ng-repeat="user in users" style="width:200px">
-        <span>{{ user.username }}</span>
+        <span>{{ $index+1+'   '+user.username }}</span>
         <span ng-if="user.sending&&!user.sended" style="float:right;color:blue">sending</span>
         <span ng-if="user.sended" style="float:right;color:green">sended</span>
     </div>
