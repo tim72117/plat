@@ -91,7 +91,11 @@ class CommFile {
             
 	}
 	
-	public function delete() {	}
+	public function delete() {
+    
+        $shareFile = ShareFile::find($this->doc_id);
+        return $this->doc_id;
+    }
 	
 	public function rename() {	}
 	
