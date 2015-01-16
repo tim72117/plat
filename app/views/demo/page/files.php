@@ -39,9 +39,9 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
             $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\RowsFile');
             $link['open'] = 'file/'.$intent_key.'/open';
         break;
-        default: 
-            $intent_key = '';
-            $link['open'] = $fileProvider->download($shareFile->file_id);            
+        default:             
+            $link['open'] = $fileProvider->download($shareFile->file_id);       
+            $intent_key = explode('/', $link['open'])[1];
         break;    
     }
     return [
@@ -62,27 +62,29 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
     /*
     | 上傳檔案且匯入檔案到doc
     */
-    echo Form::open(array('url' => $fileProvider->upload(), 'files' => true, 'method' => 'post'));
-    echo Form::file('file_upload');
-    echo Form::submit('Click Me!');
-    echo Form::close();
     ?>
-    <div ng-controller="fileController" id="fileController" style="margin-top:40px">
-
-        <input ng-click="prev()" type="button" value="上一頁" />
-        <input ng-model="page" size="2" /> / {{ pages }}
-        <input ng-click="next()" type="button" value="下一頁" />
-        <input ng-click="all()" type="button" value="顯示全部" />
-        <input ng-model="searchText.stdidnumber" size="10" />
-        
-        <div style="position: relative;height:25px;margin:10px 0 0 10px">
-            <div class="btn box default" style="width:80px;line-height:25px;background-color: #eee;color:#555" ng-if="info.pickeds.length>0" ng-click="deleteFile()">刪除</div>
+    <div ng-controller="fileController" id="fileController" style="margin: 0">
+        <?=Form::open(array('url' => $fileProvider->upload(), 'files' => true, 'method' => 'post', 'style' => 'display:none'))?>
+        <?=Form::file('file_upload', array('id'=>'file_upload', 'onchange'=>'submit()'))?>
+        <?=Form::close()?>
+        <div style="position: relative;height: 25px;margin: 0;padding:10px;box-sizing: border-box">
+            <div class="file-btn" style="width:80px;height:25px;line-height:25px;background-color: #eee;font-size:14px;float:left;" ng-click="">新增</div>
+            <label for="file_upload">
+                <div class="file-btn" style="width:80px;height:25px;line-height:25px;background-color: #eee;font-size:14px;float:left;margin-left: 2px">上傳</div>
+            </label>
+            <div class="file-btn" style="width:80px;height:25px;line-height:25px;background-color: #eee;font-size:14px;float:left;margin-left: 2px" ng-if="info.pickeds.length>0" ng-click="deleteFile()">刪除</div>
+            <div style="float:right">                
+                <div style="width:60px;height:25px;line-height:25px;float:left"><input type="text" ng-model="page" size="2" style="width:20px;border: 0" /> / {{ pages }}</div>
+                <div class="file-btn" style="width:30px;height:25px;line-height:25px;background-color: #eee;font-size:14px;float:left" ng-click="prev()"><</div>
+                <div class="file-btn" style="width:30px;height:25px;line-height:25px;background-color: #eee;font-size:14px;float:left;margin-left: 2px" ng-click="next()">></div>
+                <div class="file-btn" style="width:80px;height:25px;line-height:25px;background-color: #eee;font-size:14px;float:left;margin-left: 2px" ng-click="all()">顯示全部</div>
+            </div>
         </div>
         
         <div style="display: table;padding:10px;width:100%;box-sizing: border-box">
             <div style="display: table-row;background-color: #eee;line-height: 40px">
                 <div style="display: table-cell;width:50px"></div>
-                <div style="display: table-cell;font-size:13px">檔名</div>
+                <div style="display: table-cell;font-size:13px">檔名<input ng-model="searchText.stdidnumber" size="50" style="margin-left:5px;line-height:20px" /></div>
                 <div style="display: table-cell;font-size:13px;width:80px">擁有人</div>
                 <div style="display: table-cell;font-size:13px;width:300px">更新時間</div>
             </div>
@@ -109,7 +111,7 @@ function fileController($scope, $filter, $interval, $http) {
     $scope.files = angular.fromJson(<?=$files?>);
     $scope.predicate = 'created_at';
     $scope.page = 1;    
-    $scope.limit = 15;
+    $scope.limit = 10;
     $scope.max = $scope.files.length;
     $scope.pages = Math.ceil($scope.max/$scope.limit);
     $scope.timenow = new Date();
@@ -162,18 +164,18 @@ function fileController($scope, $filter, $interval, $http) {
     
     $scope.deleteFile = function() {
         var files = $scope.info.pickeds.map(function(file){
+            console.log(file);
             $http({method: 'POST', url: '/file/'+file.intent_key+'/delete', data:{} })
             .success(function(data, status, headers, config) {
                 console.log(data);
+                angular.forEach($scope.info.pickeds, function(file){
+                    $scope.files.splice($scope.files.indexOf(file), 1);
+                });  
             }).error(function(e){
                 console.log(e);
             });
             return file.intent_key;
         });
-
-        angular.forEach($scope.info.pickeds, function(file){
-            $scope.files.splice($scope.files.indexOf(file), 1);
-        });        
     };
     
     $scope.test = function() {
@@ -192,3 +194,21 @@ function fileController($scope, $filter, $interval, $http) {
     angular.element('#shareFile').scope().hideShareFile = false;
 }
 </script>
+<style>
+.file-btn {
+    cursor: pointer; 
+    text-align: center;
+    border: 1px solid #aaa;
+    color:#555;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.file-btn:hover {
+    border: 1px solid #888;
+    color:#000;
+}
+</style>
