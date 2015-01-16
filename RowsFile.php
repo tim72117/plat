@@ -383,9 +383,12 @@ class RowsFile extends CommFile {
         $output = '';
         $output .= implode(",", array_keys((array)$rows[0]));
         $output .=  "\n"; 
-        foreach($rows as $row){          
-            $row_text = preg_replace( "/\s/", "" , implode("\",=\"", (array)$row) );
-            $output .= "\"".iconv("UTF-8", "big5//IGNORE", $row_text)."\"";
+        foreach($rows as $row){       
+            $row_new = [];
+            foreach($row as $column){ 
+                array_push($row_new, preg_replace(array("/\"/", "/,/", "/'/", "/\s/"), "" , $column));
+            }
+            $output .= "\"".iconv("UTF-8", "big5//IGNORE", implode("\",=\"", $row_new))."\"";
             $output .= "\n";
         }
         $headers = array(
