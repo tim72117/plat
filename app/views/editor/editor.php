@@ -7,7 +7,6 @@ $editor_save_pageskip_ver = 'class/editor_save_pageskip__v1.11.php';
 
 $editor_str_id_save_ver = 'class/editor_str_id_save.php';
 
-$ques_doc = DB::table('ques_doc')->where('id', $ques_id)->first();
 $qid = $ques_doc->qid;
 $can_edit = $ques_doc->edit ? 'enable' : false;
 
@@ -1274,7 +1273,7 @@ function getPassword(length) {
 			<div style="float:right">
 				<div style="float:left"><?//=$changetime_text?></div>
 				<div style="float:left;margin-left:40px"><div><a href="demo?page=1" target="_blank">預覽</a></div><div></div></div>
-				<div style="float:left;margin-left:40px"><div><a href="/editor/creatTable">建立問卷</a></div></div>
+				<div style="float:left;margin-left:40px"><div><a href="creatTable">建立問卷</a></div></div>
 			</div>
 		</div>	
         

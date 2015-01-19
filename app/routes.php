@@ -53,8 +53,6 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::get('auth/password/change', array('before' => '', 'uses' => 'UserController@passwordChangePage'));
     Route::post('auth/password/change', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@passwordChange'));
 
-    Route::get('editor/creatTable', array('before' => 'loginAdmin', 'uses' => 'QuesCreaterController@creatTable'));
-
 });
 
 Route::get('auth/password/remind/{project}', 'UserController@remindPage')->where('project', '[a-z]+');
@@ -109,10 +107,6 @@ Route::filter('auth_logined', function() {
 Route::filter('maintenance', function($route) {
     $app = app();
     return $app->make('MagController')->callAction($app, $app['router'], 'maintenance', array());
-});
-
-Route::filter('loginAdmin', function($route) {
-    return '無權限存取';
 });
 
 Route::filter('folder_ques', function($route) {//找不到根目錄

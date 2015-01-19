@@ -116,3 +116,15 @@ function MyCtrl($scope) {
 </script>
 <div contenteditable="true" style="width:500px;height:500px;border: 1px solid black"></div>
 >>>>>>> Stashed changes
+
+<?
+$tests = DB::table('rowdata.dbo.test')->get();
+
+$new = [];
+
+foreach($tests as $test) {
+    if( !isset($new[$test->c1]) )
+        $new[$test->c1] = [];
+    array_push($new[$test->c1], $test->c2);
+}
+echo json_encode($new);
