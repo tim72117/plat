@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Response, Session, Input, DOMElement, DOMCdataSection, ShareFile;
+use DB, View, Response, Config, Schema, Session, Input, DOMElement, DOMCdataSection, ShareFile;
 
 class QuesFile extends CommFile {
 	
@@ -22,6 +22,7 @@ class QuesFile extends CommFile {
         'add_page',
         'save_data',
         'write',
+        'creatTable'
 	);
 	
 	public static function get_intent() {
@@ -42,7 +43,9 @@ class QuesFile extends CommFile {
         
         $file = $shareFile->isFile;
         
-        View::share('ques_id', $file->file);
+        $ques_doc = DB::table('ques_doc')->where('id', $file->file)->first();
+        
+        View::share('ques_doc', $ques_doc);
         
         return 'editor.editor';
         
@@ -530,16 +533,12 @@ class QuesFile extends CommFile {
         
         $file = $shareFile->isFile;
         
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $file->file)->select('dir', 'qid')->first();
-        
-        $qid = $ques_doc->qid;
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $file->file)->select('dir', 'qid', 'title')->first();
         
         $page = Input::get('page', 1);
-        $question_html = '';
+        $question_html = '';        
         
-        
-        
-        $ques_page = DB::table('ques_admin.dbo.ques_page')->where('qid', $qid)->where('page', $page)->select('xml', 'page')->first();
+        $ques_page = DB::table('ques_admin.dbo.ques_page')->where('qid', $ques_doc->qid)->where('page', $page)->select('xml', 'page')->first();
         
         $this->question_array = simplexml_load_string($ques_page->xml);
         
@@ -559,14 +558,8 @@ class QuesFile extends CommFile {
         $buildQuestionEvent = 'app\\library\\v10\\buildQuestionEvent';
 		$questionEvent = $buildQuestionEvent::buildEvent($this->question_array);
         
-        //Config::addNamespace('ques', ques_path().'/ques/data/'.$ques_doc->dir);
-		//$config = Config::get('ques::setting');
-        
-        //View::share('config', $config);
-		View::share(array('page'=>$page, 'qid'=>$qid));
+		View::share(array('page'=>$page, 'ques_doc'=>$ques_doc));
 		return View::make('editor.page',array(
-			'qname' => $ques_doc->dir,			
-			'timenow' => date("Y/n/d H:i:s"),
 			'question' => $question_html,
 			'questionEvent' => $questionEvent,
 			//'init_value' => $init_value
@@ -578,6 +571,107 @@ class QuesFile extends CommFile {
 	public function save_info() {	}
 	
 	public function count() {	}
+    
+    public function creatTable() {
+        
+        $shareFile = ShareFile::find($this->doc_id);   
+        
+        $file = $shareFile->isFile;
+        
+        $ques_doc = DB::table('ques_doc')->where('id', $file->file)->select('database', 'table', 'edit', 'qid')->first();
+        
+        if( !$ques_doc->edit )
+            return '';
+        
+        $tablename = $ques_doc->table;
+        
+        $ques_pages = DB::table('ques_page')->where('qid', $ques_doc->qid)->orderBy('page')->select('page', 'xml')->get();    
+        
+        Config::set('database.default', 'sqlsrv');
+        Config::set('database.connections.sqlsrv.database', $ques_doc->database);
+        DB::reconnect('sqlsrv');
+		
+        foreach($ques_pages as $ques_page){			
+			$page = $ques_page->page;
+
+            $question_array = simplexml_load_string($ques_page->xml);            
+						
+			//Schema::hasTable($tablename.'_page'.$page) && Schema::drop($tablename.'_page'.$page);
+            
+			Schema::create($tablename.'_page'.$page, function($table) use($question_array, $page){
+                
+				$table->string('newcid', 50)->primary();
+                
+				foreach($question_array as $question){                    
+					if ($question->getName()=="question" || $question->getName()=="question_sub"){                        
+                        switch($question->type){
+
+                            case "checkbox":
+                                foreach($question->answer->item as $item){
+                                    $attr = $item->attributes();	
+                                    $table->string((string)$attr["name"], 2)->nullable();
+                                }
+                            break;
+                            case "scale":
+                                $size = strlen(count($question->answer->degree))+1;
+                                foreach($question->answer->item as $item){
+                                    $attr = $item->attributes();
+                                    $table->string((string)$attr["name"], $size)->nullable();
+                                }
+                            break;
+                            case "radio":
+                                $size = strlen(count($question->answer->item))+1;
+                                $table->string((string)$question->answer->name, $size)->nullable();
+                            break;
+                            case "select":
+                                $answerAttr = $question->answer->attributes();
+                                $code = $answerAttr['code'];
+                                if($code=='auto'){
+                                    $size = strlen(count($question->answer->item))+1;
+                                }elseif($code=='manual'){
+                                    $size = 0;
+                                    foreach($question->answer->item as $item){
+                                        $itemAttr = $item->attributes();
+                                        if(	strlen($itemAttr['value']) > $size )
+                                            $size = strlen($itemAttr['value']);
+                                    }
+                                    $size++;
+                                }
+                                $table->string((string)$question->answer->name, $size)->nullable();
+                            break;
+                            case "text":
+                                foreach($question->answer->item as $item){
+                                    $attr = $item->attributes();
+                                    $table->string((string)$attr['name'], $attr['size'])->nullable();
+                                    if( isset($attr['confirm']) ){
+                                        $table->string((string)$attr['name'].'_confirm', $attr['size'])->nullable();
+                                        $table->string((string)$attr['name'].'_isconfirm', 1)->nullable();
+                                    }
+                                }
+                            break;
+                            case "textarea":
+                                $table->text((string)$question->answer->name)->nullable();
+                            break;
+                            case "text_phone":
+                                foreach($question->answer->item as $item){
+                                    $attr = $item->attributes();
+                                    $table->string((string)$attr["name"], $attr["size"])->nullable();
+                                }
+                            break;
+
+                        }
+                    }
+				}
+				$table->dateTime('ctime'.$page)->nullable();
+				$table->dateTime('stime'.$page)->nullable();
+				$table->dateTime('etime'.$page)->nullable();
+			});
+
+			
+		}
+		
+		DB::table($tablename.'_pstat')->update(array('page'=>1, 'updated_at'=>NULL));
+    }
 	
 	
 }
