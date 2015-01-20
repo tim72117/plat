@@ -14,4 +14,11 @@ return array(
         $code = isset($js_app->code) ? $js_app->code : '';
         return array('saveStatus'=>true, 'code'=>$code);
     },
+    'loadFile' => function() {    
+        $fileProvider = app\library\files\v0\FileProvider::make();
+        $files = DB::table('files')->where('type', 6)->where('created_by', Auth::user()->id)->get();
+        return array_map(function($file) use($fileProvider) {
+            return ['name' => $file->title, 'path' => $fileProvider->download($file->id)];
+        }, $files);
+    },
 );

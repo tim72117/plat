@@ -1,4 +1,5 @@
 <div ng-controller="js">
+    <div ng-repeat="jsonFile in jsonFiles" style="font-size:12px">jsonFiles[{{ $index }}] = {{ jsonFile.name }}<span ng-show="jsonFile.loaded" style="color:green;margin-left:10px">loaded</span></div>
     <div style="height:300px;margin:10px">
         <textarea ng-model="js"  rows="20" style="width:100%;box-sizing: border-box"></textarea>
     </div>
@@ -26,8 +27,12 @@
 angular.module('myapp', []).controller('js', share);
 function js($scope, $filter, $http) {
     
+    $scope.jsonFiles = [];
+    
     $scope.runJavascript = function() {
+        $scope.clean();
         (function(){
+            var jsonFiles = $scope.jsonFiles;
             eval($scope.js);
         })();
     };
@@ -55,6 +60,21 @@ function js($scope, $filter, $http) {
             console.log(e);
         });
     };
+    
+    $http({method: 'POST', url: 'ajax/loadFile', data:{}})
+    .success(function(data, status, headers, config) {
+        $scope.jsonFiles = data;
+        angular.forEach($scope.jsonFiles, function(jsonFile){
+            $http.get('/'+jsonFile.path).then(function(res){
+                jsonFile.data = res.data;  
+                jsonFile.loaded = true;
+            });
+        });
+
+    })
+    .error(function(e){
+        console.log(e);
+    });
     
     $scope.load();
     
