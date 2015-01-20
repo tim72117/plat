@@ -92,7 +92,7 @@ class ShareController extends BaseController {
         $input = Input::only('groups', 'files');
         $useri = Auth::user();
         $myGroups = $useri->groups;
-        $myFiles = ShareFile::where('created_by', 1)->get();        
+        $myFiles = ShareFile::where('created_by', $useri->id)->get();        
         
         foreach($input['files'] as $shareFile ){
 

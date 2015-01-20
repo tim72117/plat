@@ -246,14 +246,14 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         $scope.loadPage(sheet.page);
     }; 
     
-    $scope.saveDoc = function() {        console.log(3);
+    $scope.saveDoc = function() {        
         if( !$scope.checkEmpty($scope.table.sheets) )
             return false;
         if( $scope.table.intent_key !== null ) {
 
             $http({method: 'POST', url: 'save_table', data:{sheets: $scope.table.sheets, title: $scope.table.title} })
             .success(function(data, status, headers, config) { 
-                console.log(1);         
+                console.log(data);         
             }).error(function(e){
                 console.log(e);
             });
