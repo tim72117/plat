@@ -59,7 +59,7 @@ function main($scope, $filter, $http) {
 
 	<div style="width:100%;height: 30px;position: absolute;z-index:10;background-color: #fff">
 		<div style="background-color: #ffffff;width:100%;height:0px"></div>
-		<div style="background-color: #458A00;width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #ddd;color:#fff" align="right" ng-controller="menu">			
+		<div style="background-color: #458A00;width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #ddd;color:#fff;box-sizing: content-box" align="right" ng-controller="menu">			
             <? if( Auth::user()->id<20 ){ ?>
             <div style="position:absolute;left:370px;z-index:300" ng-cloak>
                 <div style="position:absolute;left:0">
@@ -105,7 +105,7 @@ function main($scope, $filter, $http) {
 		<div style="width: 350px;border-right: 1px solid #aaa;overflow-y: hidden;box-sizing: border-box;top:30px" class="full-auto" ng-style="{left:menuLeft}">
 			<div style="background-color: #fff;overflow-y: auto;bottom:30px" class="full-auto">
 
-				<h2>【 <?=$project->name?> 】</h2>			
+				<h3>【 <?=$project->name?> 】</h3>
 				
 				<div>	
                     
@@ -128,7 +128,7 @@ function main($scope, $filter, $http) {
                 
                 ?>
                 
-                <h2>【 待上傳資料 】</h2>                
+                <h3>【 待上傳資料 】</h3>
                 <?
                 
 				foreach($packageDocs['request'] as $packageDoc){

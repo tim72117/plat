@@ -94,31 +94,36 @@ class ShareController extends BaseController {
         $myGroups = $useri->groups;
         $myFiles = ShareFile::where('created_by', $useri->id)->get();        
         
-        foreach($input['files'] as $shareFile ){
+        foreach($input['files'] as $shareFile) {
 
-            $file = ShareFile::find($shareFile['id']);            
-            $columns = isset($shareFile['columns']) ? array_fetch($shareFile['columns'], 'name') : [];
+            $file = ShareFile::find($shareFile['id']);
 
+            $sheets = array_map(function($sheet){
+                return array_fetch($sheet['columns'], 'name');
+            }, $shareFile['sheets']);
+
+            //未處理 - sheet
             if( isset($file->power) ) {
                 $power = json_decode($file->power);
-                foreach($columns as $index => $column){
+                foreach($columns as $index => $column) {
                     if( !in_array($column, $power) )
                         unset($columns[$index]);                        
                 }
             }
             
-            foreach($input['groups'] as $group){
+            foreach($input['groups'] as $group) {
                 if( isset($group['selected']) && $group['selected'] && $myGroups->contains($group['id']) && $myFiles->contains($shareFile['id']) ){
-                    ShareFile::updateOrCreate(['target' => 'group', 'target_id' => $group['id'], 'file_id' => $file->file_id, 'created_by' => $useri->id])->update(['power' => json_encode($columns)]);                    
+                    ShareFile::updateOrCreate(['target' => 'group', 'target_id' => $group['id'], 'file_id' => $file->file_id, 'created_by' => $useri->id])->update(['power' => json_encode($sheets)]);                    
                 }
                 if( (!isset($group['selected']) || !$group['selected']) && $myFiles->contains($shareFile['id']) ){
                     foreach($group['users'] as $user){
-                        ShareFile::updateOrCreate(['target' => 'user', 'target_id' => $user['id'], 'file_id' => $file->file_id, 'created_by' => $useri->id])->update(['power' => json_encode($columns)]);
+                        ShareFile::updateOrCreate(['target' => 'user', 'target_id' => $user['id'], 'file_id' => $file->file_id, 'created_by' => $useri->id])->update(['power' => json_encode($sheets)]);
                     }
                 }
             }
         }
         
+        //未處理 - 表單變動
         return $input;
     }
     

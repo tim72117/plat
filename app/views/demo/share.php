@@ -82,16 +82,30 @@
 <!--        <div style="position: absolute;top:5px;left:230px;height:30px;width:100px;box-sizing: border-box;text-align: center;line-height: 30px" class="btn white" ng-click="switchShareType()">換</div>-->
         <div style="top:5px;left:220px;font-size:12px;color:#555" class="btn default" ng-show="advanced_status.has" ng-click="advanced()">進階</div>
     </div>
-    <div ng-repeat="file in files | filter:{type: 5}" style="position: absolute;top:10px;bottom: 80px;width:260px;left:470px" ng-style="{left:470+$index*300}" ng-init="" ng-show="advanced_status.show">
-        <div style="border:1px solid #999;margin:0;padding:5px;width:240px;box-sizing: border-box;background-color: #eee">表單({{ file.title }})</div>
-        <div style="position: absolute;top:35px;bottom:0;width:240px;overflow-y: auto;border:1px solid #999">            
-            <div ng-repeat="column in file.columns" style="border:1px solid #999;margin-top:-1px;margin-left:-1px;width:100%;line-height:35px;box-sizing: border-box;color:#555">
-                <div style="width:20px;float:left"><input type="checkbox" ng-model="column.selected" ng-init="column.selected=true" /></div>
-                <div style="width:100px;height:35px;float:left;overflow: hidden;text-overflow: ellipsis;white-space: nowrap"> {{ column.name }}</div>
-                <div style="width:100px;height:35px;float:left;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;font-size:12px;"> {{ column.title }}</div>            
-                <div style="clear: both"></div>
+    <div ng-repeat="file in files | filter:{type: 5}" style="position: absolute;top:10px;bottom: 80px;width:350px;left:470px" ng-style="{left:470+$index*350}" ng-init="" ng-show="advanced_status.show">   
+        <div style="width:330px;border:1px solid #999;margin:2px;padding:5px;box-sizing: border-box;background-color: #eee;overflow: hidden;text-overflow: ellipsis;white-space: nowrap">表單({{ file.title }})</div>
+        <div style="position: absolute;top:40px;bottom:0;left:0;right:0;overflow: auto;padding:2px">            
+            <div style="width:330px" class="ui vertical accordion menu">            
+                <div ng-repeat="($index_sheet, sheet) in file.sheets" class="item">
+                    <div class="title">
+                        <i class="dropdown icon"></i>
+                        {{ sheet.sheetName }}
+                    </div>
+                    <div class="content">
+                        <div class="ui form">
+                            <div class="grouped fields">
+                                <div ng-repeat="column in sheet.columns" class="field">
+                                    <div class="ui checkbox" style="width:100%">
+                                        <input type="checkbox" ng-model="column.selected" ng-init="column.selected=true" id="checkbox-{{ $index_sheet }}-{{ $index }}" />
+                                        <label for="checkbox-{{ $index_sheet }}-{{ $index }}" style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap">{{ column.name }}({{ column.title }})</label>
+                                    </div>
+                                </div>
+                            </div>    
+                        </div>    
+                    </div>
+                </div>
             </div>
-        </div>
+         </div>
     </div>    
 </div>
 
@@ -123,11 +137,20 @@ function share($scope, $filter, $http) {
     
     $scope.getAdvanced = function() {
         var rowsFiles = $filter('filter')($scope.files, {type: 5});
-        $scope.advanced_status.boxWidth = 500+rowsFiles.length*300;
+        $scope.advanced_status.boxWidth = 500+rowsFiles.length*350;
         angular.forEach(rowsFiles, function(rowsFile, key){
             $http({method: 'POST', url: '/file/'+rowsFile.intent_key+'/get_columns', data:{} })
             .success(function(data, status, headers, config) {
-                rowsFile.columns = data[0].columns;
+                rowsFile.sheets = [];
+                for(var i in data.sheets) {
+                    rowsFile.sheets.push({
+                        sheetName: data.sheets[i].sheetName,
+                        columns: data.sheets[i].tables[0].columns
+                    });
+                }
+                console.log(data);
+                $('.ui.accordion').accordion();
+                //rowsFile.columns = data[0].columns;
             }).error(function(e){
                 console.log(e);
             });
@@ -252,8 +275,12 @@ function share($scope, $filter, $http) {
       
         var groups = $scope.getSelectedGroup();
         var files = [];
-        angular.forEach($scope.files, function(file, key){          
-            files.push({id: file.id, columns: $filter('filter')(file.columns, {selected: true})});
+        angular.forEach($scope.files, function(file){   
+            sheets = [];
+            angular.forEach(file.sheets, function(sheet){   
+                sheets.push({columns: $filter('filter')(sheet.columns, {selected: true})});
+            });
+            files.push({id: file.id, sheets: sheets});
         });
         console.log(files);
        
@@ -312,6 +339,8 @@ function share($scope, $filter, $http) {
         });
         
     };
+    //$('.ui.checkbox').checkbox();
+    
 }
 </script>
 
@@ -494,3 +523,10 @@ function share($scope, $filter, $http) {
 }
 </style>
 
+<script src="/css/ui/UI-Checkbox-master/checkbox.min.js"></script>
+<script src="/css/ui/UI-Accordion-master/accordion.min.js"></script>
+
+
+<link rel="stylesheet" href="/css/ui/Semantic-UI-1.8.1/semantic.min.css" />
+<link rel="stylesheet" href="/css/ui/UI-Checkbox-master/checkbox.min.css" />
+<link rel="stylesheet" href="/css/ui/UI-Accordion-master/accordion.min.css" />
