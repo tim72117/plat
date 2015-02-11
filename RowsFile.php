@@ -243,8 +243,6 @@ class RowsFile extends CommFile {
         
         $sheets = $scheme->sheets;
 
-        //var_dump($scheme);
-
         //$columns = DB::table('use_103.sys.columns')->whereRaw("object_id=OBJECT_ID('use_103.dbo.seniorOne103_userinfo')")->select('name', DB::raw("'' AS description"))->get('description', 'name');
         
         $power = array();
@@ -254,17 +252,20 @@ class RowsFile extends CommFile {
         if( $shareFile->created_by!=Auth::user()->id && isset($shareFile->power) ) {
             $power = json_decode($shareFile->power);
 
-            foreach($scheme->tables as $index => $table) {
-                foreach($table->columns as $index => $column) {
-                    if( !in_array($column->name, $power) ) {
-                        unset($table->columns[$index]);
+            foreach($sheets as $index_sheet => $sheet) {
+                if( !is_array($power[$index_sheet]) ) {
+                    $sheet->tables[0]->columns = [];
+                }
+                foreach($sheet->tables[0]->columns as $index_coulmn => $column) {
+                    if( !in_array($column->name, $power[$index_sheet]) ) {
+                        unset($sheet->tables[0]->columns[$index_coulmn]);
                     }
                 }
             }            
             
         }
 
-        return Response::json(['sheets'=>$sheets, 'title'=>$title]);
+        return Response::json((object)['sheets'=>$sheets, 'title'=>$title]);
     }
 
 
