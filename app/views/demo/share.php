@@ -112,8 +112,7 @@
 <!--<input ng-click="setDefalut()" type="button" value="set default" />-->
  
 <script type="text/javascript">   
-angular.module('myapp', []).controller('share', share);
-function share($scope, $filter, $http) {
+app.controller('shareController', function($scope, $filter, $http) {
     
     $scope.groups = {};
     $scope.set_groups = {};
@@ -341,7 +340,7 @@ function share($scope, $filter, $http) {
     };
     //$('.ui.checkbox').checkbox();
     
-}
+});
 </script>
 
 <style>

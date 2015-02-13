@@ -6,12 +6,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9" />
 <meta http-equiv="X-UA-Compatible" content="IE=8" />
 @yield('head')    
-<script>
-var app = angular.module('app', []);
-</script>
 </head>
 
-<body>    
+<body>
     @yield('body')
 </body>
 

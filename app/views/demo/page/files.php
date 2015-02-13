@@ -100,14 +100,13 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
 </div>
 
 <script>
-angular.module('app', [])
+angular.module('app')
 .filter('startFrom', function() {
     return function(input, start) {         
         return input.slice(start);
     };
-}).controller('fileController', fileController);
-
-function fileController($scope, $filter, $interval, $http) {
+})
+.controller('fileController', function($scope, $filter, $interval, $http) {
     $scope.files = angular.fromJson(<?=$files?>);
     $scope.predicate = 'created_at';
     $scope.page = getCookie('file_page') || 1;
@@ -161,7 +160,7 @@ function fileController($scope, $filter, $interval, $http) {
 
     $scope.$watchCollection('files | filter:{selected:true}', function (files) {
         $scope.info.pickeds = files;
-        angular.element('#shareFile').scope().hideShareFile = files.length <= 0;        
+        //angular.element('#shareFile').scope().hideShareFile = files.length <= 0;        
     });
     
     $scope.deleteFile = function() {
@@ -193,26 +192,8 @@ function fileController($scope, $filter, $interval, $http) {
         });
     };
     
-    angular.element('#shareFile').scope().hideShareFile = false;
-}
-
-function setCookie(name, value) {
-    var Days = 30;
-    var exp  = new Date();
-    exp.setTime(exp.getTime() + Days*24*60*60*1000);
-    document.cookie = name + "="+ escape (value) + ";expires=" + exp.toGMTString();
-}
-function getCookie(name) {
-    var arr = document.cookie.match(new RegExp("(^| )"+name+"=([^;]*)(;|$)"));
-    if( arr !== null ) return unescape(arr[2]);
-    return null;
-}
-function delCookie(name) {
-    var exp = new Date();
-    exp.setTime(exp.getTime() - 1);
-    var cval=getCookie(name);
-    if( cval!==null ) document.cookie= name + "="+cval+";expires="+exp.toGMTString();
-}
+    //angular.element('#shareFile').scope().hideShareFile = false;
+});
 </script>
 <style>
 .file-btn {

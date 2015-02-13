@@ -10,14 +10,34 @@ $project = DB::table('projects')->where('code', $user->getProject())->first();
 
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
 <script src="/js/jquery-1.11.1.min.js"></script>
-<script src="/js/angular.min.js"></script>
-<!--<script src="/js/angular-animate.min.js"></script>-->
+<script src="/js/angular-1.3.11/angular.min.js"></script>
+<script src="/js/angular-1.3.11/angular-sanitize.min.js"></script>
 
 <link rel="stylesheet" href="/demo/use/css/use100_content.css" />
 <link rel="stylesheet" href="/css/main.css" />
 <link rel="stylesheet" href="/css/ui.css" />
 
 <script type="text/javascript">
+var app = angular.module('app', ['ngSanitize'])
+.controller('topMenuController', function($scope, $filter, $http) {
+    $scope.getGroupForApp = function() {
+        //angular.element('[ng-controller=share]').scope().getGroupForApp();
+    };
+    $scope.getSharedFile = function() {
+        //angular.element('[ng-controller=share]').scope().getSharedFile();
+    };
+    $scope.requestFile = function() {
+        //angular.element('[ng-controller=share]').scope().getGroupForRequest();
+    };
+})
+.controller('mainController', function($scope, $filter, $http) {
+    $scope.menuLeft = getCookie('menuLeft')*1 || 0;
+    $scope.closeLeftMenu = function() {
+        console.log(1);
+        $scope.menuLeft = $scope.menuLeft===0 ? -300 : 0;
+        setCookie('menuLeft', $scope.menuLeft);
+    };
+});
 $(document).ready(function(){	//選單功能
 
     $('.queryLogBtn').click(function(){
@@ -33,33 +53,32 @@ $(document).ready(function(){	//選單功能
     
    
 });
-angular.module('myapp', []).controller('menu', menu).controller('main', main);
-function menu($scope, $filter, $http) {
-    $scope.getGroupForApp = function() {
-        angular.element('[ng-controller=share]').scope().getGroupForApp();
-    };
-    $scope.getSharedFile = function() {
-        angular.element('[ng-controller=share]').scope().getSharedFile();
-    };
-    $scope.requestFile = function() {
-        angular.element('[ng-controller=share]').scope().getGroupForRequest();
-    };
+function setCookie(name, value) {
+    var Days = 30;
+    var exp  = new Date();
+    exp.setTime(exp.getTime() + Days*24*60*60*1000);
+    document.cookie = name + "="+ escape (value) + ";expires=" + exp.toGMTString();
 }
-function main($scope, $filter, $http) {
-    $scope.menuLeft = 0;
-    $scope.close = function() {
-        $scope.menuLeft = $scope.menuLeft===0 ? -300 : 0;
-    };
+function getCookie(name) {
+    var arr = document.cookie.match(new RegExp("(^| )"+name+"=([^;]*)(;|$)"));
+    if( arr !== null ) return unescape(arr[2]);
+    return null;
+}
+function delCookie(name) {
+    var exp = new Date();
+    exp.setTime(exp.getTime() - 1);
+    var cval=getCookie(name);
+    if( cval!==null ) document.cookie= name + "="+cval+";expires="+exp.toGMTString();
 }
 </script>
 @stop
 
 @section('body')
-<div style="width: 100%;height: 100%;max-height:100%">
+<div style="width: 100%;height: 100%;max-height:100%;background-color: #fff">
 
-	<div style="width:100%;height: 30px;position: absolute;z-index:10;background-color: #fff">
+	<div style="width:100%;height: 30px;position: absolute;z-index:10;background-color: #fff" ng-controller="topMenuController">
 		<div style="background-color: #ffffff;width:100%;height:0px"></div>
-		<div style="background-color: #458A00;width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #ddd;color:#fff;box-sizing: content-box" align="right" ng-controller="menu">			
+		<div style="background-color: #458A00;width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #ddd;color:#fff;box-sizing: content-box" align="right">			
             <? if( Auth::user()->id<20 ){ ?>
             <div style="position:absolute;left:370px;z-index:300" ng-cloak>
                 <div style="position:absolute;left:0">
@@ -67,54 +86,44 @@ function main($scope, $filter, $http) {
                     <div style="width:120px;text-align: center;position:absolute;height:40px;line-height: 40px;box-sizing: border-box;top:29px" class="menu-item" ng-show="show">
                         <div><a href="/page/table_editor">rawdata</a></div>
                     </div>
-<!--                    <div style="width:120px;text-align: center;position:absolute;height:40px;line-height: 40px;box-sizing: border-box;top:68px" class="menu-item" ng-show="show">
-                        <div><a href="/editor/main">問卷</a></div>
-                    </div>-->
                 </div>                
             </div>
             <div style="position:absolute;left:500px">
                 <div style="width:100px;text-align: center;box-sizing: border-box" class="button-share">
-                    <a href="/page/files" style="display: block;color:inherit">我的檔案</a>
+                    <a href="/page/files" style="display: block;color:inherit;font-size:16px">我的檔案</a>
                 </div>                
             </div>
             <? if( Auth::user()->id==1 && Request::is('app/*') ){ ?>
             <div style="position:absolute;left:250px">
-                <div style="width:80px;text-align: center;box-sizing: border-box" class="button-share" ng-click="getGroupForApp()">分享</div>
+                <div style="width:80px;text-align: center;box-sizing: border-box;font-size:16px" class="button-share" ng-click="getGroupForApp()">分享</div>
             </div>
             <? }} ?>
             <div style="position:absolute;left:602px" ng-hide="hideShareFile" ng-init="hideShareFile=true" id="shareFile" ng-cloak>
-                <div style="width:80px;text-align: center;box-sizing: border-box" class="button-share" ng-click="getSharedFile()">共用</div>
+                <div style="width:80px;text-align: center;box-sizing: border-box;font-size:16px" class="button-share" ng-click="getSharedFile()">共用</div>
             </div>
             <div style="position:absolute;left:602px" ng-hide="hideRequestFile" ng-init="hideRequestFile=true" ng-cloak>
-                <div style="width:80px;text-align: center;box-sizing: border-box" class="button-share" ng-click="requestFile()">共用</div>
+                <div style="width:80px;text-align: center;box-sizing: border-box;font-size:16px" class="button-share" ng-click="requestFile()">共用</div>
             </div>
 			<div style="float:right">
 				<? if( Auth::user()->id==1 ){ ?>
-				<span style="margin-right:10px;cursor: pointer" class="login-bar queryLogBtn">queryLog</span>
+				<span style="margin-right:10px;cursor: pointer;font-size:16px" class="login-bar queryLogBtn">queryLog</span>
 				<? } ?>
-				<a href="/page/project" style="margin-right:10px" class="login-bar">回首頁</a>
-				<a href="/page/project/profile" style="margin-right:10px" class="login-bar">個人資料</a>
-				<a href="/auth/password/change" style="margin-right:10px" class="login-bar">更改密碼</a>
-				<a href="/auth/logout" style="margin-right:10px" class="login-bar">登出</a>
+				<a href="/page/project" style="margin-right:10px;font-size:16px" class="login-bar">回首頁</a>
+				<a href="/page/project/profile" style="margin-right:10px;font-size:16px" class="login-bar">個人資料</a>
+				<a href="/auth/password/change" style="margin-right:10px;font-size:16px" class="login-bar">更改密碼</a>
+				<a href="/auth/logout" style="margin-right:10px;font-size:16px" class="login-bar">登出</a>
 			</div>
         </div>
 	</div>
 	
-    <div class="border-box" style="height:100%;width:100%;background-color: #fff;position: relative" ng-controller="main">
-		
-		<div style="width: 350px;border-right: 1px solid #aaa;overflow-y: hidden;box-sizing: border-box;top:30px" class="full-auto" ng-style="{left:menuLeft}">
-			<div style="background-color: #fff;overflow-y: auto;bottom:30px" class="full-auto">
-
-				<h3>【 <?=$project->name?> 】</h3>
-				
-				<div>	
-                    
-<!--                <h2>【 我的檔案 】</h2>-->
-				<?				
-
-				foreach($packageDocs['docs'] as $packageDoc){
-					foreach($packageDoc['actives'] as $active){		
-
+    <div style="position: absolute;top:30px;right:0;bottom:0;left:0" ng-controller="mainController">
+		<div style="position: absolute;top:0;bottom:0;left:0;width:350px;border-right: 1px solid #aaa;overflow-y: hidden" ng-style="{left:menuLeft+'px'}">
+			<div style="position: absolute;top:0;bottom:30px;left:0;right:0;overflow-y: auto">
+				<h3>【 <?=$project->name?> 】</h3>				
+				<div>                    
+				<?
+				foreach($packageDocs['docs'] as $packageDoc) {
+					foreach($packageDoc['actives'] as $active) {
 						if( $active['active']=='open' ){
 							echo '<div class="inbox" style="clear:both;overflow: hidden;cursor:default;margin-top:10px">';
 							echo '<div class="count button page-menu '.(Request::path()==$active['link']?'active':'').'" folder="" style="font-size:16px;text-decoration: none;float:left;margin-left:10px">';
@@ -122,18 +131,13 @@ function main($scope, $filter, $http) {
 							echo '</div>';
 							echo '</div>';
 						}
-
 					}
-				}
-                
-                ?>
-                
+				}                
+                ?>                
                 <h3>【 待上傳資料 】</h3>
-                <?
-                
-				foreach($packageDocs['request'] as $packageDoc){
-					foreach($packageDoc['actives'] as $active){		
-
+                <?                
+				foreach($packageDocs['request'] as $packageDoc) {
+					foreach($packageDoc['actives'] as $active) {
 						if( $active['active']=='open' || $active['active']=='import'  ){
 							echo '<div class="inbox" style="clear:both;overflow: hidden;cursor:default;margin-top:10px">';
 							echo '<div class="count button page-menu '.(Request::path()==$active['link']?'active':'').'" folder="" style="font-size:16px;text-decoration: none;float:left;margin-left:10px">';
@@ -141,26 +145,24 @@ function main($scope, $filter, $http) {
 							echo '</div>';
 							echo '</div>';
 						}
-
 					}
 				}
-
-
 				?>
-				</div>
-				
+				</div>				
 			</div>
-            <div style="height:30px;line-height: 30px;border-top: 1px solid #ddd;text-align: right;cursor: pointer;top: auto" class="full-auto" ng-click="close()">&#60;&#60</div>
+            <div style="position: absolute;top:auto;right:0;bottom:0;left:0;height:30px;line-height: 30px;border-top: 1px solid #ddd;text-align: right;cursor: pointer" ng-click="closeLeftMenu()">
+                <i class="angle double right icon"></i>
+            </div>
 		</div>
 
-		<div style="margin:0;top:30px" class="full-auto context" ng-style="{left:350+menuLeft}" ng-cloak>
+		<div style="position: absolute;top:0;right:0;bottom:0;left:auto" class="context" ng-style="{left:350+menuLeft+'px'}" ng-cloak>
             
-            <div style="width:500px;position: absolute;top:-100%;background-color: #fff;left:-1px;height: 95%;border: 1px solid #aaa;font-size:16px;overflow: auto;z-index: 9" ng-controller="share" ng-style="{width:advanced_status.boxWidth}" class="authorize">
+            <div style="width:500px;position: absolute;top:-100%;background-color: #fff;left:-1px;height: 95%;border: 1px solid #aaa;font-size:16px;overflow: auto;z-index: 9" ng-controller="shareController" ng-style="{width:advanced_status.boxWidth}" class="authorize">
                 <div style="margin:20px;position: absolute;top:0;bottom: 0;left:0;right:0" ng-switch on="shareBox.type"><?=$share?></div>
             </div>
             
-			<div style="overflow: auto;background-color: #fff;font-size:16px;text-align: left" class="full-auto">		              
-                <div style="margin:10px"><?=$context?></div>
+			<div style="position: absolute;top:0;right:0;bottom:0;left:0;overflow: auto">		              
+                <?=$context?>
 			</div>		
             
 		</div>

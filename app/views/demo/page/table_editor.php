@@ -1,34 +1,69 @@
+<div>
 
-<!--<script src="../js/angular.min.js"></script>-->
-
-<div ng-app="app">
-
-    <div ng-controller="newTableController" style="border: 0px solid #999;position: absolute;top: 10px;bottom: 10px;left: 10px; right: 20px">   
+    <div style="position: absolute;top: 10px;bottom: 10px;left: 10px; right: 10px" ng-controller="newTableController">     
         
-<!--        <div style="">
-            <div style="border: 1px solid #999;width:80px;text-align: center">存檔</div>
-        </div>-->
-        
-        <div ng-if="tool===1">
-            <div style="height:40px;border-bottom: 0px solid #999;position: absolute;top: 0;z-index:2">
-                <div ng-click="test()" class="page-tag top" style="margin:0;left:10px;width:60px;">測試</div>
-                <div ng-click="tableNameBox=true" class="page-tag top" style="margin:0;left:15px;width:60px;">儲存</div>
-                <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:0;left:{{ ($tindex+1)*5+15 }}px;font-weight:900;font-size:14px">{{ sheet.sheetName }}</div>
-                <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:0;left:{{ (table.sheets.length)*5+20 }}px"></div>
+        <div ng-if="tool===1" style="display:none">
+            <div style="border-bottom: 0px solid #999;position: absolute;top: 0;z-index:2" class="ui top attached tabular menu">
+                <div class="active item" ng-click="test()" class="page-tag top" style="margin:0;width:60px;left:10px">測試</div>
+                <div ng-click="tableNameBox=true" class="page-tag top" style="margin:0;width:60px;left:15px">儲存</div>
+                <div ng-click="prevSheetPage()" class="page-tag top" style="margin:0;width:20px;left:20px"> < </div>
+                <div ng-click="action.toSelect(sheet)"  class="page-tag top" style="margin:0;width:150px;font-weight:900;font-size:14px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap"
+                     ng-repeat="($tindex, sheet) in table.sheets | startFrom:(sheetsPage-1)*5 | limitTo:5" ng-style="{left:$tindex*5+25}" ng-class="{selected:sheet.selected}">{{ sheet.sheetName }}</div>
+                <div ng-click="nextSheetPage()" class="page-tag top" style="margin:0;width:20px" ng-style="{left:getSheetLength()*5+30}"> > </div>
+                <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:0" ng-style="{left:getSheetLength()*5+35}"></div>
             </div>   
+            <div class="ui menu" style="display:none">
+                <a class="browse item">
+                  <i class="dropdown icon"></i>
+                  Browse
+                </a>
+            </div>  
+            
+            <div class="ui fluid popup bottom left visible" style="display:none">
+                0000000000000000
+                <div class="ui fluid popup "></div>
+            </div>     
+            
+            <div class="ui button" ng-click="tableNameBox=true"><i class="save icon"></i>儲存</div>
+            
+            <div class="ui icon left pointing dropdown button" style="z-index:104;display:none">
+                <i class="wrench icon"></i>                
+                <div class="menu transition visible">
+                    <div class="header">設定資料表</div>
+                    <div class="item">欄位定義</div>
+                    <div class="item">選項定義</div>
+                    <div class="item">說明文件</div>
+                </div>
+            </div>
         </div>
         
-        <div ng-if="tool===1" style="border: 1px solid #999;position: absolute;top: 25px;bottom: 40px;left: 0; right:0; overflow: hidden">  
-<!--            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
-                <div class="column" style="width: 30px;left: 2px;top: 2px"></div>   
-                <div class="column" ng-repeat="column in sheet.colHeaders" style="width: 80px;left: {{ ($index+1)*79-48 }}px;top:2px;padding-left:2px">{{ column }}</div> 
-                <div ng-repeat="($rindex, row) in sheet.rows | startFrom:(page-1)*limit | limitTo:limit">
-                    <div class="column" style="width: 30px;left: 2px;top:{{ ($rindex+1)*29+2 }}px;text-align: center">{{ $rindex+1 }}</div>   
-                    <div class="column" ng-repeat="($cindex, column) in sheet.columns" ng-style="{width:80,left:($cindex+1)*79-48,top:($rindex+1)*29+2}" style="padding-left:2px" contenteditable="{{ power.edit_row }}">{{ row[column.name] }}</div>
+        <div ng-if="tool===1" style="position: absolute;top: 0;bottom: 40px;left: 0; right:0; overflow: hidden"> 
+            
+            <div class="ui ui search dropdown selection active visible" ng-click="dropdown=!dropdown" style="z-index:104;width:250px">
+                <i class="dropdown icon"></i>
+                <div class="default text">資料表</div>
+                <div class="menu transition" ng-class="{visible: dropdown}" tabindex="-1">
+                    <div ng-repeat="($tindex, sheet) in table.sheets | startFrom:(sheetsPage-1)*5 | limitTo:50" class="item" data-value="AL">{{ sheet.sheetName }}</div>                        
                 </div>
-            </div>-->
-
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 2px;right: 2px;top: 2px;bottom: 1px" id="sheet">         
+            </div>
+            
+            <div class="ui button" ng-click="tableNameBox=true"><i class="save icon"></i>儲存</div>
+            
+            <dropdown dropdown-class="ui labeled icon left pointing dropdown button" title="my dropdown" ng-model="dropdown_model" open="false" style="z-index:104">
+                <div class="header">設定資料表</div>
+                <dropdown-group ng-click="changeTool(2)">欄位定義</dropdown-group>
+                <dropdown-group ng-click="changeTool(3)">選項定義</dropdown-group>
+                <dropdown-group ng-click="changeTool(4)">說明文件</dropdown-group>
+            </dropdown>
+            
+            <div style="position: absolute;top: 0;z-index:2;display:none" class="ui top attached tabular menu">
+                <div ng-click="prevSheetPage()" class="item active" style=""> < </div>
+                <div ng-click="action.toSelect(sheet)"  class="item" style="margin:0;max-width:150px;font-weight:900;padding:5px 5px 5px 5px;font-size:14px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap"
+                     ng-repeat="($tindex, sheet) in table.sheets | startFrom:(sheetsPage-1)*5 | limitTo:50" ng-style="{left:$tindex*5+25}" ng-class="{active:sheet.selected}">{{ sheet.sheetName }}</div>
+                <div ng-click="nextSheetPage()" class="item" style="margin:0;width:20px" ng-style="{left:getSheetLength()*5+30}"> > </div>
+                <div ng-click="addSheet()" class="item" style="margin:0" ng-style="{left:getSheetLength()*5+35}"></div>
+            </div>   
+            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" class="ui segment active" ng-class="{loading: sheetLoading}" style="position: absolute;left: 2px;right: 10px;top: 35px;bottom: 2px;padding:2px" id="sheet">         
                 <hot-table
                     settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row'], afterInit: afterInit}"
                     columns="sheet.colHeaders"
@@ -44,7 +79,27 @@
             </div>    
         </div>
 
-        <div ng-if="tool===2">
+        <div ng-if="tool===2" style="position: absolute;top: 0;bottom: 40px;left: 0; right:0; overflow: hidden">
+            
+            <div class="ui ui search dropdown selection active visible" ng-click="dropdown=!dropdown" style="z-index:104;width:250px">
+                <i class="dropdown icon"></i>
+                <div class="default text">資料表</div>
+                <div class="menu transition" ng-class="{visible: dropdown}" tabindex="-1">
+                    <div ng-repeat="($tindex, sheet) in table.sheets | startFrom:(sheetsPage-1)*5 | limitTo:50" class="item" data-value="AL">{{ sheet.sheetName }}</div>                        
+                </div>
+            </div>
+            
+            <div class="ui button" ng-click="tableNameBox=true"><i class="save icon"></i>儲存</div>
+            
+            <dropdown dropdown-class="ui labeled icon left pointing dropdown button" title="設定" ng-model="dropdown_model" open="false" style="z-index:104">
+                
+                <dropdown-group ng-click="changeTool(1)">資料列</dropdown-group>
+                <div class="header">設定資料表</div>
+                <dropdown-group ng-click="changeTool(2)">欄位定義</dropdown-group>
+                <dropdown-group ng-click="changeTool(3)">選項定義</dropdown-group>
+                <dropdown-group ng-click="changeTool(4)">說明文件</dropdown-group>
+            </dropdown>
+            
             <div style="height:80px;position: absolute;top: 35px;z-index:200">
                 <div style="position: absolute;left:5px;top:0;;bottom:0;width:440px;border: 1px solid #999;background-color: #fff;padding:20px;box-shadow: 0 10px 20px rgba(0,0,0,0.5);" ng-show="tableNameBox">
                     <input type="text" placeholder="輸入檔案名稱" class="input define" style="width:220px" ng-model="table.title" />
@@ -52,91 +107,101 @@
                     <div style="top:20px;left:360px" class="btn default box white" ng-class="{wait:wait}" ng-click="tableNameBox=false">取消</div>
                 </div>
             </div>
-            <div style="height:40px;border-bottom: 0px solid #999;position: absolute;top: 0;z-index:2">
+            <div style="height:40px;border-bottom: 0px solid #999;position: absolute;top: 0;z-index:2;display:none">
                 <div ng-click="test()" class="page-tag top" style="margin:0;left:10px;width:60px;">測試</div>
-                <div ng-click="tableNameBox=true;alert();" class="page-tag top" style="margin:0;left:15px;width:60px;">儲存</div>
-                <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:0;left:{{ ($tindex+1)*5+15 }}px;font-weight:900;font-size:14px">{{ sheet.sheetName }}</div>
-                <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:0;left:{{ (table.sheets.length)*5+20 }}px"></div>
-            </div>   
-        </div>
-
-        <div ng-show="tool===2" style="border: 1px solid #999;position: absolute;top: 25px;bottom: 40px;left: 0;right: 0;overflow: scroll">
-            <div style="width:1000px;height:25px;padding:10px 0 0 5px;font-weight: bold;font-size: 14px">表單設定</div>
-            <div style="width:1000px;height:25px;padding:3px 0 2px 0">
-                <div style="border: 1px solid #999;height:30px;margin:0 0 0 3px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">表格名稱</div>  
-                <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:65px" class="define">不可編輯</div> 
-            </div>
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="width:1000px;height:25px;padding:10px 2px 10px 2px">
-                <div class="input-status" ng-class="{empty:!sheet.sheetName}">
-                    <input type="text" placeholder="表格名稱" class="input define" style="width:180px" ng-model="sheet.sheetName" />
+                <div ng-click="tableNameBox=true;alert();" class="page-tag top" style="margin:0;left:15px;width:60px;">儲存</div>    
+                <div ng-click="prev()" class="page-tag top" style="margin:0;width:20px;left:20px"> < </div>
+                <div ng-click="action.toSelect(sheet)"  class="page-tag top" style="margin:0;width:150px;font-weight:900;font-size:14px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap"
+                     ng-repeat="($tindex, sheet) in table.sheets | startFrom:(sheetsPage-1)*5 | limitTo:5" ng-style="{left:$tindex*5+25}" ng-class="{selected:sheet.selected}">{{ sheet.sheetName }}</div>                
+                <div ng-click="page = page+1" class="page-tag top" style="margin:0;width:20px" ng-style="{left:getSheetLength()*5+30}"> > </div>
+                <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:0" ng-style="{left:getSheetLength()*5+35}"></div>
+            </div>  
+            
+            <div class="ui segment active" ng-class="{loading: sheetLoading}" style="position: absolute;left: 2px;right: 10px;top: 35px;bottom: 2px;padding:2px;overflow: auto">
+                <div style="width:1000px;height:25px;padding:10px 0 0 5px;font-weight: bold;font-size: 14px">表單設定</div>
+                <div style="width:1000px;height:25px;padding:3px 0 2px 0">
+                    <div style="border: 1px solid #999;height:30px;margin:0 0 0 3px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">表格名稱</div>  
+                    <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:65px" class="define">不可編輯</div> 
                 </div>
-                <div class="input-status"><input type="checkbox" class="input define" style="width:45px" ng-model="sheet.editable" /></div>
+                <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="width:1000px;height:25px;padding:10px 2px 10px 2px">
+                    <div class="input-status" ng-class="{empty:!sheet.sheetName}">
+                        <input type="text" placeholder="表格名稱" class="input define" style="width:180px" ng-model="sheet.sheetName" />
+                    </div>
+                    <div class="input-status"><input type="checkbox" class="input define" style="width:45px" ng-model="sheet.editable" /></div>
+                </div>
+                
+                <table class="ui table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>欄位名稱</th>
+                            <th>欄位描述</th>
+                            <th>過濾規則</th>
+                            <th>欄位類型</th>
+                            <th>唯一</th>
+                            <th>連結選單</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
+                        <tr ng-repeat="colHeader in sheet.colHeaders">
+                            <td><i class="columns  icon"></i>{{ $index+1 }}</td>
+                            <td><div class="ui input"><input type="text" placeholder="欄位名稱" class="" style="min-width:250px" ng-model="colHeader.data" /></div></td>
+                            <td><div class="ui input"><input type="text" placeholder="欄位描述" class="" style="min-width:250px" ng-model="colHeader.title" /></div></td>
+                            <td>
+                                <select class="input define" ng-model="colHeader.rules" ng-options="rule.name for rule in rules" ng-change="colHeader.types=colHeader.rules.types[0]">
+                                    <option  value="">過濾規則</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select class="input define" ng-model="colHeader.types" ng-options="type.name for type in colHeader.rules.types" ng-class="{empty:!colHeader.types}" >
+                                    <option value="">欄位類型</option>
+                                </select>
+                            </td>
+                            <td><div class="ui checkbox"><input type="checkbox" id="unique-{{ $index }}" class="" style="" ng-model="colHeader.unique" /><label for="unique-{{ $index }}"></label></div></td>
+                            <td>
+                                <select class="input define" ng-model="colHeader.link.table" ng-options="index as index for (index,sheet) in table.sheets" ng-change="setAutocomplete(colHeader)">
+                                    <option value="">資料表</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div class="ui basic button" ng-click="removeColumn($index, $tindex)">
+                                    <i class="remove icon"></i>刪除
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="width:1000px;height:25px;padding:5px 0 2px 0"> 
+                    <div style="margin:10px 2px 2px 2px">
+                        <div class="input-status"><input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="newColumn.data" ng-init="newColumn.data=''" /></div>
+                        <div class="input-status"><input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="newColumn.title" ng-init="newColumn.title=''" /></div>
+                        <div class="input-status">
+                            <select style="width:180px" class="input define" ng-model="newColumn.rules" ng-options="rule.name for rule in rules" ng-change="newColumn.types=newColumn.rules.types[0]">
+                                <option  value="">過濾規則</option>
+                            </select>
+                        </div>    
+                        <div class="input-status">
+                            <select style="width:200px" class="input define" ng-model="newColumn.types" ng-options="type.name for type in newColumn.rules.types">
+                                <option value="">欄位類型</option>
+                            </select>
+                        </div>
+                        <div class="input-status"><input type="checkbox" class="input define" style="width:45px" ng-model="newColumn.unique" ng-init="newColumn.unique=false" /></div>
+                        <div class="input-status"><div style="width:90px" class="input define"></div></div>
+                        <input type="button" value="新增" ng-click="addColumn()" style="padding: 3px" />
+                    </div>   
+                </div>
             </div>
-            <div style="width:1000px;height:25px;padding:15px 0 0 5px;font-weight: bold;font-size: 14px">欄位設定</div>
-            <div style="width:1000px;height:25px;padding:3px 0 2px 0">
-                <div style="border: 1px solid #999;height:30px;margin:0 0 0 3px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">欄位名稱</div>  
-                <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">欄位描述</div> 
-                <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">過濾規則</div>
-                <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:200px" class="define">欄位類型</div>
-                <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:45px" class="define">唯一</div>
-                <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:90px" class="define">連結選單</div>
-            </div>
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="width:1000px;height:25px;padding:5px 0 2px 0">
-                <div ng-repeat="colHeader in sheet.colHeaders" style="margin:2px">
-
-                    <div class="input-status" ng-class="{empty:!colHeader.data}">
-                        <input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="colHeader.data" />
-                    </div>
-                    <div class="input-status" ng-class="{empty:!colHeader.title}">
-                        <input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="colHeader.title" />
-                    </div>    
-                    <div class="input-status" ng-class="{empty:!colHeader.rules}">
-                        <select style="width:180px" class="input define" ng-model="colHeader.rules" ng-options="rule.name for rule in rules" ng-change="colHeader.types=colHeader.rules.types[0]">
-                            <option  value="">過濾規則</option>
-                        </select>
-                    </div>
-                    <div class="input-status" ng-class="{empty:!colHeader.types}">
-                        <select style="width:200px" class="input define" ng-model="colHeader.types" ng-options="type.name for type in colHeader.rules.types" ng-class="{empty:!colHeader.types}" >
-                            <option value="">欄位類型</option>
-                        </select>
-                    </div>
-                    <div class="input-status"><input type="checkbox" class="input define" style="width:45px" ng-model="colHeader.unique" /></div>
-                    <div class="input-status">
-                        <select style="width:90px" class="input define" ng-model="colHeader.link.table" ng-options="index as index for (index,sheet) in table.sheets" ng-change="setAutocomplete(colHeader)">
-                            <option value="">資料表</option>
-                        </select>
-                    </div>
-                    <input type="button" value="刪除" ng-click="removeColumn($index, $tindex)" style="padding: 3px" />
-                </div>    
-                <div style="margin:10px 2px 2px 2px">
-                    <div class="input-status"><input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="newColumn.data" ng-init="newColumn.data=''" /></div>
-                    <div class="input-status"><input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="newColumn.title" ng-init="newColumn.title=''" /></div>
-                    <div class="input-status">
-                        <select style="width:180px" class="input define" ng-model="newColumn.rules" ng-options="rule.name for rule in rules" ng-change="newColumn.types=newColumn.rules.types[0]">
-                            <option  value="">過濾規則</option>
-                        </select>
-                    </div>    
-                    <div class="input-status">
-                        <select style="width:200px" class="input define" ng-model="newColumn.types" ng-options="type.name for type in newColumn.rules.types">
-                            <option value="">欄位類型</option>
-                        </select>
-                    </div>
-                    <div class="input-status"><input type="checkbox" class="input define" style="width:45px" ng-model="newColumn.unique" ng-init="newColumn.unique=false" /></div>
-                    <div class="input-status"><div style="width:90px" class="input define"></div></div>
-                    <input type="button" value="新增" ng-click="addColumn()" style="padding: 3px" />
-                </div>   
-            </div>
+            
         </div>
         
-        <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
-            <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}"  style="margin:0 0 0 0;width:220px;left: 5px">
-                <div ng-repeat="sheet in table.sheets" ng-if="sheet.selected">
-                    資料 分頁<div style="display: inline-block;width:20px;padding:0" ng-repeat="pageN in sheet.page_link track by $index" ng-click="loadPage(pageN)" ng-class="{notSelected:sheet.page!==pageN}">{{ pageN }}</div>
+        <div ng-if="tool===1" style="height:35px;position: absolute;bottom: 0">
+            <div ng-click="tool=1" ng-class="{selected:tool===1}"  style="margin:0 0 0 0;width:220px;left: 5px">
+                <div ng-repeat="sheet in table.sheets" ng-if="sheet.selected" class="ui pagination menu">
+                    <a class="icon item"><i class="left arrow icon"></i></a>
+                    <a class="icon item" style="display: inline-block;width:20px;padding:0" ng-repeat="pageN in sheet.page_link track by $index" ng-click="loadPage(pageN)" ng-class="{active:sheet.page===pageN}">{{ pageN }}</a>
                 </div>    
             </div>
-            <div class="page-tag" ng-click="tool=2" ng-class="{selected:tool===2}" style="margin:0 0 0 0;left:10px">欄位定義</div>
-            <div class="page-tag" ng-click="tool=3" ng-class="{selected:tool===3}" style="margin:0 0 0 0;left:15px">選項定義</div>
-            <div class="page-tag" ng-click="tool=4" ng-class="{selected:tool===4}" style="margin:0 0 0 0;left:20px">說明文件</div>
         </div>
         
     </div>   
@@ -144,9 +209,27 @@
 
 </div>
 
+<script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
+<script src="/js/angular-semantic-ui/dropdown.js"></script>
+<!--<script src="/js/angular-file-upload.min.js"></script>-->
+
+<script src="/js/jquery.fileDownload.js"></script>
+<script src="/js/ngHandsontable.js"></script>
+<script src="/js/handsontable.full.min.js"></script>
+<script src="/js/jszip.min.js"></script>
+<script src="/js/xlsx.js"></script>
+<script src="/js/lodash.min.js"></script>
+<script src="/js/xlsx-reader.js"></script>
+<script src="/js/angular-1.3.11/angular-animate.min.js"></script>
 <script>
-angular.module('app', ['ngHandsontable'])
-.controller('newTableController', newTableController)
+app.requires.push('ngHandsontable');
+app.requires.push('angularify.semantic.dropdown');
+app.requires.push('ngAnimate');
+app.filter('startFrom', function() {
+    return function(input, start) {         
+        return input.slice(start);
+    };
+})
 .factory("XLSXReaderService", ['$q', '$rootScope',
     function($q, $rootScope) {
         var service = function(data) {
@@ -168,18 +251,19 @@ angular.module('app', ['ngHandsontable'])
 
         return service;
     }
-]);
-
-function newTableController($scope, $http, $filter, XLSXReaderService) {
+])
+.controller('newTableController', function($scope, $http, $filter, XLSXReaderService) {
     
     var path = window.location.pathname.split('/');
     $scope.table = {sheets:[], intent_key:(path[1]==='file' ? path[2] : null)};
-    angular.element('[ng-controller=menu]').scope().hideRequestFile = $scope.table.intent_key === null;
+    //angular.element('[ng-controller=menu]').scope().hideRequestFile = $scope.table.intent_key === null;
     
     $scope.tool = 2;
     $scope.limit = 100;
     $scope.newColumn = {};    
     $scope.action = {}; 
+    $scope.sheetsPage = 1;
+    $scope.sheetLoading = true;
     
     var types = [
         {name: "整數", type: "int" ,validator: /^\d+$/}, {name: "小數", type: "float" ,validator: /^[0-9]+.[0-9]+$/}, {name: "中、英文(數字加符號)", type: "nvarchar"},
@@ -275,6 +359,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
     if( $scope.table.intent_key !== null ) {
         $http({method: 'POST', url: 'get_columns', data:{} })
         .success(function(data, status, headers, config) {
+            console.log(data);
             for( sindex in data.sheets ){
                 var sheet = {colHeaders:[], rows:[], sheetName:null, editable:null, tablename:null, pages:[], page:1};
                 sheet.sheetName = data.sheets[sindex].sheetName;
@@ -349,10 +434,12 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         
         var update = function() {
             $scope.getPageList(sheet);
-            angular.isObject($scope.hotInstance) && $scope.hotInstance.loadData($scope.getData(sheet));            
+            angular.isObject($scope.hotInstance) && $scope.hotInstance.loadData($scope.getData(sheet));  
+            $scope.sheetLoading = false;
         };
         
         sheet.page = page;
+        $scope.sheetLoading = true;
 
         if( sheet.pages[page-1] ) {
             update();
@@ -431,12 +518,6 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         console.log(colHeader.link);
         colHeader.type = 'dropdown';
         colHeader.source = [];
-        //angular.forEach($scope.table.sheets[colHeader.link].rows, function(row, index){
-            //console.log(row.f);
-            //colHeader.source[0] = row.f;
-        //});
-        //colHeader.source = ["BMW", "Chrysler", "Nissan", "Suzuki", "Toyota", "Volvo"];
-        
     };    
 
     $scope.checkEmpty = function(sheets) {
@@ -472,34 +553,39 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
 
     $scope.test = function() {
         console.log(1);
+    };    
+        
+    getSheetLength = function() {
+        var sheets_length = $scope.table.sheets.length;
+        return sheets_length > 5 ? 5-1 : sheets_length-1;
     };
     
-}
+    $scope.prevSheetPage = function() {
+        if( $scope.page < $scope.pages )
+            $scope.page++;
+    };
+    
+    $scope.nextSheetPage = function() {
+        
+    };
+    
+    $scope.changeTool = function(tool) {
+        $scope.tool = tool;  
+    };
+    
+});
 String.prototype.Blength = function() {
     var arr = this.match(/[^\x00-\xff]/ig);
     return  arr === null ? this.length : this.length + arr.length;
 };
 </script>
-<!--<script src="/js/angular-file-upload.min.js"></script>-->
-<script src="/js/jquery.fileDownload.js"></script>
-<script src="/js/ngHandsontable.js"></script>
-<script src="/js/handsontable.full.min.js"></script>
-<script src="/js/jszip.min.js"></script>
-<script src="/js/xlsx.js"></script>
-<script src="/js/lodash.min.js"></script>
-<script src="/js/xlsx-reader.js"></script>
+
+
+
+
 <link rel="stylesheet" media="screen" href="/js/handsontable.full.min.css">
 
-<style>
-.column {
-    box-sizing: border-box;
-    position: absolute;
-    border: 1px solid #999;
-    font-size: 13px;
-    line-height: 30px;
-    height: 30px;
-    overflow: hidden;
-}    
+<style>  
 .page-tag {
     position: relative;
     float: left;
