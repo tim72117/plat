@@ -147,7 +147,6 @@ app.controller('shareController', function($scope, $filter, $http) {
                         columns: data.sheets[i].tables[0].columns
                     });
                 }
-                console.log(data);
                 $('.ui.accordion').accordion();
                 //rowsFile.columns = data[0].columns;
             }).error(function(e){

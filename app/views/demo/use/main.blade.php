@@ -21,13 +21,13 @@ $project = DB::table('projects')->where('code', $user->getProject())->first();
 var app = angular.module('app', ['ngSanitize'])
 .controller('topMenuController', function($scope, $filter, $http) {
     $scope.getGroupForApp = function() {
-        //angular.element('[ng-controller=share]').scope().getGroupForApp();
+        angular.element('[ng-controller=shareController]').scope().getGroupForApp();
     };
     $scope.getSharedFile = function() {
-        //angular.element('[ng-controller=share]').scope().getSharedFile();
+        angular.element('[ng-controller=shareController]').scope().getSharedFile();
     };
     $scope.requestFile = function() {
-        //angular.element('[ng-controller=share]').scope().getGroupForRequest();
+        angular.element('[ng-controller=shareController]').scope().getGroupForRequest();
     };
 })
 .controller('mainController', function($scope, $filter, $http) {
@@ -151,7 +151,7 @@ function delCookie(name) {
 				</div>				
 			</div>
             <div style="position: absolute;top:auto;right:0;bottom:0;left:0;height:30px;line-height: 30px;border-top: 1px solid #ddd;text-align: right;cursor: pointer" ng-click="closeLeftMenu()">
-                <i class="angle double right icon"></i>
+                <i class="angle double icon" ng-class="{right:menuLeft===-300,left:menuLeft===0}"></i>
             </div>
 		</div>
 

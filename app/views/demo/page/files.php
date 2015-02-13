@@ -160,7 +160,7 @@ angular.module('app')
 
     $scope.$watchCollection('files | filter:{selected:true}', function (files) {
         $scope.info.pickeds = files;
-        //angular.element('#shareFile').scope().hideShareFile = files.length <= 0;        
+        angular.element('#shareFile').scope().hideShareFile = files.length <= 0;        
     });
     
     $scope.deleteFile = function() {
@@ -192,7 +192,7 @@ angular.module('app')
         });
     };
     
-    //angular.element('#shareFile').scope().hideShareFile = false;
+    angular.element('#shareFile').scope().hideShareFile = false;
 });
 </script>
 <style>

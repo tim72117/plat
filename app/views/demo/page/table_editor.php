@@ -85,7 +85,7 @@
                 <i class="dropdown icon"></i>
                 <div class="default text">資料表</div>
                 <div class="menu transition" ng-class="{visible: dropdown}" tabindex="-1">
-                    <div ng-repeat="($tindex, sheet) in table.sheets | startFrom:(sheetsPage-1)*5 | limitTo:50" class="item" data-value="AL">{{ sheet.sheetName }}</div>                        
+                    <div ng-repeat="($tindex, sheet) in table.sheets | startFrom:(sheetsPage-1)*5 | limitTo:50" class="item" ng-click="action.toSelect(sheet)">{{ sheet.sheetName }}</div>                        
                 </div>
             </div>
             
@@ -171,26 +171,35 @@
                             </td>
                         </tr>
                     </tbody>
+                    <tbody>
+                        <tr>
+                            <td><i class="add square icon"></i></td>
+                            <td><div class="ui input"><input type="text" placeholder="欄位名稱" class="" style="min-width:250px" ng-model="newColumn.data" ng-init="newColumn.data=''" /></div></td>
+                            <td><div class="ui input"><input type="text" placeholder="欄位描述" class="" style="min-width:250px" ng-model="newColumn.title" ng-init="newColumn.title=''" /></div></td>
+                            <td>
+                                <select class="input define" ng-model="newColumn.rules" ng-options="rule.name for rule in rules" ng-change="newColumn.types=newColumn.rules.types[0]">
+                                    <option  value="">過濾規則</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select class="input define" ng-model="newColumn.types" ng-options="type.name for type in newColumn.rules.types" ng-class="{empty:!colHeader.types}" >
+                                    <option value="">欄位類型</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div class="ui checkbox"><input type="checkbox" id="unique-new" class="" style="" ng-model="newColumn.unique" ng-init="newColumn.unique=false" />
+                                    <label for="unique-new"></label>
+                                </div>
+                            </td>
+                            <td></td>
+                            <td>
+                                <div class="ui basic button" ng-click="addColumn()">
+                                    <i class="plus icon"></i>新增
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
-                <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="width:1000px;height:25px;padding:5px 0 2px 0"> 
-                    <div style="margin:10px 2px 2px 2px">
-                        <div class="input-status"><input type="text" placeholder="欄位名稱" class="input define" style="width:180px" ng-model="newColumn.data" ng-init="newColumn.data=''" /></div>
-                        <div class="input-status"><input type="text" placeholder="欄位描述" class="input define" style="width:180px" ng-model="newColumn.title" ng-init="newColumn.title=''" /></div>
-                        <div class="input-status">
-                            <select style="width:180px" class="input define" ng-model="newColumn.rules" ng-options="rule.name for rule in rules" ng-change="newColumn.types=newColumn.rules.types[0]">
-                                <option  value="">過濾規則</option>
-                            </select>
-                        </div>    
-                        <div class="input-status">
-                            <select style="width:200px" class="input define" ng-model="newColumn.types" ng-options="type.name for type in newColumn.rules.types">
-                                <option value="">欄位類型</option>
-                            </select>
-                        </div>
-                        <div class="input-status"><input type="checkbox" class="input define" style="width:45px" ng-model="newColumn.unique" ng-init="newColumn.unique=false" /></div>
-                        <div class="input-status"><div style="width:90px" class="input define"></div></div>
-                        <input type="button" value="新增" ng-click="addColumn()" style="padding: 3px" />
-                    </div>   
-                </div>
             </div>
             
         </div>
@@ -327,7 +336,10 @@ app.filter('startFrom', function() {
             sheet.selected = false;
         });
         sheet.selected = true;
-        $scope.loadPage(sheet.page);
+        if( $scope.tool===1 )
+            $scope.loadPage(sheet.page);
+        if( $scope.tool===2 )
+            $scope.sheetLoading = false;
     }; 
     
     $scope.saveDoc = function() {        
