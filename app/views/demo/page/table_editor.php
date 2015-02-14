@@ -229,7 +229,7 @@
 <script src="/js/xlsx.js"></script>
 <script src="/js/lodash.min.js"></script>
 <script src="/js/xlsx-reader.js"></script>
-<script src="/js/angular-1.3.11/angular-animate.min.js"></script>
+<script src="/js/angular-1.2.28/angular-animate.min.js"></script>
 <script>
 app.requires.push('ngHandsontable');
 app.requires.push('angularify.semantic.dropdown');
