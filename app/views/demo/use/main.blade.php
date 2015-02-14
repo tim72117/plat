@@ -118,38 +118,34 @@ function delCookie(name) {
 	
     <div style="position: absolute;top:30px;right:0;bottom:0;left:0" ng-controller="mainController">
 		<div style="position: absolute;top:0;bottom:0;left:0;width:350px;border-right: 1px solid #aaa;overflow-y: hidden" ng-style="{left:menuLeft+'px'}">
-			<div style="position: absolute;top:0;bottom:30px;left:0;right:0;overflow-y: auto">
-				<h3>【 <?=$project->name?> 】</h3>				
-				<div>                    
-				<?
-				foreach($packageDocs['docs'] as $packageDoc) {
-					foreach($packageDoc['actives'] as $active) {
-						if( $active['active']=='open' ){
-							echo '<div class="inbox" style="clear:both;overflow: hidden;cursor:default;margin-top:10px">';
-							echo '<div class="count button page-menu '.(Request::path()==$active['link']?'active':'').'" folder="" style="font-size:16px;text-decoration: none;float:left;margin-left:10px">';
-							echo '<a href="/'.$active['link'].'/">'.$packageDoc['title'].'</a>';
-							echo '</div>';
-							echo '</div>';
-						}
-					}
-				}                
-                ?>                
-                <h3>【 待上傳資料 】</h3>
-                <?                
-				foreach($packageDocs['request'] as $packageDoc) {
-					foreach($packageDoc['actives'] as $active) {
-						if( $active['active']=='open' || $active['active']=='import'  ){
-							echo '<div class="inbox" style="clear:both;overflow: hidden;cursor:default;margin-top:10px">';
-							echo '<div class="count button page-menu '.(Request::path()==$active['link']?'active':'').'" folder="" style="font-size:16px;text-decoration: none;float:left;margin-left:10px">';
-							echo '<a href="/'.$active['link'].'">'.$packageDoc['title'].'</a>';
-							echo '</div>';
-							echo '</div>';
-						}
-					}
-				}
-				?>
-				</div>				
-			</div>
+            <div style="position: absolute;top:5px;bottom:45px;left:5px;right:5px;overflow-y: auto">
+                <div class="ui fluid vertical menu" style="">
+                    <div class="header item">
+                        <i class="laptop large icon"></i><span style="font-size:17px"><?=$project->name?></span>
+                    </div>                    
+                    <?
+                    foreach($packageDocs['docs'] as $packageDoc) {
+                        foreach($packageDoc['actives'] as $active) {
+                            if( $active['active']=='open' ){
+                                echo '<a class="item'.(Request::path()==$active['link']?' active':'').'" style="font-size:16px;font-weight:600" href="/'.$active['link'].'/">'.$packageDoc['title'].'</a>';
+                            }
+                        }
+                    }                
+                    ?>  
+                    <div class="header item">
+                        <i class="cloud upload large icon"></i><span style="font-size:17px">待上傳資料</span>
+                    </div>	
+                    <?                
+                    foreach($packageDocs['request'] as $packageDoc) {
+                        foreach($packageDoc['actives'] as $active) {
+                            if( $active['active']=='open' || $active['active']=='import'  ){
+                                echo '<a class="item'.(Request::path()==$active['link']?' active':'').'" style="font-size:16px;font-weight:600" href="/'.$active['link'].'">'.$packageDoc['title'].'</a>';
+                            }
+                        }
+                    }
+                    ?>
+                </div>
+            </div>    
             <div style="position: absolute;top:auto;right:0;bottom:0;left:0;height:30px;line-height: 30px;border-top: 1px solid #ddd;text-align: right;cursor: pointer" ng-click="closeLeftMenu()">
                 <i class="angle double icon" ng-class="{right:menuLeft===-300,left:menuLeft===0}"></i>
             </div>
