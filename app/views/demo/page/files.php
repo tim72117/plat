@@ -56,45 +56,59 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
 })->toJson();
 
 ?>
-<div style="margin:0;border: 1px solid #aaa;padding:10px;position:absolute;top:20px;left:20px;right:20px;bottom:20px;overflow-y: auto">
+<div ng-controller="fileController" id="fileController">
 
-    <?
-    /*
-    | 上傳檔案且匯入檔案到doc
-    */
-    ?>
-    <div ng-controller="fileController" id="fileController" style="margin: 0">
+    <div class="ui segment" style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto">
         <?=Form::open(array('url' => $fileProvider->upload(), 'files' => true, 'method' => 'post', 'style' => 'display:none'))?>
         <?=Form::file('file_upload', array('id'=>'file_upload', 'onchange'=>'submit()'))?>
         <?=Form::close()?>
-        <div style="position: relative;height: 25px;margin: 0;padding:10px;box-sizing: border-box">
-            <div class="file-btn" style="width:80px;height:25px;line-height:25px;background-color: #eee;font-size:14px;float:left;" ng-click="">新增</div>
-            <label for="file_upload">
-                <div class="file-btn" style="width:80px;height:25px;line-height:25px;background-color: #eee;font-size:14px;float:left;margin-left: 2px">上傳</div>
-            </label>
-            <div class="file-btn" style="width:80px;height:25px;line-height:25px;background-color: #eee;font-size:14px;float:left;margin-left: 2px" ng-if="info.pickeds.length>0" ng-click="deleteFile()">刪除</div>
-            <div style="float:right">                
-                <div style="width:60px;height:25px;line-height:25px;float:left"><input type="text" ng-model="page" size="2" style="width:20px;border: 0" /> / {{ pages }}</div>
-                <div class="file-btn" style="width:30px;height:25px;line-height:25px;background-color: #eee;font-size:14px;float:left" ng-click="prev()"><</div>
-                <div class="file-btn" style="width:30px;height:25px;line-height:25px;background-color: #eee;font-size:14px;float:left;margin-left: 2px" ng-click="next()">></div>
-                <div class="file-btn" style="width:80px;height:25px;line-height:25px;background-color: #eee;font-size:14px;float:left;margin-left: 2px" ng-click="all()">顯示全部</div>
+       
+        <div class="ui menu">
+            <div class="left menu">
+                <div class="item">
+                    <div class="ui basic button"><i class="icon add circle"></i>新增</div>
+                    <label for="file_upload" class="ui basic button"><i class="icon upload"></i>上傳</label>
+                    <div class="ui basic button"><i class="icon remove circle"></i>刪除</div>
+                </div>
+
             </div>
+            <div class="right menu">
+                <div class="item">
+                    {{ page }} / {{ pages }}
+                    <div class="ui basic button" ng-click="prev()"><i class="icon left arrow"></i></div>
+                    <div class="ui basic button" ng-click="next()"><i class="icon right arrow"></i></div>
+                </div>
+                <div class="item"><div class="ui basic button" ng-click="all()"><i class="icon unhide "></i>顯示全部</div></div>
+            </div>            
         </div>
         
-        <div style="display: table;padding:10px;width:100%;box-sizing: border-box">
-            <div style="display: table-row;background-color: #eee;line-height: 40px">
-                <div style="display: table-cell;width:50px"></div>
-                <div style="display: table-cell;font-size:13px">檔名<input ng-model="searchText.stdidnumber" size="50" style="margin-left:5px;line-height:20px" /></div>
-                <div style="display: table-cell;font-size:13px;width:80px">擁有人</div>
-                <div style="display: table-cell;font-size:13px;width:300px">更新時間</div>
-            </div>
-            <div ng-repeat="file in files | filter:searchText | startFrom:(page-1)*limit | limitTo:limit" style="display: table-row;line-height: 40px">
-                <div style="display: table-cell;border-bottom: 1px solid #ccc"><input type="checkbox" ng-model="file.selected" ng-click="test()" /></div>
-                <div style="display: table-cell;border-bottom: 1px solid #ccc"><img ng-src="/images/{{ getImage(file.type) }}" style="margin-bottom:-4px" /><a href="/{{ file.link.open }}">{{ file.title }}</a></div>
-                <div style="display: table-cell;border-bottom: 1px solid #ccc;width:80px">{{ file.created_by }}</div>
-                <div style="display: table-cell;border-bottom: 1px solid #ccc;width:300px">{{ diff(file.created_at) }}</div>
-            </div>
-        </div>
+        
+        <table class="ui table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>檔名</th>
+                    <th>擁有人</th>
+                    <th>更新時間</th>
+                </tr>  
+                <tr>
+                    <th></th>
+                    <th>
+                        <div class="ui icon input"><input type="text" ng-model="searchText.stdidnumber" placeholder="搜尋..."><i class="search icon"></i></div>
+                    </th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="file in files | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
+                    <td width="50"><input type="checkbox" ng-model="file.selected" ng-click="test()" /></td>
+                    <td><i class="icon" ng-class="getImage(file.type)"></i><a href="/{{ file.link.open }}">{{ file.title }}</a></td>
+                    <td width="80">{{ file.created_by }}</td>
+                    <td>{{ diff(file.created_at) }}</td>
+                </tr>
+            </tbody>
+        </table>      
 
     </div>
 </div>
@@ -115,7 +129,7 @@ angular.module('app')
     $scope.pages = Math.ceil($scope.max/$scope.limit);
     $scope.timenow = new Date();
     $scope.info = {pickeds:0};
-    $scope.types = {1: 'document-list-24.png', 3: 'document-24.png', 5: 'table-24.png', 6: 'document-24.png'};
+    $scope.types = {1: {'file text outline': true}, 3: {'file outline': true}, 5: {'file text': true}, 6: {'file outline': true}};
     
     $interval(function() {
         $scope.timenow = new Date();
@@ -196,20 +210,5 @@ angular.module('app')
 });
 </script>
 <style>
-.file-btn {
-    cursor: pointer; 
-    text-align: center;
-    border: 1px solid #aaa;
-    color:#555;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-.file-btn:hover {
-    border: 1px solid #888;
-    color:#000;
-}
+
 </style>
