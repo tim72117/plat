@@ -127,7 +127,7 @@ function delCookie(name) {
                     foreach($packageDocs['docs'] as $packageDoc) {
                         foreach($packageDoc['actives'] as $active) {
                             if( $active['active']=='open' ){
-                                echo '<a class="item'.(Request::path()==$active['link']?' active':'').'" style="font-size:16px;font-weight:600" href="/'.$active['link'].'/">'.$packageDoc['title'].'</a>';
+                                echo '<a class="item teal'.(Request::path()==$active['link']?' active':'').'" style="font-size:16px;font-weight:600" href="/'.$active['link'].'/">'.$packageDoc['title'].'</a>';
                             }
                         }
                     }                
