@@ -5,7 +5,7 @@ $fileProvider = app\library\files\v0\FileProvider::make();
 $inGroups = $user->inGroups->lists('id');
 
 $shareFiles = ShareFile::with('isFile')->where(function($query) use($user){
-    $query->where('target', 'user')->where('target_id', $user->id)->where('created_by', '<>', $user->id);
+    $query->where('target', 'user')->where('target_id', $user->id);//->where('created_by', '<>', $user->id);
 })->orWhere(function($query) use($user, $inGroups){
     count($inGroups)>0 && $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '<>', $user->id);
 })->orderBy('created_at', 'desc')->get();
@@ -21,7 +21,9 @@ foreach($shareFiles as $shareFile) {
             //$link['open'] = 'file/'.$intent_key.'/open';
         break;
         default:         
-            echo '<a href="/'.$fileProvider->download($shareFile->file_id).'">'.$shareFile->isFile->title.'</a><br />';
+            echo '<div class="item"><i class="file outline icon"></i>';
+            echo '<div class="content">國立臺灣師範大學教育評鑑與研究中心傳送一個檔案給你：<a href="/'.$fileProvider->download($shareFile->file_id).'">'.$shareFile->isFile->title.'</a></div>';
+            echo '</div>';
         break;    
     }
 }
@@ -30,7 +32,7 @@ $shares = ShareApp::where(['target' => 'group', 'active' => true])->where(functi
     empty($inGroups) ? $query->whereNull('id') : $query->whereIn('target_id', $inGroups);
 })->get()->each(function($share) use($user){
     Apps::firstOrCreate(['user_id' => $user->id, 'file_id' => $share->isApp->file_id]);
-    echo '<div style="border: 0px solid #aaa;padding:10px 10px 10px 0;width:800px;margin-top:5px;color:#f00">';
-    echo '國立臺灣師範大學教育評鑑與研究中心分享一個檔案給你：'.$share->isApp->isFile->title;
+    echo '<div class="item"><i class="alarm icon"></i>';
+    echo '<div class="content">國立臺灣師範大學教育評鑑與研究中心分享一個檔案給你：'.$share->isApp->isFile->title.'</div>';
     echo '</div>';
 });
