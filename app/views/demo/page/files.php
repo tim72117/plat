@@ -68,7 +68,7 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
                 <div class="item">
                     <div class="ui basic button"><i class="icon add circle"></i>新增</div>
                     <label for="file_upload" class="ui basic button"><i class="icon upload"></i>上傳</label>
-                    <div class="ui basic button"><i class="icon remove circle"></i>刪除</div>
+                    <div class="ui basic button" ng-if="info.pickeds.length>0" ng-click="deleteFile()"><i class="icon remove circle"></i>刪除</div>
                 </div>
 
             </div>
@@ -102,7 +102,12 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
             </thead>
             <tbody>
                 <tr ng-repeat="file in files | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
-                    <td width="50"><input type="checkbox" ng-model="file.selected" ng-click="test()" /></td>
+                    <td width="50">
+                        <div class="ui checkbox">
+                            <input type="checkbox" id="file-{{ $index }}" ng-model="file.selected" ng-click="test()">
+                            <label for="file-{{ $index }}"></label>
+                        </div>            
+                    </td>
                     <td><i class="icon" ng-class="getImage(file.type)"></i><a href="/{{ file.link.open }}">{{ file.title }}</a></td>
                     <td width="80">{{ file.created_by }}</td>
                     <td>{{ diff(file.created_at) }}</td>
