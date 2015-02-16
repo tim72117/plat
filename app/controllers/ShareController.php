@@ -98,9 +98,14 @@ class ShareController extends BaseController {
 
             $file = ShareFile::find($shareFile['id']);
 
-            $sheets = array_map(function($sheet){
-                return array_fetch($sheet['columns'], 'name');
-            }, $shareFile['sheets']);
+            if( isset($shareFile['sheets']) ) {
+                $sheets = array_map(function($sheet){
+                    return array_fetch($sheet['columns'], 'name');
+                }, $shareFile['sheets']);
+            }else{
+                $sheets = [];
+            }
+
 
             //未處理 - sheet
             if( isset($file->power) ) {
