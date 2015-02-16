@@ -1,6 +1,6 @@
-<div>
+<div ng-controller="newTableController">
 
-    <div style="position: absolute;top: 10px;bottom: 10px;left: 10px; right: 10px" ng-controller="newTableController">     
+    <div style="position: absolute;top: 10px;bottom: 10px;left: 10px; right: 10px">     
         
         <div ng-if="tool===1" style="display:none">
             <div style="border-bottom: 0px solid #999;position: absolute;top: 0;z-index:2" class="ui top attached tabular menu">
@@ -37,24 +37,48 @@
             </div>
         </div>
         
-        <div ng-if="tool===1" style="position: absolute;top: 0;bottom: 40px;left: 0; right:0; overflow: hidden"> 
+
+        
+        <div class="ui menu" >
             
-            <div class="ui ui search dropdown selection active visible" ng-click="dropdown=!dropdown" style="z-index:104;width:250px">
-                <i class="dropdown icon"></i>
-                <div class="default text">資料表</div>
-                <div class="menu transition" ng-class="{visible: dropdown}" tabindex="-1">
-                    <div ng-repeat="($tindex, sheet) in table.sheets | startFrom:(sheetsPage-1)*5 | limitTo:50" class="item" data-value="AL">{{ sheet.sheetName }}</div>                        
+            <div class="item">
+                <div class="ui basic button" id="save"><i class="save icon"></i>儲存</div>
+                <div class="ui flowing popup" style="width:500px">
+                    <div class="ui form">
+                        <h4 class="ui dividing header">輸入檔案名稱</h4>
+                        <div class="field">                        
+                            
+                            <div class="ui input">
+                                <input type="text" placeholder="輸入檔案名稱" ng-model="table.title" />
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="ui positive button" ng-click="saveDoc()" ng-class="{loading: saving}">
+                            <i class="save icon"></i>確定
+                        </div>
+                        <div class="ui basic button"  ng-click="closePopup($event)">
+                            <i class="ban icon"></i>取消
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="ui button" ng-click="tableNameBox=true"><i class="save icon"></i>儲存</div>
-            
-            <dropdown dropdown-class="ui labeled icon left pointing dropdown button" title="my dropdown" ng-model="dropdown_model" open="false" style="z-index:104">
+
+            <dropdown dropdown-class="ui item labeled icon pointing dropdown button" title="設定" ng-model="dropdown_model" open="false" style="z-index:105">                
+                <dropdown-group ng-click="changeTool(1)">資料列</dropdown-group>
                 <div class="header">設定資料表</div>
                 <dropdown-group ng-click="changeTool(2)">欄位定義</dropdown-group>
                 <dropdown-group ng-click="changeTool(3)">選項定義</dropdown-group>
                 <dropdown-group ng-click="changeTool(4)">說明文件</dropdown-group>
-            </dropdown>
+            </dropdown>   
+             
+        </div> 
+        
+        <div class="ui item search selection dropdown" ng-dropdown items="table.sheets" ng-model="sheet" title="資料表" ng-change="action.toSelect(sheet)" style="z-index:104;width:250px">
+
+        </div>
+        
+        <div ng-if="tool===1" class="ui segment active"> 
             
             <div style="position: absolute;top: 0;z-index:2;display:none" class="ui top attached tabular menu">
                 <div ng-click="prevSheetPage()" class="item active" style=""> < </div>
@@ -63,7 +87,7 @@
                 <div ng-click="nextSheetPage()" class="item" style="margin:0;width:20px" ng-style="{left:getSheetLength()*5+30}"> > </div>
                 <div ng-click="addSheet()" class="item" style="margin:0" ng-style="{left:getSheetLength()*5+35}"></div>
             </div>   
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" class="ui segment active" ng-class="{loading: sheetLoading}" style="position: absolute;left: 2px;right: 10px;top: 35px;bottom: 2px;padding:2px" id="sheet">         
+            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected"  ng-class="{loading: sheetLoading}" style="position: absolute;left: 2px;right: 10px;top: 35px;bottom: 2px;padding:2px" id="sheet">         
                 <hot-table
                     settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row'], afterInit: afterInit}"
                     columns="sheet.colHeaders"
@@ -79,59 +103,24 @@
             </div>    
         </div>
 
-        <div ng-if="tool===2" style="position: absolute;top: 0;bottom: 40px;left: 0; right:0; overflow: hidden">
+        <div ng-if="tool===2" class="ui segment active" ng-class="{loading: sheetLoading}">
             
-            <div class="ui ui search dropdown selection active visible" ng-click="dropdown=!dropdown" style="z-index:104;width:250px">
-                <i class="dropdown icon"></i>
-                <div class="default text">資料表</div>
-                <div class="menu transition" ng-class="{visible: dropdown}" tabindex="-1">
-                    <div ng-repeat="($tindex, sheet) in table.sheets | startFrom:(sheetsPage-1)*5 | limitTo:50" class="item" ng-click="action.toSelect(sheet)">{{ sheet.sheetName }}</div>                        
-                </div>
-            </div>
+
             
-            <div class="ui button" ng-click="tableNameBox=true"><i class="save icon"></i>儲存</div>
-            
-            <dropdown dropdown-class="ui labeled icon left pointing dropdown button" title="設定" ng-model="dropdown_model" open="false" style="z-index:104">
-                
-                <dropdown-group ng-click="changeTool(1)">資料列</dropdown-group>
-                <div class="header">設定資料表</div>
-                <dropdown-group ng-click="changeTool(2)">欄位定義</dropdown-group>
-                <dropdown-group ng-click="changeTool(3)">選項定義</dropdown-group>
-                <dropdown-group ng-click="changeTool(4)">說明文件</dropdown-group>
-            </dropdown>
-            
-            <div style="height:80px;position: absolute;top: 35px;z-index:200">
-                <div style="position: absolute;left:5px;top:0;;bottom:0;width:440px;border: 1px solid #999;background-color: #fff;padding:20px;box-shadow: 0 10px 20px rgba(0,0,0,0.5);" ng-show="tableNameBox">
-                    <input type="text" placeholder="輸入檔案名稱" class="input define" style="width:220px" ng-model="table.title" />
-                    <div style="top:20px;left:250px" class="btn default box green" ng-class="{wait:wait}" ng-click="saveDoc();tableNameBox=false">確定</div>
-                    <div style="top:20px;left:360px" class="btn default box white" ng-class="{wait:wait}" ng-click="tableNameBox=false">取消</div>
-                </div>
-            </div>
-            <div style="height:40px;border-bottom: 0px solid #999;position: absolute;top: 0;z-index:2;display:none">
-                <div ng-click="test()" class="page-tag top" style="margin:0;left:10px;width:60px;">測試</div>
-                <div ng-click="tableNameBox=true;alert();" class="page-tag top" style="margin:0;left:15px;width:60px;">儲存</div>    
-                <div ng-click="prev()" class="page-tag top" style="margin:0;width:20px;left:20px"> < </div>
-                <div ng-click="action.toSelect(sheet)"  class="page-tag top" style="margin:0;width:150px;font-weight:900;font-size:14px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap"
-                     ng-repeat="($tindex, sheet) in table.sheets | startFrom:(sheetsPage-1)*5 | limitTo:5" ng-style="{left:$tindex*5+25}" ng-class="{selected:sheet.selected}">{{ sheet.sheetName }}</div>                
-                <div ng-click="page = page+1" class="page-tag top" style="margin:0;width:20px" ng-style="{left:getSheetLength()*5+30}"> > </div>
-                <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:0" ng-style="{left:getSheetLength()*5+35}"></div>
-            </div>  
-            
-            <div class="ui segment active" ng-class="{loading: sheetLoading}" style="position: absolute;left: 2px;right: 10px;top: 35px;bottom: 2px;padding:2px;overflow: auto">
-                <div style="width:1000px;height:25px;padding:10px 0 0 5px;font-weight: bold;font-size: 14px">表單設定</div>
-                <div style="width:1000px;height:25px;padding:3px 0 2px 0">
-                    <div style="border: 1px solid #999;height:30px;margin:0 0 0 3px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:180px" class="define">表格名稱</div>  
-                    <div style="border: 1px solid #999;height:30px;margin:0 0 0 6px;box-sizing: border-box;float: left;line-height: 30px;padding-left:5px;font-weight: bold;width:65px" class="define">不可編輯</div> 
-                </div>
-                <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="width:1000px;height:25px;padding:10px 2px 10px 2px">
-                    <div class="input-status" ng-class="{empty:!sheet.sheetName}">
-                        <input type="text" placeholder="表格名稱" class="input define" style="width:180px" ng-model="sheet.sheetName" />
-                    </div>
-                    <div class="input-status"><input type="checkbox" class="input define" style="width:45px" ng-model="sheet.editable" /></div>
-                </div>
+            <div>
                 
                 <table class="ui table">
                     <thead>
+                        <tr ng-repeat="sheet in table.sheets" ng-if="sheet.selected">                            
+                            <th colspan="7">                                
+                                <div class="ui input"><input type="text" placeholder="表格名稱" ng-model="sheet.sheetName" /></div>
+                                <div class="ui checkbox">
+                                    <input type="checkbox" id="readOnly" ng-model="sheet.editable">
+                                    <label for="readOnly">唯讀</label>
+                                </div>
+                            </th>
+                            <th></th>
+                        </tr>
                         <tr>
                             <th></th>
                             <th>欄位名稱</th>
@@ -220,6 +209,9 @@
 
 <script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
 <script src="/js/angular-semantic-ui/dropdown.js"></script>
+<script src="/css/ui/Semantic-UI-1.8.1/components/popup.js"></script>
+<script src="/css/ui/Semantic-UI-1.8.1/components/transition.min.js"></script>
+
 <!--<script src="/js/angular-file-upload.min.js"></script>-->
 
 <script src="/js/jquery.fileDownload.js"></script>
@@ -273,6 +265,16 @@ app.filter('startFrom', function() {
     $scope.action = {}; 
     $scope.sheetsPage = 1;
     $scope.sheetLoading = true;
+    
+    $('#save').popup({
+          popup : $('.popup'),
+          on    : 'click',
+          position: 'bottom left'
+        });
+        
+    $scope.closePopup = function(event) {
+        $('#save').popup('hide');
+    };
     
     var types = [
         {name: "整數", type: "int" ,validator: /^\d+$/}, {name: "小數", type: "float" ,validator: /^[0-9]+.[0-9]+$/}, {name: "中、英文(數字加符號)", type: "nvarchar"},
@@ -332,6 +334,7 @@ app.filter('startFrom', function() {
     };
     
     $scope.action.toSelect = function(sheet) {  
+        $scope.sheetLoading = true;
         angular.forEach($filter('filter')($scope.table.sheets, {selected: true}), function(sheet){
             sheet.selected = false;
         });
@@ -342,13 +345,19 @@ app.filter('startFrom', function() {
             $scope.sheetLoading = false;
     }; 
     
-    $scope.saveDoc = function() {        
+    $scope.saveDoc = function() {     
+        
         if( !$scope.checkEmpty($scope.table.sheets) )
             return false;
+        
+        $scope.saving = true;
+
         if( $scope.table.intent_key !== null ) {
 
             $http({method: 'POST', url: 'save_table', data:{sheets: $scope.table.sheets, title: $scope.table.title} })
             .success(function(data, status, headers, config) { 
+                $scope.saving = false;
+                $scope.closePopup();
                 console.log(data);         
             }).error(function(e){
                 console.log(e);
@@ -359,6 +368,8 @@ app.filter('startFrom', function() {
             $http({method: 'POST', url: '/file/new/create', data:{sheets: $scope.table.sheets, title: $scope.table.title} })
             .success(function(data, status, headers, config) { 
                 $scope.table.intent_key = data.intent_key;
+                $scope.saving = false;
+                $scope.closePopup();
                 console.log(2);
                 window.location = '/file/'+data.intent_key+'/open';
             }).error(function(e){
@@ -545,13 +556,12 @@ app.filter('startFrom', function() {
                     
                     if( /^\w+$/.test(colHeader.data ) 
                         && colHeader.title.Blength()>0 && colHeader.title.Blength()<50
-                        && colHeader.rules.key != null
+                        && colHeader.rules.key !== null
                         && /^[a-z]+$/.test(colHeader.rules.key)
-                        && colHeader.types.type != null
-                        && /^[a-z]+$/.test(colHeader.types.type)){
+                        && colHeader.types.type !== null
+                        && /^[a-z]+$/.test(colHeader.types.type)) {
                         return false;
-                    }   
-                    else { 
+                    } else { 
                         console.log(colHeader);  
                         return true;
                     }
@@ -638,23 +648,6 @@ String.prototype.Blength = function() {
 .sorter:hover {
     color: #00f;
     background-color: #fff;
-}
-.input {
-    box-sizing: border-box;
-    padding: 5px;    
-    margin: 0;
-}
-.define {
-    font-size: 13px;
-    font-family: 微軟正黑體
-}
-.input-status {
-    display: inline-block;
-    border: 1px solid #fff;
-}
-.input-status.empty {  
-    background: red;
-    border-color: red;
 }
 .notSelected {
     color: #888;

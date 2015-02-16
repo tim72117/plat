@@ -60,20 +60,15 @@
 </div>
 
 <script>
-angular.module('app', ['ngHandsontable'])
-.controller('newTableController', newTableController)
-
-.directive("scroll", function ($window) {
+app.requires.push('ngHandsontable');
+app.directive("scroll", function ($window) {
     return function(scope, element, attrs) {
         angular.element($window).bind("scroll", function() {
             console.log(1);
         });
     };
-});
-
-
-
-function newTableController($scope, $http, $filter) {
+})
+.controller('newTableController', function($scope, $http, $filter) {
     
     $scope.table = {sheets:[], rows: []};
     
@@ -305,7 +300,7 @@ function newTableController($scope, $http, $filter) {
         console.log(1);
     };
     
-}
+});
 </script>
 <script src="/js/jquery.fileDownload.js"></script>
 <script src="/js/ngHandsontable.min.js"></script>

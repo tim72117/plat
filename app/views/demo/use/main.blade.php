@@ -10,8 +10,8 @@ $project = DB::table('projects')->where('code', $user->getProject())->first();
 
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
 <script src="/js/jquery-1.11.1.min.js"></script>
-<script src="/js/angular-1.3.11/angular.min.js"></script>
-<script src="/js/angular-1.3.11/angular-sanitize.min.js"></script>
+<script src="/js/angular-1.2.28/angular.min.js"></script>
+<script src="/js/angular-1.2.28/angular-sanitize.min.js"></script>
 
 <link rel="stylesheet" href="/demo/use/css/use100_content.css" />
 <link rel="stylesheet" href="/css/main.css" />
