@@ -14,7 +14,6 @@ $project = DB::table('projects')->where('code', $user->getProject())->first();
 <script src="/js/angular-1.2.28/angular-sanitize.min.js"></script>
 
 <link rel="stylesheet" href="/demo/use/css/use100_content.css" />
-<link rel="stylesheet" href="/css/main.css" />
 <link rel="stylesheet" href="/css/ui.css" />
 
 <script type="text/javascript">

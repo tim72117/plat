@@ -9,7 +9,7 @@
             <div style="border: 1px solid #999;width:80px;text-align: center">存檔</div>
         </div>-->
 
-        <div style="height:80px;position: absolute;top: 35px;left: 5px;z-index:200">
+        <div style="height:180px;position: absolute;top: 35px;left: 5px;z-index:130">gggg
             <div style="width:440px;border: 1px solid #999;background-color: #fff;padding:20px;box-shadow: 0 10px 20px rgba(0,0,0,0.5);" ng-show="imports.is_show_select">
                 <div ng-repeat="sheet in imports.sheets">
                     <input type="radio" id="sheet_{{ $index+1 }}" name="import_sheet" ng-value="1" ng-model="sheet.selected" />
@@ -70,9 +70,8 @@
 </div>
 
 <script>
-angular.module('app', ['ngHandsontable'])
-.controller('newTableController', newTableController)
-.factory("XLSXReaderService", ['$q', '$rootScope',
+app.requires.push('ngHandsontable');
+app.factory("XLSXReaderService", ['$q', '$rootScope',
     function($q, $rootScope) {
         var service = function(data) {
             angular.extend(this, data);
@@ -93,9 +92,8 @@ angular.module('app', ['ngHandsontable'])
 
         return service;
     }
-]);
-
-function newTableController($scope, $http, $filter, XLSXReaderService) {
+])
+.controller('newTableController', function($scope, $http, $filter, XLSXReaderService) {
     
     $scope.table = {sheets:[], rows: []};
     
@@ -424,7 +422,7 @@ function newTableController($scope, $http, $filter, XLSXReaderService) {
         });
     };
     
-}
+});
 String.prototype.Blength = function() {
     var arr = this.match(/[^\x00-\xff]/ig);
     return  arr === null ? this.length : this.length + arr.length;
