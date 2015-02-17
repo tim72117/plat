@@ -1,87 +1,51 @@
-<div style="position: relative" ng-switch-when="request">    
-
-    <div style="border:1px solid #999;margin:0;padding:0;width:220px;box-sizing: border-box;position: absolute;left:0;top:0">
-        <div style="border-top:1px solid #999;margin-top:-1px;padding:5px;box-sizing: border-box;background-color: #eee">群組</div>
-        <div ng-repeat="group in groups" style="border-top:1px solid #999;margin-top:-1px;box-sizing: border-box" class="group-tag" ng-class="group.id==group_selected ? 'selected': ''">
-
-    <!--        <input ng-click="getUsers(group)" type="button" value="成員" style="float:right" />-->
-            <div ng-dblclick="getUsers(group)" class="dbclick-tag" style="padding:5px">
-                <span>{{ group.description }}</span>
-                <div ng-click="request(group)" class="request-btn" ng-class="group.requested"></div>                
-            </div>
-        <!--    <input type="checkbox" ng-model="set_groups[group.id]" ng-init="set_groups[group.id]=group.default" id="request_group{{ group.id }}">
-
-            <label for="request_group{{ group.id }}">{{ group.name }}</label>   
-
-
-
-            <div ng-hide="group[group.id]" ng-init="group[group.id]=true ; shareds = []">
-                <table>
-                    <tr ng-repeat="(user_id, shared) in shareds">
-                        <td>
-                            <input type="checkbox" id="{{ group.id }}_request_{{ user_id }}">
-                            <label for="{{ group.id }}_request_{{ user_id }}">request</label>
-                            <input type="checkbox" id="{{ group.id }}_share_{{ user_id }}" ng-model="shared.shared" ng-click="shared.shared=!shared.shared;share(user_id, shared)">
-                            <label for="{{ group.id }}_share_{{ user_id }}">share</label>
-                            <label for="request{{ user_id }}">{{ shared.name }}</label>
-                        </td>                
-                    </tr>
-                </table>
-            </div>-->
-
-
-        </div>
-    </div>
-
-    <div style="border:1px solid #999;margin:0;padding:0;width:220px;box-sizing: border-box;position: absolute;left:222px;top:0;max-height: 497px;overflow-y: auto">
-        <div style="border-top:1px solid #999;margin-top:-1px;padding:5px;box-sizing: border-box;background-color: #eee">成員</div>
-        <div ng-repeat="user in users" style="border-top:1px solid #999;margin-top:-1px;padding:5px;box-sizing: border-box;position: relative" class="group-tag">
-            {{ user.username }}
-        </div>
-    </div>
-
-    <div style="border:1px solid #999;margin:0;padding:0;width:20px;box-sizing: border-box;position: absolute;left:444px;top:0;height: 500px;display: none" class="detail">
-    </div>
-    
-
-</div>
 
 <div style="position: absolute;background-color: #fff;top:0;bottom: 0;left:0;right:0" ng-switch-when="share">
-    <div style="position: absolute;top:10px;bottom: 80px;width:220px;overflow-y: auto;margin:0;padding:0;left:5px">
-        <div style="border:1px solid #999;margin:0;padding:5px;box-sizing: border-box;background-color: #eee">群組</div>
-        <div ng-repeat="group in groups" style="border:1px solid #999;margin-top:-1px;box-sizing: border-box" class="group-tag" ng-class="{selected:group.open}">
-            <div class="dbclick-tag">
-                <div ng-click="getUsers(group)" class="load-tag" style="padding:5px">{{ group.description }}<span style="color:#aaa">({{ group.users.length }})</span></div>
-                <div ng-click="getUsers(group);select(group);selectAll(group)" class="share-btn-all" ng-class="{selected: group.selected}"></div>                
+    
+    <div style="position: absolute;top:10px;bottom: 80px;width:250px;overflow-y: auto;margin:0;padding:5px;left:0">
+        
+        <div class="ui vertical pointing menu">
+            <div class="header item">
+                <i class="users icon"></i>群組
             </div>
-        </div>
-    </div>  
-    <div style="position: absolute;top:10px;bottom: 80px;width:210px;overflow-y: auto;left:237px" ng-hide="users.length===0">
-        <div style="border:1px solid #999;margin:0;padding:5px;width:180px;box-sizing: border-box;background-color: #eee">成員({{ group_description }})</div>
-        <div style="width:180px;box-sizing: border-box">        
-            <div ng-repeat="user in users" style="border:1px solid #999;margin-top:-1px;box-sizing: border-box" class="group-tag">
-                <div class="dbclick-tag" style="padding:5px">
-                    {{ user.username }}
-                    <div ng-click="select(user);shareGroup()" class="share-btn" ng-class="{selected: user.selected, selectable: user.selectable}"></div>   
-                </div>
+            <a class="item" ng-repeat="group in groups" ng-class="{active:group.open}" ng-click="getUsers(group)">
+                <div class="ui label" ng-click="getUsers(group);select(group);selectAll(group)" ng-class="{green: group.selected}">{{ group.users.length }}</div>
+                {{ group.description }}            
+            </a>
+        </div>    
+
+    </div> 
+
+    <div style="position: absolute;top:10px;bottom: 80px;width:250px;overflow-y: auto;left:237px" ng-hide="users.length===0">
+        
+        <div class="ui vertical menu">
+            <div class="header item">
+                <i class="user icon"></i>成員({{ group_description }})
             </div>
-        </div>
+            <a class="item green" ng-repeat="user in users" ng-click="select(user);shareGroup()" ng-class="{active: user.selected}">
+                {{ user.username }}    
+                <i class="tag icon" ng-show="user.selected"></i>
+            </a>
+        </div> 
+
     </div>
+    
     <div style="height:120px;position: absolute;bottom: 40px;z-index:3">
         <div style="position: absolute;left:5px;top:0;;bottom:0;width:300px;border: 1px solid #999;background-color: #fff;padding:20px;box-shadow: 0 10px 20px rgba(0,0,0,0.5);" ng-show="status.showDescription">
-            <input type="text" placeholder="輸入這份請求的描述" class="input define" style="width:220px" ng-model="requestDescription" />
-            <div style="top:60px;left:20px" class="btn default box green" ng-class="{wait:wait}" ng-click="requestTo(requestDescription);status.showDescription=false">確定</div>
-            <div style="top:60px;left:130px" class="btn default box white" ng-class="{wait:wait}" ng-click="status.showDescription=false">取消</div>
+            <div class="ui input"><input type="text" placeholder="輸入這份請求的描述" ng-model="requestDescription" /> </div>           
+            <div class="ui positive button" ng-class="{loading: wait}" ng-click="requestTo(requestDescription);status.showDescription=false"><i class="save icon"></i>確定</div>
+            <div class="ui basic button"  ng-click="status.showDescription=false"><i class="ban icon"></i>取消</div>
         </div>
     </div>
+    
     <div style="border:0px solid #999;position: absolute;bottom:20px;height:40px;width:400px;box-sizing: content-box">
-        <div style="top:5px;left:15px" class="btn default box green" ng-class="{wait:wait}" ng-click="shareAppTo()" ng-show="shareBox.target==='app'">分享</div>
-        <div style="top:5px;left:15px" class="btn default box green" ng-class="{wait:wait}" ng-click="shareFileTo()" ng-show="shareBox.target==='file'">共用</div>
-        <div style="top:5px;left:15px" class="btn default box green" ng-class="{wait:wait}" ng-click="status.showDescription=true" ng-show="shareBox.target==='request'">請求</div>
-        <div style="top:5px;left:120px" class="btn default box white" ng-click="shareClose()">取消</div>
-<!--        <div style="position: absolute;top:5px;left:230px;height:30px;width:100px;box-sizing: border-box;text-align: center;line-height: 30px" class="btn white" ng-click="switchShareType()">換</div>-->
-        <div style="top:5px;left:220px;font-size:12px;color:#555" class="btn default" ng-show="advanced_status.has" ng-click="advanced()">進階</div>
+        <div class="ui positive button" ng-class="{loading: wait}" ng-click="shareAppTo()" ng-show="shareBox.target==='app'"><i class="save icon"></i>分享</div>
+        <div class="ui positive button" ng-class="{loading: wait}" ng-click="shareFileTo()" ng-show="shareBox.target==='file'"><i class="save icon"></i>共用</div>
+        <div class="ui positive button" ng-class="{loading: wait}" ng-click="status.showDescription=true" ng-show="shareBox.target==='request'"><i class="save icon"></i>請求</div>
+        <div class="ui basic button"  ng-click="shareClose()"><i class="ban icon"></i>取消</div>
+
+        <div class="circular ui icon button" ng-show="advanced_status.has" ng-click="advanced()"><i class="icon settings"></i>進階</div>
     </div>
+    
     <div ng-repeat="file in files | filter:{type: 5}" style="position: absolute;top:10px;bottom: 80px;width:350px;left:470px" ng-style="{left:470+$index*350}" ng-init="" ng-show="advanced_status.show">   
         <div style="width:330px;border:1px solid #999;margin:2px;padding:5px;box-sizing: border-box;background-color: #eee;overflow: hidden;text-overflow: ellipsis;white-space: nowrap">表單({{ file.title }})</div>
         <div style="position: absolute;top:40px;bottom:0;left:0;right:0;overflow: auto;padding:2px">            
@@ -108,10 +72,8 @@
          </div>
     </div>    
 </div>
-
-<!--<input ng-click="setDefalut()" type="button" value="set default" />-->
  
-<script type="text/javascript">   
+<script>   
 app.controller('shareController', function($scope, $filter, $http) {
     
     $scope.groups = {};
@@ -232,7 +194,6 @@ app.controller('shareController', function($scope, $filter, $http) {
     $scope.selectAll = function(group) {
         for(i in group.users){            
             group.users[i].selected = group.selected;
-            group.users[i].selectable = !group.selected;
         }
     };    
     
@@ -341,153 +302,7 @@ app.controller('shareController', function($scope, $filter, $http) {
     
 });
 </script>
-
 <style>
-.lock {
-    background-color: #000
-}
-.group-tag {
-    position: relative;
-    line-height: 25px;
-    color: #555;    
-}
-.group-tag:hover {
-    color: #000;    
-}
-.group-tag.selected:after {
-    content: '';
-    display: block;
-    background-image: url('/images/br_next.png');
-    background-size: 16px 16px;
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 35px;
-    width: 16px;
-    position: absolute;
-    top: 0;
-}
-.dbclick-tag {
-    -webkit-user-select: none; /* webkit (safari, chrome) browsers */
-    -moz-user-select: none; /* mozilla browsers */
-    -khtml-user-select: none; /* webkit (konqueror) browsers */
-    -ms-user-select: none; /* IE10+ */ 
-}
-.load-tag {
-    margin-left: 12px;
-    cursor: pointer;
-}
-
-
-.request-btn, .share-btn-all, .share-btn {
-    float: right;
-    position: absolute;
-    top: 0;
-    right: 0
-}
-
-
-.dbclick-tag:hover .share-btn-all {
-    display: block;
-    background-image: url('/images/share-24-24.png'); 
-    background-size: 24px 24px;
-    background-position: center;
-    background-repeat: no-repeat;
-	height: 35px;
-	width: 30px;    
-    cursor: pointer;
-    border: 1px solid #fff;
-    background-color: #fff;
-    box-sizing: border-box;
-    box-shadow: 0 0 10px rgba(255,255,255,0);
-}
-.dbclick-tag:hover .share-btn-all:hover {
-    box-shadow: 0 0 20px rgba(255,255,255,0.3) inset;
-}
-.share-btn-all.selected {
-    display: block;
-    background-image: url('/images/share-24-24.png');
-    background-size: 24px 24px;
-    background-position: center;
-    background-repeat: no-repeat;
-    height: 35px;
-	width: 30px;    
-    cursor: pointer;
-    border: 1px solid #fff;
-    background-color: #fff;
-    box-sizing: border-box;
-}
-.dbclick-tag:hover .share-btn-all.requested {
-    box-shadow: 0 0 30px rgba(255,255,255,0.5);
-}
-
-
-
-.dbclick-tag:hover .share-btn {
-    display: block;
-    background-image: url('/images/share-24-24.png'); 
-    background-size: 24px 24px;
-    background-position: center;
-    background-repeat: no-repeat;
-	height: 35px;
-	width: 30px;    
-    cursor: pointer;
-    border: 1px solid #fff;
-    background-color: #fff;
-    box-sizing: border-box;
-    box-shadow: 0 0 20px rgba(255,255,255,0.9) inset;
-}
-.share-btn.selected {
-    display: block;
-    background-image: url('/images/shared-24-24.png'); 
-    background-size: 24px 24px;
-    background-position: center;
-    background-repeat: no-repeat;
-	height: 35px;
-	width: 30px;    
-    cursor: pointer;
-    border: 1px solid #fff;
-    background-color: #fff;
-    box-sizing: border-box;
-    box-shadow: 0 0 20px rgba(255,255,255,0.9) inset;
-}
-.dbclick-tag:hover .share-btn.selected {
-    background-image: url('/images/shared-24-24.png'); 
-}   
-.share-btn.selected:hover {
-    background-image: url('/images/shared-24-24.png'); 
-}
-
-
-
-
-.dbclick-tag:hover .request-btn {	
-    display: block;
-    background-image: url('/images/basics-24-24.png'); 
-    background-size: 24px 24px;
-    background-position: center;
-	height: 24px;
-	width: 24px;    
-    cursor: pointer;
-    border: 1px solid #fff;
-    background-color: #ddd;
-}
-.dbclick-tag:hover .request-btn.requested {
-    border: 1px solid #eee;
-    background-color: #fff;
-}
-.request-btn.requested {	
-    content: '';
-    display: block;
-    background-image: url('/images/basics-24-24.png'); 
-    background-size: 20px 20px;
-    background-position: center;
-	height: 20px;
-	width: 20px;    
-    cursor: pointer;
-    border: 1px solid #fff;
-    background-color: #fff;
-}
-
 .authorize {
     box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
@@ -525,6 +340,6 @@ app.controller('shareController', function($scope, $filter, $http) {
 <script src="/css/ui/UI-Accordion-master/accordion.min.js"></script>
 
 
-<link rel="stylesheet" href="/css/ui/Semantic-UI-1.8.1/semantic.min.css" />
+
 <link rel="stylesheet" href="/css/ui/UI-Checkbox-master/checkbox.min.css" />
 <link rel="stylesheet" href="/css/ui/UI-Accordion-master/accordion.min.css" />

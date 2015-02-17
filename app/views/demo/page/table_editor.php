@@ -257,7 +257,7 @@ app.filter('startFrom', function() {
     
     var path = window.location.pathname.split('/');
     $scope.table = {sheets:[], intent_key:(path[1]==='file' ? path[2] : null)};
-    //angular.element('[ng-controller=menu]').scope().hideRequestFile = $scope.table.intent_key === null;
+    angular.element('[ng-controller=topMenuController]').scope().hideRequestFile = $scope.table.intent_key === null;
     
     $scope.tool = 2;
     $scope.limit = 100;

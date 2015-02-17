@@ -1,73 +1,62 @@
+<div ng-controller="newTableController" style="position: absolute;top: 0;bottom: 0;left: 0; right: 0">   
 
-<!--<script src="../js/angular.min.js"></script>-->
-
-<div ng-app="app">
-
-    <div ng-controller="newTableController" style="border: 0px solid #999;position: absolute;top: 10px;bottom: 10px;left: 10px; right: 20px">   
+    <div class="ui form">
         
-<!--        <div style="">
-            <div style="border: 1px solid #999;width:80px;text-align: center">存檔</div>
-        </div>-->
-
-        <div style="height:180px;position: absolute;top: 35px;left: 5px;z-index:130">gggg
-            <div style="width:440px;border: 1px solid #999;background-color: #fff;padding:20px;box-shadow: 0 10px 20px rgba(0,0,0,0.5);" ng-show="imports.is_show_select">
-                <div ng-repeat="sheet in imports.sheets">
-                    <input type="radio" id="sheet_{{ $index+1 }}" name="import_sheet" ng-value="1" ng-model="sheet.selected" />
-                    <label for="sheet_{{ $index+1 }}">{{ sheet.name }}</label>                    
-                </div>                
-                <div style="top:20px;left:250px" class="btn default box green" ng-class="{wait:wait}" ng-click="importSheetData()">確定</div>
-                <div style="top:20px;left:360px" class="btn default box white" ng-class="{wait:wait}" ng-click="imports.is_show_select=false">取消</div>
-            </div>
+        <div class="field">
+            <div ng-repeat="sheet in imports.sheets">
+                <input type="radio" id="sheet_{{ $index+1 }}" name="import_sheet" ng-value="1" ng-model="sheet.selected" />
+                <label for="sheet_{{ $index+1 }}">{{ sheet.name }}</label>                    
+            </div>         
         </div>
         
-        <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">            
-            <input type="file" id="upload-file" accept=".xlsx" style="display:none" onChange="angular.element(this).scope().fileChanged(this)" />
-            <label for="upload-file">
-                <div class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">匯入</div>                    
-            </label>    
-            <div class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;" ng-click="saveRows()">儲存</div>
-            <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px;font-weight:900;font-size:14px">{{ sheet.sheetName }}</div>
-        </div>       
+        <div class="ui positive button" ng-click="importSheetData()" ng-class="{loading: saving}">
+            <i class="save icon"></i>
+            確定
+        </div>
+        <div class="ui basic button" ng-click="closePopup($event)">
+            <i class="ban icon"></i>取消
+        </div>
         
-        <div ng-if="tool===1" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0; right:0; overflow: hidden">  
-<!--            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
-                <div class="column" style="width: 30px;left: 2px;top: 2px"></div>   
-                <div class="column" ng-repeat="column in sheet.colHeaders" style="width: 80px;left: {{ ($index+1)*79-48 }}px;top:2px;padding-left:2px">{{ column }}</div> 
-                <div ng-repeat="($rindex, row) in sheet.rows | startFrom:(page-1)*limit | limitTo:limit">
-                    <div class="column" style="width: 30px;left: 2px;top:{{ ($rindex+1)*29+2 }}px;text-align: center">{{ $rindex+1 }}</div>   
-                    <div class="column" ng-repeat="($cindex, column) in sheet.columns" ng-style="{width:80,left:($cindex+1)*79-48,top:($rindex+1)*29+2}" style="padding-left:2px" contenteditable="{{ power.edit_row }}">{{ row[column.name] }}</div>
-                </div>
-            </div>-->
-          
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 2px;right: 2px;top: 2px;bottom: 1px" id="sheet">          
-                <hot-table                   
-                    settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row'], afterInit: afterInit, afterValidate: afterValidate, beforeValidate : beforeValidate}"
-                    columns="sheet.colHeaders"
-                    datarows="getData(sheet)"
-                    dataSchema="{}" 
-                    colHeaders="true"
-                    rowHeaders="getRowsIndex"
-                    minSpareRows="1"         
-                    startCols="20"
-                    startRows="20"
-                    stretchH="all"
-                    height="setHeight()">
-                </hot-table>
+    </div>
+
+    <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">            
+        <input type="file" id="upload-file" accept=".xlsx" style="display:none" onChange="angular.element(this).scope().fileChanged(this)" />
+        <label for="upload-file">
+            <div class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">匯入</div>                    
+        </label>    
+        <div class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;" ng-click="saveRows()">儲存</div>
+        <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px;font-weight:900;font-size:14px">{{ sheet.sheetName }}</div>
+    </div>       
+
+    <div ng-if="tool===1" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0; right:0; overflow: hidden">  
+
+        <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 2px;right: 2px;top: 2px;bottom: 1px" id="sheet">          
+            <hot-table                   
+                settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row'], afterInit: afterInit, afterValidate: afterValidate, beforeValidate : beforeValidate}"
+                columns="sheet.colHeaders"
+                datarows="getData(sheet)"
+                dataSchema="{}" 
+                colHeaders="true"
+                rowHeaders="getRowsIndex"
+                minSpareRows="1"         
+                startCols="20"
+                startRows="20"
+                stretchH="all"
+                height="setHeight()">
+            </hot-table>
+        </div>    
+    </div>
+
+    <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
+        <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}"  style="margin:0 0 0 0;width:220px;left: 5px">
+            <div ng-repeat="sheet in table.sheets" ng-if="sheet.selected">
+                資料 分頁<div style="display: inline-block;width:20px;padding:0" ng-repeat="pageN in sheet.page_link track by $index" ng-click="loadPage(pageN)" ng-class="{notSelected:sheet.page!==pageN}">{{ pageN }}</div>
             </div>    
         </div>
-        
-        <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
-            <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}"  style="margin:0 0 0 0;width:220px;left: 5px">
-                <div ng-repeat="sheet in table.sheets" ng-if="sheet.selected">
-                    資料 分頁<div style="display: inline-block;width:20px;padding:0" ng-repeat="pageN in sheet.page_link track by $index" ng-click="loadPage(pageN)" ng-class="{notSelected:sheet.page!==pageN}">{{ pageN }}</div>
-                </div>    
-            </div>
-        </div> 
+    </div> 
 
-    </div>   
-    
+</div>   
 
-</div>
 
 <script>
 app.requires.push('ngHandsontable');
@@ -103,7 +92,6 @@ app.factory("XLSXReaderService", ['$q', '$rootScope',
     $scope.action = {};
     $scope.imports = {};
     $scope.imports.sheets = [];
-    $scope.imports.is_show_select = false;
     
     var types = [
         {name: "整數", type: "int" ,validator: /^\d+$/}, {name: "小數", type: "float" ,validator: /^[0-9]+.[0-9]+$/}, {name: "中、英文(數字加符號)", type: "nvarchar"},
@@ -362,8 +350,7 @@ app.factory("XLSXReaderService", ['$q', '$rootScope',
         $scope.files = angular.element(files)[0].files[0];
         $scope.showPreview = false;
         $scope.showJSONPreview = true;
-        $scope.isProcessing = true;
-        $scope.imports.is_show_select = true;       
+        $scope.isProcessing = true;      
         
         XLSXReaderService.readFile($scope.files, $scope.showPreview, $scope.showJSONPreview).then(function(xlsxData) {
             $scope.isProcessing = false;
@@ -393,8 +380,7 @@ app.factory("XLSXReaderService", ['$q', '$rootScope',
         sheet.pages = [true];
         $scope.limit = sheetImport[0].data.length;
         $scope.loadPage(1);
-        
-        $scope.imports.is_show_select = false;
+
     };
     
     $scope.test = function() {
@@ -438,16 +424,7 @@ String.prototype.Blength = function() {
 <script src="/js/xlsx-reader.js"></script>
 <link rel="stylesheet" media="screen" href="/js/handsontable.full.min.css">
 
-<style>
-.column {
-    box-sizing: border-box;
-    position: absolute;
-    border: 1px solid #999;
-    font-size: 13px;
-    line-height: 30px;
-    height: 30px;
-    overflow: hidden;
-}    
+<style> 
 .page-tag {
     position: absolute;
     top: -1px;
@@ -459,13 +436,6 @@ String.prototype.Blength = function() {
     text-align: center;
     cursor: default
 }
-.add-tag {
-    background-image: url('/images/doc-add-20.png');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 16px 16px;
-    width:30px
-}
 .page-tag.selected {
     border-top-color: #fff
 }
@@ -476,34 +446,6 @@ String.prototype.Blength = function() {
 .page-tag.top.selected {
     border-top-color: #999;
     border-bottom-color: #fff;
-}
-.lists:not(:last-child) td {
-    border-bottom: 1px solid #999;
-}    
-.sorter {
-    color: #00f;
-    cursor: pointer;
-}
-.sorter:hover {
-    color: #00f;
-    background-color: #fff;
-}
-.input {
-    box-sizing: border-box;
-    padding: 5px;    
-    margin: 0;
-}
-.define {
-    font-size: 13px;
-    font-family: 微軟正黑體
-}
-.input-status {
-    display: inline-block;
-    border: 1px solid #fff;
-}
-.input-status.empty {  
-    background: red;
-    border-color: red;
 }
 .notSelected {
     color: #888;

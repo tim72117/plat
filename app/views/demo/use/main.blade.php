@@ -14,7 +14,7 @@ $project = DB::table('projects')->where('code', $user->getProject())->first();
 <script src="/js/angular-1.2.28/angular-sanitize.min.js"></script>
 
 <link rel="stylesheet" href="/demo/use/css/use100_content.css" />
-<link rel="stylesheet" href="/css/ui.css" />
+<link rel="stylesheet" href="/css/ui/Semantic-UI-1.8.1/semantic.min.css" />
 
 <script type="text/javascript">
 var app = angular.module('app', ['ngSanitize'])
@@ -75,7 +75,7 @@ function delCookie(name) {
 @section('body')
 <div style="width: 100%;height: 100%;max-height:100%;background-color: #fff">
 
-	<div style="width:100%;height: 30px;position: absolute;z-index:10;background-color: #fff" ng-controller="topMenuController">
+	<div style="width:100%;height: 30px;position: absolute;z-index:130;background-color: #fff" ng-controller="topMenuController">
 		<div style="background-color: #ffffff;width:100%;height:0px"></div>
 		<div style="background-color: #458A00;width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #ddd;color:#fff;box-sizing: content-box" align="right">			
             <? if( Auth::user()->id<20 ){ ?>
@@ -152,7 +152,7 @@ function delCookie(name) {
 
 		<div style="position: absolute;top:0;right:0;bottom:0;left:auto" class="context" ng-style="{left:350+menuLeft+'px'}" ng-cloak>
             
-            <div style="width:500px;position: absolute;top:-100%;background-color: #fff;left:-1px;height: 95%;border: 1px solid #aaa;font-size:16px;overflow: auto;z-index: 9" ng-controller="shareController" ng-style="{width:advanced_status.boxWidth}" class="authorize">
+            <div style="width:500px;position: absolute;top:-100%;background-color: #fff;left:-1px;height: 95%;border: 1px solid #aaa;font-size:16px;overflow: auto;z-index: 120" ng-controller="shareController" ng-style="{width:advanced_status.boxWidth}" class="authorize">
                 <div style="margin:20px;position: absolute;top:0;bottom: 0;left:0;right:0" ng-switch on="shareBox.type"><?=$share?></div>
             </div>
             

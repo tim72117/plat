@@ -39,6 +39,7 @@ if( Request::isMethod('post') ){
 	
 }
 
+
 ?>
 <style>
 .profile input{
@@ -46,45 +47,40 @@ if( Request::isMethod('post') ){
 	font-size: 15px;
 }	
 </style>
-<?=Form::open(array('url' => URL::to('page/project/profile'), 'method' => 'post'))?>
-    <table align="left" style="background-color: #fff;border: 1px solid #aaa;text-align: center;margin-left: 20px"  cellpadding="0" cellspacing="0" border="0" class="profile">  
+<div style="position: absolute;left:0;right:0;top:0;bottom:0;overflow: auto;padding:10px;max-width:800px">
+<?=Form::open(array('url' => URL::to('page/project/profile'), 'method' => 'post', 'name'=>'profile', 'class'=>'ui form segment'.(count($errors->all())>0 ? ' error' : '')))?>
+    
+    <h4 class="ui dividing header">個人資料</h4>
+    <div class="field">
+        <label>E-mail <span style="color:#f00">(登入帳號)</span></label><?=$user->email?>        
+    </div>  
+    <div class="field">
+        <label>姓名</label>
+        <?=Form::text('username', $user->username, array('placeholder'=>'姓名'))?>
+    </div>
+    <div class="field">
+        <label>職稱</label>
+        <?=Form::text('title', $user->contact->title, array('placeholder'=>'職稱'))?>
+    </div>  
+    <div class="two fields">
+        <div class="field">
+            <label>聯絡電話(Tel)</label>
+            <?=Form::text('tel', $user->contact->tel, array('placeholder'=>'聯絡電話(Tel)'))?>
+        </div>
+        <div class="field">
+            <label>傳真電話(Fax)</label>
+            <?=Form::text('fax', $user->contact->fax, array('placeholder'=>'傳真電話(Fax)'))?>
+        </div>  
+    </div>
+    <div class="field">
+        <label>備用信箱</label>
+        <?=Form::text('email2', $user->contact->email2, array('placeholder'=>'備用信箱'))?>
+    </div>  
+    <div class="ui error message">
+        <div class="header"></div>
+        <p><?=implode('、', array_filter($errors->all()));?></p>
+    </div>
+    <div class="ui submit button" onclick="profile.submit()">送出</div>
 
-        <tr>
-            <th width="175" align="left" style="padding:20px">E-mail <span style="color:#f00">(登入帳號)</span></th>		
-            <td width="175" align="left" style="padding:20px"><?=$user->email?></td>    	
-        </tr>
-        <tr>
-            <th width="175" align="left" style="padding:0 0 0 20px">姓名</th>
-            <td width="175" align="left" style="padding:0 0 0 20px"><?=Form::text('username', $user->username, array('size'=>20, 'class'=>'register-block'))?></td>
-        </tr>
-        <tr>
-            <th width="175" align="left" style="padding:0 0 0 20px">職稱</th>
-            <td width="175" align="left" style="padding:0 0 0 20px"><?=Form::text('title', $user->contact->title, array('size'=>20, 'class'=>'register-block'))?></td>
-        </tr>
-        <tr>
-            <th width="175" align="left" style="padding:0 0 0 20px">聯絡電話(Tel)</th>
-            <td width="175" align="left" style="padding:0 0 0 20px"><?=Form::text('tel', $user->contact->tel, array('size'=>20, 'class'=>'register-block'))?></td>
-        </tr>
-        <tr>
-            <th width="175" align="left" style="padding:0 0 0 20px">傳真電話(Fax)</th>
-            <td width="175" align="left" style="padding:0 0 0 20px"><?=Form::text('fax', $user->contact->fax, array('size'=>20, 'class'=>'register-block'))?></td>
-        </tr>
-        <tr>
-            <th width="175" align="left" style="padding:0 0 0 20px">備用信箱</th>
-            <td width="175" align="left" style="padding:0 0 0 20px"><?=Form::text('email2', $user->contact->email2, array('size'=>50, 'class'=>'register-block'))?></td>
-        </tr> 
-
-
-        <tr>
-            <td colspan="2" style="color:#f00;line-height: 20px"><?=implode('、',array_filter($errors->all()));?></td>
-        </tr>
-        <tr>
-            <td align="center" colspan="2" style="padding:20px 20px 20px 20px">
-                <input type="submit" value="送出">
-            </td>
-        </tr>
-    </table>
 <?=Form::close()?>
-
-
-
+</div>
