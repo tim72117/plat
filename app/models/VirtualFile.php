@@ -35,6 +35,12 @@ class ShareFile extends Eloquent {
 		return $this->hasOne('Files', 'id', 'file_id');
 	}
     
+    public function hasSharedDocs() {
+        return $this->hasMany('ShareFile', 'file_id', 'file_id')->where('created_by', '=', Auth::user()->id)->where(function($query){
+            $query->where('target', '<>', 'user')->orWhere('target_id', '<>', Auth::user()->id);
+        });
+    }
+    
 }
 	
 class Apps extends Eloquent {

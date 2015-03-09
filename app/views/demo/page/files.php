@@ -34,6 +34,7 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
         case 1:
             $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\QuesFile');
             $link['open'] = 'file/'.$intent_key.'/open';
+            $tools = ['codebook', 'receives', 'spss', 'report'];
         break;
         case 5:
             $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\RowsFile');
@@ -51,51 +52,75 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
         'created_at' => $shareFile->created_at->toIso8601String(),
         'link' => $link,
         'type' => $shareFile->isFile->type,
-        'intent_key' => $intent_key
+        'intent_key' => $intent_key,
+        'tools' => isset($tools) ? $tools : [],
+        'shared' => array_count_values($shareFile->hasSharedDocs->map(function($sharedDocs){
+            return $sharedDocs->target;
+        })->all())
     ];
 })->toJson();
 
 ?>
-<div ng-controller="fileController" id="fileController">
-
-    <div class="ui segment" style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto">
+<div ng-controller="fileController" id="fileController" style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
+    
+    <div class="ui segment">
         <?=Form::open(array('url' => $fileProvider->upload(), 'files' => true, 'method' => 'post', 'style' => 'display:none'))?>
         <?=Form::file('file_upload', array('id'=>'file_upload', 'onchange'=>'submit()'))?>
         <?=Form::close()?>
-       
-        <div class="ui menu">
-            <div class="left menu">
-                <div class="item">
-                    <div class="ui basic button"><i class="icon add circle"></i>新增</div>
-                    <label for="file_upload" class="ui basic button"><i class="icon upload"></i>上傳</label>
-                    <div class="ui basic button" ng-if="info.pickeds.length>0" ng-click="deleteFile()"><i class="icon remove circle"></i>刪除</div>
+        
+        <div class="ui grid">
+            <div class="left floated left aligned six wide column">
+                <div class="ui floating top left pointing labeled icon dropdown basic button" ng-dropdown-menu>
+                    <i class="file outline icon"></i>
+                    <span class="text">新增</span>
+                    <div class="menu"></div>
+                    <div class="menu transition" tabindex="-1">
+                        <a class="item" href="/page/table_editor"><i class="file text icon"></i>資料檔</a>
+                        <div class="item"><i class="file text outline icon"></i>問卷</div>
+                    </div>
                 </div>
-
+                <label for="file_upload" class="ui basic button"><i class="icon upload"></i>上傳</label>
+                <div class="ui basic button" ng-if="info.pickeds.length>0" ng-click="deleteFile()"><i class="icon trash outline"></i>刪除</div>
             </div>
-            <div class="right menu">
-                <div class="item">
-                    {{ page }} / {{ pages }}
-                    <div class="ui basic button" ng-click="prev()"><i class="icon left arrow"></i></div>
-                    <div class="ui basic button" ng-click="next()"><i class="icon right arrow"></i></div>
+            <div class="right floated right aligned six wide column">   
+                <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
+                <div class="ui basic mini buttons">
+                    <div class="ui button" ng-click="prev()"><i class="icon angle left arrow"></i></div>                    
+                    <div class="ui button" ng-click="next()"><i class="icon angle right arrow"></i></div>
                 </div>
-                <div class="item"><div class="ui basic button" ng-click="all()"><i class="icon unhide "></i>顯示全部</div></div>
-            </div>            
+                <div class="ui basic mini buttons">
+                    <div class="ui button" ng-click="all()"><i class="icon unhide"></i>顯示全部</div>
+                </div>
+            </div>
         </div>
         
-        
-        <table class="ui table">
+        <table class="ui compact table">
             <thead>
                 <tr>
                     <th></th>
                     <th>檔名</th>
-                    <th>擁有人</th>
+                    <th>設定</th>                    
+                    <th>已分享</th>
                     <th>更新時間</th>
+                    <th>擁有人</th>
                 </tr>  
                 <tr>
                     <th></th>
                     <th>
-                        <div class="ui icon input"><input type="text" ng-model="searchText.stdidnumber" placeholder="搜尋..."><i class="search icon"></i></div>
+                        <div class="ui floating top left pointing labeled icon dropdown basic button" ng-dropdown-menu>
+                            <i class="filter icon"></i>
+                            <span class="text"><i class="icon" ng-class="types[searchText.type]"></i></span>
+                            <div class="menu transition" tabindex="-1">
+                                <div class="item" ng-click="searchText = {type: 5}"><i class="file text icon"></i>資料檔</div>
+                                <div class="item" ng-click="searchText = {type: 1}"><i class="file text outline icon"></i>問卷</div>
+                                <div class="item" ng-click="searchText = {type: 3}"><i class="file outline blue icon"></i>一般檔案</div>
+                                <div class="item" ng-click="searchText = {type: ''}"><i class="file outline icon"></i>所有檔案</div>
+                            </div>
+                        </div>
+                        <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋..."><i class="search icon"></i></div>
                     </th>
+                    <th></th>
+                    <th></th>
                     <th></th>
                     <th></th>
                 </tr>
@@ -108,9 +133,35 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
                             <label for="file-{{ $index }}"></label>
                         </div>            
                     </td>
-                    <td><i class="icon" ng-class="getImage(file.type)"></i><a href="/{{ file.link.open }}">{{ file.title }}</a></td>
+                    <td>
+                        <i class="icon" ng-class="types[file.type]"></i>
+                        <a href="/{{ file.link.open }}" ng-mouseover="openFileMenu($event)">{{ file.title }}</a>
+                        <div class="ui inline dropdown small" ng-dropdown-menu ng-if="file.tools.length>0">
+                            <i class="dropdown icon"></i>
+                            <div class="menu transition" tabindex="-1">
+                                <a href="/file/{{ file.intent_key }}/{{ tool }}" class="item" ng-repeat="tool in file.tools">{{ tool }}</a>
+                            </div>
+                        </div>
+                    </td>
+                    <td width="70">
+                        <div class="ui basic icon button" ng-if="file.type==='1'"><i class="icon settings"></i></div>
+                    </td>                    
+                    <td width="120">
+                        
+                        <div class="ui small compact menu">
+                            <div class="item">
+                                <i class="icon user"></i>
+                                <div class="floating ui label" ng-class="{blue: file.shared.user>0}">{{ file.shared.user || 0 }}</div>
+                            </div>
+                            <div class="item">
+                                <i class="icon users"></i>
+                                <div class="floating ui label" ng-class="{green: file.shared.group>0}">{{ file.shared.group || 0 }}</div>
+                            </div>
+                        </div>
+                        
+                    </td>                    
+                    <td width="120">{{ diff(file.created_at) }}</td>
                     <td width="80">{{ file.created_by }}</td>
-                    <td>{{ diff(file.created_at) }}</td>
                 </tr>
             </tbody>
         </table>      
@@ -119,22 +170,23 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
 </div>
 
 <script>
-angular.module('app')
-.filter('startFrom', function() {
+app.requires.push('angularify.semantic.dropdown');
+app.filter('startFrom', function() {
     return function(input, start) {         
         return input.slice(start);
     };
 })
 .controller('fileController', function($scope, $filter, $interval, $http) {
     $scope.files = angular.fromJson(<?=$files?>);
-    $scope.predicate = 'created_at';
+    $scope.predicate = 'created_at';    
+    $scope.searchText = angular.fromJson(getCookie('file_filter')) || {type: ''};
     $scope.page = getCookie('file_page') || 1;
     $scope.limit = 10;
     $scope.max = $scope.files.length;
     $scope.pages = Math.ceil($scope.max/$scope.limit);
     $scope.timenow = new Date();
     $scope.info = {pickeds:0};
-    $scope.types = {1: {'file text outline': true}, 3: {'file outline': true}, 5: {'file text': true}, 6: {'file outline': true}};
+    $scope.types = {1: 'file text outline', 3: 'file outline blue', 5: 'file text', 6: 'file outline blue', '': 'file outline'};
     
     $interval(function() {
         $scope.timenow = new Date();
@@ -154,10 +206,6 @@ angular.module('app')
             return Math.floor(timediff/1000)+'秒前';
         }
     };   
-    
-    $scope.getImage = function(type) {
-        return $scope.types[type];
-    };
     
     $scope.next = function() {
         if( $scope.page < $scope.pages )
@@ -181,6 +229,14 @@ angular.module('app')
         $scope.info.pickeds = files;
         angular.element('#shareFile').scope().hideShareFile = files.length <= 0;        
     });
+    
+    $scope.$watchCollection('searchText', function(query) {
+        $scope.max = $filter("filter")($scope.files, query).length;
+        $scope.rows_filted = $filter("filter")($scope.files, query);
+        $scope.pages = Math.ceil($scope.max/$scope.limit);
+        $scope.page = 1;
+        setCookie('file_filter', angular.toJson($scope.searchText));
+    });  
     
     $scope.deleteFile = function() {
         var files = $scope.info.pickeds.map(function(file){
@@ -211,9 +267,22 @@ angular.module('app')
         });
     };
     
+    $scope.openFileMenu = function(event) {
+//        $(event.target).popup({
+//            popup: $('<div class="ui popup"><div class="ui button" ng-click="prev()"><i class="icon angle left arrow"></i></div> </div>').appendTo(event.target),
+//            position: 'right center',
+//            on: 'click'
+//        }).popup('show');
+    };    
+    
     angular.element('#shareFile').scope().hideShareFile = false;
 });
 </script>
+
+<script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
+<script src="/js/angular-semantic-ui/dropdown.js"></script>
+<script src="/css/ui/Semantic-UI-1.11.1/components/popup.js"></script>
+
 <style>
 
 </style>

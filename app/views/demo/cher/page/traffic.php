@@ -23,7 +23,7 @@ $pstat_table = DB::table($doc->database.'.dbo.'.$doc->table.'_pstat AS p')
 	->select(DB::raw('page,count(*) as tStamp_count,CONVERT(char(10), updated_at, 120) as tStamp_new'))
 	->get();
 
-$page_max = max(array_fetch($pstat_table, 'page'));
+$page_max = DB::table('ques_page')->where('qid', $doc->qid)->max('page')+1;
 
 $table = '<table>';
 foreach($pstat_table as $pstat){

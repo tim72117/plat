@@ -24,7 +24,7 @@ class FileController extends BaseController {
             }
             
             $this->intent = Session::get('file')[$route->getParameter('intent_key')];
-            //DB::connection()->disableQueryLog();
+            DB::connection()->disableQueryLog();
 		});
 	}
 	
@@ -84,6 +84,12 @@ class FileController extends BaseController {
         $file = new $this->intent['fileClass']($this->intent['doc_id']);
         
         if( $method=='open' || $method=='import' ) {
+            $view = View::make('demo.use.main')->nest('context', $file->$method())->nest('share', 'demo.share');
+		
+            return $this->createView($view);
+        }
+        
+        if( in_array($method, $file->get_views()) ) {
             $view = View::make('demo.use.main')->nest('context', $file->$method())->nest('share', 'demo.share');
 		
             return $this->createView($view);
