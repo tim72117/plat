@@ -22,7 +22,8 @@ class QuesFile extends CommFile {
         'add_page',
         'save_data',
         'write',
-        'creatTable'
+        'creatTable',
+        'codebook'
 	);
 	
 	public static function get_intent() {
@@ -32,7 +33,11 @@ class QuesFile extends CommFile {
 	/**
 	 * @param string
 	 * @return
-	 */
+	 */       
+    public function get_views() {
+        return ['open', 'codebook', 'receives', 'spss', 'report'];
+    }
+    
 	public function read_info() {
 		parent::create();
 	}
@@ -672,6 +677,53 @@ class QuesFile extends CommFile {
 		
 		DB::table($tablename.'_pstat')->update(array('page'=>1, 'updated_at'=>NULL));
     }
-	
+    
+    public function codebook() {
+        $shareFile = ShareFile::find($this->doc_id);   
+        
+        $file = $shareFile->isFile;
+        
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $file->file)->select('dir', 'qid', 'host')->first();
+        
+        View::share('doc', $ques_doc);
+        
+        return 'demo.cher.page.codebook';
+    }
+    
+    public function receives() {
+        $shareFile = ShareFile::find($this->doc_id);   
+        
+        $file = $shareFile->isFile;
+        
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $file->file)->select('dir', 'qid', 'host', 'database', 'table', 'title')->first();
+        
+        View::share('doc', $ques_doc);
+        
+        return 'demo.cher.page.traffic';
+    }
+    
+    public function spss() {
+        $shareFile = ShareFile::find($this->doc_id);   
+        
+        $file = $shareFile->isFile;
+        
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $file->file)->select('dir', 'qid', 'host', 'database', 'table')->first();
+        
+        View::share('doc', $ques_doc);
+        
+        return 'demo.cher.page.spss';
+    }
+    
+    public function report() {
+        $shareFile = ShareFile::find($this->doc_id);   
+        
+        $file = $shareFile->isFile;
+        
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $file->file)->select('dir', 'qid', 'host', 'database', 'table')->first();
+        
+        View::share('doc', $ques_doc);
+        
+        return 'demo.cher.page.report';
+    }
 	
 }
