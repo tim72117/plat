@@ -61,7 +61,7 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
 })->toJson();
 
 ?>
-<div ng-controller="fileController" id="fileController" style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
+<div ng-cloak ng-controller="fileController" id="fileController" style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
     
     <div class="ui segment">
         <?=Form::open(array('url' => $fileProvider->upload(), 'files' => true, 'method' => 'post', 'style' => 'display:none'))?>
@@ -70,7 +70,7 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
         
         <div class="ui grid">
             <div class="left floated left aligned six wide column">
-                <div class="ui floating top left pointing labeled icon dropdown basic button" ng-dropdown-menu>
+                <div ng-dropdown-menu class="ui floating top left pointing labeled icon dropdown basic mini button">
                     <i class="file outline icon"></i>
                     <span class="text">新增</span>
                     <div class="menu"></div>
@@ -79,9 +79,9 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
                         <div class="item"><i class="file text outline icon"></i>問卷</div>
                     </div>
                 </div>
-                <label for="file_upload" class="ui basic button"><i class="icon upload"></i>上傳</label>
-                <div class="ui basic button" ng-if="info.pickeds.length>0" ng-click="deleteFile()"><i class="icon trash outline"></i>刪除</div>
-                <div class="ui basic button" ng-if="info.pickeds.length>0" ng-click="getSharedFile()"><i class="icon trash outline"></i>共用</div>
+                <label for="file_upload" class="ui basic mini button"><i class="icon upload"></i>上傳</label>
+                <div class="ui basic mini button" ng-if="info.pickeds.length>0" ng-click="deleteFile()"><i class="icon trash outline"></i>刪除</div>
+                <div class="ui basic mini button" ng-if="info.pickeds.length>0" ng-click="getSharedFile()"><i class="icon trash outline"></i>共用</div>
             </div>
             <div class="right floated right aligned six wide column">   
                 <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
@@ -136,7 +136,7 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
                     </td>
                     <td>
                         <i class="icon" ng-class="types[file.type]"></i>
-                        <a href="/{{ file.link.open }}" ng-mouseover="openFileMenu($event)">{{ file.title }}</a>
+                        <a href="/{{ file.link.open }}">{{ file.title }}</a>
                         <div class="ui inline dropdown small" ng-dropdown-menu ng-if="file.tools.length>0">
                             <i class="dropdown icon"></i>
                             <div class="menu transition" tabindex="-1">
@@ -177,11 +177,11 @@ app.filter('startFrom', function() {
         return input.slice(start);
     };
 })
-.controller('fileController', function($scope, $filter, $interval, $http) {
+.controller('fileController', function($scope, $filter, $interval, $http, $cookies) {
     $scope.files = angular.fromJson(<?=$files?>);
     $scope.predicate = 'created_at';    
-    $scope.searchText = angular.fromJson(getCookie('file_filter')) || {type: ''};
-    $scope.page = getCookie('file_page') || 1;
+    $scope.searchText = getCookie($cookies.file_filter) || {type: ''};
+    $scope.page = getCookie($cookies.file_page) || 1;
     $scope.limit = 10;
     $scope.max = $scope.files.length;
     $scope.pages = Math.ceil($scope.max/$scope.limit);
@@ -211,13 +211,11 @@ app.filter('startFrom', function() {
     $scope.next = function() {
         if( $scope.page < $scope.pages )
             $scope.page++;
-        setCookie('file_page', $scope.page);
     };
     
     $scope.prev = function() {
         if( $scope.page > 1 )
-            $scope.page--;
-        setCookie('file_page', $scope.page);
+            $scope.page--;        
     };
     
     $scope.all = function() {
@@ -230,12 +228,16 @@ app.filter('startFrom', function() {
         $scope.info.pickeds = files;    
     });
     
-    $scope.$watchCollection('searchText', function(query) {
+    $scope.$watch('page', function(){
+        $cookies.file_page = $scope.page;
+    });
+    
+    $scope.$watchCollection('searchText', function(query) {        
         $scope.max = $filter("filter")($scope.files, query).length;
         $scope.rows_filted = $filter("filter")($scope.files, query);
         $scope.pages = Math.ceil($scope.max/$scope.limit);
-        $scope.page = 1;
-        setCookie('file_filter', angular.toJson($scope.searchText));
+        $scope.page = $scope.page>$scope.pages ? 1 : $scope.page;
+        $cookies.file_filter = angular.toJson($scope.searchText);
     });  
     
     $scope.deleteFile = function() {
@@ -269,14 +271,6 @@ app.filter('startFrom', function() {
     
     $scope.getSharedFile = function() {
         angular.element('[ng-controller=shareController]').scope().getSharedFile();
-    };
-    
-    $scope.openFileMenu = function(event) {
-//        $(event.target).popup({
-//            popup: $('<div class="ui popup"><div class="ui button" ng-click="prev()"><i class="icon angle left arrow"></i></div> </div>').appendTo(event.target),
-//            position: 'right center',
-//            on: 'click'
-//        }).popup('show');
     };
     
 });

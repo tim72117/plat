@@ -12,6 +12,7 @@ $project = DB::table('projects')->where('code', $user->getProject())->first();
 <script src="/js/jquery-1.11.2.min.js"></script>
 <script src="/js/angular-1.3.14/angular.min.js"></script>
 <script src="/js/angular-1.3.14/angular-sanitize.min.js"></script>
+<script src="/js/angular-1.3.14/angular-cookies.min.js"></script>
 <script src="/css/ui/Semantic-UI-1.11.4/components/transition.min.js"></script>
 <script src="/css/ui/Semantic-UI-1.11.4/components/popup.js"></script>
 <script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
@@ -36,7 +37,7 @@ p, tr, td, ul, li {
 </style>
 
 <script type="text/javascript">
-var app = angular.module('app', ['ngSanitize'])
+var app = angular.module('app', ['ngSanitize', 'ngCookies'])
 .controller('topMenuController', function($scope, $filter, $http) {
     $scope.getGroupForApp = function() {
         angular.element('[ng-controller=shareController]').scope().getGroupForApp();
@@ -48,29 +49,20 @@ var app = angular.module('app', ['ngSanitize'])
         angular.element('.queryLog').css('height', '50%');
     };
 })
-.controller('mainController', function($scope, $filter, $http) {
-    $scope.menuMin = eval(getCookie('menuMin')) || false;
-    $scope.closeLeftMenu = function() {
+.controller('mainController', function($scope, $filter, $http, $cookies) {
+    $scope.menuMin = getCookie($cookies.menuMin) || false;
+    $scope.closeLeftMenu = function() {        
         $scope.menuMin = !$scope.menuMin;
-        setCookie('menuMin', $scope.menuMin);
+        $cookies.menuMin = $scope.menuMin;
     };
 });
-function setCookie(name, value) {
-    var Days = 30;
-    var exp  = new Date();
-    exp.setTime(exp.getTime() + Days*24*60*60*1000);
-    document.cookie = name + "="+ escape (value) + ";expires=" + exp.toGMTString();
-}
-function getCookie(name) {
-    var arr = document.cookie.match(new RegExp("(^| )"+name+"=([^;]*)(;|$)"));
-    if( arr !== null ) return unescape(arr[2]);
-    return null;
-}
-function delCookie(name) {
-    var exp = new Date();
-    exp.setTime(exp.getTime() - 1);
-    var cval=getCookie(name);
-    if( cval!==null ) document.cookie= name + "="+cval+";expires="+exp.toGMTString();
+function getCookie(value) {
+    try{
+        return angular.fromJson(value);
+    }catch(e){
+        console.log(e);
+        return null;
+    };
 }
 </script>
 @stop
@@ -78,9 +70,9 @@ function delCookie(name) {
 @section('body')
 <div style="width: 100%;height: 100%">
 
-	<div style="position: absolute;left: 0;right: 0;height: 35px;z-index: 130" ng-controller="topMenuController">
+	<div style="position: absolute;left: 0;right: 0;height: 30px;z-index: 130" ng-controller="topMenuController">
         
-        <div class="ui inverted menu use-green">
+        <div class="ui inverted secondary menu use-green">
             <div class=" item"> 
                 <div class="ui transparent inverted icon input">
                     <input type="text" placeholder="Search...">
@@ -96,11 +88,6 @@ if( Auth::user()->id==1 && Request::is('app/*') ) {
 ?>
             <a class="item use-green" ng-click="getGroupForApp()"><i class="share alternate icon"></i>分享</a>
 <? } ?>
-            <div class="fitted   item"> 
-            <div class="ui secondary fluid menu">
-                <a class="item use-green" ng-click="queryLog()">queryLog</a>
-            </div>
-                </div>
             <div class="right menu">
 <?
 if( Auth::user()->id==1 ) { 
@@ -118,7 +105,7 @@ if( Auth::user()->id==1 ) {
         </div>-->
 	</div>
 	
-    <div style="position: absolute;left: 0;right: 0;top: 35px;bottom: 0" ng-controller="mainController">
+    <div style="position: absolute;left: 0;right: 0;top: 30px;bottom: 0" ng-controller="mainController">
 		<div style="position: absolute;top:0;bottom:0;left:0;width:350px;overflow-y: hidden" ng-class="{'menu-min': menuMin}">
             <div style="position: absolute;left: 5px;right: 5px;top: 5px;bottom:45px;overflow-y: auto">
                 <div class="ui fluid vertical menu">
