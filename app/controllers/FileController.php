@@ -34,7 +34,7 @@ class FileController extends BaseController {
         
 		$view_name = $this->fileAcitver->accept($method);
         
-		$view = View::make('demo.use.main')->nest('context', $view_name)->nest('share', 'demo.share');
+		$view = View::make('demo.use.main')->nest('context', $view_name);
 		
         return $this->createView($view);
 	}
@@ -84,13 +84,13 @@ class FileController extends BaseController {
         $file = new $this->intent['fileClass']($this->intent['doc_id']);
         
         if( $method=='open' || $method=='import' ) {
-            $view = View::make('demo.use.main')->nest('context', $file->$method())->nest('share', 'demo.share');
+            $view = View::make('demo.use.main')->nest('context', $file->$method());
 		
             return $this->createView($view);
         }
         
         if( in_array($method, $file->get_views()) ) {
-            $view = View::make('demo.use.main')->nest('context', $file->$method())->nest('share', 'demo.share');
+            $view = View::make('demo.use.main')->nest('context', $file->$method());
 		
             return $this->createView($view);
         }

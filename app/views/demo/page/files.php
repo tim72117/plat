@@ -81,6 +81,7 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
                 </div>
                 <label for="file_upload" class="ui basic button"><i class="icon upload"></i>上傳</label>
                 <div class="ui basic button" ng-if="info.pickeds.length>0" ng-click="deleteFile()"><i class="icon trash outline"></i>刪除</div>
+                <div class="ui basic button" ng-if="info.pickeds.length>0" ng-click="getSharedFile()"><i class="icon trash outline"></i>共用</div>
             </div>
             <div class="right floated right aligned six wide column">   
                 <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
@@ -100,7 +101,7 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
                     <th></th>
                     <th>檔名</th>
                     <th>設定</th>                    
-                    <th>已分享</th>
+                    <th>已共用</th>
                     <th>更新時間</th>
                     <th>擁有人</th>
                 </tr>  
@@ -226,8 +227,7 @@ app.filter('startFrom', function() {
     };
 
     $scope.$watchCollection('files | filter:{selected:true}', function (files) {
-        $scope.info.pickeds = files;
-        angular.element('#shareFile').scope().hideShareFile = files.length <= 0;        
+        $scope.info.pickeds = files;    
     });
     
     $scope.$watchCollection('searchText', function(query) {
@@ -267,21 +267,20 @@ app.filter('startFrom', function() {
         });
     };
     
+    $scope.getSharedFile = function() {
+        angular.element('[ng-controller=shareController]').scope().getSharedFile();
+    };
+    
     $scope.openFileMenu = function(event) {
 //        $(event.target).popup({
 //            popup: $('<div class="ui popup"><div class="ui button" ng-click="prev()"><i class="icon angle left arrow"></i></div> </div>').appendTo(event.target),
 //            position: 'right center',
 //            on: 'click'
 //        }).popup('show');
-    };    
+    };
     
-    angular.element('#shareFile').scope().hideShareFile = false;
 });
 </script>
-
-<script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
-<script src="/js/angular-semantic-ui/dropdown.js"></script>
-<script src="/css/ui/Semantic-UI-1.11.1/components/popup.js"></script>
 
 <style>
 

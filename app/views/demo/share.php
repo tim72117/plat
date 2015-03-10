@@ -302,44 +302,10 @@ app.controller('shareController', function($scope, $filter, $http) {
     
 });
 </script>
+<script src="/css/ui/UI-Accordion-master/accordion.min.js"></script>
+
 <style>
 .authorize {
     box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
-
-.green {
-    background-color: rgba(69,170,0,0.5);    
-    color: #fff;
-}
-
-.green:hover {
-    background-color: rgba(69,170,0,0.6);    
-}
-
-.white {
-    background-color: #fff;
-    color: #000
-}
-
-.white:hover {
-    background-color: #eee;
-    color: #000
-}
-
-.green.wait {
-    background-color: rgba(69,170,0,0.3);    
-    background-image: url('/images/wait.gif');
-    background-size: 30px 30px;
-    background-position: left;
-    background-repeat: no-repeat;  
-    color: #459A00;
-}
 </style>
-
-<script src="/css/ui/UI-Checkbox-master/checkbox.min.js"></script>
-<script src="/css/ui/UI-Accordion-master/accordion.min.js"></script>
-
-
-
-<link rel="stylesheet" href="/css/ui/UI-Checkbox-master/checkbox.min.css" />
-<link rel="stylesheet" href="/css/ui/UI-Accordion-master/accordion.min.css" />
