@@ -46,6 +46,10 @@ class CommFile {
 	 * @param string
 	 * @return
 	 */
+    public function get_views() {
+        return [];
+    }
+    
 	public function createFile($original_path, $name, $title) {
         
 		$user_id = Auth::user()->id;	
