@@ -14,7 +14,7 @@ $project = DB::table('projects')->where('code', $user->getProject())->first();
 <script src="/js/angular-1.3.14/angular-sanitize.min.js"></script>
 <script src="/js/angular-1.3.14/angular-cookies.min.js"></script>
 <script src="/css/ui/Semantic-UI-1.11.4/components/transition.min.js"></script>
-<script src="/css/ui/Semantic-UI-1.11.4/components/popup.js"></script>
+<script src="/css/ui/Semantic-UI-1.11.4/components/popup.min.js"></script>
 <script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
 <script src="/js/angular-semantic-ui/dropdown.js"></script>
 
@@ -38,6 +38,11 @@ p, tr, td, ul, li {
 
 <script type="text/javascript">
 var app = angular.module('app', ['ngSanitize', 'ngCookies'])
+app.filter('startFrom', function() {
+    return function(input, start) {         
+        return input.slice(start);
+    };
+})
 .controller('topMenuController', function($scope, $filter, $http) {
     $scope.getGroupForApp = function() {
         angular.element('[ng-controller=shareController]').scope().getGroupForApp();
@@ -92,7 +97,7 @@ if( Auth::user()->id==1 && Request::is('app/*') ) {
 <?
 if( Auth::user()->id==1 ) { 
 ?>
-                <a class="item use-green" ng-click="queryLog()">queryLog</a>
+                <a class="item use-green" href="javascript:void(0)" ng-click="queryLog()">queryLog</a>
 <? } ?>
                 <a class="item use-green" href="/page/project"><i class="home icon"></i>首頁</a>
                 <a class="item use-green" href="/page/project/profile">個人資料</a>

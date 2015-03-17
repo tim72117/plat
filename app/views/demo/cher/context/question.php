@@ -1,27 +1,3 @@
-<?php
-
-$count_report = DB::table('report')->where('solve','False')->groupBy('root')->select(DB::raw('root,count(root) AS count'))->lists('count','root');
-		
-$docs = DB::table('ques_doc')->select('qid','title','year','dir','edit','ver')->orderBy('ver')->orderBy('qid')->orderBy('year', 'desc')->get();
-
-$docsTable = '';
-foreach($docs as $doc){
-
-	$reports_num = isset($count_report[$doc->dir]) ? $count_report[$doc->dir] : 0;
-	
-	$docsTable .= '<tr>';
-    $docsTable .= '<td>'.$doc->year.'</td>';
-	$docsTable .= '<td>'.$doc->title.'</td>';
-	$docsTable .= '<td><a href="platform/'.$doc->dir.'/demo">demo</a></td>';
-	$docsTable .= '<td><a href="'.asset('ques/project/codebook/'.$doc->dir).'">codebook</a></td>';  
-	$docsTable .= '<td><a href="'.asset('ques/project/spss/'.$doc->dir).'">spss</a></td>';  
-	$docsTable .= '<td><a href="'.asset('ques/project/traffic/'.$doc->dir).'">receives</a></td>';  
-	$docsTable .= '<td><a href="'.asset('ques/project/report/'.$doc->dir).'">report</a>( '.$reports_num.' )</td>';  
-	$docsTable .= '</tr>';
-}
-
-$ques_update_log = DB::table('ques_admin.dbo.ques_update_log')->whereRaw('DATEDIFF(SECOND, updated_at, { fn NOW() }) < 180')->groupBy('host')->select('host', DB::raw('count(*) AS count'))->get();
-?>
 <div ng-controller="QuesStatusController" ng-cloak style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
     <div class="ui segment">
         <div class="ui statistics">
@@ -32,21 +8,41 @@ $ques_update_log = DB::table('ques_admin.dbo.ques_update_log')->whereRaw('DATEDI
                 <div class="label">{{ server.host }}</div>
             </div> 
         </div>    
+        
+        <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
+        
+        <div class="ui basic mini buttons">
+            <div class="ui button" ng-click="prev()"><i class="icon angle left arrow"></i></div>                    
+            <div class="ui button" ng-click="next()"><i class="icon angle right arrow"></i></div>
+        </div>
+                
         <table class="ui compact table">	
             <thead>
                 <tr>
                     <th width="60">年度</th>
                     <th width="400">問卷名稱</th>
-                    <th width="90">預覽問卷</th>
                     <th width="100">codebook</th>
                     <th width="60">spss</th>
                     <th width="80">回收數</th>
                     <th width="100">問題回報</th>
-                    <th>文件檔最後更新</th>
-                    <th>資料庫最後更新</th>
+                    <th>開始時間</th>
+                    <th>結束時間</th>
+                    <th>關閉</th>
                 </tr>
             </thead>
-            <?=$docsTable?>
+            <tbody>
+                <tr ng-repeat="question in questions | startFrom:(page-1)*limit | limitTo:limit">
+                    <td>{{ question.year }}</td>
+                    <td>{{ question.title }}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>{{ question.start_at }}</td>
+                    <td>{{ question.close_at }}</td>
+                    <td>{{ question.closed }}</td>
+                </tr>
+            </tbody>
         </table>
     </div>
 </div>  
@@ -55,6 +51,27 @@ $ques_update_log = DB::table('ques_admin.dbo.ques_update_log')->whereRaw('DATEDI
 <script>
 app.controller('QuesStatusController', function($scope, $http, $interval) {
     $scope.servers = [];
+    $scope.questions = [];
+    $scope.page = 0;
+    $scope.limit = 20;
+    $scope.max = 0;
+    $scope.pages = 0;
+    
+    $scope.next = function() {
+        if( $scope.page < $scope.pages )
+            $scope.page++;
+    };
+    
+    $scope.prev = function() {
+        if( $scope.page > 1 )
+            $scope.page--;        
+    };
+    
+    $scope.all = function() {
+        $scope.page = 1;
+        $scope.limit = $scope.max;
+        $scope.pages = 1;
+    };
     
     $interval(function() {
         $scope.getServers();
@@ -69,6 +86,18 @@ app.controller('QuesStatusController', function($scope, $http, $interval) {
         });
     };
     
+    $scope.getQuestions = function() {
+        $http({method: 'POST', url: 'ajax/getQuestions', data:{} })
+        .success(function(data, status, headers, config) {
+            $scope.questions = data.questions;
+            $scope.max = $scope.questions.length;
+            $scope.pages = Math.ceil($scope.max/$scope.limit);
+            $scope.page = 1;
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+    
     $scope.clearServers = function() {
         $http({method: 'POST', url: 'ajax/clearServers', data:{} })
         .success(function(data, status, headers, config) {
@@ -78,7 +107,8 @@ app.controller('QuesStatusController', function($scope, $http, $interval) {
         });
     };
     
-    $scope.clearServers();
+    $scope.clearServers();    
     $scope.getServers();
+    $scope.getQuestions();
 });
 </script>

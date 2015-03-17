@@ -23,8 +23,7 @@ class FileController extends BaseController {
                 return $this->timeOut();
             }
             Event::fire('ques.open', array());
-            $this->intent = Session::get('file')[$route->getParameter('intent_key')];
-            DB::connection()->disableQueryLog();
+            $this->intent = Session::get('file')[$route->getParameter('intent_key')];            
 		});
 	}
 	

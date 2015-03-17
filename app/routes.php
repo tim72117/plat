@@ -34,14 +34,11 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::get('app/{intent_key}/my/group', 'ShareController@getSharedApp');
     Route::post('app/{intent_key}/share/group', 'ShareController@shareAppTo');
 
-    Route::post('file/new/create', 'DocController@create');
     Route::post('file/{intent_key}/upload', 'FileController@fileUpload');
     Route::any('file/{intent_key}/{method}', 'FileController@fileOpen');
 
     Route::get('page/project/{context?}', array('before' => '', 'as' => 'project', 'uses' => 'PageController@project'));
     Route::post('page/project/{context?}', array('before' => 'csrf', 'uses' => 'PageController@project'));
-
-    Route::get('ques/project/{context}/{root}', array('before' => '', 'uses' => 'ViewerController@project'));
 
     Route::get('page/{context}', 'PageController@page');
     Route::post('page/{context}', 'PageController@page');

@@ -32,6 +32,7 @@ class CommFile {
 		'share_to',				
 		'open',
 		'download',
+        'create'
 	);	
 	
 	public function __construct($doc_id = null){
@@ -225,7 +226,15 @@ class CommFile {
 	public function get_auth() {
 		return $this->auth;
 	}
-	
-	
+    
+    public function createNewFile($type, $title, $setting) {
+        $user_id = Auth::user()->id;
+        return Files::create(array_merge([                
+            'type'       =>   $type,
+            'title'      =>   $title,
+            'owner'      =>   0,
+            'created_by' =>   $user_id,
+        ], $setting));
+    }
 	
 }

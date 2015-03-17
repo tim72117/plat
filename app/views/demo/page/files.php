@@ -60,6 +60,8 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
     ];
 })->toJson();
 
+$newFiles = [1 => $fileProvider->doc_intent_key('open', '', 'app\\library\\files\\v0\\QuesFile')];
+
 ?>
 <div ng-cloak ng-controller="fileController" id="fileController" style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
     
@@ -73,10 +75,9 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
                 <div ng-dropdown-menu class="ui floating top left pointing labeled icon dropdown basic mini button">
                     <i class="file outline icon"></i>
                     <span class="text">新增</span>
-                    <div class="menu"></div>
                     <div class="menu transition" tabindex="-1">
-                        <a class="item" href="/page/table_editor"><i class="file text icon"></i>資料檔</a>
-                        <div class="item"><i class="file text outline icon"></i>問卷</div>
+                        <a class="item" href="javascript:void(0)" ng-click="createNewDataFile(5)"><i class="file text icon"></i>資料檔</a>
+                        <a class="item" href="javascript:void(0)" ng-click="createNewDataFile(1)"><i class="file text outline icon"></i>問卷</a>
                     </div>
                 </div>
                 <label for="file_upload" class="ui basic mini button"><i class="icon upload"></i>上傳</label>
@@ -108,7 +109,7 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
                 <tr>
                     <th></th>
                     <th>
-                        <div class="ui floating top left pointing labeled icon dropdown basic button" ng-dropdown-menu>
+                        <div ng-dropdown-menu class="ui floating top left pointing labeled icon dropdown basic button">
                             <i class="filter icon"></i>
                             <span class="text"><i class="icon" ng-class="types[searchText.type]"></i></span>
                             <div class="menu transition" tabindex="-1">
@@ -128,7 +129,17 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="file in files | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
+                <tr ng-if="newDataFile">
+                    <td></td>
+                    <td>
+                        <i class="icon" ng-class="types[newDataFile.type]"></i>
+                        <div class="ui mini input"><input type="text" ng-model="newDataFile.title" size="50" placeholder="檔案名稱"></div>
+                        <div class="ui basic mini button" ng-click="saveNewDataFile()"><i class="icon save"></i>確定</div>
+                    </td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr ng-repeat="file in files | orderBy:'created_at':true | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
                     <td width="50">
                         <div class="ui checkbox">
                             <input type="checkbox" id="file-{{ $index }}" ng-model="file.selected" ng-click="test()">
@@ -180,6 +191,7 @@ app.filter('startFrom', function() {
 })
 .controller('fileController', function($scope, $filter, $interval, $http, $cookies) {
     $scope.files = angular.fromJson(<?=$files?>);
+    $scope.newFiles = angular.fromJson(<?=json_encode($newFiles)?>); 
     $scope.predicate = 'created_at';    
     $scope.searchText = getCookie($cookies.file_filter) || {type: ''};
     $scope.page = getCookie($cookies.file_page) || 1;
@@ -274,6 +286,21 @@ app.filter('startFrom', function() {
     $scope.getSharedFile = function() {
         angular.element('[ng-controller=shareController]').scope().getSharedFile();
     };
+    
+    $scope.createNewDataFile = function(type) {
+        $scope.newDataFile = {type: type, title: ''};
+    }; 
+    
+    $scope.saveNewDataFile = function(type) {
+        $http({method: 'POST', url: '/file/'+$scope.newFiles[$scope.newDataFile.type]+'/create', data:{title: $scope.newDataFile.title} })
+        .success(function(data, status, headers, config) {
+            $scope.files.push(data.shareFile); 
+            $scope.timenow = new Date();
+            $scope.newDataFile = null;
+        }).error(function(e){
+            console.log(e);
+        });
+    }; 
     
 });
 </script>
