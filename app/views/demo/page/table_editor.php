@@ -109,7 +109,7 @@
             
             <div>
                 
-                <table class="ui table">
+                <table class="ui compact table">
                     <thead>
                         <tr ng-repeat="sheet in table.sheets" ng-if="sheet.selected">                            
                             <th colspan="7">                                
@@ -135,26 +135,26 @@
                     <tbody ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
                         <tr ng-repeat="colHeader in sheet.colHeaders">
                             <td><i class="columns  icon"></i>{{ $index+1 }}</td>
-                            <td><div class="ui input"><input type="text" placeholder="欄位名稱" class="" style="min-width:250px" ng-model="colHeader.data" /></div></td>
-                            <td><div class="ui input"><input type="text" placeholder="欄位描述" class="" style="min-width:250px" ng-model="colHeader.title" /></div></td>
+                            <td><div class="ui mini input"><input type="text" placeholder="欄位名稱" class="" style="min-width:250px" ng-model="colHeader.data" /></div></td>
+                            <td><div class="ui mini input"><input type="text" placeholder="欄位描述" class="" style="min-width:250px" ng-model="colHeader.title" /></div></td>
                             <td>
-                                <select class="input define" ng-model="colHeader.rules" ng-options="rule.name for rule in rules" ng-change="colHeader.types=colHeader.rules.types[0]">
+                                <select class="input" ng-model="colHeader.rules" ng-options="rule.name for rule in rules" ng-change="colHeader.types=colHeader.rules.types[0]">
                                     <option  value="">過濾規則</option>
                                 </select>
                             </td>
                             <td>
-                                <select class="input define" ng-model="colHeader.types" ng-options="type.name for type in colHeader.rules.types" ng-class="{empty:!colHeader.types}" >
+                                <select class="input" ng-model="colHeader.types" ng-options="type.name for type in colHeader.rules.types" ng-class="{empty:!colHeader.types}" >
                                     <option value="">欄位類型</option>
                                 </select>
                             </td>
                             <td><div class="ui checkbox"><input type="checkbox" id="unique-{{ $index }}" class="" style="" ng-model="colHeader.unique" /><label for="unique-{{ $index }}"></label></div></td>
                             <td>
-                                <select class="input define" ng-model="colHeader.link.table" ng-options="index as index for (index,sheet) in table.sheets" ng-change="setAutocomplete(colHeader)">
+                                <select class="input" ng-model="colHeader.link.table" ng-options="index as index for (index,sheet) in table.sheets" ng-change="setAutocomplete(colHeader)">
                                     <option value="">資料表</option>
                                 </select>
                             </td>
                             <td>
-                                <div class="ui basic button" ng-click="removeColumn($index, $tindex)">
+                                <div class="ui basic mini button" ng-click="removeColumn($index, $tindex)">
                                     <i class="remove icon"></i>刪除
                                 </div>
                             </td>
@@ -166,12 +166,12 @@
                             <td><div class="ui input"><input type="text" placeholder="欄位名稱" class="" style="min-width:250px" ng-model="newColumn.data" ng-init="newColumn.data=''" /></div></td>
                             <td><div class="ui input"><input type="text" placeholder="欄位描述" class="" style="min-width:250px" ng-model="newColumn.title" ng-init="newColumn.title=''" /></div></td>
                             <td>
-                                <select class="input define" ng-model="newColumn.rules" ng-options="rule.name for rule in rules" ng-change="newColumn.types=newColumn.rules.types[0]">
+                                <select class="input" ng-model="newColumn.rules" ng-options="rule.name for rule in rules" ng-change="newColumn.types=newColumn.rules.types[0]">
                                     <option  value="">過濾規則</option>
                                 </select>
                             </td>
                             <td>
-                                <select class="input define" ng-model="newColumn.types" ng-options="type.name for type in newColumn.rules.types" ng-class="{empty:!colHeader.types}" >
+                                <select class="input" ng-model="newColumn.types" ng-options="type.name for type in newColumn.rules.types" ng-class="{empty:!colHeader.types}" >
                                     <option value="">欄位類型</option>
                                 </select>
                             </td>
@@ -207,11 +207,6 @@
 
 </div>
 
-<script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
-<script src="/js/angular-semantic-ui/dropdown.js"></script>
-<script src="/css/ui/Semantic-UI-1.8.1/components/popup.js"></script>
-<script src="/css/ui/Semantic-UI-1.8.1/components/transition.min.js"></script>
-
 <!--<script src="/js/angular-file-upload.min.js"></script>-->
 
 <script src="/js/jquery.fileDownload.js"></script>
@@ -221,11 +216,10 @@
 <script src="/js/xlsx.js"></script>
 <script src="/js/lodash.min.js"></script>
 <script src="/js/xlsx-reader.js"></script>
-<script src="/js/angular-1.2.28/angular-animate.min.js"></script>
 <script>
 app.requires.push('ngHandsontable');
 app.requires.push('angularify.semantic.dropdown');
-app.requires.push('ngAnimate');
+//app.requires.push('ngAnimate');
 app.filter('startFrom', function() {
     return function(input, start) {         
         return input.slice(start);
@@ -602,54 +596,6 @@ String.prototype.Blength = function() {
 };
 </script>
 
-
-
-
-<link rel="stylesheet" media="screen" href="/js/handsontable.full.min.css">
-
 <style>  
-.page-tag {
-    position: relative;
-    float: left;
-    top: -1px;
-    padding: 0 10px 0 10px;
-    height: 25px;
-    border: 1px solid #999;
-    font-size: 13px;
-    line-height: 25px;
-    text-align: center;
-    cursor: default
-}
-.add-tag {
-    background-image: url('/images/doc-add-20.png');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 16px 16px;
-    width:30px
-}
-.page-tag.selected {
-    border-top-color: #fff
-}
-.page-tag:not(.selected):hover {
-    border-color: #555 #555 #555 #555;
-    cursor: pointer
-}
-.page-tag.top.selected {
-    border-top-color: #999;
-    border-bottom-color: #fff;
-}
-.lists:not(:last-child) td {
-    border-bottom: 1px solid #999;
-}    
-.sorter {
-    color: #00f;
-    cursor: pointer;
-}
-.sorter:hover {
-    color: #00f;
-    background-color: #fff;
-}
-.notSelected {
-    color: #888;
-}
+
 </style>

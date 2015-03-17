@@ -4,9 +4,9 @@ $fileProvider = app\library\files\v0\FileProvider::make();
 
 $inGroups = $user->inGroups->lists('id');
 
-$shareFiles = ShareFile::with('isFile')->where(function($query) use($user){
+$shareFiles = ShareFile::with('isFile')->where(function($query) use($user) {
     $query->where('target', 'user')->where('target_id', $user->id);//->where('created_by', '<>', $user->id);
-})->orWhere(function($query) use($user, $inGroups){
+})->orWhere(function($query) use($user, $inGroups) {
     count($inGroups)>0 && $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '<>', $user->id);
 })->orderBy('created_at', 'desc')->get();
 
@@ -46,9 +46,13 @@ foreach($shareFiles as $shareFile) {
     }
 }
 
-$shares = ShareApp::where(['target' => 'group', 'active' => true])->where(function($query) use($inGroups){
-    empty($inGroups) ? $query->whereNull('id') : $query->whereIn('target_id', $inGroups);
-})->get()->each(function($share) use($user){
+$shares = ShareApp::where(['active' => true])->where(function($query) use($user, $inGroups) {
+    $query->where('target', 'user')->where('target_id', $user->id);
+    !empty($inGroups) && 
+    $query->orWhere(function($query) use($inGroups) {
+        $query->where('target', 'group')->whereIn('target_id', $inGroups);
+    });
+})->get()->each(function($share) use($user) {
     Apps::firstOrCreate(['user_id' => $user->id, 'file_id' => $share->isApp->file_id]);
     echo '<div class="item"><i class="alarm icon"></i>';
     echo '<div class="content">教育評鑑與研究中心分享一個檔案給你：'.$share->isApp->isFile->title.'</div>';

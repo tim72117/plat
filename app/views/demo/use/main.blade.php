@@ -86,7 +86,7 @@ if( Auth::user()->id<20 ) {
 <? } 
 if( Auth::user()->id==1 && Request::is('app/*') ) { 
 ?>
-            <a class="item use-green" ng-click="getGroupForApp()"><i class="share alternate icon"></i>分享</a>
+            <a class="item use-green" href="javascript:void(0)" ng-click="getGroupForApp()"><i class="share alternate icon"></i>分享</a>
 <? } ?>
             <div class="right menu">
 <?
@@ -106,8 +106,8 @@ if( Auth::user()->id==1 ) {
 	</div>
 	
     <div style="position: absolute;left: 0;right: 0;top: 30px;bottom: 0" ng-controller="mainController">
-		<div style="position: absolute;top:0;bottom:0;left:0;width:350px;overflow-y: hidden" ng-class="{'menu-min': menuMin}">
-            <div style="position: absolute;left: 5px;right: 5px;top: 5px;bottom:45px;overflow-y: auto">
+		<div style="position: absolute;top:0;bottom:0;left:0;width:360px;overflow-y: hidden" ng-class="{'menu-min': menuMin}">
+            <div style="position: absolute;left: 5px;right: 5px;top: 5px;bottom:45px;padding:5px;overflow-y: auto">
                 <div class="ui fluid vertical menu">
                     <div class="header item">
                         <i class="laptop large icon"></i><span style="font-size:17px"><?=$project->name?></span>
@@ -135,12 +135,12 @@ if( Auth::user()->id==1 ) {
                     ?>
                 </div>
             </div>    
-            <div style="position: absolute;left: 0;right: 0;top: auto;bottom: 0;height: 30px;line-height: 30px;border-top: 1px solid #ddd;text-align: right;cursor: pointer" ng-click="closeLeftMenu()">
+            <div style="position: absolute;left: 0;right: 0;top: auto;bottom: 0;height: 30px;line-height: 30px;border-top: 0px solid #ddd;text-align: right;cursor: pointer" ng-click="closeLeftMenu()">
                 <i class="angle double icon" ng-class="{right:menuMin,left:!menuMin}"></i>
             </div>
 		</div>
 
-        <div style="position: absolute;top: 0;right: 0;bottom: 0;left: 350px" class="context" ng-class="{'menu-min': menuMin}">
+        <div style="position: absolute;top: 0;right: 0;bottom: 0;left: 360px" class="context" ng-class="{'menu-min': menuMin}">
             
             <div style="width:500px;position: absolute;top:-100%;background-color: #fff;left:-1px;height: 95%;border: 1px solid #aaa;font-size:16px;overflow: auto;z-index: 120" ng-controller="shareController" ng-style="{width:advanced_status.boxWidth}" class="authorize">
                 <div style="margin:20px;position: absolute;top:0;bottom: 0;left:0;right:0" ng-switch on="shareBox.type">
