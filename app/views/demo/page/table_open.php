@@ -162,20 +162,14 @@
         
     </div>
 
-</div>   
+</div>
 
+<script src="/js/jquery.fileDownload.js"></script>
 <script>
 app.requires.push('angularify.semantic.dropdown');
 app.filter('startFrom', function() {
     return function(input, start) {  
         return input.slice(start);
-    };
-});
-app.directive("scroll", function ($window) {
-    return function(scope, element, attrs) {
-        angular.element($window).bind("scroll", function() {
-            console.log(1);
-        });
     };
 })
 .controller('newTableController', function($scope, $http, $filter, $timeout) {
@@ -249,11 +243,6 @@ app.directive("scroll", function ($window) {
         });
         sheet.selected = true;
         $scope.loadPage(sheet.page);
-    };    
-    
-    $scope.getSheet = function() {
-        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
-        return sheet || [];
     };
     
     $scope.setColumns = function(sheet_new) {
@@ -279,20 +268,24 @@ app.directive("scroll", function ($window) {
         return sheet;
     };
     
-    $http({method: 'POST', url: 'get_columns', data:{} })
-    .success(function(data, status, headers, config) {
-        
-        $scope.table.sheets = [];
-        for( var sindex in data.sheets ) {
-            $scope.table.sheets.push($scope.setColumns(data.sheets[sindex]));
-        }        
-        
-        $scope.table.title = data.title;
-        $scope.action.toSelect($scope.table.sheets[0]);     
-        
-    }).error(function(e){
-        console.log(e);
-    });
+    $scope.get_columns = function() {
+        $http({method: 'POST', url: 'get_columns', data:{} })
+        .success(function(data, status, headers, config) {
+
+            $scope.table.sheets = [];
+            for( var sindex in data.sheets ) {
+                $scope.table.sheets.push($scope.setColumns(data.sheets[sindex]));
+            }        
+
+            $scope.table.title = data.title;
+            $scope.action.toSelect($scope.table.sheets[0]);     
+
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+    
+    $scope.get_columns();
     
     $scope.loadPage = function(page) {
         
@@ -500,9 +493,16 @@ app.directive("scroll", function ($window) {
         on: 'click'
     });//.popup('show');
     
+})
+.directive("scroll", function ($window) {
+    return function(scope, element, attrs) {
+        angular.element($window).bind("scroll", function() {
+            console.log(1);
+        });
+    };
 });
 </script>
-<script src="/js/jquery.fileDownload.js"></script>
 
-<style>  
+<style>
+    
 </style>
