@@ -1,66 +1,176 @@
-
-<!--<script src="../js/angular.min.js"></script>-->
-
-<div ng-app="app">
-
-    <div ng-controller="newTableController" style="border: 0px solid #999;position: absolute;top: 10px;bottom: 10px;left: 10px; right: 20px">   
-        
-<!--        <div style="">
-            <div style="border: 1px solid #999;width:80px;text-align: center">存檔</div>
-        </div>-->
-        
-        <div ng-if="tool===1">
-            <div style="height:40px;border-bottom: 0px solid #999;position: absolute;top: 0;z-index:2">
-    <!--            <div ng-click="addRows()" class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;">匯入</div>-->
-                <div ng-click="testClick()" class="page-tag top" style="margin:0;left:10px;width:60px;">測試</div>
-                <div ng-click="download()" class="page-tag top" style="margin:0;left:15px;width:60px;">下載</div>
-                <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:0;left:{{ ($tindex+1)*5+15 }}px;font-weight:900;font-size:14px">{{ sheet.sheetName }}</div>
-                <div ng-click="addTable()" class="page-tag top add-tag" ng-show="power.edit_column" style="margin:5px 0 0 5px;left:{{ (table.sheets.length)*85+150 }}px"></div>
-            </div>
-        </div>
-
-        <div ng-if="tool===1" style="border: 1px solid #999;position: absolute;top: 25px;bottom: 40px;left: 0; right:0; overflow: hidden">  
-<!--            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected">
-                <div class="column" style="width: 30px;left: 2px;top: 2px"></div>   
-                <div class="column" ng-repeat="column in sheet.colHeaders" style="width: 80px;left: {{ ($index+1)*79-48 }}px;top:2px;padding-left:2px">{{ column }}</div> 
-                <div ng-repeat="($rindex, row) in sheet.rows | startFrom:(page-1)*limit | limitTo:limit">
-                    <div class="column" style="width: 30px;left: 2px;top:{{ ($rindex+1)*29+2 }}px;text-align: center">{{ $rindex+1 }}</div>   
-                    <div class="column" ng-repeat="($cindex, column) in sheet.columns" ng-style="{width:80,left:($cindex+1)*79-48,top:($rindex+1)*29+2}" style="padding-left:2px" contenteditable="{{ power.edit_row }}">{{ row[column.name] }}</div>
-                </div>
-            </div>-->
-          
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 2px;right: 2px;top: 2px;bottom: 1px" id="sheet">          
-                <hot-table                   
-                    settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row'], afterInit: afterInit}"
-                    columns="sheet.colHeaders"
-                    datarows="getData(sheet)"
-                    dataSchema="{}" 
-                    colHeaders="true"
-                    rowHeaders="getRowsIndex"
-                    minSpareRows="1"         
-                    startCols="20"
-                    startRows="20"
-                    stretchH="all"                 
-                    height="setHeight()">
-                </hot-table>
-            </div>    
-        </div>
-        
-        <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
-            <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}"  style="margin:0 0 0 0;width:220px;left: 5px">
-                <div ng-repeat="sheet in table.sheets" ng-if="sheet.selected">
-                    資料 分頁<div style="display: inline-block;width:20px;padding:0" ng-repeat="pageN in sheet.page_link track by $index" ng-click="loadPage(pageN)" ng-class="{notSelected:sheet.page!==pageN}">{{ pageN }}</div>
-                </div>    
-            </div>
-        </div> 
-        
-    </div>    
+<div ng-controller="newTableController" style="position: absolute;top: 10px;bottom: 0;left: 10px; right: 10px">  
     
+    <div class="ui menu">    
+        
+        <div class="item">
+            <div ng-click="download()" class="ui basic button"><i class="icon download"></i>下載</div>
+        </div>
+        
+        <div class="item">
+            <div class="ui small steps">                
+                <div class="step" ng-class="{active: getStep()===0}">
+                    <i class="icon file"></i>
+                    <div class="content">
+                        <div class="description">串聯資料檔{{ myRowsFile.title }}</div>
+                        <div class="title">
+                            <div class="ui mini compact labeled icon basic button" ng-click="linkify()" id="linkifyBtn">
+                                <i class="icon setting"></i>
+                                選擇資料檔   
+                            </div>
+                        </div>
+                    </div>
+                </div>    
+                <div class="step" ng-if="getStep()>0" ng-class="{active: getStep()===1}">
+                    <i class="icon table"></i>
+                    <div class="content">
+                        <div class="description">{{ sheet_compact.sheetName }}</div>
+                        <div class="title">                               
+                            <div class="ui mini compact labeled icon basic button">
+                                <i class="icon setting"></i>選擇資料表 
+                            </div>
+                        </div>      
+                    </div>
+                </div>    
+                <div class="step" ng-if="getStep()>1" ng-class="{active: getStep()===2}">
+                    <i class="icon magnet"></i>
+                    <div class="content">
+                        <div class="description">選擇關聯索引鍵</div>                            
+                    </div>
+                </div>    
+                <div class="step active" ng-if="getStep()>2" ng-class="{active: getStep()===3}">
+                    <i class="icon columns"></i>
+                    <div class="content">
+                        <div class="description">選擇欄位</div>    
+                        <div class="title">
+                            <div class="ui mini compact labeled icon basic button" id="columnFilterBtn">
+                                <i class="icon setting"></i>
+                                選擇欄位   
+                            </div>
+                        </div>
+                    </div>
+                </div>   
+                <div class="step active" ng-if="getStep()>3" ng-class="{active: getStep()===4}">
+                    <i class="icon filter"></i>
+                    <div class="content">
+                        <div class="description">過濾資料</div>    
+                        <div class="title">
+                            <div class="ui mini compact labeled icon basic button" id="columnFilterBtn">
+                                <i class="icon setting"></i>
+                                過濾資料   
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </div>
+            
+            <div class="ui flowing popup" style="width:850px;height:650px" id="columnFilter">
+                <div class="ui segment" style="height:500px;overflow-y: scroll">
+                    <table class="ui small compact table">
+                        <thead>
+                            <tr>
+                                <th class="collapsing">欄位名稱</th>
+                                <th class="collapsing">欄位代碼</th>
+                                <th class="collapsing">選擇欄位</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="column in getFilted(table.sheets, {is_compacted_colums: true})[0].colHeaders">
+                                <td ng-class="{warning: column.compact}">{{ column.title }}</td>
+                                <td ng-class="{warning: column.compact}">{{ column.name }}</td>
+                                <td ng-class="{warning: column.compact}">
+                                    <div class="ui checkbox"><input type="checkbox" ng-model="column.selected" id="column-select-{{ $index }}"><label for="column-select-{{ $index }}"></label></div>
+                                </td>                            
+                            </tr>
+                        </tbody>
+                    </table>  
+                </div>
+                <div class="ui basic segment">
+                    <div class="ui positive button" ng-click="get_compacted_rows()" ng-class="{loading: compacting}">
+                        <i class="checkmark icon"></i>確定
+                    </div>
+                    <div class="ui basic button" ng-click="closePopup()">
+                        <i class="ban icon"></i>取消
+                    </div> 
+                </div>
+            </div>
 
-</div>
+            <div class="ui flowing popup" style="width:850px;height:650px" id="linkify">
+                
+                <div class="ui horizontal segment" style="height:500px;overflow-y: scroll">
+                    <select ng-model="myRowsFile" ng-change="get_compact_colums(myRowsFile);sheet_compact=NULL" ng-options="myRowsFile.title for myRowsFile in myRowsFiles"></select>
+                    <select ng-model="sheet_compact" ng-options="sheet.sheetName for sheet in myRowsFile.sheets"></select>
+                    <table class="ui small compact table">
+                        <thead>
+                            <tr>
+                                <th class="collapsing">欄位名稱</th>
+                                <th class="collapsing">欄位代碼</th>
+                                <th class="collapsing">關聯索引鍵</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="column in sheet_compact.tables[0].columns">
+                                <td>{{ column.title }}</td>
+                                <td>{{ column.name }}</td>
+                                <td><div class="ui checkbox"><input type="checkbox" ng-model="column.compact" id="column-{{ $index }}"><label for="column-{{ $index }}"></label></div></td>                            
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>                    
+
+                <div class="ui basic segment">
+                    <div class="ui positive button" ng-click="get_compacted_colums(myRowsFile, sheet_compact)" ng-class="{loading: compacting}">
+                        <i class="checkmark icon"></i>確定
+                    </div>
+                    <div class="ui basic button" ng-click="closePopup()">
+                        <i class="ban icon"></i>取消
+                    </div> 
+                </div>
+
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="ui item search selection dropdown" ng-dropdown items="table.sheets" ng-model="sheet" title="資料表" ng-change="action.toSelect(sheet)" style="z-index:104;width:250px">
+
+    </div>
+
+    <div class="ui pagination menu" ng-repeat="sheet in table.sheets" ng-if="sheet.selected">
+        <a class="icon item" ng-class="{disabled:sheet.page===1}"><i class="left arrow icon"></i></a>
+        <a class="item" ng-click="loadPage(1)" ng-class="{active:sheet.page===1}">1</a>
+        <a class="item disabled" ng-if="sheet.page_link[0]!==2 && sheet.pages.length>7">...</a>
+        <a class="item" ng-repeat="pageN in sheet.page_link" ng-class="{active:sheet.page===pageN}" ng-click="loadPage(pageN)">{{ pageN }}</a>
+        <a class="item disabled" ng-if="sheet.page_link[sheet.page_link.length-1]!==sheet.pages.length-1 && sheet.pages.length>7">...</a>
+        <a class="item" ng-click="loadPage(sheet.pages.length)" ng-class="{active:sheet.page===sheet.pages.length}" ng-if="sheet.pages.length>1">{{ sheet.pages.length }}</a>
+        <a class="icon item" ng-class="{disabled:sheet.page===sheet.pages.length}"><i class="right arrow icon"></i></a>
+    </div>
+    
+    <div ng-if="tool===1" class="ui segment" ng-class="{loading: loading}">  
+               
+        <table ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" class="ui small compact table" id="sheet">  
+            <thead>
+                <tr>
+                    <th class="collapsing" ng-repeat="column in sheet.colHeaders" ng-if="column.selected">{{ column.title }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="row in sheet.rows | startFrom:(sheet.page-1)*limit | limitTo:limit track by $index">
+                    <td ng-repeat="column in sheet.colHeaders" ng-if="column.selected" ng-class="{warning: vaildColumn(column), warning: column.compact}">{{ row[column.data] }}</td>
+                </tr>
+            </tbody>
+        </table>   
+        
+    </div>
+
+</div>   
 
 <script>
-app.requires.push('ngHandsontable');
+app.requires.push('angularify.semantic.dropdown');
+app.filter('startFrom', function() {
+    return function(input, start) {  
+        return input.slice(start);
+    };
+});
 app.directive("scroll", function ($window) {
     return function(scope, element, attrs) {
         angular.element($window).bind("scroll", function() {
@@ -68,32 +178,38 @@ app.directive("scroll", function ($window) {
         });
     };
 })
-.controller('newTableController', function($scope, $http, $filter) {
+.controller('newTableController', function($scope, $http, $filter, $timeout) {
     
-    $scope.table = {sheets:[], rows: []};
+    $scope.table = {sheets:[], compacted: false};
     
     $scope.tool = 1;
-    $scope.limit = 100;
+    $scope.limit = 50;
     $scope.newColumn = {};    
     $scope.action = {};
+    $scope.loading = false;
+    $scope.saving = false;
+    $scope.linkingData = false;
+    $scope.linkedData = false;
     
     var types = [
         {name: "整數", type: "int" ,validator: /^\d+$/}, {name: "小數", type: "float" ,validator: /^[0-9]+.[0-9]+$/}, {name: "中、英文(數字加符號)", type: "nvarchar"},
         {name: "英文(數字加符號)", type: "varchar"}, {name: "日期", type: "date"}, {name: "0或1", type: "bit"}, {name: "多文字(中英文、數字和符號)", type: "text"}];
 
     $scope.rules = [
-        {name: "地址", key: "address", types: [types[2]]}, {name: "手機", key: "phone", types: [types[3]] ,validator: /^\w+$/}, {name: "電話", key: "tel", types: [types[3]] ,validator: /^\w+$/}, 
+        {name: "地址", key: "address", types: [types[2]]},
+        {name: "手機", key: "phone", types: [types[3]] ,validator: /^\w+$/},
+        {name: "電話", key: "tel", types: [types[3]] ,validator: /^\w+$/}, 
         {name: "信箱", key: "email", types: [types[3]] ,validator: /^[a-zA-Z0-9_]+@[a-zA-Z0-9._]+$/},
-        {name: "身分證", key: "id", types: [types[3]] ,validator: /^\w+$/}, {name: "性別: 1.男 2.女", key: "gender", types: [types[3]] ,validator: /^\w+$/}, {name: "日期", key: "date", types: [types[4]] ,validator: /^[0-9]+-[0-9]+-[0-9]+$/}, 
+        {name: "身分證", key: "id", types: [types[3]] ,validator: /^\w+$/},
+        {name: "性別: 1.男 2.女", key: "gender", types: [types[3]] ,validator: /^\w+$/},
+        {name: "日期", key: "date", types: [types[4]] ,validator: /^[0-9]+-[0-9]+-[0-9]+$/}, 
         {name: "是與否", key: "bool", types: [types[5]],validator: /^[0-1]+$/},
-        {name: "整數", key: "int", types: [types[0]] ,validator: /^\d+$/}, {name: "小數", key: "float", types: [types[1]] ,validator: /^[0-9]+.[0-9]+$/}, {name: "多文字(50字以上)", key: "text", types: [types[6]]}, 
+        {name: "整數", key: "int", types: [types[0]] ,validator: /^\d+$/},
+        {name: "小數", key: "float", types: [types[1]] ,validator: /^[0-9]+.[0-9]+$/},
+        {name: "多文字(50字以上)", key: "text", types: [types[6]]}, 
         {name: "多文字(50字以內)", key: "nvarchar", types: [types[2]]},
-        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]]}]; 
-    
-    $scope.afterInit = function() {
-        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
-        sheet.hotInstance = this;       
-    }; 
+        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]]}
+    ];
     
     $scope.setHeight = function() {
         return angular.element('#sheet').height();
@@ -136,33 +252,40 @@ app.directive("scroll", function ($window) {
     };    
     
     $scope.getSheet = function() {
-        return $filter('filter')($scope.table.sheets, {selected: true});
+        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
+        return sheet || [];
+    };
+    
+    $scope.setColumns = function(sheet_new) {
+        var sheet = {colHeaders:[], rows:[], editable:sheet_new.editable, sheetName:sheet_new.sheetName, compact: sheet_new.compact, pages:[], page:1};
+        for( var tindex in sheet_new.tables ){
+            var table = sheet_new.tables[tindex];
+            sheet.tablename = table.name;
+            for( var cindex in table.columns ){                
+                var rule = $filter('filter')($scope.rules, {key: table.columns[cindex].rules})[0];
+                var type = $filter('filter')(rule.types, {type: table.columns[cindex].types})[0];
+                sheet.colHeaders.push({
+                    data: table.columns[cindex].name,
+                    title: table.columns[cindex].title,
+                    rules: rule,
+                    types: type,
+                    unique: table.columns[cindex].unique,
+                    readOnly: true,
+                    compact: table.columns[cindex].compact,
+                    selected: true
+                });
+            }
+        }
+        return sheet;
     };
     
     $http({method: 'POST', url: 'get_columns', data:{} })
     .success(function(data, status, headers, config) {
-        for( sindex in data.sheets ){
-            var sheet = {colHeaders:[], rows:[], editable:null, sheetName:null, pages:[], page:1};
-            sheet.sheetName = data.sheets[sindex].sheetName;
-            sheet.editable = data.sheets[sindex].editable;
-            for( tindex in data.sheets[sindex].tables ){
-                var table = data.sheets[sindex].tables[tindex];
-                sheet.tablename = table.name;
-                for( cindex in table.columns ){
-                    var rule = $filter('filter')($scope.rules, {key: table.columns[cindex].rules})[0];
-                    var type = $filter('filter')(rule.types, {type: table.columns[cindex].types})[0];
-                    sheet.colHeaders.push({
-                        data: table.columns[cindex].name,
-                        title: table.columns[cindex].title,
-                        rules: rule,
-                        types: type,
-                        unique: table.columns[cindex].unique,
-                        readOnly: true,
-                    });
-                }
-            }
-            $scope.table.sheets.push(sheet);            
-        }
+        
+        $scope.table.sheets = [];
+        for( var sindex in data.sheets ) {
+            $scope.table.sheets.push($scope.setColumns(data.sheets[sindex]));
+        }        
         
         $scope.table.title = data.title;
         $scope.action.toSelect($scope.table.sheets[0]);     
@@ -171,36 +294,21 @@ app.directive("scroll", function ($window) {
         console.log(e);
     });
     
-    var part = [];
-    $scope.getData = function(sheet) {        
-        
-        part.length = 0;
-        
-        angular.extend(part, sheet.rows.slice((sheet.page-1)*$scope.limit, (sheet.page-1)*$scope.limit+$scope.limit));
-        
-        return part;        
-    };    
-    
     $scope.loadPage = function(page) {
+        
+        if( !angular.isNumber(page) )
+            return false;
         
         var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
         
         var update = function() {
-            //console.log(); 
-            if( sheet.rows.length===0 )
-                sheet.rows.push({});
-            $scope.getData(sheet);
-            $scope.getPageList(sheet);sheet.hotInstance.render();return 1;
-            
-            sheet.hotInstance.validateCells(function(){
-                sheet.hotInstance.render();
-            });
-            //angular.isObject($scope.hotInstance) && $scope.hotInstance.loadData($scope.getData(sheet));            
+            $scope.getPageList(sheet);   
+            sheet.loaded = true;
         };
         
         sheet.page = page;
 
-        if( sheet.pages[page-1] ) {
+        if( $scope.isImprot ) {
             update();
         }else{            
             $scope.loadData(sheet, update);            
@@ -209,9 +317,13 @@ app.directive("scroll", function ($window) {
     };  
     
     $scope.loadData = function(sheet, update) {
+  
+        $scope.loading = true;
         
-        $http({method: 'POST', url: 'get_rows?page='+(sheet.page), data:{index: $scope.table.sheets.indexOf(sheet), limit: $scope.limit} })
-        .success(function(data, status, headers, config) {            
+        var url = sheet.compact ? 'get_compact_rows' : 'get_import_rows';
+        
+        $http({method: 'POST', url: url+'?page='+(sheet.page), data:{index: $scope.table.sheets.indexOf(sheet), limit: $scope.limit, sheet_info: sheet.info} })
+        .success(function(data, status, headers, config) {  
             
             if( sheet.page!==data.current_page ) 
                 return false;
@@ -219,11 +331,11 @@ app.directive("scroll", function ($window) {
             if( sheet.rows.length!==data.total ){
                 sheet.pages.length = data.last_page;
                 sheet.rows.length = data.total;
-            }            
+            }    
+
+            sheet.rows.splice.apply(sheet.rows, [data.from-1, data.per_page].concat(data.data));
             
-            angular.forEach(data.data, function(row, index){
-                sheet.rows[data.from-1+index] = row;
-            });
+            //console.log(angular.equals(data.data, sheet.rows));            
             
             sheet.pages[sheet.page-1] = true;
             
@@ -242,6 +354,8 @@ app.directive("scroll", function ($window) {
                     console.log(data);
                 }, true);
             });
+            
+            $scope.loading = false;
 
         }).error(function(e){
             console.log(e);
@@ -255,21 +369,21 @@ app.directive("scroll", function ($window) {
         var pages = sheet.pages.length;
 
         if( pages <= 7 ){
-            var page_link = [];
-            for(var i=1; i <= pages; i++) {
-                page_link.push(i);
+            sheet.page_link = [];
+            for(var i=2; i <= pages-1; i++) {
+                sheet.page_link.push(i);
             }
         }else{            
             if( sheet.page < 5 ) {
-                var page_link = [1, 2, 3, 4, 5,'...', pages];
+                sheet.page_link = [2, 3, 4, 5];
             }else
             if( pages-sheet.page < 4 ){
-                var page_link = [1, '...', pages-4, pages-3, pages-2, pages-1, pages];
+                sheet.page_link = [pages-4, pages-3, pages-2, pages-1];
             }else{
-                var page_link = [1, '...', sheet.page-1, sheet.page, sheet.page+1, '...', pages];
+                sheet.page_link = [sheet.page-1, sheet.page, sheet.page+1];
             }            
         }
-        sheet.page_link = page_link;
+
     };
 
     $scope.download = function(){
@@ -294,88 +408,101 @@ app.directive("scroll", function ($window) {
         console.log(e);
     });
     
-    $scope.testClick = function(){        
+    $scope.getFilted = function(array, expression) {  
+        return $filter('filter')(array, expression);
+    };
+    
+    $scope.isPrepared = function() {  
+        return $scope.getFilted($scope.table.sheets, {prepare: true}).length===0;
+    };
+    
+    $scope.getStep = function() {
+        var step = 0;
+        $scope.myRowsFile && step++;
+        $scope.sheet_compact && step++;
+        var sheet_compacted = $scope.getFilted($scope.table.sheets, {is_compacted_colums: true});
+        sheet_compacted.length>0 && step++;   
+        sheet_compacted.length>0 && sheet_compacted[0].loaded && step++;    
+        return step;
+    };
+    
+    $scope.testClick = function() {        
         $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders.length = 0;
         angular.extend($filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders, [{data:'cid'}]);        
-        console.log(1);
     };
+    
+    $scope.linkify = function() {
+        $scope.myRowsFile = null;
+        $scope.sheet_compact = null;
+        $scope.linkingData = true;
+        $http({method: 'POST', url: 'get_compact_files', data:{} })
+        .success(function(data, status, headers, config) {
+            $scope.myRowsFiles = data;
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+    
+    $scope.get_compact_colums = function(myRowsFile) {
+        $http({method: 'POST', url: '/file/'+myRowsFile.intent_key+'/get_columns', data:{} })
+        .success(function(data, status, headers, config) {
+            myRowsFile.sheets = data.sheets;
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+    
+    $scope.get_compacted_colums = function(myRowsFile, sheet_compact) {
+        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
+        $scope.compacting = true;
+        $http({method: 'POST', url: 'get_compact_sheet',
+            data:{
+                index: $scope.table.sheets.indexOf(sheet),
+                intent_key_compact: myRowsFile.intent_key,
+                sheet_index_compact: myRowsFile.sheets.indexOf(sheet_compact)
+            }
+        })
+        .success(function(data, status, headers, config) {
+            var sheet_new = $scope.setColumns(data.sheet_compact);
+            sheet_new.info = {
+                source_index: $scope.table.sheets.indexOf(sheet),
+                compact_intent_key: myRowsFile.intent_key,
+                compact_sheet_index: myRowsFile.sheets.indexOf(sheet_compact)
+            };
+            sheet_new.is_compacted_colums = true;
+            $scope.table.sheets.push(sheet_new);
+            $scope.linkedData = true;
+            $scope.compacting = false;
+            $('#linkifyBtn').popup('hide');
+            $timeout(function() {
+                $(angular.element('#columnFilterBtn')).popup({
+                    popup: $('#columnFilter'),
+                    position: 'bottom right',
+                    on: 'click'
+                }).popup('show');
+            });            
+        });
+    };
+    
+    $scope.get_compacted_rows = function() {
+        var sheet = $filter('filter')($scope.table.sheets, {is_compacted_colums: true})[0];
+        $scope.action.toSelect(sheet);
+        $('#columnFilterBtn').popup('hide');
+    };
+    
+    $scope.closePopup = function() {
+        $('.popup').popup('hide');
+    };
+    
+    $('#linkifyBtn').popup({
+        popup: $('#linkify'),
+        position: 'bottom left',
+        on: 'click'
+    });//.popup('show');
     
 });
 </script>
 <script src="/js/jquery.fileDownload.js"></script>
-<script src="/js/ngHandsontable.min.js"></script>
-<script src="/js/handsontable.full.min.js"></script>
-<link rel="stylesheet" media="screen" href="/js/handsontable.full.min.css">
 
-<style>
-.column {
-    box-sizing: border-box;
-    position: absolute;
-    border: 1px solid #999;
-    font-size: 13px;
-    line-height: 30px;
-    height: 30px;
-    overflow: hidden;
-}    
-.page-tag {
-    position: relative;
-    float: left;
-    top: -1px;
-    padding: 0 10px 0 10px;
-    height: 25px;
-    border: 1px solid #999;
-    font-size: 13px;
-    line-height: 25px;
-    text-align: center;
-    cursor: default
-}
-.add-tag {
-    background-image: url('/images/doc-add-20.png');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 16px 16px;
-    width:30px
-}
-.page-tag.selected {
-    border-top-color: #fff
-}
-.page-tag:not(.selected):hover {
-    border-color: #555 #555 #555 #555;
-    cursor: pointer
-}
-.page-tag.top.selected {
-    border-top-color: #999;
-    border-bottom-color: #fff;
-}
-.lists:not(:last-child) td {
-    border-bottom: 1px solid #999;
-}    
-.sorter {
-    color: #00f;
-    cursor: pointer;
-}
-.sorter:hover {
-    color: #00f;
-    background-color: #fff;
-}
-.input {
-    box-sizing: border-box;
-    padding: 5px;    
-    margin: 0;
-}
-.define {
-    font-size: 13px;
-    font-family: 微軟正黑體
-}
-.input-status {
-    display: inline-block;
-    border: 1px solid #fff;
-}
-.input-status.empty {  
-    background: red;
-    border-color: red;
-}
-.notSelected {
-    color: #888;
-}
+<style>  
 </style>

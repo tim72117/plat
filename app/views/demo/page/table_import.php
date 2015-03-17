@@ -1,65 +1,75 @@
-<div ng-controller="newTableController" style="position: absolute;top: 0;bottom: 0;left: 0; right: 0">   
+<div ng-controller="newTableController" style="position: absolute;top: 10px;bottom: 0;left: 10px; right: 10px">   
+    
+    <div class="ui menu">
+            
+        <div class="item">
+            <input type="file" id="upload-file" accept=".xlsx" style="display:none" onChange="angular.element(this).scope().fileChanged(this)" />
+            <label class="ui basic button" for="upload-file" id="import"><i class="save icon"></i>匯入</label>
+            <div class="ui popup" style="width:300px">
+                <div class="ui form">
 
-    <div class="ui form">
-        
-        <div class="field">
-            <div ng-repeat="sheet in imports.sheets">
-                <input type="radio" id="sheet_{{ $index+1 }}" name="import_sheet" ng-value="1" ng-model="sheet.selected" />
-                <label for="sheet_{{ $index+1 }}">{{ sheet.name }}</label>                    
-            </div>         
+                    <div class="field" ng-repeat="sheet in imports.sheets">
+                        <div class="ui radio checkbox">
+                            <input type="radio" id="sheet_{{ $index+1 }}" name="import_sheet" ng-value="1" ng-model="sheet.selected" />
+                            <label for="sheet_{{ $index+1 }}">{{ sheet.name }}</label>
+                        </div>
+                    </div>
+  
+                    <div class="ui positive button" ng-click="importSheetData()" ng-class="{loading: saving}">
+                        <i class="save icon"></i>確定
+                    </div>
+                    <div class="ui basic button" ng-click="closePopup($event)">
+                        <i class="ban icon"></i>取消
+                    </div>
+
+                </div>
+            </div> 
+
+            <div class="ui basic button" ng-click="saveRows()"><i class="save icon"></i>儲存</div>
         </div>
         
-        <div class="ui positive button" ng-click="importSheetData()" ng-class="{loading: saving}">
-            <i class="save icon"></i>
-            確定
-        </div>
-        <div class="ui basic button" ng-click="closePopup($event)">
-            <i class="ban icon"></i>取消
-        </div>
-        
+    </div>  
+    
+    <div class="ui item search selection dropdown" ng-dropdown items="table.sheets" ng-model="sheet" title="資料表" ng-change="action.toSelect(sheet)" style="z-index:104;width:250px">
+
+    </div>
+    
+    <div class="ui pagination menu" ng-repeat="sheet in table.sheets" ng-if="sheet.selected">
+        <a class="icon item" ng-class="{disabled:sheet.page===1}"><i class="left arrow icon"></i></a>
+        <a class="item" ng-click="loadPage(1)" ng-class="{active:sheet.page===1}">1</a>
+        <a class="item disabled" ng-if="sheet.page_link[0]!==2 && sheet.pages.length>7">...</a>
+        <a class="item" ng-repeat="pageN in sheet.page_link" ng-class="{active:sheet.page===pageN}" ng-click="loadPage(pageN)">{{ pageN }}</a>
+        <a class="item disabled" ng-if="sheet.page_link[sheet.page_link.length-1]!==sheet.pages.length-1 && sheet.pages.length>7">...</a>
+        <a class="item" ng-click="loadPage(sheet.pages.length)" ng-class="{active:sheet.page===sheet.pages.length}" ng-if="sheet.pages.length>1">{{ sheet.pages.length }}</a>
+        <a class="icon item" ng-class="{disabled:sheet.page===sheet.pages.length}"><i class="right arrow icon"></i></a>
     </div>
 
-    <div style="height:40px;border-bottom: 1px solid #999;position: absolute;top: 0;z-index:2">            
-        <input type="file" id="upload-file" accept=".xlsx" style="display:none" onChange="angular.element(this).scope().fileChanged(this)" />
-        <label for="upload-file">
-            <div class="page-tag top" style="margin:5px 0 0 5px;left:5px;width:60px;">匯入</div>                    
-        </label>    
-        <div class="page-tag top" style="margin:5px 0 0 5px;left:70px;width:60px;" ng-click="saveRows()">儲存</div>
-        <div ng-repeat="($tindex, sheet) in table.sheets" class="page-tag top" ng-click="action.toSelect(sheet)" ng-class="{selected:sheet.selected}" style="margin:5px 0 0 5px;left:{{ $tindex*85+150 }}px;font-weight:900;font-size:14px">{{ sheet.sheetName }}</div>
-    </div>       
-
-    <div ng-if="tool===1" style="border: 1px solid #999;position: absolute;top: 30px;bottom: 40px;left: 0; right:0; overflow: hidden">  
-
-        <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" style="position: absolute;left: 2px;right: 2px;top: 2px;bottom: 1px" id="sheet">          
-            <hot-table                   
-                settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row'], afterInit: afterInit, afterValidate: afterValidate, beforeValidate : beforeValidate}"
-                columns="sheet.colHeaders"
-                datarows="getData(sheet)"
-                dataSchema="{}" 
-                colHeaders="true"
-                rowHeaders="getRowsIndex"
-                minSpareRows="1"         
-                startCols="20"
-                startRows="20"
-                stretchH="all"
-                height="setHeight()">
-            </hot-table>
-        </div>    
+    <div ng-if="tool===1" class="ui segment" ng-class="{loading: loading}">  
+               
+        <table ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" class="ui small compact table" id="sheet">  
+            <thead>
+                <tr>
+                    <th class="collapsing" ng-repeat="column in sheet.colHeaders">{{ column.title }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="row in sheet.rows | startFrom:(sheet.page-1)*limit | limitTo:limit track by $index">
+                    <td ng-repeat="column in sheet.colHeaders" ng-class="{warning: vaildColumn(column)}">{{ row[column.data] }}</td>
+                </tr>
+            </tbody>
+        </table>   
+        
     </div>
-
-    <div style="height:40px;border-top: 1px solid #999;position: absolute;bottom: 0">
-        <div class="page-tag" ng-click="tool=1" ng-class="{selected:tool===1}"  style="margin:0 0 0 0;width:220px;left: 5px">
-            <div ng-repeat="sheet in table.sheets" ng-if="sheet.selected">
-                資料 分頁<div style="display: inline-block;width:20px;padding:0" ng-repeat="pageN in sheet.page_link track by $index" ng-click="loadPage(pageN)" ng-class="{notSelected:sheet.page!==pageN}">{{ pageN }}</div>
-            </div>    
-        </div>
-    </div> 
 
 </div>   
 
-
 <script>
-app.requires.push('ngHandsontable');
+app.requires.push('angularify.semantic.dropdown');
+app.filter('startFrom', function() {
+    return function(input, start) {  
+        return input.slice(start);
+    };
+});
 app.factory("XLSXReaderService", ['$q', '$rootScope',
     function($q, $rootScope) {
         var service = function(data) {
@@ -84,35 +94,49 @@ app.factory("XLSXReaderService", ['$q', '$rootScope',
 ])
 .controller('newTableController', function($scope, $http, $filter, XLSXReaderService) {
     
-    $scope.table = {sheets:[], rows: []};
+    $scope.table = {sheets:[]};
     
     $scope.tool = 1;
-    $scope.limit = 100;
+    $scope.limit = 50;
     $scope.newColumn = {};    
-    $scope.action = {};
-    $scope.imports = {};
+    $scope.action = {};       
+    $scope.loading = false;
+    $scope.saving = false;
+    $scope.imports = {}; 
     $scope.imports.sheets = [];
+    $scope.isImprot = false;
     
     var types = [
         {name: "整數", type: "int" ,validator: /^\d+$/}, {name: "小數", type: "float" ,validator: /^[0-9]+.[0-9]+$/}, {name: "中、英文(數字加符號)", type: "nvarchar"},
         {name: "英文(數字加符號)", type: "varchar"}, {name: "日期", type: "date"}, {name: "0或1", type: "bit"}, {name: "多文字(中英文、數字和符號)", type: "text"}];
 
     $scope.rules = [
-        {name: "地址", key: "address", types: [types[2]]}, {name: "手機", key: "phone", types: [types[3]] ,validator: /^\w+$/}, {name: "電話", key: "tel", types: [types[3]] ,validator: /^\w+$/}, 
+        {name: "地址", key: "address", types: [types[2]]},
+        {name: "手機", key: "phone", types: [types[3]] ,validator: /^\w+$/},
+        {name: "電話", key: "tel", types: [types[3]] ,validator: /^\w+$/}, 
         {name: "信箱", key: "email", types: [types[3]] ,validator: /^[a-zA-Z0-9_]+@[a-zA-Z0-9._]+$/},
-        {name: "身分證", key: "id", types: [types[3]] ,validator: /^\w+$/}, {name: "性別: 1.男 2.女", key: "gender", types: [types[3]] ,validator: /^\w+$/}, {name: "日期", key: "date", types: [types[4]] ,validator: /^[0-9]+-[0-9]+-[0-9]+$/}, 
+        {name: "身分證", key: "id", types: [types[3]] ,validator: /^\w+$/},
+        {name: "性別: 1.男 2.女", key: "gender", types: [types[3]] ,validator: /^\w+$/},
+        {name: "日期", key: "date", types: [types[4]] ,validator: /^[0-9]+-[0-9]+-[0-9]+$/}, 
         {name: "是與否", key: "bool", types: [types[5]],validator: /^[0-1]+$/},
-        {name: "整數", key: "int", types: [types[0]] ,validator: /^\d+$/}, {name: "小數", key: "float", types: [types[1]] ,validator: /^[0-9]+.[0-9]+$/}, {name: "多文字(50字以上)", key: "text", types: [types[6]]}, 
+        {name: "整數", key: "int", types: [types[0]] ,validator: /^\d+$/},
+        {name: "小數", key: "float", types: [types[1]] ,validator: /^[0-9]+.[0-9]+$/},
+        {name: "多文字(50字以上)", key: "text", types: [types[6]]}, 
         {name: "多文字(50字以內)", key: "nvarchar", types: [types[2]]},
-        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]]}];
-    
-    $scope.afterInit = function() {
-        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
-        sheet.hotInstance = this;       
-    };
+        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]]}
+    ];
     
     $scope.setHeight = function() {
         return angular.element('#sheet').height();
+    };
+    
+    $scope.vaildColumn = function(column) {
+        //console.log(column);
+        var rule = $filter('filter')($scope.rules, {key: column.rules})[0];
+        //var type = $filter('filter')(rule.types, {type: column.types})[0];
+
+        
+        return true;
     };
     
     $scope.getRowsIndex = function(index) {
@@ -185,18 +209,10 @@ app.factory("XLSXReaderService", ['$q', '$rootScope',
         
         save(sheets);
 
-        
-//        sheetQueue = $scope.table.sheets.length;
-//        angular.forEach($scope.table.sheets, function(sheet){
-//            sheet.hotInstance && sheet.hotInstance.validateCells(function(){
-//                sheet.hotInstance.render();
-//            });            
-//        });
-
     };
 	
     $http({method: 'POST', url: 'get_columns', data:{} })
-    .success(function(data, status, headers, config) {
+    .success(function(data, status, headers, config) {        
         for( sindex in data.sheets ){
             var sheet = {colHeaders:[], rows:[], editable:null, sheetName:null, pages:[], page:1};
             sheet.sheetName = data.sheets[sindex].sheetName;
@@ -204,34 +220,23 @@ app.factory("XLSXReaderService", ['$q', '$rootScope',
             for( tindex in data.sheets[sindex].tables ){
                 var table = data.sheets[sindex].tables[tindex];
                 sheet.tablename = table.name;
-                for( cindex in table.columns ){       
+                for( cindex in table.columns ){  
                     var rule = $filter('filter')($scope.rules, {key: table.columns[cindex].rules})[0];
                     var type = $filter('filter')(rule.types, {type: table.columns[cindex].types})[0];
-                    if(rule.key == 'else') {
-                        sheet.colHeaders.push({
-                            data: table.columns[cindex].name,
-                            title: table.columns[cindex].title,
-                            rules: rule,
-                            types: type,
-                            unique: table.columns[cindex].unique,
-                            readOnly: sheet.editable,
-                            renderer: function(instance, td, row, col, prop, value, cellProperties){ Handsontable.renderers.TextRenderer.apply(this, arguments);},
-                            validator: type.validator
-                        });
+                    sheet.colHeaders.push({
+                        data: table.columns[cindex].name,
+                        title: table.columns[cindex].title,
+                        rules: rule,
+                        types: type,
+                        unique: table.columns[cindex].unique,
+                        readOnly: sheet.editable
+                    });
+                    if( rule.key === 'else' ) {
+                        sheet.colHeaders[sheet.colHeaders.length-1].validator = type.validator;
+                    }else{
+                        sheet.colHeaders[sheet.colHeaders.length-1].validator = rule.validator;
                     }
-                    else{
-                        sheet.colHeaders.push({
-                            data: table.columns[cindex].name,
-                            title: table.columns[cindex].title,
-                            rules: rule,
-                            types: type,
-                            unique: table.columns[cindex].unique,
-                            readOnly: sheet.editable,
-                            renderer: function(instance, td, row, col, prop, value, cellProperties){ Handsontable.renderers.TextRenderer.apply(this, arguments);},
-                            validator: rule.validator
-                        });
-                    }
-                    
+                    console.log(rule);
                 }
             }
             $scope.table.sheets.push(sheet);            
@@ -239,41 +244,26 @@ app.factory("XLSXReaderService", ['$q', '$rootScope',
         
         $scope.table.title = data.title;
         $scope.action.toSelect($scope.table.sheets[0]); 
+        console.log($scope.table);
         
     }).error(function(e){
         console.log(e);
-    });
-    
-    var part = [];
-    $scope.getData = function(sheet) {        
-        
-        part.length = 0;
-        
-        angular.extend(part, sheet.rows.slice((sheet.page-1)*$scope.limit, (sheet.page-1)*$scope.limit+$scope.limit));
-        
-        return part;        
-    };    
+    });  
     
     $scope.loadPage = function(page) {
+        
+        if( !angular.isNumber(page) )
+            return false;
         
         var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
         
         var update = function() {
-            //console.log(); 
-            if( sheet.rows.length===0 )
-                sheet.rows.push({});
-            $scope.getData(sheet);
-            $scope.getPageList(sheet);
-            
-            sheet.hotInstance.validateCells(function(){
-                sheet.hotInstance.render();
-            });
-            //angular.isObject($scope.hotInstance) && $scope.hotInstance.loadData($scope.getData(sheet));            
+            $scope.getPageList(sheet);          
         };
         
         sheet.page = page;
 
-        if( sheet.pages[page-1] ) {
+        if( $scope.isImprot ) {
             update();
         }else{            
             $scope.loadData(sheet, update);            
@@ -282,6 +272,8 @@ app.factory("XLSXReaderService", ['$q', '$rootScope',
     };  
     
     $scope.loadData = function(sheet, update) {
+  
+        $scope.loading = true;
         
         $http({method: 'POST', url: 'get_import_rows?page='+(sheet.page), data:{index: $scope.table.sheets.indexOf(sheet), limit: $scope.limit} })
         .success(function(data, status, headers, config) {            
@@ -292,11 +284,11 @@ app.factory("XLSXReaderService", ['$q', '$rootScope',
             if( sheet.rows.length!==data.total ){
                 sheet.pages.length = data.last_page;
                 sheet.rows.length = data.total;
-            }            
+            }    
+
+            sheet.rows.splice.apply(sheet.rows, [data.from-1, data.per_page].concat(data.data));
             
-            angular.forEach(data.data, function(row, index){
-                sheet.rows[data.from-1+index] = row;
-            });
+            console.log(angular.equals(data.data, sheet.rows));
             
             sheet.pages[sheet.page-1] = true;
             
@@ -315,6 +307,8 @@ app.factory("XLSXReaderService", ['$q', '$rootScope',
                     console.log(data);
                 }, true);
             });
+            
+            $scope.loading = false;
 
         }).error(function(e){
             console.log(e);
@@ -328,21 +322,21 @@ app.factory("XLSXReaderService", ['$q', '$rootScope',
         var pages = sheet.pages.length;
 
         if( pages <= 7 ){
-            var page_link = [];
-            for(var i=1; i <= pages; i++) {
-                page_link.push(i);
+            sheet.page_link = [];
+            for(var i=2; i <= pages-1; i++) {
+                sheet.page_link.push(i);
             }
         }else{            
             if( sheet.page < 5 ) {
-                var page_link = [1, 2, 3, 4, 5,'...', pages];
+                sheet.page_link = [2, 3, 4, 5];
             }else
             if( pages-sheet.page < 4 ){
-                var page_link = [1, '...', pages-4, pages-3, pages-2, pages-1, pages];
+                sheet.page_link = [pages-4, pages-3, pages-2, pages-1];
             }else{
-                var page_link = [1, '...', sheet.page-1, sheet.page, sheet.page+1, '...', pages];
+                sheet.page_link = [sheet.page-1, sheet.page, sheet.page+1];
             }            
         }
-        sheet.page_link = page_link;
+
     };
     
     $scope.fileChanged = function(files) {
@@ -350,20 +344,27 @@ app.factory("XLSXReaderService", ['$q', '$rootScope',
         $scope.files = angular.element(files)[0].files[0];
         $scope.showPreview = false;
         $scope.showJSONPreview = true;
-        $scope.isProcessing = true;      
+        $scope.isProcessing = true;
         
         XLSXReaderService.readFile($scope.files, $scope.showPreview, $scope.showJSONPreview).then(function(xlsxData) {
             $scope.isProcessing = false;
             
             $scope.imports.sheets = Object.keys(xlsxData.sheets).map(function (key) {return {name:key,data:xlsxData.sheets[key]};});
 
-            angular.element(files).val(null);            
+            angular.element(files).val(null);  
+            
+            $('#import').popup({
+                popup: $('.popup'),
+                position: 'bottom left',
+                on: 'manual'
+            }).popup('show');
             
         });
     };
     
     $scope.importSheetData = function() {
 
+        $scope.saving = true;
         var sheetImport = $filter('filter')($scope.imports.sheets, {selected: 1});
         var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
         
@@ -371,15 +372,19 @@ app.factory("XLSXReaderService", ['$q', '$rootScope',
             return false;
         
         sheet.rows.length = 0;
-
+        
         angular.forEach(sheetImport[0].data, function(row, index){
             sheet.rows.push(row);
+            //console.log(1);
         });
         
-        sheet.page = 1;
-        sheet.pages = [true];
-        $scope.limit = sheetImport[0].data.length;
-        $scope.loadPage(1);
+        var max = sheet.rows.length;
+        sheet.page = 1;        
+        sheet.pages.length = Math.ceil(max/$scope.limit);
+        $scope.isImprot = true;
+        $scope.getPageList(sheet);
+        
+        $('#import').popup('hide');
 
     };
     
@@ -416,38 +421,10 @@ String.prototype.Blength = function() {
 </script>
 <!--<script src="/js/angular-file-upload.min.js"></script>-->
 <script src="/js/jquery.fileDownload.js"></script>
-<script src="/js/ngHandsontable.js"></script>
-<script src="/js/handsontable.full.min.js"></script>
 <script src="/js/jszip.min.js"></script>
 <script src="/js/xlsx.js"></script>
 <script src="/js/lodash.min.js"></script>
 <script src="/js/xlsx-reader.js"></script>
-<link rel="stylesheet" media="screen" href="/js/handsontable.full.min.css">
 
 <style> 
-.page-tag {
-    position: absolute;
-    top: -1px;
-    width: 80px;
-    height: 25px;
-    border: 1px solid #999;
-    font-size: 13px;
-    line-height: 25px;
-    text-align: center;
-    cursor: default
-}
-.page-tag.selected {
-    border-top-color: #fff
-}
-.page-tag:not(.selected):hover {
-    border-color: #555 #555 #555 #555;
-    cursor: pointer
-}
-.page-tag.top.selected {
-    border-top-color: #999;
-    border-bottom-color: #fff;
-}
-.notSelected {
-    color: #888;
-}
 </style>

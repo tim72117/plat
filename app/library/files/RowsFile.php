@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Schema, Response, ShareFile, RequestFile, Auth, Input, Illuminate\Filesystem\Filesystem;
+use DB, View, Schema, Response, ShareFile, RequestFile, Auth, Input, Session, Illuminate\Filesystem\Filesystem, app\library\files\v0\FileProvider;
 
 class RowsFile extends CommFile {
 	
@@ -27,6 +27,7 @@ class RowsFile extends CommFile {
         'upload',
         'save_import_rows',
         'delete',
+        'get_compact_files',
 	);
 	
 	public static function get_intent() {
@@ -306,10 +307,10 @@ class RowsFile extends CommFile {
 
             if( $shareFile->created_by==Auth::user()->id ) {              
                 //$power = array_map(function($column){return $column->name;}, $table->columns);
-                $power = array_merge($power, array('id'), array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
+                $power = array_merge($power, array('t0.id'), array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
                 //$power = array_fetch($table->columns, 'name');
             }else{
-                $power = array_merge($power, array('id'), array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
+                $power = array_merge($power, array('t0.id'), array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
             }
 
         }
@@ -458,6 +459,91 @@ class RowsFile extends CommFile {
 
 		
         return Response::json([]);
+    }
+    
+    public function get_compact_files() {
+        $user = Auth::user();
+
+        $fileProvider = FileProvider::make();
+        
+        $inGroups = $user->inGroups->lists('id');
+        
+        $myRowFiles = ShareFile::with('isFile')->whereHas('isFile', function($query){
+            $query->where('type', '=', 5);
+        })->where(function($query) use($user){
+            $query->where('target', 'user')->where('target_id', $user->id);
+        })->orWhere(function($query) use($user, $inGroups){
+            count($inGroups)>0 && $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $user->id);
+        })->orderBy('created_at', 'desc')->get();
+        
+        $files = $myRowFiles->map(function($myRowFile) use($fileProvider){    
+            $intent_key = $fileProvider->doc_intent_key('open', $myRowFile->id, 'app\\library\\files\\v0\\RowsFile');
+            return [
+                'title' => $myRowFile->is_file->title,
+                'intent_key' => $intent_key
+            ];
+        });
+        return $files;
+    }
+    
+    public function get_compact_sheet() {
+        
+        $index = Input::only('index')['index'];
+        $intent_key_compact = Input::only('intent_key_compact')['intent_key_compact'];
+        $sheet_index_compact = Input::only('sheet_index_compact')['sheet_index_compact'];
+        
+        $doc_id_compact = Session::get('file')[$intent_key_compact]['doc_id'];
+        $shareFile_compact = ShareFile::find($doc_id_compact);
+        $sheet_compact = $this->get_scheme($shareFile_compact)->sheets[$sheet_index_compact];        
+        $table_compact = $sheet_compact->tables[0];
+        
+        list($rows_query, $power) = $this->get_rows_query($index);          
+        
+        $shareFile = ShareFile::find($this->doc_id);        
+        $sheet = $this->get_scheme($shareFile)->sheets[$index];  
+        $table = $sheet->tables[0];
+        
+        $power = array_merge($power, array_map(function($column){return 'compact.'.$column->name;}, $table_compact->columns));
+        
+        $sheet_new = [
+            'compact' => true,
+            'sheetName' => $shareFile->is_file->title.' - '.$shareFile_compact->is_file->title,
+            'tables' => [[
+                'columns' => array_merge($table->columns, array_map(function($column){$column->compact = true;return $column;}, $table_compact->columns)),
+                'tablename' => ''
+            ]]            
+        ];
+        
+        return Response::json(['sheet_compact'=>$sheet_new]);
+    }
+    
+    public function get_compact_rows() {
+        
+        $sheet_info = Input::only('sheet_info')['sheet_info'];
+
+        $index = $sheet_info['source_index'];
+        $intent_key_compact = $sheet_info['compact_intent_key'];
+        $sheet_index_compact = $sheet_info['compact_sheet_index'];
+        
+        $doc_id_compact = Session::get('file')[$intent_key_compact]['doc_id'];
+        $shareFile_compact = ShareFile::find($doc_id_compact);
+        $sheet_compact = $this->get_scheme($shareFile_compact)->sheets[$sheet_index_compact];        
+        $table_compact = $sheet_compact->tables[0];
+        
+        list($rows_query, $power) = $this->get_rows_query($index);    
+        
+        $shareFile = ShareFile::find($this->doc_id);        
+        $sheet = $this->get_scheme($shareFile)->sheets[$index];  
+        $table = $sheet->tables[0];
+        
+        $columns_compacted = array_diff(array_fetch($table_compact->columns, 'name'), array_fetch($table->columns, 'name'));
+        
+        $power = array_merge($power, array_map(function($column){return 'compact.'.$column;}, $columns_compacted));
+        $rows = $rows_query->leftJoin($table_compact->database.'.dbo.'.$table_compact->name.' AS compact', 'compact.newcid', '=', 't0.newcid')
+            ->where('t0.created_by', Auth::user()->id)
+            ->select($power)->paginate(Input::only('limit')['limit']);
+        
+        return Response::json($rows);
     }
     
     public function delete() {

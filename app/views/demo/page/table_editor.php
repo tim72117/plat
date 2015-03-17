@@ -12,73 +12,46 @@
                 <div ng-click="nextSheetPage()" class="page-tag top" style="margin:0;width:20px" ng-style="{left:getSheetLength()*5+30}"> > </div>
                 <div ng-click="addSheet()" class="page-tag top add-tag" style="margin:0" ng-style="{left:getSheetLength()*5+35}"></div>
             </div>   
-            <div class="ui menu" style="display:none">
-                <a class="browse item">
-                  <i class="dropdown icon"></i>
-                  Browse
-                </a>
-            </div>  
-            
-            <div class="ui fluid popup bottom left visible" style="display:none">
-                0000000000000000
-                <div class="ui fluid popup "></div>
-            </div>     
             
             <div class="ui button" ng-click="tableNameBox=true"><i class="save icon"></i>儲存</div>
-            
-            <div class="ui icon left pointing dropdown button" style="z-index:104;display:none">
-                <i class="wrench icon"></i>                
-                <div class="menu transition visible">
-                    <div class="header">設定資料表</div>
-                    <div class="item">欄位定義</div>
-                    <div class="item">選項定義</div>
-                    <div class="item">說明文件</div>
-                </div>
-            </div>
-        </div>
+        </div>       
         
 
         
-        <div class="ui menu" >
+        <div class="ui item search selection dropdown" ng-dropdown-search-menu ng-model="sheet" items="table.sheets" ng-change="action.toSelect(sheet)" title="資料表" style="z-index:104;width:250px">
+
+        </div>
+        
+        <div class="ui segment active"> 
             
-            <div class="item">
-                <div class="ui basic button" id="save"><i class="save icon"></i>儲存</div>
-                <div class="ui flowing popup" style="width:500px">
-                    <div class="ui form">
-                        <h4 class="ui dividing header">輸入檔案名稱</h4>
-                        <div class="field">                        
-                            
-                            <div class="ui input">
-                                <input type="text" placeholder="輸入檔案名稱" ng-model="table.title" />
-                            </div>
-                            
+            <div class="ui basic mini button" id="save"><i class="save icon"></i>儲存</div>
+            <div class="ui flowing popup" style="width:500px">
+                <div class="ui form">
+                    <h4 class="ui dividing header">輸入檔案名稱</h4>
+                    <div class="field">                        
+
+                        <div class="ui input">
+                            <input type="text" placeholder="輸入檔案名稱" ng-model="table.title" />
                         </div>
-                        
-                        <div class="ui positive button" ng-click="saveDoc()" ng-class="{loading: saving}">
-                            <i class="save icon"></i>確定
-                        </div>
-                        <div class="ui basic button"  ng-click="closePopup($event)">
-                            <i class="ban icon"></i>取消
-                        </div>
+
+                    </div>
+
+                    <div class="ui positive button" ng-click="saveDoc()" ng-class="{loading: saving}">
+                        <i class="save icon"></i>確定
+                    </div>
+                    <div class="ui basic button"  ng-click="closePopup($event)">
+                        <i class="ban icon"></i>取消
                     </div>
                 </div>
             </div>
-
+            
             <dropdown dropdown-class="ui item labeled icon pointing dropdown button" title="設定" ng-model="dropdown_model" open="false" style="z-index:105">                
                 <dropdown-group ng-click="changeTool(1)">資料列</dropdown-group>
                 <div class="header">設定資料表</div>
                 <dropdown-group ng-click="changeTool(2)">欄位定義</dropdown-group>
                 <dropdown-group ng-click="changeTool(3)">選項定義</dropdown-group>
                 <dropdown-group ng-click="changeTool(4)">說明文件</dropdown-group>
-            </dropdown>   
-             
-        </div> 
-        
-        <div class="ui item search selection dropdown" ng-dropdown items="table.sheets" ng-model="sheet" title="資料表" ng-change="action.toSelect(sheet)" style="z-index:104;width:250px">
-
-        </div>
-        
-        <div ng-if="tool===1" class="ui segment active"> 
+            </dropdown> 
             
             <div style="position: absolute;top: 0;z-index:2;display:none" class="ui top attached tabular menu">
                 <div ng-click="prevSheetPage()" class="item active" style=""> < </div>
@@ -87,7 +60,7 @@
                 <div ng-click="nextSheetPage()" class="item" style="margin:0;width:20px" ng-style="{left:getSheetLength()*5+30}"> > </div>
                 <div ng-click="addSheet()" class="item" style="margin:0" ng-style="{left:getSheetLength()*5+35}"></div>
             </div>   
-            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected"  ng-class="{loading: sheetLoading}" style="position: absolute;left: 2px;right: 10px;top: 35px;bottom: 2px;padding:2px" id="sheet">         
+            <div ng-repeat="($tindex, sheet) in table.sheets" ng-if="tool===1 && sheet.selected"  ng-class="{loading: sheetLoading}" style="position: absolute;left: 2px;right: 10px;top: 35px;bottom: 2px;padding:2px" id="sheet">         
                 <hot-table
                     settings="{manualColumnResize: true, contextMenu: ['row_above', 'row_below', 'remove_row'], afterInit: afterInit}"
                     columns="sheet.colHeaders"
@@ -101,15 +74,12 @@
                     height="setHeight()">
                 </hot-table>
             </div>    
-        </div>
-
-        <div ng-if="tool===2" class="ui segment active" ng-class="{loading: sheetLoading}">
-            
-
+      
             
             <div>
                 
-                <table class="ui compact table">
+                <table class="ui compact table" ng-if="tool===2">
+
                     <thead>
                         <tr ng-repeat="sheet in table.sheets" ng-if="sheet.selected">                            
                             <th colspan="7">                                
@@ -210,16 +180,12 @@
 <!--<script src="/js/angular-file-upload.min.js"></script>-->
 
 <script src="/js/jquery.fileDownload.js"></script>
-<script src="/js/ngHandsontable.js"></script>
-<script src="/js/handsontable.full.min.js"></script>
 <script src="/js/jszip.min.js"></script>
 <script src="/js/xlsx.js"></script>
 <script src="/js/lodash.min.js"></script>
 <script src="/js/xlsx-reader.js"></script>
 <script>
-app.requires.push('ngHandsontable');
 app.requires.push('angularify.semantic.dropdown');
-//app.requires.push('ngAnimate');
 app.filter('startFrom', function() {
     return function(input, start) {         
         return input.slice(start);
