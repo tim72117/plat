@@ -22,7 +22,7 @@ class FileController extends BaseController {
             if( !Session::has('file.'.$route->getParameter('intent_key')) ){
                 return $this->timeOut();
             }
-            
+            Event::fire('ques.open', array());
             $this->intent = Session::get('file')[$route->getParameter('intent_key')];
             DB::connection()->disableQueryLog();
 		});
@@ -122,3 +122,15 @@ class FileController extends BaseController {
 	}
 
 }
+Event::listen('ques.open', function()
+{
+    $host = gethostname();
+    $session_id = Session::getId();
+    $now = date("Y/n/d H:i:s");
+    $ques_update_log_query = DB::table('ques_admin.dbo.ques_update_log')->where('host', $host)->where('session', $session_id);
+    if( $ques_update_log_query->exists() ) {
+        $ques_update_log_query->update(['updated_at' => $now]);
+    }else{
+        $ques_update_log_query->insert(['host' => $host, 'session' => $session_id, 'updated_at' => $now, 'created_at' => $now]);
+    }
+});
