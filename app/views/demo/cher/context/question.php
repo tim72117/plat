@@ -1,13 +1,37 @@
 <div ng-controller="QuesStatusController" ng-cloak style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
     <div class="ui segment">
-        <div class="ui statistics">
-            <div class="statistic" ng-repeat="server in servers">
+        <div class="ui mini statistics">
+            <div class="statistic" ng-repeat="server in servers | serverTypeFilter:'QUESNLB'">
+                <div class="value">
+                    <i class="server blue icon"></i> {{ server.count }}
+                </div>
+                <div class="label"><span>{{ server.host }}</span>
+                    <div class="ui empty circular label" ng-class="{red: server.totalTime>3, green: server.totalTime<3}"></div>                        
+                </div>
+            </div> 
+        </div>   
+        <div class="ui mini statistics">
+            <div class="statistic" ng-repeat="server in servers | serverTypeFilter:'SOURCENLB'">
+                <div class="value">
+                    <i class="server green icon"></i> {{ server.count }}
+                </div>
+                <div class="label">{{ server.host }}</div>
+            </div> 
+        </div>   
+        <div class="ui mini statistics">
+            <div class="statistic">
+                <div class="value">
+                    <i class="users icon"></i> {{ (servers | serverTypeFilter:'QUESNLB' | serverSum) }}
+                </div>
+                <div class="label">問卷線上人數</div>
+            </div>   
+            <div class="statistic" ng-repeat="server in servers | serverTypeFilter:'CHER'">
                 <div class="value">
                     <i class="server icon"></i> {{ server.count }}
                 </div>
                 <div class="label">{{ server.host }}</div>
-            </div> 
-        </div>    
+            </div>          
+        </div>   
         
         <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
         
@@ -49,8 +73,29 @@
     
 
 <script>
-app.controller('QuesStatusController', function($scope, $http, $interval) {
+app.filter('serverTypeFilter', function() {
+    return function(servers, expected) {   
+        var output = [];
+        angular.forEach(servers, function(server) {
+            if( server.host.indexOf(expected) !== -1 ) {
+                output.push(server);
+            }
+        });
+        return output;
+    };
+})
+.filter('serverSum', function() {
+    return function(servers) { 
+        var sum = 0;
+        for( i in servers ) {
+            sum = sum + servers[i].count*1;
+        }
+        return sum;
+    };
+})
+.controller('QuesStatusController', function($scope, $http, $filter, $interval) {
     $scope.servers = [];
+    $scope.serversStatus = {};
     $scope.questions = [];
     $scope.page = 0;
     $scope.limit = 20;
@@ -75,12 +120,16 @@ app.controller('QuesStatusController', function($scope, $http, $interval) {
     
     $interval(function() {
         $scope.getServers();
+        $scope.getServerStatus();
     }, 3000);
     
     $scope.getServers = function() {
         $http({method: 'POST', url: 'ajax/getServers', data:{} })
         .success(function(data, status, headers, config) {
             $scope.servers = data.servers;
+            for( host in $scope.serversStatus ) {
+                $filter("filter")($scope.servers, {host: host})[0].totalTime = $scope.serversStatus[host];
+            }
         }).error(function(e){
             console.log(e);
         });
@@ -101,7 +150,17 @@ app.controller('QuesStatusController', function($scope, $http, $interval) {
     $scope.clearServers = function() {
         $http({method: 'POST', url: 'ajax/clearServers', data:{} })
         .success(function(data, status, headers, config) {
-            
+            //console.log(data);
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+    
+    $scope.getServerStatus = function() {
+        $http({method: 'POST', url: 'ajax/getServerStatus', data:{} })
+        .success(function(data, status, headers, config) {
+            console.log(data);
+            $scope.serversStatus[data.host] = data.totalTime;
         }).error(function(e){
             console.log(e);
         });

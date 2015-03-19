@@ -5,7 +5,8 @@ return array(
         return array('saveStatus'=>true, 'servers'=>$servers);
     },
     'clearServers' => function() {
-        DB::table('ques_admin.dbo.ques_update_log')->whereRaw('DATEDIFF(SECOND, updated_at, { fn NOW() }) > 1800')->delete();
+        DB::table('ques_admin.dbo.ques_update_log')->whereRaw('DATEDIFF(SECOND, updated_at, { fn NOW() }) > 600')->delete();
+        return [];
     },
     'getQuestions' => function() {
         $count_report = DB::table('report')->where('solve', 'False')->groupBy('root')->select(DB::raw('root,count(root) AS count'))->lists('count','root');
@@ -24,5 +25,33 @@ return array(
                 'closed'   => $doc->closed,
             ];
         }, $docs)]; 
+    },
+    'getServerStatus' => function() {
+        $ch = curl_init();	
+        curl_setopt($ch, CURLOPT_URL, "https://192.168.0.98/getServerStatus"); 
+        //curl_setopt($ch, CURLOPT_POST, 1);	
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+        curl_setopt($ch, CURLOPT_SSLVERSION, 3);
+        
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        //curl_setopt($ch, CURLOPT_POSTFIELDS, 'username='.$username.'&password='.($userpwd).'&site='.$_SESSION['site']); 
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        
+        $tuData = curl_exec($ch); 
+        echo curl_getinfo($ch, CURLINFO_CONNECT_TIME );
+        echo '<br />';
+        echo curl_getinfo($ch, CURLINFO_TOTAL_TIME );
+        echo '<br />';
+        curl_close($ch);
+        
+        var_dump($tuData);        
+        exit;
+        $totalTime = curl_getinfo($ch, CURLINFO_TOTAL_TIME );
+        echo curl_getinfo($ch, CURLINFO_CONNECT_TIME );
+                
+        $server = json_decode($tuData);
+        return ['status' => isset($server), 'host' => isset($server) ? $server->host : '', 'totalTime' => $totalTime];
     }
 );
