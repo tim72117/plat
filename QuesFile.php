@@ -729,23 +729,25 @@ class QuesFile extends CommFile {
     
     public function create() {
         $fileProvider = FileProvider::make();
-        $ques_doc_id = DB::table('ques_admin.dbo.ques_doc')->insertGetId(['qid'=>9999, 'title'=>Input::get('title'), 'year'=>103, 'dir'=>'9999']);
+        $ques_doc_id = DB::table('ques_admin.dbo.ques_doc')->insertGetId([
+            'qid'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))'),
+            'title' => Input::get('title'),
+            'year'  => 103,
+            'dir'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))')
+        ]);
         $file = parent::createNewFile(1, Input::get('title'), ['file'=>$ques_doc_id]);
         $shareFile = ShareFile::create(['target'=>'user', 'target_id'=>$file->created_by, 'file_id'=>$file->id, 'created_by'=>$file->created_by]);
         $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\QuesFile');
-        $link['open'] = 'file/'.$intent_key.'/open';
         return Response::json(['shareFile' => [
             'id' => $shareFile->id,
             'title' => $shareFile->isFile->title,
             'created_by' => $shareFile->created_by,
             'created_at' => $shareFile->created_at->toIso8601String(),
-            'link' => $link,
+            'link' => ['open' => 'file/'.$intent_key.'/open'],
             'type' => $shareFile->isFile->type,
             'intent_key' => $intent_key,
             'tools' => ['codebook', 'receives', 'spss', 'report'],
-            'shared' => array_count_values($shareFile->hasSharedDocs->map(function($sharedDocs){
-                return $sharedDocs->target;
-            })->all())
+            'shared' => []
         ]]);
     }
 	
