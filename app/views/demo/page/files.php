@@ -294,6 +294,7 @@ app.filter('startFrom', function() {
     $scope.saveNewDataFile = function(type) {
         $http({method: 'POST', url: '/file/'+$scope.newFiles[$scope.newDataFile.type]+'/create', data:{title: $scope.newDataFile.title} })
         .success(function(data, status, headers, config) {
+            console.log(data);
             $scope.files.push(data.shareFile); 
             $scope.timenow = new Date();
             $scope.newDataFile = null;
