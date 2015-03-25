@@ -94,7 +94,7 @@ class QuesFile extends CommFile {
         
         $file = $shareFile->isFile;
         
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $file->file)->select('dir', 'qid')->first();
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $file->file)->select('dir', 'qid', 'edit')->first();
         
         $qid = $ques_doc->qid;
         
