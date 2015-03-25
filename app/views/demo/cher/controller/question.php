@@ -1,7 +1,13 @@
 <?php
 return array(
     'getServers' => function() {
-        $servers = DB::table('ques_admin.dbo.ques_update_log')->whereRaw('DATEDIFF(SECOND, updated_at, { fn NOW() }) < 180')->groupBy('host')->orderBy('host')->select('host', DB::raw('count(*) AS count'))->get();
+        $servers = Cache::remember('get-servers', 1, function() {
+            return DB::table('ques_admin.dbo.ques_update_log')
+                ->whereRaw('DATEDIFF(SECOND, updated_at, { fn NOW() }) < 180')
+                ->groupBy('host')->orderBy('host')
+                ->select('host', DB::raw('count(*) AS count'))
+                ->get();
+        });    
         return array('saveStatus'=>true, 'servers'=>$servers);
     },
     'clearServers' => function() {
@@ -27,31 +33,25 @@ return array(
         }, $docs)]; 
     },
     'getServerStatus' => function() {
-        $ch = curl_init();	
-        curl_setopt($ch, CURLOPT_URL, "https://192.168.0.98/getServerStatus"); 
-        //curl_setopt($ch, CURLOPT_POST, 1);	
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-        curl_setopt($ch, CURLOPT_SSLVERSION, 3);
-        
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-        //curl_setopt($ch, CURLOPT_POSTFIELDS, 'username='.$username.'&password='.($userpwd).'&site='.$_SESSION['site']); 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        
-        $tuData = curl_exec($ch); 
-        echo curl_getinfo($ch, CURLINFO_CONNECT_TIME );
-        echo '<br />';
-        echo curl_getinfo($ch, CURLINFO_TOTAL_TIME );
-        echo '<br />';
-        curl_close($ch);
-        
-        var_dump($tuData);        
-        exit;
-        $totalTime = curl_getinfo($ch, CURLINFO_TOTAL_TIME );
-        echo curl_getinfo($ch, CURLINFO_CONNECT_TIME );
-                
-        $server = json_decode($tuData);
+        list($server, $totalTime) = Cache::remember('get-server-status', 1, function() {
+            $ch = curl_init();	
+            curl_setopt($ch, CURLOPT_URL, "https://192.168.0.99/getServerStatus"); 
+            //curl_setopt($ch, CURLOPT_POST, 1);	
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+            curl_setopt($ch, CURLOPT_SSLVERSION, 3);
+
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+            //curl_setopt($ch, CURLOPT_POSTFIELDS, 'username='.$username.'&password='.($userpwd).'&site='.$_SESSION['site']); 
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);        
+            $tuData = curl_exec($ch);         
+            $totalTime = curl_getinfo($ch, CURLINFO_TOTAL_TIME );
+            curl_close($ch);        
+            $server = json_decode($tuData);
+            
+            return [$server, $totalTime];
+        });
         return ['status' => isset($server), 'host' => isset($server) ? $server->host : '', 'totalTime' => $totalTime];
     }
 );

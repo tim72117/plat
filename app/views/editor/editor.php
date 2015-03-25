@@ -69,7 +69,7 @@ $(document).ready(function() {
 	//---------------------------------------------------------------------------------新增一頁
 	$('#btn_cpage').click(function(){
 		$.post('add_page',function(data){
-			//location.reload();
+			location.reload();
 			console.log(data);
 		}).error(function(e){
             console.log(e);
@@ -852,7 +852,7 @@ $(document).ready(function() {
 						
 			var type_box = $(
 				'<div class="qtype_box changed" style="padding-right:0px;background-color:#58b5e1">'+
-					(addlayer!=0?'<div style="position:absolute;margin-left:-30px"><img src="images/link.png" alt="" /></div>':'')+
+					(addlayer!=0?'<div style="position:absolute;margin-left:-30px"><img src="/editor/images/link.png" alt="" /></div>':'')+
 					'<span style="font-size:10px;background-color:#D4BFFF;width:170px;position:absolute;margin-left:-'+(180+addlayer*46)+'px">Table:;QID:'+newid+'</span>'+
 					'<table style="width:100%"><tr>'+
 					'<td>'+
@@ -1214,39 +1214,49 @@ function getPassword(length) {
 
 </head>
 	
-<div style="margin:0 auto;width:300px;text-align: left;float:left">
+<div style="margin:0 auto;width:120px;text-align: left;float:left">
 	
-	<div style="position:fixed;width:300px;background-color:#fff;border-top:0;z-index:1">
+	<div style="position:fixed;width:120px;background-color:#fff;border-top:0;z-index:1">
 		<div style="background-color:#fff"> 
 				
             <form style="display:inline" name="form1" action="" method="post">	
                 <div>
                     頁數<input name="pages" type="text" size="2" value="<?=count($options_page)?>" disabled="disabled" />
                     <?=Form::select('page', $options_page, $page, array('style'=>'font-size:15px', 'onChange'=>'this.form.submit()'))?>
-                    <input id="btn_cpage" type="button" value="新增一頁" <?=($can_edit=='enable'?'':'disabled="disabled"')?> />
-                    <input id="btn_dpage" type="button" value="刪除整頁" disabled="disabled" />
+                    <!--<input id="btn_dpage" type="button" value="刪除整頁" disabled="disabled" />-->
                 </div>
-                <input id="btn_save" type="button" value="儲存檔案" <?=($can_edit=='enable'?'':'disabled="disabled"')?> />
+                <div class="ui basic mini button <?=($can_edit=='enable'?'':'disabled')?>" id="btn_cpage">                    
+                    <i class="file outline icon"></i>
+                    新增一頁
+                </div>  
+                <div class="ui basic mini button <?=($can_edit=='enable'?'':'disabled')?>" id="btn_save">
+                    <i class="save icon"></i>
+                    儲存檔案
+                </div>    
                 
                 
-                <input id="btn_analysis" type="button" value="線上分析存檔" />
-                <input id="btn_pageskip" type="button" value="跳頁存檔" />
+                <!--<input id="btn_analysis" type="button" value="線上分析存檔" />
+                <input id="btn_pageskip" type="button" value="跳頁存檔" />-->
             </form>  
             
 		</div>
-		<div style="background-color:#fff">        
+		<!--<div style="background-color:#fff">        
 				<input id="btn_check" type="button" value="check" disabled="disabled" />            
 				<input id="btn_creattb" type="button" value="重編Table" <?=($can_edit=='enable'?'':'disabled="disabled"')?> />
-				<input id="btn_resetid" type="button" value="重編ID" disabled="disabled" />
-				
-				
+				<input id="btn_resetid" type="button" value="重編ID" disabled="disabled" />		
+		</div>-->
+		
+		<div style="">
+			<div style=""><?//=$changetime_text?></div>
+			<div style=""><div><a href="demo?page=1" target="_blank">預覽</a></div><div></div></div>
+			<!--<div style="float:left;margin-left:40px"><div><a href="creatTable">建立問卷</a></div></div>-->
 		</div>
 
-		<div style="background-color:#fff">        
+		<!--<div style="background-color:#fff">        
 				部分<input name="part" type="text" size="2" value="<?//=$part?>" />         
 				部分名稱<input name="part_name" type="text" size="20" value="<?//=$part_name?>" />
 				<div style="float:right"></div>
-		</div>
+		</div>-->
         
 		<div class="isShunt">
 		<?		
@@ -1268,19 +1278,11 @@ function getPassword(length) {
 		}
 		?>
 		</div>
-		
-		<div style="margin:0 auto">
-			<div style="float:right">
-				<div style="float:left"><?//=$changetime_text?></div>
-				<div style="float:left;margin-left:40px"><div><a href="demo?page=1" target="_blank">預覽</a></div><div></div></div>
-				<div style="float:left;margin-left:40px"><div><a href="creatTable">建立問卷</a></div></div>
-			</div>
-		</div>	
         
     </div>
 </div>
 	
-<div id="building" style="border:0px dashed #A0A0A4;border-top:0;border-bottom:0;z-index:1;padding-left:200px;padding-right:200px">
+<div id="building" style="border:0px dashed #A0A0A4;border-top:0;border-bottom:0;z-index:1">
 
 	<div id="contents" style="margin-left:0px">
     
