@@ -12,7 +12,6 @@
         <label>密碼</label>
         <input name="password" type="password" placeholder="密碼">
     </div>        
-    <input type="hidden" name="_token2" value="<?=dddos_token()?>" />
     <input type="submit" value="送出" hidden="hidden" />
     <div class="ui submit basic button" onclick="loginForm.submit()">送出</div>
 
