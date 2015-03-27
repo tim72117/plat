@@ -44,11 +44,10 @@ class UserController extends BaseController {
             return Redirect::to('project/use');
         }
 		
-		$contents = View::make('demo.'.$project.'.home', array('contextFile'=>'login', 'title'=>'使用者登入'))
-			->nest('child_tab',   'demo.'.$project.'.tabs')
-			->nest('context',     'demo.login', array('project'=>$project))	
-			->nest('news',        'demo.'.$project.'.news')	
-			->nest('child_footer','demo.'.$project.'.footer');		
+		$contents = View::make('demo.' . $project . '.home')
+			->nest('context', 'demo.' . $project . '.login')
+			->nest('news', 'demo.' . $project . '.news')
+			->nest('child_footer', 'demo.' . $project . '.footer');
 		$response = Response::make($contents, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
 		$response->header('Pragma', 'no-cache');
@@ -57,20 +56,18 @@ class UserController extends BaseController {
 	}
 	
 	public function login() {
-		$input = Input::only('email', 'password', 'project');
+		$input = Input::only('email', 'password');
         
 		$rulls = array(
 			'email'    => 'required|email',
 			'password' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:3,20',
-			'project'  => 'required|alpha',
 		);
         
 		$rulls_message = array(
 			'email.required'    => '電子郵件必填',
 			'email.email'       => '電子郵件格式錯誤',
 			'password.required' => '密碼必填',
-			'password.regex'    => '密碼格式錯誤',						
-			'project.required'  => '計畫錯誤',			
+			'password.regex'    => '密碼格式錯誤',
 		);
         
 		$validator = Validator::make($input, $rulls, $rulls_message);
@@ -104,9 +101,9 @@ class UserController extends BaseController {
 	}
 	
 	public function remindPage($project) {
-		return View::make('demo.'.$project.'.home', array('contextFile'=>'remind', 'title'=>'忘記密碼'))
-			->nest('context','demo.remind', array('project'=>$project))
-			->nest('child_footer','demo.'.$project.'.footer');
+		return View::make('demo.' . $project . '.home')
+			->nest('context','demo.' . $project . '.remind', ['project' => $project])
+			->nest('child_footer','demo.' . $project . '.footer');
 	}
 
 	public function remind($project) {
@@ -213,46 +210,56 @@ class UserController extends BaseController {
 		}
 
 	}
-	
-	public function register($project) {
-	
-		if( Request::isMethod('post') && Session::has('register') ){	
-			$user = require app_path().'\views\demo\\'.$project.'\registerValidator.php';
-			if( $user ){			
-				
-                $context =  View::make('demo.'.$project.'.registerPrint', array('user'=>$user));
-                return $context;
-                //$html2pdf = new HTML2PDF('L', 'A4', 'en', true, 'UTF-8', array(0, 5, 0, 5));
-                //$html2pdf->pdf->SetAuthor('國立臺灣師範大學 教育研究與評鑑中心');
-                //$html2pdf->pdf->SetTitle('後期中等教育整合資料庫國民中學承辦人員帳號使用權申請表');
-                //$html2pdf->setDefaultFont('kaiu');
-                //$html2pdf->writeHTML($context, false);
-                //return Response::make($html2pdf->Output('register.pdf'), 200, array('content-type'=>'application/pdf'));
-                //$context = '註冊成功'.'   <a href="'.asset('files/CERE-ISMS-D-031_查詢平台帳號使用權申請、變更、註銷表_v2.0(1030305修定).pdf').'">下載申請表</a><br />';	
-                
-			}else{
-				return Redirect::back();
-			}
-		}else{
-			Session::flash('register', true);
-            if( $project=='use' ){
-                $context =  View::make('demo.'.$project.'.register');		
-            }else{
-                $context =  View::make('demo.'.$project.'.register_stop');	
-            }
-		}
-		
-		$contents = View::make('demo.'.$project.'.home', array('contextFile'=>'register','title'=>'註冊帳號'))
+
+    public function registerPage($project) {
+        $project_info = DB::table('projects')->where('code', $project)->first();
+        if( $project_info->register ) {
+            $context = View::make('demo.' . $project . '.register');
+        }else{
+            $context = View::make('demo.' . $project . '.register_stop');
+        }
+        return View::make('demo.' . $project . '.home')
 			->with('context', $context)
-			->nest('child_tab','demo.'.$project.'.tabs')			
-			->nest('child_footer','demo.'.$project.'.footer');		
-		
+			->nest('child_footer','demo.' . $project . '.footer');
+    }
+	
+	public function registerSave($project) {
+	
+        $email = 'tim72117';//$user->getReminderEmail();
+        $token = str_shuffle(sha1($email.spl_object_hash($this).microtime(true)));
+
+        DB::table('register_print')->insert(['token' => $token, 'user_id' => 1, 'created_at' => new Carbon\Carbon]);
+
+//        $user = require app_path().'\views\demo\\'.$project.'\registerValidator.php';
+//        if( $user ){
+//
+//            $context =  View::make('demo.'.$project.'.registerPrint', arrayView('user'=>$user));
+//            return $context;
+//
+//        }else{
+//            return Redirect::back();
+//        }
+
+        return Redirect::to('project/' . $project . '/register/finish/' . $token);
+	}
+
+    public function registerFinish($project, $token) {
+        return View::make('demo.' . $project . '.home')
+            ->nest('context', 'demo.' . $project . '.register_finish', ['register_print_url' => URL::to('project/' . $project . '/register/print/' . $token)])
+            ->nest('child_footer', 'demo.' . $project . '.footer');
+    }
+
+    public function registerPrint($project, $token) {
+
+        DB::table('projects')->where('code', $token)->first();
+
+        return View::make('demo.' . $project . '.register_print', array('user' => 1));
+
 		$response = Response::make($contents, 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
 		$response->header('Pragma', 'no-cache');
 		$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
 		return $response;
-	}
-	
+    }
 
 }

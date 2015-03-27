@@ -64,9 +64,11 @@ App::missing(function($exception) {
 |
 */
 
-Route::filter('auth', function()
+Route::filter('auth', function($route)
 {
-	if (Auth::guest()) return Redirect::guest('login');
+	if( Auth::guest() ) {
+        return Redirect::guest('/login/' . $route->getParameter('project'));
+    }
 });
 
 
@@ -108,44 +110,21 @@ Route::filter('csrf', function()
 	{		
 		//throw new Illuminate\Session\TokenMismatchException;
         $messageBag = new Illuminate\Support\MessageBag();
-        $messageBag->add('csrf', '畫面過期1，請重新登入');
+        $messageBag->add('csrf', '畫面過期，請重新登入');
 		throw new app\library\files\v0\TokenMismatchException($messageBag);
 	}
 });
 
-Route::filter('delay', function() {
-	usleep(500000);
-});
-
-Route::filter('dddos', function() {	
-	$input = Input::all();
-		
-	if( Session::get('dddos') != Input::get('_token2') ){
-		//throw new Illuminate\Session\TokenMismatchException;	
-        $messageBag = new Illuminate\Support\MessageBag();
-        $messageBag->add('dddos', '畫面過期2，請重新登入');
-		throw new app\library\files\v0\TokenMismatchException($messageBag);
-	}
-	Session::forget('dddos');
-	
+Route::filter('post_delay', function() {
 	$ip = Request::server('REMOTE_ADDR');
-	$ip_time = Cache::get($ip, array('block'=>false,'time'=>array()));
-	array_push($ip_time['time'],date("Y/n/d H:i:s"));	
+    
+    $ip_requested = sha1($ip.Request::url());
 
-	$ip_time_re = array_reverse($ip_time['time']);
-	if( count($ip_time_re)>2 ){
-		if( $ip_time['block'] ){
-			$ip_time['block'] = (strtotime($ip_time_re[0])-strtotime($ip_time_re[1])<30);
-		}else{
-			$ip_time['block'] = (strtotime($ip_time_re[0])-strtotime($ip_time_re[1])<10) && (strtotime($ip_time_re[1])-strtotime($ip_time_re[2])<10);
-		}
-	}
-	Cache::put($ip, $ip_time, 10);
+    $ip_requested_cache = Cache::get('post_delay' . $ip_requested, 0);
 
-	$input['dddos_error'] = true;
-	if( $ip_time['block'] ){
-        $messageBag = new Illuminate\Support\MessageBag();
-        $messageBag->add('dddos', '登入次數過多,請等待30秒後再進行登入');
-		throw new app\library\files\v0\TokenMismatchException($messageBag);
-    }
+    sleep($ip_requested_cache);
+
+    $ip_requested_cache++;
+
+    Cache::put('post_delay' . $ip_requested, $ip_requested_cache, 10);
 });

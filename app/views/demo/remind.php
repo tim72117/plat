@@ -1,15 +1,16 @@
-<?=Form::open(array('url' => action('UserController@remind', array($project)), 'method' => 'post'))?>
+<?=Form::open(array('url' => action('UserController@remind', array($project)), 'method' => 'post', 'class' => 'ui warning form attached fluid segment'.($errors->isEmpty() ? '' : ' error'), 'name' => 'remindForm'))?>
+    <div class="ui error message">
+        <div class="header">資料錯誤</div>
+        <p><?=implode('、', array_filter($errors->all()))?></p>
+    </div>
+    <div class="field">
+        <label>電子郵件信箱</label>
+        <input name="email" type="text" placeholder="電子郵件信箱">
+    </div>
     <input type="hidden" name="_token2" value="<?=dddos_token()?>" />
-	<table style="width:500px;margin:0 auto">
-		<tr>
-			<th>電子郵件信箱</th>
-			<td><input type="text" name="email" size="55" class="register-block"></td>
-		</tr>
-		<tr>
-			<td colspan="2" style="text-align:center;color:#f00"><?=implode('、',array_filter($errors->all()))?></td>
-		</tr>
-		<tr>
-			<td colspan="2" style="text-align:center"><input type="submit" value="送出"></td>
-		</tr>	
-	</table>
+    <input type="submit" value="送出" hidden="hidden" />
+    <div class="ui submit basic button" onclick="remindForm.submit()">送出</div> 
+    <a href="/project/tiped">
+        <div class="ui button" onclick="remindForm.submit()">取消</div>  
+    </a>        
 <?=Form::close()?>

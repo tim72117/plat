@@ -15,10 +15,12 @@ Route::get('test', function() {
     return;
 });
 
+Route::patterns(['project' => '[a-z]+', 'token' => '[a-z0-9]+']);
+
 Route::get('/', function(){ return Redirect::to('user/auth/cher'); });
 Route::get('project', 'UserController@project');
-Route::get('project/{project}', array('before' => '', 'uses' => 'UserController@loginPage'))->where('project', '[a-z]+');
-Route::get('user/auth/{project}', function($project){ return Redirect::to('project/'.$project); });
+Route::get('project/{project}/', array('before' => 'guest', 'uses' => 'UserController@loginPage'));
+Route::get('user/auth/{project}', function($project) { return Redirect::to('project/' . $project); });
 //平台-------------------------------------------------------------------------------------------------------------------------------
 Route::group(array('before' => 'auth_logined'), function() {        
 
@@ -48,20 +50,22 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::get('auth/logout', array('as' => 'logout', 'uses' => 'UserController@logout'));
 
     Route::get('auth/password/change', array('before' => '', 'uses' => 'UserController@passwordChangePage'));
-    Route::post('auth/password/change', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@passwordChange'));
+    Route::post('auth/password/change', array('before' => 'csrf|post_delay', 'uses' => 'UserController@passwordChange'));
 
 });
 
-Route::get('auth/password/remind/{project}', 'UserController@remindPage')->where('project', '[a-z]+');
-Route::post('auth/password/remind/{project}', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@remind'))->where('project', '[a-z]+');
+Route::get('project/{project}/password/remind', 'UserController@remindPage');
+Route::post('auth/password/remind/{project}', array('before' => 'csrf|post_delay', 'uses' => 'UserController@remind'));
 
 Route::get('user/auth/password/reset/{project}/{token}', 'UserController@resetPage');
-Route::post('user/auth/password/reset/{token}', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@reset'));
+Route::post('user/auth/password/reset/{token}', array('before' => 'csrf|post_delay', 'uses' => 'UserController@reset'));
 
-Route::post('auth/login', array('before' => 'delay|csrf|dddos', 'uses' => 'UserController@login'));
+Route::post('project/{project}/login', array('before' => 'csrf|post_delay', 'uses' => 'UserController@login'));
 
-Route::get('user/auth/register/{project}', 'RegisterController@register')->where('project', '[a-z]+');
-Route::post('user/auth/register/{project}', array('before' => 'csrf', 'uses' => 'RegisterController@register'))->where('project', '[a-z]+');
+Route::get('project/{project}/register', 'UserController@registerPage');
+Route::post('project/{project}/register/save', array('before' => 'csrf|post_delay', 'uses' => 'UserController@registerSave'));
+Route::get('project/{project}/register/finish/{token}', 'UserController@registerFinish');
+Route::get('project/{project}/register/print/{token}', 'UserController@registerPrint');
 //平台--------------------------------------------------------------------------------------------------------------------------------- 
 
 Route::filter('auth_logined', function() {
@@ -99,16 +103,4 @@ Route::filter('auth_logined', function() {
             }
         }
     }
-});
-
-Route::filter('maintenance', function($route) {
-    $app = app();
-    return $app->make('MagController')->callAction($app, $app['router'], 'maintenance', array());
-});
-
-Route::filter('folder_ques', function($route) {//找不到根目錄
-    $root = $route->getParameter('root');
-    $folder = ques_path().'/ques/data/'.$root;
-    if( !is_dir($folder) )
-        return Response::view('nopage', array(), 404);
 });
