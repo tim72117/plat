@@ -1,15 +1,4 @@
-<?
-##########################################################################################
-#
-# filename: 1isms_create_user.php
-# function: 申請use查詢平台使用者資料
-#
-# 維護者  : 周家吉
-# 維護日期: 2013/05/20
-#
-##########################################################################################	
-?>
-<div ng-app ng-controller="register">
+<div ng-app="app" ng-controller="register">
     
 <?=Form::open(array('url' => 'project/' . Request::segment(2) . '/register/save', 'method' => 'post'))?>
 <table width="100%">
@@ -24,82 +13,118 @@
                 <div class="img" style="top:248px;left:0;width:128px;height:128px;background-image: url('<?=asset('images/register/email.png')?>')"><div style="margin-top:138px">到您註冊的信箱收取更改密碼的信件</div></div>
                 <div class="img" style="top:248px;left:256px;width:128px;height:128px;background-image: url('<?=asset('images/register/letter.png')?>')"><div style="margin-top:138px">主管簽核後，將申請表正本寄給我們</div></div>
                 <div class="img" style="top:426px;left:64px;width:256px;height:128px;background-image: url('<?=asset('images/register/key.png')?>')"><div style="margin-top:138px">我們收到您的申請表後，確認您已經完成修改密碼，即為您開通帳號</div></div>
+                <!--<img src="<?=asset('images/register/printer.png')?>" style="position: absolute;left:256px" /><span>列印申請表</span><br />
+                <img src="<?=asset('images/register/letter.png')?>" style="position: absolute" /><span>將申請表正本寄給我們</span><br />
+                <img src="<?=asset('images/register/email.png')?>" style="position: absolute" /><span>到您註冊的信箱收取更改密碼的信件</span><br />
+                <img src="<?=asset('images/register/key.png')?>" style="position: absolute" /><span>修改密碼</span>-->
             </div>
         </td>
-        <td>
-            <table width="580" align="left" cellpadding="0" cellspacing="10" border="0" style="background-color: #F2FFF2">    
-                <tr>
-                  <td class="header2" colspan="2"><p>&nbsp;資料查詢平台使用權限申請 &nbsp;<u><font color="#0000FF">請填完下列資料後點選申請表送出</font></u></p></td>
-                </tr>
-                <tr>
-                    <th align="right" width="150" height="30" valign="middle">E-mail <span style="color:#f00">(登入帳號)</span></th>		
-                    <td align="left" colspan="3"><?=Form::text('email', '', array('size'=>50, 'class'=>'register-block'))?></td>    	
-                </tr>
-                <tr>
-                    <th align="right" height="40" valign="middle">姓名</th>
-                    <td align="left"><?=Form::text('name', '', array('size'=>20, 'class'=>'register-block'))?></td>
-                </tr>
-                <tr>
-                    <th align="right" height="40" valign="middle">職稱</th>
-                    <td align="left"><?=Form::text('title', '', array('size'=>20, 'class'=>'register-block'))?></td>
-                </tr>
-                <tr>
-                    <th align="right" height="40" valign="middle">聯絡電話(Tel)</th>
-                    <td align="left">
-                        <?=Form::text('tel', '', array('size'=>18, 'class'=>'register-block'))?>
-                        傳真電話
-                        <?=Form::text('fax', '', array('size'=>18, 'class'=>'register-block'))?>
-                    </td>
-                </tr>
-                <tr>
-                    <th align="right" height="40" valign="middle">單位類別</th>
-                    <td align="left">
-                        <?=Form::radio('department_class', 2, '', array('id'=>'department_class[0]', 'ng-model'=>'class.type', 'size'=>20)).Form::label('department_class[0]', '中央政府')?>
-                        <?=Form::radio('department_class', 1, '', array('id'=>'department_class[1]', 'ng-model'=>'class.type', 'size'=>20)).Form::label('department_class[1]', '縣市政府')?>
-                        <?=Form::radio('department_class', 0, '', array('id'=>'department_class[2]', 'ng-model'=>'class.type', 'size'=>20)).Form::label('department_class[2]', '各級學校')?>
-                    </td>  
-                </tr>
-                <tr>
-                    <th align="right" height="40" valign="middle">單位名稱</th>
-                    <td align="left">
-                        <div id="schools">
-                            <div ng-repeat="sch_id in sch_ids" style="float:left;border:1px solid #888;margin-right:3px;margin-top:3px"><span class="muti-select-lab">{{ sch_id.name }}</span></div>
-                        </div>                        
-                        <select ng-model="sch_id" ng-options="(school.id+' - '+school.sname) group by school.cityname for school in schools | filter:class track by school.id" ng-change="change()" name="sch_id" style="padding:5px;width:400px">
-                            <option value="">----------------------------選擇您服務的單位----------------------------</option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <th align="right" height="40" valign="middle">申請權限</th>
-                    <td align="left">
-                        <?=Form::checkbox('scope[plat]',  1, false, array('id'=>'scope[plat]', 'size'=>20)).Form::label('scope[plat]', '學校查詢平台')?>
-                        <?=Form::checkbox('scope[das]',   1, false, array('id'=>'scope[das]',  'size'=>20)).Form::label('scope[das]',  '線上分析系統')?>
-                    </td>
-                </tr>
-                <tr>
-                    <th align="right" height="100" valign="middle">承辦業務</th>
-                    <td align="left" style="line-height:25px">
-                        <div><?=Form::checkbox('operational[schpeo]',  1, false, array('id'=>'operational[0]','size'=>20)).Form::label('operational[0]', '學校人員')?></div>
-                        <div><?=Form::checkbox('operational[senior1]', 1, false, array('id'=>'operational[1]','size'=>20)).Form::label('operational[1]', '高一、專一學生')?></div>
-                        <div><?=Form::checkbox('operational[senior2]', 1, false, array('id'=>'operational[2]','size'=>20)).Form::label('operational[2]', '高二、專二學生')?></div>
-                        <div><?=Form::checkbox('operational[tutor]',   1, false, array('id'=>'operational[3]','size'=>20)).Form::label('operational[3]', '高二、專二導師')?></div>
-                        <div><?=Form::checkbox('operational[parent]',  1, false, array('id'=>'operational[4]','size'=>20)).Form::label('operational[4]', '高二、專二家長')?></div>
-                     </td>
-                </tr>
-                <tr>
-                    <td align="center" height="60" valign="middle" colspan="2">
-                        <div style="color:#f00"><?
-                            if( isset($dddos_error) && $dddos_error )
-                                echo '送出次數過多,請等待30秒後再進行';
-                            if( isset($csrf_error) && $csrf_error )
-                                echo '畫面過期，請重新整理';
-                            echo implode('、',array_filter($errors->all()));
-                        ?>
-                        </div>
-                        <input type="submit" value="申請表送出" style="padding: 10px" />
-                    </td>
-                </tr>
+     <td>
+     <table width="580" align="left" cellpadding="0" cellspacing="10" border="0">    
+		<form class="ui form">
+			<h2 class="ui dividing header"><p>&nbsp;資料查詢平台使用權限申請 &nbsp;
+    			<u><font color="#336666">請填完下列資料後點選申請表送出</font></u></p>
+    		</h2>
+            
+    		<div class="two fields">
+        		<div class="field">
+          			E-mail <span style="color:#f00">(登入帳號)</span>
+        		</div>
+        		<div class="field">
+          			<?=Form::text('email', '', array('size'=>50, 'class'=>'register-block'))?>
+        		</div>
+      		</div>
+            
+      		<div class="two fields">
+        		<div class="field">
+          			姓名
+        		</div>
+        		<div class="field">
+          			<?=Form::text('name', '', array('size'=>20, 'class'=>'register-block'))?>
+        		</div>
+      		</div>
+      
+      		<div class="two fields">
+        		<div class="field">
+          			職稱
+        		</div>
+        		<div class="field">
+          			<?=Form::text('title', '', array('size'=>20, 'class'=>'register-block'))?>
+        		</div>
+      		</div>
+
+      		<div class="two fields">
+        		<div class="field">
+          			聯絡電話(Tel)
+        		</div>
+        		<div class="field">
+          			<?=Form::text('tel', '', array('size'=>18, 'class'=>'register-block', 'style'=>'ui form'))?>
+        		</div>
+      		</div>
+
+     	 	<div class="two fields">
+        		<div class="field">
+        			單位類別
+        		</div>
+        		<div class="field">
+				<div>              
+          			<?=Form::radio('department_class', 2, '', array('id'=>'department_class[0]', 'ng-model'=>'class.type', 'size'=>20, 'class'=>'ui form')).Form::label('department_class[0]', '中央政府')?>
+        		</div>
+        		<div> 
+          			<?=Form::radio('department_class', 1, '', array('id'=>'department_class[1]', 'ng-model'=>'class.type', 'size'=>20,'class'=>'ui form')).Form::label('department_class[1]', '縣市政府')?>
+        		</div>
+        		<div> 
+          		<?=Form::radio('department_class', 0, '', array('id'=>'department_class[2]', 'ng-model'=>'class.type', 'size'=>20,'class'=>'ui form')).Form::label('department_class[2]', '各級學校')?>
+        		</div>
+        		</div>
+     		</div>
+        
+      		<div class="two fields">
+        		<div class="field">
+        			單位名稱
+        		</div>
+        		<div class="field">      
+         			<select ng-model="sch_id" ng-options="(school.id+' - '+school.sname) group by school.cityname for school in schools | filter:class track by school.id" name="sch_id" style="padding:5px;width:400px" select class="ui search dropdown">
+             		<option value="">----------------------------選擇您服務的單位----------------------------</option>
+         			</select>
+        		</div>
+      		</div>        
+
+      		<div class="two fields">
+        		<div class="field">
+        			申請權限
+        		</div>
+        		<div class="field">
+        			<?=Form::checkbox('scope[plat]',  1, false, array('id'=>'scope[plat]', 'size'=>20)).Form::label('scope[plat]', '學校查詢平台')?>
+					<?=Form::checkbox('scope[das]',   1, false, array('id'=>'scope[das]',  'size'=>20)).Form::label('scope[das]',  '線上分析系統')?>
+        		</div>
+      		</div>      
+
+      		<div class="two fields">
+        		<div class="field">      
+      				承辦業務
+        		</div>
+        		<div class="field">
+                	<div><?=Form::checkbox('operational[schpeo]',  1, false, array('id'=>'operational[0]','size'=>20)).Form::label('operational[0]', '學校人員')?></div>
+                    <div><?=Form::checkbox('operational[senior1]', 1, false, array('id'=>'operational[1]','size'=>20)).Form::label('operational[1]', '高一、專一學生')?></div>
+                    <div><?=Form::checkbox('operational[senior2]', 1, false, array('id'=>'operational[2]','size'=>20)).Form::label('operational[2]', '高二、專二學生')?></div>
+                    <div><?=Form::checkbox('operational[tutor]',   1, false, array('id'=>'operational[3]','size'=>20)).Form::label('operational[3]', '高二、專二導師')?></div>
+                    <div><?=Form::checkbox('operational[parent]',  1, false, array('id'=>'operational[4]','size'=>20)).Form::label('operational[4]', '高二、專二家長')?></div>
+        		</div>
+      		</div>
+      
+      		<div class="field" style="color:#f00">  
+      			<div ><?
+        	if( isset($dddos_error) && $dddos_error )
+            	echo '送出次數過多,請等待30秒後再進行';
+            if( isset($csrf_error) && $csrf_error )
+            	echo '畫面過期，請重新整理';
+            	echo implode('、',array_filter($errors->all()));
+                        		?>
+        		</div>
+       			<input type="submit" value="申請表送出" style="padding: 10px" /> 
+      		</div>    
+</form>
             </table>
         </td>
     </tr>
@@ -131,21 +156,21 @@
 </table>
 <?=Form::close()?>
     
-<script>
 <?
-//$schools = DB::table('pub_school')->where('year', 102)->orderBy('schtype', 'desc')->select('sname', 'id', 'type', 'cityname')->get();
-?>
-function register($scope) {
-    $scope.schools = angular.fromJson(<?//=json_encode($schools)?>);
-
-    $scope.sch_ids = [];
-    $scope.change = function(){
-        $scope.sch_ids.push({id:$scope.sch_id.id, name:$scope.sch_id.sname});
-    };
-
-};
-
+$schools = DB::table('pub_school')->where('year', 102)->orderBy('schtype', 'desc')->select('sname', 'id', 'type', 'cityname')->get();
+?> 
+<script>
+angular.module('app', [])
+.controller('register', function($scope) {
+    $scope.schools = angular.fromJson(<?=json_encode($schools)?>);
+});
 </script>
+
+<script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
+<script src="/js/angular-semantic-ui/dropdown.js"></script>
+
+<link rel="stylesheet" href="/css/ui/Semantic-UI-1.11.4/components/form.min.css" />
+
 <style>
 th,td,p {
    font-size: 14px 

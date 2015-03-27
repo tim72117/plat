@@ -19,8 +19,8 @@ Route::patterns(['project' => '[a-z]+', 'token' => '[a-z0-9]+']);
 
 Route::get('/', function(){ return Redirect::to('user/auth/cher'); });
 Route::get('project', 'UserController@project');
-Route::get('project/{project}/', array('before' => 'guest', 'uses' => 'UserController@loginPage'));
 Route::get('user/auth/{project}', function($project) { return Redirect::to('project/' . $project); });
+Route::get('user/auth/password/reset/{project}/{token}', function($project, $token){ return Redirect::to('project/'. $project .'/password/reset/' . $token); });
 //平台-------------------------------------------------------------------------------------------------------------------------------
 Route::group(array('before' => 'auth_logined'), function() {        
 
@@ -39,7 +39,7 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::post('file/{intent_key}/upload', 'FileController@fileUpload');
     Route::any('file/{intent_key}/{method}', 'FileController@fileOpen');
 
-    Route::get('page/project/{context?}', array('before' => '', 'as' => 'project', 'uses' => 'PageController@project'));
+    Route::get('page/project/{context?}', array('before' => '', 'uses' => 'PageController@project'));
     Route::post('page/project/{context?}', array('before' => 'csrf', 'uses' => 'PageController@project'));
 
     Route::get('page/{context}', 'PageController@page');
@@ -55,11 +55,11 @@ Route::group(array('before' => 'auth_logined'), function() {
 });
 
 Route::get('project/{project}/password/remind', 'UserController@remindPage');
-Route::post('auth/password/remind/{project}', array('before' => 'csrf|post_delay', 'uses' => 'UserController@remind'));
+Route::post('project/{project}/password/remind', array('before' => 'csrf|post_delay', 'uses' => 'UserController@remind'));
+Route::get('project/{project}/password/reset/{token}', 'UserController@resetPage');
+Route::post('project/{project}/password/reset/{token}', array('before' => 'csrf|post_delay', 'uses' => 'UserController@reset'));
 
-Route::get('user/auth/password/reset/{project}/{token}', 'UserController@resetPage');
-Route::post('user/auth/password/reset/{token}', array('before' => 'csrf|post_delay', 'uses' => 'UserController@reset'));
-
+Route::get('project/{project}', array('before' => 'guest', 'uses' => 'UserController@loginPage'));
 Route::post('project/{project}/login', array('before' => 'csrf|post_delay', 'uses' => 'UserController@login'));
 
 Route::get('project/{project}/register', 'UserController@registerPage');

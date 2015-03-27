@@ -15,9 +15,16 @@ class UserController extends BaseController {
 	*/
     protected $layout = 'demo.layout-main';
 	protected $auth_rull = array(
-			'username'              => 'required|regex:/^[0-9a-zA-Z!@_]+$/|between:3,20',
-			'password'              => 'required|regex:/^[0-9a-zA-Z!@#$%^&*]+$/|between:6,20',
-			'password_confirmation' => 'required|regex:/^[0-9a-zA-Z!@#$%^&*]+$/|between:6,20|confirmed');
+        'username'              => 'required|regex:/^[0-9a-zA-Z!@_]+$/|between:3,20',
+        'password'              => 'required|regex:/^[0-9a-zA-Z!@#$%^&*]+$/|between:6,20',
+        'password_confirmation' => 'required|regex:/^[0-9a-zA-Z!@#$%^&*]+$/|between:6,20|confirmed',
+    );
+    protected $rulls_message = array(
+        'email.required'    => '電子郵件必填',
+        'email.email'       => '電子郵件格式錯誤',
+        'password.required' => '密碼必填',
+        'password.regex'    => '密碼格式錯誤',
+    );
 	
 	public function __construct(){
 		$this->beforeFilter(function($route){
@@ -34,43 +41,26 @@ class UserController extends BaseController {
 		return Redirect::to('project/'.$project);
 	}	
 
-	public function loginPage($project) {
-
-        if( Auth::check() ){
-            if( Auth::user()->getProject() == $project ) return Redirect::route('project');
-        }
-        
-        if( $project=='das' ){
+	public function loginPage($project) {        
+        if( $project=='das' ){exit;
             return Redirect::to('project/use');
         }
 		
-		$contents = View::make('demo.' . $project . '.home')
+		return View::make('demo.' . $project . '.home')
 			->nest('context', 'demo.' . $project . '.login')
 			->nest('news', 'demo.' . $project . '.news')
 			->nest('child_footer', 'demo.' . $project . '.footer');
-		$response = Response::make($contents, 200);
-		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
-		$response->header('Pragma', 'no-cache');
-		$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
-		return $response;
 	}
 	
-	public function login() {
+	public function login($project) {
 		$input = Input::only('email', 'password');
         
 		$rulls = array(
 			'email'    => 'required|email',
-			'password' => 'required|regex:/[0-9a-zA-Z!@#$%^&*]/|between:3,20',
+			'password' => $this->auth_rull['password'],
 		);
         
-		$rulls_message = array(
-			'email.required'    => '電子郵件必填',
-			'email.email'       => '電子郵件格式錯誤',
-			'password.required' => '密碼必填',
-			'password.regex'    => '密碼格式錯誤',
-		);
-        
-		$validator = Validator::make($input, $rulls, $rulls_message);
+		$validator = Validator::make($input, $rulls, $this->rulls_message);
 
 		if( $validator->fails() ){
 			throw new app\library\files\v0\ValidateException($validator);
@@ -80,18 +70,18 @@ class UserController extends BaseController {
             
             $user = Auth::user();            
             
-            $projects = DB::table('contact')->where('user_id', $user->id)->where('active', true)->orderBy('main', 'desc')->lists('project');
+            $contact_query = DB::table('contact')->where('user_id', $user->id)->where('active', true)->where('project', $project);
             
-            if( $user->active != 1 || !in_array($input['project'], $projects) ){
+            if( !$user->active || !$contact_query->exists() ){
                 $validator->getMessageBag()->add('login_error', '帳號尚未開通');
                 throw new app\library\files\v0\ValidateException($validator);
             }
             
-            $user->setProject($input['project']);
+            $user->setProject($project);
                 
             Auth::login($user, true);
             
-            return Redirect::route('project');
+            return Redirect::to('page/project');
 			
 		}else{			
 			$validator->getMessageBag()->add('login_error', '帳號密碼錯誤');
@@ -102,7 +92,7 @@ class UserController extends BaseController {
 	
 	public function remindPage($project) {
 		return View::make('demo.' . $project . '.home')
-			->nest('context','demo.' . $project . '.remind', ['project' => $project])
+			->nest('context','demo.' . $project . '.remind')
 			->nest('child_footer','demo.' . $project . '.footer');
 	}
 
@@ -117,7 +107,7 @@ class UserController extends BaseController {
 				return Redirect::back()->withErrors(['error' => Lang::get($response)]);
 
 			case Password::REMINDER_SENT:
-				return View::make('demo.'.$project.'.home', array('contextFile'=>'remind', 'title'=>'重設密碼信件已寄出'))
+				return View::make('demo.' . $project . '.home', array('contextFile'=>'remind', 'title'=>'重設密碼信件已寄出'))
                     ->with('context', '<div style="margin:30px auto;width:300px;color:#f00">重設密碼信件已寄出，請到您的電子郵件信箱收取信件</div>')
                     ->nest('child_footer','demo.'.$project.'.footer');
 		}
@@ -208,7 +198,6 @@ class UserController extends BaseController {
 			$validator->getMessageBag()->add('passwordold', '舊密碼錯誤');
 			return Redirect::back()->withErrors($validator);
 		}
-
 	}
 
     public function registerPage($project) {
@@ -223,24 +212,20 @@ class UserController extends BaseController {
 			->nest('child_footer','demo.' . $project . '.footer');
     }
 	
-	public function registerSave($project) {
-	
-        $email = 'tim72117';//$user->getReminderEmail();
-        $token = str_shuffle(sha1($email.spl_object_hash($this).microtime(true)));
-
-        DB::table('register_print')->insert(['token' => $token, 'user_id' => 1, 'created_at' => new Carbon\Carbon]);
-
-//        $user = require app_path().'\views\demo\\'.$project.'\registerValidator.php';
-//        if( $user ){
-//
-//            $context =  View::make('demo.'.$project.'.registerPrint', arrayView('user'=>$user));
-//            return $context;
-//
-//        }else{
-//            return Redirect::back();
-//        }
-
-        return Redirect::to('project/' . $project . '/register/finish/' . $token);
+	public function registerSave($project) { 
+        $user = require app_path().'\views\demo\\' . $project . '\register_validator.php';
+        
+        if( $user ) {
+            $email = $user->getReminderEmail();
+            
+            $token = str_shuffle(sha1($email.spl_object_hash($this).microtime(true)));
+            
+            DB::table('register_print')->insert(['token' => $token, 'user_id' => 1, 'created_at' => new Carbon\Carbon]);
+            
+            return Redirect::to('project/' . $project . '/register/finish/' . $token);
+        }else{
+            return Redirect::back();
+        }
 	}
 
     public function registerFinish($project, $token) {
@@ -250,12 +235,15 @@ class UserController extends BaseController {
     }
 
     public function registerPrint($project, $token) {
+        $register_print_query = DB::table('register_print')->where('token', $token);
+        
+        if( $register_print_query->exists() ) {
+            $user = User::find($register_print_query->first()->user_id);
+            
+            return View::make('demo.' . $project . '.register_print', array('user' => $user));
+        }       
 
-        DB::table('projects')->where('code', $token)->first();
-
-        return View::make('demo.' . $project . '.register_print', array('user' => 1));
-
-		$response = Response::make($contents, 200);
+		$response = Response::make('', 200);
 		$response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
 		$response->header('Pragma', 'no-cache');
 		$response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');

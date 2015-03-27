@@ -1,4 +1,4 @@
-<?
+<?php
 	
 $input = Input::only('email','name','title','scope','department_class','tel','fax','sch_id','operational');	
 
@@ -52,7 +52,7 @@ $user->valid();
 
 if( Input::get('scope.plat') == 1 ){
     $contact_use = new Contact(array(
-        'project'          => 'use', 
+        'project'          => 'tiped', 
         'main'             => 1,
         'active'           => 0,    
         'sname'            => School::find($input['sch_id'])->sname,
@@ -65,20 +65,6 @@ if( Input::get('scope.plat') == 1 ){
     $contact_use->valid();
 }
 
-if( Input::get('scope.das') == 1 ){
-    $contact_das = new Contact(array(
-        'project'          => 'das',    
-        'active'           => 0,    
-        'sname'            => School::find($input['sch_id'])->sname,
-        'title'            => $input['title'],
-        'tel'              => $input['tel'],
-        'fax'              => $input['fax'],
-        'created_ip'       => Request::getClientIp(),
-    ));
-
-    $contact_das->valid();
-}
-
 $user->save();
 
 
@@ -86,11 +72,6 @@ $user->save();
 if( Input::get('scope.plat') == 1 ){
     $user->setProject('use');
     $user->contact()->save($contact_use);
-}
-
-if( Input::get('scope.das') == 1 ){
-    $user->setProject('das');
-    $user->contact()->save($contact_das);
 }
 
 $user->schools()->attach($input['sch_id'],array(
