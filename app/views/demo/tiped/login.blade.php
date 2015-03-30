@@ -1,3 +1,4 @@
+<div style="height: 150px"></div>
 <div class="ui basic segment" style="width: 400px;margin: 0 auto">
     <div class="ui attached message">
         <div class="header">

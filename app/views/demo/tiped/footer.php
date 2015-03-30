@@ -1,7 +1,7 @@
 <div style="margin: 0 auto;width:850px">
     <div class="ui basic segment" style="margin: 0 auto;width:380px">
 
-        <div style="font-size:12px;color:#888">
+        <div style="color: #888;font-size: 12px">
             Tel:（02）7734-3669、（02）7734-3654、（02）7734-3686
             <br />
             Fax:（02）3343-3910
@@ -20,7 +20,7 @@
         <span style="margin-left:10px">隱私政策</span>
         <span style="margin-left:10px">網路安全</span>-->
 
-        <div style="color:#888">Copyright © 2013 國立台灣師範大學 教育研究與評鑑中心 版權所有</div>
+        <div style="color:#888;font-size: 12px">Copyright © 2013 國立台灣師範大學 教育研究與評鑑中心 版權所有</div>
         
     </div>
 </div>

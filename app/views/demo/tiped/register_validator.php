@@ -1,41 +1,29 @@
 <?php
 	
-$input = Input::only('email','name','title','scope','department_class','tel','fax','sch_id','operational');	
+$input = Input::only('email', 'name', 'title', 'tel', 'sch_id');	
 
 $rulls = array(
     'email'               => 'required|email|unique:users',
-    'department_class'    => 'required|in:0,1,2',
-    'sch_id'              => 'required|alpha_num|max:6',
-    'scope'               => 'required',
-    'scope.plat'          => 'in:1',
-    'scope.das'           => 'in:1',
-    'operational'         => 'required',
-    'operational.schpeo'  => 'in:1',
-    'operational.senior1' => 'in:1',
-    'operational.senior2' => 'in:1',
-    'operational.tutor'   => 'in:1',
-    'operational.parent'  => 'in:1',
+    'name'                => 'required|max:10',
+    'title'               => 'required|max:10',
+    'tel'                 => 'required|max:20',
+    'sch_id'              => 'required|alpha_num|max:4',
 );
 
 $rulls_message = array(
-    'email.required'            => '電子郵件必填',
-    'department_class.required' => '單位級別必填',	
-    'sch_id.required'           => '學校名稱、代號必填',	
-    'scope.required'            => '申請權限必填',	
-    'operational.required'      => '承辦業務必填',	
+    'email.required'         => '電子郵件必填',
+    'name.required'          => '姓名必填',
+    'title.required'         => '職稱必填',
+    'tel.required'           => '連絡電話必填',
+    'sch_id.required'        => '服務單位必填',
 
     'email.email'            => '電子郵件格式錯誤',
     'email.unique'           => '電子郵件已被註冊',
-    'department_class.in'    => '單位級別格式錯誤',	
-    'sch_id.alpha_num'       => '學校名稱、代號格式錯誤',	
-    'sch_id.max'             => '代號不能格式錯誤',	
-    'scope.plat.in'          => '申請權限格式錯誤',
-    'scope.das.in'           => '申請權限格式錯誤',
-    'operational.schpeo.in'  => '承辦業務格式錯誤',
-    'operational.senior1.in' => '承辦業務格式錯誤',
-    'operational.senior2.in' => '承辦業務格式錯誤',
-    'operational.tutor.in'   => '承辦業務格式錯誤',
-    'operational.parent.in'  => '承辦業務格式錯誤',			
+    'name.max'               => '姓名最多10個字',
+    'title.max'              => '職稱最多10個字',
+    'tel.max'                => '連絡電話最多20個字',
+    'sch_id.alpha_num'       => '服務單位格式錯誤',
+    'sch_id.max'             => '服務單位格式錯誤',	
 );
 
 $validator = Validator::make($input, $rulls, $rulls_message);
@@ -50,20 +38,16 @@ $user->username    = $input['name'];
 $user->email       = $input['email'];
 $user->valid();
 
-if( Input::get('scope.plat') == 1 ){
-    $contact_use = new Contact(array(
-        'project'          => 'tiped', 
-        'main'             => 1,
-        'active'           => 0,    
-        'sname'            => School::find($input['sch_id'])->sname,
-        'title'            => $input['title'],
-        'tel'              => $input['tel'],
-        'fax'              => $input['fax'],
-        'created_ip'       => Request::getClientIp(),
-    ));
+$contact_use = new Contact(array(
+    'project'    => 'tiped',
+    'active'     => 0,
+    'sname'      => School::find($input['sch_id'])->sname,
+    'title'      => $input['title'],
+    'tel'        => $input['tel'],
+    'created_ip' => Request::getClientIp(),
+));
 
-    $contact_use->valid();
-}
+$contact_use->valid();
 
 $user->save();
 
