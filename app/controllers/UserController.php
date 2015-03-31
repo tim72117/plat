@@ -62,7 +62,7 @@ class UserController extends BaseController {
 		$input = Input::only('email', 'password');
         
 		$rulls = array(
-			'email'    => 'required|email',
+			'email'    => $this->auth_rull['email'],
 			'password' => $this->auth_rull['password'],
 		);
         
@@ -129,9 +129,9 @@ class UserController extends BaseController {
 		$input = Input::only('email', 'password', 'password_confirmation');
         
 		$rulls = array(
-			'email'                  => $this->auth_rull['email'],
-			'password'               => $this->auth_rull['password_confirmation'],
-			'password_confirmation'  => $this->auth_rull['password'],
+			'email'                 => $this->auth_rull['email'],
+			'password'              => $this->auth_rull['password_confirmation'],
+			'password_confirmation' => $this->auth_rull['password'],
 		);
         
         $validator = Validator::make($input, $rulls, $this->rulls_message);
@@ -167,21 +167,14 @@ class UserController extends BaseController {
 	
 	public function passwordChange() {		
 		$input = Input::only('passwordold', 'password', 'password_confirmation');
+        
 		$rulls = array(
 			'passwordold'            => $this->auth_rull['password'],
 			'password'               => $this->auth_rull['password_confirmation'],
 			'password_confirmation'  => $this->auth_rull['password'],
 		);
-		$rulls_message = array(
-			'passwordold.required' => '舊密碼必填',
-			'passwordold.regex'    => '舊密碼格式錯誤',
-			'password.required'    => '新密碼必填',
-			'password.regex'       => '新密碼格式錯誤',
-			'password_confirmation.required' => '確認新密碼必填',	
-			'password_confirmation.regex'    => '確認新密碼格式錯誤',
-			'password.confirmed'             => '確認新密碼必須相同',	
-		);
-		$validator = Validator::make($input, $rulls, $rulls_message);
+
+		$validator = Validator::make($input, $rulls, $this->rulls_message);
 		
 		if( $validator->fails() ){
 			throw new app\library\files\v0\ValidateException($validator);
