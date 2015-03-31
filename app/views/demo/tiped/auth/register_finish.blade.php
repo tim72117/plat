@@ -15,7 +15,6 @@
     </div>
     
     <div class="ui bottom attached warning message">
-        <i class="icon help"></i>
-        Already signed up? <a href="#">Login here</a> instead.
+        我已經註冊過了，我要<?=link_to('project/' . Request::segment(2), '登入')?>
     </div>
 </div>

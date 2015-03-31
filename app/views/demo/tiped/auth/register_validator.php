@@ -41,7 +41,6 @@ $user->valid();
 $contact_use = new Contact(array(
     'project'    => 'tiped',
     'active'     => 0,
-    'sname'      => School::find($input['sch_id'])->sname,
     'title'      => $input['title'],
     'tel'        => $input['tel'],
     'created_ip' => Request::getClientIp(),
@@ -57,19 +56,5 @@ if( Input::get('scope.plat') == 1 ){
     $user->setProject('use');
     $user->contact()->save($contact_use);
 }
-
-$user->schools()->attach($input['sch_id'],array(
-    'department_class' => $input['department_class'],
-    'schpeo'           => Input::get('operational.schpeo', '0'),
-    'senior1'          => Input::get('operational.senior1','0'),
-    'senior2'          => Input::get('operational.senior2','0'),
-    'tutor'            => Input::get('operational.tutor',  '0'),
-    'parent'           => Input::get('operational.parent', '0'),
-));		
-
-    
-$credentials = array('email' => $input['email']);
-
-Password::remind($credentials);
 
 return $user;

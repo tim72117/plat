@@ -3,13 +3,12 @@
         <div class="header">
             教育資料庫資料查詢平台
         </div>
-        <p>請輸入您註冊的電子郵件信箱，系統將會發送一封重新設定您的密碼的信件到這個信箱。</p>
+        <p>設定密碼</p>
     </div>
     
-    @include('demo.remind')
+    @include('demo.auth.reset')
     
     <div class="ui bottom attached warning message">
-        <i class="icon help"></i>
-        Already signed up? <a href="#">Login here</a> instead.
+        我已經註冊過了，我要<?=link_to('project/' . Request::segment(2), '登入')?>
     </div>
 </div>

@@ -18,8 +18,9 @@
         <div class="column">
             <div class="ui horizontal segment">
                 <?=Form::open(array('url' => 'project/' . Request::segment(2) . '/register/save', 'method' => 'post', 'class' => 'ui form segment attached ' . ($errors->isEmpty() ? '' : 'error'), 'name' => 'registerForm'))?>                
-                    <h4 class="ui dividing header"><p>申請資料查詢平台使用權限
-                        <u><font color="#336666">請填完下列資料後點選申請表送出</font></u></p>
+                    <h4 class="ui dividing header">
+                        申請資料查詢平台使用權限
+                        <u>請填完下列資料後點選申請表送出</u>
                     </h4>
                 
                     <div class="field">
@@ -54,14 +55,13 @@
                     </div>
                 
                     <div class="field">
-                        <label>一旦點擊註冊，即表示你同意 <a href="register/terms">使用條款</a>。</label>
+                        <label>一旦點擊註冊，即表示你同意 <a href="register/terms" target="_blank">使用條款</a>。</label>
                     </div>
                 
                     <div class="ui submit positive button" onclick="registerForm.submit()">註冊</div>
                 <?=Form::close()?>
                     
                 <div class="ui bottom attached warning message">
-                    <i class="icon help"></i>
                     我已經註冊過了，我要<?=link_to('project/' . Request::segment(2), '登入')?>
                     <br />
                     <i class="icon help"></i>
