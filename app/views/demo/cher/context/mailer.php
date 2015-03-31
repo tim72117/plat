@@ -19,8 +19,7 @@
 </div>
 
 <script type="text/javascript">  
-angular.module('myapp', []).controller('mailer', mailer);
-function mailer($scope, $filter, $http, $interval) {
+app.controller('mailer', function($scope, $filter, $http, $interval) {
     
     $scope.groups = [];
     $scope.users = [];
@@ -106,6 +105,5 @@ function mailer($scope, $filter, $http, $interval) {
 
     };
 
-}
+});
 </script>
-<?
