@@ -18,10 +18,9 @@
         <div class="column">
             <div class="ui horizontal segment">
                 <?=Form::open(array('url' => 'project/' . Request::segment(2) . '/register/save', 'method' => 'post', 'class' => 'ui form segment attached ' . ($errors->isEmpty() ? '' : 'error'), 'name' => 'registerForm'))?>                
-                    <h4 class="ui dividing header">
-                        申請資料查詢平台使用權限
-                        <u>請填完下列資料後點選申請表送出</u>
-                    </h4>
+                    <h5 class="ui dividing header"><p>申請資料查詢平台使用權限
+                        <u><font color="#336666">請填完下列資料後點選申請表送出</font></u></p>
+                    </h5>
                 
                     <div class="field">
                         <label>登入帳號 (e-mail)</label>
