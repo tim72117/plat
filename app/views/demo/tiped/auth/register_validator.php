@@ -1,5 +1,4 @@
-<?php
-	
+<?php	
 $input = Input::only('email', 'name', 'title', 'tel', 'sch_id');	
 
 $rulls = array(
@@ -31,14 +30,13 @@ $validator = Validator::make($input, $rulls, $rulls_message);
 if( $validator->fails() ){	
     throw new app\library\files\v0\ValidateException($validator);
 }
-
 		
-$user = new User;
+$user = new User_tiped;
 $user->username    = $input['name'];
 $user->email       = $input['email'];
 $user->valid();
 
-$contact_use = new Contact(array(
+$contact_tiped = new Contact(array(
     'project'    => 'tiped',
     'active'     => 0,
     'title'      => $input['title'],
@@ -46,15 +44,16 @@ $contact_use = new Contact(array(
     'created_ip' => Request::getClientIp(),
 ));
 
-$contact_use->valid();
+$contact_tiped->valid();
+
+DB::beginTransaction();
 
 $user->save();
 
+$user->contacts()->save($contact_tiped);
 
+$user->schools()->attach($input['sch_id'], array());
 
-if( Input::get('scope.plat') == 1 ){
-    $user->setProject('use');
-    $user->contact()->save($contact_use);
-}
+DB::commit();
 
 return $user;

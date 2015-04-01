@@ -19,7 +19,7 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 	 *
 	 * @var array
 	 */
-	protected $hidden = array('password','rules','rulls_message','remember_token','pivot');
+	protected $hidden = array('password', 'rules', 'rulls_message', 'remember_token', 'pivot');
 
 	/**
 	 * Get the unique identifier for the user.
@@ -151,16 +151,12 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
     /*
 	| Relations
     */
-	public function docsHasRequester() {
-		return $this->hasMany('Apps', 'user_id');//->has('requester','=',0);
-	}
-
 	public function contact() {
 		return $this->hasOne('Contact', 'user_id', 'id')->where('contact.project', $this->getProject());
 	}
     
 	public function contacts() {        
-		return $this->hasOne('Contact', 'user_id', 'id');
+		return $this->hasMany('Contact', 'user_id', 'id');
 	}
     
 	public function works() {
@@ -172,7 +168,6 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 	}
 	
 	public function groups() {
-		//return $this->hasMany('Group', 'user_id', 'id');
         return $this->belongsToMany('Group', 'user_own_group', 'user_id', 'group_id');
 	}    
     

@@ -1,16 +1,17 @@
+<div style="height: 100px"></div>
 <div ng-app="app" ng-controller="register">
     
     <div class="ui two column grid" style="width: 1000px;min-height: 650px;margin: 0 auto">
         <div class="column">
             <div class="ui horizontal segment">
-                <div style="position: relative;margin:20px auto;width:400px">
+                <div style="position: relative;margin: 0 auto;width:400px">
                     <div class="img" style="top:0;left:0;width:128px;height:128px;background-image: url('/images/register/pencil.png')"><div style="margin-top:138px">線上填寫申請表</div></div>
                     <div class="img" style="top:0;left:128px;width:128px;height:128px;background-image: url('/images/register/ArrowRight.png')"></div>
                     <div class="img" style="top:0;left:256px;width:128px;height:128px;background-image: url('/images/register/printer.png')"><div style="margin-top:138px">列印申請表</div></div>
                     <div class="img" style="top:140px;left:0;width:128px;height:128px;background-image: url('/images/register/ArrowDown.png')"></div>
                     <div class="img" style="top:140px;left:256px;width:128px;height:128px;background-image: url('/images/register/ArrowDown.png')"></div>
                     <div class="img" style="top:248px;left:0;width:128px;height:128px;background-image: url('/images/register/email.png')"><div style="margin-top:138px">到您註冊的信箱收取更改密碼的信件</div></div>
-                    <div class="img" style="top:248px;left:256px;width:128px;height:128px;background-image: url('/images/register/letter.png')"><div style="margin-top:138px">主管簽核後，將申請表正本寄給我們</div></div>
+                    <div class="img" style="top:248px;left:256px;width:128px;height:128px;background-image: url('/images/register/letter.png')"><div style="margin-top:138px">主管簽核後，將申請表傳真或郵寄給我們</div></div>
                     <div class="img" style="top:426px;left:64px;width:256px;height:128px;background-image: url('/images/register/key.png')"><div style="margin-top:138px">我們收到您的申請表後，確認您已經完成修改密碼，即為您開通帳號</div></div>
                 </div>
             </div>
