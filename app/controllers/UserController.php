@@ -211,7 +211,7 @@ class UserController extends BaseController {
             
             $token = str_shuffle(sha1($email.spl_object_hash($this).microtime(true)));
             
-            DB::table('register_print')->insert(['token' => $token, 'user_id' => 1, 'created_at' => new Carbon\Carbon]);
+            DB::table('register_print')->insert(['token' => $token, 'user_id' => $user->id, 'created_at' => new Carbon\Carbon]);
             
             Config::set('auth.reminder.email', 'emails.auth.register_' . $project);
             
@@ -237,9 +237,8 @@ class UserController extends BaseController {
         $register_print_query = DB::table('register_print')->where('token', $token);
         
         if( $register_print_query->exists() ) {
-            $user = User::find($register_print_query->first()->user_id);
             
-            return View::make('demo.' . $project . '.auth.register_print', array('user' => $user));
+            return View::make('demo.' . $project . '.auth.register_print', array('user_id' => $register_print_query->first()->user_id));
         }       
     }
     
