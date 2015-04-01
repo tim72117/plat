@@ -10,21 +10,21 @@ $shareFiles = ShareFile::with('isFile')->where(function($query) use($user) {
     count($inGroups)>0 && $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '<>', $user->id);
 })->orderBy('created_at', 'desc')->get();
 
-
-$news = DB::table('news')->orderBy('created_by')->get();
+$project_id = DB::table('projects')->where('code', $user->getProject())->first()->id;
+$news = DB::table('news')->where('project', $project_id)->orderBy('publish_at', 'desc')->get();
 foreach($news as $new) { 
-    echo '<div class="item"><i class="top aligned announcement icon"></i>';
+    $publish_at = new Carbon\Carbon($new->publish_at);
+    $now = Carbon\Carbon::now();
+    $difference = ($publish_at->diff($now)->days);
+    echo '<div class="item"><i class="top aligned announcement ' . ($difference>7 ? '' : 'red') . ' icon"></i>';
     
     echo '<div class="content">';
     echo    '<div class="header">';
-    echo        $new->context;
+    echo        $new->title;
     echo    '</div>';
-    echo    '<div class="description">'. $new->created_at;
-    
-    //echo        '<div style="width:100%;overflow:hidden!important;white-space: nowrap;text-overflow: ellipsis">'. $new->context .'</div>';
-    echo    '</div>';
-    
+    echo    '<div class="description">' . $new->context . '  ' . $difference . '天前</div>';    
     echo '</div>';
+    
     echo '</div>';
 }
 
