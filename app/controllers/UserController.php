@@ -51,10 +51,11 @@ class UserController extends BaseController {
         if( $project=='das' ){exit;
             return Redirect::to('project/use');
         }
+        
+        View::share('project', $project);
 		
 		return View::make('demo.' . $project . '.home')
 			->nest('context', 'demo.' . $project . '.auth.login')
-			->nest('news', 'demo.' . $project . '.news')
 			->nest('child_footer', 'demo.' . $project . '.footer');
 	}
 	
@@ -244,6 +245,10 @@ class UserController extends BaseController {
     
     public function terms($project) {
         return View::make('demo.' . $project . '.home')->nest('context', 'demo.' . $project . '.auth.register_terms')->nest('child_footer', 'demo.' . $project . '.footer');
+    }
+    
+    public function help($project) {
+        return View::make('demo.' . $project . '.home')->nest('context', 'demo.' . $project . '.auth.register_help')->nest('child_footer', 'demo.' . $project . '.footer');
     }
     
     public function check($project) {

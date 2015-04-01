@@ -65,6 +65,7 @@ Route::post('project/{project}/login', array('before' => 'csrf|post_delay', 'use
 Route::get('project/{project}/register', 'UserController@registerPage');
 Route::post('project/{project}/register/check', array('before' => 'post_delay', 'uses' => 'UserController@check'));
 Route::get('project/{project}/register/terms', 'UserController@terms');
+Route::get('project/{project}/register/help', 'UserController@help');
 Route::post('project/{project}/register/save', array('before' => 'csrf|post_delay', 'uses' => 'UserController@registerSave'));
 Route::get('project/{project}/register/finish/{token}', 'UserController@registerFinish');
 Route::get('project/{project}/register/print/{token}', 'UserController@registerPrint');
