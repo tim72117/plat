@@ -246,5 +246,9 @@ class UserController extends BaseController {
     public function terms($project) {
         return View::make('demo.' . $project . '.home')->nest('context', 'demo.' . $project . '.auth.register_terms')->nest('child_footer', 'demo.' . $project . '.footer');
     }
+    
+    public function check($project) {
+        return $project;
+    }
 
 }
