@@ -12,10 +12,10 @@
         <label>密碼</label>
         <input name="password" type="password" placeholder="密碼">
     </div>        
-    <input type="submit" value="送出" hidden="hidden" />
-    <div class="ui submit basic button" onclick="loginForm.submit()">送出</div>
+    <input type="submit" value="登入" hidden="hidden" />
+    <div class="ui submit green button" onclick="loginForm.submit()">登入</div>
 
     <a href="/project/<?=Request::segment(2)?>/register">
-        <div class="ui green button">帳號申請</div>
+        <div class="ui button">申請帳號</div>
     </a>
 <?=Form::close()?>

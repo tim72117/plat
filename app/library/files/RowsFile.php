@@ -220,6 +220,7 @@ class RowsFile extends CommFile {
         $scheme = $this->get_scheme($shareFile);
         
         if( $shareFile->created_by==Auth::user()->id && $scheme->power->edit ){
+            return 'demo.page.table_info';
             return 'demo.page.table_editor';
         }else{
             return 'demo.page.table_open';
@@ -338,7 +339,7 @@ class RowsFile extends CommFile {
         
         list($rows_query, $power) = $this->get_rows_query($index);
         
-        $rows = $rows_query->where('created_by', Auth::user()->id)->select($power)->paginate(Input::only('limit')['limit']);
+        $rows = $rows_query->select($power)->paginate(Input::only('limit')['limit']);//->where('created_by', Auth::user()->id)
 
         return Response::json($rows);
     }
