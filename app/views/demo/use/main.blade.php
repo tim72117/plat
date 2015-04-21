@@ -2,6 +2,8 @@
 $user = Auth::user();
 $packageDocs = $user->get_file_provider()->lists();
 $project = DB::table('projects')->where('code', $user->getProject())->first();
+$power_global = DB::table('power_global')->where('user_id', $user->id)->first();
+isset($power_global->power) && ($power = json_decode($power_global->power));
 ?>
 @extends('demo.layout-main')
 
@@ -24,15 +26,8 @@ $project = DB::table('projects')->where('code', $user->getProject())->first();
 body {
     font-family: 微軟正黑體!important;
 }
-p, tr, td, ul, li {
-    color: #000000;
-/*    font-size: 16px*/
-}
 .menu.use-green {
     background-color: #458A00!important;
-}
-.menu-min {
-    margin-left: -310px;
 }
 </style>
 
@@ -85,7 +80,7 @@ function getCookie(value) {
                 </div>
             </div>
 <?
-if( Auth::user()->id<20 ) { 
+if( isset($power->files) && $power->files ) { 
 ?>
             <a class="item use-green" href="/page/files">我的檔案</a>
 <? } 
