@@ -7,6 +7,7 @@ $cname_columns = [
     'stdidnumber'=>'身分證字號',
     'udepcode'=>'系所代碼',
     'udepname'=>'系所名稱',
+    'udepclassname'=>'系班級名稱',
     'stdyear'=>'',
     'stdschoolsys'=>'學制',
     'stdname'=> '學生姓名',
@@ -31,7 +32,7 @@ $tables = [
     'tiped_103_0016_phd' => (object)['pages' => 7, 'stdschoolsys' => [8]]
 ];
 $against_column = ['id', 'cid', 'newcid', 'file_id', 'updated_by', 'created_by', 'updated_at', 'created_at', 'deleted_at', 'stdregzipcode', 'stdregaddr', 'stdidnumber',
-    '系所中文名稱', '系班級名稱', '性別', '戶籍地址郵遞區號', '戶籍地址', '連絡電話', '行動電話','stdsex', 'qtype', 'pstat', 'newadd'];
+    '性別', '戶籍地址郵遞區號', '戶籍地址', '連絡電話', '行動電話','stdsex', 'qtype', 'pstat', 'newadd'];
 return array(
     'getStudents' => function() use($cname_columns, $against_column, $tables) {
         
