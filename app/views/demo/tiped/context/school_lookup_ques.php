@@ -1,7 +1,40 @@
 
 <div ng-controller="Ctrl" style="position: absolute;left: 10px;right: 10px;top: 10px;bottom: 10px">
-
+    
     <div class="ui segment active" ng-cloak ng-class="{loading: sheetLoading}" style="position:absolute;left:0;right:0;top:0;bottom:0;overflow: auto">
+        
+        <div class="ui basic segment">
+            <div class="ui secondary menu">
+                <div class="item">
+                    <div class="ui mini statistic">
+                        <div class="value">{{ rate.finish }}</div>
+                        <div class="label">回收數</div>
+                    </div>
+                    <div class="ui mini statistic">
+                        <div class="value">{{ rate.rows }}</div>
+                        <div class="label">總人數</div>
+                    </div>
+                    <div class="ui mini statistic">
+                        <div class="value">{{ rate.rate }}%</div>
+                        <div class="label">回收率</div>
+                    </div>
+                </div>  
+                <div class="item">
+                    <select class="ui search dropdown" ng-model="table" ng-change="changeTable()">
+                        <option value="tiped_103_0016_ba">大專應屆畢業生</option>
+                        <option value="tiped_103_0016_ma">碩士應屆畢業生</option>
+                        <option value="tiped_103_0016_phd">博士應屆畢業生</option>
+                    </select>
+                </div>    
+<!--                                <select ng-model="school_selected" ng-options="id as school for (id, school) in schools" ng-change="changeSchool()" style="padding:5px"></select>-->                                
+                <div class="item" style="width:400px">    
+                    <div ng-dropdown-search-menu class="ui fluid search selection dropdown" ng-model="school_selected" ng-change="changeSchool()"  items="schools" title="選擇學校">
+<!--                                    <input type="hidden" name="country" />-->
+                        <i class="dropdown icon"></i>                                    
+                    </div>    
+                </div>
+            </div>
+        </div>
         
         <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
         
@@ -22,51 +55,32 @@
         
         <div class="ui mini basic button" ng-click="downloadRate()" ng-show="false"><i class="download icon"></i>下載回收率</div>
         
+        <div class="ui mini red button" ng-class="{'left attached': deleteStatus.confrim, loading: deleteStatus.deleting}" ng-show="(rows | filter: {selected: true}).length > 0" ng-click="deleteStatus.confrim=true">
+            <i class="trash icon"></i>刪除調查名單 ({{ (rows | filter: {selected: true}).length }}筆資料)
+        </div>
+        <div class="ui mini right attached button" ng-show="(rows | filter: {selected: true}).length > 0 && deleteStatus.confrim" ng-click="delete()">
+            <i class="checkmark icon"></i> 確定
+        </div>
+        
 <!--        <div class="ui item search selection dropdown" ng-dropdown ng-model="sheet" title="資料表" ng-change="action.toSelect(sheet)" style="z-index:104;width:250px"></div>-->
         
         <table class="ui very compact small table">
             <thead>
+<!--                <tr>
+                    <th colspan="{{ columns.length+1 }}"></th>
+                </tr>-->
                 <tr>
-                    <th class="collapsing" colspan="{{ columns.length }}">
-                        
-                        <div class="ui secondary menu">
-                            <div class="item">
-                                <div class="ui mini statistic">
-                                    <div class="value">{{ rate.finish }}</div>
-                                    <div class="label">回收數</div>
-                                </div>
-                                <div class="ui mini statistic">
-                                    <div class="value">{{ rate.rows }}</div>
-                                    <div class="label">總人數</div>
-                                </div>
-                                <div class="ui mini statistic">
-                                    <div class="value">{{ rate.rate }}%</div>
-                                    <div class="label">回收率</div>
-                                </div>
-                            </div>  
-                            <div class="item">
-                                <select class="ui search dropdown" ng-model="table" ng-change="changeTable()">
-                                    <option value="tiped_103_0016_ba">大專應屆畢業生</option>
-                                    <option value="tiped_103_0016_ma">碩士應屆畢業生</option>
-                                    <option value="tiped_103_0016_phd">博士應屆畢業生</option>
-                                </select>
-                            </div>    
-<!--                                <select ng-model="mySchool" ng-options="id as school for (id, school) in schools" ng-change="changeSchool(mySchool)" style="padding:5px"></select>-->                                
-                            <div class="item" style="width:400px">    
-                                <div ng-dropdown-search-menu class="ui fluid search selection dropdown" ng-model="mySchool" ng-change="changeSchool(mySchool)"  items="schools" title="選擇學校">
-<!--                                    <input type="hidden" name="country" />-->
-                                    <i class="dropdown icon"></i>                                    
-                                </div>    
-                            </div>
+                    <th></th>
+                    <th ng-repeat="column in columns">{{ columnsName[column] }}</th>
+                </tr>
+                <tr>
+                    <th>
+                        <div class="ui checkbox">
+                            <input type="checkbox" id="user-selected-all" ng-checked="(rows | filter: {selected: true}).length > 0" ng-click="toggleSelected()">
+                            <label for="user-selected-all"></label>
                         </div>
-            
                     </th>
-                </tr>
-                <tr>
-                    <th class="collapsing" ng-repeat="column in columns">{{ columnsName[column] }}</th>
-                </tr>
-                <tr>
-                    <th class="collapsing" ng-repeat="column in columns">
+                    <th ng-repeat="column in columns">
                         <div class="ui icon small input" >
                             <input type="text" ng-model="searchText[column]" /><i class="filter icon"></i>
                         </div>                        
@@ -75,7 +89,13 @@
             </thead>
             <tbody>
                 <tr ng-repeat="user in rows | orderBy:predicate:reverse | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
-                    <td class="collapsing" ng-repeat="column in columns">{{ user[column] }}</td>
+                    <td style="width: 40px">
+                        <div class="ui checkbox">
+                            <input type="checkbox" id="user-selected-{{ $index }}" ng-model="user.selected" ng-click="deleteStatus.confrim=false">
+                            <label for="user-selected-{{ $index }}"></label>
+                        </div>
+                    </td>
+                    <td ng-repeat="column in columns">{{ user[column] }}</td>
                 </tr>   
             </tbody>    
         </table>
@@ -97,6 +117,7 @@ app.controller('Ctrl', function($scope, $http, $filter) {
     $scope.searchText = {};
     $scope.table = 'tiped_103_0016_ba';
     $scope.rate = {};
+    $scope.deleteStatus = {confirm: false, deleting: false};
     
     $scope.groups = [{id:1, name:'use'}];
     
@@ -140,19 +161,19 @@ app.controller('Ctrl', function($scope, $http, $filter) {
         $scope.getUser(true);
     };
     
-    $scope.changeSchool = function(mySchool) {
+    $scope.changeSchool = function() {
         $scope.getUser(true);        
     };    
     
     $scope.getUser = function(reflash) {
         $scope.sheetLoading = true;
         reflash = typeof reflash !== 'undefined' ? reflash : false;
-        $http({method: 'POST', url: 'ajax/getStudents', data:{ reflash: reflash, table: $scope.table, mySchool: $scope.mySchool }})
+        $http({method: 'POST', url: 'ajax/getStudents', data:{ reflash: reflash, table: $scope.table, school_selected: $scope.school_selected }})
         .success(function(data, status, headers, config) {
             $scope.rows = data.students;            
             $scope.rows_filted = data.students;
             $scope.schools = data.schools;
-            $scope.mySchool = data.mySchool;
+            $scope.school_selected = data.school_selected;
             $scope.columns = data.columns;
             $scope.columnsName = data.columnsName;
             $scope.max = $scope.rows.length;
@@ -206,6 +227,31 @@ app.controller('Ctrl', function($scope, $http, $filter) {
         }
         return Object.keys(input).length;      
     };    
+    
+    $scope.toggleSelected = function() {
+        $scope.deleteStatus = {confirm: false, deleting: false};
+        var set_value = $filter("filter")($scope.rows, {selected: true}).length === 0;
+        angular.forEach($scope.rows, function(row){
+            row.selected = set_value;
+        });
+    };
+    
+    $scope.delete = function() {
+        $scope.deleteStatus = {confirm: false, deleting: true};
+        var students_id = [];
+        var students = $filter("filter")($scope.rows, {selected: true});
+        angular.forEach(students, function(row){
+            students_id.push(row.id);
+        });
+        $http({method: 'POST', url: 'ajax/delete', data:{ table: $scope.table, students_id: students_id }})
+        .success(function(data, status, headers, config) {
+            $scope.deleteStatus.deleting = false;
+            $scope.getUser(true);
+        })
+        .error(function(e){
+            console.log(e);
+        });
+    };
     
     $scope.getUser();
 
