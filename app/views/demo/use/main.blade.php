@@ -1,6 +1,6 @@
 <?
 $user = Auth::user();
-$packageDocs = $user->get_file_provider()->lists();
+list($apps, $requests) = $user->get_file_provider()->lists();
 $project = DB::table('projects')->where('code', $user->getProject())->first();
 $power_global = DB::table('power_global')->where('user_id', $user->id)->first();
 isset($power_global->power) && ($power = json_decode($power_global->power));
@@ -112,25 +112,17 @@ if( Auth::user()->id==1 ) {
                     <div class="header item">
                         <i class="laptop large icon"></i><span style="font-size:17px"><?=$project->name?></span>
                     </div>                    
-                    <?
-                    foreach($packageDocs['docs'] as $packageDoc) {
-                        foreach($packageDoc['actives'] as $active) {
-                            if( $active['active']=='open' ){
-                                echo '<a class="item teal'.(Request::path()==$active['link']?' active':'').'" style="font-size:16px;font-weight:600" href="/'.$active['link'].'/">'.$packageDoc['title'].'</a>';
-                            }
-                        }
-                    }                
+                    <?php
+                    foreach($apps as $app) {                        
+                        echo '<a class="item teal' . (Request::path()=='app/' . $app['intent_key']?' active':'').'" style="font-size:16px;font-weight:600" href="/app/' . $app['intent_key'] . '/">' . $app['title'] . '</a>';
+                    }             
                     ?>  
                     <div class="header item">
                         <i class="cloud upload large icon"></i><span style="font-size:17px">待上傳資料</span>
                     </div>	
-                    <?                
-                    foreach($packageDocs['request'] as $packageDoc) {
-                        foreach($packageDoc['actives'] as $active) {
-                            if( $active['active']=='open' || $active['active']=='import'  ){
-                                echo '<a class="item'.(Request::path()==$active['link']?' active':'').'" style="font-size:16px;font-weight:600" href="/'.$active['link'].'">'.$packageDoc['title'].'</a>';
-                            }
-                        }
+                    <?php     
+                    foreach($requests as $request) {   
+                        echo '<a class="item teal' . (Request::path()==$request['link']?' active':'').'" style="font-size:16px;font-weight:600" href="' . $request['link'] . '">' . $request['title'] . '</a>';
                     }
                     ?>
                 </div>
