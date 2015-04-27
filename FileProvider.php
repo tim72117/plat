@@ -23,32 +23,27 @@ class FileProvider {
      * @return
      */    
 	public function lists() {
-        
-        $packageDocs = array('docs'=>array(), 'request'=>array());
 
-        $apps = Apps::with(['isFile' => function($query){
+        $apps = [];
+
+        Apps::with(['isFile' => function($query){
             $query->leftJoin('files_type', 'files.type', '=', 'files_type.id')->select('files.id', 'files.title', 'files_type.class');
         }])->whereHas('isFile', function($query){
             $query->where('files.type', 2);
-        })->where('user_id', $this->user_id)->get();
-
-        foreach($apps as $app){
-
-            $fileClass = 'app\\library\\files\\v0\\'.$app->isFile->class;
+        })->where('user_id', $this->user_id)->where('visible', true)->get()->each(function($app) use(&$apps) {
             
-            if( class_exists($fileClass) ){
-
-                $actives = $fileClass::get_intent();
-                
-                $packageDoc = array('title'=>$app->isFile->title, 'actives'=>array());
-                foreach($actives as $active){
-                    $intent_key = $this->app_intent_key($active, $app->id, $fileClass);
-                    array_push($packageDoc['actives'], array('link'=>'app/'.$intent_key, 'active'=>$active));
-                }
-                array_push($packageDocs['docs'], $packageDoc);
-            }    
-
-        }
+            $fileClass = 'app\\library\\files\\v0\\' . $app->isFile->class;
+            
+            if( class_exists($fileClass) ) {                
+                array_push($apps, [
+                    'title'      => $app->isFile->title,
+                    'intent_key' => $this->app_intent_key('open', $app->id, $fileClass),
+                ]);
+            }   
+            
+        });
+        
+        $requests = [];
 
         $inGroups = $this->user->inGroups->lists('id');
 
@@ -56,33 +51,31 @@ class FileProvider {
             
             empty($inGroups) ? $query->whereNull('id') : $query->where('target', 'group')->whereIn('target_id', $inGroups);
             
-        })->get()->each(function($requestFile) use(&$packageDocs){
-            
-            $fileClass = 'app\\library\\files\\v0\\RowsFile';
-            $intent_key = $this->doc_intent_key('import', $requestFile->doc_id, $fileClass, ['requested_file_id' => $requestFile->id]);
-            array_push($packageDocs['request'], [
-                'title'   => $requestFile->description,
-                'actives' => [['link' => 'file/'.$intent_key.'/import', 'active' => 'import']]
+        })->get()->each(function($requestFile) use(&$requests){
+
+            $intent_key = $this->doc_intent_key('import', $requestFile->doc_id, 'app\\library\\files\\v0\\RowsFile', ['requested_file_id' => $requestFile->id]);
+            array_push($requests, [
+                'title' => $requestFile->description,
+                'link'  => '/file/' . $intent_key . '/import',
             ]);
             
         });
         
         RequestApp::where(function($query) use($inGroups){
             
-            empty($inGroups) ? $query->whereNull('id') : $query->where('target', 'group')->whereIn('target_id', $inGroups);
+            empty($inGroups) ? $query->whereNull('id') : $query->where('target', 'group')->where('disabled', false)->whereIn('target_id', $inGroups);
             
-        })->get()->each(function($requestApp) use(&$packageDocs){
+        })->get()->each(function($requestApp) use(&$requests){
             
-            $fileClass = 'app\\library\\files\\v0\\CustomFile';
-            $intent_key = $this->app_intent_key('open', $requestApp->app_id, $fileClass);
-            array_push($packageDocs['request'], [
-                'title'   => $requestApp->description,
-                'actives' => [['link' => 'app/'.$intent_key.'/', 'active' => 'open']]
+            $intent_key = $this->app_intent_key('open', $requestApp->app_id, 'app\\library\\files\\v0\\CustomFile');
+            array_push($requests, [
+                'title' => $requestApp->description,
+                'link'  => '/app/' . $intent_key . '/',
             ]);
 
         });
                 
-        return $packageDocs;
+        return [$apps, $requests];
     }
     
     public function openDoc($type, $doc_id) {
