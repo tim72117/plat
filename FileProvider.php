@@ -56,7 +56,7 @@ class FileProvider {
             $intent_key = $this->doc_intent_key('import', $requestFile->doc_id, 'app\\library\\files\\v0\\RowsFile', ['requested_file_id' => $requestFile->id]);
             array_push($requests, [
                 'title' => $requestFile->description,
-                'link'  => '/file/' . $intent_key . '/import',
+                'link'  => 'file/' . $intent_key . '/import',
             ]);
             
         });
@@ -70,7 +70,7 @@ class FileProvider {
             $intent_key = $this->app_intent_key('open', $requestApp->app_id, 'app\\library\\files\\v0\\CustomFile');
             array_push($requests, [
                 'title' => $requestApp->description,
-                'link'  => '/app/' . $intent_key . '/',
+                'link'  => 'app/' . $intent_key . '/',
             ]);
 
         });
