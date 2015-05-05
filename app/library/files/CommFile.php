@@ -34,9 +34,15 @@ class CommFile {
 		'download',
         'create'
 	);	
+    
+    public $storage_path;
 	
 	public function __construct($doc_id = null){
-		$this->doc_id = $doc_id;
+		
+        $this->doc_id = $doc_id;
+        
+        $this->storage_path = storage_path() . '/file_upload';
+        
 	}
 	
 	public static function get_intent() {
@@ -51,44 +57,43 @@ class CommFile {
         return [];
     }
     
-	public function createFile($original_path, $name, $title) {
+	public function createFile($title) {
         
-		$user_id = Auth::user()->id;	
-        
-        $storage_path = storage_path().'/file_upload';
+		$user_id = Auth::user()->id;
         
         $parts = array_slice(str_split($hash = md5($user_id), 2), 0, 2);
 		
         $path = join('/', $parts);
         
-        $filesystem = new Filesystem();   
+        $filesystem = new Filesystem();
             
         try	
         {				
-            $filesystem->makeDirectory(dirname($storage_path.'/'.$path.'/'.$name), 0777, true, true);									
+            $filesystem->makeDirectory(dirname($this->storage_path . '/' . $path . '/'), 0777, true, true);									
 
-            $filesystem->move($original_path . $name, $storage_path.'/'.$path. '/' . $name);
+            //$filesystem->move($original_path . $name, $storage_path.'/'.$path. '/' . $name);
         }
         catch (\Exception $e)
         {
             throw $e;
         } 
         
-        $file = Files::updateOrCreate([                
-            'type'       =>   5,
-            'owner'      =>   0,
-            'file'       =>   $path.'/'.$name,
-            'created_by' =>   $user_id,
-        ],[
-            'title'      =>   $title,
+        $file = Files::create([                
+            'type'       => 5,
+            'owner'      => 0,
+            //'file'       =>   $path.'/'.$name,
+            'created_by' => $user_id,
+            'title'      => $title,
+        ], [
+            
         ]);
         
-        $shareFile = ShareFile::updateOrCreate([
+        $shareFile = ShareFile::create([
             'target'     => 'user',
             'target_id'  => $user_id,
             'file_id'    => $file->id,
             'created_by' => $user_id,
-        ],[
+        ], [
             //'power'      => json_encode([]),
         ]); 
         
@@ -226,15 +231,7 @@ class CommFile {
 	public function get_auth() {
 		return $this->auth;
 	}
+
+
     
-    public function createNewFile($type, $title, $setting) {
-        $user_id = Auth::user()->id;
-        return Files::create(array_merge([                
-            'type'       =>   $type,
-            'title'      =>   $title,
-            'owner'      =>   0,
-            'created_by' =>   $user_id,
-        ], $setting));
-    }
-	
 }

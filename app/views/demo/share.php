@@ -283,20 +283,23 @@ app.controller('shareController', function($scope, $filter, $http) {
     
     $scope.requestTo = function(requestDescription) {
         
-        var intent_key = angular.element('[ng-controller=newTableController]').scope().table.intent_key;
-        
         var groups = $scope.getSelectedGroup();
-        console.log({groups: groups, intent_key: intent_key, description: requestDescription});
-        //if(false)
-        $http({method: 'POST', url: '/file/'+intent_key+'/requestTo', data:{groups: groups, description: requestDescription}})
+        
+        var file = $scope.getFiles()[0];
+        
+        $http({method: 'POST', url: '/file/'+file.intent_key+'/requestTo', data:{groups: groups, description: requestDescription}})
         .success(function(data, status, headers, config) {
             $scope.shareClose();
-            console.log(data);
         })
         .error(function(e){
             console.log(e);
         });
         
+    };
+    
+    $scope.getFiles = function() {
+        var files = $filter('filter')(angular.element('#fileController').scope().files, {selected: true});
+        return files;
     };
     //$('.ui.checkbox').checkbox();
     

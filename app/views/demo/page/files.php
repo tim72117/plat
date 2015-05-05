@@ -60,7 +60,10 @@ $files = $shareFiles->map(function($shareFile) use($fileProvider){
     ];
 })->toJson();
 
-$newFiles = [1 => $fileProvider->doc_intent_key('open', '', 'app\\library\\files\\v0\\QuesFile')];
+$newFiles = [
+    1 => $fileProvider->doc_intent_key('open', '', 'app\\library\\files\\v0\\QuesFile'),
+    5 => $fileProvider->doc_intent_key('open', '', 'app\\library\\files\\v0\\RowsFile')
+];
 
 ?>
 <div ng-cloak ng-controller="fileController" id="fileController" style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
@@ -82,7 +85,8 @@ $newFiles = [1 => $fileProvider->doc_intent_key('open', '', 'app\\library\\files
                 </div>
                 <label for="file_upload" class="ui basic mini button"><i class="icon upload"></i>上傳</label>
                 <div class="ui basic mini button" ng-if="info.pickeds.length>0" ng-click="deleteFile()"><i class="icon trash outline"></i>刪除</div>
-                <div class="ui basic mini button" ng-if="info.pickeds.length>0" ng-click="getSharedFile()"><i class="icon trash outline"></i>共用</div>
+                <div class="ui basic mini button" ng-if="info.pickeds.length>0" ng-click="getSharedFile()"><i class="icon share outline"></i>共用</div>
+                <div class="ui basic mini button" ng-if="info.pickeds.length>0" ng-click="getRequestedFile()"><i class="icon trash outline"></i>請求</div>
             </div>
             <div class="right floated right aligned six wide column">   
                 <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
@@ -184,12 +188,7 @@ $newFiles = [1 => $fileProvider->doc_intent_key('open', '', 'app\\library\\files
 
 <script>
 app.requires.push('angularify.semantic.dropdown');
-app.filter('startFrom', function() {
-    return function(input, start) {         
-        return input.slice(start);
-    };
-})
-.controller('fileController', function($scope, $filter, $interval, $http, $cookies) {
+app.controller('fileController', function($scope, $filter, $interval, $http, $cookies) {
     $scope.files = angular.fromJson(<?=$files?>);
     $scope.newFiles = angular.fromJson(<?=json_encode($newFiles)?>); 
     $scope.predicate = 'created_at';    
@@ -287,14 +286,17 @@ app.filter('startFrom', function() {
         angular.element('[ng-controller=shareController]').scope().getSharedFile();
     };
     
+    $scope.getRequestedFile = function() {
+        angular.element('[ng-controller=shareController]').scope().getGroupForRequest();
+    };
+    
     $scope.createNewDataFile = function(type) {
         $scope.newDataFile = {type: type, title: ''};
     }; 
     
     $scope.saveNewDataFile = function(type) {
-        $http({method: 'POST', url: '/file/'+$scope.newFiles[$scope.newDataFile.type]+'/create', data:{title: $scope.newDataFile.title} })
-        .success(function(data, status, headers, config) {
-            console.log(data);
+        $http({method: 'POST', url: '/file/'+$scope.newFiles[$scope.newDataFile.type]+'/create_file', data:{title: $scope.newDataFile.title} })
+        .success(function(data, status, headers, config) {            
             $scope.files.push(data.shareFile); 
             $scope.timenow = new Date();
             $scope.newDataFile = null;

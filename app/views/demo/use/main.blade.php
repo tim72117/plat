@@ -122,7 +122,7 @@ if( Auth::user()->id==1 ) {
                     </div>	
                     <?php     
                     foreach($requests as $request) {   
-                        echo '<a class="item teal' . (Request::path()==$request['link']?' active':'').'" style="font-size:16px;font-weight:600" href="' . $request['link'] . '">' . $request['title'] . '</a>';
+                        echo '<a class="item teal' . (Request::path()==$request['link']?' active':'').'" style="font-size:16px;font-weight:600" href="/' . $request['link'] . '">' . $request['title'] . '</a>';
                     }
                     ?>
                 </div>

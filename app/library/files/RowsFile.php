@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Schema, Response, ShareFile, RequestFile, Auth, Input, Session, Illuminate\Filesystem\Filesystem, app\library\files\v0\FileProvider;
+use DB, View, Schema, Response, ShareFile, RequestFile, Files, Auth, Input, Session, Redirect, Carbon\Carbon, PHPExcel_IOFactory, Illuminate\Filesystem\Filesystem, app\library\files\v0\FileProvider;
 
 class RowsFile extends CommFile {
 	
@@ -13,6 +13,8 @@ class RowsFile extends CommFile {
 	 * @var array 1 dimension
 	 */
 	public $columns;
+    
+    public $database = 'rows';
 	
 	public static $intent = array(
 		'import',
@@ -29,198 +31,28 @@ class RowsFile extends CommFile {
         'delete',
         'get_compact_files',
 	);
+    
+    function __construct($doc_id) {
+        
+        if( $doc_id == '' )
+            return false;
+        
+        $this->shareFile = ShareFile::find($doc_id);  
+        
+        $this->file = $this->shareFile->isFile;
+        
+    }
 	
 	public static function get_intent() {
 		return array_unique(array_merge(parent::$intent,self::$intent));
 	}
-	
-	/**
-	 * @var string
-	 * @return
-	 */	
-	public function import() {
-        
-        //$requestFile = RequestFile::find($value['requested_file_id']);
-        
-        $shareFile = ShareFile::find($this->doc_id);
-        
-        return 'demo.page.table_import';
-        
-    }
-    
-    public function create_table() {
-        
-        $filesystem = new Filesystem;
-        
-        $scheme = $this->get_struct(); 
-     
-        $name = hash('md5', json_encode($scheme));       
-        
-        $filesystem->put( storage_path() . '/rows/temp/' . $name, json_encode($scheme) );
-        
-        $commFile = new CommFile;
-        
-        return $commFile->createFile(storage_path() . '/rows/temp/', $name, Input::only('title')['title']);
-        
-    }
-    
-    public function save_table() {
-        
-        $shareFile = ShareFile::find($this->doc_id);
-        
-        if( $shareFile->created_by==Auth::user()->id ){
-            
-            $filesystem = new Filesystem;
-            
-            $scheme_old = $this->get_scheme(ShareFile::find($this->doc_id));
-            
-            $scheme = $this->get_struct($scheme_old);
-            
-            $file = $shareFile->isFile;
-            
-            $file->title = Input::only('title')['title'];
-            
-            $file->save();
-            
-            $filesystem->put( storage_path() . '/file_upload/' . $file->file, json_encode($scheme) );
-            
-        }
-        return json_encode($scheme);
-    }
-    
-    private function get_struct($scheme_old = null) {     
-        
-        $sheets = Input::only('sheets')['sheets'];
-        
-        $struct = (object)['power'=> (object)['edit_column'=>0, 'edit_row'=>false, 'edit'=>true], 'sheets' =>[]];
-        
-        foreach ($sheets as $index => $sheet) {
-            
-            $sheet_old = ( isset($scheme_old) && isset($scheme_old->sheets[$index]) ) ? $scheme_old->sheets[$index] : null;
-       
-            $name = ( isset($sheet['tablename']) && isset($sheet_old) && ($sheet['tablename'] == $sheet_old->tables[0]->name) ) ? $sheet['tablename'] : md5(uniqid(time(), true));
 
-            $sheet_new = (object)[
-                'sheetName' => $sheet['sheetName'],
-                'editable' => isset($sheet['editable']) ? $sheet['editable'] : false,
-                'tables' =>[(object)[
-                    'database'   => 'rowdata',
-                    'name'       => $name,
-                    'primaryKey' => 'id',
-                    'columns'    => []
-                ]]
-            ];
-
-            foreach ($sheet['colHeaders'] as $columns) {
-                array_push($sheet_new->tables[0]->columns, (object)[
-                    'name'   => $columns["data"],
-                    'title'  => $columns["title"],
-                    'rules'  => $columns["rules"]["key"],
-                    'types'  => $columns["types"]["type"],
-                    'link'   => $columns["link"],
-                    'unique' => $columns["unique"]
-                ]);
-            }
-            
-            array_push($struct->sheets, $sheet_new);
-            
-            $this->updateOrCreateScheme($sheet_new, $sheet_old);
-            
-        }
-        
-        return $struct;
-        
-    }
-    
-    private function updateOrCreateScheme($sheet_new, $sheet_old) {
-                
-        $columns_old = isset($sheet_old) ? $sheet_old->tables[0]->columns : [];
-        $columns_new = $sheet_new->tables[0]->columns;
-
-        if( DB::table('rowdata.dbo.sysobjects')->where('name', $sheet_new->tables[0]->name)->exists() ) {
-
-            Schema::table('rowdata.dbo.'.$sheet_new->tables[0]->name, function($table) use($columns_old, $columns_new) {
-
-                $columns_old_names = array_fetch($columns_old, 'name');
-                $columns_new_names = array_fetch($columns_new, 'name');
-
-                foreach ($columns_old_names as $old_name){
-                    if( !in_array($old_name, $columns_new_names) ){
-
-                        $table->dropColumn($old_name);
-
-                    }else{
-
-                    }
-                }
-
-                foreach ($columns_new as $column_new){
-                    if( !in_array($column_new->name, $columns_old_names) ){
-
-                        $this->add_scheme_column($table, $column_new->name, $column_new->types);
-
-                    }else{
-
-                    }
-                }
-
-
-            });
-
-        }else{
-            
-            Schema::create('rowdata.dbo.'.$sheet_new->tables[0]->name, function($table) use($columns_new) {
-
-                $table->increments('id');
-
-                $table->timestamps();
-                //$table->dateTime('created_at');
-                //$table->dateTime('updated_at');
-                $table->dateTime('deleted_at')->nullable();
-                $table->integer('created_by');
-
-                foreach ($columns_new as $column_new) {
-                    $this->add_scheme_column($table, $column_new->name, $column_new->types);
-                }
-
-            });
-
-        }
-        
-    }
-    
-    private function add_scheme_column($table, $name, $type) {
-        if($type == 'int'){
-            $table->integer($name)->nullable();
-        }
-        if($type == 'float'){
-            $table->float($name)->nullable();
-        }
-        if($type == 'nvarchar'){
-            $table->string($name, 50)->nullable();
-        }
-        if($type == 'varchar'){
-            $table->string($name, 50)->nullable();
-        }
-        if($type == 'date'){
-            $table->date($name)->nullable();
-        }
-        if($type == 'bit'){
-            $table->integer($name)->nullable();
-        }
-        if($type == 'text'){
-            $table->text($name)->nullable();
-        }
-    }
-    
     public function open() {
         
-        $shareFile = ShareFile::find($this->doc_id);  
+        $schema = $this->get_schema();
         
-        $scheme = $this->get_scheme($shareFile);
-        
-        if( $shareFile->created_by==Auth::user()->id && $scheme->power->edit ){
-            return 'demo.page.table_info';
+        if( $this->shareFile->created_by == Auth::user()->id && $schema->power->edit ){
+            //return 'demo.page.table_info';
             return 'demo.page.table_editor';
         }else{
             return 'demo.page.table_open';
@@ -228,31 +60,434 @@ class RowsFile extends CommFile {
         
     }
     
-    private function get_scheme($shareFile) {
+	public function import() {
         
-        $file = $shareFile->isFile->file;
+        return 'demo.page.rows_import';
         
-        $filesystem = new Filesystem;
-        
-        return json_decode($filesystem->get( storage_path() . '/file_upload/' . $file ));
     }
     
-	public function get_columns() {	
+    public function get_rows_count() {
+        
+        $schema = $this->get_schema();
+        
+        $database = $schema->sheets[0]->tables[0]->database;
+        $table = $schema->sheets[0]->tables[0]->name;
+        
+        $work_schools = ['011C31' => '測試'];
+        
+        $rows_count = DB::table($database . '.dbo.' . $table)->whereNull('deleted_at')->whereIn('shid', array_keys($work_schools))->count();
+        
+        return ['rows_count' => $rows_count]; 
+    }
+    
+    public function import_upload() {
+        
+        $user = Auth::user();
+        
+        $schema = $this->get_schema();
+        
+        $upload_file_id = $this->upload(false);
+        
+        $upload_file = Files::find($upload_file_id)->file;
+        
+        $database = $schema->sheets[0]->tables[0]->database;
+        $table = $schema->sheets[0]->tables[0]->name;
+        
+        require_once base_path() . '/app/views/demo/page/check_function.php';
+        
+        $rows = \Excel::load(storage_path() . '/file_upload/' . $upload_file, function($reader) {
 
-        $shareFile = ShareFile::find($this->doc_id);
+            //$reader->noHeading();
+            //$reader->take(10);
+            //$reader->select(array('0', 'B'));
+
+        })->toArray();
         
-        $scheme = $this->get_scheme($shareFile);
+        //$reader = PHPExcel_IOFactory::createReaderForFile( storage_path() . '/file_upload/' . $upload_file );
+        //$reader->setReadDataOnly(true);
+        //$objPHPExcel = PHPExcel_IOFactory::load( storage_path() . '/file_upload/' . $upload_file );
         
-        $sheets = $scheme->sheets;
+        //var_dump($rows);exit;
+
+        //$workSheet = $objPHPExcel->getActiveSheet();
+        
+        //$column_max_name = num2alpha(count($schema->sheets[0]->tables[0]->columns));
+        
+        //$rows = $workSheet->rangeToArray('A2:' . $column_max_name . $workSheet->getHighestRow(), '', false, true, false);
+        //$rows = $workSheet->toArray(null, true, true, true);
+        //unset($reader);
+
+//        $cloumns = array(
+//            'A'	=> ['function' => 'shid',    'param' => 'sch_id'],			//學校代碼
+//            'B'	=> ['function' => 'depcode', 'param' => 'udepcode_list'],//科系代碼
+//            'D'	=> ['function' => 'stdidnumber', 'unique' => 'newcid'],			//身份證
+//            'E'	=> ['function' => 'stdsex',  'param' => 'stdidnumber'],	//性別(男：1，女：2)
+//        );
+        
+        $columns = array_map(function($column, $key) use($database, $table, $rows) {
+            
+            $index = num2alpha($key);
+                
+            if( $column->unique ) 
+            {   
+                $cells = array_pluck($rows, $key);
+                
+                $column->repeats = array_count_values(array_map('strval', $cells));                
+                
+                $column->uniques = array_filter($cells, function($cell) use($column)
+                {
+                    $column_value = remove_space($cell);
+                    
+                    $column_checked = $this->check_column($column, $column_value);
+                    
+                    return empty($column_checked);                    
+                });    
+                
+                $column->exists = DB::table($database . '.dbo.' . $table)->whereIn($column->name, $column->uniques)->lists('created_by', $column->name);
+            }
+            
+            return (object)[
+                'index'   => $index,
+                'name'    => $column->name,                
+                'rules'   => $column->rules,
+                'title'   => $column->title,
+                'unique'  => $column->unique,                
+                'encrypt' => $column->encrypt,
+                'uniques' => isset($column->uniques) ? $column->uniques : [],
+                'repeats' => isset($column->repeats) ? $column->repeats : [],
+                'exists' => isset($column->exists) ? $column->exists : [],
+            ];            
+        }, $schema->sheets[0]->tables[0]->columns, array_keys($schema->sheets[0]->tables[0]->columns));
+        
+        $table_schema = array_fetch($columns, 'name');   
+
+        $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lists('sname', 'id');
+
+        $udepcode = DB::table('use_103.dbo.list_department_103')
+            ->wherein('shid', array_keys($work_schools))
+            ->distinct()
+            ->lists('depcode');
+
+        $param['sch_id'] = $work_schools;
+        $param['udepcode_list'] = $udepcode;   
+
+        $rows_message = [];
+    
+        function combine_table($table, $input) {
+            extract($input);
+            return compact($table);
+        }        
+        
+        $rows_insert = [];
+    
+        foreach($rows as $row_index => $row) {
+            
+            $row_message = (object)['index'=> $row_index, 'pass' => true, 'empty' => false, 'errors' => [], 'exist' => false, 'status' => false];
+
+            $row_filtered = array_filter($row);
+
+            if( empty($row_filtered) ) {
+                $row_message->empty = true;
+                array_push($rows_message, $row_message);
+                continue;
+            }
+            
+            $exist = false;
+            $row_valid = [];
+
+            foreach($columns as $column_index => $column)
+            {
+                $row_valid[$column->name] = isset( $row[$column_index] ) ? remove_space($row[$column_index]) : '';
+
+                $cloumn_errors = $this->check_column($column, $row_valid[$column->name]);
+
+                if( $column->unique )
+                {
+                    $primary = $column->name;
+                        
+                    $exist = isset($column->exists) && array_key_exists($row_valid[$column->name], $column->exists);
+                    
+                    if( $exist && $column->exists[$row_valid[$column->name]] != $user->id )
+                    {
+                        $cloumn_errors = ['此學生資料已由他人上傳，欲更新資料請與本中心聯繫。'];
+                    }
+                }
+                
+                !empty($cloumn_errors) && $row_message->pass = false;
+                
+                array_push($row_message->errors, (object)['value' => $row_valid[$column->name], 'errors' => $cloumn_errors]);
+            }     
+            
+            $row_message->exist = $exist;
+            
+            array_push($rows_message, $row_message);
+    
+            if( !$row_message->pass ) continue;
+            
+            $row_reduced = combine_table($table_schema, $row_valid);
+            
+            $row_reduced['file_id'] = $this->file->id;
+            $row_reduced['updated_by'] = $user->id;
+            $row_reduced['updated_at'] = Carbon::now()->toDateTimeString(); 
+            
+            if( $exist )
+            {
+                $row_message->status = DB::table($database . '.dbo.' . $table)
+                    ->where($primary, $row_reduced[$primary])
+                    ->update($row_reduced);
+            }
+            else
+            {
+                $row_reduced['created_by'] = $user->id;
+                $row_reduced['created_at'] = Carbon::now()->toDateTimeString();
+                array_push($rows_insert, $row_reduced);
+            }         
+        }    
+        
+        foreach(array_chunk($rows_insert, 50) as $rows)
+        {
+            DB::table($database . '.dbo.' . $table)->insert($rows);
+        }        
+        
+        $message = compact('rows_message', 'columns');
+        
+        //exit;
+        
+        Session::flash('message', $message);
+        
+        return Redirect::back();  
+
+    }    
+    
+    public function check_column($column, $column_value)
+    {
+        $cloumn_errors = [];
+
+        check_empty($column_value, $column->title, $cloumn_errors);
+
+        if( isset( $column->repeats[$column_value] ) && $column->repeats[$column_value] > 1 )
+        {
+            array_push($cloumn_errors, $column->title . '資料重複');
+        }   
+
+        if( empty( $cloumn_errors ) )
+        {                    
+            function_exists('check_' . $column->rules) && call_user_func_array('check_' . $column->rules, array($column_value, $column->title, &$cloumn_errors));                
+        }
+
+        return $cloumn_errors; 
+    }
+	
+    public function create_file() {            
+        
+        $commFile = new CommFile;
+        
+        $doc_id = $commFile->createFile(Input::only('title')['title']);
+        
+        $shareFile = ShareFile::find($doc_id);
+        
+        $schema = (object)['power'=> (object)['edit_column'=>0, 'edit_row'=>false, 'edit'=>true], 'sheets' =>[]];
+        
+        $parts = array_slice(str_split($hash = md5(Auth::user()->id), 2), 0, 2);
+        
+        $path = join('/', $parts);
+        
+        $this->put_schema($commFile->storage_path . '/' . $path . '/' . $shareFile->isFile->id, json_encode($schema));
+        
+        $shareFile->isFile->file = $path . '/' . $shareFile->isFile->id;
+        
+        $shareFile->isFile->save();
+        
+        $fileProvider = FileProvider::make();   
+        
+        $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\RowsFile');
+        
+        return Response::json(['shareFile' => [
+            'id'         => $shareFile->id,
+            'title'      => $shareFile->isFile->title,
+            'created_by' => $shareFile->created_by,
+            'created_at' => $shareFile->created_at->toIso8601String(),
+            'link'       => ['open' => 'file/' . $intent_key . '/open'],
+            'type'       => $shareFile->isFile->type,
+            'intent_key' => $intent_key,
+            'tools'      => [],
+            'shared'     => []
+        ]]);
+
+    }    
+    
+    public function save_table()
+    {        
+        if( $this->shareFile->created_by==Auth::user()->id )
+        {            
+            $schema = $this->get_schema();
+            
+            $this->drop_tables($schema);
+            $schema->sheets = [];
+            
+            $sheets = $this->get_sheets();
+            
+            //var_dump($sheets);exit;
+            
+            foreach($sheets as $sheet)
+            {
+                array_push($schema->sheets, $sheet);
+                $this->create_tables($sheet);
+            }
+            
+            $this->file->title = Input::only('title')['title'];
+            
+            $this->file->save();
+            
+            $this->put_schema(storage_path() . '/file_upload/' . $this->file->file, json_encode($schema));            
+        }
+        
+        return Response::json($schema);        
+    }
+    
+    public function put_schema($path, $schema)
+    {        
+        $filesystem = new Filesystem;
+        
+        $filesystem->put($path, $schema);        
+    }    
+        
+    public function get_schema()
+    {        
+        $filesystem = new Filesystem;
+        
+        $file_path = storage_path() . '/file_upload/' . $this->file->file;
+        
+        try {
+            $schema = file_exists($file_path) ? $filesystem->get($file_path) : '{"power": {"edit": true}}';
+        } catch (Exception $e) {
+            $schema = '';
+        }
+        
+        return json_decode($schema);
+    }  
+    
+    public function drop_tables($schema)
+    {
+        foreach($schema->sheets as $sheet)
+        {
+            foreach($sheet->tables as $table)
+            {       
+                Schema::drop($table->database . '.dbo.' . $table->name);
+            }            
+        }
+    }
+    
+    public function create_tables($sheet)
+    {        
+        foreach($sheet->tables as $table)
+        {
+            Schema::create($this->database . '.dbo.' . $table->name, function($query) use($table) 
+            {                
+                $query->increments('id');
+
+                foreach($table->columns as $column)
+                {
+                    $this->add_schema_column($query, $column->name, $column->types);
+                }
+
+                $query->integer('file_id');
+                $query->dateTime('updated_at');
+                $query->dateTime('created_at');   
+                $query->dateTime('deleted_at')->nullable(); 
+                $query->integer('updated_by');
+                $query->integer('created_by');
+                $query->integer('deleted_by')->nullable();
+            });
+        }       
+    }
+    
+    public function get_sheets()
+    {        
+        $sheets = Input::get('sheets');
+        $sheets_new = [];
+        
+        foreach($sheets as $sheet)
+        {            
+            array_push($sheets_new, (object)[
+                'sheetName' => $sheet['sheetName'],
+                'editable'  => isset($sheet['editable']) ? $sheet['editable'] : false,
+                'tables'    => [(object)[
+                    'database'   => $this->database,
+                    'name'       => 'row_' . Carbon::now()->formatLocalized('%Y%m%d_%H%M%S_') . Auth::user()->id . '_' . strtolower(str_random(5)),
+                    'primaryKey' => 'id',
+                    'columns'    => array_map(function($columns){
+                        return (object)[
+                            'name'   => $columns["data"],
+                            'title'  => $columns["title"],
+                            'rules'  => $columns["rules"]["key"],
+                            'types'  => $columns["types"]["type"],
+                            //'link'   => $columns["link"],
+                            'unique'  => $columns["unique"],
+                            'encrypt' => $columns["encrypt"],
+                            'isnull'  => $columns["isnull"],                    
+                        ];
+                    } ,$sheet['colHeaders']),
+                    'encrypt'    => false,
+                ]]
+            ]);           
+        }
+        
+        return $sheets_new;        
+    } 
+    
+    private function add_schema_column($table, $name, $type, $indexs = []) {         
+        if($type == 'int'){
+            $schema = $table->integer($name);
+        }
+        if($type == 'float'){
+            $schema = $table->float($name);
+        }
+        if($type == 'nvarchar'){
+            $schema = $table->string($name, 50);               
+        }
+        if($type == 'varchar'){
+            $schema = $table->string($name, 50);
+        }
+        if($type == 'encrypt'){
+            $schema = $table->string($name, 255);               
+        }        
+        if($type == 'date'){
+            $schema = $table->date($name);
+        }
+        if($type == 'date_six'){
+            $schema = $table->string($name, 6);
+        }
+        if($type == 'bit'){
+            $schema = $table->integer($name);
+        }
+        if($type == 'text'){
+            $schema = $table->text($name);
+        }
+        
+        foreach($indexs as $index) {        
+            if( 'unique' == $index ) {
+                $schema->$index($name);
+            }else{
+                $schema->$index();
+            }            
+        }
+    }
+  
+	public function get_columns() {	
+        
+        $schema = $this->get_schema();
+        
+        $sheets = $schema->sheets;
 
         //$columns = DB::table('use_103.sys.columns')->whereRaw("object_id=OBJECT_ID('use_103.dbo.seniorOne103_userinfo')")->select('name', DB::raw("'' AS description"))->get('description', 'name');
         
         $power = array();
         
-        $title = $shareFile->isFile->title;        
+        $title = $this->file->title;        
         
-        if( $shareFile->created_by!=Auth::user()->id && isset($shareFile->power) ) {
-            $power = json_decode($shareFile->power);
+        if( $this->shareFile->created_by!=Auth::user()->id && isset($this->shareFile->power) ) {
+            $power = json_decode($this->shareFile->power);
 
             foreach($sheets as $index_sheet => $sheet) {
                 if( !is_array($power[$index_sheet]) ) {
@@ -273,24 +508,18 @@ class RowsFile extends CommFile {
 
     public function get_power() {
         
-        $shareFile = ShareFile::find($this->doc_id);
-        
-        $file = $shareFile->isFile->file;
-        
         $filesystem = new Filesystem;
         
-        $scheme = json_decode($filesystem->get( storage_path() . '/file_upload/' . $file ));
+        $schema = json_decode($filesystem->get( storage_path() . '/file_upload/' . $this->file->file ));
         
-        return Response::json($scheme->power);
+        return Response::json($schema->power);
     }
     
     private function get_rows_query($index_sheet) {
         
-        $shareFile = ShareFile::find($this->doc_id);
+        $schema = $this->get_schema();
         
-        $scheme = $this->get_scheme($shareFile);
-        
-        $sheets = $scheme->sheets;        
+        $sheets = $schema->sheets;        
         
         $tables = $sheets[$index_sheet]->tables; 
         
@@ -306,7 +535,7 @@ class RowsFile extends CommFile {
                 $rows_query->leftJoin($database.'.dbo.'.$table->name.' AS t'.$index, 't'.$index.'.'.$table->primaryKey, '=', 't0.'.$table->primaryKey);
             }    
 
-            if( $shareFile->created_by==Auth::user()->id ) {              
+            if( $this->shareFile->created_by==Auth::user()->id ) {              
                 //$power = array_map(function($column){return $column->name;}, $table->columns);
                 $power = array_merge($power, array('t0.id'), array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
                 //$power = array_fetch($table->columns, 'name');
@@ -349,14 +578,13 @@ class RowsFile extends CommFile {
         $input = Input::only('groups', 'file_id', 'description');
         $user = Auth::user();
         $myGroups = $user->groups;
-        $file = ShareFile::find($this->doc_id);
         
-        if( $file && $file->created_by == $user->id ) {
+        if( $this->shareFile->created_by == $user->id ) {
             
             foreach($input['groups'] as $group) {
                 
                 if( isset($group['selected']) && $group['selected'] && $myGroups->contains($group['id']) ) {
-                    RequestFile::updateOrCreate(['target' => 'group', 'target_id' => $group['id'], 'doc_id' => $this->doc_id, 'created_by' => $user->id], ['description' => $input['description']]);
+                    RequestFile::updateOrCreate(['target' => 'group', 'target_id' => $group['id'], 'doc_id' => $this->shareFile->id, 'created_by' => $user->id], ['description' => $input['description']]);
                 }
                 
             }
@@ -376,7 +604,7 @@ class RowsFile extends CommFile {
         list($rows_query, $power) = $this->get_rows_query($index);        
         
 //        if( $shareFile->created_by==Auth::user()->id ) {
-//            $power = array_fetch($scheme->tables[0]->columns, 'name');
+//            $power = array_fetch($schema->tables[0]->columns, 'name');
 //        }else{
 //            $power = json_decode($shareFile->power);
 //        }        
@@ -404,15 +632,13 @@ class RowsFile extends CommFile {
         
     }
 
-	 public function save_import_rows() {
-        
+	 public function save_import_rows() {        
 
 		$input_sheets = Input::only('sheets')['sheets'];
-		//var_dump($input_sheets);
-		$shareFile = ShareFile::find($this->doc_id);
-        $scheme = $this->get_scheme($shareFile);
 
-		foreach($scheme->sheets as $index => $sheets){
+        $schema = $this->get_schema();
+
+		foreach($schema->sheets as $index => $sheets){
 			
             $table = $sheets->tables[0];
             empty($input_sheets[$index]['rows'][count($input_sheets[$index]['rows'])-1]) && array_pop($input_sheets[$index]['rows']);
@@ -495,13 +721,13 @@ class RowsFile extends CommFile {
         
         $doc_id_compact = Session::get('file')[$intent_key_compact]['doc_id'];
         $shareFile_compact = ShareFile::find($doc_id_compact);
-        $sheet_compact = $this->get_scheme($shareFile_compact)->sheets[$sheet_index_compact];        
+        $sheet_compact = $this->get_schema($shareFile_compact)->sheets[$sheet_index_compact];        
         $table_compact = $sheet_compact->tables[0];
         
         list($rows_query, $power) = $this->get_rows_query($index);          
         
         $shareFile = ShareFile::find($this->doc_id);        
-        $sheet = $this->get_scheme($shareFile)->sheets[$index];  
+        $sheet = $this->get_schema($shareFile)->sheets[$index];  
         $table = $sheet->tables[0];
         
         $power = array_merge($power, array_map(function($column){return 'compact.'.$column->name;}, $table_compact->columns));
@@ -528,13 +754,13 @@ class RowsFile extends CommFile {
         
         $doc_id_compact = Session::get('file')[$intent_key_compact]['doc_id'];
         $shareFile_compact = ShareFile::find($doc_id_compact);
-        $sheet_compact = $this->get_scheme($shareFile_compact)->sheets[$sheet_index_compact];        
+        $sheet_compact = $this->get_schema($shareFile_compact)->sheets[$sheet_index_compact];        
         $table_compact = $sheet_compact->tables[0];
         
         list($rows_query, $power) = $this->get_rows_query($index);    
         
         $shareFile = ShareFile::find($this->doc_id);        
-        $sheet = $this->get_scheme($shareFile)->sheets[$index];  
+        $sheet = $this->get_schema($shareFile)->sheets[$index];  
         $table = $sheet->tables[0];
         
         $columns_compacted = array_diff(array_fetch($table_compact->columns, 'name'), array_fetch($table->columns, 'name'));
@@ -548,10 +774,9 @@ class RowsFile extends CommFile {
     }
     
     public function delete() {
-        $shareFile = ShareFile::find($this->doc_id);
-        $shareFile->isFile->delete();
-        $shareFile->delete();
-        return $shareFile->id;
+        $this->shareFile->isFile->delete();
+        $this->shareFile->delete();
+        return $this->shareFile->id;
     }
 	
 }
