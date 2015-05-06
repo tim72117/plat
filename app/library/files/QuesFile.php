@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Response, Config, Schema, Session, Input, DOMElement, DOMCdataSection, ShareFile, app\library\files\v0\FileProvider;
+use DB, View, Response, Config, Schema, Session, Input, DOMElement, DOMCdataSection, ShareFile, Auth, app\library\files\v0\FileProvider;
 
 class QuesFile extends CommFile {
 	
@@ -42,28 +42,20 @@ class QuesFile extends CommFile {
 	public function read_info() {
 		parent::create();
 	}
-    
+
     public function open() {
         
-        $shareFile = ShareFile::find($this->doc_id);   
+        View::share('ques_id', $this->file->file);
         
-        $file = $shareFile->isFile;
-        
-        $ques_doc = DB::table('ques_doc')->where('id', $file->file)->first();
-        
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid', 'edit')->first();
         View::share('ques_doc', $ques_doc);
         
         return 'editor.editor';
-        
     }
     
     public function add_page() {
         
-        $shareFile = ShareFile::find($this->doc_id);   
-        
-        $file = $shareFile->isFile;
-        
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $file->file)->select('dir', 'qid')->first();
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid')->first();
 
         $page = Session::get('page');
 
@@ -90,11 +82,7 @@ class QuesFile extends CommFile {
     
     public function save_data() {
         
-        $shareFile = ShareFile::find($this->doc_id);   
-        
-        $file = $shareFile->isFile;
-        
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $file->file)->select('dir', 'qid', 'edit')->first();
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid')->first();
         
         $qid = $ques_doc->qid;
         
@@ -532,17 +520,13 @@ class QuesFile extends CommFile {
 		
 		return '';
 	}
-    
+
     public function demo() {
         
-        $shareFile = ShareFile::find($this->doc_id);   
-        
-        $file = $shareFile->isFile;
-        
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $file->file)->select('dir', 'qid', 'title')->first();
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid', 'title')->first();
         
         $page = Input::get('page', 1);
-        $question_html = '';        
+        $question_html = '';    
         
         $ques_page = DB::table('ques_admin.dbo.ques_page')->where('qid', $ques_doc->qid)->where('page', $page)->select('xml', 'page')->first();
         
@@ -577,14 +561,10 @@ class QuesFile extends CommFile {
 	public function save_info() {	}
 	
 	public function count() {	}
-    
+
     public function creatTable() {
         
-        $shareFile = ShareFile::find($this->doc_id);   
-        
-        $file = $shareFile->isFile;
-        
-        $ques_doc = DB::table('ques_doc')->where('id', $file->file)->select('database', 'table', 'edit', 'qid')->first();
+        $ques_doc = DB::table('ques_doc')->where('id', $this->file->file)->select('database', 'table', 'edit', 'qid')->first();
         
         if( !$ques_doc->edit )
             return '';
@@ -675,16 +655,12 @@ class QuesFile extends CommFile {
 
 			
 		}
-		
+
 		DB::table($tablename.'_pstat')->update(array('page'=>1, 'updated_at'=>NULL));
     }
-    
+
     public function codebook() {
-        $shareFile = ShareFile::find($this->doc_id);   
-        
-        $file = $shareFile->isFile;
-        
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $file->file)->select('dir', 'qid', 'host')->first();
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid', 'host')->first();
         
         View::share('doc', $ques_doc);
         
@@ -692,11 +668,7 @@ class QuesFile extends CommFile {
     }
     
     public function receives() {
-        $shareFile = ShareFile::find($this->doc_id);   
-        
-        $file = $shareFile->isFile;
-        
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $file->file)->select('dir', 'qid', 'host', 'database', 'table', 'title')->first();
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id',  $this->file->file)->select('dir', 'qid', 'host', 'database', 'table', 'title')->first();
         
         View::share('doc', $ques_doc);
         
@@ -704,11 +676,7 @@ class QuesFile extends CommFile {
     }
     
     public function spss() {
-        $shareFile = ShareFile::find($this->doc_id);   
-        
-        $file = $shareFile->isFile;
-        
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $file->file)->select('dir', 'qid', 'host', 'database', 'table')->first();
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id',  $this->file->file)->select('dir', 'qid', 'host', 'database', 'table')->first();
         
         View::share('doc', $ques_doc);
         
@@ -716,11 +684,7 @@ class QuesFile extends CommFile {
     }
     
     public function report() {
-        $shareFile = ShareFile::find($this->doc_id);   
-        
-        $file = $shareFile->isFile;
-        
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $file->file)->select('dir', 'qid', 'host', 'database', 'table')->first();
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id',  $this->file->file)->select('dir', 'qid', 'host', 'database', 'table')->first();
         
         View::share('doc', $ques_doc);
         
@@ -750,5 +714,275 @@ class QuesFile extends CommFile {
             'shared' => []
         ]]);
     }
+    
+    public function create_pstat($tablename) {		
+        !Schema::hasTable($tablename.'_pstat') && Schema::create($tablename.'_pstat', function($table){
+            $table->integer('id', true);
+            $table->string('newcid', 20)->unique();
+            $table->tinyInteger('page');
+            $table->dateTime('updated_at')->nullable();
+            $table->dateTime('created_at');
+        });
+    }
+        
+    function __construct($doc_id) {
+        
+        if( $doc_id == '' )
+            return false;
+        
+        $this->shareFile = ShareFile::find($doc_id);  
+        
+        $this->file = $this->shareFile->isFile;
+        
+    }
 	
+    public function template() {
+        
+        return View::make('editor.question');        
+    }
+    
+    public function template_demo() {
+        
+        return View::make('editor.question_demo');        
+    }
+    
+    function decodeInput($input) {
+        
+        return json_decode(urldecode(base64_decode($input)));
+    }
+    
+    function get_struct_from_view($questions, $call=null) {  
+        $subs = [];
+        foreach($questions as $question){
+            
+            $sub = (object)[
+                'id' => null,
+                'answers' => [],
+            ];
+            
+            if( isset($question->answers) ) {               
+
+                $sub->id = isset($question->id) ? $question->id : (is_callable($call) ? $call($question) : null);
+                
+                foreach($question->answers as $index => $anwser){
+                    if( isset($anwser->subs) ){
+
+                        $sub->answers[$index] = ['subs' => $this->get_struct_from_view($anwser->subs, $call)];
+
+                        unset($anwser->subs);
+                    }else{
+
+                        $sub->answers[$index] = ['subs' => []];
+
+                    } 
+                }
+                
+                array_push($subs, $sub);
+            }
+            
+            if( isset($question->subs) ) {
+                $sub->subs = $this->get_struct_from_view($question->subs, $call);                
+            }
+            
+        }
+        return $subs;
+    }
+    
+    public function updateOrCreateQuestion($question) {
+        if( isset($question->id) ) {
+            DB::table('ques_new')->where('id', $question->id)->where('census_id', $this->file->file)->update([
+                'title' => isset($question->title) ? $question->title : '',
+                'type' => isset($question->type) ? $question->type : '',
+                'answers' => isset($question->answers) ? json_encode($question->answers) : null,
+                'setting' => isset($question->code) ? json_encode(['code'=>$question->code]) : null,
+                'updated_at' => date("Y-n-d H:i:s"),
+            ]);
+            return $question->id;
+        }else{
+            return DB::table('ques_new')->insertGetId([
+                'census_id' => $this->file->file,
+                'title' => isset($question->title) ? $question->title : '',
+                'type' => isset($question->type) ? $question->type : '',
+                'answers' => isset($question->answers) ? json_encode($question->answers) : null,
+                'setting' => isset($question->code) ? json_encode(['code'=>$question->code]) : null,
+                'updated_at' => date("Y-n-d H:i:s"),
+                'created_at' => date("Y-n-d H:i:s"),
+            ]);   
+        }
+    }
+    
+    public function update_ques_to_db() {
+        $updateQueue = $this->decodeInput(Input::get('updateQueue'));
+        foreach($updateQueue as $question) {
+            $this->updateOrCreateQuestion($question);
+        }
+        
+        return '';        
+    }
+    
+    public function save_ques_to_db() {
+        
+        $input = Input::get('pages');
+        
+        $pages = json_decode(urldecode(base64_decode($input)));
+        
+        DB::table('ques_new')->truncate();
+        
+        $ques_struct = array_map(function($page) {
+            $questions = $page->data;
+            return $this->get_struct_from_view($questions, function($question) {
+                return $this->updateOrCreateQuestion($question);
+            }); 
+        }, $pages);
+        
+        DB::table('ques_struct')->truncate();
+        
+        DB::table('ques_struct')->insert(['census_id'=>$this->file->file, 'struct'=>json_encode($ques_struct)]);
+        
+        return $ques_struct;        
+    }
+    
+    public function save_ques_struct_to_db() {
+        
+        $questions = Input::get('questions');
+        
+        $ques_struct = $this->get_struct_from_view($questions, function($question) {
+            return $this->updateOrCreateQuestion($question);
+        });
+        
+        DB::table('ques_struct')->truncate();
+        
+        DB::table('ques_struct')->insert(['census_id'=>$this->file->file, 'struct'=>json_encode($ques_struct)]);
+        
+        return $this->get_ques_from_db();
+    }
+    
+    function set_subs(&$questions, $ques_items) {
+        foreach($questions as $ques_index => $question){
+            $ques_item = $ques_items[$question->id];      
+
+            $questions[$ques_index]->type = $ques_item->type;            
+            $questions[$ques_index]->title = $ques_item->title;
+            isset($ques_item->setting) && $questions[$ques_index]->code = $ques_item->setting->code;
+            
+            isset($question->subs) && $this->set_subs($question->subs, $ques_items);
+
+            foreach($question->answers as $var_index => $answer){
+
+                $ans_item = $ques_item->answers[$var_index];
+                isset($ans_item->value) && $questions[$ques_index]->answers[$var_index]->value = $ans_item->value;
+                isset($ans_item->title) && $questions[$ques_index]->answers[$var_index]->title = $ans_item->title;
+                isset($ans_item->struct) && $questions[$ques_index]->answers[$var_index]->struct = $ans_item->struct; 
+                isset($ans_item->skips) && $questions[$ques_index]->answers[$var_index]->skips = $ans_item->skips; 
+                isset($ans_item->sub_title) && $questions[$ques_index]->answers[$var_index]->sub_title = $ans_item->sub_title; 
+
+                if( isset($answer->subs) ) {
+                    $this->set_subs($questions[$ques_index]->answers[$var_index]->subs, $ques_items);
+                }
+
+            }
+            
+        }
+    }
+    
+    public function get_ques_from_db() {
+        
+        $questions_db = DB::table('ques_new')->where('census_id', $this->file->file)->get();
+        
+        $pages_struct = json_decode(DB::table('ques_struct')->where('census_id', $this->file->file)->select('struct')->first()->struct);       
+                  
+        $ques_items = array_reduce($questions_db, function ($result, $item) {
+            $item->answers = json_decode($item->answers);
+            $item->setting = json_decode($item->setting);
+            $result[$item->id] = $item;
+            return $result;
+        }, array());      
+        
+        $pages = array_map(function($page_struct) use($ques_items) {
+            $this->set_subs($page_struct, $ques_items);
+            return (object)['data'=>$page_struct];
+        }, $pages_struct);
+        
+        
+        return $pages;        
+    }
+    
+    public function get_ques_from_xml() {
+        
+        include_once(app_path().'/views/editor/buildQuestion_editor__v2.0.laravel-ng.php'); 
+        
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid', 'edit')->first();
+        
+        $pages = DB::table('ques_page')->where('qid', $ques_doc->qid)->orderBy('page')->select('page', DB::raw('CAST(page AS varchar) AS label'), 'xml')->get();
+        
+        Session::put('page', Input::get('page'));
+        
+        $question_box = array();
+        
+        foreach($pages as $index => $page) {
+            $question_box[$index] = (object)['data'=>[]];
+            $question_array = simplexml_load_string($page->xml);
+            foreach($question_array as $question){
+                if( $question->getName()=='question' ){
+                    array_push($question_box[$index]->data, buildQuestion_ng($question, $question_array, 0, "no"));
+                }                
+            }
+        }
+        
+        $can_edit = $ques_doc->edit ? true : false;
+        
+        return ['data'=>$question_box, 'edit'=>$can_edit];
+    }
+    
+    public function save_answer_data() {
+        
+        $user = Auth::user();        
+        
+        $ques_data = DB::table('ques_data')->where('census_id', $this->file->file)->where('created_by', $user->id)->where('ques_id', Input::get('id'));
+        
+        $input_org = Input::get('input');
+        
+        $input = is_array($input_org) ? implode(' ', $input_org) : $input_org;
+        
+        if( $ques_data->exists() ) {
+            
+            $ques_data->update(['answer' => $input]); 
+            
+            
+        }else{
+            
+            DB::table('ques_data')->insert([
+                'census_id' => $this->file->file,
+                'ques_id' => Input::get('id'),                
+                'answer' => $input,
+                'created_by' => $user->id,
+                'updated_at' => date("Y-n-d H:i:s"),
+                'created_at' => date("Y-n-d H:i:s"),
+            ]);
+            
+        }
+            
+        return Input::get('input');
+    }
+    
+    public function cache_manifest() {
+        
+        return Response::view('nopage', array(), 404);
+        //return View::make('editor.cache_manifest');
+    }    
+    
+    public function open_ng() {
+        
+        View::share('ques_id', $this->file->file);
+        
+        return View::make('html5-layer')->nest('context', 'editor.editor-ng'); 
+    }
+    
+    public function demo_ng() {
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid', 'title')->first();
+        
+        return View::make('editor.demo-ng');
+    }
+    
+    
 }
