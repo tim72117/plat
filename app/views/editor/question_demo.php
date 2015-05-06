@@ -1,22 +1,31 @@
-<div class="main" ng-repeat="question in questions" ng-if="($index===step||layer!==0)" style="">
+<div ng-repeat="question in questions" ng-if="($index===step||layer!==0)" style="">
                 
     <div id="'.$question->id.'" parrent="'.$parrent.'" class="layer'.$layer.'" style="">
         
-        <div class="main" ng-repeat="head in question.heads">
-            <h4 class="title" style="" ng-bind-html="head.title"></h4>
+        <div ng-repeat="head in question.heads">
+            <h1 class="ui header" ng-bind-html="head.title"></h1>
         </div>
-        <h4 class="title" style="" ng-bind-html="question.title"></h4>
+        <h1 class="ui header" ng-bind-html="question.title"></h1>
 
-        <div class="fieldA" init="" style="overflow : auto;position:static">
-            
-            <div ng-if="question.type==='radio'" ng-repeat="answer in question.answers">
-                <p class="radio">
-                    <input type="radio" class="qcheck" id="{{ question.id+'_'+$index }}" ng-model="db[question.id]" ng-value="answer.value" ng-change="save_data(question)" />
-                    <label for="{{ question.id+'_'+$index }}" class="radio" ng-bind-html="answer.title"></label>
-                </p>
-                <div ng-if="answer.subs.length>0 && db[question.id]===answer.value">
-                    <questions data="answer.subs" layer="layer+1"></questions>
+        <div class="fieldA three fields" init="">
+
+            <div ng-if="question.type==='radio'">
+                
+                <div class="grouped inline fields">
+                    <div class="field" ng-repeat="answer in question.answers">
+                        
+                        <div class="ui radio checkbox">
+                            <input type="radio" class="qcheck" id="{{ question.id+'_'+$index }}" ng-model="db[question.id]" ng-value="answer.value" ng-change="save_data(question)" />
+                            <label for="{{ question.id+'_'+$index }}" class="radio" ng-bind-html="answer.title"></label>
+                        </div>
+                        
+                        <div ng-if="answer.subs.length>0 && db[question.id]===answer.value">
+                            <questions data="answer.subs" layer="layer+1"></questions>
+                        </div>
+                        
+                    </div>
                 </div>
+
             </div>
             
             <div ng-if="question.type==='select'">
@@ -26,15 +35,13 @@
                 </select>
             </div>
             
-            <div ng-if="question.type==='text'" ng-repeat="answer in question.answers">
-                <div style="display:table-row">
-                    <div style="display:table-cell;line-height:60px">{{ answer.title }}</div>
-                    <div style="display:table-cell;line-height:60px">
-                        <input type="text" class="fat qcheck" placeholder="{{ answer.sub_title }}"
-                               ng-style="{maxlength: answer.size, textsize: answer.size, size: answer.size}"
-                               ng-model="db[question.id][$index]" ng-model-options="{ updateOn: 'blur' }"
-                               ng-change="save_data(question)" />
-                    </div>
+            <div class="field" ng-if="question.type==='text'" ng-repeat="answer in question.answers">
+                <label>{{ answer.title }}</label>
+                <div class="ui input">
+                    <input type="text" placeholder="{{ answer.sub_title }}"
+                           ng-style="{maxlength: answer.size, textsize: answer.size, size: answer.size}"
+                           ng-model="db[question.id][$index]" ng-model-options="{ updateOn: 'blur' }"
+                           ng-change="save_data(question)" />
                 </div>
             </div>
             
@@ -73,10 +80,10 @@
             
             <div ng-if="question.type==='checkbox'">
                 <div ng-repeat="question in question.subs">
-                    <p class="checkbox">
-                        <input type="checkbox" class="qcheck" id="{{ question.id+'_'+$index }}" ng-model="db[question.id]" ng-true-value="1" ng-false-value="0" ng-change="save_data(question)" />
-                        <label for="{{ question.id+'_'+$index }}" class="checkbox">{{ question.title }}</label>
-                    </p>
+                    <div class="ui toggle checkbox">
+                        <input type="checkbox" id="{{ question.id+'_'+$index }}" ng-model="db[question.id]" ng-true-value="1" ng-false-value="0" ng-change="save_data(question)" />
+                        <label for="{{ question.id+'_'+$index }}">{{ question.title }}</label>
+                    </div>
                     <div ng-if="answer.subs.length>0" ng-repeat="answer in question.answers">
                         <div ng-if="answer.subs.length>0 && db[question.id]">
                             <questions data="answer.subs" layer="layer+1"></questions>
