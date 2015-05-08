@@ -6,14 +6,14 @@
             
             <thead>
                 <tr>
-                    <th></th>
+                    <th width="100"></th>
                     <th>開發需求或問題描述</th>
-                    <th>需求類型</th>
-                    <th>重要性</th>
-                    <th>發佈時間</th>
-                    <th>處理人員</th>
+                    <th width="120">需求類型</th>
+                    <th width="100">重要性</th>
+                    <th width="120">發佈時間</th>
+                    <th width="120">處理人員</th>
                     <th>處理狀況</th>
-                    <th class="center aligned">處理完成</th>
+                    <th class="center aligned" width="60">完成</th>
                     <th ng-if="developments.hasOwnProperty(user_id)">git紀錄</th>
                 </tr>  
             </thead>
@@ -57,15 +57,15 @@
             </tbody>
             
             <tbody>
-                <tr ng-repeat="request in requests | orderBy:['completed', 'created_at.h', 'created_at.i', 'created_at.s']:false" ng-class="{disabled: request.saving}">
+                <tr ng-repeat="request in requests | orderBy:['completed', sortCreatedBy, 'created_at.days', 'created_at.h', 'created_at.i', 'created_at.s']:false" ng-class="{disabled: request.saving}">
                     <td><i class="child icon"></i>{{ request.creater }}</td>
                     
-                    <td ng-if="!request.edit" style="max-width: 250px;overflow-wrap: break-word">
+                    <td ng-if="!request.edit" style="max-width: 350px;overflow-wrap: break-word">
                         <a href="javascript:void(0)" class="header" ng-click="request.edit=!request.edit"><i class="write icon"></i>{{ request.describe }}</a>
                     </td>
                     <td ng-if="request.edit">
                         <form class="ui form" ng-class="{loading: request.saving}">
-                            <textarea ng-model="request.describe" ng-model-options="{ debounce: 1000 }" ng-change="updateOrCreate(request)" ng-blur="request.edit=false"></textarea>
+                            <textarea ng-model="request.describe" ng-model-options="{ debounce: 3000 }" ng-change="updateOrCreate(request)" ng-blur="request.edit=false"></textarea>
                         </form>                        
                     </td>                    
                     
@@ -86,9 +86,10 @@
                     </td>
                     
                     <td><i class="history icon"></i>
-                        <span ng-if="request.created_at.h > 0">{{ request.created_at.h }}小時前</span>
-                        <span ng-if="request.created_at.i > 0 && request.created_at.h == 0">{{ request.created_at.i }}分鐘前</span>
-                        <span ng-if="request.created_at.s >= 0 && request.created_at.h == 0 && request.created_at.i == 0">{{ request.created_at.s }}秒前</span>
+                        <span ng-if="request.created_at.days > 0">{{ request.created_at.days }}天前</span>
+                        <span ng-if="request.created_at.days == 0 && request.created_at.h > 0">{{ request.created_at.h }}小時前</span>
+                        <span ng-if="request.created_at.days == 0 && request.created_at.i > 0 && request.created_at.h == 0">{{ request.created_at.i }}分鐘前</span>
+                        <span ng-if="request.created_at.days == 0 && request.created_at.s >= 0 && request.created_at.h == 0 && request.created_at.i == 0">{{ request.created_at.s }}秒前</span>
                     </td>
                     
                     <td ng-if="!developments.hasOwnProperty(user_id)">{{ developments[request.handler_id] }}</td>
@@ -96,13 +97,13 @@
                         <select class="ui dropdown" ng-options="id as name for (id, name) in developments" ng-model="request.handler_id" ng-change="updateOrCreate(request)"></select>
                     </td>
                     
-                    <td ng-if="!developments.hasOwnProperty(user_id)" style="max-width: 250px;overflow-wrap: break-word">{{ request.handle }}</td>
+                    <td ng-if="!developments.hasOwnProperty(user_id)" style="max-width: 350px;overflow-wrap: break-word">{{ request.handle }}</td>
                     <td ng-if="developments.hasOwnProperty(user_id) && !request.edit" style="max-width: 250px;overflow-wrap: break-word">
                         <a href="javascript:void(0)" class="header" ng-click="request.edit=!request.edit"><i class="write icon"></i>{{ request.handle }}</a>
                     </td>
                     <td ng-if="request.edit">
                         <form class="ui form" ng-class="{loading: request.saving}">
-                            <textarea ng-model="request.handle" ng-model-options="{ debounce: 1000 }" ng-change="updateOrCreate(request)" ng-blur="request.edit=false"></textarea>
+                            <textarea ng-model="request.handle" ng-model-options="{ debounce: 3000 }" ng-change="updateOrCreate(request)" ng-blur="request.edit=false"></textarea>
                         </form>                        
                     </td>
                     
@@ -116,7 +117,7 @@
                     
                     <td ng-if="developments.hasOwnProperty(user_id)">
                         <div class="ui input">
-                            <input type="text" placeholder="git紀錄" ng-model="request.git" ng-model-options="{ debounce: 1000 }" ng-change="updateOrCreate(request)" />
+                            <input type="text" placeholder="git紀錄" ng-model="request.git" ng-model-options="{ debounce: 3000 }" ng-change="updateOrCreate(request)" />
                         </div>
                     </td>
                 </tr>  
@@ -144,6 +145,12 @@
                     
                     <div class="extra text">
                         I'm having a BBQ this weekend. Come by around 4pm if you can.
+                    </div>
+                    
+                    <div class="extra text">
+                        排序方式<br />
+                        程式人員 處理完成 > 處理人員 > 時間<br />
+                        非程式人員 處理完成 > 貼文人員 > 時間
                     </div>
                     
                     <div class="meta">
@@ -193,6 +200,17 @@ angular.module('app')
         $scope.saving = query.length > 0;
     });
     
+    $scope.sortCreatedBy = function(request) {
+        if( $scope.developments.hasOwnProperty($scope.user_id) ) 
+        {
+            return !(request.handler_id===$scope.user_id);
+        }
+        else
+        {
+            return !(request.created_by===$scope.user_id);
+        }
+    };
+    
     $scope.add_request = function() {
         $scope.new.describe = null;
         $scope.new.type = null;
@@ -215,8 +233,12 @@ angular.module('app')
             rank: request.rank,
             completed: request.completed
         } })
-        .success(function(data, status, headers, config) {             
-            if( data.is_new )
+        .success(function(data, status, headers, config) {              
+            if( data.updated_by !== $scope.user_id )
+            {
+                $scope.getRequests();
+            }
+            else if( data.is_new )
             {
                 $scope.requests.push(data.request);
             }
@@ -231,10 +253,10 @@ angular.module('app')
         });
     };
     
-    $scope.getRequest = function() {
+    $scope.getRequests = function() {
         $scope.loading = true;
-        $http({method: 'POST', url: 'ajax/getRequest', data:{} })
-        .success(function(data, status, headers, config) {   
+        $http({method: 'POST', url: 'ajax/getRequests', data:{} })
+        .success(function(data, status, headers, config) {      
             $scope.user_id = data.user_id;
             $scope.requests = data.requests;
             $scope.developments = data.developments;
@@ -244,7 +266,7 @@ angular.module('app')
         });
     };
     
-    $scope.getRequest();
+    $scope.getRequests();
     
 });
 </script>

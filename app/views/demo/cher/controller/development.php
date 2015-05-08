@@ -1,24 +1,27 @@
 <?
 return [
-    'getRequest' => function() {
+    'getRequests' => function() {
         $developments = User::whereIn('id', [1, 5, 10, 18])->lists('username', 'id');
         $requests = DB::table('development')->leftJoin('users', 'development.created_by', '=', 'users.id')->select(['development.*', 'users.username AS creater'])->get();
-        return ['user_id' => Auth::user()->id, 'developments' => $developments, 'requests' => array_map(function($request){
-            return [
-                'id'         => $request->id,
-                'describe'   => $request->describe,
-                'type'       => $request->type,
-                'handle'     => $request->handle,
-                'handler_id' => $request->handler_id,
-                'git'        => $request->git,
-                'rank'       => $request->rank,
-                'created_by' => $request->created_by,
-                'updated_at' => $request->updated_at,
-                'created_at' => Carbon\Carbon::parse($request->created_at)->diff(Carbon\Carbon::now()),
-                'creater'    => $request->creater,
-                'completed'  => (bool)$request->completed,                
-            ];
-        }, $requests)];
+        return [
+            'user_id'      => Auth::user()->id,
+            'developments' => $developments,
+            'requests'     => array_map(function($request){
+                return [
+                    'id'         => $request->id,
+                    'describe'   => $request->describe,
+                    'type'       => $request->type,
+                    'handle'     => $request->handle,
+                    'handler_id' => $request->handler_id,
+                    'git'        => $request->git,
+                    'rank'       => $request->rank,
+                    'created_by' => $request->created_by,
+                    'updated_at' => $request->updated_at,
+                    'created_at' => Carbon\Carbon::parse($request->created_at)->diff(Carbon\Carbon::now()),
+                    'creater'    => $request->creater,
+                    'completed'  => (bool)$request->completed,                
+                ];
+            }, $requests)];
     },
     'updateOrCreate' => function()
     {
@@ -50,9 +53,12 @@ return [
             $is_new = false;
         }
         $request = DB::table('development')->where('development.id', $id)->leftJoin('users', 'development.created_by', '=', 'users.id')->select(['development.*', 'users.username AS creater'])->first();
+        $updated_by = Cache::remember('development-updated_by', 1, function() { return Auth::user()->id; });
+        Auth::user()->id != $updated_by && Cache::forget('development-updated_by');
         return [
-            'is_new' => $is_new, 
-            'request' => [
+            'is_new'     => $is_new,
+            'updated_by' => $updated_by,
+            'request'    => [
                 'id'         => $request->id,
                 'describe'   => $request->describe,
                 'type'       => $request->type,
