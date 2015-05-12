@@ -60,14 +60,7 @@
                 <tr ng-repeat="request in requests | orderBy:['completed', sortCreatedBy, 'created_at.days', 'created_at.h', 'created_at.i', 'created_at.s']:false" ng-class="{disabled: request.saving}">
                     <td><i class="child icon"></i>{{ request.creater }}</td>
                     
-                    <td ng-if="!request.edit" style="max-width: 350px;overflow-wrap: break-word">
-                        <a href="javascript:void(0)" class="header" ng-click="request.edit=!request.edit"><i class="write icon"></i>{{ request.describe }}</a>
-                    </td>
-                    <td ng-if="request.edit">
-                        <form class="ui form" ng-class="{loading: request.saving}">
-                            <textarea ng-model="request.describe" ng-model-options="{ debounce: 3000 }" ng-change="updateOrCreate(request)" ng-blur="request.edit=false"></textarea>
-                        </form>                        
-                    </td>                    
+                    <td contenteditable ng-model="request.describe" ng-model-options="{ debounce: 3000 }" style="max-width: 350px;overflow-wrap: break-word" ng-change="updateOrCreate(request)"></td>                  
                     
                     <td>
                         <select class="ui dropdown" ng-model="request.type" ng-change="updateOrCreate(request)">
@@ -97,15 +90,9 @@
                         <select class="ui dropdown" ng-options="id as name for (id, name) in developments" ng-model="request.handler_id" ng-change="updateOrCreate(request)"></select>
                     </td>
                     
-                    <td ng-if="!developments.hasOwnProperty(user_id)" style="max-width: 350px;overflow-wrap: break-word">{{ request.handle }}</td>
-                    <td ng-if="developments.hasOwnProperty(user_id) && !request.edit" style="max-width: 250px;overflow-wrap: break-word">
-                        <a href="javascript:void(0)" class="header" ng-click="request.edit=!request.edit"><i class="write icon"></i>{{ request.handle }}</a>
-                    </td>
-                    <td ng-if="request.edit">
-                        <form class="ui form" ng-class="{loading: request.saving}">
-                            <textarea ng-model="request.handle" ng-model-options="{ debounce: 3000 }" ng-change="updateOrCreate(request)" ng-blur="request.edit=false"></textarea>
-                        </form>                        
-                    </td>
+                    <td ng-if="!developments.hasOwnProperty(user_id)" style="max-width: 350px;overflow-wrap: break-word" ng-bind-html="request.handle "></td>
+                    <td ng-if="developments.hasOwnProperty(user_id)" contenteditable ng-model="request.handle" ng-model-options="{ debounce: 3000 }"
+                        ng-change="updateOrCreate(request)" style="max-width: 250px;overflow-wrap: break-word"></td>
                     
                     <td ng-if="!developments.hasOwnProperty(user_id)" class="center aligned"><i class="thumbs outline up green icon" ng-if="request.completed"></i></td>
                     <td ng-if="developments.hasOwnProperty(user_id)">
@@ -268,7 +255,33 @@ angular.module('app')
     
     $scope.getRequests();
     
-});
+})
+.directive('contenteditable', ['$sce', function($sce) {
+    return {
+        restrict: 'A',
+        require: '?ngModel',
+        link: function(scope, element, attrs, ngModel) {            
+            if (!ngModel) return;
+
+            // Specify how UI should be updated
+            ngModel.$render = function() {                
+                element.html($sce.getTrustedHtml(ngModel.$viewValue || ''));
+            };
+
+            // Listen for change events to enable binding
+            element.on('blur keyup change', function() {
+                scope.$evalAsync(read);
+            });
+            
+            // Write data to the model
+            function read() {
+                var html = element.html();
+                
+                ngModel.$setViewValue(html);
+            }
+        }
+    };
+}]);;
 </script>
 
 <script src="/css/ui/Semantic-UI-1.11.1/components/popup.js"></script>
