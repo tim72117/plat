@@ -14,8 +14,17 @@ class AnalysisController extends BaseController {
 	|	Route::get('/', 'HomeController@showWelcome');
 	|
 	*/
+    
+    public function page($page) {
+        return View::make('analysis.' . $page);
+    }
+    
+    public function getData($data) {
+        $data = View::make('analysis.data.' . $data)->render();
+        return Response::json(json_decode($data));
+    }
 	
-	public function pointer(){
+	public function pointer() {
 		
 		//error_reporting(E_ALL | E_STRICT);
 		//ini_set('display_errors', true);

@@ -58,7 +58,8 @@
                                 <div class="item" ng-click="searchText = {type: 1}"><i class="file text outline icon"></i>問卷</div>
                                 <div class="item" ng-click="searchText = {type: 3}"><i class="file outline blue icon"></i>一般檔案</div>
                                 <div class="item" ng-click="searchText = {type: 2}"><i class="code icon"></i>程式</div>
-                                <div class="item" ng-click="searchText = {type: ''}"><i class="file outline icon"></i>所有檔案</div>                                
+                                <div class="item" ng-click="searchText = {type: 7}"><i class="bar chart icon"></i>線上分析</div>
+                                <div class="item" ng-click="searchText = {type: ''}"><i class="file outline icon"></i>所有檔案</div>                    
                             </div>
                         </div>
                         <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋..."><i class="search icon"></i></div>
@@ -138,7 +139,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     $scope.pages = Math.ceil($scope.max/$scope.limit);
     $scope.timenow = new Date();
     $scope.info = {pickeds:0};
-    $scope.types = {1: 'file text outline', 2: 'code', 3: 'file outline blue', 5: 'file text', 6: 'file outline blue', '': 'file outline'};
+    $scope.types = {1: 'file text outline', 2: 'code', 3: 'file outline blue', 5: 'file text', 6: 'file outline blue', 7: 'bar chart', '': 'file outline'};
     $scope.tools = {codebook: 'book', receives: 'line chart', spss: 'code', report: 'comment outline'};
     $scope.uploading = false;
     
