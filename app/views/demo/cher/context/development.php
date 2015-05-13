@@ -36,13 +36,11 @@
             </tbody>
             
             <tbody ng-if="is_add">
-                <tr class="positive">
+                <tr>
                     <td></td>
-                    <td>
-                        <form class="ui form">
-                            <textarea ng-model="new.describe"></textarea>
-                        </form>                        
-                    </td>
+                    
+                    <td class="positive" contenteditable ng-model="new.describe"></td>
+                    
                     <td>
                         <select class="ui dropdown" ng-model="new.type" ng-init="new.type=1">                            
                             <option value="1">程式錯誤</option>
@@ -50,6 +48,7 @@
                             <option value="3">功能開發</option>
                         </select>
                     </td>
+                    
                     <td colspan="5">
                         <div class="ui positive button" ng-click="updateOrCreate(new)">儲存</div>                      
                     </td>
