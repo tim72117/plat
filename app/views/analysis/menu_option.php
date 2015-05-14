@@ -1,29 +1,15 @@
-<?php
-$_SESSION['def_city'] = '30';
-
-$census = DB::reconnect('sqlsrv_analysis')->table('census_info')->where('used_site', 'used')->get();
-?>
-
-<div ng-controller="analysisController" style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
-
-<div ng-cloak class="ui segment">
+<div ng-cloak ng-controller="analysisController" class="ui segment" style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto">
     
-    <div class="ui left floated segment" style="width:300px">
-            <select ng-model="census_selected" ng-options="census.CID as census.census_text_title for census in census_" ng-change="get_questions(census_selected)"></select>
+    <div class="ui left floated segment" style="width:350px">
 
-            <select ng-model="part_selected" ng-options="part.part_name for part in parts" ng-change=""></select>
+            <select ng-model="part_selected.part" ng-options="part.part as part.part_name for part in parts" ng-change=""></select>
             
-            <div class="ui divided list" style="overflow-y: auto;max-height:500px">
-                <div class="item">
-                    <div class="ui checkbox">
-                        <input type="checkbox" id="label_ques_for_all" />
-                        <label for="label_ques_for_all">全選<span style="color:red">(勾選題目時，建議您參考問卷，以完整瞭解題目原意！)</span></label>
-                    </div>
-                </div>
-                <div class="item" ng-repeat="question in questions">
+            <div class="ui list" style="overflow-y: auto;max-height:600px">
+
+                <div class="item" ng-repeat="question in questions | filter: part_selected">
                     <div class="content">
                         <div class="ui checkbox">
-                            <input type="checkbox" id="question-{{ $index }}"  ng-model="question.selected" />
+                            <input type="checkbox" id="question-{{ $index }}"  ng-model="question.selected" ng-click="get_variables(question)" />
                             <label for="question-{{ $index }}">{{ question.label }}</label>
                         </div>  
 
@@ -35,10 +21,11 @@ $census = DB::reconnect('sqlsrv_analysis')->table('census_info')->where('used_si
                         </div>
                     </div>
                 </div>
+                
             </div>
     </div>
     
-    <div class="ui left floated basic segment" style="width:800px">
+    <div class="ui left floated basic segment" style="min-width:800px">
         <div class="ui top attached tabular menu">
             <div class="item" ng-class="{active: tool===1}" ng-click="tool=1">次數分配</div>
             <div class="item" ng-class="{active: tool===2}" ng-click="tool=2">交叉表</div>
@@ -63,19 +50,33 @@ $census = DB::reconnect('sqlsrv_analysis')->table('census_info')->where('used_si
             <?// include_once('tb/use/'.$tb5_inner)?>5
         </div>
 
-        <div class="ui positive button" ng-click="start()">開始分析</div>
     </div>
 
 </div>
 
 <div class="ui dimmer modals page transition" ng-class="{visible: dialog.open, active: dialog.open}">
+    
 	<div class="ui fullscreen modal transition visible active" style="margin-top: -221px;">
+    
 		<i class="close icon" ng-click="dialog.open=false"></i>
 		<div class="header">{{ dialog.question_label }}</div>
 		<div class="content">
+        
+            <div class="ui icon basic button">
+                <i class="bar chart icon"></i>
+            </div>
+        
+            <div class="ui icon basic button">
+                <i class="clockwise rotated bar chart icon"></i>
+            </div>
+            
 			<table class="ui table">
 				<thead>
-
+                    <tr>
+                        <th></th>
+                        <th ng-repeat="variable in variables">{{ variable.variable_label }}</th>
+                        <th></th>
+                    </tr>
 				</thead>
 				<tbody ng-repeat="frequence in dialog.frequences">
 					<tr>
@@ -101,8 +102,6 @@ $census = DB::reconnect('sqlsrv_analysis')->table('census_info')->where('used_si
 		</div>
 	</div>
 </div>
-    
-</div>
 
 <script src="/analysis/use/js/jqueryUI/Highcharts-2.3.5/js/highcharts.js"></script>
 <script src="/analysis/use/js/jqueryUI/Highcharts-2.3.5/js/modules/exporting.src.js"></script>
@@ -115,14 +114,12 @@ $census = DB::reconnect('sqlsrv_analysis')->table('census_info')->where('used_si
 
 <script>
 app.controller('analysisController', function($scope, $filter, $interval, $http) {
-    $scope.census_ = angular.fromJson(<?=json_encode($census)?>);
     $scope.authority = 1;
     $scope.tool = 1;
 	$scope.dialog = {open: false, frequences: []};
-	$scope.target_group = 'my';
-	$scope.target = {my: {selected: true}};
-
-	console.log($scope.target);
+    $scope.results = {};
+    $scope.targets = [];
+    $scope.target = {};
 	
 	$scope.getGroups = function (items) {
         var groupArray = [];
@@ -133,32 +130,42 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         return groupArray.sort();
     };
     
-    $scope.run = function(QID, target) {
-		$http({method: 'POST', url: 'get_count_frequence', data:{QID: QID, target: target} })
+    $scope.setGroup = function(group) {
+        angular.forEach($scope.targets.groups, function(group, key) {
+            if( group.selected )
+                group.selected = false;
+        });
+        group.selected = true;
+    };
+    
+    $scope.getResult = function(QID, group_key, target_key) {
+        $scope.targets.groups[group_key].targets[target_key].loading = true;        
+		$http({method: 'POST', url: 'get_count_frequence', data:{QID: QID, group_key: group_key, target_key: target_key} })
 		.success(function(data, status, headers, config) {
-			console.log(data);
-         	$scope.dialog.question_label = data.question_label;            
-			$scope.dialog.frequences.push({variables: data.variables, school: data.school});
-//			$scope.dialog_frequence.otherinf = data.otherinf;
-			
+			console.log(data);           
+            $scope.results[target_key] = data.frequencesTable;
+            $scope.targets.groups[group_key].targets[target_key].loading = false;
+            console.log($scope.results);
+//			$scope.dialog_frequence.otherinf = data.otherinf;			
 		}).error(function(e){
 			console.log(e);
 		});
     };
 	
-    $scope.start = function() {
+    $scope.getResults = function() {
         var QID = $filter('filter')($scope.questions, {selected: true})[0].QID;
-        var targets = $scope.target;
-        $scope.dialog.frequences = [];
-        for(target in targets) {
-            console.log(target);
-            $scope.run(QID, target);
-        }		
-        $scope.dialog.open = true;
+        $scope.results = {};
+        var groups = $scope.targets.groups;
+        for( group_key in groups ) {
+            for( target_key in groups[group_key].targets ) {
+                if( groups[group_key].targets[target_key].selected )
+                    $scope.getResult(QID, group_key, target_key);
+            }		
+        }
 	};
     
-    $scope.get_questions = function(CID) {
-        $http({method: 'POST', url: 'get_questions', data:{CID: CID} })
+    $scope.get_questions = function() {
+        $http({method: 'POST', url: 'get_questions', data:{} })
 		.success(function(data, status, headers, config) {
 			console.log(data);
             $scope.questions = data.questions;
@@ -168,16 +175,45 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 		});
     };
     
-    $scope.get_varibales = function(CID) {
-        $http({method: 'POST', url: 'get_varibale', data:{CID: CID} })
+    $scope.get_variables = function(question) {
+        
+        var question_selected = $filter('filter')($scope.questions, {selected: true, QID: '!' + question.QID});
+        if ( question_selected.length > 0 ) question_selected[0].selected = false;
+        
+        $http({method: 'POST', url: 'get_variables', data:{QID: question.QID} })
 		.success(function(data, status, headers, config) {
-			console.log(data);
-            $scope.questions = data.questions;
-            $scope.parts = data.census_parts;
+            console.log(data);
+            $scope.variables = data.variables;            
+            $scope.getResults();
 		}).error(function(e){
 			console.log(e);
 		});
     };
+    
+    $scope.get_targets = function() {
+        $http({method: 'POST', url: 'get_targets', data:{} })
+		.success(function(data, status, headers, config) {
+            console.log(data);		
+            $scope.targets = data.targets;
+            //$scope.targets['my'].selected = true;
+            angular.forEach($scope.targets.groups, function(group, group_key) {
+                angular.forEach(group.targets, function(target, target_key) {
+                    $scope.$watch('targets.groups["'+group_key+'"].targets["'+target_key+'"].selected', function(selected) {
+                        if( selected )
+                        {
+                            var QID = $filter('filter')($scope.questions, {selected: true})[0].QID;
+                            $scope.getResult(QID, group_key, target_key);
+                        }                        
+                    });
+                });    
+            });
+		}).error(function(e){
+			console.log(e);
+		});
+    };
+    
+    $scope.get_questions();
+    $scope.get_targets();    
 	
 });
 app.filter('groupby', function(){

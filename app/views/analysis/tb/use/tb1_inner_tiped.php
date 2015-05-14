@@ -1,31 +1,83 @@
 
 <div class="ui segment"> 
 
-    <h5 class="ui header">選擇變數
-		<div class="content">(<i class="help icon"></i>選擇題目後點選向右箭頭加入題目)</div>
+    <h5 class="ui header">
+		<div class="content">已選擇變數</div>
 	</h5>
     
-    <div style="border:2px dashed #777;background-color:#fff">
+    <div class="ui label" ng-repeat="question in questions | filter: {selected: true}">
+        {{ question.label }}
+        <i class="delete icon" ng-click="question.selected = false"></i>
+    </div>
         
-        <div class="ui label" ng-repeat="question in questions | filter: {selected: true}">
-            {{ question.label }}
-            <i class="delete icon"></i>
-        </div>
+    <table class="ui table">
+        <thead>
+            <tr>
+                <th>
+                    
+                    <div class="ui left pointing labeled icon dropdown button active visible" ng-click="target.show=!target.show">
+                        <i class="add icon"></i>
+                        <span class="text">分析對象</span>                        
+                        
+                        <div class="menu transition" ng-class="{visible: target.show}" ng-click="$event.stopPropagation()">
+                            
+                            <div class="ui basic segment">
+                                <div class="ui basic button" ng-repeat="(group_key, group) in targets.groups" ng-class="{active: group.selected}" ng-click="setGroup(group)">{{ group.name }}</div>
+                            </div>
+                            
+                            <div class="ui basic segment" ng-repeat="group in targets.groups" ng-if="group.selected">
+                                <div class="ui list">
+                                    <div class="item" ng-repeat="(target_key, target) in group.targets">
+                                        <div class="ui checkbox">
+                                            <input type="checkbox" id="target-{{ target_key }}" ng-model="target.selected" />
+                                            <label for="target-{{ target_key }}">{{ target.name }}</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="ui basic segment" ng-show="target_group==='my'">                                
+                                <div class="ui checkbox">
+                                    <input type="checkbox" id="target-my" ng-model="targets['my'].selected" />
+                                    <label for="target-my">本校</label>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
         
+                </th>
+                <th ng-repeat="variable in variables">{{ variable.variable_label }}({{ variable.variable }})</th>
+            </tr>
+        </thead>
+        <tbody ng-repeat="group in targets.groups">
+            <tr ng-repeat="(target_key, target) in group.targets" ng-if="target.selected" ng-class="{disabled: target.loading}">
+                <td>{{ target.name }}</td>
+                <td class="right aligned collapsing" ng-repeat="variable in variables">{{ results[target_key][variable.variable] ? results[target_key][variable.variable] : 0 }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+<div class="ui segment"> 
+    
+    <h5 class="ui header">是否加權</h5>
+    
+    <div class="ui radio checkbox">
+        <input type="radio" id="ext_weight_yes" ng-model="ext_weight" value="1" />
+        <label for="ext_weight_yes">是</label>
+    </div>
+    
+    <div class="ui radio checkbox">
+        <input type="radio" id="ext_weight_no" ng-model="ext_weight" value="0" />
+        <label for="ext_weight_no">否</label>
     </div>
 
 </div>
 
-<div class="ui segment"> 
-    
-    <h5 class="ui header">是否選擇加權</h5>
-    
-    <input type="radio" name="ext_weight_1" name_same='ext_weight' value="1" checked="checked" />是
-    <input type="radio" name="ext_weight_1" name_same='ext_weight' value="0" />否
-
-</div>
-
-<div class="ui segment"> 
+<div class="ui segment" style="display:none"> 
     
     <h5 class="ui header">分析對象</h5>
     
@@ -49,104 +101,6 @@
         <a href="javascript:void(0)" class="item" href="#tabs-target_group-6">各縣市</a>
         <a href="javascript:void(0)" class="item" href="#tabs-target_group-8">各縣市學校</a>
     </div>
-    
-    <div class="ui basic segment" ng-show="target_group==='my'">
-		<div class="ui checkbox">
-			<input type="checkbox" id="target-my" ng-model="target['my'].selected" />
-			<label for="target-my">本校</label>
-		</div>
-    </div>
-    
-    <div class="ui basic segment" ng-if="target_group==='all'">
-		<div class="ui checkbox">
-			<input type="checkbox" id="target-all" ng-model="target['all'].selected" />
-			<label for="target-all">全國學校</label>
-		</div>
-		<div class="ui checkbox">
-			<input type="checkbox" id="target-state-all" ng-model="target['state-all'].selected" />
-			<label for="target-state-all">全國國立學校</label>
-		</div>
-		<div class="ui checkbox">
-			<input type="checkbox" id="target-private-all" ng-model="target['private-all'].selected" />
-			<label for="target-private-all">全國私立學校</label>
-		</div>
-		<div class="ui checkbox">
-			<input type="checkbox" id="target-county-all" ng-model="target['county-all'].selected" />
-			<label for="target-county-all">全國縣市立學校</label>
-		</div>
-    </div>
-	
-    <div class="ui basic segment" ng-if="target_group==='schools'">
-        <div class="ui five column grid">
-            <div class="column">
-                <div class="ui horizontal segment">
-                    <h5 class="ui header">國立學校</h5>
-                    <p><input type="checkbox" name="input-target_group" value="state-normal" />國立高中</p>
-					<p><input type="checkbox" name="input-target_group" value="state-skill" />國立高職</p>
-					<p><input type="checkbox" name="input-target_group" value="state-night" />國立進校</p>
-					<p><input type="checkbox" name="input-target_group" value="state-five" />國立五專</p>	
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui horizontal segment">
-                    <h5 class="ui header">私立學校</h5>
-                    <p><input type="checkbox" name="input-target_group" value="private-normal" />私立高中</p>
-					<p><input type="checkbox" name="input-target_group" value="private-skill" />私立高職</p>
-					<p><input type="checkbox" name="input-target_group" value="private-night" />私立進校</p>
-					<p><input type="checkbox" name="input-target_group" value="private-five" />私立五專</p>
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui horizontal segment">
-                    <h5 class="ui header">縣市立學校</h5>
-                    <p><input type="checkbox" name="input-target_group" value="county-normal" />縣市立高中</p>
-					<p><input type="checkbox" name="input-target_group" value="county-skill" />縣市立高職</p>
-					<p><input type="checkbox" name="input-target_group" value="county-night" />縣市立進校</p>	
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui horizontal segment">
-                    <h5 class="ui header">公/私立學校</h5>
-                    <p><input type="checkbox" name="input-target_group" value="public" />公立學校</p>
-					<p><input type="checkbox" name="input-target_group" value="private" />私立學校</p>
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui horizontal segment">
-                    <h5 class="ui header">綜合高中</h5>
-                    <p><input type="checkbox" name="input-target_group" value="mix" />綜合高中</p>
-					<p><input type="checkbox" name="input-target_group" value="nmix" />非綜合高中</p>
-                </div>
-            </div>
-        </div>
-    </div>
-	
-    <div class="ui basic segment" ng-if="target_group==='study_area'">
-        <p>
-        <input type="checkbox" name="input-target" value="NTR01" />基北區
-        <input type="checkbox" name="input-target" value="NTR02" />桃園區
-        <input type="checkbox" name="input-target" value="NTR03" />竹苗區
-        <input type="checkbox" name="input-target" value="NTR13" />宜蘭區
-        </p>
-        <p>
-        <input type="checkbox" name="input-target" value="NTR04" />中投區				
-        <input type="checkbox" name="input-target" value="NTR06" />彰化區				
-        <input type="checkbox" name="input-target" value="NTR05" />嘉義區
-        <input type="checkbox" name="input-target" value="NTR07" />雲林區
-        </p>					
-        <p>
-        <input type="checkbox" name="input-target" value="NTR08" />台南區					
-        <input type="checkbox" name="input-target" value="NTR09" />高雄區
-        <input type="checkbox" name="input-target" value="NTR10" />屏東區
-        <input type="checkbox" name="input-target" value="NTR11" />台東區
-        </p>
-        <p>					
-        <input type="checkbox" name="input-target" value="NTR12" />花蓮區				
-
-        <input type="checkbox" name="input-target" value="NTR14" />澎湖區
-        <input type="checkbox" name="input-target" value="NTR15" />金門區
-        </p>
-    </div>
 	
     <div class="ui basic segment" ng-if="target_group==='my_area'">
         <div class="ui three column grid">
@@ -156,7 +110,7 @@
                     <p><input type="checkbox" name="input-target" value="county-my" />本縣市</p>
                 </div>
             </div>
-            <? if( $_SESSION['def_city']=='30' || $_SESSION['def_city']=='50' ){ ?>
+            <? if( isset($_SESSION) ) if( $_SESSION['def_city']=='30' || $_SESSION['def_city']=='50' ){ ?>
             <div class="column">
                 <div class="ui horizontal segment">
                     <h5 class="ui header">私立學校</h5>
@@ -177,49 +131,8 @@
             <? } ?>
         </div>
     </div>
-    <div class="ui basic segment" ng-if="target_group==='areas'">
-        <p>
-        <input type="checkbox" name="input-target" value="CR01" />台北市
-        <input type="checkbox" name="input-target" value="CR02" />新北市
-        <input type="checkbox" name="input-target" value="CR03" />基隆市
-        <input type="checkbox" name="input-target" value="CR04" />桃園縣
-        <input type="checkbox" name="input-target" value="CR05" />新竹縣
-        <input type="checkbox" name="input-target" value="CR06" />新竹市
-        <input type="checkbox" name="input-target" value="CR07" />苗栗縣					
-        </p>
-        <p>
-        <input type="checkbox" name="input-target" value="CR08" />台中市								
-        <input type="checkbox" name="input-target" value="CR09" />彰化縣
-        <input type="checkbox" name="input-target" value="CR10" />南投縣
-        <input type="checkbox" name="input-target" value="CR11" />雲林縣				
-        <input type="checkbox" name="input-target" value="CR12" />嘉義縣
-        <input type="checkbox" name="input-target" value="CR13" />嘉義市					
-        </p>					
-        <p>
-        <input type="checkbox" name="input-target" value="CR14" />台南市					
-        <input type="checkbox" name="input-target" value="CR15" />高雄市
-        <input type="checkbox" name="input-target" value="CR16" />屏東縣
-        <input type="checkbox" name="input-target" value="CR17" />宜蘭縣
-        <input type="checkbox" name="input-target" value="CR18" />花蓮縣
-        <input type="checkbox" name="input-target" value="CR19" />台東縣
-        </p>
-        <p>
-        <input type="checkbox" name="input-target" value="CR20" />金門縣
-        <input type="checkbox" name="input-target" value="CR21" />連江縣
-        <input type="checkbox" name="input-target" value="CR22" />澎湖縣
-        </p>
-    </div>
     
 </div>
-
-<div class="ui segment"> 
-    <h5 class="ui header">勾選要輸出的統計圖表</h5>
-    <input type="radio" name="figureA" value="0" checked="checked" />無
-    <input type="radio" name="figureA" value="2" />
-    <i class="bar chart icon"></i>
-    <input type="radio" name="figureA" value="1" />
-    <i class="bar chart icon"></i>
-</div>  
 
 <div class="ui segment">
     <h5 class="ui header">勾選要輸出的統計量</h5>
