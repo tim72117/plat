@@ -1,4 +1,4 @@
-<?
+<?php
 $user = Auth::user();
 list($apps, $requests) = $user->get_file_provider()->lists();
 $project = DB::table('projects')->where('code', $user->getProject())->first();
@@ -29,10 +29,29 @@ body {
 .menu.use-green {
     background-color: #458A00!important;
 }
+::-webkit-scrollbar {
+	width: 5px;
+    background: #fff;
+}
+::-webkit-scrollbar-thumb {
+    background: #aaa;
+}
+.left-menu-min {
+    left: 0
+}
+.left-menu-min {
+    left: -320px
+}
+.context { 
+    left: 360px;
+}
+.context-max {
+    left: 40px;
+}
 </style>
 
 <script type="text/javascript">
-var app = angular.module('app', ['ngSanitize', 'ngCookies'])
+var app = angular.module('app', ['ngSanitize', 'ngCookies']);
 app.filter('startFrom', function() {
     return function(input, start) {         
         return input.slice(start);
@@ -106,7 +125,8 @@ if( Auth::user()->id==1 ) {
 	</div>
 	
     <div style="position: absolute;left: 0;right: 0;top: 30px;bottom: 0" ng-controller="mainController">
-		<div style="position: absolute;top:0;bottom:0;left:0;width:360px;overflow-y: hidden" ng-class="{'menu-min': menuMin}">
+        
+		<div ng-cloak style="position: absolute;top:0;bottom:0;width:360px;overflow-y: hidden" ng-class="{'left-menu-max': !menuMin, 'left-menu-min': menuMin}">
             <div style="position: absolute;left: 5px;right: 5px;top: 5px;bottom:45px;padding:5px;overflow-y: auto">
                 <div class="ui fluid vertical menu">
                     <div class="header item">
@@ -132,7 +152,7 @@ if( Auth::user()->id==1 ) {
             </div>
 		</div>
 
-        <div style="position: absolute;top: 0;right: 0;bottom: 0;left: 360px" class="context" ng-class="{'menu-min': menuMin}">
+        <div style="position: absolute;top: 0;right: 0;bottom: 0" class="context" ng-class="{'context-max': menuMin}">
             
             <div style="width:500px;position: absolute;top:-100%;background-color: #fff;left:-1px;height: 95%;border: 1px solid #aaa;font-size:16px;overflow: auto;z-index: 120" ng-controller="shareController" ng-style="{width:advanced_status.boxWidth}" class="authorize">
                 <div style="margin:20px;position: absolute;top:0;bottom: 0;left:0;right:0" ng-switch on="shareBox.type">
