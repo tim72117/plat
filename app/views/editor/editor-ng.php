@@ -1,72 +1,58 @@
 <head>
 <!--<script src="/editor/js/jquery-ui-1.9.2.custom.min.js"></script>-->
 <script src="/js/ckeditor/4.4.7-basic-source/ckeditor.js"></script>
-<!--<script src="/js/textAngular/textAngular-rangy.min.js"></script>
-<script src="/js/textAngular/textAngular-sanitize.min.js"></script>
-<script src="/js/textAngular/textAngular.min.js"></script>-->
 <!--<script src="/js/textAngular/ng-ckeditor.js"></script>-->
 
-<link rel="stylesheet" href="/editor/css/editor/structure_new.css" />
-<link rel='stylesheet prefetch' href='http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css'>
+<link rel="stylesheet" href="/css/ui/Semantic-UI-1.11.4/semantic.min.css" />
 </head>
-
-
-<?
-//
-//User::
-//
-//$result = array_merge($a, $b);
-//print_r($result);
-?>
 	
 <div ng-controller="editorController" ng-click="resetEditor()">
-<div style="margin:0 auto;width:300px;text-align: left;float:left">
-	
-	<div style="position:fixed;width:100px;background-color:#fff;border-top:0;z-index:1">
-		<div style="background-color:#fff;font-size:14px">	
-            
-            <div class="file-btn" style="width:70px;height:25px;line-height:25px;background-color: #eee;float:left;margin:0 0 0 2px" ng-click="" disabled="disabled">刪除整頁</div>
-            <div class="file-btn" style="width:70px;height:25px;line-height:25px;background-color: #eee;float:left;margin:2px 0 0 2px" ng-click="get_from_xml()">讀取xml</div>
-            <div class="file-btn" style="width:70px;height:25px;line-height:25px;background-color: #eee;float:left;margin:2px 0 0 2px" ng-click="get_from_db()">讀取db</div>
-            <div class="file-btn" style="width:70px;height:25px;line-height:25px;background-color: #eee;float:left;margin:2px 0 0 2px" ng-click="save_to_db()" ng-disabled="false&&!edit">儲存db</div>
-            <div class="file-btn" style="width:30px;height:25px;line-height:25px;background-color: #eee;float:left;margin:2px 0 0 2px" ng-click="prev_part()"><</div>
-            {{ page }}
-            <div class="file-btn" style="width:30px;height:25px;line-height:25px;background-color: #eee;float:left;margin:2px 0 0 2px" ng-click="next_part()">></div>
-            <div class="file-btn" style="width:40px;height:25px;line-height:25px;background-color: #eee;float:left;margin:2px 0 0 2px"><a href="demo?page=1" target="_blank">預覽</a></div>
-            <div class="file-btn" style="width:60px;height:25px;line-height:25px;background-color: #eee;float:left;margin:2px 0 0 2px"><a href="demo_ng" target="_blank">預覽ng</a></div>
-            <div class="file-btn" style="width:70px;height:25px;line-height:25px;background-color: #eee;float:left;margin:2px 0 0 2px"><a href="/editor/creatTable">建立問卷</a></div>
-            <div style="float:left;font-size:16px" ng-if="update_mis>1">儲存中{{ update_mis }}...</div>
-            <div style="width:150px;float:left;font-size:14px;color:#aaa" ng-if="update_mis===1">所有變更都已經儲存</div>
-		</div>
-        
+    
+    <div class="ui left floated basic segment">
+        <div class="ui vertical mini basic buttons">
+            <div class="ui button disabled"><i class="icon trash"></i>刪除整頁</div>
+            <div class="ui button" ng-click="get_from_xml()"><i class="icon trash"></i>讀取xml</div>
+            <div class="ui button" ng-click="get_from_db()"><i class="icon trash"></i>讀取db</div>
+            <div class="ui button" ng-click="save_to_db()" ng-disabled="false&&!edit"><i class="icon trash"></i>儲存db</div>
+            <div class="ui button" ng-click="prev_part()"><i class="icon trash"></i>前一頁</div>
+            <div class="ui button" ng-click="next_part()"><i class="icon trash"></i>下一頁</div>  
+            <div class="ui button" ng-click="get_from_db_new()"><i class="icon trash"></i>讀取DB(新)</div>  
+        </div>
+        <br />
+        <div class="ui vertical text menu">
+            <a class="item" href="demo?page=1" target="_blank">預覽</a>
+            <a class="item" href="demo_ng" target="_blank">預覽ng</a>
+            <a class="item" href="/editor/creatTable">建立問卷</a>
+        </div>
+		
+		<div class="ui mini basic button" ng-click="ques_add_ques(questions, $index+1, question.layer)"><i class="icon file outline"></i>加入分頁</div>
+		<div class="ui mini basic button" ng-click="adding=true"><i class="icon help circle"></i>加入題目</div>
     </div>
-</div>
+    
+    <div style="float:left;font-size:16px" ng-if="update_mis>1">儲存中{{ update_mis }}...</div>
+    <div style="width:150px;float:left;font-size:14px;color:#aaa" ng-if="update_mis===1">所有變更都已經儲存</div>
 	
-<div id="building" style="border:0px dashed #A0A0A4;border-top:0;border-bottom:0;z-index:1;padding-left:200px;padding-right:200px">
+    <div class="ui left floated basic segment" style="min-height: 600px;max-width: 800px">
 
-	<div id="contents" style="margin-left:0px">
-        
-        <div class="main">
-            <div class="addq_box" align="left" style="padding: 2px;background-color:#fff;margin-left:0">
-                <span class="cut-page" title="加入分頁" ng-click="ques_add_ques(questions, $index+1, question.layer)" style="display: inline-block"></span>
-            </div>
-        </div>
-        <div ng-repeat="page in pages | filter:{selected: true}" style="border: 1px solid black;padding:10px">
-            
-            <div class="main">
-                <div class="addq_box" align="left" style="padding: 2px;background-color:#fff;margin-left:0">
-                    <span class="addquestion" title="加入題目" ng-click="ques_add_ques(questions, $index+1, question.layer)" style="display: inline-block"></span>
-                </div>
-            </div>
-            <questions data="page.data" layer="0" update="update"></questions>  
-        </div>
-        
-	</div>
+		<div ng-repeat="page in pages | filter:{selected: true}">
+			
+			 <div ng-cloak ng-repeat="question in page.data" ng-mouseover="question.hover = true" ng-mouseleave="question.hover = false">
 
-	<div id="footer" style="margin-bottom:20px"></div>
+				<div question="question" layer="0" update="update" ></div>
+				
+				<div class="ui bottom attached basic button" ng-if="question.hover && adding" ng-click="added();ques_add_ques(page.data, $index+1, question.layer)">
+					<i class="file outline icon"></i>
+				</div>	
+				
+				<div class="ui hidden divider"></div>
+				
+			 </div>
+
+		</div>
+
+    </div>
     
 </div>
-</div><!-- controller  -->
 
 <script>
 angular.module('app', [])
@@ -76,7 +62,131 @@ angular.module('app', [])
             return input.slice(start);
     };
 })
-.controller('editorController', editorController)
+.controller('editorController', function editorController($http, $scope, $sce, $interval, $filter) {
+		
+    $scope.pages = [];
+    $scope.page = 0;
+    $scope.update_mis = 0;
+    $scope.editorOptions = {
+        language: 'ru',
+        uiColor: '#000000'
+    };
+	
+	$scope.adding = false;
+	$scope.added = function() {
+		$scope.adding = false;
+	};
+    
+    $scope.resetEditor = function() {
+        for(var i in CKEDITOR.instances) {
+            console.log(CKEDITOR.instances[i]);
+            CKEDITOR.instances[i].destroy(false);
+        }        
+    };
+    
+    $scope.get_from_xml = function() {
+        $http({method: 'POST', url: 'get_ques_from_xml', data:{} })
+        .success(function(data, status, headers, config) {
+            console.log(data);
+            $scope.pages = data.data;
+            $scope.edit = data.edit;
+            $scope.page = 0;
+            $scope.pages[$scope.page].selected = true;
+            //$scope.pages = data.pages;
+            //$scope.page = $scope.pages[page-1];            
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+    
+    $scope.update = function(update_mis) {
+        $scope.update_mis = update_mis;
+    };
+    
+    $scope.renderHtml = function(htmlCode) {
+        return $sce.trustAsHtml(htmlCode);
+    };
+    
+    $scope.ques_import_var = function(question) {        
+        question.answers.length = 0;
+        var list = question.importText.split('\n');
+        for(index in list){	
+            var itemn = list[index].split('	');
+            question.answers.push({value:itemn[0], title:itemn[1]});
+        }       
+        question.code = 'manual';
+        question.importText = null;
+        question.is_import = false;
+    };
+    
+    $scope.ques_add_page = function() {
+        $http({method: 'POST', url: 'add_page', data:{} })
+        .success(function(data, status, headers, config) {
+            console.log(data);
+        }).error(function(e){
+            console.log(e);
+        });
+    };    
+
+    $scope.save_to_db = function() {
+        $http({method: 'POST', url: 'save_ques_to_db', data:{pages: btoa(encodeURIComponent(angular.toJson($scope.pages)))} })
+        .success(function(data, status, headers, config) {
+            console.log(data);
+            $scope.pages = data.struct;            
+        }).error(function(e){
+            console.log(e);
+        });
+    };  
+    
+    $scope.get_from_db_new = function() {
+        $http({method: 'POST', url: 'get_ques_from_db_new', data:{} })
+        .success(function(data, status, headers, config) {
+			$scope.pages[0] = {data: data};
+			$scope.pages[0].selected = true;
+            console.log($scope.pages);
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+	
+	$scope.get_from_db_new();
+    
+    $scope.get_from_db = function() {
+        $http({method: 'POST', url: 'get_ques_from_db', data:{} })
+        .success(function(data, status, headers, config) {
+            console.log(data);
+            $scope.pages = data;
+            $scope.edit = true;
+            $scope.page = 0;
+            $scope.pages[$scope.page].selected = true;
+//            $scope.$watch(function(){ return $scope.questions[0]; }, function(newValue, oldValue){
+//                $scope.update_mis = 50;
+//            }, true);
+                    
+        }).error(function(e){
+            console.log(e);
+        });
+    };  
+    
+    $scope.save_ques_to_db = function() {
+        
+    };
+    
+    $scope.next_part = function() {
+        if( $scope.page < $scope.pages.length ) {
+            $scope.pages[$scope.page].selected = false;
+            $scope.pages[++$scope.page].selected = true;
+        }
+    };
+    
+    $scope.prev_part = function() {
+        if( $scope.page > 0 ) {
+            $scope.pages[$scope.page].selected = false;
+            $scope.pages[--$scope.page].selected = true;
+        }
+    };
+    
+})
 .directive('ngAutoHeight', function(){
     return { 
         restrict: 'A',
@@ -170,16 +280,18 @@ angular.module('app', [])
         }
     };        
 })
-.directive('questions', function(){
+.directive('question', function(){
     return {
-        restrict: 'E',
+        restrict: 'A',
         replace: true,
         transclude: false,
         //require: '?ngAutoHeight',
-        scope: {questions: '=data', layer: '=layer', parts: '=', update: '='},
-        template: '<div ng-include src="\'template\'"></div>',
+        scope: {question: '=question', layer: '=layer', parts: '=', update: '='},
+		templateUrl: 'template',
+        ///template: '<div ng-include src="\'template\'"></div>',
         link: function(scope, element, attrs) {
-            //console.log();
+			
+            //console.log(scope);
         },
         controller: function($scope, $http, $interval) {
             
@@ -283,113 +395,6 @@ angular.module('app', [])
         }
     };    
 });
-function editorController($http, $scope, $sce, $interval, $filter) {
-    
-    $scope.pages = [];
-    $scope.page = 0;
-    $scope.update_mis = 0;
-    $scope.editorOptions = {
-        language: 'ru',
-        uiColor: '#000000'
-    };
-    
-    $scope.resetEditor = function() {
-        for(var i in CKEDITOR.instances) {
-            console.log(CKEDITOR.instances[i]);
-            CKEDITOR.instances[i].destroy(false);
-        }        
-    };
-    
-    $scope.get_from_xml = function() {
-        $http({method: 'POST', url: 'get_ques_from_xml', data:{} })
-        .success(function(data, status, headers, config) {
-            console.log(data);
-            $scope.pages = data.data;
-            $scope.edit = data.edit;
-            $scope.page = 0;
-            $scope.pages[$scope.page].selected = true;
-            //$scope.pages = data.pages;
-            //$scope.page = $scope.pages[page-1];            
-        }).error(function(e){
-            console.log(e);
-        });
-    };
-    
-    $scope.update = function(update_mis) {
-        $scope.update_mis = update_mis;
-    };
-    
-    $scope.renderHtml = function(htmlCode) {
-        return $sce.trustAsHtml(htmlCode);
-    };
-    
-    $scope.ques_import_var = function(question) {        
-        question.answers.length = 0;
-        var list = question.importText.split('\n');
-        for(index in list){	
-            var itemn = list[index].split('	');
-            question.answers.push({value:itemn[0], title:itemn[1]});
-        }       
-        question.code = 'manual';
-        question.importText = null;
-        question.is_import = false;
-    };
-    
-    $scope.ques_add_page = function() {
-        $http({method: 'POST', url: 'add_page', data:{} })
-        .success(function(data, status, headers, config) {
-            console.log(data);
-        }).error(function(e){
-            console.log(e);
-        });
-    };    
-
-    $scope.save_to_db = function() {
-        $http({method: 'POST', url: 'save_ques_to_db', data:{pages: btoa(encodeURIComponent(angular.toJson($scope.pages)))} })
-        .success(function(data, status, headers, config) {
-            console.log(data);
-            $scope.pages = data.struct;            
-        }).error(function(e){
-            console.log(e);
-        });
-    };   
-    
-    $scope.get_from_db = function() {
-        $http({method: 'POST', url: 'get_ques_from_db', data:{} })
-        .success(function(data, status, headers, config) {
-            console.log(data);
-            $scope.pages = data;
-            $scope.edit = true;
-            $scope.page = 0;
-            $scope.pages[$scope.page].selected = true;
-//            $scope.$watch(function(){ return $scope.questions[0]; }, function(newValue, oldValue){
-//                $scope.update_mis = 50;
-//            }, true);
-                    
-        }).error(function(e){
-            console.log(e);
-        });
-    };  
-    
-    $scope.save_ques_to_db = function() {
-        
-    };
-    
-    $scope.next_part = function() {
-        if( $scope.page < $scope.pages.length ) {
-            $scope.pages[$scope.page].selected = false;
-            $scope.pages[++$scope.page].selected = true;
-        }
-    };
-    
-    $scope.prev_part = function() {
-        if( $scope.page > 0 ) {
-            $scope.pages[$scope.page].selected = false;
-            $scope.pages[--$scope.page].selected = true;
-        }
-    };
-    
-}
 </script>
 <style>
 div.title-editor {

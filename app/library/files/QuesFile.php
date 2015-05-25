@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Response, Config, Schema, Session, Input, DOMElement, DOMCdataSection, ShareFile, Auth, app\library\files\v0\FileProvider;
+use DB, View, Response, Config, Schema, Session, Input, DOMElement, DOMCdataSection, ShareFile, Auth, app\library\files\v0\FileProvider, Question, Answer;
 
 class QuesFile extends CommFile {
 	
@@ -751,7 +751,7 @@ class QuesFile extends CommFile {
         return json_decode(urldecode(base64_decode($input)));
     }
     
-    function get_struct_from_view($questions, $call=null) {  
+    function get_struct_from_view($questions, $call = null, $parent_id = null, $parent_value = null) {  
         $subs = [];
         foreach($questions as $question){
             
@@ -760,14 +760,19 @@ class QuesFile extends CommFile {
                 'answers' => [],
             ];
             
+            $question->parent_id = $parent_id;
+			$question->parent_value = $parent_value;
+            
             if( isset($question->answers) ) {               
 
                 $sub->id = isset($question->id) ? $question->id : (is_callable($call) ? $call($question) : null);
                 
                 foreach($question->answers as $index => $anwser){
                     if( isset($anwser->subs) ){
+						
+						$value = isset($anwser->value) ? $anwser->value : null;
 
-                        $sub->answers[$index] = ['subs' => $this->get_struct_from_view($anwser->subs, $call)];
+                        $sub->answers[$index] = ['subs' => $this->get_struct_from_view($anwser->subs, $call, $sub->id, $value)];
 
                         unset($anwser->subs);
                     }else{
@@ -781,7 +786,7 @@ class QuesFile extends CommFile {
             }
             
             if( isset($question->subs) ) {
-                $sub->subs = $this->get_struct_from_view($question->subs, $call);                
+                $sub->subs = $this->get_struct_from_view($question->subs, $call, $question->id);                
             }
             
         }
@@ -797,19 +802,32 @@ class QuesFile extends CommFile {
                 'setting' => isset($question->code) ? json_encode(['code'=>$question->code]) : null,
                 'updated_at' => date("Y-n-d H:i:s"),
             ]);
+			$this->updateOrCreateAnswer($question);
             return $question->id;
-        }else{
-            return DB::table('ques_new')->insertGetId([
-                'census_id' => $this->file->file,
-                'title' => isset($question->title) ? $question->title : '',
-                'type' => isset($question->type) ? $question->type : '',
-                'answers' => isset($question->answers) ? json_encode($question->answers) : null,
-                'setting' => isset($question->code) ? json_encode(['code'=>$question->code]) : null,
-                'updated_at' => date("Y-n-d H:i:s"),
-                'created_at' => date("Y-n-d H:i:s"),
-            ]);   
+        }else{			
+            $question->id = DB::table('ques_new')->insertGetId([
+                'census_id'    => $this->file->file,
+                'title'        => isset($question->title) ? $question->title : '',
+                'type'         => isset($question->type) ? $question->type : '',
+                'answers'      => isset($question->answers) ? json_encode($question->answers) : null,
+                'parent'       => $question->parent_id,
+				'parent_value' => $question->parent_value,
+                'setting'      => isset($question->code) ? json_encode(['code'=>$question->code]) : null,
+                'updated_at'   => date("Y-n-d H:i:s"),
+                'created_at'   => date("Y-n-d H:i:s"),
+            ]);
+			$this->updateOrCreateAnswer($question);
+			return $question->id;
         }
     }
+	
+	public function updateOrCreateAnswer($question) {		
+		if( isset($question->answers) && !empty($question->answers) && $question->type!='scale_i' && $question->type!='checkbox_i' && $question->type!='textarea' ) {
+			foreach($question->answers as $answer) {
+				Answer::updateOrCreate(['ques_id' => $question->id,'value' => $answer->value, 'title' => $answer->title], []);
+			}
+		}
+	}
     
     public function update_ques_to_db() {
         $updateQueue = $this->decodeInput(Input::get('updateQueue'));
@@ -834,6 +852,8 @@ class QuesFile extends CommFile {
                 return $this->updateOrCreateQuestion($question);
             }); 
         }, $pages);
+        
+        var_dump(1);exit;  
         
         DB::table('ques_struct')->truncate();
         
@@ -905,6 +925,12 @@ class QuesFile extends CommFile {
         
         
         return $pages;        
+    }
+    
+    public function get_ques_from_db_new() {
+		$questions = Question::with('answers', 'subs.answers', 'subs.subs')->where('census_id', 69)->whereNull('parent')->where('type', 'scale')->limit(20)->get();
+		
+        return $questions->toArray();
     }
     
     public function get_ques_from_xml() {
