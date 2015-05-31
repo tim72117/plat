@@ -203,7 +203,7 @@ app.controller('shareController', function($scope, $filter, $http) {
         });
         group.open = true;
         if( group.users.length>0 ){
-            $scope.users = group.users;            
+            $scope.users = group.users;
             $scope.group_description = group.description;
         }else{
             $scope.users = [];
@@ -232,7 +232,7 @@ app.controller('shareController', function($scope, $filter, $http) {
     
     $scope.shareFileTo = function() {
       
-        var groups = $scope.getSelectedGroup();
+        var groups = $scope.getSelectedGroups();
         var files = [];
         angular.forEach($scope.files, function(file){   
             sheets = [];
@@ -256,11 +256,12 @@ app.controller('shareController', function($scope, $filter, $http) {
         });
     };
     
-    $scope.getSelectedGroup = function() {
+    $scope.getSelectedGroups = function() {
         var groups = [];
-        angular.forEach($scope.groups, function(group, key){
-            var users = group.selected ? [] : $filter('filter')(group.users, {changed: true});             
-            groups.push({id:group.id, selected:group.selected, users:users});
+        angular.forEach($scope.groups, function(group, key) {
+            var users = group.selected ? [] : $filter('filter')(group.users, {selected: true});      
+            if( group.selected || users.length > 0 )       
+                groups.push({id: group.id, users: users});
         });  
         return groups;
     };   
@@ -283,12 +284,13 @@ app.controller('shareController', function($scope, $filter, $http) {
     
     $scope.requestTo = function(requestDescription) {
         
-        var groups = $scope.getSelectedGroup();
+        var groups = $scope.getSelectedGroups();
         
-        var file = $scope.getFiles()[0];
+        var files = $scope.getFiles();
         
-        $http({method: 'POST', url: '/file/'+file.intent_key+'/requestTo', data:{groups: groups, description: requestDescription}})
+        $http({method: 'POST', url: '/file/'+files[0].intent_key+'/request_to', data:{groups: groups, description: requestDescription}})
         .success(function(data, status, headers, config) {
+            console.log(data);
             $scope.shareClose();
         })
         .error(function(e){
@@ -298,10 +300,8 @@ app.controller('shareController', function($scope, $filter, $http) {
     };
     
     $scope.getFiles = function() {
-        var files = $filter('filter')(angular.element('#fileController').scope().files, {selected: true});
-        return files;
+        return $filter('filter')(angular.element('#fileController').scope().files, {selected: true});
     };
-    //$('.ui.checkbox').checkbox();
     
 });
 </script>

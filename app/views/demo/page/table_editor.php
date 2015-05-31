@@ -1,8 +1,16 @@
 <div ng-cloak ng-controller="newTableController" style="position: absolute;top: 10px;bottom: 10px;left: 10px; right: 10px">
         
-    <div class="ui segment"> 
+    <div class="ui segment" ng-class="{loading: sheetLoading}"> 
 
-        <div class="ui item search selection dropdown" ng-dropdown-search-menu ng-model="sheet" items="table.sheets" ng-change="action.toSelect(sheet)" title="資料表" style="z-index:104;width:250px"></div>
+        <!-- <div class="ui item search selection dropdown" ng-dropdown-search-menu ng-model="sheet" items="table.sheets" ng-change="action.toSelect(sheet)" title="資料表" style="z-index:104;width:250px"></div> -->
+
+        <div class="ui compact selection dropdown active visible" ng-click="service_countrys_visible=!service_countrys_visible;$event.stopPropagation()">
+            <i class="dropdown icon"></i>
+            <span class="text" ng-repeat="sheet in file.schema.sheets | filter: {selected: true}">{{ sheet.name }}</span>    
+            <div class="menu transition" ng-class="{visible: service_countrys_visible}" ng-click="$event.stopPropagation()">
+                <div class="item" ng-repeat="sheet in file.schema.sheets" ng-click="action.toSelect(sheet)">{{ sheet.name }}</div>
+            </div>
+        </div>
 
         <div class="ui basic mini button" ng-click="addSheet()">新增資料表</div>
 
@@ -13,12 +21,12 @@
                 <div class="field">                        
 
                     <div class="ui input">
-                        <input type="text" placeholder="輸入檔案名稱" ng-model="table.title" />
+                        <input type="text" placeholder="輸入檔案名稱" ng-model="file.title" />
                     </div>
 
                 </div>
 
-                <div class="ui positive button" ng-click="saveDoc()" ng-class="{loading: saving}">
+                <div class="ui positive button" ng-click="saveFile()" ng-class="{loading: saving}">
                     <i class="save icon"></i>確定
                 </div>
                 <div class="ui basic button" ng-click="closePopup($event)">
@@ -35,15 +43,7 @@
             <dropdown-group ng-click="changeTool(4)">說明文件</dropdown-group>
         </dropdown> 
 
-        <div style="position: absolute;top: 0;z-index:2;display:none" class="ui top attached tabular menu">
-            <div ng-click="prevSheetPage()" class="item active" style=""> < </div>
-            <div ng-click="action.toSelect(sheet)"  class="item" style="margin:0;max-width:150px;font-weight:900;padding:5px 5px 5px 5px;font-size:14px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap"
-                 ng-repeat="($tindex, sheet) in table.sheets | startFrom:(sheetsPage-1)*5 | limitTo:50" ng-style="{left:$tindex*5+25}" ng-class="{active:sheet.selected}">{{ sheet.sheetName }}</div>
-            <div ng-click="nextSheetPage()" class="item" style="margin:0;width:20px" ng-style="{left:getSheetLength()*5+30}"> > </div>
-            <div ng-click="addSheet()" class="item" style="margin:0" ng-style="{left:getSheetLength()*5+35}"></div>
-        </div>   
-
-        <table ng-repeat="($tindex, sheet) in table.sheets" ng-if="tool===1 && sheet.selected" class="ui small compact table" id="sheet">  
+        <table ng-repeat="($tindex, sheet) in file.schema.sheets" ng-if="tool===1 && sheet.selected" class="ui small compact table" id="sheet">  
             <thead>
                 <tr>
                     <th class="collapsing" ng-repeat="column in sheet.colHeaders" ng-if="column.selected">{{ column.title }}</th>
@@ -56,11 +56,11 @@
             </tbody>
         </table>  
 
-        <table ng-repeat="($tindex, sheet) in table.sheets" ng-if="tool===2 && sheet.selected" class="ui compact table">
+        <table ng-repeat="($tindex, sheet) in file.schema.sheets" ng-if="tool===2 && sheet.selected" class="ui compact collapsing table">
             <thead>
                 <tr>                            
-                    <th colspan="10">                                
-                        <div class="ui input"><input type="text" placeholder="表格名稱" ng-model="sheet.sheetName" /></div>
+                    <th colspan="9">                                
+                        <div class="ui input"><input type="text" placeholder="表格名稱" ng-model="sheet.name" /></div>
                         <div class="ui checkbox">
                             <input type="checkbox" id="readOnly" ng-model="sheet.editable">
                             <label for="readOnly">唯讀</label>
@@ -71,7 +71,6 @@
                     <th></th>
                     <th>欄位名稱</th>
                     <th>欄位描述</th>
-                    <th>過濾規則</th>
                     <th>欄位類型</th>
                     <th>唯一</th>
                     <th>加密</th>
@@ -80,66 +79,44 @@
                     <th></th>
                 </tr>
             </thead>
-            <tbody>
-                <tr ng-repeat="colHeader in sheet.colHeaders">
-                    <td><i class="columns icon"></i>{{ $index+1 }}</td>
-                    <td><div class="ui mini input"><input type="text" placeholder="欄位名稱" class="" style="min-width:250px" ng-model="colHeader.data" /></div></td>
-                    <td><div class="ui mini input"><input type="text" placeholder="欄位描述" class="" style="min-width:250px" ng-model="colHeader.title" /></div></td>
+            <tbody ng-repeat="table in sheet.tables">
+                <tr ng-repeat="column in table.columns" ng-class="{active: !notNew(column)}">
+                    <td><i class="icon" ng-class="{columns: notNew(column), add: !notNew(column)}"></i>{{ $index+1 }}</td>
+                    <td><div class="ui mini input"><input type="text" placeholder="欄位名稱" style="min-width:250px" ng-model="column.name" /></div></td>
+                    <td><div class="ui mini input"><input type="text" placeholder="欄位描述" style="min-width:250px" ng-model="column.title" /></div></td>
                     <td>
-                        <select class="ui dropdown" ng-model="colHeader.rules" ng-options="rule.name for rule in rules" ng-change="colHeader.types=colHeader.rules.types[0]">
+                        <select class="ui dropdown" ng-model="column.rules" ng-options="rule.key as rule.name for rule in rules">
                             <option value="">過濾規則</option>
                         </select>
                     </td>
+                    <td><div class="ui checkbox"><input type="checkbox" id="unique-{{ $index }}" ng-model="column.unique" /><label for="unique-{{ $index }}"></label></div></td>
+                    <td><div class="ui checkbox"><input type="checkbox" id="encrypt-{{ $index }}" ng-model="column.encrypt" /><label for="encrypt-{{ $index }}"></label></div></td>
+                    <td><div class="ui checkbox"><input type="checkbox" id="isnull-{{ $index }}" ng-model="column.isnull" /><label for="isnull-{{ $index }}"></label></div></td>
                     <td>
-                        <select class="ui dropdown" ng-model="colHeader.types" ng-options="type.name for type in colHeader.rules.types" ng-class="{empty:!colHeader.types}">
-                            <option value="">欄位類型</option>
-                        </select>
-                    </td>
-                    <td><div class="ui checkbox"><input type="checkbox" id="unique-{{ $index }}" ng-model="colHeader.unique" /><label for="unique-{{ $index }}"></label></div></td>
-                    <td><div class="ui checkbox"><input type="checkbox" id="encrypt-{{ $index }}" ng-model="colHeader.encrypt" /><label for="encrypt-{{ $index }}"></label></div></td>
-                    <td><div class="ui checkbox"><input type="checkbox" id="isnull-{{ $index }}" ng-model="colHeader.isnull" /><label for="isnull-{{ $index }}"></label></div></td>
-                    <td>
-                        <select class="input" ng-model="colHeader.link.table" ng-options="index as index for (index,sheet) in table.sheets" ng-change="setAutocomplete(colHeader)">
+                        <select class="ui dropdown" ng-model="column.link.table" ng-options="index as index for (index,sheet) in file.schema.sheets" ng-change="setAutocomplete(colHeader)">
                             <option value="">資料表</option>
                         </select>
                     </td>
                     <td>
-                        <div class="ui basic mini button" ng-click="removeColumn($index, $tindex)">
+                        <div class="ui basic mini button" ng-if="notNew(column)" ng-click="removeColumn($index, $tindex)">
                             <i class="remove icon"></i>刪除
                         </div>
                     </td>
                 </tr>
             </tbody>
-            <tbody>
+<!--             <tbody>
                 <tr>
                     <td><i class="add square icon"></i></td>
-                    <td><div class="ui mini input"><input type="text" placeholder="欄位名稱" class="" style="min-width:250px" ng-model="newColumn.data" ng-init="newColumn.data=''" /></div></td>
-                    <td><div class="ui mini input"><input type="text" placeholder="欄位描述" class="" style="min-width:250px" ng-model="newColumn.title" ng-init="newColumn.title=''" /></div></td>
+                    <td><div class="ui mini input"><input type="text" placeholder="欄位名稱" style="min-width:250px" ng-model="newColumn.name" /></div></td>
+                    <td><div class="ui mini input"><input type="text" placeholder="欄位描述" style="min-width:250px" ng-model="newColumn.title" /></div></td>
                     <td>
-                        <select class="ui dropdown" ng-model="newColumn.rules" ng-options="rule.name for rule in rules" ng-change="newColumn.types=newColumn.rules.types[0]">
+                        <select class="ui dropdown" ng-model="newColumn.rules" ng-options="rule.key as rule.name for rule in rules">
                             <option  value="">過濾規則</option>
                         </select>
                     </td>
-                    <td>
-                        <select class="ui dropdown" ng-model="newColumn.types" ng-options="type.name for type in newColumn.rules.types" ng-class="{empty:!colHeader.types}" >
-                            <option value="">欄位類型</option>
-                        </select>
-                    </td>
-                    <td>
-                        <div class="ui checkbox"><input type="checkbox" id="unique-new" class="" style="" ng-model="newColumn.unique" ng-init="newColumn.unique=false" />
-                            <label for="unique-new"></label>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="ui checkbox"><input type="checkbox" id="encrypt-new" class="" style="" ng-model="newColumn.encrypt" ng-init="newColumn.encrypt=false" />
-                            <label for="encrypt-new"></label>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="ui checkbox"><input type="checkbox" id="encrypt-new" class="" style="" ng-model="newColumn.isnull" ng-init="newColumn.isnull=false" />
-                            <label for="isnull-new"></label>
-                        </div>
-                    </td>
+                    <td><div class="ui checkbox"><input type="checkbox" id="unique-new" ng-model="newColumn.unique" /><label for="unique-new"></label></div></td>
+                    <td><div class="ui checkbox"><input type="checkbox" id="encrypt-new" ng-model="newColumn.encrypt" /><label for="encrypt-new"></label></div></td>
+                    <td><div class="ui checkbox"><input type="checkbox" id="isnull-new" ng-model="newColumn.isnull" /><label for="isnull-new"></label></div></td>
                     <td></td>
                     <td>
                         <div class="ui basic mini button" ng-click="addColumn()">
@@ -147,19 +124,10 @@
                         </div>
                     </td>
                 </tr>
-            </tbody>                
+            </tbody> -->
         </table>
 
     </div>
-
-    <div ng-if="tool===1" style="height:35px;position: absolute;bottom: 0">
-        <div ng-click="tool=1" ng-class="{selected:tool===1}"  style="margin:0 0 0 0;width:220px;left: 5px">
-            <div ng-repeat="sheet in table.sheets" ng-if="sheet.selected" class="ui pagination menu">
-                <a class="icon item"><i class="left arrow icon"></i></a>
-                <a class="icon item" style="display: inline-block;width:20px;padding:0" ng-repeat="pageN in sheet.page_link track by $index" ng-click="loadPage(pageN)" ng-class="{active:sheet.page===pageN}">{{ pageN }}</a>
-            </div>    
-        </div>
-    </div>    
 
 </div>
 
@@ -173,256 +141,105 @@
 <script>
 app.requires.push('angularify.semantic.dropdown');
 app.controller('newTableController', function($scope, $http, $filter, XLSXReaderService) {
-    
-    var path = window.location.pathname.split('/');
-    $scope.table = {sheets:[], intent_key:(path[1]==='file' ? path[2] : null)};
-    angular.element('[ng-controller=topMenuController]').scope().hideRequestFile = $scope.table.intent_key === null;
-    
+
+    $scope.file = {};
     $scope.tool = 2;
     $scope.limit = 100;
-    $scope.newColumn = {};    
+    $scope.newColumn = {};
     $scope.action = {}; 
     $scope.sheetsPage = 1;
     $scope.sheetLoading = true;
-    
-    var types = [
-        {name: "整數", type: "int" ,validator: /^\d+$/},
-        {name: "小數", type: "float" ,validator: /^[0-9]+.[0-9]+$/},
-        {name: "中、英文(數字加符號)", type: "nvarchar"},
-        {name: "英文(數字加符號)", type: "varchar"},
-        {name: "日期", type: "date_six"},
-        {name: "0或1", type: "bit"},
-        {name: "多文字(中英文、數字和符號)", type: "text"}
-    ];
 
     $scope.rules = [
-        {name: "地址", key: "address", types: [types[2]]},
-        {name: "手機", key: "phone", types: [types[3]] ,validator: /^\w+$/},
-        {name: "電話", key: "tel", types: [types[3]] ,validator: /^\w+$/}, 
-        {name: "信箱", key: "email", types: [types[3]] ,validator: /^[a-zA-Z0-9_]+@[a-zA-Z0-9._]+$/},
-        {name: "身分證", key: "stdidnumber", types: [types[3]] ,validator: /^\w+$/},
-        {name: "性別: 1.男 2.女", key: "gender", types: [types[3]] ,validator: /^\w+$/},
-        {name: "日期", key: "date_six", types: [types[4]] ,validator: /^[0-9]+-[0-9]+-[0-9]+$/}, 
-        {name: "是與否", key: "bool", types: [types[5]],validator: /^[0-1]+$/},
-        {name: "整數", key: "int", types: [types[0]] ,validator: /^\d+$/},
-        {name: "小數", key: "float", types: [types[1]] ,validator: /^[0-9]+.[0-9]+$/},
-        {name: "多文字(50字以上)", key: "text", types: [types[6]]}, 
-        {name: "多文字(50字以內)", key: "nvarchar", types: [types[2]]},
-        {name: "其他", key: "else", types: [types[0], types[1], types[2], types[6]]}
+        {name: '地址', key: 'address'},
+        {name: '手機', key: 'phone', validator: /^\w+$/},
+        {name: '電話', key: 'tel', validator: /^\w+$/},
+        {name: '信箱', key: 'email', validator: /^[a-zA-Z0-9_]+@[a-zA-Z0-9._]+$/},
+        {name: '身分證', key: 'stdidnumber', validator: /^\w+$/},
+        {name: '性別: 1.男 2.女', key: 'gender', validator: /^\w+$/},
+        {name: '日期(yymmdd)', key: 'date_six', validator: /^[0-9]+-[0-9]+-[0-9]+$/},
+        {name: '是與否', key: 'bool', validator: /^[0-1]+$/},
+        {name: '整數', key: 'int', validator: /^\d+$/},
+        {name: '小數', key: 'float', validator: /^[0-9]+.[0-9]+$/},        
+        {name: '文字(50字以內)', key: 'nvarchar'},
+        {name: '文字(50字以上)', key: 'text'},
+        {name: '其他', key: 'other'}
     ];   
     
-    $scope.setHeight = function() {
-        return angular.element('#sheet').height();
-    };
-    
-    $scope.getRowsIndex = function(index) {
-        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
-        return (sheet.page-1)*$scope.limit+index+1;
-    };
-    
     $scope.addSheet = function() {
-        $scope.table.sheets.push({colHeaders:[], rows:[]});
-        $scope.action.toSelect($scope.table.sheets[$scope.table.sheets.length-1]);
+        var sheet = {tables: [{columns:[], rows:[]}]};
+        $scope.file.schema.sheets.push(sheet);
+        $scope.action.toSelect(sheet);
     };
+
+    $scope.$watch('file.schema.sheets | filter: {selected: true}', function(sheets) {
+        if( !sheets ) return;
+        var columns = sheets[0].tables[0].columns;
+        if( Object.keys(columns[columns.length-1]).length > 1 ) {
+            columns.push(angular.copy($scope.newColumn));
+        }
+    }, true);
 
     $scope.addColumn = function() {
+        var table = $filter('filter')($scope.file.schema.sheets, {selected: true})[0].tables[0];
+        var property = ['id', 'created_by', 'created_at', 'deleted_at', 'updated_at'].concat(table.columns.map(function(column){ return column.name; }));
 
-        var colHeaders = $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders;
-        var property = ['id', 'created_by', 'created_at', 'deleted_at', 'updated_at'].concat(colHeaders.map(function(column){ return column.data; }));
+        var newColumn = angular.copy($scope.newColumn);
+        table.columns.push(newColumn);console.log($scope.newColumn);
+        $scope.newColumn = {};
+        console.log($scope.newColumn);
         
-        if( property.indexOf($scope.newColumn.data) < 0 ){
-            $filter('filter')($scope.table.sheets, {selected: true})[0].colHeaders.push({
-                data: $scope.newColumn.data,
-                title: $scope.newColumn.title,
-                types: $scope.newColumn.types,
-                rules: $scope.newColumn.rules,
-                link: {enable: false, table: null},
-                unique: $scope.newColumn.unique,
-                encrypt: $scope.newColumn.encrypt,
-                isnull: $scope.newColumn.isnull
-            });
-            $scope.newColumn.data = '';
-            $scope.newColumn.title = '';
-            $scope.newColumn.types = null;
-            $scope.newColumn.rules = null;
-            $scope.newColumn.unique = false;
-            $scope.newColumn.encrypt = false;
-            $scope.newColumn.isnull = false;
+        if( property.indexOf($scope.newColumn.name) < 0 ) {
+
         }
     };
 
     $scope.removeColumn = function(index, tindex) {
-        $scope.table.sheets[tindex].colHeaders.splice(index, 1); 
+        $scope.file.schema.sheets[tindex].tables[0].columns.splice(index, 1); 
     };
     
-    $scope.action.toSelect = function(sheet) {  
-        $scope.sheetLoading = true;
-        angular.forEach($filter('filter')($scope.table.sheets, {selected: true}), function(sheet){
+    $scope.action.toSelect = function(sheet) {          
+        angular.forEach($filter('filter')($scope.file.schema.sheets, {selected: true}), function(sheet){
             sheet.selected = false;
         });
-        sheet.selected = true;
-        if( $scope.tool===1 )
-            $scope.loadPage(sheet.page);
-        if( $scope.tool===2 )
-            $scope.sheetLoading = false;
+        sheet.selected = true;        
     }; 
     
-    $scope.setColumns = function(sheet_new) {
-        var sheet = {colHeaders:[], rows:[], editable:sheet_new.editable, sheetName:sheet_new.sheetName, compact: sheet_new.compact, pages:[], page:1};
-        for( var tindex in sheet_new.tables ){
-            var table = sheet_new.tables[tindex];
-            sheet.tablename = table.name;
-            for( var cindex in table.columns ){                
-                var rule = $filter('filter')($scope.rules, {key: table.columns[cindex].rules})[0];
-                var type = $filter('filter')(rule.types, {type: table.columns[cindex].types})[0];
-                sheet.colHeaders.push({
-                    data: table.columns[cindex].name,
-                    title: table.columns[cindex].title,
-                    rules: rule,
-                    types: type,
-                    unique: table.columns[cindex].unique,
-                    encrypt: table.columns[cindex].encrypt,
-                    isnull: table.columns[cindex].isnull,
-                    readOnly: true,
-                    compact: table.columns[cindex].compact,
-                    selected: true
-                });
-            }
-        }
-        return sheet;
-    };
-    
-    $scope.get_columns = function() {
-        $http({method: 'POST', url: 'get_columns', data:{} })
+    $scope.getFile = function() {
+        $scope.sheetLoading = true;
+        $http({method: 'POST', url: 'get_file', data:{} })
         .success(function(data, status, headers, config) {
             console.log(data);
-            $scope.table.sheets = [];
-            for( var sindex in data.sheets ) {
-                $scope.table.sheets.push($scope.setColumns(data.sheets[sindex]));
-            }        
-
-            $scope.table.title = data.title;
+            $scope.file = data.file;
             
-            if( data.sheets.length > 0 )
-                $scope.action.toSelect($scope.table.sheets[0]);     
+            if( $scope.file.schema.sheets.length > 0 )
+                $scope.file.schema.sheets[0].selected = true; 
 
+            $scope.sheetLoading = false;
         }).error(function(e){
             console.log(e);
         });
     };
     
-    $scope.get_columns();       
+    $scope.getFile();       
     
-    $scope.saveDoc = function() {     
+    $scope.saveFile = function() {     
         
-        if( !$scope.checkEmpty($scope.table.sheets) )
+        if( $scope.isEmpty($scope.file.schema.sheets) )
             return false;
+        //console.log($scope.file.schema.sheets);return;
         
         $scope.saving = true;
 
-        $http({method: 'POST', url: 'save_table', data:{sheets: $scope.table.sheets, title: $scope.table.title} })
+        $http({method: 'POST', url: 'save_file', data:{file: $scope.file} })
         .success(function(data, status, headers, config) { 
-            console.log(data);    
-            $scope.saving = false;
-            $scope.closePopup();                 
-        }).error(function(e){
-            console.log(e);
-        });
-    };
-    
-    var part = [];
-    $scope.getData = function(sheet) {        
-        
-        part.length = 0;
-        
-        angular.extend(part, sheet.rows.slice((sheet.page-1)*$scope.limit, (sheet.page-1)*$scope.limit+$scope.limit));
-        
-        return part;        
-    };    
-    
-    $scope.loadPage = function(page) {
-        
-        var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
-        
-        var update = function() {
-            $scope.getPageList(sheet);
-            $scope.sheetLoading = false;
-        };
-        
-        sheet.page = page;
-        $scope.sheetLoading = true;
-
-        if( sheet.pages[page-1] ) {
-            update();
-        }else{            
-            $scope.loadData(sheet, update);            
-        }
-
-    };  
-    
-    $scope.loadData = function(sheet, update) {
-        
-        $http({method: 'POST', url: 'get_rows?page='+(sheet.page), data:{index: $scope.table.sheets.indexOf(sheet), limit: $scope.limit} })
-        .success(function(data, status, headers, config) {            
-            
-            if( sheet.page!==data.current_page ) 
-                return false;
-            
-            if( sheet.rows.length!==data.total ){    
-                sheet.pages.length = data.last_page;
-                sheet.rows.length = data.total;
-            }            
-            
-            angular.forEach(data.data, function(row, index){
-                sheet.rows[data.from-1+index] = row;
-            });
-            
-            sheet.pages[sheet.page-1] = true;
-            
-            update();
-
-            angular.forEach($filter('filter')(sheet.colHeaders, {link: {enable: true}}), function(colHeader, index){                
-
-                $scope.$watch('table.sheets['+colHeader.link.table+'].rows', function(rows){
-                    colHeader.type = 'dropdown';
-                    colHeader.source = [];
-                    angular.forEach(rows, function(row){
-                        if( row.f )
-                            colHeader.source.push(row.f);
-                    });
-                    
-                    console.log(data);
-                }, true);
-            });
-
+            console.log(data);            
+            $scope.closePopup();   
+            $scope.saving = false;              
         }).error(function(e){
             console.log(e);
         });
     }; 
-    
-    $scope.getPageList = function(sheet) {
-        
-        if( !sheet || sheet.pages.length<1 ) return false;
-        
-        var pages = sheet.pages.length;
-
-        if( pages <= 7 ){
-            sheet.page_link = [];
-            for(var i=2; i <= pages-1; i++) {
-                sheet.page_link.push(i);
-            }
-        }else{            
-            if( sheet.page < 5 ) {
-                sheet.page_link = [2, 3, 4, 5];
-            }else
-            if( pages-sheet.page < 4 ){
-                sheet.page_link = [pages-4, pages-3, pages-2, pages-1];
-            }else{
-                sheet.page_link = [sheet.page-1, sheet.page, sheet.page+1];
-            }            
-        }
-
-    };   
 
     $scope.setAutocomplete = function(colHeader) {
         colHeader.link.enable = !!colHeader.link.table;
@@ -431,53 +248,35 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         colHeader.source = [];
     };    
 
-    $scope.checkEmpty = function(sheets) {
+    $scope.isEmpty = function(sheets) {
         var emptyColumns = 0;
         angular.forEach(sheets, function(sheet, index){
 
-            if( !sheet.sheetName || sheet.sheetName.length === 0 ) {
+            if( !sheet.name || sheet.name.length === 0 ) {
                 emptyColumns += 1 ;
             }
+            else
+            {
+                emptyColumns += $filter('filter')(sheet.tables[0].columns, function(column, index) {
+                    if( !$scope.notNew(column) )
+                        return false;
 
-            else {
-                emptyColumns += $filter('filter')(sheet.colHeaders, function(colHeader) {
-                    
-                    if( /^\w+$/.test(colHeader.data ) 
-                        && colHeader.title.Blength()>0 && colHeader.title.Blength()<50
-                        && colHeader.rules.key !== null
-                        && /^[a-z_]+$/.test(colHeader.rules.key)
-                        && colHeader.types.type !== null
-                        && /^[a-z_]+$/.test(colHeader.types.type)) {
+                    if( /^\w+$/.test(column.name ) 
+                        && column.title.Blength()>0 && column.title.Blength()<50
+                        && column.rules
+                        && /^[a-z_]+$/.test(column.rules.key)
+                    ) {
                         return false;
                     } else { 
-                        console.log(colHeader);  
+                        console.log(column);  
                         return true;
                     }
 
                 }).length;     
             }       
         });    
-
-        return !emptyColumns>0;
-    };
-
-    $scope.test = function() {
-        console.log(1);
-    };    
-        
-    getSheetLength = function() {
-        var sheets_length = $scope.table.sheets.length;
-        return sheets_length > 5 ? 5-1 : sheets_length-1;
-    };
-    
-    $scope.prevSheetPage = function() {
-        if( $scope.page < $scope.pages )
-            $scope.page++;
-    };
-    
-    $scope.nextSheetPage = function() {
-        
-    };
+        return emptyColumns > 0;
+    };  
     
     $scope.changeTool = function(tool) {
         $scope.tool = tool;  
@@ -492,9 +291,13 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
     $scope.closePopup = function(event) {
         $('#save').popup('hide');
     };
+
+    $scope.notNew = function(column) {
+        return Object.keys(column).length > 1;
+    };
     
 })
-.factory("XLSXReaderService", ['$q', '$rootScope',
+.factory('XLSXReaderService', ['$q', '$rootScope',
     function($q, $rootScope) {
         var service = function(data) {
             angular.extend(this, data);

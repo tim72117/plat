@@ -49,7 +49,7 @@ class FileProvider {
 
         RequestFile::where(function($query) use($inGroups){
             
-            empty($inGroups) ? $query->whereNull('id') : $query->where('target', 'group')->whereIn('target_id', $inGroups);
+            empty($inGroups) ? $query->whereNull('id') : $query->where('disabled', false)->where('target', 'group')->whereIn('target_id', $inGroups);
             
         })->get()->each(function($requestFile) use(&$requests){
 
@@ -63,7 +63,7 @@ class FileProvider {
         
         RequestApp::where(function($query) use($inGroups){
             
-            empty($inGroups) ? $query->whereNull('id') : $query->where('target', 'group')->where('disabled', false)->whereIn('target_id', $inGroups);
+            empty($inGroups) ? $query->whereNull('id') : $query->where('disabled', false)->where('target', 'group')->whereIn('target_id', $inGroups);
             
         })->get()->each(function($requestApp) use(&$requests){
             

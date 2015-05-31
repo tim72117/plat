@@ -145,7 +145,7 @@
         <a class="icon item" ng-class="{disabled:sheet.page===sheet.pages.length}"><i class="right arrow icon"></i></a>
     </div>
     
-    <div ng-if="tool===1 && false" class="ui segment" ng-class="{loading: loading}">  
+    <div ng-if="tool===1" class="ui segment" ng-class="{loading: loading}">  
                
         <table ng-repeat="($tindex, sheet) in table.sheets" ng-if="sheet.selected" class="ui small compact table" id="sheet">  
             <thead>
@@ -317,8 +317,7 @@ app.filter('startFrom', function() {
         
         $http({method: 'POST', url: url+'?page='+(sheet.page), data:{index: $scope.table.sheets.indexOf(sheet), limit: $scope.limit, sheet_info: sheet.info} })
         .success(function(data, status, headers, config) {  
-console.log(1);            
-console.log(data);  
+            
             if( sheet.page!==data.current_page ) 
                 return false;
             
