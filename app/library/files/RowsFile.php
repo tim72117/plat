@@ -288,10 +288,12 @@ class RowsFile extends CommFile {
         $doc_id = $commFile->createFile('');
         
         $this->shareFile = ShareFile::find($doc_id);
+
+        $this->file = $this->shareFile->isFile;
         
         $schema = (object)['power'=> (object)['editable' => true], 'sheets' =>[]];
 
-        $this->put_schema($schema, Input::only('title')['title']);        
+        $this->put_schema($schema, Input::get('title'));        
         
         $fileProvider = FileProvider::make();
         
@@ -508,6 +510,23 @@ class RowsFile extends CommFile {
         $rows = $rows_query->select($power)->paginate(Input::only('limit')['limit']);//->where('created_by', $this->user->id)
 
         return Response::json($rows);
+    }
+
+    public function export_columns()
+    {
+        \Excel::create('Filename', function($excel) {
+
+            $excel->sheet('sample', function($sheet) {
+
+                $schema = $this->get_schema();
+
+                $table = $schema->sheets[0]->tables[0]; 
+
+                $sheet->fromArray(array_pluck($table->columns, 'name'));
+
+            });
+
+        })->download('xlsx');
     }
 
 	public function export() 

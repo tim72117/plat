@@ -173,9 +173,11 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
     };
 
     $scope.$watch('file.schema.sheets | filter: {selected: true}', function(sheets) {
-        if( !sheets ) return;
+        if( !sheets || sheets.length < 1 ) return;
+
         var columns = sheets[0].tables[0].columns;
-        if( Object.keys(columns[columns.length-1]).length > 1 ) {
+        
+        if( columns.length < 1 || Object.keys(columns[columns.length-1]).length > 1 ) {
             columns.push(angular.copy($scope.newColumn));
         }
     }, true);

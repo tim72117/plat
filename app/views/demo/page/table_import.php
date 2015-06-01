@@ -11,7 +11,7 @@ if( isset($message) ) {
 <div ng-cloak ng-controller="uploadController" style="position: absolute;left: 10px;right: 10px;top: 10px;bottom: 10px">
     <div class="ui segment active">
 
-        <p style="color:#F00">詳細說明請參考《<a href="<?=URL::to($fileProvider->download(3334))?>">基本欄位格式範本表格下載</a>》</p>
+        <p style="color:#F00">《<a href="javascript:void(0)" ng-click="exportColumns()">欄位格式範本表格下載</a>》</p>
         <p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p>
 
         <?=Form::open(array('url' => '/file/' . Request::segment(2) . '/import_upload', 'files' => true, 'name' => 'file_form'))?>
@@ -109,6 +109,14 @@ app.controller('uploadController', function($scope, $http) {
         $scope.file_upload = input[0].value;
         $scope.$apply();
     };
+
+    $scope.exportColumns = function() {
+        jQuery.fileDownload('export_columns', {
+            httpMethod: "POST",
+            data: {index: 1},
+            failCallback: function (responseHtml, url) { console.log(responseHtml); }
+        }); 
+    }
 
 });
 </script>
