@@ -23,6 +23,18 @@ class CustomFile extends CommFile {
 	public static function get_intent() {
 		return array_unique(array_merge(parent::$intent,self::$intent));
 	}
+
+	function __construct($app_id) 
+	{
+		$app = Apps::find($app_id);
+
+		parent::__construct($app);
+	}
+
+	public function open()
+	{        
+		return $this->file->file;
+	}
 	
 	/**
 	 * @var string
@@ -34,27 +46,15 @@ class CustomFile extends CommFile {
 		
         Session::flash('upload_file_id', $file_id);		
         
-        $file = Apps::find($this->doc_id)->isFile->file;
-		
-		if( is_null($file) )
-			throw new FileFailedException;  
+        $file = Apps::find($this->doc_id)->isFile->file;		
+		 
         
 		return $file;
 
 	}
 	
-	public function export() {	}
+	public function export() {	}	
 	
-	public function open() {
-                
-		$file = Apps::find($this->doc_id)->isFile->file;
-        
-		if( is_null($file) ){
-            throw new FileFailedException;
-        }
-        
-		return $file;
-	}	
 	
 	private function get_users($groups = array(), $users = array()) {
 		
