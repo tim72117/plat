@@ -26,17 +26,42 @@ class QuesFile extends CommFile {
         'codebook',
         'create'
 	);
+        
+    function __construct($doc_id) 
+    {
+        $shareFile = ShareFile::find($doc_id);
+
+        parent::__construct($shareFile);
+    }
 	
-	public static function get_intent() {
+	public static function get_intent() 
+    {
 		return array_merge(parent::$intent,self::$intent);
 	}
-	
-	/**
-	 * @param string
-	 * @return
-	 */       
-    public function get_views() {
+	     
+    public function get_views() 
+    {
         return ['open', 'codebook', 'receives', 'spss', 'report'];
+    }
+    
+    public static function create($newFile) 
+    {
+        $shareFile = parent::create($newFile);
+
+        $file = $shareFile->isFile;
+
+        $ques_doc_id = DB::table('ques_admin.dbo.ques_doc')->insertGetId([
+            'qid'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))'),
+            'title' => Input::get('title'),
+            'year'  => 103,
+            'dir'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))')
+        ]);
+
+        $file->file = $ques_doc_id;
+        
+        $file->save(); 
+
+        return $shareFile;
     }
     
 	public function read_info() {
@@ -690,31 +715,7 @@ class QuesFile extends CommFile {
         
         return 'demo.cher.page.report';
     }
-    
-    public function create() {
-        $fileProvider = FileProvider::make();
-        $ques_doc_id = DB::table('ques_admin.dbo.ques_doc')->insertGetId([
-            'qid'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))'),
-            'title' => Input::get('title'),
-            'year'  => 103,
-            'dir'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))')
-        ]);
-        $file = parent::createNewFile(1, Input::get('title'), ['file'=>$ques_doc_id]);
-        $shareFile = ShareFile::create(['target'=>'user', 'target_id'=>$file->created_by, 'file_id'=>$file->id, 'created_by'=>$file->created_by]);
-        $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\QuesFile');
-        return Response::json(['shareFile' => [
-            'id' => $shareFile->id,
-            'title' => $shareFile->isFile->title,
-            'created_by' => $shareFile->created_by,
-            'created_at' => $shareFile->created_at->toIso8601String(),
-            'link' => ['open' => 'file/'.$intent_key.'/open'],
-            'type' => $shareFile->isFile->type,
-            'intent_key' => $intent_key,
-            'tools' => ['codebook', 'receives', 'spss', 'report'],
-            'shared' => []
-        ]]);
-    }
-    
+
     public function create_pstat($tablename) {		
         !Schema::hasTable($tablename.'_pstat') && Schema::create($tablename.'_pstat', function($table){
             $table->integer('id', true);
@@ -724,18 +725,7 @@ class QuesFile extends CommFile {
             $table->dateTime('created_at');
         });
     }
-        
-    function __construct($doc_id) {
-        
-        if( $doc_id == '' )
-            return false;
-        
-        $this->shareFile = ShareFile::find($doc_id);  
-        
-        $this->file = $this->shareFile->isFile;
-        
-    }
-	
+
     public function template() {
         
         return View::make('editor.question');        
