@@ -10,6 +10,9 @@ class CommFile {
 	
 	public function __construct($shareFile)
 	{      
+		if( gettype($shareFile) != 'object' )
+			$shareFile = ShareFile::find($shareFile);//暫時
+
 		$this->shareFile = $shareFile;
 
 		$this->file = $this->shareFile->isFile;
@@ -20,6 +23,11 @@ class CommFile {
 
         if( is_null($this->file) )
 			throw new FileFailedException; 
+	}
+
+	public function get_views() 
+	{
+		return [];
 	}
     
 	public static function create($newFile)
@@ -124,15 +132,14 @@ class CommFile {
 	}
 	
 	public function download()
-	{        
-		$file = Files::find($this->doc_id);
+	{
         
-		$file_path = $file->file;
+		$file_path = $this->file->file;
         
         if( !file_exists($this->storage_path . '/' . $file_path) )
             throw new FileFailedException;
         
-        return Response::download($this->storage_path . '/' . $file_path, $file->title);
+        return Response::download($this->storage_path . '/' . $file_path, $this->file->title);
 	}
 	
 	public function save_as() { }

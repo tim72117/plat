@@ -49,7 +49,7 @@ class RowsFile extends CommFile {
 
     public function get_views()
     {
-        return ['open'];
+        return ['open', 'import'];
     }
     
     public static function get_intent() 
