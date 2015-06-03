@@ -23,11 +23,6 @@ Route::get('user/auth/{project}', function($project) { return Redirect::to('proj
 Route::get('user/auth/password/reset/{project}/{token}', function($project, $token){ return Redirect::to('project/'. $project .'/password/reset/' . $token); });
 //平台-------------------------------------------------------------------------------------------------------------------------------
 Route::group(array('before' => 'auth_logined'), function() {        
-
-    Route::get('app/{intent_key}', 'FileController@appGet');
-    Route::post('app/{intent_key}/{method}', 'FileController@appPost');
-    Route::get('app/{intent_key}/ajax', 'FileController@appAjaxGet');
-    Route::post('app/{intent_key}/ajax/{method}', 'FileController@appAjaxPost');
     
     Route::post('share/files', 'ShareController@shareFileTo');
     Route::post('share/request/new', 'ShareController@requestFileTo');
@@ -36,8 +31,8 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::get('app/{intent_key}/my/group', 'ShareController@getSharedApp');
     Route::post('app/{intent_key}/share/group', 'ShareController@shareAppTo');
 
-    Route::post('file/{intent_key}/upload', 'FileController@fileUpload');
-    Route::any('file/{intent_key}/{method}', 'FileController@fileOpen');
+    Route::any('file/{intent_key}/{method}', 'FileController@open');
+    Route::any('file/{intent_key}/ajax/{method}', 'FileController@appAjax');
 
     Route::get('page/project/{context?}', array('before' => '', 'uses' => 'PageController@project'));
     Route::post('page/project/{context?}', array('before' => 'csrf', 'uses' => 'PageController@project'));
@@ -53,6 +48,8 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::post('auth/password/change', array('before' => 'csrf|post_delay', 'uses' => 'UserController@passwordChange'));
 
 });
+
+Route::post('data/post/{table}', 'DataExchangeController@post');
 
 Route::get('project/{project}/password/remind', 'UserController@remindPage');
 Route::post('project/{project}/password/remind', array('before' => 'csrf|post_delay', 'uses' => 'UserController@remind'));

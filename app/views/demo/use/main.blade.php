@@ -101,7 +101,7 @@ function getCookie(value) {
 <?
 if( isset($power->files) && $power->files ) { 
 ?>
-            <a class="item use-green" href="/app/<?=app\library\files\v0\FileProvider::make()->app_intent_key('open', 18, 'app\\library\\files\\v0\\CustomFile')?>/">我的檔案</a>
+            <a class="item use-green" href="/file/<?=app\library\files\v0\FileProvider::make()->app_intent_key('open', 18, 'app\\library\\files\\v0\\CustomFile')?>/open">我的檔案</a>
 <? } 
 if( Auth::user()->id==1 && Request::is('app/*') ) { 
 ?>
@@ -134,7 +134,7 @@ if( Auth::user()->id==1 ) {
                     </div>                    
                     <?php
                     foreach($apps as $app) {                        
-                        echo '<a class="item teal' . (Request::path()=='app/' . $app['intent_key']?' active':'').'" style="font-size:16px;font-weight:600" href="/app/' . $app['intent_key'] . '/">' . $app['title'] . '</a>';
+                        echo '<a class="item teal' . (Request::path()=='app/' . $app['intent_key']?' active':'').'" style="font-size:16px;font-weight:600" href="/file/' . $app['intent_key'] . '/open">' . $app['title'] . '</a>';
                     }             
                     ?>  
                     <div class="header item">

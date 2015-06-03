@@ -31,6 +31,11 @@ class CustomFile extends CommFile {
 		parent::__construct($app);
 	}
 
+	public function get_views() 
+	{
+		return ['open'];
+	}
+
 	public function open()
 	{        
 		return $this->file->file;

@@ -87,11 +87,6 @@ class FileProvider {
         }
     }
     
-    public function upload() {
-        $intent_key = $this->doc_intent_key('upload', Null, 'app\\library\\files\\v0\\CommFile');
-        return 'file/'.$intent_key.'/upload';
-    }
-    
     public function download($file_id) {
         $intent_key = $this->doc_intent_key('download', $file_id, 'app\\library\\files\\v0\\CommFile');
         return 'file/'.$intent_key.'/download';
@@ -128,7 +123,7 @@ class FileProvider {
     }
     
     public function app_intent_key($active, $app_id, $fileClass, $value = null) {
-        $intent = array('active'=>$active, 'app_id'=>$app_id, 'fileClass'=>$fileClass, 'value'=>$value);
+        $intent = array('active'=>$active, 'doc_id'=>$app_id, 'fileClass'=>$fileClass, 'value'=>$value);
         $intent_key = $this->get_intent_id($intent);
         $this->files[$intent_key] = $intent;
         $this->save_intent();
@@ -152,16 +147,16 @@ class FileProvider {
         return $this->intent_hash_table[$intent_hash];
     }
     
-    private function get_intent_uniqid() {
-                
-        while( true ){
+    private function get_intent_uniqid()
+    {                
+        while( true ) 
+        {
             $key = md5(uniqid(rand()));
             //$key = md5(uniqid());
             if( !array_key_exists($key, $this->files) ){
                 return $key;
             }
-        }
-        
+        }        
     }
     
     
