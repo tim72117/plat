@@ -101,7 +101,7 @@ function getCookie(value) {
 <?
 if( isset($power->files) && $power->files ) { 
 ?>
-            <a class="item use-green" href="/page/files">我的檔案</a>
+            <a class="item use-green" href="/app/<?=app\library\files\v0\FileProvider::make()->app_intent_key('open', 18, 'app\\library\\files\\v0\\CustomFile')?>/">我的檔案</a>
 <? } 
 if( Auth::user()->id==1 && Request::is('app/*') ) { 
 ?>

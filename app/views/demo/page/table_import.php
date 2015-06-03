@@ -1,39 +1,20 @@
 <?php
-$fileProvider = app\library\files\v0\FileProvider::make();
-
 $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lists('sname', 'id');
-
-$message = Session::get('message');
-if( isset($message) ) {
-    extract($message);
-}
 ?>
 <div ng-cloak ng-controller="uploadController" style="position: absolute;left: 10px;right: 10px;top: 10px;bottom: 10px">
-    <div class="ui segment active">
+    <div class="ui segment">
+
+        <div class="ui top attached orange progress" ng-class="{disabled: progress<1}">
+            <div class="bar" style="width: {{ progress }}%"></div>
+        </div>
 
         <p style="color:#F00">《<a href="javascript:void(0)" ng-click="exportColumns()">欄位格式範本表格下載</a>》</p>
         <p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p>
 
-        <?=Form::open(array('url' => '/file/' . Request::segment(2) . '/import_upload', 'files' => true, 'name' => 'file_form'))?>
-
-        <input type="file" id="file_upload" name="file_upload" hidden="hidden" onchange="angular.element(this).scope().selectFile(angular.element(this))"
-               accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
-        <label for="file_upload" class="ui basic button"><i class="file icon"></i>選擇檔案 <span id="file_upload_name">{{ file_upload }}</span></label>
-        <div class="ui basic button" onClick="file_form.submit()"><i class="upload icon"></i>上傳檔案</div>
-        
-        <?=Form::close()?>
-        
-        <?php
-        if( !Session::has('upload_file_id') )
-        {               
-            if( $errors && count($errors->all())>0 )
-            {
-                echo '<div class="ui negative message">';
-                echo '<p>'.implode('、',array_filter($errors->all())).'</p>';  
-                echo '</div>';
-            }
-        }  
-        ?>
+        <form style="display:none">
+            <input type="file" id="file_upload" nv-file-select uploader="uploader" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+        </form>
+        <label for="file_upload" class="ui basic button" ng-class="{loading: uploading}"><i class="icon upload"></i>上傳</label>
    
         <div class="ui positive message">
             <div class="header">
@@ -50,7 +31,8 @@ if( isset($message) ) {
             </p>
         </div>  
 
-        <table class="ui compact definition  table" ng-if="messages.length > 0">
+        <div class="ui basic segment" ng-class="{loading: sheetLoading}">
+        <table class="ui compact definition table" ng-if="messages.length > 0">
             <thead>
                 <tr>	
                     <th></th>
@@ -82,33 +64,35 @@ if( isset($message) ) {
                     </td>
                 </tr>
             </tbody>
-        </table>    
+        </table>   
+        </div> 
 
     </div>
 </div>
 
 <script src="/js/jquery.fileDownload.js"></script>
+<script src="/js/angular-file-upload.min.js"></script>
 
 <script>
-app.controller('uploadController', function($scope, $http) {
+app.requires.push('angularFileUpload');
+app.controller('uploadController', function($scope, $http, $timeout, FileUploader) {
     $scope.schools = angular.fromJson(<?=(isset($work_schools) ? json_encode($work_schools) : '[]')?>);    
-    $scope.columns = angular.fromJson(<?=(isset($columns) ? json_encode($columns) : '[]')?>);
-    $scope.messages = angular.fromJson(<?=(isset($rows_message) ? json_encode($rows_message) : '[]')?>);
+    $scope.columns = [];
+    $scope.uploading = false;
+    $scope.sheetLoading = false;
     
-    $http({method: 'POST', url: 'get_rows_count', data:{} })
-    .success(function(data, status, headers, config) {
-        //console.log(data);
-        $scope.rows_count = data.rows_count;
-    }).error(function(e){
-        console.log(e);
-    });
-    
-    //console.log($scope.messages);
-    
-    $scope.selectFile = function(input) {
-        $scope.file_upload = input[0].value;
-        $scope.$apply();
+    $scope.getStatus = function(input) {
+        $http({method: 'POST', url: 'get_status', data:{} })
+        .success(function(data, status, headers, config) {
+            console.log(data);
+            $scope.rows_count = data.rows_count;
+            $scope.columns = data.columns;
+        }).error(function(e){
+            console.log(e);
+        });
     };
+
+    $scope.getStatus();
 
     $scope.exportColumns = function() {
         jQuery.fileDownload('export_columns', {
@@ -116,12 +100,53 @@ app.controller('uploadController', function($scope, $http) {
             data: {index: 1},
             failCallback: function (responseHtml, url) { console.log(responseHtml); }
         }); 
-    }
+    };
+
+    $scope.uploader = new FileUploader({
+        alias: 'file_upload',
+        url: 'import_upload',
+        //autoUpload: true,
+        removeAfterUpload: true
+    });
+
+    $scope.uploader.onAfterAddingFile = function(item) { 
+        $scope.messages = [];     
+        $scope.uploading = true;  
+        $scope.progress = 0;        
+        $timeout(function() {            
+            $scope.uploader.uploadAll();
+        }, 500);
+    };
+
+    $scope.uploader.onCompleteItem = function(fileItem, response, status, headers) {
+        if( headers['content-type'] != 'application/json' )
+            return;        
+
+        $scope.messages = response.messages;
+        $scope.progress = 100;
+        $scope.sheetLoading = false; 
+
+        document.forms[0].reset();
+    };
+
+    $scope.uploader.onProgressAll  = function(progress) {
+        $scope.progress = progress > 80 ? 80 : progress;
+        if( progress > 80 )
+            $scope.sheetLoading = true; 
+    };
+
+    $scope.uploader.onErrorItem = function(fileItem, response, status, headers) {
+        angular.element('.queryLog').append(response);        
+    };
+
+    $scope.uploader.onCompleteAll = function() {
+        $scope.uploading = false;
+    };
 
 });
 </script>
-<style>
-</style>
+
+<style></style>
 <?php
 //$explorer = $_SERVER['HTTP_USER_AGENT'];
 //DB::table('user_info')->insert(array('user_id'=>$user->id, 'info'=>$explorer));

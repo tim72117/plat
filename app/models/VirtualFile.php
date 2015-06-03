@@ -100,3 +100,43 @@ class ShareApp extends Eloquent {
     }
     
 }
+
+class Struct_file
+{  
+    static function open($shareFile) 
+    {
+    	$fileProvider = app\library\files\v0\FileProvider::make();
+
+		$link = [];
+	    
+	    switch($shareFile->isFile->type) {
+	        case 1:
+	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\QuesFile');
+	            $link['open'] = 'file/'.$intent_key.'/open';
+	            $tools = ['codebook', 'receives', 'spss', 'report'];
+	        break;
+	        case 5:
+	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\RowsFile');
+	            $link['open'] = 'file/'.$intent_key.'/open';
+	        break;
+	        default:             
+	            $link['open'] = $fileProvider->download($shareFile->file_id);       
+	            $intent_key = explode('/', $link['open'])[1];
+	        break;    
+	    }
+
+	    return [
+	        'id'         => $shareFile->id,
+	        'title'      => $shareFile->isFile->title,
+	        'created_by' => $shareFile->created_by,
+	        'created_at' => $shareFile->created_at->toIso8601String(),
+	        'link'       => $link,
+	        'type'       => $shareFile->isFile->type,
+	        'intent_key' => $intent_key,
+	        'tools'      => isset($tools) ? $tools : [],
+	        'shared'     => array_count_values($shareFile->hasSharedDocs->map(function($sharedDocs){
+	            return $sharedDocs->target;
+	        })->all())
+	    ];
+    }
+}

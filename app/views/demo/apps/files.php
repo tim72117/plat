@@ -1,77 +1,14 @@
-<?php
-$user = Auth::user();
-
-$fileProvider = app\library\files\v0\FileProvider::make();
-
-if( Session::has('upload_file_id') ){
-	$file_id = Session::get('upload_file_id');	
-	
-	ShareFile::updateOrCreate([
-        'file_id'    =>  $file_id,
-        'target'     =>  'user',
-		'target_id'  =>  $user->id,
-        'created_by' =>  $user->id
-	])->touch();
-}else{
-	
-	if( $errors )
-		echo implode('、',array_filter($errors->all()));
-}
-
-$inGroups = $user->inGroups->lists('id');
-
-
-$shareFiles = ShareFile::with('isFile')->where(function($query) use($user){
-    $query->where('target', 'user')->where('target_id', $user->id);
-})->orWhere(function($query) use($user, $inGroups){
-    count($inGroups)>0 && $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $user->id);
-})->orderBy('created_at', 'desc')->get();
-
-$files = $shareFiles->map(function($shareFile) use($fileProvider){
-    $link = [];
-    
-    switch($shareFile->isFile->type) {
-        case 1:
-            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\QuesFile');
-            $link['open'] = 'file/'.$intent_key.'/open';
-            $tools = ['codebook', 'receives', 'spss', 'report'];
-        break;
-        case 5:
-            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\RowsFile');
-            $link['open'] = 'file/'.$intent_key.'/open';
-        break;
-        default:             
-            $link['open'] = $fileProvider->download($shareFile->file_id);       
-            $intent_key = explode('/', $link['open'])[1];
-        break;    
-    }
-    return [
-        'id' => $shareFile->id,
-        'title' => $shareFile->isFile->title,
-        'created_by' => $shareFile->created_by,
-        'created_at' => $shareFile->created_at->toIso8601String(),
-        'link' => $link,
-        'type' => $shareFile->isFile->type,
-        'intent_key' => $intent_key,
-        'tools' => isset($tools) ? $tools : [],
-        'shared' => array_count_values($shareFile->hasSharedDocs->map(function($sharedDocs){
-            return $sharedDocs->target;
-        })->all())
-    ];
-})->toJson();
-
-$newFiles = [
-    1 => $fileProvider->doc_intent_key('open', '', 'app\\library\\files\\v0\\QuesFile'),
-    5 => $fileProvider->doc_intent_key('open', '', 'app\\library\\files\\v0\\RowsFile')
-];
-
-?>
 <div ng-cloak ng-controller="fileController" id="fileController" style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
     
     <div class="ui segment">
-        <?=Form::open(array('url' => $fileProvider->upload(), 'files' => true, 'method' => 'post', 'style' => 'display:none'))?>
-        <?=Form::file('file_upload', array('id'=>'file_upload', 'onchange'=>'submit()'))?>
-        <?=Form::close()?>
+
+        <div class="ui top attached orange progress">
+            <div class="bar" style="width: {{ progress }}%"></div>
+        </div>
+
+        <form style="display:none">
+            <input type="file" id="file_upload" nv-file-select uploader="uploader" />
+        </form>
         
         <div class="ui grid">
             <div class="left floated left aligned six wide column">
@@ -79,11 +16,11 @@ $newFiles = [
                     <i class="file outline icon"></i>
                     <span class="text">新增</span>
                     <div class="menu transition" tabindex="-1">
-                        <a class="item" href="javascript:void(0)" ng-click="createNewDataFile(5)"><i class="file text icon"></i>資料檔</a>
-                        <a class="item" href="javascript:void(0)" ng-click="createNewDataFile(1)"><i class="file text outline icon"></i>問卷</a>
+                        <a class="item" href="javascript:void(0)" ng-click="addFile(5)"><i class="file text icon"></i>資料檔</a>
+                        <a class="item" href="javascript:void(0)" ng-click="addFile(1)"><i class="file text outline icon"></i>問卷</a>
                     </div>
                 </div>
-                <label for="file_upload" class="ui basic mini button"><i class="icon upload"></i>上傳</label>
+                <label for="file_upload" class="ui basic mini button" ng-class="{loading: uploading}"><i class="icon upload"></i>上傳</label>
                 <div class="ui basic mini button" ng-if="info.pickeds.length>0" ng-click="deleteFile()"><i class="icon trash outline"></i>刪除</div>
                 <div class="ui basic mini button" ng-if="info.pickeds.length>0" ng-click="getSharedFile()"><i class="icon share outline"></i>共用</div>
                 <div class="ui basic mini button" ng-if="info.pickeds.length>0" ng-click="getRequestedFile()"><i class="icon trash outline"></i>請求</div>
@@ -133,15 +70,15 @@ $newFiles = [
                 </tr>
             </thead>
             <tbody>
-                <tr ng-if="newDataFile">
+                <tr ng-if="newFile">
                     <td></td>
                     <td>
-                        <i class="icon" ng-class="types[newDataFile.type]"></i>
-                        <div class="ui mini input"><input type="text" ng-model="newDataFile.title" size="50" placeholder="檔案名稱"></div>
-                        <div class="ui basic mini button" ng-click="saveNewDataFile()"><i class="icon save"></i>確定</div>
+                        <i class="icon" ng-class="types[newFile.type]"></i>
+                        <div class="ui mini input"><input type="text" ng-model="newFile.title" size="50" placeholder="檔案名稱"></div>
+                        <div class="ui basic mini button" ng-click="createFile()"><i class="icon save"></i>確定</div>
                     </td>
-                    <td></td>
-                    <td></td>
+                    <td></td><td></td>
+                    <td></td><td></td>
                 </tr>
                 <tr ng-repeat="file in files | orderBy:'created_at':true | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
                     <td width="50">
@@ -186,11 +123,13 @@ $newFiles = [
     </div>
 </div>
 
+<script src="/js/angular-file-upload.min.js"></script>
+
 <script>
 app.requires.push('angularify.semantic.dropdown');
-app.controller('fileController', function($scope, $filter, $interval, $http, $cookies) {
-    $scope.files = angular.fromJson(<?=$files?>);
-    $scope.newFiles = angular.fromJson(<?=json_encode($newFiles)?>); 
+app.requires.push('angularFileUpload');
+app.controller('fileController', function($scope, $filter, $interval, $http, $cookies, FileUploader) {
+    $scope.files = [];
     $scope.predicate = 'created_at';    
     $scope.searchText = getCookie($cookies.file_filter) || {type: ''};
     $scope.page = getCookie($cookies.file_page) || 1;
@@ -201,6 +140,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     $scope.info = {pickeds:0};
     $scope.types = {1: 'file text outline', 2: 'code', 3: 'file outline blue', 5: 'file text', 6: 'file outline blue', '': 'file outline'};
     $scope.tools = {codebook: 'book', receives: 'line chart', spss: 'code', report: 'comment outline'};
+    $scope.uploading = false;
     
     $interval(function() {
         $scope.timenow = new Date();
@@ -241,21 +181,35 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         $scope.info.pickeds = files;    
     });
     
-    $scope.$watch('page', function(){
+    $scope.$watch('page', function() {
         $cookies.file_page = $scope.page;
     });
     
-    $scope.$watchCollection('searchText', function(query) {        
+    $scope.$watchCollection('searchText', function(query) {  
+        if( $scope.files.length < 1 )
+            return;      
         $scope.max = $filter("filter")($scope.files, query).length;
         $scope.rows_filted = $filter("filter")($scope.files, query);
         $scope.pages = Math.ceil($scope.max/$scope.limit);
         $scope.page = $scope.page>$scope.pages ? 1 : $scope.page;
         $cookies.file_filter = angular.toJson($scope.searchText);
     });  
+
+    $scope.getFiles = function() {
+        $http({method: 'POST', url: 'ajax/getFiles', data:{} })
+        .success(function(data, status, headers, config) {
+            $scope.files = data.files;
+            $scope.max = $scope.files.length;
+            $scope.pages = Math.ceil($scope.max/$scope.limit);
+        }).error(function(e){
+            console.log(e);
+        });
+    };    
+
+    $scope.getFiles();
     
     $scope.deleteFile = function() {
-        var files = $scope.info.pickeds.map(function(file){
-            console.log(file);
+        var files = $scope.info.pickeds.map(function(file) {
             $http({method: 'POST', url: '/file/'+file.intent_key+'/delete', data:{} })
             .success(function(data, status, headers, config) {
                 console.log(data);
@@ -267,10 +221,6 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
             });
             return file.intent_key;
         });
-    };
-    
-    $scope.test = function() {
-        //console.log($scope.files);
     };
     
     $scope.loadFile = function() {
@@ -290,20 +240,58 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         angular.element('[ng-controller=shareController]').scope().getGroupForRequest();
     };
     
-    $scope.createNewDataFile = function(type) {
-        $scope.newDataFile = {type: type, title: ''};
+    $scope.addFile = function(type) {
+        $scope.newFile = {type: type, title: ''};
     }; 
     
-    $scope.saveNewDataFile = function(type) {
-        $http({method: 'POST', url: '/file/'+$scope.newFiles[$scope.newDataFile.type]+'/create_file', data:{title: $scope.newDataFile.title} })
-        .success(function(data, status, headers, config) {            
-            $scope.files.push(data.shareFile); 
-            $scope.timenow = new Date();
-            $scope.newDataFile = null;
+    $scope.createFile = function(type) {
+        $http({method: 'POST', url: 'ajax/createFile', data:{newFile: $scope.newFile} })
+        .success(function(data, status, headers, config) {    
+            $scope.files.push(data.file); 
+            $scope.newFile = null;
         }).error(function(e){
             console.log(e);
         });
     }; 
+
+    $scope.uploader = new FileUploader({
+        alias: 'file_upload',
+        url: 'ajax/upload',
+        autoUpload: true,
+        removeAfterUpload: true
+    });
+
+    $scope.uploader.onBeforeUploadItem = function(item) {
+        $scope.uploading = true;
+        $scope.progress = 0;
+    };
+
+    $scope.uploader.onCompleteItem = function(fileItem, response, status, headers) {
+        if( headers['content-type'] != 'application/json' )
+            return;
+
+        var files = $filter("filter")($scope.files, {id: response.file.id});
+        
+        if( files.length > 0 ) {
+            angular.extend(files[0], response.file);
+        }else{
+            $scope.files.push(response.file);
+        }
+
+        document.forms[0].reset();
+    };
+
+    $scope.uploader.onProgressAll = function(progress) {
+        $scope.progress = progress;
+    };
+
+    $scope.uploader.onErrorItem = function(fileItem, response, status, headers) {
+        angular.element('.queryLog').append(response);        
+    };
+
+    $scope.uploader.onCompleteAll = function() {
+        $scope.uploading = false;        
+    };
     
 });
 </script>
