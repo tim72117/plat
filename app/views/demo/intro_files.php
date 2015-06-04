@@ -5,7 +5,7 @@ $fileProvider = app\library\files\v0\FileProvider::make();
 $inGroups = $user->inGroups->lists('id');
 
 $shareFiles = ShareFile::with('isFile')->where(function($query) use($user) {
-    $query->where('target', 'user')->where('target_id', $user->id);//->where('created_by', '<>', $user->id);
+    $query->where('target', 'user')->where('target_id', $user->id)->where('created_by', '<>', $user->id);
 })->orWhere(function($query) use($user, $inGroups) {
     count($inGroups)>0 && $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '<>', $user->id);
 })->orderBy('created_at', 'desc')->get();
@@ -40,7 +40,7 @@ foreach($shareFiles as $shareFile) {
         break;
         default:         
             echo '<div class="item"><i class="file outline icon"></i>';
-            echo '<div class="content">教育評鑑與研究中心傳送一個檔案給你：<a href="/'.$fileProvider->download($shareFile->file_id).'">'.$shareFile->isFile->title.'</a></div>';
+            echo '<div class="content">教育評鑑與研究中心傳送一個檔案給你：<a href="/'.$fileProvider->download($shareFile->id).'">'.$shareFile->isFile->title.'</a></div>';
             echo '</div>';
         break;    
     }
