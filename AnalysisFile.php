@@ -6,13 +6,18 @@ class AnalysisFile extends CommFile
 {        
     function __construct($doc_id)
     {       
-        $this->shareFile = ShareFile::find($doc_id);  
+        $shareFile = ShareFile::find($doc_id);   
+
+        parent::__construct($shareFile);  
         
-        $this->file = $this->shareFile->isFile;     
-        
-        $this->census = DB::reconnect('sqlsrv_analysis')->table('census_info')->where('CID', $this->file->file)->first();
+        $this->census = DB::reconnect('sqlsrv_analysis')->table('census_info')->where('CID', $this->file->file)->first();        
         
         //def_city = 30;
+    }
+
+    public function get_views() 
+    {
+        return ['open'];
     }
     
     public function open()
@@ -20,6 +25,11 @@ class AnalysisFile extends CommFile
         return 'analysis.menu_option';        
     }
     
+    public function information() 
+    {
+
+    }
+
     public function get_questions()
     {
         //tted isready=1, ,isteacher=1, $skip_part
