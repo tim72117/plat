@@ -122,6 +122,7 @@ class Struct_file
 	        case 7:
 	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\AnalysisFile');
 	            $link['open'] = 'file/'.$intent_key.'/open';
+	            $tools = ['information'];
 	        break;
 	        case 8:
 	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\ExamFile');
