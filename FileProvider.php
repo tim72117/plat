@@ -87,8 +87,8 @@ class FileProvider {
         }
     }
     
-    public function download($file_id) {
-        $intent_key = $this->doc_intent_key('download', $file_id, 'app\\library\\files\\v0\\CommFile');
+    public function download($doc_id) {
+        $intent_key = $this->doc_intent_key('download', $doc_id, 'app\\library\\files\\v0\\CommFile');
         return 'file/'.$intent_key.'/download';
     }
     
