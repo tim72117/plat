@@ -2,72 +2,87 @@
 $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lists('sname', 'id');
 ?>
 <div ng-cloak ng-controller="uploadController" style="position: absolute;left: 10px;right: 10px;top: 10px;bottom: 10px">
-    <div class="ui segment">
 
-        <div class="ui top attached orange progress" ng-class="{disabled: progress<1}">
-            <div class="bar" style="width: {{ progress }}%"></div>
-        </div>
-
-        <p style="color:#F00">《<a href="javascript:void(0)" ng-click="exportColumns()">欄位格式範本表格下載</a>》</p>
-        <p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p>
+    <div class="ui segment" ng-class="{loading: sheetLoading}">
 
         <form style="display:none">
             <input type="file" id="file_upload" nv-file-select uploader="uploader" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
         </form>
-        <label for="file_upload" class="ui basic button" ng-class="{loading: uploading}"><i class="icon upload"></i>上傳</label>
-   
-        <div class="ui positive message">
-            <div class="header">
-                
-            </div>
-            <p>
-                共有 
-                {{ rows_count }} 
-                筆資料 這次上傳 新增
-                {{ (messages | filter:{pass: true, empty: false, exist: false}).length }}
-                筆，更新
-                {{ (messages | filter:{pass: true, empty: false, exist: true}).length }}
-                筆 資料
-            </p>
+
+        <div class="ui top attached orange progress" ng-class="{disabled: progress<1}">
+            <div class="bar" style="width: {{ progress }}%"></div>
         </div>  
 
-        <div class="ui basic segment" ng-class="{loading: sheetLoading}">
-        <table class="ui compact definition table" ng-if="messages.length > 0">
+        <label for="file_upload" class="ui basic button" ng-class="{loading: uploading}"><i class="icon upload"></i>上傳</label>           
+
+        <br />
+
+        <div class="ui negative compact message" ng-if="message.errors">
+            <div class="header">檔案錯誤</div> 
+            <p ng-repeat="(error, value) in message.errors">
+                <span ng-if="error=='noColumn'">沒有{{ value }}欄位</span>                    
+            </p>                
+        </div> 
+
+        <h4 class="ui header">上傳名單用的資料表格 <a href="javascript:void(0)" ng-click="exportSample()">下載</a></h4>
+
+        <h4 class="ui header">欄位說明 <a href="javascript:void(0)" ng-click="exportDescribe()">下載</a></h4>
+
+        <table class="ui compact collapsing definition table">
             <thead>
-                <tr>	
+                <tr>
+                    <th>欄位代號</th>
+                    <th ng-repeat="column in columns">{{ column.name }}</th>
                     <th></th>
+                </tr>
+                <tr>	
+                    <th>欄位名稱</th>
                     <th ng-repeat="column in columns">{{ column.title }}</th>
                     <th>錯誤資訊</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr ng-repeat="message in messages" ng-class="{positive: message.pass && !message.empty, error: message.empty}">
+            <tbody ng-if="message.rows.length > 0">
+                <tr ng-repeat="message in message.rows" ng-class="{positive: message.pass && !message.empty, error: message.empty}">                        
                     <td>
-                        <div class="ui label" ng-if="message.pass && !message.empty" ng-class="{yellow: message.exist, green: !message.exist}">
-                            {{ message.index }}
-                            <div class="detail" ng-if="!message.exist">新增</div>
-                            <div class="detail" ng-if="message.exist">更新</div>             
-                            <div class="detail" ng-if="message.system_error">系統錯誤</div>
+                        <div class="ui label" ng-if="message.pass && !message.empty" ng-class="{yellow: message.exist, green: !message.exist}">                                
+                            <div ng-if="!message.exist">新增</div>
+                            <div ng-if="message.exist">更新</div>             
+                            <div ng-if="message.system_error">系統錯誤</div>
                         </div>
                         <div class="ui label" ng-if="!message.pass || message.empty" ng-class="{red: !message.pass, blue: message.empty}">
-                            {{ message.index }}
-                            <div class="detail" ng-if="!message.pass">錯誤</div>
-                            <div class="detail" ng-if="message.empty">空白</div>
+                            <div ng-if="!message.pass">錯誤</div>
+                            <div ng-if="message.empty">空白</div>
                         </div>
                     </td>
                     <td ng-repeat="column in message.errors" ng-class="{error: column.errors.length>0}">{{ column.value }}</td>
                     <td ng-if="message.empty" colspan="{{ columns.length }}"></td>
-                    <td>
+                    <td class="error">
                         <div ng-repeat="column in message.errors">
-                            <div ng-repeat="error in column.errors">{{ error }}</div>
+                            <div ng-repeat="error in column.errors"><i class="attention icon"></i>{{ error }}</div>
                         </div>   
                     </td>
                 </tr>
             </tbody>
-        </table>   
-        </div> 
+            <tfoot>
+                <tr>   
+                    <td></td>
+                    <td class="warning" colspan="{{ columns.length+1 }}">
+                        <p>
+                            共有 
+                            {{ rows_count }} 
+                            筆資料 這次上傳 新增
+                            {{ (message.rows | filter:{pass: true, empty: false, exist: false}).length }}
+                            筆，更新
+                            {{ (message.rows | filter:{pass: true, empty: false, exist: true}).length }}
+                            筆 資料
+                        </p>
+                        <p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>    
+    </div> 
 
-    </div>
 </div>
 
 <script src="/js/jquery.fileDownload.js"></script>
@@ -77,6 +92,7 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
 app.requires.push('angularFileUpload');
 app.controller('uploadController', function($scope, $http, $timeout, FileUploader) {
     $scope.schools = angular.fromJson(<?=(isset($work_schools) ? json_encode($work_schools) : '[]')?>);    
+    $scope.message = {rows: []};
     $scope.columns = [];
     $scope.uploading = false;
     $scope.sheetLoading = false;
@@ -94,8 +110,16 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
 
     $scope.getStatus();
 
-    $scope.exportColumns = function() {
-        jQuery.fileDownload('export_columns', {
+    $scope.exportSample = function() {
+        jQuery.fileDownload('export_sample', {
+            httpMethod: "POST",
+            data: {index: 1},
+            failCallback: function (responseHtml, url) { console.log(responseHtml); }
+        }); 
+    };
+
+    $scope.exportDescribe = function() {
+        jQuery.fileDownload('export_describe', {
             httpMethod: "POST",
             data: {index: 1},
             failCallback: function (responseHtml, url) { console.log(responseHtml); }
@@ -119,10 +143,11 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
     };
 
     $scope.uploader.onCompleteItem = function(fileItem, response, status, headers) {
+        console.log(response);
         if( headers['content-type'] != 'application/json' )
             return;        
 
-        $scope.messages = response.messages;
+        $scope.message = response.message;
         $scope.progress = 100;
         $scope.sheetLoading = false; 
 

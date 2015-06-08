@@ -42,6 +42,7 @@
                 <tr>
                     <th></th>
                     <th>檔名</th>
+                    <th></th>
                     <th>設定</th>                    
                     <th>已共用</th>
                     <th>更新時間</th>
@@ -64,6 +65,7 @@
                         </div>
                         <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋..."><i class="search icon"></i></div>
                     </th>
+                    <th></th>
                     <th></th>
                     <th></th>
                     <th></th>
@@ -91,17 +93,26 @@
                     <td>
                         <i class="icon" ng-class="types[file.type]"></i>
                         <a href="/{{ file.link.open }}">{{ file.title }}</a>
-                        <div class="ui inline dropdown small" ng-dropdown-menu ng-if="file.tools.length>0">
-                            <i class="dropdown icon"></i>
+                    </td>
+                    <td width="140">
+                        <div class="ui inline labeled icon dropdown mini basic button" ng-dropdown-menu ng-if="file.tools.length>0" ng-click="getPosition(file, $event)">
+                            <span class="text">更多資訊</span><i class="dropdown icon"></i>
                             <div class="menu transition" tabindex="-1">
-                                <a href="/file/{{ file.intent_key }}/{{ tool }}" class="item" ng-repeat="tool in file.tools"><i class="icon" ng-class="tools[tool]"></i>{{ tool }}</a>
+                                <a href="/file/{{ file.intent_key }}/{{ tool.method }}" class="item" ng-repeat="tool in file.tools" ng-click="getInformation()">
+                                    <i class="icon" ng-class="tool.icon"></i>
+                                    {{ tool.title }}
+                                </a>
                             </div>
                         </div>
-                    </td>
+
+<!--         <div class="ignored ui popup basic top left transition" ng-class="{visible: file.information.open}" style="top: {{ information.y }}px; bottom: auto; left: {{ information.x }}px; right: auto">
+            <div class="content">預設佈景的標準提示訊息並不包含指示的箭頭</div>
+        </div> -->
+                    </td> 
                     <td width="70">
                         <div class="ui basic icon button" ng-if="file.type==='1'"><i class="icon settings"></i></div>
                     </td>                    
-                    <td width="120">
+                    <td width="180">
                         
                         <div class="ui small compact menu">
                             <div class="item">
@@ -111,6 +122,10 @@
                             <div class="item">
                                 <i class="icon users"></i>
                                 <div class="floating ui label" ng-class="{green: file.shared.group>0}">{{ file.shared.group || 0 }}</div>
+                            </div>
+                            <div class="item" ng-if="file.type==='5'">
+                                <i class="icon retweet"></i>
+                                <div class="floating ui label" ng-class="{blue: file.shared.user>0}">{{ file.shared.user || 0 }}</div>
                             </div>
                         </div>
                         
@@ -122,6 +137,7 @@
         </table>      
 
     </div>
+
 </div>
 
 <script src="/js/angular-file-upload.min.js"></script>
@@ -140,8 +156,8 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     $scope.timenow = new Date();
     $scope.info = {pickeds:0};
     $scope.types = {1: 'file text outline', 2: 'code', 3: 'file outline blue', 5: 'file text', 6: 'file outline blue', 7: 'bar chart', '': 'file outline'};
-    $scope.tools = {codebook: 'book', receives: 'line chart', spss: 'code', report: 'comment outline'};
     $scope.uploading = false;
+    $scope.information = {};
     
     $interval(function() {
         $scope.timenow = new Date();
@@ -293,6 +309,13 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     $scope.uploader.onCompleteAll = function() {
         $scope.uploading = false;        
     };
+
+    $scope.getPosition = function(file, event) {
+        console.log(event);
+        file.information = {open: true};
+        $scope.information.x = event.delegateTarget.offsetLeft;
+        $scope.information.y = event.delegateTarget.offsetTop + event.delegateTarget.offsetHeight + 5;
+    }
     
 });
 </script>

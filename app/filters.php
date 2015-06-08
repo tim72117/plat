@@ -22,37 +22,6 @@ App::after(function($request, $response)
 	//
 });
 
-App::error(function(app\library\files\v0\FileFailedException $exception) {
-	return Response::view('noFile', array(), 404)->header('Refresh','5;url='.URL::to('page/project'));
-});
-
-App::error(function(app\library\files\v0\ValidateException $exception) {
-	return Redirect::back()->withErrors($exception->validator)->withInput();
-});
-
-App::error(function(app\library\files\v0\TokenMismatchException $exception) {
-	return Redirect::back()->withErrors($exception->validator)->withInput(Input::except('_token','_token2'));
-});
-
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-App::error(function(ModelNotFoundException $e)
-{
-    //return Response::make('Not Found', 404);
-});
-
-App::error(function(PDOException $exception) {
-	//return Response::view('nopage', array(), 404);
-});
-
-App::error(function(Exception $exception)
-{
-	//return Response::view('nopage', array(), 404);
-});
-
-App::missing(function($exception) {
-	//return Response::view('nopage', array(), 404);
-});
-
 /*
 |--------------------------------------------------------------------------
 | Authentication Filters

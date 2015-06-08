@@ -113,16 +113,22 @@ class Struct_file
 	        case 1:
 	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\QuesFile');
 	            $link['open'] = 'file/'.$intent_key.'/open';
-	            $tools = ['codebook', 'receives', 'spss', 'report'];
+	            $tools = [
+	            	['name' => 'codebook', 'title' => 'codebook', 'method' => 'codebook', 'icon' => 'book'],
+	            	['name' => 'receives', 'title' => '回收狀況', 'method' => 'receives', 'icon' => 'line chart'],
+	            	['name' => 'spss',     'title' => 'spss',     'method' => 'spss',     'icon' => 'code'],
+	            	['name' => 'report',   'title' => '問題回報', 'method' => 'report',   'icon' => 'comment outline']
+	            ];
 	        break;
 	        case 5:
 	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\RowsFile');
 	            $link['open'] = 'file/'.$intent_key.'/open';
+	            $tools = [['name' => 'edit_information', 'title' => '編輯檔案資訊', 'method' => 'edit_information', 'icon' => 'edit']];
 	        break;
 	        case 7:
 	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\AnalysisFile');
 	            $link['open'] = 'file/'.$intent_key.'/open';
-	            $tools = ['information'];
+	            $tools = [['name' => 'information', 'title' => '調查資訊', 'method' => 'information', 'icon' => 'edit']];
 	        break;
 	        case 8:
 	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\ExamFile');
