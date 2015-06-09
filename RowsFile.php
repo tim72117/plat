@@ -109,7 +109,7 @@ class RowsFile extends CommFile {
         
         $rows_count = DB::table($database . '.dbo.' . $table->name)->whereNull('deleted_at')->where('created_by', $this->user->id)->count();
         
-        return ['rows_count' => $rows_count, 'columns' => $columns];
+        return ['rows_count' => $rows_count, 'columns' => $columns, 'comment' => $schema->comment];
     }
     
     public function import_upload() 
@@ -297,6 +297,8 @@ class RowsFile extends CommFile {
         if( $this->shareFile->created_by == $this->user->id )
         {
             $schema = $this->update_or_create_schema(Input::get('file')['schema']['sheets']);
+
+            isset(Input::get('file')['schema']['comment']) && $schema->comment = Input::get('file')['schema']['comment'];
             
             $this->put_schema($schema);            
         }
