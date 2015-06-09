@@ -16,7 +16,6 @@
                     <input type="checkbox" id="readOnly" ng-model="sheet.editable">
                     <label for="readOnly">唯讀</label>
                 </div>
-                <div class="ui basic button" ng-click="saveFile()" ng-class="{loading: saving}"><i class="save icon"></i>儲存</div>
                 {{ sheet.id }}{{ sheet.tables[0].name }}
             </th>
         </tr>

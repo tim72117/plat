@@ -27,7 +27,10 @@
             <a class="item" href="javascript:void(0)" ng-class="{active: tool==2}" ng-click="changeTool(2)">欄位定義</a>
             <!-- <a class="item" href="javascript:void(0)" ng-class="{active: tool==3}" ng-click="changeTool(3)">選項定義</a> -->
             <a class="item" href="javascript:void(0)" ng-class="{active: tool==4}" ng-click="changeTool(4)">說明文件</a>
-            <a class="item" href="import">預覽</a>
+            <div class="item"><p><a href="import">預覽</a></p></div>
+            <a class="item" href="javascript:void(0)">
+                <div class="ui basic button" ng-click="saveFile()" ng-class="{loading: saving}"><i class="save icon"></i>儲存</div> 
+            </a>
         </div>
 
         <div class="slide-animate" ng-include="'subs?tool=column_limit'" ng-if="tool==2"></div>
@@ -267,7 +270,33 @@ app.controller('newTableController', function($scope, $http, $filter, $timeout, 
 
         return service;
     }
-]);
+])
+.directive('contenteditable', ['$sce', function($sce) {
+    return {
+        restrict: 'A',
+        require: '?ngModel',
+        link: function(scope, element, attrs, ngModel) {            
+            if (!ngModel) return;
+
+            // Specify how UI should be updated
+            ngModel.$render = function() {                
+                element.html($sce.getTrustedHtml(ngModel.$viewValue || ''));
+            };
+
+            // Listen for change events to enable binding
+            element.on('blur keyup change', function() {
+                scope.$evalAsync(read);
+            });
+            
+            // Write data to the model
+            function read() {
+                var html = element.html();
+                
+                ngModel.$setViewValue(html);
+            }
+        }
+    };
+}]);
 String.prototype.Blength = function() {
     var arr = this.match(/[^\x00-\xff]/ig);
     return  arr === null ? this.length : this.length + arr.length;

@@ -5,18 +5,24 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
 
     <div class="ui segment" ng-class="{loading: sheetLoading}">
 
-        <form style="display:none">
-            <input type="file" id="file_upload" nv-file-select uploader="uploader" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
-        </form>
+        
 
         <div class="ui top attached orange progress" ng-class="{disabled: progress<1}">
             <div class="bar" style="width: {{ progress }}%"></div>
         </div>  
 
+        
+        <form style="display:none">
+            <input type="file" id="file_upload" nv-file-select uploader="uploader" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+        </form>
         <label for="file_upload" class="ui basic button" ng-class="{loading: uploading}"><i class="icon upload"></i>上傳</label>           
 
-        <br />
+        <div class="ui green label">上傳名單用的資料表格 <a class="detail" href="javascript:void(0)" ng-click="exportSample()"><i class="icon download"></i>下載</a></div>
 
+        <br />
+        <div class="ui compact message" ng-bind-html="comment"></div> 
+
+        <br />
         <div class="ui negative compact message" ng-if="message.errors">
             <div class="header">檔案錯誤</div> 
             <p ng-repeat="(error, value) in message.errors">
@@ -24,9 +30,7 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
             </p>                
         </div> 
 
-        <h4 class="ui header">上傳名單用的資料表格 <a href="javascript:void(0)" ng-click="exportSample()">下載</a></h4>
-
-        <h4 class="ui header">欄位說明 <a href="javascript:void(0)" ng-click="exportDescribe()">下載</a></h4>
+        <!-- <h4 class="ui header">欄位說明 <a href="javascript:void(0)" ng-click="exportDescribe()">下載</a></h4> -->        
 
         <table class="ui compact collapsing definition table">
             <thead>
@@ -103,6 +107,7 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
             console.log(data);
             $scope.rows_count = data.rows_count;
             $scope.columns = data.columns;
+            $scope.comment = data.comment;
         }).error(function(e){
             console.log(e);
         });

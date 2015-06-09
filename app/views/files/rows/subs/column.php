@@ -15,8 +15,7 @@
                 <div class="ui checkbox">
                     <input type="checkbox" id="readOnly" ng-model="sheet.editable">
                     <label for="readOnly">唯讀</label>
-                </div>
-                <div class="ui basic button" ng-click="saveFile()" ng-class="{loading: saving}"><i class="save icon"></i>儲存</div>           
+                </div>      
             </th>
         </tr>
         <tr>

@@ -27,7 +27,10 @@
             <a class="item" href="javascript:void(0)" ng-class="{active: tool==2}" ng-click="changeTool(2)">欄位定義</a>
             <!-- <a class="item" href="javascript:void(0)" ng-class="{active: tool==3}" ng-click="changeTool(3)">選項定義</a> -->
             <a class="item" href="javascript:void(0)" ng-class="{active: tool==4}" ng-click="changeTool(4)">說明文件</a>
-            <a class="item" href="import">預覽</a>
+            <div class="item"><p><a href="import">預覽</a></p></div>
+            <a class="item" href="javascript:void(0)">
+                <div class="ui basic button" ng-click="saveFile()" ng-class="{loading: saving}"><i class="save icon"></i>儲存</div> 
+            </a>
         </div>
 
         <div class="slide-animate" ng-include="'subs?tool=column'" ng-if="tool==2"></div>
