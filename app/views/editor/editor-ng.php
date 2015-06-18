@@ -14,8 +14,8 @@
             <div class="ui button" ng-click="get_from_xml()"><i class="icon trash"></i>讀取xml</div>
             <div class="ui button" ng-click="get_from_db()"><i class="icon trash"></i>讀取db</div>
             <div class="ui button" ng-click="save_to_db()" ng-disabled="false&&!edit"><i class="icon trash"></i>儲存db</div>
-            <div class="ui button" ng-click="prev_part()"><i class="icon trash"></i>前一頁</div>
-            <div class="ui button" ng-click="next_part()"><i class="icon trash"></i>下一頁</div>  
+            <div class="ui button" ng-click="prev_page()"><i class="icon trash"></i>前一頁</div>
+            <div class="ui button" ng-click="next_page()"><i class="icon trash"></i>下一頁</div>  
             <div class="ui button" ng-click="get_from_db_new()"><i class="icon trash"></i>讀取DB(新)</div>  
         </div>
         <br />
@@ -25,30 +25,41 @@
             <a class="item" href="/editor/creatTable">建立問卷</a>
         </div>
 		
-		<div class="ui mini basic button" ng-click="ques_add_ques(questions, $index+1, question.layer)"><i class="icon file outline"></i>加入分頁</div>
+		<div class="ui mini basic button" ng-click="addQues(questions, $index+1, question.layer)"><i class="icon file outline"></i>加入分頁</div>
 		<div class="ui mini basic button" ng-click="adding=true"><i class="icon help circle"></i>加入題目</div>
     </div>
     
     <div style="float:left;font-size:16px" ng-if="update_mis>1">儲存中{{ update_mis }}...</div>
     <div style="width:150px;float:left;font-size:14px;color:#aaa" ng-if="update_mis===1">所有變更都已經儲存</div>
 	
-    <div class="ui left floated basic segment" style="min-height: 600px;max-width: 800px">
-
-		<div ng-repeat="page in pages | filter:{selected: true}">
+    <div ng-cloak class="ui left floated basic segment" style="min-height: 600px;min-width: 800px">
 			
-			 <div ng-cloak ng-repeat="question in page.data" ng-mouseover="question.hover = true" ng-mouseleave="question.hover = false">
+		<div class="ui segment" ng-repeat="question in page.questions" ng-if="question.type != 'list'" question="question" layer="0" update="update"
+            ng-mouseover="question.hover = true" ng-mouseleave="question.hover = false"></div>
 
-				<div question="question" layer="0" update="update" ></div>
-				
-				<div class="ui bottom attached basic button" ng-if="question.hover && adding" ng-click="added();ques_add_ques(page.data, $index+1, question.layer)">
-					<i class="file outline icon"></i>
-				</div>	
-				
-				<div class="ui hidden divider"></div>
-				
-			 </div>
+        <div class="ui segment" ng-repeat="question in page.questions" ng-if="question.type == 'list'">
 
-		</div>
+            <div class="ui form">
+                <div class="field">
+                    <textarea ng-model="question.title" placeholder="輸入題目標題..." style="resize: none"></textarea>
+                </div>
+            </div>
+            
+            <div class="ui accordion field">
+
+                <div class="title" ng-class="{active: question.open.subs}" ng-click="question.open.subs = !question.open.subs">
+                    <i class="dropdown icon"></i>題目
+                </div>
+
+                <div class="content" ng-if="question.subs.length > 0" ng-class="{active: question.open.subs}">
+                    <div class="ui tertiary segment" ng-repeat="sub in question.subs">
+                        <div class="ui vertical segment" question="sub" layer="0" update="update"></div>
+                    </div>
+                </div>
+
+            </div>  
+
+        </div>
 
     </div>
     
@@ -65,7 +76,7 @@ angular.module('app', [])
 .controller('editorController', function editorController($http, $scope, $sce, $interval, $filter) {
 		
     $scope.pages = [];
-    $scope.page = 0;
+    $scope.page = {};
     $scope.update_mis = 0;
     $scope.editorOptions = {
         language: 'ru',
@@ -123,7 +134,7 @@ angular.module('app', [])
         $http({method: 'POST', url: 'add_page', data:{} })
         .success(function(data, status, headers, config) {
             console.log(data);
-        }).error(function(e){
+        }).error(function(e) {
             console.log(e);
         });
     };    
@@ -133,7 +144,7 @@ angular.module('app', [])
         .success(function(data, status, headers, config) {
             console.log(data);
             $scope.pages = data.struct;            
-        }).error(function(e){
+        }).error(function(e) {
             console.log(e);
         });
     };  
@@ -141,10 +152,10 @@ angular.module('app', [])
     $scope.get_from_db_new = function() {
         $http({method: 'POST', url: 'get_ques_from_db_new', data:{} })
         .success(function(data, status, headers, config) {
-			$scope.pages[0] = {data: data};
-			$scope.pages[0].selected = true;
+            $scope.pages = data;
+            $scope.page = $scope.pages[0];
             console.log($scope.pages);
-        }).error(function(e){
+        }).error(function(e) {
             console.log(e);
         });
     };
@@ -171,106 +182,28 @@ angular.module('app', [])
     $scope.save_ques_to_db = function() {
         
     };
-    
-    $scope.next_part = function() {
-        if( $scope.page < $scope.pages.length ) {
-            $scope.pages[$scope.page].selected = false;
-            $scope.pages[++$scope.page].selected = true;
-        }
+
+    $scope.next_page = function() {
+        var index = $scope.pages.indexOf($scope.page);
+        if( index < $scope.pages.length )
+            $scope.page = $scope.pages[++index];
     };
     
-    $scope.prev_part = function() {
-        if( $scope.page > 0 ) {
-            $scope.pages[$scope.page].selected = false;
-            $scope.pages[--$scope.page].selected = true;
-        }
+    $scope.prev_page = function() {
+        var index = $scope.pages.indexOf($scope.page);
+        if( index > 0 )
+            $scope.page = $scope.pages[--index];
     };
     
 })
-.directive('ngAutoHeight', function(){
-    return { 
-        restrict: 'A',
-        replace: true,
-        link: function(scope, element, attributes){
-            setTimeout( function() {
-                element[0].style.height = element[0].scrollHeight+2+'px';     
-            }, 0);
-            element.bind('keyup', function(){
-                element[0].style.height = element[0].scrollHeight+2+'px';   
-            });
-        }
-    };
-})
-.directive('ngEditor', function($timeout){
-    return { 
-        restrict: 'A',
-        replace: true,
-        require: '?ngModel',
-//        compile: function(element) {
-//            var edit_btn = element.append('<span class="style_edit"></div>');
-//        },
-        link: function(scope, element, attributes, ngModel){
-            
-            //element.parent().bind('click', function (e) {
-                //e.stopPropagation();
-            //});
-            //console.log(edit_btn);
-            element.on('click', function(e) {   
-                var edit_btn = element.prepend('<span class="style_edit">1</div>');
-                var config = {};
-                config.toolbar =
-                    [   
-                        { name: 'document',    items : [ 'mode','Source','-','NewPage' ] },
-                        //{ name: 'clipboard',   items : [ 'Cut','Copy','Paste','PasteText','PasteFromWord','-','Undo','Redo' ] },
-                        { name: 'colors',      items : [ 'TextColor','BGColor' ] },
-                        { name: 'styles',      items : [ 'FontSize' ] },
-                        { name: 'basicstyles', items : [ 'Italic','Bold','Underline','Strike','Subscript','Superscript','-','RemoveFormat' ] },
-                        //{ name: 'paragraph',   items : [ 'NumberedList','BulletedList','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock' ] },
-                        { name: 'links',       items : [ 'Link','Unlink' ] },
-                        { name: 'insert',      items : [ 'Image','SpecialChar' ] }			
-                    ];
-                config.height = element[0].scrollHeight+40;
-                config.readOnly = false;
-                config.enterMode = CKEDITOR.ENTER_BR;
-                config.startupFocus = true;
 
-                var instance = CKEDITOR.replace(element[0], config);
-
-
-                
-                element.bind('$destroy', function () {
-                    console.log(555);
-                });
-                
-                var setModelData = function() {
-                    var data = instance.getData();                    
-                    $timeout(function () {                        
-                        //ngModel.$setViewValue(data);
-                    }, 0);
-                };
-                
-                instance.on('instanceReady', function() {
-                    instance.document.on('keyup', setModelData);
-                    instance.on('destroy', function(e){
-                        element.triggerHandler('blur');
-                    });
-                });
-                
-            });
-            
-//            ngModel.$render = function() {
-//                element.html(ngModel.$viewValue || '');
-//            };
-        }
-    };
-})
 .directive('contenteditable', function(){
     return { 
         restrict: 'A',
         require: 'ngModel',
         link: function(scope, element, attributes, ngModel){
             ngModel.$render = function() {
-                element.html(ngModel.$viewValue||'');
+                element.html(ngModel.$viewValue || '');
             };
             element.bind('blur keyup change', function() {
                 //scope.$apply(function() {
@@ -280,20 +213,39 @@ angular.module('app', [])
         }
     };        
 })
-.directive('question', function(){
+.directive('question', function($compile){
     return {
         restrict: 'A',
         replace: true,
         transclude: false,
         //require: '?ngAutoHeight',
-        scope: {question: '=question', layer: '=layer', parts: '=', update: '='},
+        scope: {question: '=question', layer: '=layer', parts: '=', update: '=', index: '='},
 		templateUrl: 'template',
         ///template: '<div ng-include src="\'template\'"></div>',
-        link: function(scope, element, attrs) {
-			
-            //console.log(scope);
+        compile: function(tElement, tAttr) {            
+            var contents = tElement.contents().remove();
+            var compiledContents;
+
+            return function(scope, iElement, iAttr) {
+                if( !compiledContents )
+                    compiledContents = $compile(contents);
+
+                scope.$watch('question.removed', function(removed) {
+                    if( removed )
+                        iElement.remove();
+                });
+
+                compiledContents(scope, function(clone, scope) {
+                    iElement.append(clone); 
+                });
+            };      
         },
-        controller: function($scope, $http, $interval) {
+        link: function(scope, element, attrs) {			
+            return function(scope, iElement, iAttr) {
+                console.log(scope);
+            };
+        },
+        controller: function($scope, $http, $interval, $timeout) {
             
             $scope.test = function(type) {
                 console.log(type);
@@ -312,29 +264,53 @@ angular.module('app', [])
                 {type: 'explain', name: '文字標題'}
             ]; 
             
-            $scope.ques_add_ques = function(questions, index, layer) {
-                console.log(questions);
-                questions.splice(index, 0 ,{
+            $scope.addQues = function(question, index, answer) {
+                answer = answer || {};
+                question.subs = question.subs || [];
+                question.subs.splice(index, 0, {
+                    title: '',    
                     type: '?',
                     code: 'auto',
-                    answers: [{subs:[]}]
+                    answers: [],
+                    subs: [],
+                    parent_value: answer.value || null 
                 });                
                 //$scope.updateStruct(questions);
             };
             
-            $scope.ques_remove = function(questions, index) {
-                questions.splice(index, 1);
+            $scope.removeQues = function(question, index) {
+                question.removed = true;
                 //$scope.updateStruct(questions);
             };
+
+            $scope.addSub = function(subs, index, obj) {
+                console.log(index);
+                obj = obj || {};
+                subs.splice(index, 0, obj);
+            };
             
-            $scope.ques_add_var = function(vars, index, obj) {
-                obj = obj || {subs:[]};
-                vars.splice(index, 0, obj);
+            $scope.addAns = function(answers, index, obj) {
+                obj = obj || {};
+                answers.splice(index, 0, obj);
+                $scope.resetAnswers(answers);
             };  
 
-            $scope.ques_remove_var = function(vars, index) {
-                vars.splice(index, 1);
+            $scope.removeAns = function(answers, index) {
+                answers.splice(index, 1);
+                $scope.resetAnswers(answers);
             }; 
+
+            $scope.resetAnswers = function(answers) {
+                for(index in answers) {
+                    answers[index].value = index*1+1;
+                }
+            };
+
+            $scope.hideOptions = function(question, index) {
+                $timeout(function() {
+                    question.open.button[index] = false;
+                }, 300);
+            }
             
             $scope.typeChange = function(question) {
                 if( question.type==='textarea'  ){
@@ -394,6 +370,83 @@ angular.module('app', [])
     
         }
     };    
+})
+.directive('ngAutoHeight', function(){
+    return { 
+        restrict: 'A',
+        replace: true,
+        link: function(scope, element, attributes){
+            setTimeout( function() {
+                element[0].style.height = element[0].scrollHeight+2+'px';     
+            }, 0);
+            element.bind('keyup', function(){
+                element[0].style.height = element[0].scrollHeight+2+'px';   
+            });
+        }
+    };
+})
+.directive('ngEditor', function($timeout){
+    return { 
+        restrict: 'A',
+        replace: true,
+        require: '?ngModel',
+//        compile: function(element) {
+//            var edit_btn = element.append('<span class="style_edit"></div>');
+//        },
+        link: function(scope, element, attributes, ngModel){
+            
+            //element.parent().bind('click', function (e) {
+                //e.stopPropagation();
+            //});
+            //console.log(edit_btn);
+            element.on('click', function(e) {   
+                var edit_btn = element.prepend('<span class="style_edit">1</div>');
+                var config = {};
+                config.toolbar =
+                    [   
+                        { name: 'document',    items : [ 'mode','Source','-','NewPage' ] },
+                        //{ name: 'clipboard',   items : [ 'Cut','Copy','Paste','PasteText','PasteFromWord','-','Undo','Redo' ] },
+                        { name: 'colors',      items : [ 'TextColor','BGColor' ] },
+                        { name: 'styles',      items : [ 'FontSize' ] },
+                        { name: 'basicstyles', items : [ 'Italic','Bold','Underline','Strike','Subscript','Superscript','-','RemoveFormat' ] },
+                        //{ name: 'paragraph',   items : [ 'NumberedList','BulletedList','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock' ] },
+                        { name: 'links',       items : [ 'Link','Unlink' ] },
+                        { name: 'insert',      items : [ 'Image','SpecialChar' ] }          
+                    ];
+                config.height = element[0].scrollHeight+40;
+                config.readOnly = false;
+                config.enterMode = CKEDITOR.ENTER_BR;
+                config.startupFocus = true;
+
+                var instance = CKEDITOR.replace(element[0], config);
+
+
+                
+                element.bind('$destroy', function () {
+                    console.log(555);
+                });
+                
+                var setModelData = function() {
+                    var data = instance.getData();                    
+                    $timeout(function () {                        
+                        //ngModel.$setViewValue(data);
+                    }, 0);
+                };
+                
+                instance.on('instanceReady', function() {
+                    instance.document.on('keyup', setModelData);
+                    instance.on('destroy', function(e){
+                        element.triggerHandler('blur');
+                    });
+                });
+                
+            });
+            
+//            ngModel.$render = function() {
+//                element.html(ngModel.$viewValue || '');
+//            };
+        }
+    };
 });
 </script>
 <style>
@@ -416,21 +469,5 @@ input.editor {
     box-sizing: border-box;
     height: 30px;
     padding: 0 0 0 2px;
-}
-.file-btn {
-    cursor: pointer; 
-    text-align: center;
-    border: 1px solid #aaa;
-    color:#555;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-.file-btn:hover {
-    border: 1px solid #888;
-    color:#000;
 }
 </style>

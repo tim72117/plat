@@ -7,7 +7,7 @@ class Question extends Eloquent
 	public $timestamps = false;
 	
     public function answers() {
-        return $this->hasMany('Answer', 'ques_id', 'id');
+        return $this->hasMany('Answer', 'ques_id', 'id')->orderBy('value');
     }
 	
     public function subs() {

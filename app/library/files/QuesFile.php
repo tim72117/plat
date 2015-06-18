@@ -729,7 +729,7 @@ class QuesFile extends CommFile {
     public function template() {
         
         return View::make('editor.question');        
-    }
+    }  
     
     public function template_demo() {
         
@@ -747,7 +747,8 @@ class QuesFile extends CommFile {
             
             $sub = (object)[
                 'id' => null,
-                'answers' => [],
+                //'answers' => [],
+                //'subs' => [],
             ];
             
             $question->parent_id = $parent_id;
@@ -762,21 +763,24 @@ class QuesFile extends CommFile {
 						
 						$value = isset($anwser->value) ? $anwser->value : null;
 
-                        $sub->answers[$index] = ['subs' => $this->get_struct_from_view($anwser->subs, $call, $sub->id, $value)];
+                        $this->get_struct_from_view($anwser->subs, $call, $sub->id, $value);
 
-                        unset($anwser->subs);
+                        //$sub->answers[$index] = ['subs' => ];
+
+                        //unset($anwser->subs);
                     }else{
 
-                        $sub->answers[$index] = ['subs' => []];
+                        //$sub->answers[$index] = ['subs' => []];
 
                     } 
                 }
                 
-                array_push($subs, $sub);
+                array_push($subs, $sub->id);
             }
             
             if( isset($question->subs) ) {
-                $sub->subs = $this->get_struct_from_view($question->subs, $call, $question->id);                
+                //$sub->subs = 
+                $this->get_struct_from_view($question->subs, $call, $question->id);                
             }
             
         }
@@ -788,7 +792,7 @@ class QuesFile extends CommFile {
             DB::table('ques_new')->where('id', $question->id)->where('census_id', $this->file->file)->update([
                 'title' => isset($question->title) ? $question->title : '',
                 'type' => isset($question->type) ? $question->type : '',
-                'answers' => isset($question->answers) ? json_encode($question->answers) : null,
+                //'answers' => isset($question->answers) ? json_encode($question->answers) : null,
                 'setting' => isset($question->code) ? json_encode(['code'=>$question->code]) : null,
                 'updated_at' => date("Y-n-d H:i:s"),
             ]);
@@ -799,7 +803,7 @@ class QuesFile extends CommFile {
                 'census_id'    => $this->file->file,
                 'title'        => isset($question->title) ? $question->title : '',
                 'type'         => isset($question->type) ? $question->type : '',
-                'answers'      => isset($question->answers) ? json_encode($question->answers) : null,
+                //'answers'      => isset($question->answers) ? json_encode($question->answers) : null,
                 'parent'       => $question->parent_id,
 				'parent_value' => $question->parent_value,
                 'setting'      => isset($question->code) ? json_encode(['code'=>$question->code]) : null,
@@ -812,9 +816,13 @@ class QuesFile extends CommFile {
     }
 	
 	public function updateOrCreateAnswer($question) {		
-		if( isset($question->answers) && !empty($question->answers) && $question->type!='scale_i' && $question->type!='checkbox_i' && $question->type!='textarea' ) {
+		if( isset($question->answers) && !empty($question->answers) && $question->type!='scale_i' && $question->type!='checkbox_i' ) {
 			foreach($question->answers as $answer) {
-				Answer::updateOrCreate(['ques_id' => $question->id,'value' => $answer->value, 'title' => $answer->title], []);
+                if( $question->type == 'textarea' ) {                  
+                    Answer::updateOrCreate(['ques_id' => $question->id, 'value' => '{"size": ' . $answer->struct->size . '}', 'title' => $answer->title], []);
+                }else{
+                    Answer::updateOrCreate(['ques_id' => $question->id, 'value' => $answer->value, 'title' => $answer->title], []);
+                }				
 			}
 		}
 	}
@@ -835,17 +843,18 @@ class QuesFile extends CommFile {
         $pages = json_decode(urldecode(base64_decode($input)));
         
         DB::table('ques_new')->truncate();
+        DB::table('ques_answers')->truncate();
+        DB::table('ques_page_new')->truncate();
         
-        $ques_struct = array_map(function($page) {
-            $questions = $page->data;
-            return $this->get_struct_from_view($questions, function($question) {
+        $ques_struct = array_walk($pages, function($page, $index) {
+            $struct = $this->get_struct_from_view($page->data, function($question) {
                 return $this->updateOrCreateQuestion($question);
-            }); 
-        }, $pages);
+            });
+            //var_dump($struct);
+            DB::table('ques_page_new')->insert(['census_id' => $this->file->file, 'value' => $index+1, 'questions' => json_encode($struct)]);
+        });
         
-        var_dump(1);exit;  
-        
-        DB::table('ques_struct')->truncate();
+        var_dump(1);exit;
         
         DB::table('ques_struct')->insert(['census_id'=>$this->file->file, 'struct'=>json_encode($ques_struct)]);
         
@@ -916,9 +925,33 @@ class QuesFile extends CommFile {
         
         return $pages;        
     }
+
+    public function get_all_subs($questions) {
+        foreach($questions as $question) {
+            if( !$question->subs->isEmpty() ) {
+                $this->get_all_subs($question->subs);
+            }
+            $question->answers;  
+        }
+    }
     
     public function get_ques_from_db_new() {
-		$questions = Question::with('answers', 'subs.answers', 'subs.subs')->where('census_id', 69)->whereNull('parent')->where('type', 'scale')->limit(20)->get();
+        $pages = DB::table('ques_page_new')->where('census_id', 69)->get();
+
+        return array_map(function($page) {
+            $questions = Question::with('answers', 'subs.answers', 'subs.subs', 'subs.subs.answers')->whereIn('id', json_decode($page->questions))->get();//->toArray();
+            $this->get_all_subs($questions);
+            
+            return (object)[
+                'value' => $page->value,
+                'questions' => $questions->toArray()
+            ];
+        }, $pages);
+
+        var_dump('');exit;
+		
+        //->where('type', 'select')
+        //->limit(40)->get();
 		
         return $questions->toArray();
     }

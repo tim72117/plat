@@ -103,7 +103,7 @@ if( isset($power->files) && $power->files ) {
 ?>
             <a class="item use-green" href="/file/<?=app\library\files\v0\FileProvider::make()->app_intent_key('open', 18, 'app\\library\\files\\v0\\CustomFile')?>/open">我的檔案</a>
 <? } 
-if( Auth::user()->id==1 && Request::is('app/*') ) { 
+if( Auth::user()->id==1 && Request::is('file/*') ) { 
 ?>
             <a class="item use-green" href="javascript:void(0)" ng-click="getGroupForApp()"><i class="share alternate icon"></i>分享</a>
 <? } ?>
