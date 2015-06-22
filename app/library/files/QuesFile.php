@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Response, Config, Schema, Session, Input, DOMElement, DOMCdataSection, ShareFile, Auth, app\library\files\v0\FileProvider, Question, Answer;
+use DB, View, Response, Config, Schema, Session, Input, DOMElement, DOMCdataSection, ShareFile, Auth, app\library\files\v0\FileProvider, Question, Answer, Carbon\Carbon;
 
 class QuesFile extends CommFile {
 	
@@ -936,7 +936,7 @@ class QuesFile extends CommFile {
     }
     
     public function get_ques_from_db_new() {
-        $pages = DB::table('ques_page_new')->where('census_id', 69)->get();
+        $pages = DB::table('ques_page_new')->where('census_id', $this->file->file)->get();
 
         return array_map(function($page) {
             $questions = Question::with('answers', 'subs.answers', 'subs.subs', 'subs.subs.answers')->whereIn('id', json_decode($page->questions))->get();//->toArray();
@@ -983,11 +983,13 @@ class QuesFile extends CommFile {
         return ['data'=>$question_box, 'edit'=>$can_edit];
     }
     
-    public function save_answer_data() {
+    public function save_answer_data() {    
+
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('database', 'table')->first();
+
+        $ques = Question::find(Input::get('id'));
         
-        $user = Auth::user();        
-        
-        $ques_data = DB::table('ques_data')->where('census_id', $this->file->file)->where('created_by', $user->id)->where('ques_id', Input::get('id'));
+        $ques_data = DB::table($ques_doc->database . '.dbo.' . $ques_doc->table)->where('ques_id', Input::get('id'))->where('created_by', $this->user->id);
         
         $input_org = Input::get('input');
         
@@ -995,19 +997,31 @@ class QuesFile extends CommFile {
         
         if( $ques_data->exists() ) {
             
-            $ques_data->update(['answer' => $input]); 
-            
+            if( $ques->type == 'text' || $ques->type == 'textarea' ) {
+                $ques_data->update(['string' => $input]);
+            }else{
+                $ques_data->update(['value' => $input]);  
+            }       
             
         }else{
-            
-            DB::table('ques_data')->insert([
-                'census_id' => $this->file->file,
-                'ques_id' => Input::get('id'),                
-                'answer' => $input,
-                'created_by' => $user->id,
-                'updated_at' => date("Y-n-d H:i:s"),
-                'created_at' => date("Y-n-d H:i:s"),
-            ]);
+
+            if( $ques->type == 'text' || $ques->type == 'textarea' ) {
+                DB::table($ques_doc->database . '.dbo.' . $ques_doc->table)->insert([
+                    'ques_id' => Input::get('id'),                
+                    'string' => $input,                
+                    'updated_at' => Carbon::now()->toDateTimeString(),
+                    'created_at' => Carbon::now()->toDateTimeString(),
+                    'created_by' => $this->user->id,
+                ]);   
+            }else{
+                DB::table($ques_doc->database . '.dbo.' . $ques_doc->table)->insert([
+                    'ques_id' => Input::get('id'),                
+                    'value' => $input,                
+                    'updated_at' => Carbon::now()->toDateTimeString(),
+                    'created_at' => Carbon::now()->toDateTimeString(),
+                    'created_by' => $this->user->id,
+                ]);                
+            }         
             
         }
             

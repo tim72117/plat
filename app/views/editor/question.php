@@ -159,9 +159,19 @@
     
 
     <div class="ui basic segment" ng-if="question.type==='text'">
-            字數 {{ answer.size }}
-            欄位名稱 {{ answer.title }}
-            填答注意事項 {{ answer.sub_title }} {{ question.answers }} 未紀錄
+        <div class="ui selection list">
+            <div class="item" ng-repeat="answer in question.answers">    
+                <div class="header">                            
+                    <div class="ui transparent fluid action left icon input">
+                        <i class="icon" ng-class="{'red warning': !answer.title, move: !!answer.title}"></i>
+                        <input type="text" ng-model="answer.title" placeholder="輸入欄位描述..." /> 
+                        <div class="ui icon basic buttons">                                
+                            <div class="ui button" ng-click="removeAns(question.answers, $index)" title="刪除欄位"><i class="close icon"></i></div>                                
+                        </div>
+                    </div>         
+                </div>  
+            </div>    
+        </div>
     </div>
     
     <div class="ui basic segment" ng-if="question.type==='textarea'">

@@ -10,11 +10,10 @@
 
 <script>
 angular.module('app', ['ngSanitize'])
-.controller('quesController', function quesController($scope, $http, $filter, $window){
+.controller('quesController', function quesController($scope, $http, $filter, $window, dbService){
     
     $scope.pages = [];
     $scope.page = {};
-    $scope.db = {};
     
     $scope.online = navigator.onLine;
     
@@ -52,19 +51,23 @@ angular.module('app', ['ngSanitize'])
         .success(function(data, status, headers, config) {
             console.log(data);
             $scope.pages = data;
-            $scope.page = $scope.pages[9];
+            $scope.page = $scope.pages[1];
             window.localStorage.setItem('pages', angular.toJson(data));     
         }).error(function(e){
             console.log(e);
         });
         
     }
+
+    dbService.db[5] = 1;
+    console.log(dbService.db);
     
 
 })
 .factory('dbService', [function() {
+    var db = {};
     return {
-        db: {}
+        db: db
     };
 }])
 .directive('question', ['$compile', 'dbService', function($compile, dbService){
@@ -87,8 +90,7 @@ angular.module('app', ['ngSanitize'])
                     iElement.append(clone); 
                 });
 
-                scope.db = dbService.db;
-                console.log(dbService);
+                
             };          
         },
         link: function(scope, element, attrs) {
@@ -96,6 +98,10 @@ angular.module('app', ['ngSanitize'])
             
         },
         controller: function($scope, $http, $window, $filter) {
+
+            //angular.extend($scope.db, dbService.db);
+            $scope.db = dbService.db;
+                console.log($scope.db);
             
             $scope.get_explain = function() {
                 var qq = $filter('filter')($scope.questions, {type: '!explain'});
@@ -103,7 +109,7 @@ angular.module('app', ['ngSanitize'])
             
             $scope.getDataFromWebStorage = function() {
                 if( $scope.$parent.online ) {   
-                    
+                    console.log('online');
                 }else{
                     $scope.db = angular.fromJson(window.localStorage.getItem('ques_data'));
                 }                
@@ -122,12 +128,12 @@ angular.module('app', ['ngSanitize'])
                 
                 if( navigator.onLine ) {                    
                 
-                    // $http({method: 'POST', url: 'save_answer_data', data:{id: question.id, input: $scope.db[question.id]} })
-                    // .success(function(data, status, headers, config) {
-                    //     console.log(data);
-                    // }).error(function(e){
-                    //     console.log(e);
-                    // });
+                    $http({method: 'POST', url: 'save_answer_data', data:{id: question.id, input: $scope.db[question.id]} })
+                    .success(function(data, status, headers, config) {
+                        console.log(data);
+                    }).error(function(e){
+                        console.log(e);
+                    });
                     
                 }else{
                     

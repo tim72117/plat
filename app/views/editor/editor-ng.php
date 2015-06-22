@@ -32,32 +32,35 @@
     <div style="float:left;font-size:16px" ng-if="update_mis>1">儲存中{{ update_mis }}...</div>
     <div style="width:150px;float:left;font-size:14px;color:#aaa" ng-if="update_mis===1">所有變更都已經儲存</div>
 	
-    <div ng-cloak class="ui left floated basic segment" style="min-height: 600px;min-width: 800px">
-			
-		<div class="ui segment" ng-repeat="question in page.questions" ng-if="question.type != 'list'" question="question" layer="0" update="update"
-            ng-mouseover="question.hover = true" ng-mouseleave="question.hover = false"></div>
+    <div ng-cloak class="ui left floated basic segment" style="min-height: 600px;min-width: 800px">		
 
-        <div class="ui segment" ng-repeat="question in page.questions" ng-if="question.type == 'list'">
+        <div class="ui segment" ng-repeat="question in page.questions">
 
-            <div class="ui form">
-                <div class="field">
-                    <textarea ng-model="question.title" placeholder="輸入題目標題..." style="resize: none"></textarea>
-                </div>
-            </div>
-            
-            <div class="ui accordion field">
-
-                <div class="title" ng-class="{active: question.open.subs}" ng-click="question.open.subs = !question.open.subs">
-                    <i class="dropdown icon"></i>題目
-                </div>
-
-                <div class="content" ng-if="question.subs.length > 0" ng-class="{active: question.open.subs}">
-                    <div class="ui tertiary segment" ng-repeat="sub in question.subs">
-                        <div class="ui vertical segment" question="sub" layer="0" update="update"></div>
+            <div ng-if="question.type == 'list'">
+                <div class="ui form">
+                    <div class="field">
+                        <textarea ng-model="question.title" placeholder="輸入題目標題..." style="resize: none"></textarea>
                     </div>
                 </div>
+                
+                <div class="ui accordion field">
 
-            </div>  
+                    <div class="title" ng-class="{active: question.open.subs}" ng-click="question.open.subs = !question.open.subs">
+                        <i class="dropdown icon"></i>題目
+                    </div>
+
+                    <div class="content" ng-if="question.subs.length > 0" ng-class="{active: question.open.subs}">
+                        <div class="ui tertiary segment" ng-repeat="sub in question.subs">
+                            <div class="ui vertical segment" question="sub" layer="0" update="update"></div>
+                        </div>
+                    </div>
+
+                </div>  
+            </div>
+
+            <div ng-if="question.type != 'list'">
+                <div question="question" layer="0" update="update" ng-mouseover="question.hover = true" ng-mouseleave="question.hover = false"></div>
+            </div> 
 
         </div>
 
@@ -153,7 +156,7 @@ angular.module('app', [])
         $http({method: 'POST', url: 'get_ques_from_db_new', data:{} })
         .success(function(data, status, headers, config) {
             $scope.pages = data;
-            $scope.page = $scope.pages[0];
+            $scope.page = $scope.pages[1];
             console.log($scope.pages);
         }).error(function(e) {
             console.log(e);

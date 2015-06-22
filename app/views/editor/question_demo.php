@@ -3,20 +3,26 @@
             <h1 class="ui header" ng-bind-html="head.title"></h1>
         </div> -->
 
+
         <div class="ui form" ng-if="question.type==='explain'">
             <h4 class="ui header" ng-bind-html="question.title" style="max-width: 700px"></h4>
         </div>   
 
+
         <div class="ui form" ng-if="question.type==='text'">
-            <div class="field" ng-repeat="answer in question.answers">
+            <div class="field">
                 <label>{{ question.title }}</label>
-                <div class="ui input">
-                    {{ answer.title }}
-                    <input type="text" placeholder="{{ answer.sub_title }}"
-                           ng-style="{maxlength: answer.size, textsize: answer.size, size: answer.size}"
-                           ng-model="db[question.id][$index]" ng-model-options="{ updateOn: 'blur' }"
-                           ng-change="save_data(question)" />
-                </div>
+                <div class="fields">                    
+                    <div class="field" ng-repeat="answer in question.answers">
+                        <label>{{ answer.title }}</label>
+                        <div class="ui input">                            
+                            <input type="text" placeholder="{{ answer.sub_title }}"
+                                   ng-style="{maxlength: answer.size, textsize: answer.size, size: answer.size}"
+                                   ng-model="db[question.id][$index]" ng-model-options="{ updateOn: 'blur' }"
+                                   ng-change="save_data(question)" />
+                        </div>
+                    </div> 
+                </div>         
             </div>
         </div>
 
