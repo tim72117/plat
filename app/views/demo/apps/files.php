@@ -1,6 +1,6 @@
 <div ng-cloak ng-controller="fileController" id="fileController" style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
     
-    <div class="ui segment">
+    <div class="ui segment" ng-class="{loading: loading}">
 
         <div class="ui top attached orange progress">
             <div class="bar" style="width: {{ progress }}%"></div>
@@ -157,6 +157,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     $scope.info = {pickeds:0};
     $scope.types = {1: 'file text outline', 2: 'code', 3: 'file outline blue', 5: 'file text', 6: 'file outline blue', 7: 'bar chart', '': 'file outline'};
     $scope.uploading = false;
+    $scope.loading = false;
     $scope.information = {};
     
     $interval(function() {
@@ -213,11 +214,13 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     });  
 
     $scope.getFiles = function() {
+        $scope.loading = true;
         $http({method: 'POST', url: 'ajax/getFiles', data:{} })
         .success(function(data, status, headers, config) {
             $scope.files = data.files;
             $scope.max = $scope.files.length;
             $scope.pages = Math.ceil($scope.max/$scope.limit);
+            $scope.loading = false;
         }).error(function(e){
             console.log(e);
         });

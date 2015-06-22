@@ -88,7 +88,7 @@ function buildQuestion_ng($question, $question_array, $layer, $parrent){
                 
             break;    
             case "text":
-                array_push($question_new->answers, ['value'=>(string)$attr['value'], 'title'=>strip_tags((string)$answer), 'size'=>(string)$attr['size'], 'sub_title'=>(string)$attr['sub_title']]);
+                array_push($question_new->answers, ['value'=>(string)$attr['value'], 'name'=>(string)$attr['name'], 'title'=>strip_tags((string)$answer), 'size'=>(string)$attr['size'], 'sub_title'=>(string)$attr['sub_title']]);
             break; 
         }
 

@@ -22,7 +22,7 @@ class AnalysisFile extends CommFile
     
     public function open()
     {
-        return 'analysis.menu_option';        
+        return 'files.analysis.menu_option';        
     }
     
     public function information() 
@@ -108,7 +108,7 @@ class AnalysisFile extends CommFile
     
     public function get_targets()
     {
-        return ['targets' => require(app_path() . '/views/analysis/filter_' . $this->census->used_site . '.php')];
+        return ['targets' => require(app_path() . '/views/files/analysis/filter_' . $this->census->used_site . '.php')];
     }
     
     public function get_count_frequence()
@@ -202,7 +202,7 @@ class AnalysisFile extends CommFile
         if($ext2==1)
         $r_intro_data .= 'data=cbind(c(' . implode(',', array_fetch($rows, 'variable')) . '),c(' . implode(',', array_fetch($rows, 'FW_new')) . '))' . "\n";
 
-        $name = hash('md5', $r_intro_data);	
+        $name = hash('md5', $r_intro_data);
 
         $source_path = $path . '/' . $name . '.source.R';
         $script_path = $path . '/' . $name . '.script.R';
@@ -232,8 +232,8 @@ class AnalysisFile extends CommFile
             //$filesystem->delete($script_path);	
             $ouput_data = json_decode(eval("return (" . substr($ouput, 4) . ");"));
             //$ouput_data = json_decode($filesystem->get($output_path));	
-        } catch (Exception $e) {            
-            exit;
+        } catch (Exception $e) {
+            var_dump($e);exit;
         }
         
         return $ouput_data;

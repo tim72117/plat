@@ -41,7 +41,7 @@ class QuesFile extends CommFile {
 	     
     public function get_views() 
     {
-        return ['open', 'codebook', 'receives', 'spss', 'report'];
+        return ['open', 'codebook', 'receives', 'spss', 'report', 'analysis'];
     }
     
     public static function create($newFile) 
@@ -689,7 +689,7 @@ class QuesFile extends CommFile {
         
         View::share('doc', $ques_doc);
         
-        return 'demo.cher.page.codebook';
+        return 'files.ques.codebook';
     }
     
     public function receives() {
@@ -697,7 +697,7 @@ class QuesFile extends CommFile {
         
         View::share('doc', $ques_doc);
         
-        return 'demo.cher.page.traffic';
+        return 'files.ques.traffic';
     }
     
     public function spss() {
@@ -705,7 +705,7 @@ class QuesFile extends CommFile {
         
         View::share('doc', $ques_doc);
         
-        return 'demo.cher.page.spss';
+        return 'files.ques.spss';
     }
     
     public function report() {
@@ -713,7 +713,11 @@ class QuesFile extends CommFile {
         
         View::share('doc', $ques_doc);
         
-        return 'demo.cher.page.report';
+        return 'files.ques.report';
+    }
+
+    public function analysis() {
+        return 'files.ques.analysis';
     }
 
     public function create_pstat($tablename) {		
@@ -1045,6 +1049,84 @@ class QuesFile extends CommFile {
         $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid', 'title')->first();
         
         return View::make('editor.demo-ng');
+    }
+
+    public function get_questions() {
+
+        $questions = [];
+
+        function get_subs($subs, $index, &$questions, $parent_title = null) {
+            foreach($subs as $sub) {
+
+                if( $sub->type != 'explain' && $sub->type != 'list' && $sub->type != 'checkbox' && $sub->type != 'checkbox_i' && $sub->type != 'scale'  && $sub->type != 'text'  && $sub->type != 'textarea' ) {
+
+                    if( isset($parent_title) )
+                        $sub->title = $parent_title . '-' . $sub->title;
+                    
+                    $answers = array_map(function($answer) {
+                        if( !isset($answer['value']) )
+                            return (object)[];
+                        return (object)['value' => $answer['value'], 'title' => strip_tags($answer['title'])];
+                    }, $sub->answers);
+
+                    array_push($questions, (object)['name' => $sub->name, 'title' => strip_tags($sub->title), 'page' => $index, 'type' => $sub->type, 'answers' => $answers, 'obj' => $sub]);
+
+                    //var_dump($sub);exit; 
+
+                    foreach($sub->answers as $answer) {
+                        if( isset($answer['subs']) )
+                            get_subs($answer['subs'], $index, $questions, $sub->title . '-' . $answer['title']);
+                    }
+                }
+
+                if( $sub->type == 'checkbox' )
+                {
+                    //var_dump($sub);exit;
+                    get_subs($sub->subs, $index, $questions, $sub->title); 
+                }  
+
+                if( $sub->type == 'checkbox_i' ) {
+
+                    if( isset($parent_title) )
+                        $sub->title = $parent_title . '-' . $sub->title;
+
+                    $answers = [(object)['value' => '1', 'title' => '是'], (object)['value' => '0', 'title' => '否']];
+
+                    array_push($questions, (object)['name' => $sub->name, 'title' => strip_tags($sub->title), 'page' => $index, 'type' => $sub->type, 'answers' => $answers]);
+
+                    // foreach($sub->subs as $sub) {
+                    //     get_subs($answer['subs'], $index, $questions, $sub->title . '-' . $answer['title']);                            
+                    // }
+                }   
+            }
+        }
+
+        $pages = $this->get_ques_from_xml()['data'];
+
+        foreach($pages as $index => $page) {
+            get_subs($page->data, $index, $questions);
+        }
+
+        //$analysisFile = new AnalysisFile($this->shareFile->id);
+                
+        return ['title' => $this->shareFile->isFile->title, 'questions' => $questions];
+    }
+
+    public function get_frequence() {
+
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('database', 'table')->first();
+
+        $question = Input::get('question');
+
+        $frequence = DB::table($ques_doc->database . '.dbo.' . $ques_doc->table . '_page' . ($question['page']+1))
+            ->where($question['name'], '<>', '')
+            ->groupBy($question['name'])
+            ->select(DB::raw('count(*) AS total'), $question['name'])            
+            ->lists('total', $question['name']);
+
+        //var_dump($frequencesTable);exit;
+        return ['frequence' => $frequence];
+
     }
     
     

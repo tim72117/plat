@@ -116,6 +116,7 @@ class Struct_file
 	            $tools = [
 	            	['name' => 'codebook', 'title' => 'codebook', 'method' => 'codebook', 'icon' => 'book'],
 	            	['name' => 'receives', 'title' => '回收狀況', 'method' => 'receives', 'icon' => 'line chart'],
+	            	['name' => 'analysis', 'title' => '分析結果', 'method' => 'analysis', 'icon' => 'bar chart'],
 	            	['name' => 'spss',     'title' => 'spss',     'method' => 'spss',     'icon' => 'code'],
 	            	['name' => 'report',   'title' => '問題回報', 'method' => 'report',   'icon' => 'comment outline']
 	            ];
