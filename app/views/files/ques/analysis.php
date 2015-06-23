@@ -17,13 +17,25 @@
         		<tr>
         			<th class="right aligned">選項</th>
         			<th class="right aligned">數量</th>
+                    <th class="right aligned">百分比</th>
         		</tr>
         	</thead>
 	        <tbody>
 	            <tr ng-repeat="answer in question.answers">
 	            	<td class="right aligned" style="max-width:800px">{{ answer.title }}</td>
 	                <td class="right aligned">{{ frequence[answer.value] ? frequence[answer.value] : 0 }}</td>
+                    <td class="right aligned">{{ frequence[answer.value] ? ((100*frequence[answer.value]/total) | number:1) : 0 }}%</td>
 	            </tr>
+                <tr ng-if="frequence['n']">
+                    <td class="right aligned">無須填答</td>
+                    <td class="right aligned">{{ frequence['n'] }}</td>
+                    <td class="right aligned">{{ (100*frequence['n']/total) | number:1 }}%</td>
+                </tr> 
+                <tr>
+                    <td class="right aligned">總數</td>
+                    <td class="right aligned">{{ total }}</td>
+                    <td class="right aligned"></td>
+                </tr>    
 	        </tbody>
     	</table>
 
@@ -40,9 +52,9 @@ angular.module('app')
 
         $http({method: 'POST', url: 'get_questions', data:{} })
         .success(function(data, status, headers, config) {      
-			console.log(data);
+			//console.log(data);
 			$scope.questions = data.questions;
-			$scope.title = data.title
+			$scope.title = data.title;
         }).error(function(e){
             console.log(e);
         });
@@ -57,6 +69,10 @@ angular.module('app')
 			//console.log(data);
 			$scope.loading = false;
 			$scope.frequence = data.frequence;
+            $scope.total = 0 ;
+            angular.forEach($scope.frequence, function(value) {
+                $scope.total += value ? value*1 : 0;
+            });
         }).error(function(e){
             console.log(e);
         });
