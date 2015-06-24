@@ -117,10 +117,10 @@ class ShareController extends BaseController {
             }
             
             foreach($input['groups'] as $group) {
-                if( isset($group['selected']) && $group['selected'] && $myGroups->contains($group['id']) && $myFiles->contains($shareFile['id']) ){
+                if( count($group['users']) == 0 && $myGroups->contains($group['id']) && $myFiles->contains($shareFile['id']) ){                    
                     ShareFile::updateOrCreate(['target' => 'group', 'target_id' => $group['id'], 'file_id' => $file->file_id, 'created_by' => $useri->id])->update(['power' => json_encode($sheets)]);                    
                 }
-                if( (!isset($group['selected']) || !$group['selected']) && $myFiles->contains($shareFile['id']) ){
+                if( count($group['users']) != 0 && $myFiles->contains($shareFile['id']) ){
                     foreach($group['users'] as $user){
                         ShareFile::updateOrCreate(['target' => 'user', 'target_id' => $user['id'], 'file_id' => $file->file_id, 'created_by' => $useri->id])->update(['power' => json_encode($sheets)]);
                     }
