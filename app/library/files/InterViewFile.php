@@ -288,6 +288,7 @@ class InterViewFile extends CommFile {
                     'string' => $answer,                
                     'updated_at' => Carbon::now()->toDateTimeString(),
                     'created_at' => Carbon::now()->toDateTimeString(),
+                    'baby_id' => 1, 
                     'created_by' => $this->user->id,
                 ]);   
             }else{
@@ -297,6 +298,7 @@ class InterViewFile extends CommFile {
                     'value' => $answer,                
                     'updated_at' => Carbon::now()->toDateTimeString(),
                     'created_at' => Carbon::now()->toDateTimeString(),
+                    'baby_id' => 1,
                     'created_by' => $this->user->id,
                 ]);                
             }         
