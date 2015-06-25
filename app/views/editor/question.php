@@ -22,7 +22,7 @@
 
     <div class="ui form">
         <div class="field">
-            <textarea ng-model="question.title" placeholder="輸入題目標題..." style="resize: none"></textarea>
+            <textarea ng-model="question.title" ng-model-options="{ updateOn: 'blur' }" ng-change="update(question)" placeholder="輸入題目標題..." style="resize: none"></textarea>
         </div>
     </div>
     
@@ -164,7 +164,7 @@
                 <div class="header">                            
                     <div class="ui transparent fluid action left icon input">
                         <i class="icon" ng-class="{'red warning': !answer.title, move: !!answer.title}"></i>
-                        <input type="text" ng-model="answer.title" placeholder="輸入欄位描述..." /> 
+                        <input type="text" ng-model="answer.title" ng-model-options="{ updateOn: 'blur' }" ng-change="update(question)" placeholder="輸入欄位描述..." /> 
                         <div class="ui icon basic buttons">                                
                             <div class="ui button" ng-click="removeAns(question.answers, $index)" title="刪除欄位"><i class="close icon"></i></div>                                
                         </div>

@@ -5,6 +5,8 @@ class Question extends Eloquent
 	protected $table = 'ques_new';
 	
 	public $timestamps = false;
+
+	protected $fillable = array('title', 'type');
 	
     public function answers() {
         return $this->hasMany('Answer', 'ques_id', 'id')->orderBy('value');

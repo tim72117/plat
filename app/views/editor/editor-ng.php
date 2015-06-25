@@ -1,5 +1,4 @@
 <head>
-<!--<script src="/editor/js/jquery-ui-1.9.2.custom.min.js"></script>-->
 <script src="/js/ckeditor/4.4.7-basic-source/ckeditor.js"></script>
 <!--<script src="/js/textAngular/ng-ckeditor.js"></script>-->
 
@@ -14,14 +13,13 @@
             <div class="ui button" ng-click="get_from_xml()"><i class="icon trash"></i>讀取xml</div>
             <div class="ui button" ng-click="get_from_db()"><i class="icon trash"></i>讀取db</div>
             <div class="ui button" ng-click="save_to_db()" ng-disabled="false&&!edit"><i class="icon trash"></i>儲存db</div>
-            <div class="ui button" ng-click="prev_page()"><i class="icon trash"></i>前一頁</div>
+            <div class="ui button" ng-click="prev_page()"><i class="icon trash"></i>前一頁{{ page.value }}</div>
             <div class="ui button" ng-click="next_page()"><i class="icon trash"></i>下一頁</div>  
             <div class="ui button" ng-click="get_from_db_new()"><i class="icon trash"></i>讀取DB(新)</div>  
         </div>
         <br />
         <div class="ui vertical text menu">
-            <a class="item" href="demo?page=1" target="_blank">預覽</a>
-            <a class="item" href="demo_ng" target="_blank">預覽ng</a>
+            <a class="item" href="demo" target="_blank">預覽</a>
             <a class="item" href="/editor/creatTable">建立問卷</a>
         </div>
 		
@@ -153,42 +151,21 @@ angular.module('app', [])
     };  
     
     $scope.get_from_db_new = function() {
-        $http({method: 'POST', url: 'get_ques_from_db_new', data:{} })
+        $http({method: 'POST', url: 'get_ques_from_db', data:{} })
         .success(function(data, status, headers, config) {
+            console.log(data);
             $scope.pages = data;
-            $scope.page = $scope.pages[1];
-            console.log($scope.pages);
+            $scope.page = $scope.pages[1];            
         }).error(function(e) {
             console.log(e);
         });
     };
 	
-	$scope.get_from_db_new();
-    
-    $scope.get_from_db = function() {
-        $http({method: 'POST', url: 'get_ques_from_db', data:{} })
-        .success(function(data, status, headers, config) {
-            console.log(data);
-            $scope.pages = data;
-            $scope.edit = true;
-            $scope.page = 0;
-            $scope.pages[$scope.page].selected = true;
-//            $scope.$watch(function(){ return $scope.questions[0]; }, function(newValue, oldValue){
-//                $scope.update_mis = 50;
-//            }, true);
-                    
-        }).error(function(e){
-            console.log(e);
-        });
-    };  
-    
-    $scope.save_ques_to_db = function() {
-        
-    };
+	$scope.get_from_db_new(); 
 
     $scope.next_page = function() {
         var index = $scope.pages.indexOf($scope.page);
-        if( index < $scope.pages.length )
+        if( index < $scope.pages.length-1 )
             $scope.page = $scope.pages[++index];
     };
     
@@ -324,6 +301,16 @@ angular.module('app', [])
                         question.degrees = [];
                 }
             };
+
+            $scope.update = function(question) {
+                console.log(question);
+                $http({method: 'POST', url: 'update_question', data:{question: btoa(encodeURIComponent(angular.toJson(question)))} })
+                .success(function(data, status, headers, config) {
+                    console.log(data);          
+                }).error(function(e) {
+                    console.log(e);
+                });
+            }
             
             $scope.update_mis = 5;
             

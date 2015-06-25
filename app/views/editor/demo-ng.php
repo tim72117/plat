@@ -13,7 +13,7 @@ angular.module('app', ['ngSanitize'])
 .controller('quesController', function quesController($scope, $http, $filter, $window, dbService){
     
     $scope.pages = [];
-    $scope.page = {};
+    $scope.page = {}; 
     
     $scope.online = navigator.onLine;
     
@@ -31,7 +31,7 @@ angular.module('app', ['ngSanitize'])
 
     $scope.next_page = function() {
         var index = $scope.pages.indexOf($scope.page);
-        if( index < $scope.pages.length )
+        if( index < $scope.pages.length-1 )
             $scope.page = $scope.pages[++index];
     };
     
@@ -40,6 +40,10 @@ angular.module('app', ['ngSanitize'])
         if( index > 0 )
             $scope.page = $scope.pages[--index];
     }; 
+
+    $scope.$watch('page', function() {
+        dbService.setPage($scope.page);
+    });
     
     if( !navigator.onLine ){
         
@@ -47,11 +51,11 @@ angular.module('app', ['ngSanitize'])
         
     }else{
         
-        $http({method: 'POST', url: 'get_ques_from_db_new', data:{} })
+        $http({method: 'POST', url: 'get_ques_from_db', data:{} })
         .success(function(data, status, headers, config) {
             console.log(data);
             $scope.pages = data;
-            $scope.page = $scope.pages[1];
+            $scope.page = $scope.pages[2];
             window.localStorage.setItem('pages', angular.toJson(data));     
         }).error(function(e){
             console.log(e);
@@ -59,18 +63,66 @@ angular.module('app', ['ngSanitize'])
         
     }
 
-    dbService.db[5] = 1;
-    console.log(dbService.db);
-    
+    $scope.getDataFromWebStorage = function() {
+
+        $http({method: 'POST', url: 'get_answers', data:{} })
+        .success(function(data, status, headers, config) {
+            console.log(data);   
+            dbService.setAnswers(data.answers);
+            //dbService.answers = data.answers;
+        }).error(function(e){
+            console.log(e);
+        });
+
+        if( $scope.$parent.online ) {   
+            console.log('online');
+        }else{
+            $scope.answers = angular.fromJson(window.localStorage.getItem('ques_data'));
+        }                
+    };
+
+    $scope.getDataFromWebStorage();
+
+    $scope.answers = dbService.answers;
 
 })
-.factory('dbService', [function() {
-    var db = {};
+.factory('dbService', ['$http', function($http) {
+    var answers = {};
+    var page = {};
     return {
-        db: db
+        answers: answers,
+        setPage: function(v) { page = v; },
+        setAnswers: function(values) { 
+            //answers = v;
+            angular.forEach(values, function(v, k) {
+                answers[k] = v;
+            });
+        },
+        save: function(question) {
+            if( navigator.onLine ) {        
+
+                console.log(answers);console.log(question.id);
+            
+                $http({method: 'POST', url: 'save_answers', data:{page_id: page.id, ques_id: question.id, answer: answers[question.id]} })
+                .success(function(data, status, headers, config) {
+                    console.log(data);
+                }).error(function(e){
+                    console.log(e);
+                });
+                
+            }else{
+                
+                //$scope.answers[question.id] = input;
+                
+                //var item = window.localStorage ? window.localStorage.setItem('ques_data', angular.toJson($scope.answers)) : null;
+                
+                //console.log($scope.answers);
+                
+            }
+        }
     };
 }])
-.directive('question', ['$compile', 'dbService', function($compile, dbService){
+.directive('question', ['$compile', 'dbService', function($compile, dbService) {
     return {
         restrict: 'A',
         replace: true,
@@ -89,62 +141,21 @@ angular.module('app', ['ngSanitize'])
                 compiledContents(scope, function(clone, scope) {
                     iElement.append(clone); 
                 });
-
                 
+                scope.answers = dbService.answers;
+                scope.save_answers = dbService.save;
             };          
         },
-        link: function(scope, element, attrs) {
-            //console.log(scope);
-            
-        },
         controller: function($scope, $http, $window, $filter) {
-
-            //angular.extend($scope.db, dbService.db);
-            $scope.db = dbService.db;
-                console.log($scope.db);
             
             $scope.get_explain = function() {
                 var qq = $filter('filter')($scope.questions, {type: '!explain'});
-            };              
-            
-            $scope.getDataFromWebStorage = function() {
-                if( $scope.$parent.online ) {   
-                    console.log('online');
-                }else{
-                    $scope.db = angular.fromJson(window.localStorage.getItem('ques_data'));
-                }                
-            };
+            }; 
 
             $scope.fromJson = function(json) {
                 console.log(json);
                 return angular.fromJson(json);
             }
-            
-            $scope.getDataFromWebStorage();
-            
-            $scope.save_data = function(question) {
-                
-                //console.log($scope.db[question.id]);
-                
-                if( navigator.onLine ) {                    
-                
-                    $http({method: 'POST', url: 'save_answer_data', data:{id: question.id, input: $scope.db[question.id]} })
-                    .success(function(data, status, headers, config) {
-                        console.log(data);
-                    }).error(function(e){
-                        console.log(e);
-                    });
-                    
-                }else{
-                    
-                    //$scope.db[question.id] = input;
-                    
-                    //var item = window.localStorage ? window.localStorage.setItem('ques_data', angular.toJson($scope.db)) : null;
-                    
-                    //console.log($scope.db);
-                    
-                }
-            };
                         
         }
     };    
@@ -186,6 +197,7 @@ angular.module('app', ['ngSanitize'])
     <div class="ui segment" ng-repeat="question in page.questions">
         <div class="field">
             <!-- <h4 class="ui header" ng-bind-html="question.title" style="max-width: 700px"></h4> -->
+            
             <div question="question" layer="0"></div>
         </div>        
     </div>

@@ -57,6 +57,7 @@
                             <div class="menu transition" tabindex="-1">
                                 <div class="item" ng-click="searchText = {type: 5}"><i class="file text icon"></i>資料檔</div>
                                 <div class="item" ng-click="searchText = {type: 1}"><i class="file text outline icon"></i>問卷</div>
+                                <div class="item" ng-click="searchText = {type: 9}"><i class="file text outline icon red"></i>面訪問卷</div>
                                 <div class="item" ng-click="searchText = {type: 3}"><i class="file outline blue icon"></i>一般檔案</div>
                                 <div class="item" ng-click="searchText = {type: 2}"><i class="code icon"></i>程式</div>
                                 <div class="item" ng-click="searchText = {type: 7}"><i class="bar chart icon"></i>線上分析</div>
@@ -155,7 +156,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     $scope.pages = Math.ceil($scope.max/$scope.limit);
     $scope.timenow = new Date();
     $scope.info = {pickeds:0};
-    $scope.types = {1: 'file text outline', 2: 'code', 3: 'file outline blue', 5: 'file text', 6: 'file outline blue', 7: 'bar chart', '': 'file outline'};
+    $scope.types = {1: 'file text outline', 2: 'code', 3: 'file outline blue', 5: 'file text', 6: 'file outline blue', 9: 'file text outline red', 7: 'bar chart', '': 'file outline'};
     $scope.uploading = false;
     $scope.loading = false;
     $scope.information = {};
