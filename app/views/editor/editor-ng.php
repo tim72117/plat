@@ -2,7 +2,7 @@
 <script src="/js/ckeditor/4.4.7-basic-source/ckeditor.js"></script>
 <!--<script src="/js/textAngular/ng-ckeditor.js"></script>-->
 
-<link rel="stylesheet" href="/css/ui/Semantic-UI-1.11.4/semantic.min.css" />
+<link rel="stylesheet" href="/css/ui/Semantic-UI-1.12.3/semantic.min.css" />
 </head>
 	
 <div ng-controller="editorController" ng-click="resetEditor()">
@@ -10,17 +10,14 @@
     <div class="ui left floated basic segment">
         <div class="ui vertical mini basic buttons">
             <div class="ui button disabled"><i class="icon trash"></i>刪除整頁</div>
-            <div class="ui button" ng-click="get_from_xml()"><i class="icon trash"></i>讀取xml</div>
-            <div class="ui button" ng-click="get_from_db()"><i class="icon trash"></i>讀取db</div>
             <div class="ui button" ng-click="save_to_db()" ng-disabled="false&&!edit"><i class="icon trash"></i>儲存db</div>
             <div class="ui button" ng-click="prev_page()"><i class="icon trash"></i>前一頁{{ page.value }}</div>
             <div class="ui button" ng-click="next_page()"><i class="icon trash"></i>下一頁</div>  
-            <div class="ui button" ng-click="get_from_db_new()"><i class="icon trash"></i>讀取DB(新)</div>  
+            <div class="ui button" ng-click="to_interview_file()"><i class="icon trash"></i>轉成面訪問卷檔</div>  
         </div>
         <br />
         <div class="ui vertical text menu">
             <a class="item" href="demo" target="_blank">預覽</a>
-            <a class="item" href="/editor/creatTable">建立問卷</a>
         </div>
 		
 		<div class="ui mini basic button" ng-click="addQues(questions, $index+1, question.layer)"><i class="icon file outline"></i>加入分頁</div>
@@ -96,21 +93,6 @@ angular.module('app', [])
         }        
     };
     
-    $scope.get_from_xml = function() {
-        $http({method: 'POST', url: 'get_ques_from_xml', data:{} })
-        .success(function(data, status, headers, config) {
-            console.log(data);
-            $scope.pages = data.data;
-            $scope.edit = data.edit;
-            $scope.page = 0;
-            $scope.pages[$scope.page].selected = true;
-            //$scope.pages = data.pages;
-            //$scope.page = $scope.pages[page-1];            
-        }).error(function(e){
-            console.log(e);
-        });
-    };
-    
     $scope.update = function(update_mis) {
         $scope.update_mis = update_mis;
     };
@@ -150,7 +132,7 @@ angular.module('app', [])
         });
     };  
     
-    $scope.get_from_db_new = function() {
+    $scope.get_from_db = function() {
         $http({method: 'POST', url: 'get_ques_from_db', data:{} })
         .success(function(data, status, headers, config) {
             console.log(data);
@@ -161,7 +143,7 @@ angular.module('app', [])
         });
     };
 	
-	$scope.get_from_db_new(); 
+	$scope.get_from_db(); 
 
     $scope.next_page = function() {
         var index = $scope.pages.indexOf($scope.page);
@@ -173,6 +155,15 @@ angular.module('app', [])
         var index = $scope.pages.indexOf($scope.page);
         if( index > 0 )
             $scope.page = $scope.pages[--index];
+    };
+
+    $scope.to_interview_file = function() {
+        $http({method: 'POST', url: 'to_interview_file', data:{} })
+        .success(function(data, status, headers, config) {
+            console.log(data);          
+        }).error(function(e) {
+            console.log(e);
+        });
     };
     
 })

@@ -49,6 +49,7 @@ angular.module('app', ['ngSanitize', 'ngQuestion'])
     if( !navigator.onLine ){
         
         $scope.questions = angular.fromJson(window.localStorage.getItem('questions'));
+        $scope.answers = angular.fromJson(window.localStorage.getItem('ques_data'));
         
     }else{
         
@@ -56,47 +57,36 @@ angular.module('app', ['ngSanitize', 'ngQuestion'])
         .success(function(data, status, headers, config) {
             console.log(data);
             $scope.pages = data;
-            $scope.page = $scope.pages[2];
-            window.localStorage.setItem('pages', angular.toJson(data));     
+            $scope.page = $scope.pages[0];
+            window.localStorage.setItem('pages', angular.toJson(data));   
+            $scope.getAnswers();  
         }).error(function(e){
             console.log(e);
         });
         
     }
 
-    $scope.getDataFromWebStorage = function() {
+    $scope.getAnswers = function() {
 
         $http({method: 'POST', url: 'get_answers', data:{} })
         .success(function(data, status, headers, config) {
             console.log(data);   
             dbService.setAnswers(data.answers);
-            //dbService.answers = data.answers;
         }).error(function(e){
             console.log(e);
         });
+              
+    };    
 
-        if( $scope.$parent.online ) {   
-            console.log('online');
-        }else{
-            $scope.answers = angular.fromJson(window.localStorage.getItem('ques_data'));
-        }                
+})
+.filter('valueToObject', function() {
+    return function(answers) {
+        angular.forEach(answers, function(answer) {
+            answer.value = angular.fromJson(answer.value);
+        });        
+        return answers;
     };
-
-    $scope.getDataFromWebStorage();
-
-    $scope.answers = dbService.answers;
-
 });
-
-
-// .filter('valueToObject', function() {
-//     return function(answers) {
-//         angular.forEach(answers, function(answer) {
-//             answer.value = angular.fromJson(answer.value);
-//         });        
-//         return answers;
-//     };
-// });
 </script>
 <style>
 

@@ -12,10 +12,10 @@
             <div class="field">
                 <label>{{ question.title }}</label>
                 <div class="fields">                    
-                    <div class="field" ng-repeat="answer in question.answers">
+                    <div class="field" ng-repeat="answer in question.answers | valueToObject">
                         <label>{{ answer.title }}</label>
                         <div class="ui input">                            
-                            <input type="text" placeholder="{{ answer.sub_title }}"
+                            <input type="{{ answer.value ? answer.value.type : 'text' }}" placeholder="{{ answer.sub_title }}"
                                    ng-style="{maxlength: answer.size, textsize: answer.size, size: answer.size}"
                                    ng-model="answers[question.id][$index]" ng-model-options="{ updateOn: 'blur' }"
                                    ng-change="save_answers(question)" />
