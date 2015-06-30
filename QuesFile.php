@@ -23,7 +23,6 @@ class QuesFile extends CommFile {
         'save_data',
         'write',
         'creatTable',
-        'codebook',
         'create'
 	);
         
@@ -78,6 +77,13 @@ class QuesFile extends CommFile {
         return 'editor.editor';
     }
     
+    public function open_ng() {
+        
+        View::share('ques_id', $this->file->file);
+        
+        return View::make('html5-layer')->nest('context', 'editor.editor-ng'); 
+    }
+
     public function add_page() {
         
         $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid')->first();
@@ -789,176 +795,7 @@ class QuesFile extends CommFile {
             
         }
         return $subs;
-    }
-    
-    public function updateOrCreateQuestion($question) {
-        if( isset($question->id) ) {
-            DB::table('ques_new')->where('id', $question->id)->where('census_id', $this->file->file)->update([
-                'title' => isset($question->title) ? $question->title : '',
-                'type' => isset($question->type) ? $question->type : '',
-                //'answers' => isset($question->answers) ? json_encode($question->answers) : null,
-                'setting' => isset($question->code) ? json_encode(['code'=>$question->code]) : null,
-                'updated_at' => date("Y-n-d H:i:s"),
-            ]);
-			$this->updateOrCreateAnswer($question);
-            return $question->id;
-        }else{			
-            $question->id = DB::table('ques_new')->insertGetId([
-                'census_id'    => $this->file->file,
-                'title'        => isset($question->title) ? $question->title : '',
-                'type'         => isset($question->type) ? $question->type : '',
-                //'answers'      => isset($question->answers) ? json_encode($question->answers) : null,
-                'parent'       => $question->parent_id,
-				'parent_value' => $question->parent_value,
-                'setting'      => isset($question->code) ? json_encode(['code'=>$question->code]) : null,
-                'updated_at'   => date("Y-n-d H:i:s"),
-                'created_at'   => date("Y-n-d H:i:s"),
-            ]);
-			$this->updateOrCreateAnswer($question);
-			return $question->id;
-        }
-    }
-	
-	public function updateOrCreateAnswer($question) {		
-		if( isset($question->answers) && !empty($question->answers) && $question->type!='scale_i' && $question->type!='checkbox_i' ) {
-			foreach($question->answers as $answer) {
-                if( $question->type == 'textarea' ) {                  
-                    Answer::updateOrCreate(['ques_id' => $question->id, 'value' => '{"size": ' . $answer->struct->size . '}', 'title' => $answer->title], []);
-                }else{
-                    Answer::updateOrCreate(['ques_id' => $question->id, 'value' => $answer->value, 'title' => $answer->title], []);
-                }				
-			}
-		}
-	}
-    
-    public function update_ques_to_db() {
-        $updateQueue = $this->decodeInput(Input::get('updateQueue'));
-        foreach($updateQueue as $question) {
-            $this->updateOrCreateQuestion($question);
-        }
-        
-        return '';        
-    }
-    
-    public function save_ques_to_db() {
-        
-        $input = Input::get('pages');
-        
-        $pages = json_decode(urldecode(base64_decode($input)));
-        
-        DB::table('ques_new')->truncate();
-        DB::table('ques_answers')->truncate();
-        DB::table('ques_page_new')->truncate();
-        
-        $ques_struct = array_walk($pages, function($page, $index) {
-            $struct = $this->get_struct_from_view($page->data, function($question) {
-                return $this->updateOrCreateQuestion($question);
-            });
-            //var_dump($struct);
-            DB::table('ques_page_new')->insert(['census_id' => $this->file->file, 'value' => $index+1, 'questions' => json_encode($struct)]);
-        });
-        
-        var_dump(1);exit;
-        
-        DB::table('ques_struct')->insert(['census_id'=>$this->file->file, 'struct'=>json_encode($ques_struct)]);
-        
-        return $ques_struct;        
-    }
-    
-    public function save_ques_struct_to_db() {
-        
-        $questions = Input::get('questions');
-        
-        $ques_struct = $this->get_struct_from_view($questions, function($question) {
-            return $this->updateOrCreateQuestion($question);
-        });
-        
-        DB::table('ques_struct')->truncate();
-        
-        DB::table('ques_struct')->insert(['census_id'=>$this->file->file, 'struct'=>json_encode($ques_struct)]);
-        
-        return $this->get_ques_from_db();
-    }
-    
-    function set_subs(&$questions, $ques_items) {
-        foreach($questions as $ques_index => $question){
-            $ques_item = $ques_items[$question->id];      
-
-            $questions[$ques_index]->type = $ques_item->type;            
-            $questions[$ques_index]->title = $ques_item->title;
-            isset($ques_item->setting) && $questions[$ques_index]->code = $ques_item->setting->code;
-            
-            isset($question->subs) && $this->set_subs($question->subs, $ques_items);
-
-            foreach($question->answers as $var_index => $answer){
-
-                $ans_item = $ques_item->answers[$var_index];
-                isset($ans_item->value) && $questions[$ques_index]->answers[$var_index]->value = $ans_item->value;
-                isset($ans_item->title) && $questions[$ques_index]->answers[$var_index]->title = $ans_item->title;
-                isset($ans_item->struct) && $questions[$ques_index]->answers[$var_index]->struct = $ans_item->struct; 
-                isset($ans_item->skips) && $questions[$ques_index]->answers[$var_index]->skips = $ans_item->skips; 
-                isset($ans_item->sub_title) && $questions[$ques_index]->answers[$var_index]->sub_title = $ans_item->sub_title; 
-
-                if( isset($answer->subs) ) {
-                    $this->set_subs($questions[$ques_index]->answers[$var_index]->subs, $ques_items);
-                }
-
-            }
-            
-        }
-    }
-    
-    public function get_ques_from_db() {
-        
-        $questions_db = DB::table('ques_new')->where('census_id', $this->file->file)->get();
-        
-        $pages_struct = json_decode(DB::table('ques_struct')->where('census_id', $this->file->file)->select('struct')->first()->struct);       
-                  
-        $ques_items = array_reduce($questions_db, function ($result, $item) {
-            $item->answers = json_decode($item->answers);
-            $item->setting = json_decode($item->setting);
-            $result[$item->id] = $item;
-            return $result;
-        }, array());      
-        
-        $pages = array_map(function($page_struct) use($ques_items) {
-            $this->set_subs($page_struct, $ques_items);
-            return (object)['data'=>$page_struct];
-        }, $pages_struct);
-        
-        
-        return $pages;        
-    }
-
-    public function get_all_subs($questions) {
-        foreach($questions as $question) {
-            if( !$question->subs->isEmpty() ) {
-                $this->get_all_subs($question->subs);
-            }
-            $question->answers;  
-        }
-    }
-    
-    public function get_ques_from_db_new() {
-        $pages = DB::table('ques_page_new')->where('census_id', $this->file->file)->get();
-
-        return array_map(function($page) {
-            $questions = Question::with('answers', 'subs.answers', 'subs.subs', 'subs.subs.answers')->whereIn('id', json_decode($page->questions))->get();//->toArray();
-            $this->get_all_subs($questions);
-            
-            return (object)[
-                'value' => $page->value,
-                'questions' => $questions->toArray()
-            ];
-        }, $pages);
-
-        var_dump('');exit;
-		
-        //->where('type', 'select')
-        //->limit(40)->get();
-		
-        return $questions->toArray();
-    }
+    }  
     
     public function get_ques_from_xml() {
         
@@ -985,70 +822,17 @@ class QuesFile extends CommFile {
         $can_edit = $ques_doc->edit ? true : false;
         
         return ['data'=>$question_box, 'edit'=>$can_edit];
-    }
-    
-    public function save_answer_data() {    
+    } 
 
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('database', 'table')->first();
-
-        $ques = Question::find(Input::get('id'));
+    public function to_interview_file() {
+        $pages = $this->get_ques_from_xml()['data'];
+        //var_dump($pages);exit;
+        $shareFile = InterViewFile::create((object)['title' => $this->file->title, 'type' => 9]);
+        $interViewFile = new InterViewFile($shareFile->id);
         
-        $ques_data = DB::table($ques_doc->database . '.dbo.' . $ques_doc->table)->where('ques_id', Input::get('id'))->where('created_by', $this->user->id);
+        $interViewFile->save_ques_to_db($pages);
         
-        $input_org = Input::get('input');
-        
-        $input = is_array($input_org) ? implode(' ', $input_org) : $input_org;
-        
-        if( $ques_data->exists() ) {
-            
-            if( $ques->type == 'text' || $ques->type == 'textarea' ) {
-                $ques_data->update(['string' => $input]);
-            }else{
-                $ques_data->update(['value' => $input]);  
-            }       
-            
-        }else{
-
-            if( $ques->type == 'text' || $ques->type == 'textarea' ) {
-                DB::table($ques_doc->database . '.dbo.' . $ques_doc->table)->insert([
-                    'ques_id' => Input::get('id'),                
-                    'string' => $input,                
-                    'updated_at' => Carbon::now()->toDateTimeString(),
-                    'created_at' => Carbon::now()->toDateTimeString(),
-                    'created_by' => $this->user->id,
-                ]);   
-            }else{
-                DB::table($ques_doc->database . '.dbo.' . $ques_doc->table)->insert([
-                    'ques_id' => Input::get('id'),                
-                    'value' => $input,                
-                    'updated_at' => Carbon::now()->toDateTimeString(),
-                    'created_at' => Carbon::now()->toDateTimeString(),
-                    'created_by' => $this->user->id,
-                ]);                
-            }         
-            
-        }
-            
-        return Input::get('input');
-    }
-    
-    public function cache_manifest() {
-        
-        return Response::view('nopage', array(), 404);
-        //return View::make('editor.cache_manifest');
-    }    
-    
-    public function open_ng() {
-        
-        View::share('ques_id', $this->file->file);
-        
-        return View::make('html5-layer')->nest('context', 'editor.editor-ng'); 
-    }
-    
-    public function demo_ng() {
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid', 'title')->first();
-        
-        return View::make('editor.demo-ng');
+        return 1;
     }
 
     public function get_questions() {

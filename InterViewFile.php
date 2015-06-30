@@ -16,7 +16,6 @@ class InterViewFile extends CommFile {
 
 	public static $intent = array(
         'open',	
-        'add_page',
         'create'
 	);
         
@@ -41,19 +40,6 @@ class InterViewFile extends CommFile {
     {
         $shareFile = parent::create($newFile);
 
-        $file = $shareFile->isFile;
-
-        // $ques_doc_id = DB::table('ques_admin.dbo.ques_doc')->insertGetId([
-        //     'qid'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))'),
-        //     'title' => Input::get('title'),
-        //     'year'  => 103,
-        //     'dir'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))')
-        // ]);
-
-        $file->file = $ques_doc_id;
-        
-        $file->save(); 
-
         return $shareFile;
     }
     
@@ -76,33 +62,6 @@ class InterViewFile extends CommFile {
     {        
         return View::make('editor.question_demo');        
     }
-    
-    public function add_page() {
-        
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid')->first();
-
-        $page = Session::get('page');
-
-        if( DB::table('ques_page')->where('qid', $ques_doc->qid)->exists() ){
-
-            DB::table('ques_page')->where('qid', $ques_doc->qid)->where('page', '>', $page)->increment('page');
-
-            DB::table('ques_page')->insert(array(
-                'qid'        => $ques_doc->qid,
-                'page'       => $page+1,
-                'xml'        => '<?xml version="1.0"?><page>'."\n".'<init/></page>',
-                'updated_at' => date("Y-m-d H:i:s")
-            ));
-        }else{
-            DB::table('ques_page')->insert(array(
-                'qid'        => $ques_doc->qid,
-                'page'       => 1,
-                'xml'        => '<?xml version="1.0"?><page>'."\n".'<init/></page>',
-                'updated_at' => date("Y-m-d H:i:s")
-            ));  
-        }
-        return '';
-    }
 
     function decodeInput($input)
     {        
@@ -122,20 +81,21 @@ class InterViewFile extends CommFile {
             $question->parent_id = $parent_id;
 			$question->parent_value = $parent_value;
             
-            if( isset($question->answers) ) {               
+            if( isset($question->answers) ) {            
 
                 $sub->id = isset($question->id) ? $question->id : (is_callable($call) ? $call($question) : null);
                 
-                foreach($question->answers as $index => $anwser){
-                    if( isset($anwser->subs) ){
+                foreach($question->answers as $index => $answer) {                    
+                    is_array($answer) && $answer = (object)$answer;
+                    if( isset($answer->subs) ){
 						
-						$value = isset($anwser->value) ? $anwser->value : null;
-
-                        $this->get_struct_from_view($anwser->subs, $call, $sub->id, $value);
+						$value = isset($answer->value) ? $answer->value : null;
+                        
+                        $this->get_struct_from_view($answer->subs, $call, $sub->id, $value);
 
                         //$sub->answers[$index] = ['subs' => ];
 
-                        //unset($anwser->subs);
+                        //unset($answer->subs);
                     }else{
 
                         //$sub->answers[$index] = ['subs' => []];
@@ -169,7 +129,7 @@ class InterViewFile extends CommFile {
             ]);
         }else{			
             $question->id = DB::table('ques_new')->insertGetId([
-                'census_id'    => $this->file->file,
+                'file_id'    => $this->file->id,
                 'title'        => isset($question->title) ? $question->title : '',
                 'type'         => isset($question->type) ? $question->type : '',
                 //'answers'      => isset($question->answers) ? json_encode($question->answers) : null,
@@ -188,9 +148,10 @@ class InterViewFile extends CommFile {
     {		
 		if( isset($question->answers) && !empty($question->answers) && $question->type!='scale_i' && $question->type!='checkbox_i' ) {
 			foreach($question->answers as $answer) {
+                is_array($answer) && $answer = (object)$answer;
                 if( $question->type == 'textarea' ) {                  
                     Answer::updateOrCreate(['ques_id' => $question->id, 'value' => '{"size": ' . $answer->struct->size . '}', 'title' => $answer->title], []);
-                }else{
+                }else{                    
                     Answer::updateOrCreate(['ques_id' => $question->id, 'value' => $answer->value], ['title' => $answer->title]);
                 }				
 			}
@@ -208,27 +169,22 @@ class InterViewFile extends CommFile {
         return ['question' => $this->updateOrCreateQuestion($question)];
     }
     
-    public function save_ques_to_db()
+    public function save_ques_to_db($pages)
     {        
         $input = Input::get('pages');
         
-        $pages = json_decode(urldecode(base64_decode($input)));
+        //$pages = json_decode(urldecode(base64_decode($input)));
         
         DB::table('ques_new')->truncate();
         DB::table('ques_answers')->truncate();
         DB::table('ques_page_new')->truncate();
         
-        $ques_struct = array_walk($pages, function($page, $index) {
-            $struct = $this->get_struct_from_view($page->data, function($question) {
+        $ques_struct = array_walk($pages, function($page, $index) {            
+            $questions = $this->get_struct_from_view($page->data, function($question) {              
                 return $this->updateOrCreateQuestion($question);
             });
-            //var_dump($struct);
-            DB::table('ques_page_new')->insert(['census_id' => $this->file->file, 'value' => $index+1, 'questions' => json_encode($struct)]);
+            DB::table('ques_page_new')->insert(['file_id' => $this->file->id, 'value' => $index+1, 'questions' => json_encode($questions)]);
         });
-        
-        var_dump(1);exit;
-        
-        DB::table('ques_struct')->insert(['census_id'=>$this->file->file, 'struct'=>json_encode($ques_struct)]);
         
         return $ques_struct;        
     }
