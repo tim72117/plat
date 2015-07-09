@@ -9,6 +9,8 @@ class AnalysisFile extends CommFile
         $shareFile = ShareFile::find($doc_id);   
 
         parent::__construct($shareFile);  
+
+        $this->information = json_decode($this->file->information);
         
         $this->census = DB::reconnect('sqlsrv_analysis')->table('census_info')->where('CID', $this->file->file)->first();        
         
@@ -33,6 +35,10 @@ class AnalysisFile extends CommFile
     public function get_questions()
     {
         //tted isready=1, ,isteacher=1, $skip_part
+
+        $quesFile = new QuesFile($this->information->doc_id);
+
+        return $quesFile->get_questions();
 
         $census_parts = DB::reconnect('sqlsrv_analysis')->table('census_part')->where('CID', $this->census->CID)->get();
         
@@ -79,9 +85,15 @@ class AnalysisFile extends CommFile
     
     public function get_census()
     {
-        $QID = Input::get('QID');
-        $question_cache_name = 'frequence-question-' . $QID;
-        Cache::forget($question_cache_name);
+        
+        //$question_cache_name = 'frequence-question-' . $name;
+        //Cache::forget($question_cache_name);
+
+        $quesFile = new QuesFile($this->information->doc_id);
+
+        $census = DB::table('ques_census')->where('CID', $this->information->census_id)->where('used_site', 'used')->first();
+
+        return $census;
         
         return Cache::remember($question_cache_name, 10, function() use($QID) {
 
@@ -108,7 +120,55 @@ class AnalysisFile extends CommFile
     
     public function get_targets()
     {
-        return ['targets' => require(app_path() . '/views/files/analysis/filter_' . $this->census->used_site . '.php')];
+        return ['targets' => require(app_path() . '/views/files/analysis/filter_' . $this->information->target . '.php')];
+    }
+
+    public function get_frequence()
+    {
+        $data_query = $this->get_data_query();
+
+        $name = Input::get('name');
+
+        $frequence = $data_query->groupBy($name . 'w_final')->select(DB::raw('count(*) AS total'), $name)->remember(3)->lists('total', $name);
+
+        return ['frequence' => $frequence];
+    }
+
+    public function get_data_query()
+    {
+        $filter = $this->get_targets()['targets'];
+
+        $name = Input::get('name');
+
+        //list($census, $question, $variables) = $this->get_census();
+
+        $census = $this->get_census();
+        
+        $get_data_query = DB::table('analysis_data.dbo.' . $census->census_tablename);        
+        
+        $get_data_query->where($name, '<>', '')
+            //->where($question->spss_name, '<>', $question->skip_value)
+            ->where($name, '<>', '-8')
+            ->where($name, '<>', '-9')
+            ->select([$name . ' AS variable', $filter['FW'] . ' AS FW_new']);
+        
+        $group = $filter['groups'][Input::get('group_key')];
+        $target = $group['targets'][Input::get('target_key')];        
+        
+        isset($target['shid']) && $get_data_query->whereIn('shid', $target['shid']);
+        isset($target['type_establish']) && $get_data_query->whereIn('type_establish', $target['type_establish']);
+        isset($target['type2']) && $get_data_query->where('type2', $target['type2']);
+        isset($target['type_school']) && $get_data_query->where('type_school', $target['type_school']);
+        isset($target['type4']) && $get_data_query->where('type4', $target['type4']);
+        isset($target['city']) && $get_data_query->where('city', $target['city']);
+        isset($target['city_notest']) && $get_data_query->where('city_notest', $target['city_notest']);
+        
+        isset($target['class_k']) && $get_data_query->where('class_k', $target['class_k']);
+        isset($target['class_e']) && $get_data_query->where('class_e', $target['class_e']);
+        isset($target['class_m']) && $get_data_query->where('class_m', $target['class_m']);
+        isset($target['class_s']) && $get_data_query->where('class_s', $target['class_s']);
+
+        return $get_data_query;
     }
     
     public function get_count_frequence()
@@ -138,42 +198,6 @@ class AnalysisFile extends CommFile
         }
        
         return ['frequencesTable' => $frequencesTable, 'otherinf' => $otherinf];
-    }
-    
-    public function getDataAndAnalysis()
-    {
-        $filter = $this->get_targets()['targets'];
-        //var_dump($filter);exit;
-        list($census, $question, $variables) = $this->get_census();
-        
-        $get_data_query = DB::reconnect('sqlsrv_analysis')->table('analysis_data.dbo.' . $this->census->census_tablename);
-        
-        $get_data_query->where($question->spss_name, '<>', '')
-            ->where($question->spss_name, '<>', $question->skip_value)
-            ->where($question->spss_name, '<>', '-8')
-            ->where($question->spss_name, '<>', '-9')->select([$question->spss_name . ' AS variable', $filter['FW'] . ' AS FW_new']);
-        
-        $group = $filter['groups'][Input::get('group_key')];
-        $target = $group['targets'][Input::get('target_key')];        
-        
-        isset($target['shid']) && $get_data_query->whereIn('shid', $target['shid']);
-        isset($target['type1']) && $get_data_query->whereIn('type1', $target['type1']);
-        isset($target['type2']) && $get_data_query->where('type2', $target['type2']);
-        isset($target['type3']) && $get_data_query->where('type3', $target['type3']);
-        isset($target['type4']) && $get_data_query->where('type4', $target['type4']);
-        isset($target['city1']) && $get_data_query->where('city1', $target['city1']);
-        
-        isset($target['class_k']) && $get_data_query->where('class_k', $target['class_k']);
-        isset($target['class_e']) && $get_data_query->where('class_e', $target['class_e']);
-        isset($target['class_m']) && $get_data_query->where('class_m', $target['class_m']);
-        isset($target['class_s']) && $get_data_query->where('class_s', $target['class_s']);
-        
-        Cache::forget('frequence-question-data');
-        $rows = Cache::remember('frequence-question-data', 10, function() use($get_data_query) {
-            return $get_data_query->limit(10000)->get();
-        });
-        
-        return $this->process_r($rows);
     }
 
     public function process_r($rows)
