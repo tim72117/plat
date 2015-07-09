@@ -1,12 +1,12 @@
 
-<div class="ui segment"> 
+<div class="ui segment" style="min-height:200px"> 
 
     <h5 class="ui header">
 		<div class="content">已選擇變數</div>
 	</h5>
     
     <div class="ui label" ng-repeat="question in questions | filter: {selected: true}">
-        {{ question.label }}
+        {{ question.title }}
         <i class="delete icon" ng-click="question.selected = false"></i>
     </div>
         
@@ -48,13 +48,13 @@
                     </div>
         
                 </th>
-                <th ng-repeat="variable in variables">{{ variable.variable_label }}({{ variable.variable }})</th>
+                <th ng-repeat="answer in answers">{{ answer.title }}({{ answer.value }})</th>
             </tr>
         </thead>
         <tbody ng-repeat="group in targets.groups">
             <tr ng-repeat="(target_key, target) in group.targets" ng-if="target.selected" ng-class="{disabled: target.loading}">
                 <td>{{ target.name }}</td>
-                <td class="right aligned collapsing" ng-repeat="variable in variables">{{ results[target_key][variable.variable] ? results[target_key][variable.variable] : 0 }}</td>
+                <td class="right aligned collapsing" ng-repeat="answer in answers">{{ results[target_key][answer.value] ? results[target_key][answer.value] : 0 }}</td>
             </tr>
         </tbody>
     </table>
@@ -134,7 +134,7 @@
     
 </div>
 
-<div class="ui segment">
+<!-- <div class="ui segment">
     <h5 class="ui header">勾選要輸出的統計量</h5>
     <div class="ui three column grid">
         <div class="column">
@@ -169,7 +169,7 @@
         <option value="2">2</option>
         <option value="3" selected="selected">3</option>
     </select>
-</div>
+</div> -->
 <?return?>
 <table border="0" cellspacing="0" cellpadding="0" width="99%">
 	<tr>

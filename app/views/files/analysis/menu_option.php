@@ -2,7 +2,7 @@
     
     <div class="ui left floated segment" style="width:350px">
 
-            <select ng-model="part_selected.part" ng-options="part.part as part.part_name for part in parts" ng-change=""></select>
+            <!-- <select ng-model="part_selected.part" ng-options="part.part as part.part_name for part in parts" ng-change=""></select> -->
             
             <div class="ui list" style="overflow-y: auto;max-height:600px">
 
@@ -10,7 +10,7 @@
                     <div class="content">
                         <div class="ui checkbox">
                             <input type="checkbox" id="question-{{ $index }}"  ng-model="question.selected" ng-click="get_variables(question)" />
-                            <label for="question-{{ $index }}">{{ question.label }}</label>
+                            <label for="question-{{ $index }}">{{ question.title }}</label>
                         </div>  
 
                     </div>
@@ -21,17 +21,39 @@
                         </div>
                     </div>
                 </div>
+
+                            <div class="item" ng-repeat="question in questions | filter: part_selected">
+                        <div class="ui checkbox">
+                            <input type="checkbox" id="question-{{ $index }}"  ng-model="question.selected" ng-click="get_variables(question)" />
+                            <label for="question-{{ $index }}">{{ question.title }}</label>
+                        </div>  
+            </div>   
                 
             </div>
     </div>
+
+    <div class="ui floating dropdown labeled icon button">
+        <i class="filter icon"></i>
+        <span class="text">Filter Posts</span>
+        <div class="menu transition visible" style="width:350px">
+            <div class="item" ng-repeat="question in questions | filter: part_selected">
+                <div class="content">
+                        <div class="ui checkbox">
+                            <input type="checkbox" id="question-{{ $index }}"  ng-model="question.selected" ng-click="get_variables(question)" />
+                            <label for="question-{{ $index }}">{{ question.title }}</label>
+                        </div>  
+                </div>         
+            </div>      
+        </div>
+    </div>   
     
     <div class="ui left floated basic segment" style="min-width:800px">
         <div class="ui top attached tabular menu">
             <div class="item" ng-class="{active: tool===1}" ng-click="tool=1">次數分配</div>
             <div class="item" ng-class="{active: tool===2}" ng-click="tool=2">交叉表</div>
-            <div class="item" ng-class="{active: tool===3}" ng-click="tool=3">平均數比較</div>
+<!--             <div class="item" ng-class="{active: tool===3}" ng-click="tool=3">平均數比較</div>
             <div class="item" ng-class="{active: tool===4}" ng-click="tool=4">相關分析</div>
-            <div class="item" ng-class="{active: tool===5}" ng-click="tool=5">迴歸分析</div>
+            <div class="item" ng-class="{active: tool===5}" ng-click="tool=5">迴歸分析</div> -->
         </div>
 
         <div class="ui bottom attached tab segment" ng-class="{active: tool===1}" style="min-height:500px">
@@ -138,28 +160,27 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         group.selected = true;
     };
     
-    $scope.getResult = function(QID, group_key, target_key) {
-        $scope.targets.groups[group_key].targets[target_key].loading = true;        
-		$http({method: 'POST', url: 'get_count_frequence', data:{QID: QID, group_key: group_key, target_key: target_key} })
+    $scope.getResult = function(name, group_key, target_key) {
+        $scope.targets.groups[group_key].targets[target_key].loading = true;     
+		$http({method: 'POST', url: 'get_frequence', data:{name: name, group_key: group_key, target_key: target_key} })
 		.success(function(data, status, headers, config) {
 			console.log(data);           
-            $scope.results[target_key] = data.frequencesTable;
+            $scope.results[target_key] = data.frequence;
             $scope.targets.groups[group_key].targets[target_key].loading = false;
-            console.log($scope.results);
-//			$scope.dialog_frequence.otherinf = data.otherinf;			
+            // $scope.dialog_frequence.otherinf = data.otherinf;
 		}).error(function(e){
 			console.log(e);
 		});
     };
 	
     $scope.getResults = function() {
-        var QID = $filter('filter')($scope.questions, {selected: true})[0].QID;
+        var name = $filter('filter')($scope.questions, {selected: true})[0].name;   
         $scope.results = {};
         var groups = $scope.targets.groups;
         for( group_key in groups ) {
             for( target_key in groups[group_key].targets ) {
                 if( groups[group_key].targets[target_key].selected )
-                    $scope.getResult(QID, group_key, target_key);
+                    $scope.getResult(name, group_key, target_key);
             }		
         }
 	};
@@ -177,17 +198,12 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
     
     $scope.get_variables = function(question) {
         
-        var question_selected = $filter('filter')($scope.questions, {selected: true, QID: '!' + question.QID});
+        var question_selected = $filter('filter')($scope.questions, {selected: true, name: '!' + question.name});
         if ( question_selected.length > 0 ) question_selected[0].selected = false;
-        
-        $http({method: 'POST', url: 'get_variables', data:{QID: question.QID} })
-		.success(function(data, status, headers, config) {
-            console.log(data);
-            $scope.variables = data.variables;            
-            $scope.getResults();
-		}).error(function(e){
-			console.log(e);
-		});
+
+        $scope.answers = question.answers; 
+
+        $scope.getResults();
     };
     
     $scope.get_targets = function() {
@@ -201,8 +217,8 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
                     $scope.$watch('targets.groups["'+group_key+'"].targets["'+target_key+'"].selected', function(selected) {
                         if( selected )
                         {
-                            var QID = $filter('filter')($scope.questions, {selected: true})[0].QID;
-                            $scope.getResult(QID, group_key, target_key);
+                            var name = $filter('filter')($scope.questions, {selected: true})[0].name;
+                            $scope.getResult(name, group_key, target_key);
                         }                        
                     });
                 });    
@@ -229,19 +245,5 @@ var tab_panel = null;
 </script>
 
 <style>
-ul.filetree {
-    scrollbar-face-color:#FFF;
-    SCROLLBAR-TRACK-COLOR:#FFF;
-    SCROLLBAR-ARROW-COLOR:#000;
-    SCROLLBAR-HIGHLIGHT-COLOR:#000;
-    SCROLLBAR-3DLIGHT-COLOR:#FFF;
-    SCROLLBAR-SHADOW-COLOR:#000;
-    SCROLLBAR-DARKSHADOW-COLOR:#FFF;	
-}
-::-webkit-scrollbar {
-	width:5px;
-	background:rgba(255,255,255,0.5);
-}
-::-webkit-scrollbar-thumb {background:#ccc;-webkit-border-radius:10px;}
 
 </style>
