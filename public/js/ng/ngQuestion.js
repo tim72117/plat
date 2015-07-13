@@ -5,7 +5,7 @@ angular.module('ngQuestion',
     ]);
 
 angular.module('ngQuestion.services', [])
-.factory('dbService', ['$http', function($http) {
+.factory('questionService', ['$http', function($http) {
     var answers = {};
     var pageInfo;
     var key;
@@ -20,38 +20,44 @@ angular.module('ngQuestion.services', [])
             });
         },
         getPage: function(page) { 
-            pages = angular.fromJson(window.localStorage.getItem('pages' + page.doc_id)) || [];
-            if( pages.length == 0 )
+            if( !navigator.onLine  ) {
+                pages = angular.fromJson(window.localStorage.getItem('pages' + page.doc_id)) || [];
+                if( pages.length == 0 )
+                    return pages;
+
+                key = '';
+
+                for (var i in page) key += i+page[i];  
+
+                var values = angular.fromJson(window.localStorage.getItem(key)) || {};
+
+                for (var i in answers) delete answers[i];
+
+                angular.forEach(values, function(v, k) {
+                    answers[k] = v;
+                });
+
+                var pageAnswers = angular.fromJson(window.localStorage.getItem('pageAnswers')) || {};            
+
+                if( !pageAnswers.hasOwnProperty(key) ) {
+                    pageAnswers[key] = page;
+                    
+                    window.localStorage.setItem('pageAnswers', angular.toJson(pageAnswers));
+                    console.log(angular.fromJson(window.localStorage.getItem('pageAnswers')));
+                }   
+
                 return pages;
+            }else{
 
-            key = '';
 
-            for (var i in page) key += i+page[i];  
+            }
 
-            var values = angular.fromJson(window.localStorage.getItem(key)) || {};
-
-            for (var i in answers) delete answers[i];
-
-            angular.forEach(values, function(v, k) {
-                answers[k] = v;
-            });
-
-            var pageAnswers = angular.fromJson(window.localStorage.getItem('pageAnswers')) || {};            
-
-            if( !pageAnswers.hasOwnProperty(key) ) {
-                pageAnswers[key] = page;
-                
-                window.localStorage.setItem('pageAnswers', angular.toJson(pageAnswers));
-                console.log(angular.fromJson(window.localStorage.getItem('pageAnswers')));
-            }   
-
-            return pages;
         },
         save: function(question) {
             
-            if( false && navigator.onLine ) { 
+            if( navigator.onLine ) { 
             
-                $http({method: 'POST', url: 'save_answers', data:{page_id: page.id, ques_id: question.id, answer: answers[question.id]} })
+                $http({method: 'POST', url: 'ajax/save_answers', data:{page_id: page.id, doc_id: page.doc_id, ques_id: question.id, answer: answers[question.id]} })
                 .success(function(data, status, headers, config) {
                     console.log(data);
                 }).error(function(e){
@@ -68,13 +74,13 @@ angular.module('ngQuestion.services', [])
 }]);
 
 angular.module('ngQuestion.directives', [])
-.directive('question', ['$compile', 'dbService', function($compile, dbService) {
+.directive('question', ['$compile', 'questionService', function($compile, questionService) {
     return {
         restrict: 'A',
         replace: true,
         transclude: false,
         scope: {question: '=question', layer: '=layer'},
-        templateUrl: 'template_demo',
+        templateUrl: 'ajax/template_demo',
         //template: '<div ng-include src="\'template_demo\'"></div>',
         compile: function(tElement, tAttr) {            
             var contents = tElement.contents().remove();
@@ -88,8 +94,8 @@ angular.module('ngQuestion.directives', [])
                     iElement.append(clone); 
                 });
                 
-                scope.answers = dbService.answers;
-                scope.save_answers = dbService.save;
+                scope.answers = questionService.answers;
+                scope.save_answers = questionService.save;
             };          
         },
         controller: function($scope, $http, $window, $filter) {
