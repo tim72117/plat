@@ -1,7 +1,7 @@
 <?
 return [
     'getRequests' => function() {
-        $developments = User::whereIn('id', [1, 5, 10, 18])->lists('username', 'id');
+        $developments = User::whereIn('id', [1, 5, 7, 10, 18])->lists('username', 'id');
         $requests = DB::table('development')->leftJoin('users', 'development.created_by', '=', 'users.id')->select(['development.*', 'users.username AS creater'])->get();
         return [
             'user_id'      => Auth::user()->id,
