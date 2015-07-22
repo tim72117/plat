@@ -57,7 +57,7 @@ Route::get('project/{project}/password/reset/{token}', 'UserController@resetPage
 Route::post('project/{project}/password/reset/{token}', array('before' => 'csrf|post_delay', 'uses' => 'UserController@reset'));
 
 Route::get('project/{project}', array('before' => 'guest', 'uses' => 'UserController@loginPage'));
-Route::post('project/{project}/login', array('before' => 'csrf|post_delay', 'uses' => 'UserController@login'));
+Route::post('project/{project}', array('before' => 'csrf|post_delay', 'uses' => 'UserController@login'));
 
 Route::get('project/{project}/register', 'UserController@registerPage');
 Route::post('project/{project}/register/check', array('before' => 'post_delay', 'uses' => 'UserController@check'));

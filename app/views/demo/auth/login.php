@@ -1,4 +1,4 @@
-<?=Form::open(array('url' => 'project/' . Request::segment(2) . '/login', 'method' => 'post', 'class' => 'ui warning form segment attached ' . ($errors->isEmpty() ? '' : 'error'), 'name' => 'loginForm'))?>	
+<?=Form::open(array('url' => URL::current(), 'method' => 'post', 'class' => 'ui warning form segment attached ' . ($errors->isEmpty() ? '' : 'error'), 'name' => 'loginForm'))?>	
     <h4 class="ui dividing header">使用者登入</h4>
     <div class="ui error message">
         <div class="header">資料錯誤</div>
