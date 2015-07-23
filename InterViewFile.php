@@ -58,7 +58,7 @@ class InterViewFile extends CommFile {
         return View::make('editor.question');        
     }  
     
-    public function template_demo()
+    public static function template_demo()
     {        
         return View::make('editor.question_demo');        
     }
@@ -209,6 +209,7 @@ class InterViewFile extends CommFile {
             
             return (object)[
                 'id' => $page->id,
+                'doc_id' => $this->shareFile->id,
                 'value' => $page->value,
                 'questions' => $questions->toArray()
             ];
@@ -268,7 +269,7 @@ class InterViewFile extends CommFile {
     {
         $information = json_decode($this->file->information);
 
-        $answers = DB::table($information->table)->where('created_by', $this->user->id)->get();
+        $answers = DB::table($information->table)->where('created_by', $this->user->id)->where('created_by', $this->user->id)->get();
 
         $ques_data = [];
 
