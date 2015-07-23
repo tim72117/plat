@@ -37,8 +37,15 @@ class CustomFile extends CommFile {
 	}
 
 	public function open()
-	{        
+	{
 		return $this->file->file;
+	}
+
+	public function is_full()
+	{
+		$information = json_decode($this->file->information);
+
+		return isset($information->full) && $information->full;
 	}
 	
 	/**

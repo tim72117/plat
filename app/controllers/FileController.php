@@ -49,6 +49,9 @@ class FileController extends BaseController {
         
         if( in_array($method, $file->get_views()) )
         {
+            if( $file->is_full() )
+                return View::make($file->$method());
+
             $view = View::make('demo.use.main')->nest('context', $file->$method());
 		
             return $this->createView($view);

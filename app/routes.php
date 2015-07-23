@@ -37,6 +37,9 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::get('page/project/{context?}', array('before' => '', 'uses' => 'PageController@project'));
     Route::post('page/project/{context?}', array('before' => 'csrf', 'uses' => 'PageController@project'));
 
+    Route::get('offline/{context?}', array('before' => '', 'uses' => 'OfflineController@offline'));
+    Route::post('offline/{context?}', array('before' => 'csrf', 'uses' => 'OfflineController@offline'));
+
     Route::get('page/{context}', 'PageController@page');
     Route::post('page/{context}', 'PageController@page');
     
