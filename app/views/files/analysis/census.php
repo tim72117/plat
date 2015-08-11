@@ -145,7 +145,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 	        </div>
 	        <div class="item">
 				<div class="ui small breadcrumb">
-					<a class="section">首頁</a>
+					<a class="section" href="/page/project">首頁</a>
 					<i class="right chevron icon divider"></i>
 					<div class="active section">選擇資料庫</div>
 				</div>
@@ -159,16 +159,16 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 		<div class="four wide column">
 			<div class="ui fluid vertical pointing menu">
 				<div class="header item">資料庫類型 <div class="ui pointing left olive large label"><i class="puzzle icon"></i> Step 1 </div></div>
-				<a class="item" ng-click="clouds = 'C10'" ng-class="{active: clouds == 'C10'}">高一專一</a>
-				<a class="item" ng-click="clouds = 'C11'" ng-class="{active: clouds == 'C11'}">高二專二</a>
-				<a class="item" ng-click="clouds = 'CT'" ng-class="{active: clouds == 'CT'}">教師</a>
-				<a class="item" ng-click="clouds = 'C11P'" ng-class="{active: clouds == 'C11P'}">高二家長</a>
+				<a href="javascript:void(0)" class="item" ng-click="clouds = 'C10'" ng-class="{active: clouds == 'C10'}">高一專一</a>
+				<a href="javascript:void(0)" class="item" ng-click="clouds = 'C11'" ng-class="{active: clouds == 'C11'}">高二專二</a>
+				<a href="javascript:void(0)" class="item" ng-click="clouds = 'CT'" ng-class="{active: clouds == 'CT'}">教師</a>
+				<a href="javascript:void(0)" class="item" ng-click="clouds = 'C11P'" ng-class="{active: clouds == 'C11P'}">高二家長</a>
 			</div>
 		</div>	
 		<div class="four wide column">	
 			<div class="ui fluid vertical menu">
 				<div class="header item">資料庫 <div class="ui pointing left olive large label"><i class="puzzle icon"></i> Step 2 </div></div>
-				<a class="item" ng-repeat="doc in docs | filter: {target_people: clouds}" ng-class="{active: doc.selected}"  ng-click="selectDoc(doc)">
+				<a href="javascript:void(0)" class="item" ng-repeat="doc in docs | filter: {target_people: clouds}" ng-class="{active: doc.selected}"  ng-click="selectDoc(doc)">
 					{{ doc.is_file.title }}
 				</a>
 			</div>

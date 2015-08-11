@@ -27,7 +27,12 @@ class CountFile extends CommFile {
 
         $this->information = json_decode($this->file->information);
     }
-	
+
+    public function is_full()
+    {
+        return false;
+    }
+
 	public static function get_intent() 
     {
 		return array_merge(parent::$intent,self::$intent);

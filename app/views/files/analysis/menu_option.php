@@ -29,7 +29,7 @@
         </div>
         <div class="item">
             <div class="ui small breadcrumb">
-                <a class="section">首頁</a>
+                <a class="section" href="/page/project">首頁</a>
                 <i class="right chevron icon divider"></i>
                 <a class="section" href="open">{{ title }}</a>
                 <i class="right chevron icon divider"></i>

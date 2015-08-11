@@ -124,7 +124,7 @@ foreach($questions as $ques) {
 	        </div>
 	        <div class="item">
 				<div class="ui small breadcrumb">
-					<a class="section">首頁</a>
+					<a class="section" href="/page/project">首頁</a>
 					<i class="right chevron icon divider"></i>
 					<a class="section" href="open">{{ title }}</a>
 					<i class="right chevron icon divider"></i>
@@ -181,8 +181,8 @@ foreach($questions as $ques) {
 
 		<div class="ui basic segment">
 			<div class="ui two attached buttons">
-				<a href="open" class="ui button">上一步</a>
-				<a class="ui button" ng-click="nextStep()">下一步</a>
+				<a class="ui button" href="open">上一步</a>
+				<a class="ui button" href="javascript:void(0)" ng-click="nextStep()">下一步</a>
 			</div>
 		</div>
 
