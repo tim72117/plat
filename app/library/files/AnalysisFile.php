@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, ShareFile, Auth, Input, Cache;
+use DB, ShareFile, Auth, Input, Cache, View, Session;
 
 class AnalysisFile extends CommFile
 {        
@@ -12,103 +12,112 @@ class AnalysisFile extends CommFile
 
         $this->information = json_decode($this->file->information);
         
-        $this->census = DB::reconnect('sqlsrv_analysis')->table('census_info')->where('CID', $this->file->file)->first();        
+        $this->census = DB::table('ques_census')->where('file_id', $this->file->id)->first();        
         
         //def_city = 30;
     }
 
+    public function is_full()
+    {
+        return true;
+    }
+
     public function get_views() 
     {
-        return ['open'];
+        return ['open', 'menu', 'analysis'];
     }
-    
+
     public function open()
     {
-        return 'files.analysis.menu_option';        
+        return 'files.analysis.census';        
+    }
+
+    public function menu()
+    {   
+        $columns_selected = Session::pull('analysis-columns-selected', []);
+
+        !empty($columns_selected) && Session::put('analysis-columns-choosed', $columns_selected);
+
+        return 'files.analysis.menu';        
     }
     
+    public function analysis()
+    {       
+        $columns_selected = Input::get('columns_selected', []);
+
+        !empty($columns_selected) && Session::put('analysis-columns-selected', $columns_selected);    
+
+        Session::forget('analysis-columns-choosed');    
+
+        return 'files.analysis.menu_option';        
+    }
+
     public function information() 
     {
 
     }
 
-    public function get_questions()
-    {
-        //tted isready=1, ,isteacher=1, $skip_part
-
-        $quesFile = new QuesFile($this->information->doc_id);
-
-        return $quesFile->get_questions();
-
-        $census_parts = DB::reconnect('sqlsrv_analysis')->table('census_part')->where('CID', $this->census->CID)->get();
-        
-        $parts = array_map(function($part) {
-            return $part->part;
-        }, $census_parts);
-
-        $questions = DB::reconnect('sqlsrv_analysis')->table('question')
-            ->where('CID', $this->census->CID)->where('isready', '1')->whereIn('part', $parts)->orderBy('QID')->get();
-
-        $competence_key_array = array(1=>'001', 2=>'010', 3=>'100');
-        $competence_key = $competence_key_array[1];
-
-        $ques_temp = [];
-        foreach($questions as $question){
-
-            if( isset($question->competence) && $question->competence!='' ){
-                if( ($competence_key & $question->competence)!=$competence_key ){
-                    continue;
-                }
-            }
-
-            if( $question->qtree_level==0 ) {	
-
-                array_push($ques_temp, (object)[
-                    'QID'   => $question->QID,
-                    'label' => str_replace("&", "&amp;", $question->question_label),      
-                    'part'  => $question->part,
-                ]);	
-            }
-
-            if( $question->qtree_level>=1 ){
-
-                array_push($ques_temp, (object)[
-                    'QID'   => $question->QID,
-                    'label' => str_replace("&", "&amp;", $question->question_label),
-                    'part'  => $question->part,
-                ]);	
-            }
-        }
-
-        return ['questions' => $ques_temp, 'census_parts' => $census_parts];
-    }
-    
     public function get_census()
     {
-        
-        //$question_cache_name = 'frequence-question-' . $name;
-        //Cache::forget($question_cache_name);
-
         $quesFile = new QuesFile($this->information->doc_id);
 
-        $census = DB::table('ques_census')->where('CID', $this->information->census_id)->where('used_site', 'used')->first();
+        return [
+            'title'     => $quesFile->title(),
+            'questions' => $this->get_questions(),
+        ];
+    }
 
-        return $census;
-        
-        return Cache::remember($question_cache_name, 10, function() use($QID) {
+    public function get_questions()
+    {
+        $quesFile = new QuesFile($this->information->doc_id);
 
-            $question = DB::reconnect('sqlsrv_analysis')->table('question')->where('QID', $QID)->first();
+        $columns = DB::table('analysis_data.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $this->census->tablename)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
 
-            $question->skip_value = $question->skip_value ? $question->skip_value : '';
+        $columns_selected = Session::get('analysis-columns-selected', []);
+        $columns_choosed = Session::get('analysis-columns-choosed', []);
 
-            $variables = DB::reconnect('sqlsrv_analysis')->table('variable')->where('QID', $QID)
-                ->where('variable', '<>', $question->skip_value)->where('variable', '<>', '')->orderBy('variable')->get();
+        $questions = array_values(array_filter($quesFile->get_questions(), function(&$question) use($columns, $columns_selected, $columns_choosed) {
+            if (!empty($columns_choosed)) {
+                in_array($question->name, $columns_choosed) && $question->selected = true;
+            }            
+            if (!empty($columns_selected)) {
+                return in_array($question->name, $columns) && in_array($question->name, $columns_selected);
+            }
+            return in_array($question->name, $columns);
+        }));
 
-            $census = DB::reconnect('sqlsrv_analysis')->table('census_info')->where('CID', $question->CID)->where('used_site', 'used')->first();
+        return $questions;
 
-            return [$census, $question, $variables];
+        //$census_parts = DB::reconnect('sqlsrv_analysis')->table('census_part')->where('CID', $this->census->CID)->get();
+    }
 
-        });
+    public function all_census()
+    {
+        $fileProvider = FileProvider::make();
+
+        return [
+            'docs' => ShareFile::with('isFile')->whereHas('isFile', function($query) {
+                $query->where('files.type', 7);
+            })
+            ->leftJoin('ques_census', 'docs.file_id', '=', 'ques_census.file_id')
+            ->where(function($query) {
+                $query->where('target', 'user')->where('target_id', Auth::user()->id)->whereNotNull('ques_census.file_id');
+            })
+            ->select('docs.*', 'ques_census.target_people')
+            ->get()->map(function($doc) use($fileProvider) {
+
+                $information = json_decode($doc->isFile->information);
+                $doc->information = json_decode($doc->isFile->information);
+                $doc->intent_key = $fileProvider->doc_intent_key('open', $doc->id, 'app\\library\\files\\v0\\AnalysisFile');
+                $doc->selected = $this->shareFile->id == $doc->id ? true : false;
+                return $doc;
+                
+                if ($information->target == 'use') {
+                    $clouds = array_add($clouds, $information->type, []);
+                    array_push($clouds[$information->type], $doc);
+                }
+            })
+        ];
     }
     
     public function get_variables($QID = null)
@@ -125,36 +134,55 @@ class AnalysisFile extends CommFile
 
     public function get_frequence()
     {
-        $data_query = $this->get_data_query();
-
         $name = Input::get('name');
 
-        $frequence = $data_query->groupBy($name . 'w_final')->select(DB::raw('count(*) AS total'), $name)->remember(3)->lists('total', $name);
+        $data_query = $this->get_data_query([$name]);     
+
+        $frequence = $data_query->groupBy($name)->select(DB::raw('count(*) AS total'), $name)->remember(3)->lists('total', $name);
 
         return ['frequence' => $frequence];
     }
 
-    public function get_data_query()
+    public function get_crosstable()
+    {
+        $column_name1 = Input::get('name1');
+        $column_name2 = Input::get('name2');
+
+        $data_query = $this->get_data_query([$column_name1, $column_name2]);
+
+        $frequences = $data_query->groupBy($column_name1, $column_name2)->select(DB::raw('count(*) AS total, ' . $column_name1 . ' AS name1, ' . $column_name2 . ' AS name2'))->remember(3)->get();
+
+        //$columns_horizontal = [];
+        //$columns_vertical = [];
+        $crosstable = [];
+
+        foreach($frequences as $frequence) {
+            //$columns_horizontal = array_add($columns_horizontal, $frequence->name1, $frequence->name1);
+            //$columns_vertical = array_add($columns_vertical, $frequence->name2, $frequence->name2);
+            $crosstable = array_add($crosstable, $frequence->name1, []);
+            $crosstable[$frequence->name1][$frequence->name2] = $frequence->total;
+        }
+
+        return ['crosstable' => $crosstable]; 
+    }
+
+    public function get_data_query($names)
     {
         $filter = $this->get_targets()['targets'];
 
         $name = Input::get('name');
-
-        //list($census, $question, $variables) = $this->get_census();
-
-        $census = $this->get_census();
         
-        $get_data_query = DB::table('analysis_data.dbo.' . $census->census_tablename);        
+        $get_data_query = DB::table('analysis_data.dbo.' . $this->census->tablename);  
+
+        foreach ($names as $name) {
+            $get_data_query->where($name, '<>', '')->where($name, '<>', '-8')->where($name, '<>', '-9');
+        }
         
-        $get_data_query->where($name, '<>', '')
-            //->where($question->spss_name, '<>', $question->skip_value)
-            ->where($name, '<>', '-8')
-            ->where($name, '<>', '-9')
-            ->select([$name . ' AS variable', $filter['FW'] . ' AS FW_new']);
+        //$get_data_query->where($question->spss_name, '<>', $question->skip_value);
         
         $group = $filter['groups'][Input::get('group_key')];
         $target = $group['targets'][Input::get('target_key')];        
-        
+
         isset($target['shid']) && $get_data_query->whereIn('shid', $target['shid']);
         isset($target['type_establish']) && $get_data_query->whereIn('type_establish', $target['type_establish']);
         isset($target['type2']) && $get_data_query->where('type2', $target['type2']);

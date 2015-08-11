@@ -1,65 +1,70 @@
 
-<div class="ui segment" style="min-height:200px"> 
-
-    <h5 class="ui header">
-		<div class="content">已選擇變數</div>
-	</h5>
-    
-    <div class="ui label" ng-repeat="question in questions | filter: {selected: true}">
-        {{ question.title }}
-        <i class="delete icon" ng-click="question.selected = false"></i>
-    </div>
-        
-    <table class="ui table">
-        <thead>
-            <tr>
-                <th>
-                    
-                    <div class="ui left pointing labeled icon dropdown button active visible" ng-click="target.show=!target.show">
-                        <i class="add icon"></i>
-                        <span class="text">分析對象</span>                        
-                        
-                        <div class="menu transition" ng-class="{visible: target.show}" ng-click="$event.stopPropagation()">
-                            
-                            <div class="ui basic segment">
-                                <div class="ui basic button" ng-repeat="(group_key, group) in targets.groups" ng-class="{active: group.selected}" ng-click="setGroup(group)">{{ group.name }}</div>
-                            </div>
-                            
-                            <div class="ui basic segment" ng-repeat="group in targets.groups" ng-if="group.selected">
-                                <div class="ui list">
-                                    <div class="item" ng-repeat="(target_key, target) in group.targets">
-                                        <div class="ui checkbox">
-                                            <input type="checkbox" id="target-{{ target_key }}" ng-model="target.selected" />
-                                            <label for="target-{{ target_key }}">{{ target.name }}</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="ui basic segment" ng-show="target_group==='my'">                                
-                                <div class="ui checkbox">
-                                    <input type="checkbox" id="target-my" ng-model="targets['my'].selected" />
-                                    <label for="target-my">本校</label>
-                                </div>
-                            </div>
-                            
-                        </div>
-                        
-                    </div>
-        
-                </th>
-                <th ng-repeat="answer in answers">{{ answer.title }}({{ answer.value }})</th>
-            </tr>
-        </thead>
-        <tbody ng-repeat="group in targets.groups">
-            <tr ng-repeat="(target_key, target) in group.targets" ng-if="target.selected" ng-class="{disabled: target.loading}">
-                <td>{{ target.name }}</td>
-                <td class="right aligned collapsing" ng-repeat="answer in answers">{{ results[target_key][answer.value] ? results[target_key][answer.value] : 0 }}</td>
-            </tr>
-        </tbody>
-    </table>
-
+<div class="ui fluid dropdown selection multiple" ng-class="{active: false, visible: false, disabled: loading}">
+    <a ng-repeat="column in selected.columns" class="ui label transition visible" style="display: inline-block !important;" ng-click="selected.columns.length = 0;clear(column)">
+        {{ column.title }} <i class="delete icon"></i>
+    </a>
+    <div class="default text">已選擇變數</div>
 </div>
+
+<div class="ui hidden fitted divider"></div>
+
+<div class="ui fluid dropdown selection multiple" ng-class="{active: false, visible: false, disabled: loading}">
+    <a ng-repeat="column in selected.rows" class="ui label transition visible" style="display: inline-block !important;" ng-click="selected.rows.length = 0;clear(column)">
+        {{ column.title }} <i class="delete icon"></i>
+    </a>
+    <div class="default text">已選擇變數</div>
+</div>
+
+<table class="ui table" ng-if="selected.rows.length == 0">
+    <thead>
+        <tr>
+            <th style="min-width:150px"></th>
+            <th class="center aligned" colspan="{{ selected.columns[0].answers.length }}" ng-repeat="column in selected.columns">{{ column.title }}</th>
+        </tr>
+        <tr>
+            <th></th>
+            <th class="right aligned" ng-repeat="answer in selected.columns[0].answers">{{ answer.title }}({{ answer.value }})</th>
+        </tr>
+    </thead>
+    <tbody ng-repeat="target in targetsSelected()">
+        <tr>
+            <td>{{ target.name }}</td>
+            <td class="right aligned collapsing1" ng-class="{disabled: target.loading}" ng-repeat="answer in selected.columns[0].answers">
+                {{ frequence[target.id][answer.value] ? frequence[target.id][answer.value] : 0 }}
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<table class="ui structured table" ng-if="selected.rows.length > 0">
+    <thead>
+        <tr>
+            <th style="min-width:150px"></th>
+            <th ng-if="selected.rows.length > 0"></th>
+            <th colspan="{{ column.answers.length }}" ng-repeat="column in selected.columns">{{ column.title }}</th>
+        </tr>
+        <tr>
+            <th></th>
+            <th ng-if="selected.rows.length > 0"></th>
+            <th class="right aligned" ng-repeat="answer in selected.columns[0].answers">{{ answer.title }}({{ answer.value }})</th>
+        </tr>
+    </thead>
+    <tbody ng-repeat="target in targetsSelected()">
+        <tr>
+            <td rowspan="{{ selected.rows[0].answers.length }}" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">{{ target.name }}</td>
+            <td class="right aligned collapsing" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">{{ selected.rows[0].answers[0].title }}</td>
+            <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat="answer in selected.columns[0].answers">
+                {{ crosstable[target.id][answer.value][selected.rows[0].answers[0].value] ? crosstable[target.id][answer.value][selected.rows[0].answers[0].value] : 0 }}
+            </td>
+        </tr>
+        <tr ng-repeat="(key, row_answer) in selected.rows[0].answers" ng-if="key != 0">
+            <td class="right aligned collapsing" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">{{ row_answer.title }}</td>
+            <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat="column_answer in selected.columns[0].answers">
+                {{ crosstable[target.id][column_answer.value][row_answer.value] ? crosstable[target.id][column_answer.value][row_answer.value] : 0 }}
+            </td>
+        </tr>
+    </tbody>
+</table>
 
 <div class="ui segment"> 
     

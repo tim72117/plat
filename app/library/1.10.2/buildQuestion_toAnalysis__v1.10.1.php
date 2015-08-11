@@ -51,8 +51,9 @@ class buildQuestionAnalysis {
 
                     $qtree = '<li><span class="file">'.$title.'</span></li>';
                     
-                    $question_db = DB::connection('mysql')->table('question')->where('CID', $GLOBALS['CID'])->where('spss_name', (string)$question->answer->name)->select('QID')->first();
+                    $question_db = DB::connection('sqlsrv_analysis')->table('question')->where('CID', $GLOBALS['CID'])->where('spss_name', (string)$question->answer->name)->select('QID')->first();
 
+                    if (isset($question_db))
                     foreach($question->answer->item as $item){
                         if( $item['value']!= '-1' ){
                             $GLOBALS['variableSQL'] .= self::buildVariable((string)$question->answer->name, $item['value'], strip_tags((string)$item), $question_db->QID);
@@ -130,10 +131,12 @@ class buildQuestionAnalysis {
                     $thisClumn_name_checkboxSub = (string)$attr["name"];
                     
 
-                    $question_db = DB::connection('mysql')->table('question')->where('CID', $GLOBALS['CID'])->where('spss_name', (string)$attr["name"])->select('QID')->first();
+                    $question_db = DB::connection('sqlsrv_analysis')->table('question')->where('CID', $GLOBALS['CID'])->where('spss_name', (string)$attr["name"])->select('QID')->first();
                     
-                    $GLOBALS['variableSQL'] .= self::buildVariable($attr["name"], '1', '勾選', $question_db->QID);
-                    $GLOBALS['variableSQL'] .= self::buildVariable($attr["name"], '0', '未勾選', $question_db->QID);
+                    if (isset($question_db)) {
+                        $GLOBALS['variableSQL'] .= self::buildVariable($attr["name"], '1', '勾選', $question_db->QID);
+                        $GLOBALS['variableSQL'] .= self::buildVariable($attr["name"], '0', '未勾選', $question_db->QID);
+                    }
 
                     $sub_array = explode(",", $attr["sub"]);
                     $qtree_sub = '';
@@ -163,9 +166,10 @@ class buildQuestionAnalysis {
 
                     $sql = " SELECT QID FROM $tablename_insert WHERE CID='".$GLOBALS['CID']."' AND spss_name='".((string)$attr["name"])."'";
                     //$result_array = $db->getData($sql,'assoc');
-                    $question_db = DB::connection('mysql')->table('question')->where('CID', $GLOBALS['CID'])->where('spss_name', (string)$attr["name"])->select('QID')->first();
+                    $question_db = DB::connection('sqlsrv_analysis')->table('question')->where('CID', $GLOBALS['CID'])->where('spss_name', (string)$attr["name"])->select('QID')->first();
 
                     $degree_key = 0;		   
+                    if (isset($question_db))
                     foreach($question->answer->degree as $degree){		
                         $attr_degree = $degree->attributes();
                         $table .= $attr_degree["value"];
@@ -195,7 +199,7 @@ class buildQuestionAnalysis {
                 $sub_array = explode(",", $attr["sub"]);	
                 foreach($sub_array as $attr_i){
                     $sub = $question_array->xpath("/page/question_sub/id[.='".$attr_i."']/parent::*");	
-                    if($sub[0])
+                    if(isset($sub[0]))
                       $qtree_sub .= self::build($sub[0],$question_array,$layer,$thisClumn_objcet);		
                 }
                 $qtree = '<ul>'.$qtree_sub.'</ul>';

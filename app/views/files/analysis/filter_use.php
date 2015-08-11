@@ -11,7 +11,7 @@ return [
             'key'   => 'all',
             'name'  => '全國',
             'targets' => [
-                'all'            => ['name' => '全國'],
+                'all'            => ['name' => '全國', 'selected' => true],
                 'all-state'      => ['name' => '全國國立學校', 'type_establish' => [1]],
                 'all-private'    => ['name' => '全國私立學校', 'type_establish' => [2]],
                 'all-county'     => ['name' => '全國縣市立學校', 'type_establish' => [3]],

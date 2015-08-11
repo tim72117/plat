@@ -118,6 +118,20 @@ app.controller('CountController', function($scope, $filter, $interval, $http) {
         });
     };
 
+    $scope.getVariable = function(column) { 
+        if( !column.isFilter ) {
+            column.variables = [];
+            return true;
+        }
+        $http({method: 'POST', url: 'get_variable', data:{name: column.COLUMN_NAME} })
+        .success(function(data, status, headers, config) {
+            //console.log(data);
+            column.variables = data.variables;
+        }).error(function(e){
+            console.log(e);
+        });
+    }
+
     $scope.getCount = function() {
     	var columns = $filter("filter")($scope.columns, {selected: true});
     	if( columns.length == 0 ) {
@@ -137,20 +151,6 @@ app.controller('CountController', function($scope, $filter, $interval, $http) {
 
     $scope.reCount = function(column) {
 		var variable = $filter("filter")(column.variables, {selected: true}); 	
-    }
-
-    $scope.getVariable = function(column) { 
-    	if( !column.isFilter ) {
-    		column.variables = [];
-    		return true;
-    	}
-        $http({method: 'POST', url: 'get_variable', data:{name: column.COLUMN_NAME} })
-        .success(function(data, status, headers, config) {
-            //console.log(data);
-            column.variables = data.variables;
-        }).error(function(e){
-            console.log(e);
-        });
     }
 
     $scope.getFrequence = function(column) {  

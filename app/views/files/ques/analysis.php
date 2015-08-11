@@ -50,7 +50,7 @@ angular.module('app')
 	$scope.questions = [];
 	$scope.loading = false;
 
-        $http({method: 'POST', url: 'get_questions', data:{} })
+        $http({method: 'POST', url: 'get_census', data:{} })
         .success(function(data, status, headers, config) {      
 			//console.log(data);
 			$scope.questions = data.questions;

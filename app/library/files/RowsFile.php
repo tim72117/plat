@@ -47,6 +47,11 @@ class RowsFile extends CommFile {
         parent::__construct($shareFile);
     }
 
+    public function is_full()
+    {
+        return false;
+    }
+
     public function get_views()
     {
         return ['open', 'import'];
