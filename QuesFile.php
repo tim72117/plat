@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Response, Config, Schema, Session, Input, DOMElement, DOMCdataSection, ShareFile, Auth, app\library\files\v0\FileProvider, Question, Answer, Carbon\Carbon;
+use DB, View, Response, Config, Schema, Session, Input, DOMElement, DOMCdataSection, ShareFile, Auth, app\library\files\v0\FileProvider, Question, Answer, Carbon\Carbon, app\library\v10\buildQuestionAnalysis;
 
 class QuesFile extends CommFile {
 	
@@ -17,7 +17,6 @@ class QuesFile extends CommFile {
 	public static $intent = array(
 		'read_info',
 		'save_info',
-		'count',
         'open',	
         'add_page',
         'save_data',
@@ -32,7 +31,12 @@ class QuesFile extends CommFile {
 
         parent::__construct($shareFile);
     }
-	
+
+    public function is_full()
+    {
+        return false;
+    }
+
 	public static function get_intent() 
     {
 		return array_merge(parent::$intent,self::$intent);
@@ -53,7 +57,9 @@ class QuesFile extends CommFile {
             'qid'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))'),
             'title' => Input::get('title'),
             'year'  => 103,
-            'dir'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))')
+            'dir'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))'),
+            'edit'  => true,
+            'host'  => 1,
         ]);
 
         $file->file = $ques_doc_id;
@@ -590,8 +596,6 @@ class QuesFile extends CommFile {
     }
     
 	public function save_info() {	}
-	
-	public function count() {	}
 
     public function creatTable() {
         
@@ -803,7 +807,7 @@ class QuesFile extends CommFile {
         
         $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid', 'edit')->first();
         
-        $pages = DB::table('ques_page')->where('qid', $ques_doc->qid)->orderBy('page')->select('page', DB::raw('CAST(page AS varchar) AS label'), 'xml')->get();
+        $pages = DB::table('ques_page')->where('qid', $ques_doc->qid)->orderBy('page')->select('page', DB::raw('CAST(page AS varchar) AS label'), 'xml')->remember(10)->get();
         
         Session::put('page', Input::get('page'));
         
@@ -835,14 +839,29 @@ class QuesFile extends CommFile {
         return 1;
     }
 
-    public function get_questions() {
+    public function title()
+    {
+        return $this->shareFile->isFile->title;
+    }
 
+    public function get_census()
+    {
+        return [
+            'title'     => $this->title(),
+            'questions' => $this->get_questions(),
+        ];
+    }
+
+    public function get_questions()
+    {
         $questions = [];
 
         function get_subs($subs, $index, &$questions, $parent_title = null) {
             foreach($subs as $sub) {
 
-                if( $sub->type != 'explain' && $sub->type != 'list' && $sub->type != 'checkbox' && $sub->type != 'checkbox_i' && $sub->type != 'scale'  && $sub->type != 'text'  && $sub->type != 'textarea' ) {
+                $sub->title = str_replace(PHP_EOL, '', $sub->title);
+
+                if( $sub->type != 'explain' && $sub->type != 'list' && $sub->type != 'checkbox' && $sub->type != 'checkbox_i' && $sub->type != 'scale'  && $sub->type != 'text'  && $sub->type != 'textarea' ) {                    
 
                     if( isset($parent_title) )
                         $sub->title = $parent_title . '-' . $sub->title;
@@ -865,7 +884,6 @@ class QuesFile extends CommFile {
 
                 if( $sub->type == 'checkbox' )
                 {
-                    //var_dump($sub);exit;
                     get_subs($sub->subs, $index, $questions, $sub->title); 
                 }  
 
@@ -893,7 +911,7 @@ class QuesFile extends CommFile {
 
         //$analysisFile = new AnalysisFile($this->shareFile->id);
                 
-        return ['title' => $this->shareFile->isFile->title, 'questions' => $questions];
+        return $questions;
     }
 
     public function get_frequence() {
@@ -912,6 +930,36 @@ class QuesFile extends CommFile {
         return ['frequence' => $frequence];
 
     }
-    
+
+    public function to_old_analysis() {
+
+        //DB::connection('sqlsrv_analysis')->table('question')->get();exit;
+        
+        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid', 'edit', 'table')->first();
+        
+        $pages = DB::table('ques_page')->where('qid', $ques_doc->qid)->orderBy('page')->select('page', DB::raw('CAST(page AS varchar) AS label'), 'xml')->get();
+
+        $GLOBALS['tablename'] = $ques_doc->table;
+        $GLOBALS['qOption'] = '';
+        $GLOBALS['page'] = 1;
+        $GLOBALS['scale_head_count'] = 1;
+        $GLOBALS['checkbox_head_count'] = 1;
+        $GLOBALS['CID'] = $ques_doc->qid;
+        $GLOBALS['part'] = '1';
+        $GLOBALS['questionSQL'] = '';
+        $GLOBALS['variableSQL'] = '';
+
+        $qtree = '';
+
+        foreach($pages as $page) {
+            $xml = simplexml_load_string($page->xml);
+            foreach($xml->question as $question){
+                $qtree .= buildQuestionAnalysis::build($question, $xml->question, 0, '');
+            }
+        }
+
+        return $GLOBALS['variableSQL'];
+
+    }
     
 }
