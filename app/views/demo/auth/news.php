@@ -20,7 +20,8 @@ foreach($news as $new) {
         echo    '<div class="header">';
         echo        $new->title;
         echo    '</div>';
-        echo    '<div class="description">' . $new->context . '  ' . $difference . '天前</div>';    
+        echo    $new->context;
+        echo    '<div class="description">' . '  ' . $difference . '天前</div>';    
         echo '</div>';
 
         echo '</div>';
