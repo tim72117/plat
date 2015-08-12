@@ -102,6 +102,10 @@ class AnalysisFile extends CommFile
             ->leftJoin('ques_census', 'docs.file_id', '=', 'ques_census.file_id')
             ->where(function($query) {
                 $query->where('target', 'user')->where('target_id', Auth::user()->id)->whereNotNull('ques_census.file_id');
+            })->orWhere(function($query) {
+                $user = Auth::user();
+                $inGroups = $user->inGroups->lists('id');
+                count($inGroups)>0 && $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $user->id);
             })
             ->select('docs.*', 'ques_census.target_people')
             ->get()->map(function($doc) use($fileProvider) {
