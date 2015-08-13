@@ -3,7 +3,12 @@
     <a ng-repeat="column in selected.columns" class="ui label transition visible" style="display: inline-block !important;" ng-click="selected.columns.length = 0;clear(column)">
         {{ column.title }} <i class="delete icon"></i>
     </a>
-    <div class="default text">已選擇變數</div>
+    <div class="default text">
+        <div class="ui label">
+            <i class="columns icon"></i>Columns 
+            <div class="detail">列變數</div>
+        </div>
+    </div>
 </div>
 
 <div class="ui hidden fitted divider"></div>
@@ -12,7 +17,12 @@
     <a ng-repeat="column in selected.rows" class="ui label transition visible" style="display: inline-block !important;" ng-click="selected.rows.length = 0;clear(column)">
         {{ column.title }} <i class="delete icon"></i>
     </a>
-    <div class="default text">已選擇變數</div>
+    <div class="default text">
+        <div class="ui label">
+            <i class="counterclockwise rotated columns icon"></i>Rows 
+            <div class="detail">行變數</div>
+        </div>
+    </div>
 </div>
 
 <table class="ui table" ng-if="selected.rows.length == 0">
@@ -66,7 +76,7 @@
     </tbody>
 </table>
 
-<div class="ui segment"> 
+<!-- <div class="ui segment"> 
     
     <h5 class="ui header">是否加權</h5>
     
@@ -80,7 +90,7 @@
         <label for="ext_weight_no">否</label>
     </div>
 
-</div>
+</div> -->
 
 <div class="ui segment" style="display:none"> 
     

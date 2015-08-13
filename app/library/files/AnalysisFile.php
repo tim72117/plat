@@ -54,7 +54,7 @@ class AnalysisFile extends CommFile
 
     public function information() 
     {
-
+        return ['information' => $this->census];
     }
 
     public function get_census()
@@ -96,30 +96,27 @@ class AnalysisFile extends CommFile
         $fileProvider = FileProvider::make();
 
         return [
-            'docs' => ShareFile::with('isFile')->whereHas('isFile', function($query) {
+            'docs' => ShareFile::with('isFile')
+            ->whereHas('isFile', function($query) {
                 $query->where('files.type', 7);
             })
             ->leftJoin('ques_census', 'docs.file_id', '=', 'ques_census.file_id')
+            ->whereNotNull('ques_census.file_id')
             ->where(function($query) {
-                $query->where('target', 'user')->where('target_id', Auth::user()->id)->whereNotNull('ques_census.file_id');
-            })->orWhere(function($query) {
-                $user = Auth::user();
-                $inGroups = $user->inGroups->lists('id');
-                count($inGroups)>0 && $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $user->id);
+                $user = Auth::user();                
+                $query->where('target', 'user')->where('target_id', $user->id);
+                $query->orWhere(function($query) use($user) {    
+                    $inGroups = $user->inGroups->lists('id');                
+                    $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $user->id);
+                });
             })
             ->select('docs.*', 'ques_census.target_people')
             ->get()->map(function($doc) use($fileProvider) {
 
-                $information = json_decode($doc->isFile->information);
-                $doc->information = json_decode($doc->isFile->information);
                 $doc->intent_key = $fileProvider->doc_intent_key('open', $doc->id, 'app\\library\\files\\v0\\AnalysisFile');
-                $doc->selected = $this->shareFile->id == $doc->id ? true : false;
+                $doc->selected = $this->shareFile->file_id == $doc->file_id ? true : false;
                 return $doc;
-                
-                if ($information->target == 'use') {
-                    $clouds = array_add($clouds, $information->type, []);
-                    array_push($clouds[$information->type], $doc);
-                }
+
             })
         ];
     }
