@@ -11,7 +11,7 @@ $shareFiles = ShareFile::with('isFile')->where(function($query) use($user) {
 })->orderBy('created_at', 'desc')->get();
 
 $project_id = DB::table('projects')->where('code', $user->getProject())->first()->id;
-$news = DB::table('news')->where('project', $project_id)->orderBy('publish_at', 'desc')->get();
+$news = DB::table('news')->where('project', $project_id)->whereNull('deleted_at')->orderBy('publish_at', 'desc')->get();
 foreach($news as $new) { 
     $publish_at = new Carbon\Carbon($new->publish_at);
     $now = Carbon\Carbon::now();
@@ -22,7 +22,8 @@ foreach($news as $new) {
     echo    '<div class="header">';
     echo        $new->title;
     echo    '</div>';
-    echo    '<div class="description">' . $new->context . '  ' . $difference . '天前</div>';    
+    echo    $new->context;
+    echo    '<div class="description">' . $difference . '天前</div>';    
     echo '</div>';
     
     echo '</div>';
