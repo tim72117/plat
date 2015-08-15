@@ -3,14 +3,11 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
 ?>
 <div ng-cloak ng-controller="uploadController" style="position: absolute;left: 10px;right: 10px;top: 10px;bottom: 10px">
 
-    <div class="ui segment" ng-class="{loading: sheetLoading}">
-
-        
+    <div class="ui segment" ng-class="{loading: sheetLoading}">        
 
         <div class="ui top attached orange progress" ng-class="{disabled: progress<1}">
             <div class="bar" style="width: {{ progress }}%"></div>
-        </div>  
-
+        </div>
         
         <form style="display:none">
             <input type="file" id="file_upload" nv-file-select uploader="uploader" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
@@ -97,7 +94,7 @@ app.requires.push('angularFileUpload');
 app.controller('uploadController', function($scope, $http, $timeout, FileUploader) {
     $scope.schools = angular.fromJson(<?=(isset($work_schools) ? json_encode($work_schools) : '[]')?>);    
     $scope.message = {rows: []};
-    $scope.columns = [];
+    $scope.sheets = [];
     $scope.uploading = false;
     $scope.sheetLoading = false;
     
@@ -106,7 +103,7 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
         .success(function(data, status, headers, config) {
             console.log(data);
             $scope.rows_count = data.rows_count;
-            $scope.columns = data.columns;
+            $scope.sheets = data.sheets;
             $scope.comment = data.comment;
         }).error(function(e){
             console.log(e);

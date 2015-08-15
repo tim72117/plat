@@ -7,6 +7,9 @@ class Files extends Eloquent {
 	
 	protected $fillable = array('title', 'type', 'owner', 'file', 'created_by');
 
+	public function sheets() {
+		return $this->hasMany('Row\Sheet', 'file_id', 'id');
+	}
 }
 
 class RequestFile extends Eloquent {

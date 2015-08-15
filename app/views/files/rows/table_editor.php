@@ -51,67 +51,47 @@
 <script>
 app.requires.push('angularify.semantic.dropdown');
 app.controller('newTableController', function($scope, $http, $filter, XLSXReaderService) {
-
-    $scope.file = {};
+    $scope.file = {title: ''};
     $scope.tool = 2;
     $scope.limit = 100;
-    $scope.newColumn = {};
     $scope.action = {}; 
     $scope.sheetsPage = 1;
-    $scope.loading = true;
-
-    $scope.rules = [
-        {name: '地址', key: 'address'},
-        {name: '手機', key: 'phone', validator: /^\w+$/},
-        {name: '電話', key: 'tel', validator: /^\w+$/},
-        {name: '信箱', key: 'email', validator: /^[a-zA-Z0-9_]+@[a-zA-Z0-9._]+$/},
-        {name: '身分證', key: 'stdidnumber', validator: /^\w+$/},
-        {name: '性別: 1.男 2.女', key: 'gender', validator: /^\w+$/},
-        {name: '日期(yymmdd)', key: 'date_six', validator: /^[0-9]+-[0-9]+-[0-9]+$/},
-        {name: '是與否', key: 'bool', validator: /^[0-1]+$/},
-        {name: '整數', key: 'int', validator: /^\d+$/},
-        {name: '小數', key: 'float', validator: /^[0-9]+.[0-9]+$/},        
-        {name: '文字(50字以內)', key: 'nvarchar'},
-        {name: '文字(50字以上)', key: 'text'},
-        {name: '其他', key: 'other'}
-    ];   
+    $scope.loading = true; 
     
     $scope.addSheet = function() {
-        var sheet = {name:'', tables: [{columns:[], rows:[]}]};
-        $scope.file.schema.sheets.push(sheet);
+        var sheet = {name:'', tables: [{columns:[]}]};
+        $scope.file.sheets.push(sheet);
         $scope.action.toSelect(sheet);
     };
 
-    $scope.$watch('file.schema.sheets | filter: {selected: true}', function(sheets) {
+    $scope.$watch('file.sheets | filter: {selected: true}', function(sheets) {
         if( !sheets ) return;
 
         var columns = sheets[0].tables[0].columns;
         
         if( columns.length < 1 || Object.keys(columns[columns.length-1]).length > 1 ) {
-            columns.push(angular.copy($scope.newColumn));
+            columns.push({});
         }
     }, true);
 
     $scope.addColumn = function() {
-        var table = $filter('filter')($scope.file.schema.sheets, {selected: true})[0].tables[0];
+        var table = $filter('filter')($scope.file.sheets, {selected: true})[0].tables[0];
         var property = ['id', 'created_by', 'created_at', 'deleted_at', 'updated_at'].concat(table.columns.map(function(column){ return column.name; }));
 
-        var newColumn = angular.copy($scope.newColumn);
-        table.columns.push(newColumn);console.log($scope.newColumn);
-        $scope.newColumn = {};
-        console.log($scope.newColumn);
+        table.columns.push({});
         
         if( property.indexOf($scope.newColumn.name) < 0 ) {
 
         }
     };
 
-    $scope.removeColumn = function(index, tindex) {
-        $scope.file.schema.sheets[tindex].tables[0].columns.splice(index, 1); 
+    $scope.removeColumn = function(column) {
+        var table = $filter('filter')($scope.file.sheets, {selected: true})[0].tables[0];
+        table.columns.splice(table.columns.indexOf(column), 1);
     };
     
-    $scope.action.toSelect = function(sheet) {          
-        angular.forEach($filter('filter')($scope.file.schema.sheets, {selected: true}), function(sheet){
+    $scope.action.toSelect = function(sheet) {
+        angular.forEach($filter('filter')($scope.file.sheets, {selected: true}), function(sheet) {
             sheet.selected = false;
         });
         sheet.selected = true;        
@@ -122,46 +102,40 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         $http({method: 'POST', url: 'get_file', data:{} })
         .success(function(data, status, headers, config) {
             console.log(data);
-            $scope.file = data.file;
-            
-            if( $scope.file.schema.sheets.length > 0 ) {
-                $scope.file.schema.sheets[0].selected = true; 
-            }else{
-                $scope.addSheet();
-            }                
-
+            $scope.setFile(data);
             $scope.loading = false;
         }).error(function(e){
             console.log(e);
         });
-    };
+    }; 
+
+    $scope.getFile();   
     
-    $scope.getFile();       
-    
-    $scope.saveFile = function() {     
-        
-        if( $scope.isEmpty($scope.file.schema.sheets) )
+    $scope.saveFile = function() {
+        if( $scope.isEmpty($scope.file.sheets) )
             return false;
-        //console.log($scope.file.schema.sheets);return;
         
         $scope.saving = true;
-
         $http({method: 'POST', url: 'save_file', data:{file: $scope.file} })
         .success(function(data, status, headers, config) { 
             console.log(data);            
-            $scope.file = data.file;  
-            
-            if( $scope.file.schema.sheets.length > 0 ) {
-                $scope.file.schema.sheets[0].selected = true; 
-            }else{
-                $scope.addSheet();
-            } 
-             
-            $scope.saving = false;              
+            $scope.setFile(data);
+            $scope.saving = false; 
         }).error(function(e){
             console.log(e);
         });
     }; 
+
+    $scope.setFile = function(file) {
+        $scope.file.title = file.title;
+        $scope.file.sheets = file.sheets;
+        $scope.rules = file.rules;
+        if( $scope.file.sheets.length > 0 ) {
+            $scope.file.sheets[0].selected = true;
+        }else{
+            $scope.addSheet();
+        } 
+    };      
 
     $scope.setAutocomplete = function(colHeader) {
         colHeader.link.enable = !!colHeader.link.table;
@@ -172,31 +146,21 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
 
     $scope.isEmpty = function(sheets) {
         var emptyColumns = 0;
-        angular.forEach(sheets, function(sheet, index){
-
-            if( !sheet.name || sheet.name.length === 0 ) {
+        angular.forEach(sheets, function(sheet, index) {
+            if( !sheet.title || sheet.title.length === 0 ) {                
                 emptyColumns += 1 ;
-            }
-            else
-            {
+            } else {
                 emptyColumns += $filter('filter')(sheet.tables[0].columns, function(column, index) {
                     if( !$scope.notNew(column) )
                         return false;
 
-                    if( /^\w+$/.test(column.name ) 
-                        && column.title.Blength()>0 && column.title.Blength()<50
-                        && column.rules
-                        && /^[a-z_]+$/.test(column.rules.key)
-                    ) {
-                        return false;
-                    } else { 
-                        console.log(column);  
-                        return true;
-                    }
+                    column.error = !/^\w{1,50}$/.test(column.name ) || !column.rules || !/^[a-z_]+$/.test(column.rules);
+
+                    return column.error;
 
                 }).length;     
             }       
-        });    
+        });
         return emptyColumns > 0;
     };  
     
