@@ -59,14 +59,9 @@ class RowsFile extends CommFile {
     }
 
     public function open() 
-    {        
-        $schema = $this->get_information();
-        
-        if( $this->shareFile->created_by == $this->user->id ) {
-            $view = $schema->power->editable ? 'files.rows.table_editor' : 'files.rows.table_info_editor';     
-        }else{
-            $view =  'files.rows.table_open';
-        }
+    {
+        $view = $this->shareFile->created_by == $this->user->id ? 'files.rows.table_editor' : 'files.rows.table_open';
+
         return $view;    
     }
 
@@ -104,9 +99,10 @@ class RowsFile extends CommFile {
         }
         $sheets = $this->shareFile->isFile->sheets()->with(['tables', 'tables.columns'])->get()->toArray();
         return [
-            'title'  => $this->file->title,
-            'sheets' => $sheets,
-            'rules'  => $this->rules,
+            'title'    => $this->file->title,
+            'sheets'   => $sheets,
+            'rules'    => $this->rules,
+            'comment'  => $this->information->comment,
         ];
     }    
     
@@ -114,17 +110,48 @@ class RowsFile extends CommFile {
     {
         if( $this->shareFile->created_by == $this->user->id )
         {
-            var_dump(Input::get('file')['sheets']);exit;
-            $information = $this->get_information();
+            $sheets = $this->file->sheets;
+            foreach (Input::get('file')['sheets'] as $sheet) {
+                $sheets->find($sheet['id'])->update(['title' => $sheet['title']]);
+                foreach ($sheet['tables'] as $table) {
+                    $tables = $sheets->find($sheet['id'])->tables;
+                    $tables->find($table['id']);
+                    foreach ($table['columns'] as $column) {
+                        $columns = $tables->find($table['id'])->columns;
+                        if (isset($column['id'])) {
+                            $columns->find($column['id'])->update([
+                                'name'  => $column['name'],
+                                'title' => $column['title'],
+                            ]);
+                        }
+                    }
+                }
+            }
 
-            $information->sheets = $this->update_sheets($information->sheets, Input::get('file')['schema']['sheets']);
+            $this->information->comment = isset(Input::get('file')['comment']) ? Input::get('file')['comment'] : '';
 
-            isset(Input::get('file')['schema']['comment']) && $information->comment = Input::get('file')['schema']['comment'];
-
-            $this->put_information($information);
+            $this->put_information($this->information);
         }
 
         return $this->get_file();
+    }
+
+    public function remove_column()
+    {
+        Column::find(Input::get('id'))->delete();
+
+        return $this->get_file();
+    }
+
+    public function update_column()
+    {
+        $column = $this->file->sheets
+        ->find(Input::get('sheet_id'))->tables
+        ->find(Input::get('table_id'))->columns
+        ->find(Input::get('column')['id']);
+        $column->update(array_only(Input::get('column'), array('name', 'title')));
+
+        return ['column' => $column];
     }
 
     public function import_upload() 
@@ -302,16 +329,11 @@ class RowsFile extends CommFile {
         return $cloumn_errors; 
     }
 
-    public function get_information()
-    {        
-        return json_decode($this->file->information);
-    }
-    
-    public function put_information($schema, $title = null)
+    public function put_information($information, $title = null)
     {        
         isset($title) && $this->file->title = $title;
 
-        $this->file->information = json_encode($schema);
+        $this->file->information = json_encode($information);
         
         $this->file->save();        
     }    
@@ -360,12 +382,6 @@ class RowsFile extends CommFile {
         foreach($indexs as $index) {        
             $schema->$index();          
         }      
-    }
-
-    public function update_columns()
-    {
-        sleep(1);
-        return '';
     }
     
     public function request_to()
@@ -710,7 +726,13 @@ class RowsFile extends CommFile {
             }
         }
     }
-    
+ 
+    //deprecated
+    public function get_information()
+    {        
+        return json_decode($this->file->information);
+    }
+       
     //deprecated
     public function update_sheets($sheets_old, $sheets)
     {        

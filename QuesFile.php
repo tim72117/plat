@@ -882,6 +882,23 @@ class QuesFile extends CommFile {
                     }
                 }
 
+                if( $sub->type == 'scale' )
+                {                   
+                    $answers = array_map(function($answer) {
+                        return (object)['value' => $answer['value'], 'title' => strip_tags($answer['title'])];
+                    }, $sub->answers);
+                    foreach($sub->subs as $scale) {
+                        array_push($questions, (object)[
+                            'name'  => $scale->name,
+                            'title' => strip_tags($sub->title) . strip_tags($scale->title),
+                            'page'  => $index,
+                            'type'  => $sub->type,
+                            'answers' => $answers,
+                            'obj' => $sub
+                        ]);
+                    }                    
+                }  
+
                 if( $sub->type == 'checkbox' )
                 {
                     get_subs($sub->subs, $index, $questions, $sub->title); 
