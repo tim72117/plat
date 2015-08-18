@@ -1,1 +1,1 @@
-<div class="ui compact message" contenteditable ng-model="file.schema.comment" style="min-height:500px;min-width: 800px;overflow-wrap: break-word"></div>
+<div class="ui compact message" contenteditable ng-model="file.comment" style="min-height:500px;min-width: 800px;overflow-wrap: break-word"></div>

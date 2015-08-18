@@ -1,20 +1,21 @@
 <?php
 return [
     'FW'  => 'FWT',
-    'uid' =>    ['name' => '本校', 'uid' => User_tted::find(Auth::user()->id)->schools->map(function($school)
-                                            {
-                                                return $school->id;
-                                            })->all()
-                ],
+    // 'uid' =>    ['name' => '本校', 'uid' => User_tted::find(Auth::user()->id)->schools->map(function($school)
+    //                                         {
+    //                                             return $school->id;
+    //                                         })->all()
+    //             ],
     'groups' => [
         'all' => [
             'key'   => 'all',
             'name'  => '全國',
             'targets' => [
-                'all-program-child' =>  ['name' => '幼教學程', 'class_k' => 1],
-                'all-program-pri'   =>  ['name' => '小教學程', 'class_e' => 1],
-                'all-program-sec'   =>  ['name' => '中教學程', 'class_m' => 1],
-                'all-program-spe'   =>  ['name' => '特教學程', 'class_s' => 1],
+                'all'               => ['name' => '全國', 'selected' => true],
+                'all-program-child' => ['name' => '幼教學程', 'class_k' => 1],
+                'all-program-pri'   => ['name' => '小教學程', 'class_e' => 1],
+                'all-program-sec'   => ['name' => '中教學程', 'class_m' => 1],
+                'all-program-spe'   => ['name' => '特教學程', 'class_s' => 1],
             ],
         ],
         'set-public' => [

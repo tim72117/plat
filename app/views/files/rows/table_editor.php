@@ -2,40 +2,18 @@
         
     <div class="ui segment" ng-class="{loading: loading}"> 
 
-<!--         <div class="ui flowing popup" style="width:500px">
-            <div class="ui form">
-                <h4 class="ui dividing header">輸入檔案名稱</h4>
-                <div class="field">                        
-
-                    <div class="ui input">
-                        <input type="text" placeholder="輸入檔案名稱" ng-model="file.title" />
-                    </div>
-
-                </div>
-
-                <div class="ui positive button" ng-click="saveFile()" ng-class="{loading: saving}">
-                    <i class="save icon"></i>確定
-                </div>
-                <div class="ui basic button" ng-click="closePopup($event)">
-                    <i class="ban icon"></i>取消
-                </div>
-            </div>
-        </div> -->
-
         <div class="ui text menu">
             <div class="header item"><i class="file text icon"></i>{{ file.title }}</div>
-            <a class="item" href="javascript:void(0)" ng-class="{active: tool==2}" ng-click="changeTool(2)">欄位定義</a>
-            <!-- <a class="item" href="javascript:void(0)" ng-class="{active: tool==3}" ng-click="changeTool(3)">選項定義</a> -->
-            <a class="item" href="javascript:void(0)" ng-class="{active: tool==4}" ng-click="changeTool(4)">說明文件</a>
+            <a class="item" href="javascript:void(0)" ng-class="{active: tool=='columns'}" ng-click="changeTool('columns')">欄位定義</a>
+            <a class="item" href="javascript:void(0)" ng-class="{active: tool=='comment'}" ng-click="changeTool('comment')">說明文件</a>
             <div class="item"><p><a href="import">預覽</a></p></div>
             <a class="item" href="javascript:void(0)">
                 <div class="ui basic button" ng-click="saveFile()" ng-class="{loading: saving}"><i class="save icon"></i>儲存</div> 
             </a>
         </div>
 
-        <div class="slide-animate" ng-include="'subs?tool=column'" ng-if="tool==2"></div>
-        <div class="slide-animate" ng-include="'subs?tool=define'" ng-if="tool==3"></div>
-        <div class="slide-animate" ng-include="'subs?tool=comment'" ng-if="tool==4"></div>
+        <div class="slide-animate" ng-include="'subs?tool=columns'" ng-if="tool=='columns'"></div>
+        <div class="slide-animate" ng-include="'subs?tool=comment'" ng-if="tool=='comment'"></div>
 
     </div>
 
@@ -52,7 +30,7 @@
 app.requires.push('angularify.semantic.dropdown');
 app.controller('newTableController', function($scope, $http, $filter, XLSXReaderService) {
     $scope.file = {title: ''};
-    $scope.tool = 2;
+    $scope.tool = 'columns';
     $scope.limit = 100;
     $scope.action = {}; 
     $scope.sheetsPage = 1;
@@ -79,15 +57,34 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         var property = ['id', 'created_by', 'created_at', 'deleted_at', 'updated_at'].concat(table.columns.map(function(column){ return column.name; }));
 
         table.columns.push({});
-        
+        alert();
         if( property.indexOf($scope.newColumn.name) < 0 ) {
 
         }
     };
 
     $scope.removeColumn = function(column) {
-        var table = $filter('filter')($scope.file.sheets, {selected: true})[0].tables[0];
-        table.columns.splice(table.columns.indexOf(column), 1);
+        $scope.saving = true;
+        $http({method: 'POST', url: 'remove_column', data:{id: column.id} })
+        .success(function(data, status, headers, config) { 
+            console.log(data);            
+            $scope.setFile(data);
+            $scope.saving = false; 
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+
+    $scope.updateColumn = function(sheet, table, column) {
+        $scope.saving = true;
+        $http({method: 'POST', url: 'update_column', data:{sheet_id: sheet.id, table_id: table.id, column: column} })
+        .success(function(data, status, headers, config) { 
+            console.log(data);            
+            angular.extend(column, data.column);
+            $scope.saving = false; 
+        }).error(function(e){
+            console.log(e);
+        });
     };
     
     $scope.action.toSelect = function(sheet) {
@@ -114,7 +111,7 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
     $scope.saveFile = function() {
         if( $scope.isEmpty($scope.file.sheets) )
             return false;
-        
+        console.log($scope.file);
         $scope.saving = true;
         $http({method: 'POST', url: 'save_file', data:{file: $scope.file} })
         .success(function(data, status, headers, config) { 
@@ -127,9 +124,10 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
     }; 
 
     $scope.setFile = function(file) {
-        $scope.file.title = file.title;
-        $scope.file.sheets = file.sheets;
         $scope.rules = file.rules;
+        $scope.file.title = file.title;
+        $scope.file.sheets = file.sheets;        
+        $scope.file.comment = file.comment;
         if( $scope.file.sheets.length > 0 ) {
             $scope.file.sheets[0].selected = true;
         }else{

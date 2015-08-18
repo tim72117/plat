@@ -29,7 +29,7 @@ class AnalysisFile extends CommFile
 
     public function open()
     {
-        return 'files.analysis.census';        
+        return 'files.analysis.census_' . $this->census->site;        
     }
 
     public function menu()
@@ -38,7 +38,7 @@ class AnalysisFile extends CommFile
 
         !empty($columns_selected) && Session::put('analysis-columns-choosed', $columns_selected);
 
-        return 'files.analysis.menu';        
+        return 'files.analysis.menu_' . $this->census->site;        
     }
     
     public function analysis()
@@ -49,7 +49,7 @@ class AnalysisFile extends CommFile
 
         Session::forget('analysis-columns-choosed');    
 
-        return 'files.analysis.menu_option';        
+        return 'files.analysis.menu_option_' . $this->census->site;        
     }
 
     public function information() 
@@ -62,7 +62,7 @@ class AnalysisFile extends CommFile
         $quesFile = new QuesFile($this->information->doc_id);
 
         return [
-            'title'     => $quesFile->title(),
+            'title'     => $this->shareFile->isFile->title,
             'questions' => $this->get_questions(),
         ];
     }
@@ -85,6 +85,15 @@ class AnalysisFile extends CommFile
             }
             return in_array($question->name, $columns);
         }));
+
+        foreach($columns as $column) {
+            if (substr($column, 0, 2) == 'YB' && (empty($columns_selected) || (!empty($columns_selected) && in_array($column, $columns_selected)))) {
+                array_push($questions, [
+                    'name'  => $column,
+                    'title' => $column,
+                ]);
+            }
+        }
 
         return $questions;
 
@@ -137,9 +146,9 @@ class AnalysisFile extends CommFile
     {
         $name = Input::get('name');
 
-        $data_query = $this->get_data_query([$name]);     
-
-        $frequence = $data_query->groupBy($name)->select(DB::raw('count(*) AS total'), $name)->remember(3)->lists('total', $name);
+        $data_query = $this->get_data_query([$name]);    
+        //var_dump($data_query->groupBy($name)->select(DB::raw('count(*) AS total'), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->get());exit;
+        $frequence = $data_query->groupBy($name)->select(DB::raw('count(*) AS total'), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->remember(3)->lists('total', 'name'); 
 
         return ['frequence' => $frequence];
     }
@@ -151,7 +160,8 @@ class AnalysisFile extends CommFile
 
         $data_query = $this->get_data_query([$column_name1, $column_name2]);
 
-        $frequences = $data_query->groupBy($column_name1, $column_name2)->select(DB::raw('count(*) AS total, ' . $column_name1 . ' AS name1, ' . $column_name2 . ' AS name2'))->remember(3)->get();
+        $frequences = $data_query->groupBy($column_name1, $column_name2)
+        ->select(DB::raw('count(*) AS total, CAST(' . $column_name1 . ' AS varchar) AS name1, CAST(' . $column_name2 . ' AS varchar) AS name2'))->remember(3)->get();
 
         //$columns_horizontal = [];
         //$columns_vertical = [];

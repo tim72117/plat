@@ -7,11 +7,11 @@
                     <div class="default text" ng-class="{filtered: (file.sheets | filter: {selected: true})[0].name!=''}">輸入資料表名稱</div>
                     <input type="text" class="search" ng-repeat="sheet in file.sheets | filter: {selected: true}" ng-model="sheet.title" ng-click="$event.stopPropagation()" />    
                     <div class="menu transition" ng-class="{visible: visible['sheets']}" ng-click="$event.stopPropagation()">
-                        <div class="item" ng-repeat="sheet in file.sheets" ng-click="action.toSelect(sheet)">{{ sheet.name }}</div>
+                        <div class="item" ng-repeat="sheet in file.sheets" ng-click="action.toSelect(sheet)">{{ sheet.title }}</div>
                     </div>
                 </div>                   
                 <!-- <div class="ui input"><input type="text" placeholder="表格名稱" ng-model="sheet.name" /></div> -->
-                <div class="ui right attached basic icon button" ng-click="addSheet()" title="新增資料表"><i class="plus icon"></i></div>
+                <div class="ui right attached basic icon button disabled" ng-click="addSheet()" title="新增資料表"><i class="plus icon"></i></div>
                 <div class="ui checkbox">
                     <input type="checkbox" id="readOnly" ng-true-value="'1'" ng-model="sheet.fillable">
                     <label for="readOnly">可匯入</label>
@@ -22,7 +22,6 @@
             <th></th>
             <th width="150">欄位代號</th>
             <th width="200">欄位名稱</th>
-            <!-- <th width="180">欄位描述</th> -->
             <th>欄位類型</th>
             <th width="50">唯一</th>
             <th width="50">加密</th>
@@ -34,8 +33,16 @@
     <tbody ng-repeat="table in sheet.tables">
         <tr ng-repeat="column in table.columns" ng-class="{active: !notNew(column), disabled: column.updating, error: column.error}">
             <td><i class="icon" ng-class="{columns: notNew(column), add: !notNew(column)}"></i>{{ $index+1 }}</td>
-            <td><div class="ui large input"><input type="text" placeholder="欄位代號" ng-model="column.name" /></div></td>
-            <td><div class="ui large input"><input type="text" placeholder="欄位名稱" ng-model="column.title" /></div></td>
+            <td>
+                <div class="ui large input">
+                    <input type="text" placeholder="欄位代號" ng-model="column.name" ng-model-options="{ debounce: 500 }" ng-change="updateColumn(sheet, table, column)" />
+                </div>
+            </td>
+            <td>
+                <div class="ui large input">
+                    <input type="text" placeholder="欄位名稱" ng-model="column.title" ng-model-options="{ debounce: 500 }" ng-change="updateColumn(sheet, table, column)" />
+                </div>
+            </td>
             <td>
                 <select class="ui dropdown" ng-model="column.rules" ng-options="key as rule.title for (key , rule) in rules">
                     <option value="">過濾規則</option>
