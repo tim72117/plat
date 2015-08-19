@@ -4,7 +4,7 @@ use DB, View, Schema, Response, ShareFile, RequestFile, Files, Auth, Input, Sess
 
 class RowsFile extends CommFile {
 
-    public $database = 'rows';
+    public static $database = 'rows';
 
     public $columns;
 
@@ -47,13 +47,13 @@ class RowsFile extends CommFile {
     {        
         $shareFile = parent::create($newFile);
 
-        $file = $shareFile->isFile;
+        $shareFile->isFile->information = '{"power":{"editable":true},"comment":""}';
 
-        $schema = (object)['power'=> (object)['editable' => true], 'sheets' =>[]];
+        $shareFile->push();
 
-        $file->information = json_encode($schema);
-        
-        $file->save();   
+        $sheet = $shareFile->isFile->sheets()->create(['title' => '']);
+        $sheet->tables()->create(['name' => self::$database . '.dbo.row_' . Carbon::now()->formatLocalized('%Y%m%d_%H%M%S_') . '_' . strtolower(str_random(5))]);
+        //$shareFile->isFile->sheets()->save(new Sheet(['title' => '']));
 
         return $shareFile;
     }
@@ -136,6 +136,15 @@ class RowsFile extends CommFile {
         return $this->get_file();
     }
 
+    public function update_sheet()
+    {
+        $sheet = $this->file->sheets()->with(['tables', 'tables.columns'])->find(Input::get('sheet')['id']);
+
+        $sheet->update(['title' => Input::get('sheet')['title']]);
+
+        return ['sheet' => $sheet]; 
+    }
+
     public function remove_column()
     {
         Column::find(Input::get('id'))->delete();
@@ -145,11 +154,18 @@ class RowsFile extends CommFile {
 
     public function update_column()
     {
-        $column = $this->file->sheets
-        ->find(Input::get('sheet_id'))->tables
-        ->find(Input::get('table_id'))->columns
-        ->find(Input::get('column')['id']);
-        $column->update(array_only(Input::get('column'), array('name', 'title')));
+        $input = array_only(Input::get('column'), array('name', 'title', 'rules'));
+        if (!isset(Input::get('column')['id'])) {
+            $column = $this->file->sheets         
+            ->find(Input::get('sheet_id'))->tables
+            ->find(Input::get('table_id'))->columns()->create($input);
+        } else {   
+            $column = $this->file->sheets
+            ->find(Input::get('sheet_id'))->tables
+            ->find(Input::get('table_id'))->columns
+            ->find(Input::get('column')['id']);
+            $column->update($input);
+        }
 
         return ['column' => $column];
     }
@@ -708,20 +724,22 @@ class RowsFile extends CommFile {
     {
         $information = $this->get_information();
 
-        foreach($information->sheets as $sheet) {
-            $aa = $this->shareFile->isFile->sheets()->save(new Sheet(['title' => $sheet->name, 'editable' => $sheet->editable]));
-            foreach($sheet->tables as $table) {
-                //var_dump($table);exit;
-                $bb = $aa->tables()->save(new Table(['name' => $table->database . '.dbo.' . $table->name]));
-                foreach($table->columns as $column) {
-                    $bb->columns()->save(new Column([
-                        'name'    => $column->name,
-                        'title'   => $column->title,
-                        'rules'   => $column->rules,
-                        'unique'  => $column->unique,
-                        'encrypt' => $column->encrypt,
-                        'isnull'  => $column->isnull,
-                    ]));
+        if (isset($information->sheets)) {
+            foreach($information->sheets as $sheet) {
+                $aa = $this->shareFile->isFile->sheets()->save(new Sheet(['title' => $sheet->name, 'editable' => $sheet->editable]));
+                foreach($sheet->tables as $table) {
+                    //var_dump($table);exit;
+                    $bb = $aa->tables()->save(new Table(['name' => $table->database . '.dbo.' . $table->name]));
+                    foreach($table->columns as $column) {
+                        $bb->columns()->save(new Column([
+                            'name'    => $column->name,
+                            'title'   => $column->title,
+                            'rules'   => $column->rules,
+                            'unique'  => $column->unique,
+                            'encrypt' => $column->encrypt,
+                            'isnull'  => $column->isnull,
+                        ]));
+                    }
                 }
             }
         }
