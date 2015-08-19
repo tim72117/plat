@@ -57,8 +57,18 @@
                     <label for="unique-{{ $index }}"></label>
                 </div>
             </td>
-            <td><div class="ui checkbox"><input type="checkbox" id="encrypt-{{ $index }}" ng-true-value="'1'" ng-model="column.encrypt" /><label for="encrypt-{{ $index }}"></label></div></td>
-            <td><div class="ui checkbox"><input type="checkbox" id="isnull-{{ $index }}" ng-true-value="'1'" ng-model="column.isnull" /><label for="isnull-{{ $index }}"></label></div></td>
+            <td>
+                <div class="ui checkbox">
+                    <input type="checkbox" id="encrypt-{{ $index }}" ng-true-value="'1'" ng-model="column.encrypt" ng-change="updateColumn(sheet, table, column)" />
+                    <label for="encrypt-{{ $index }}"></label>
+                </div>
+            </td>
+            <td>
+                <div class="ui checkbox">
+                    <input type="checkbox" id="isnull-{{ $index }}" ng-true-value="'1'" ng-model="column.isnull" ng-change="updateColumn(sheet, table, column)" />
+                    <label for="isnull-{{ $index }}"></label>
+                </div>
+            </td>
             <td>
                 <select class="ui dropdown" ng-model="column.link.table" ng-options="index as index for (index,sheet) in file.sheets" ng-change="setAutocomplete(colHeader)">
                     <option value="">資料表</option>

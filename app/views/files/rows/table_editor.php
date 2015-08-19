@@ -8,7 +8,8 @@
             <a class="item" href="javascript:void(0)" ng-class="{active: tool=='comment'}" ng-click="changeTool('comment')">說明文件</a>
             <div class="item"><p><a href="import">預覽</a></p></div>
             <a class="item" href="javascript:void(0)">
-                <div class="ui basic button" ng-click="saveFile()" ng-class="{loading: saving}"><i class="save icon"></i>儲存</div> 
+                <div class="ui basic button" ng-click="saveFile()" ng-class="{loading: saving, disabled: tool=='columns'}"><i class="save icon"></i>儲存</div> 
+                <span ng-if="saving">儲存中...</span>
             </a>
         </div>
 
@@ -55,8 +56,7 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
     $scope.updateSheet = function(sheet) {
         $scope.saving = true;
         $http({method: 'POST', url: 'update_sheet', data:{sheet: sheet} })
-        .success(function(data, status, headers, config) { 
-            console.log(data);            
+        .success(function(data, status, headers, config) {          
             angular.extend(sheet, data.sheet);
             $scope.saving = false; 
         }).error(function(e){
@@ -64,22 +64,23 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         });
     }
 
-    $scope.addColumn = function() {
-        var table = $filter('filter')($scope.file.sheets, {selected: true})[0].tables[0];
-        var property = ['id', 'created_by', 'created_at', 'deleted_at', 'updated_at'].concat(table.columns.map(function(column){ return column.name; }));
+    $scope.updateColumn = function(sheet, table, column) {
+        if ($scope.checkColumn(column)) return;
 
-        table.columns.push({});
-        alert();
-        if( property.indexOf($scope.newColumn.name) < 0 ) {
-
-        }
+        $scope.saving = true;
+        $http({method: 'POST', url: 'update_column', data:{sheet_id: sheet.id, table_id: table.id, column: column} })
+        .success(function(data, status, headers, config) {           
+            angular.extend(column, data.column);
+            $scope.saving = false; 
+        }).error(function(e){
+            console.log(e);
+        });
     };
 
     $scope.removeColumn = function(column) {
         $scope.saving = true;
         $http({method: 'POST', url: 'remove_column', data:{id: column.id} })
-        .success(function(data, status, headers, config) { 
-            console.log(data);            
+        .success(function(data, status, headers, config) {           
             $scope.setFile(data);
             $scope.saving = false; 
         }).error(function(e){
@@ -87,21 +88,6 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         });
     };
 
-    $scope.updateColumn = function(sheet, table, column) {
-        if ($scope.checkColumn(column)) return;
-        if (!column.id) {};
-        console.log(1);
-        $scope.saving = true;
-        $http({method: 'POST', url: 'update_column', data:{sheet_id: sheet.id, table_id: table.id, column: column} })
-        .success(function(data, status, headers, config) { 
-            console.log(data);            
-            angular.extend(column, data.column);
-            $scope.saving = false; 
-        }).error(function(e){
-            console.log(e);
-        });
-    };
-    
     $scope.action.toSelect = function(sheet) {
         angular.forEach($filter('filter')($scope.file.sheets, {selected: true}), function(sheet) {
             sheet.selected = false;
@@ -113,7 +99,6 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         $scope.loading = true;
         $http({method: 'POST', url: 'get_file', data:{} })
         .success(function(data, status, headers, config) {
-            console.log(data);
             $scope.setFile(data);
             $scope.loading = false;
         }).error(function(e){
@@ -157,8 +142,8 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         colHeader.source = [];
     };  
 
-    $scope.checkColumn = function(column) {
-        column.error = !/^\w{1,50}$/.test(column.name ) || !column.rules || !/^[a-z_]+$/.test(column.rules);
+    $scope.checkColumn = function(column) {        
+        column.error = !column.name || !column.title || !column.rules || !/^\w{1,50}$/.test(column.name) || !/^[a-z_]+$/.test(column.rules);
 
         return column.error;
     };

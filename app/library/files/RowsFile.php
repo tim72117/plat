@@ -154,7 +154,8 @@ class RowsFile extends CommFile {
 
     public function update_column()
     {
-        $input = array_only(Input::get('column'), array('name', 'title', 'rules'));
+        $input = array_only(Input::get('column'), array('name', 'title', 'rules', 'unique', 'encrypt', 'isnull'));
+
         if (!isset(Input::get('column')['id'])) {
             $column = $this->file->sheets         
             ->find(Input::get('sheet_id'))->tables
