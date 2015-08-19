@@ -99,6 +99,7 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         $scope.loading = true;
         $http({method: 'POST', url: 'get_file', data:{} })
         .success(function(data, status, headers, config) {
+            console.log(data);  
             $scope.setFile(data);
             $scope.loading = false;
         }).error(function(e){
@@ -114,8 +115,7 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         console.log($scope.file);
         $scope.saving = true;
         $http({method: 'POST', url: 'save_file', data:{file: $scope.file} })
-        .success(function(data, status, headers, config) { 
-            console.log(data);            
+        .success(function(data, status, headers, config) {
             $scope.setFile(data);
             $scope.saving = false; 
         }).error(function(e){
@@ -128,6 +128,7 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         $scope.file.title = file.title;
         $scope.file.sheets = file.sheets;        
         $scope.file.comment = file.comment;
+        $scope.file.editable = file.editable;
         if( $scope.file.sheets.length > 0 ) {
             $scope.file.sheets[0].selected = true;
         }else{
