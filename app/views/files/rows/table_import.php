@@ -3,7 +3,7 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
 ?>
 <div ng-cloak ng-controller="uploadController" style="position: absolute;left: 10px;right: 10px;top: 10px;bottom: 10px">
 
-    <div class="ui segment" ng-class="{loading: sheetLoading}">        
+    <div class="ui segment" ng-class="{loading: sheetLoading}" ng-repeat="sheet in file.sheets">        
 
         <div class="ui top attached orange progress" ng-class="{disabled: progress<1}">
             <div class="bar" style="width: {{ progress }}%"></div>
@@ -17,7 +17,7 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
         <div class="ui green label">上傳名單用的資料表格 <a class="detail" href="javascript:void(0)" ng-click="exportSample()"><i class="icon download"></i>下載</a></div>
 
         <br />
-        <div class="ui compact message" ng-bind-html="comment"></div> 
+        <div class="ui compact message" ng-bind-html="file.comment"></div> 
 
         <br />
         <div class="ui negative compact message" ng-if="message.errors">
@@ -29,16 +29,16 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
 
         <!-- <h4 class="ui header">欄位說明 <a href="javascript:void(0)" ng-click="exportDescribe()">下載</a></h4> -->        
 
-        <table class="ui compact collapsing definition table">
+        <table ng-repeat="table in sheet.tables" class="ui compact collapsing definition table">
             <thead>
                 <tr>
                     <th>欄位代號</th>
-                    <th ng-repeat="column in columns">{{ column.name }}</th>
+                    <th ng-repeat="column in table.columns">{{ column.name }}</th>
                     <th></th>
                 </tr>
                 <tr>	
                     <th>欄位名稱</th>
-                    <th ng-repeat="column in columns">{{ column.title }}</th>
+                    <th ng-repeat="column in table.columns">{{ column.title }}</th>
                     <th>錯誤資訊</th>
                 </tr>
             </thead>
@@ -67,7 +67,7 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
             <tfoot>
                 <tr>   
                     <td></td>
-                    <td class="warning" colspan="{{ columns.length+1 }}">
+                    <td class="warning" colspan="{{ table.columns.length+1 }}">
                         <p>
                             共有 
                             {{ rows_count }} 
@@ -94,7 +94,7 @@ app.requires.push('angularFileUpload');
 app.controller('uploadController', function($scope, $http, $timeout, FileUploader) {
     $scope.schools = angular.fromJson(<?=(isset($work_schools) ? json_encode($work_schools) : '[]')?>);    
     $scope.message = {rows: []};
-    $scope.sheets = [];
+    $scope.file = {sheets: [], comment: ''};
     $scope.uploading = false;
     $scope.sheetLoading = false;
     
@@ -103,8 +103,8 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
         .success(function(data, status, headers, config) {
             console.log(data);
             $scope.rows_count = data.rows_count;
-            $scope.sheets = data.sheets;
-            $scope.comment = data.comment;
+            $scope.file.sheets = data.sheets;
+            $scope.file.comment = data.comment;
         }).error(function(e){
             console.log(e);
         });
