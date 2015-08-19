@@ -34,7 +34,7 @@
         </tr>
     </thead>
     <tbody ng-repeat="table in sheet.tables">
-        <tr ng-repeat="column in table.columns" ng-class="{active: !notNew(column), disabled: column.updating, error: column.error}">
+        <tr ng-repeat="column in table.columns" ng-class="{active: !notNew(column), disabled: !file.editable || column.updating, error: column.error}">
             <td><i class="icon" ng-class="{columns: notNew(column), add: !notNew(column)}"></i>{{ $index+1 }}</td>
             <td>
                 <div class="ui large input">

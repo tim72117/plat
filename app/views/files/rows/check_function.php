@@ -189,14 +189,3 @@ function teamail($n) {
     
     return $errors;
 }
-
-///// 檢查日期
-
-function check_date($mm, $dd, $yy){
-    if !checkdate($mm, $dd, $yy){
-        $errors = [];
-        array_push($errors, $yy.$mm.$dd.'日期錯誤');
-        return $errors;
-    }
-
-}

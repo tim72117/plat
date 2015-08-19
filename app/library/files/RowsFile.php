@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Schema, Response, ShareFile, RequestFile, Files, Auth, Input, Session, Redirect, Carbon\Carbon, Illuminate\Filesystem\Filesystem, app\library\files\v0\FileProvider, Row\Sheet, Row\Table, Row\Column;
+use DB, View, Schema, Response, ShareFile, RequestFile, Files, Auth, Input, Session, Redirect, Carbon\Carbon, app\library\files\v0\FileProvider, Row\Sheet, Row\Table, Row\Column;
 
 class RowsFile extends CommFile {
 
@@ -9,19 +9,19 @@ class RowsFile extends CommFile {
     public $columns;
 
     public $rules = [
-        'address'     => ['title' => '地址', 'type' => 'string', 'size' => 50],
-        'phone'       => ['title' => '手機', 'type' => 'string', 'size' => 20, 'validator' => '/^\w+$/'],
-        'tel'         => ['title' => '電話', 'type' => 'string', 'size' => 20, 'validator' => '/^\w+$/'],
-        'email'       => ['title' => '信箱', 'type' => 'string', 'size' => 50, 'validator' => '/^[a-zA-Z0-9_]+@[a-zA-Z0-9._]+$/'],
-        'stdidnumber' => ['title' => '身分證', 'type' => 'string', 'size' => 10, 'validator' => '/^\w+$/'],
+        'address'     => ['title' => '地址',            'type' => 'string', 'size' => 50],
+        'phone'       => ['title' => '手機',            'type' => 'string', 'size' => 20, 'validator' => '/^\w+$/'],
+        'tel'         => ['title' => '電話',            'type' => 'string', 'size' => 20, 'validator' => '/^\w+$/'],
+        'email'       => ['title' => '信箱',            'type' => 'string', 'size' => 50, 'validator' => '/^[a-zA-Z0-9_]+@[a-zA-Z0-9._]+$/'],
+        'stdidnumber' => ['title' => '身分證',          'type' => 'string', 'size' => 10, 'validator' => '/^\w+$/'],
         'gender'      => ['title' => '性別: 1.男 2.女', 'type' => 'tinyInteger', 'validator' => '/^\w+$/'],
-        'date_six'    => ['title' => '日期(yymmdd)', 'type' => 'string', 'size' => 6, 'validator' => '/^[0-9]+-[0-9]+-[0-9]+$/'],
-        'bool'        => ['title' => '是與否', 'type' => 'boolean', 'validator' => '/^[0-1]+$/'],
-        'int'         => ['title' => '整數', 'type' => 'integer', 'validator' => '/^\d+$/'],
-        'float'       => ['title' => '小數', 'type' => 'float', 'validator' => '/^[0-9]+.[0-9]+$/'],
+        'date_six'    => ['title' => '日期(yymmdd)',   'type' => 'string', 'size' => 6, 'validator' => '/^[0-9]+-[0-9]+-[0-9]+$/'],
+        'bool'        => ['title' => '是與否',         'type' => 'boolean', 'validator' => '/^[0-1]+$/'],
+        'int'         => ['title' => '整數',           'type' => 'integer', 'validator' => '/^\d+$/'],
+        'float'       => ['title' => '小數',           'type' => 'float', 'validator' => '/^[0-9]+.[0-9]+$/'],
         'text'        => ['title' => '文字(50字以內)', 'type' => 'longText', 'size' => 50],
         'nvarchar'    => ['title' => '文字(50字以上)', 'type' => 'string', 'size' => 500],
-        'other'       => ['title' => '其他', 'type' => 'string', 'size' => 50],
+        'other'       => ['title' => '其他',           'type' => 'string', 'size' => 50],
     ]; 
     
     function __construct($doc_id) 
@@ -52,7 +52,7 @@ class RowsFile extends CommFile {
         $shareFile->push();
 
         $sheet = $shareFile->isFile->sheets()->create(['title' => '']);
-        $sheet->tables()->create(['name' => self::$database . '.dbo.row_' . Carbon::now()->formatLocalized('%Y%m%d_%H%M%S_') . '_' . strtolower(str_random(5))]);
+        $sheet->tables()->create(['database' => self::$database, 'name' => 'row_' . Carbon::now()->formatLocalized('%Y%m%d_%H%M%S_') . '_' . strtolower(str_random(5))]);
         //$shareFile->isFile->sheets()->save(new Sheet(['title' => '']));
 
         return $shareFile;
@@ -101,40 +101,11 @@ class RowsFile extends CommFile {
         return [
             'title'    => $this->file->title,
             'sheets'   => $sheets,
-            'rules'    => $this->rules,
+            'rules'    => $this->rules,            
             'comment'  => $this->information->comment,
+            'editable' => $this->information->power->editable,
         ];
     }    
-    
-    public function save_file()
-    {
-        if( $this->shareFile->created_by == $this->user->id )
-        {
-            $sheets = $this->file->sheets;
-            foreach (Input::get('file')['sheets'] as $sheet) {
-                $sheets->find($sheet['id'])->update(['title' => $sheet['title']]);
-                foreach ($sheet['tables'] as $table) {
-                    $tables = $sheets->find($sheet['id'])->tables;
-                    $tables->find($table['id']);
-                    foreach ($table['columns'] as $column) {
-                        $columns = $tables->find($table['id'])->columns;
-                        if (isset($column['id'])) {
-                            $columns->find($column['id'])->update([
-                                'name'  => $column['name'],
-                                'title' => $column['title'],
-                            ]);
-                        }
-                    }
-                }
-            }
-
-            $this->information->comment = isset(Input::get('file')['comment']) ? Input::get('file')['comment'] : '';
-
-            $this->put_information($this->information);
-        }
-
-        return $this->get_file();
-    }
 
     public function update_sheet()
     {
@@ -179,36 +150,35 @@ class RowsFile extends CommFile {
 
         $schema = $this->get_information();
 
-        $database = $schema->sheets[0]->tables[0]->database;
-
-        $table = $schema->sheets[0]->tables[0];
-
-        $table_columns = array_fetch($table->columns, 'name');
+        $table = $this->file->sheets[0]->tables[0];
         
-        require_once base_path() . '/app/views/files/rows/check_function.php';        
+        require_once base_path() . '/app/views/files/rows/check_function.php';  
+
+        $table_columns = $table->columns->fetch('name')->toArray();      
         
         $rows = \Excel::load(storage_path() . '/file_upload/' . $upload_file->file, function($reader) {
+            
+        })->get($table_columns)->toArray();
+        
+        $head = head($rows);          
 
-        })->toArray();
+        //check excel column head
+        $check_head = $table->columns->filter(function($column) use($head) {
+            return !array_key_exists($column->name, $head);
+        });
 
-        $head = head($rows);
+        if (!$check_head->isEmpty()) {
+            return ['message' => ['head' => $check_head]];
+        }        
 
-        $columns = array_map(function($column, $key) use($database, $table, $rows, $head)
+        $columns = $table->columns->map(function($column) use($table, $rows, $head)
         {           
-            if( !array_key_exists($key, $head) )
-                throw new UploadFailedException([
-                    'message' => [
-                        'errors' => ['noColumn' => $key]
-                    ]
-                ]);
-
-            //$index = num2alpha($key);
                 
             if( $column->unique ) 
-            {
-                $cells = array_pluck($rows, $key);
+            {                 
+                $cells = array_pluck($rows, $column->name);                
                 
-                $column->repeats = array_count_values(array_map('strval', $cells));           
+                $column->repeats = array_count_values(array_map('strval', $cells));                     
                 
                 $column->uniques = array_filter($cells, function($cell) use($column)
                 {
@@ -219,11 +189,11 @@ class RowsFile extends CommFile {
                     return empty($column_checked);                    
                 });    
                 
-                $column->exists = DB::table($database . '.dbo.' . $table->name)->whereIn($column->name, $column->uniques)->lists('created_by', $column->name);
+                $column->exists = DB::table($table->database . '.dbo.' . $table->name)->whereIn('C' . $column->id, $column->uniques)->lists('created_by', 'C' . $column->id);
             }
             
             return (object)[
-                //'index'   => $index,
+                'id'      => $column->id,
                 'name'    => $column->name,  
                 'title'   => $column->title,              
                 'rules'   => $column->rules,                
@@ -233,98 +203,69 @@ class RowsFile extends CommFile {
                 'repeats' => isset($column->repeats) ? $column->repeats : [],
                 'exists'  => isset($column->exists) ? $column->exists : [],
             ];            
-        }, $table->columns, $table_columns);       
+        });
 
         $work_schools = ['011C31' => '測試'];//User_use::find($this->user->id)->schools->lists('sname', 'id');
-
         $udepcode = DB::table('use_103.dbo.list_department_103')->wherein('shid', array_keys($work_schools))->distinct()->lists('depcode');
-
         $param['sch_id'] = $work_schools;
-        $param['udepcode_list'] = $udepcode;  
-
-        
+        $param['udepcode_list'] = $udepcode;
     
-        function combine_table($table, $input) {
-            extract($input);
-            return compact($table);
-        }        
-        
         $rows_insert = [];
-    
-        foreach($rows as $row_index => $row) {
+        foreach ($rows as $row_index => $row)
+        {
+            $row_filted = array_filter($row);
+
+            $rows_message[$row_index] = (object)['pass' => false, 'limit' => false, 'empty' => empty($row_filted), 'exists' => [], 'status' => false, 'errors' => [], 'row' => $row_filted];            
             
-            $row_message = (object)['index'=> $row_index, 'pass' => true, 'empty' => false, 'errors' => [], 'exist' => false, 'status' => false];
+            if ($rows_message[$row_index]->empty) continue;
 
-            $row_filtered = array_filter($row);
+            foreach ($columns as $column)
+            {                
+                $value = $row[$column->name] = isset($row[$column->name]) ? remove_space($row[$column->name]) : '';                            
 
-            if( empty($row_filtered) ) {
-                $row_message->empty = true;
-                array_push($rows_message, $row_message);
-                continue;
-            }
-            
-            $exist = false;
-            $row_valid = [];
-
-            foreach($columns as $column_index => $column)
-            {
-                $row_valid[$column->name] = isset( $row[$column->name] ) ? remove_space($row[$column->name]) : '';//var_dump($row_valid[$column->name]);exit;
-
-                $cloumn_errors = $this->check_column($column, $row_valid[$column->name]);
-
-                if( $column->unique )
+                if ($column->unique && array_key_exists($value, $column->exists))
                 {
-                    $primary = $column->name;
-                        
-                    $exist = isset($column->exists) && array_key_exists($row_valid[$column->name], $column->exists);
-                    
-                    if( $exist && $column->exists[$row_valid[$column->name]] != $this->user->id )
-                    {
-                        $cloumn_errors = ['此學生資料已由他人上傳，欲更新資料請與本中心聯繫。'];
-                    }
-                }
+                    $rows_message[$row_index]->limit = $rows_message[$row_index]->limit || $column->exists[$value] == $this->user->id;
+
+                    array_push($rows_message[$row_index]->exists, $column->name);
+                }                
+
+                $cloumn_errors = $this->check_column($column, $row[$column->name]);
+
+                $rows_message[$row_index]->pass = $rows_message[$row_index]->pass && !empty($cloumn_errors);
                 
-                !empty($cloumn_errors) && $row_message->pass = false;
-                
-                array_push($row_message->errors, (object)['value' => $row_valid[$column->name], 'errors' => $cloumn_errors]);
-            }     
-            
-            $row_message->exist = $exist;
-            
-            array_push($rows_message, $row_message);
+                array_push($rows_message[$row_index]->errors, $cloumn_errors);
+            }
     
-            if( !$row_message->pass ) continue;
+            if (!$rows_message[$row_index]->pass || $rows_message[$row_index]->limit) continue;            
             
-            $row_reduced = combine_table($table_columns, $row_valid);
+            $row['file_id'] = $this->file->id;
+            $row['updated_by'] = $this->user->id;
+            $row['updated_at'] = Carbon::now()->toDateTimeString();            
             
-            $row_reduced['file_id'] = $this->file->id;
-            $row_reduced['updated_by'] = $this->user->id;
-            $row_reduced['updated_at'] = Carbon::now()->toDateTimeString(); 
-            
-            if( $exist )
+            if (!empty($rows_message[$row_index]->exists))
             {
-                $row_message->status = DB::table($database . '.dbo.' . $table->name)
-                    ->where($primary, $row_reduced[$primary])
-                    ->update($row_reduced);
+                $query = DB::table($table->database . '.dbo.' . $table->name);
+                foreach ($rows_message[$row_index]->exists as $exist)
+                {
+                    $query->where($exist, $row[$exist]);
+                }
+                $rows_message[$row_index]->status = $query->update($row);
             }
             else
             {
-                $row_reduced['created_by'] = $this->user->id;
-                $row_reduced['created_at'] = Carbon::now()->toDateTimeString();
-                array_push($rows_insert, $row_reduced);
+                $row['created_by'] = $this->user->id;
+                $row['created_at'] = Carbon::now()->toDateTimeString();
+                array_push($rows_insert, $row);
             }         
         }    
-        
-        foreach(array_chunk($rows_insert, 50) as $rows)
+        //var_dump($rows_message);exit;
+        foreach(array_chunk($rows_insert, 50) as $rows_part)
         {
-            DB::table($database . '.dbo.' . $table->name)->insert($rows);
+            DB::table($table->database . '.dbo.' . $table->name)->insert($rows_part);
         }     
         
-        //exit;
-        
-        //var_dump($message);exit; 
-        
-        return Response::json(['message' => ['rows' => $rows_message]]);
+        return ['messages' => $rows_message];
     }    
     
     public function check_column($column, $column_value)
@@ -354,16 +295,22 @@ class RowsFile extends CommFile {
         
         $this->file->save();        
     }    
+
+    public function has_table($table)
+    {
+        return DB::table($table->database . '.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table->name)->exists();
+    }
     
-    public function create_table($table)
-    {     
+    public function create_schema_table($table)
+    {  
+        $this->has_table($table) && Schema::drop($table->database . '.dbo.' . $table->name);
         Schema::create($table->database . '.dbo.' . $table->name, function($query) use($table) 
         {                
             $query->increments('id');
 
             foreach($table->columns as $column)
             {
-                $this->add_schema_column($query, $column->name, $this->rules[$column->rules]);
+                $this->add_schema_column($query, 'C' . $column->id, $this->rules[$column->rules]);
             }
 
             $query->integer('file_id');
@@ -387,36 +334,31 @@ class RowsFile extends CommFile {
         }
     }
  
-    private function add_schema_column($table, $name, $type, $indexs = [])
+    private function add_schema_column($query, $name, $rule, $indexs = [])
     {   
-        if( isset($type[1]) )  {
-            $schema = $table->$type[0]($name, $type[1]);
-        }
-        else
-        {
-            $schema = $table->$type[0]($name);
+        if( isset($rule['size']) )  {
+            $schema = $query->$rule['type']($name, $rule['size']);
+        } else {
+            $schema = $query->$rule['type']($name);
         }
         foreach($indexs as $index) {        
             $schema->$index();          
         }      
     }
-    
+
     public function request_to()
     {
-        $schema = $this->get_information();
-        if( $schema->power->editable ) {
-            foreach($schema->sheets as $sheet)
-            {
-                foreach($sheet->tables as $table)
-                {                    
-                    $this->create_table($table);
+        if( $this->information->power->editable ) {
+            foreach($this->file->sheets as $sheet) {                
+                foreach($sheet->tables as $table) {                    
+                    $this->create_schema_table($table);
                 }                
             }
         }
 
-        $schema->power->editable = false;
+        $this->information->power->editable = false;
 
-        $this->put_information($schema);            
+        $this->put_information($this->information);            
         
         $input = Input::only('groups', 'description');
 
@@ -504,17 +446,15 @@ class RowsFile extends CommFile {
 
             $excel->sheet('sample', function($sheet) {
 
-                $schema = $this->get_information();
-
-                $table = $schema->sheets[0]->tables[0];
+                $table = $this->file->sheets[0]->tables[0];                
 
                 $sheet->freezeFirstRow();
 
-                $sheet->fromArray(array_pluck($table->columns, 'name'));
+                $sheet->fromArray($table->columns->fetch('name')->toArray());
 
             });
 
-        })->download('xlsx');
+        })->download('xls');
     }
 
     public function export_describe()
@@ -745,7 +685,38 @@ class RowsFile extends CommFile {
             }
         }
     }
- 
+    
+    //deprecated (update comment)
+    public function save_file()
+    {
+        if( $this->shareFile->created_by == $this->user->id )
+        {
+            $sheets = $this->file->sheets;
+            foreach (Input::get('file')['sheets'] as $sheet) {
+                $sheets->find($sheet['id'])->update(['title' => $sheet['title']]);
+                foreach ($sheet['tables'] as $table) {
+                    $tables = $sheets->find($sheet['id'])->tables;
+                    $tables->find($table['id']);
+                    foreach ($table['columns'] as $column) {
+                        $columns = $tables->find($table['id'])->columns;
+                        if (isset($column['id'])) {
+                            $columns->find($column['id'])->update([
+                                'name'  => $column['name'],
+                                'title' => $column['title'],
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            $this->information->comment = isset(Input::get('file')['comment']) ? Input::get('file')['comment'] : '';
+
+            $this->put_information($this->information);
+        }
+
+        return $this->get_file();
+    }
+
     //deprecated
     public function get_information()
     {        

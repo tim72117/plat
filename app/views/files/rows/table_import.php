@@ -20,11 +20,9 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
         <div class="ui compact message" ng-bind-html="file.comment"></div> 
 
         <br />
-        <div class="ui negative compact message" ng-if="message.errors">
+        <div class="ui negative compact message" ng-if="message.head">
             <div class="header">檔案錯誤</div> 
-            <p ng-repeat="(error, value) in message.errors">
-                <span ng-if="error=='noColumn'">沒有{{ value }}欄位</span>                    
-            </p>                
+            <p ng-repeat="error in message.head">沒有{{ error.title }}欄位</p>$cloumn_errors = ['此學生資料已由他人上傳，欲更新資料請與本中心聯繫。'];                
         </div> 
 
         <!-- <h4 class="ui header">欄位說明 <a href="javascript:void(0)" ng-click="exportDescribe()">下載</a></h4> -->        
@@ -42,8 +40,8 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
                     <th>錯誤資訊</th>
                 </tr>
             </thead>
-            <tbody ng-if="message.rows.length > 0">
-                <tr ng-repeat="message in message.rows" ng-class="{positive: message.pass && !message.empty, error: message.empty}">                        
+            <tbody ng-if="messages.length > 0">
+                <tr ng-repeat="message in messages" ng-class="{positive: message.pass && !message.empty, error: message.empty}">                        
                     <td>
                         <div class="ui label" ng-if="message.pass && !message.empty" ng-class="{yellow: message.exist, green: !message.exist}">                                
                             <div ng-if="!message.exist">新增</div>
@@ -55,7 +53,7 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
                             <div ng-if="message.empty">空白</div>
                         </div>
                     </td>
-                    <td ng-repeat="column in message.errors" ng-class="{error: column.errors.length>0}">{{ column.value }}</td>
+                    <td ng-repeat="column in table.columns" ng-class="{error: column.errors.length>0}">{{ message.row[column.name] }}</td>
                     <td ng-if="message.empty" colspan="{{ columns.length }}"></td>
                     <td class="error">
                         <div ng-repeat="column in message.errors">
@@ -93,7 +91,7 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
 app.requires.push('angularFileUpload');
 app.controller('uploadController', function($scope, $http, $timeout, FileUploader) {
     $scope.schools = angular.fromJson(<?=(isset($work_schools) ? json_encode($work_schools) : '[]')?>);    
-    $scope.message = {rows: []};
+    $scope.messages = [];
     $scope.file = {sheets: [], comment: ''};
     $scope.uploading = false;
     $scope.sheetLoading = false;
@@ -149,7 +147,7 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
         if( headers['content-type'] != 'application/json' )
             return;        
 
-        $scope.message = response.message;
+        $scope.messages = response.messages;
         $scope.progress = 100;
         $scope.sheetLoading = false; 
 
@@ -163,6 +161,7 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
     };
 
     $scope.uploader.onErrorItem = function(fileItem, response, status, headers) {
+        console.log(response);
         angular.element('.queryLog').append(response);        
     };
 
