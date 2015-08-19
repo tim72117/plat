@@ -45,6 +45,18 @@ function check_stdidnumber($text, $name, &$errors) {
     !check_id_nation($text) && array_push($errors, '非本國身分證，不列入調查對象，無須上傳');
 }
 
+/////檢查國中會考成績
+function check_exam_score($text, $name, &$errors){
+    $errors = [];
+    $score = array("A++", "A+", "A", "B++", "B+", "B", "C", "");
+    //庭育記得把沒成績的欄位補成 -9
+    if (!in_array($text, $score)){
+        array_push($errors, $name . '錯誤');
+    }
+    return $errors;
+}
+
+    
 /// 1 ： 檢查學校代碼
 function shid($n, $sch_id) {
     $name = '學校代碼';
@@ -72,6 +84,7 @@ function birth($n) {
     $errors = [];
     check_empty($n, $name, $errors);
     !preg_match("/^[0-9]{6}$/u", $n) && array_push($errors, $name . '錯誤');
+    check_date(substr($n,2,2),substr($n,4,2),substr($n,0,2));
     
     return $errors;
 }
@@ -122,8 +135,6 @@ function stdsex($n, $stdidnumber) {
     $errors = [];
     check_empty($n, $name, $errors);
     !preg_match("/^[1-2]{1}$/u", $n) && array_push($errors, $name . '錯誤');
-    //var_dump(check_id_nation($stdidnumber));
-    //echo '2-'.$stdidnumber;
     check_id_nation($stdidnumber) && substr($stdidnumber, 1, 1)!=$n && array_push($errors, '性別代碼與身分證字號不相符');
     
     return $errors;
@@ -177,4 +188,15 @@ function teamail($n) {
     $validator->fails() && array_push($errors, $name . '格式錯誤');
     
     return $errors;
+}
+
+///// 檢查日期
+
+function check_date($mm, $dd, $yy){
+    if !checkdate($mm, $dd, $yy){
+        $errors = [];
+        array_push($errors, $yy.$mm.$dd.'日期錯誤');
+        return $errors;
+    }
+
 }
