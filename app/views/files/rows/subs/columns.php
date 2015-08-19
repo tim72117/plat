@@ -5,7 +5,10 @@
                 <div class="ui search selection dropdown active visible" ng-click="visible['sheets']=!visible['sheets'];$event.stopPropagation()">
                     <i class="dropdown icon"></i>
                     <div class="default text" ng-class="{filtered: (file.sheets | filter: {selected: true})[0].name!=''}">輸入資料表名稱</div>
-                    <input type="text" class="search" ng-repeat="sheet in file.sheets | filter: {selected: true}" ng-model="sheet.title" ng-click="$event.stopPropagation()" />    
+                    <input type="text" class="search" 
+                        ng-repeat="sheet in file.sheets | filter: {selected: true}" 
+                        ng-model="sheet.title" ng-model-options="{ debounce: 500 }"
+                        ng-change="updateSheet(sheet)" ng-click="$event.stopPropagation()" />    
                     <div class="menu transition" ng-class="{visible: visible['sheets']}" ng-click="$event.stopPropagation()">
                         <div class="item" ng-repeat="sheet in file.sheets" ng-click="action.toSelect(sheet)">{{ sheet.title }}</div>
                     </div>
@@ -44,11 +47,16 @@
                 </div>
             </td>
             <td>
-                <select class="ui dropdown" ng-model="column.rules" ng-options="key as rule.title for (key , rule) in rules">
+                <select class="ui dropdown" ng-model="column.rules" ng-options="key as rule.title for (key , rule) in rules" ng-change="updateColumn(sheet, table, column)">
                     <option value="">過濾規則</option>
                 </select>
             </td>
-            <td><div class="ui checkbox"><input type="checkbox" id="unique-{{ $index }}" ng-true-value="'1'" ng-model="column.unique" /><label for="unique-{{ $index }}"></label></div></td>
+            <td>
+                <div class="ui checkbox">
+                    <input type="checkbox" id="unique-{{ $index }}" ng-true-value="'1'" ng-model="column.unique" ng-change="updateColumn(sheet, table, column)" />
+                    <label for="unique-{{ $index }}"></label>
+                </div>
+            </td>
             <td><div class="ui checkbox"><input type="checkbox" id="encrypt-{{ $index }}" ng-true-value="'1'" ng-model="column.encrypt" /><label for="encrypt-{{ $index }}"></label></div></td>
             <td><div class="ui checkbox"><input type="checkbox" id="isnull-{{ $index }}" ng-true-value="'1'" ng-model="column.isnull" /><label for="isnull-{{ $index }}"></label></div></td>
             <td>

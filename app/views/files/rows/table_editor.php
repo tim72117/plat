@@ -52,6 +52,18 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         }
     }, true);
 
+    $scope.updateSheet = function(sheet) {
+        $scope.saving = true;
+        $http({method: 'POST', url: 'update_sheet', data:{sheet: sheet} })
+        .success(function(data, status, headers, config) { 
+            console.log(data);            
+            angular.extend(sheet, data.sheet);
+            $scope.saving = false; 
+        }).error(function(e){
+            console.log(e);
+        });
+    }
+
     $scope.addColumn = function() {
         var table = $filter('filter')($scope.file.sheets, {selected: true})[0].tables[0];
         var property = ['id', 'created_by', 'created_at', 'deleted_at', 'updated_at'].concat(table.columns.map(function(column){ return column.name; }));
@@ -76,6 +88,9 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
     };
 
     $scope.updateColumn = function(sheet, table, column) {
+        if ($scope.checkColumn(column)) return;
+        if (!column.id) {};
+        console.log(1);
         $scope.saving = true;
         $http({method: 'POST', url: 'update_column', data:{sheet_id: sheet.id, table_id: table.id, column: column} })
         .success(function(data, status, headers, config) { 
@@ -140,7 +155,13 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         console.log(colHeader.link);
         colHeader.type = 'dropdown';
         colHeader.source = [];
-    };    
+    };  
+
+    $scope.checkColumn = function(column) {
+        column.error = !/^\w{1,50}$/.test(column.name ) || !column.rules || !/^[a-z_]+$/.test(column.rules);
+
+        return column.error;
+    };
 
     $scope.isEmpty = function(sheets) {
         var emptyColumns = 0;
