@@ -15,8 +15,9 @@ class RowsFile extends CommFile {
         'gender_id'   => ['type' => 'tinyInteger', 'title' => '性別: 1.男 2.女(身分證第2碼)', 'regex' => '/^[1-2]{1}$/'],
         'date_six'    => ['type' => 'string',   'title' => '日期(yymmdd)',   'size' => 6, 'regex' => '/^[0-9]{6}$/'],
         'bool'        => ['type' => 'boolean',  'title' => '是(1)與否(0)',   'validator' => 'boolean'],
-        'int'         => ['type' => 'integer',  'title' => '整數',           'regex' => '/^\d+$/'],
+        'int'         => ['type' => 'string',  'title' => '整數',           'regex' => '/^\d+$/'],
         'float'       => ['type' => 'float',    'title' => '小數',           'regex' => '/^[0-9]+.[0-9]+$/'],
+        'order'       => ['type' => 'string',    'title' => '順序',           'size' => 2, 'regex' => '/^\w+$/'],
         'score'       => ['type' => 'string',   'title' => '成績(A++,A+,A,B++,B+,B,C,-9)', 'size' => 3, 'validator' => 'in:A++,A+,A,B++,B+,B,C,-9'],
         'score_six'   => ['type' => 'string',   'title' => '成績(0~6,-9)', 'size' => 2, 'validator' => 'in:0,1,2,3,4,5,6,-9'],
         'phone'       => ['type' => 'string', 'title' => '手機',                    'size' => 20, 'regex' => '/^\w+$/'],
@@ -244,7 +245,7 @@ class RowsFile extends CommFile {
         $rows_insert = [];
         foreach ($rows as $row_index => $row)
         {
-            $row_filted = array_filter($row);
+            $row_filted = array_filter(array_map('strval', $row));
 
             $rows_message[$row_index] = (object)['pass' => false, 'limit' => false, 'empty' => empty($row_filted), 'updated' => false, 'exists' => [], 'errors' => [], 'row' => []];            
             
