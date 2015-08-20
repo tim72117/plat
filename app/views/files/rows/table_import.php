@@ -19,10 +19,10 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
         <br />
         <div class="ui compact message" ng-bind-html="file.comment"></div> 
 
-        <br />
-        <div class="ui negative compact message" ng-if="message.head">
+        <br />{{ message.head }}
+        <div class="ui negative compact message" ng-if="messages.head">
             <div class="header">檔案錯誤</div> 
-            <p ng-repeat="error in message.head">沒有{{ error.title }}欄位</p>$cloumn_errors = ['此學生資料已由他人上傳，欲更新資料請與本中心聯繫。'];                
+            <p ng-repeat="error in messages.head">沒有{{ error.title }}欄位</p>              
         </div> 
 
         <!-- <h4 class="ui header">欄位說明 <a href="javascript:void(0)" ng-click="exportDescribe()">下載</a></h4> -->        
@@ -41,23 +41,21 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
                 </tr>
             </thead>
             <tbody ng-if="messages.length > 0">
-                <tr ng-repeat="message in messages" ng-class="{positive: message.pass && !message.empty, error: message.empty}">                        
+                <tr ng-repeat="message in messages" ng-class="{positive: message.pass, error1: message.empty}">                        
                     <td>
                         <div class="ui label" ng-if="message.pass && !message.empty" ng-class="{yellow: message.exist, green: !message.exist}">                                
-                            <div ng-if="!message.exist">新增</div>
-                            <div ng-if="message.exist">更新</div>             
-                            <div ng-if="message.system_error">系統錯誤</div>
+                            <div ng-if="message.exists.length < 1">新增</div>
+                            <div ng-if="message.exists.length > 0">更新</div>
+                            <div ng-if="message.exists.length > 0 && !message.updated">更新失敗</div>
+                            <div ng-if="message.limit">此學生資料已由他人上傳，欲更新資料請與本中心聯繫。</div>               
                         </div>
-                        <div class="ui label" ng-if="!message.pass || message.empty" ng-class="{red: !message.pass, blue: message.empty}">
-                            <div ng-if="!message.pass">錯誤</div>
-                            <div ng-if="message.empty">空白</div>
-                        </div>
+                        <div class="ui red label" ng-if="!message.pass && !message.empty">錯誤</div>
+                        <div class="ui grey label" ng-if="message.empty">空白</div>
                     </td>
-                    <td ng-repeat="column in table.columns" ng-class="{error: column.errors.length>0}">{{ message.row[column.name] }}</td>
-                    <td ng-if="message.empty" colspan="{{ columns.length }}"></td>
+                    <td ng-repeat="column in table.columns" ng-class="{error: message.errors[column.id]}">{{ message.row['C' + column.id] }}</td>
                     <td class="error">
-                        <div ng-repeat="column in message.errors">
-                            <div ng-repeat="error in column.errors"><i class="attention icon"></i>{{ error }}</div>
+                        <div ng-repeat="errors in message.errors">
+                            <div ng-repeat="error in errors"><i class="attention icon"></i>{{ error }}</div>
                         </div>   
                     </td>
                 </tr>

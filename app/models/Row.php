@@ -21,7 +21,7 @@ class Table extends Eloquent
 
 	public $timestamps = true;
     
-    protected $fillable = array('name');
+    protected $fillable = array('database', 'name');
 
     public function columns() {
     	return $this->hasMany('Row\Column', 'table_id', 'id');

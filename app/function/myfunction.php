@@ -43,6 +43,22 @@ if ( ! function_exists('ques_url'))
 	}
 }
 
+if ( ! function_exists('remove_space'))
+{
+	function remove_space($text)
+	{
+		return preg_replace('/\s(?=)/', '', $text);
+	}
+}
+
+if ( ! function_exists('check_empty'))
+{
+	function check_empty($text, $name, &$errors)
+	{
+		empty($text) && array_push($errors, '未填入' . $name);
+	}
+}
+
 if ( ! function_exists('check_id_number'))
 {
 	/**

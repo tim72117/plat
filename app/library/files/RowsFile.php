@@ -8,21 +8,51 @@ class RowsFile extends CommFile {
 
     public $columns;
 
-    public $rules = [
-        'address'     => ['title' => '地址',            'type' => 'string', 'size' => 50],
-        'phone'       => ['title' => '手機',            'type' => 'string', 'size' => 20, 'validator' => '/^\w+$/'],
-        'tel'         => ['title' => '電話',            'type' => 'string', 'size' => 20, 'validator' => '/^\w+$/'],
-        'email'       => ['title' => '信箱',            'type' => 'string', 'size' => 50, 'validator' => '/^[a-zA-Z0-9_]+@[a-zA-Z0-9._]+$/'],
-        'stdidnumber' => ['title' => '身分證',          'type' => 'string', 'size' => 10, 'validator' => '/^\w+$/'],
-        'gender'      => ['title' => '性別: 1.男 2.女', 'type' => 'tinyInteger', 'validator' => '/^\w+$/'],
-        'date_six'    => ['title' => '日期(yymmdd)',   'type' => 'string', 'size' => 6, 'validator' => '/^[0-9]+-[0-9]+-[0-9]+$/'],
-        'bool'        => ['title' => '是與否',         'type' => 'boolean', 'validator' => '/^[0-1]+$/'],
-        'int'         => ['title' => '整數',           'type' => 'integer', 'validator' => '/^\d+$/'],
-        'float'       => ['title' => '小數',           'type' => 'float', 'validator' => '/^[0-9]+.[0-9]+$/'],
-        'text'        => ['title' => '文字(50字以內)', 'type' => 'longText', 'size' => 50],
-        'nvarchar'    => ['title' => '文字(50字以上)', 'type' => 'string', 'size' => 500],
-        'other'       => ['title' => '其他',           'type' => 'string', 'size' => 50],
+    public $rules = [  
+        'stdidnumber' => ['type' => 'string', 'title' => '身分證',                  'size' => 10, 'regex' => '/^\w+$/', 'function' => 'stdidnumber'],
+        'email'       => ['type' => 'string', 'title' => '信箱',                    'size' => 50, 'validator' => 'email'],        
+        'gender'      => ['type' => 'tinyInteger', 'title' => '性別: 1.男 2.女',         'regex' => '/^[1-2]{1}$/'],
+        'gender_id'   => ['type' => 'tinyInteger', 'title' => '性別: 1.男 2.女(身分證第2碼)', 'regex' => '/^[1-2]{1}$/'],
+        'date_six'    => ['type' => 'string',   'title' => '日期(yymmdd)',   'size' => 6, 'regex' => '/^[0-9]{6}$/'],
+        'bool'        => ['type' => 'boolean',  'title' => '是(1)與否(0)',   'validator' => 'boolean'],
+        'int'         => ['type' => 'integer',  'title' => '整數',           'regex' => '/^\d+$/'],
+        'float'       => ['type' => 'float',    'title' => '小數',           'regex' => '/^[0-9]+.[0-9]+$/'],
+        'score'       => ['type' => 'string',   'title' => '成績(A++,A+,A,B++,B+,B,C,-9)', 'size' => 3, 'validator' => 'in:A++,A+,A,B++,B+,B,C,-9'],
+        'score_six'   => ['type' => 'string',   'title' => '成績(0~6,-9)', 'size' => 2, 'validator' => 'in:0,1,2,3,4,5,6,-9'],
+        'phone'       => ['type' => 'string', 'title' => '手機',                    'size' => 20, 'regex' => '/^\w+$/'],
+        'tel'         => ['type' => 'string', 'title' => '電話',                    'size' => 20, 'regex' => '/^\w+$/'],
+        'address'     => ['type' => 'string', 'title' => '地址',                    'size' => 50],
+        'text'        => ['type' => 'longText', 'title' => '文字(50字以內)', 'size' => 50],
+        'nvarchar'    => ['type' => 'string',   'title' => '文字(50字以上)', 'size' => 500],
+        'other'       => ['type' => 'string',   'title' => '其他',           'size' => 50],
     ]; 
+
+    public function checker($name) {
+        $checkers = [
+            'stdidnumber' => function($column_value, $column, &$column_errors) {
+                !check_id_number($column_value) && array_push($column_errors, $column->title . '無效');
+            },
+            'shid' => function($column_value, $column, &$column_errors) {
+                $name = '學校代碼';
+                $errors = [];    
+                check_empty($n, $name, $errors);
+                !preg_match("/^[0-9A-Za-z]{6}$/u", $n) && array_push($errors, $name . '錯誤');
+                !array_key_exists($n, $sch_id) && array_push($errors, '不是本校學生');
+                
+                return $errors;
+            },
+            'depcode' => function($column_value, $column, &$column_errors) {
+                $name = '科系代碼';
+                $errors = [];
+                check_empty($n, $name, $errors);
+                !preg_match("/^[a-zA-Z0-9]{3,6}$/u", $n) && array_push($errors, $name . '錯誤');
+                !in_array($n, $m) && array_push($errors, '非貴校科系代碼');
+                
+                return $errors;
+            },
+        ];
+        return $checkers[$name];
+    }
     
     function __construct($doc_id) 
     {
@@ -52,8 +82,8 @@ class RowsFile extends CommFile {
         $shareFile->push();
 
         $sheet = $shareFile->isFile->sheets()->create(['title' => '']);
-        $sheet->tables()->create(['database' => self::$database, 'name' => 'row_' . Carbon::now()->formatLocalized('%Y%m%d_%H%M%S_') . '_' . strtolower(str_random(5))]);
-        //$shareFile->isFile->sheets()->save(new Sheet(['title' => '']));
+
+        $sheet->tables()->create(['database' => self::$database, 'name' => self::generate_table()]);
 
         return $shareFile;
     }
@@ -73,6 +103,11 @@ class RowsFile extends CommFile {
 	public function import() 
     {        
         return 'files.rows.table_import';        
+    }
+
+    public static function generate_table()
+    {
+        return 'row_' . Carbon::now()->formatLocalized('%Y%m%d_%H%M%S') . '_' . strtolower(str_random(5));
     }
     
     public function get_status() 
@@ -102,8 +137,8 @@ class RowsFile extends CommFile {
             'title'    => $this->file->title,
             'sheets'   => $sheets,
             'rules'    => $this->rules,            
-            'comment'  => $this->information->comment,
-            'editable' => $this->information->power->editable,
+            'comment'  => isset($this->information->comment) ? $this->information->comment : '',
+            'editable' => isset($this->information->power->editable) ? $this->information->power->editable : true,
         ];
     }    
 
@@ -148,11 +183,7 @@ class RowsFile extends CommFile {
 
         $upload_file = $this->upload(false);
 
-        $schema = $this->get_information();
-
-        $table = $this->file->sheets[0]->tables[0];
-        
-        require_once base_path() . '/app/views/files/rows/check_function.php';  
+        $table = $this->file->sheets[0]->tables[0]; 
 
         $table_columns = $table->columns->fetch('name')->toArray();      
         
@@ -168,7 +199,7 @@ class RowsFile extends CommFile {
         });
 
         if (!$check_head->isEmpty()) {
-            return ['message' => ['head' => $check_head]];
+            return ['messages' => ['head' => $check_head]];
         }        
 
         $columns = $table->columns->map(function($column) use($table, $rows, $head)
@@ -215,48 +246,53 @@ class RowsFile extends CommFile {
         {
             $row_filted = array_filter($row);
 
-            $rows_message[$row_index] = (object)['pass' => false, 'limit' => false, 'empty' => empty($row_filted), 'exists' => [], 'status' => false, 'errors' => [], 'row' => $row_filted];            
+            $rows_message[$row_index] = (object)['pass' => false, 'limit' => false, 'empty' => empty($row_filted), 'updated' => false, 'exists' => [], 'errors' => [], 'row' => []];            
             
+            //skip if empty
             if ($rows_message[$row_index]->empty) continue;
 
             foreach ($columns as $column)
-            {                
-                $value = $row[$column->name] = isset($row[$column->name]) ? remove_space($row[$column->name]) : '';                            
+            {             
+                $value = $rows_message[$row_index]->row['C' . $column->id] = isset($row[$column->name]) ? remove_space($row[$column->name]) : '';                            
 
                 if ($column->unique && array_key_exists($value, $column->exists))
                 {
-                    $rows_message[$row_index]->limit = $rows_message[$row_index]->limit || $column->exists[$value] == $this->user->id;
+                    $rows_message[$row_index]->limit = $rows_message[$row_index]->limit || $column->exists[$value] != $this->user->id;
 
-                    array_push($rows_message[$row_index]->exists, $column->name);
-                }                
+                    array_push($rows_message[$row_index]->exists, 'C' . $column->id);
+                }    
 
-                $cloumn_errors = $this->check_column($column, $row[$column->name]);
+                $column_errors = $this->check_column($column, $value);
 
-                $rows_message[$row_index]->pass = $rows_message[$row_index]->pass && !empty($cloumn_errors);
-                
-                array_push($rows_message[$row_index]->errors, $cloumn_errors);
+                if (!empty($column_errors)) 
+                {
+                    $rows_message[$row_index]->errors[$column->id] = $column_errors;
+                }
             }
+
+            $rows_message[$row_index]->pass = !$rows_message[$row_index]->limit && empty($rows_message[$row_index]->errors);
     
-            if (!$rows_message[$row_index]->pass || $rows_message[$row_index]->limit) continue;            
+            //skip if not pass
+            if (!$rows_message[$row_index]->pass) continue;            
             
-            $row['file_id'] = $this->file->id;
-            $row['updated_by'] = $this->user->id;
-            $row['updated_at'] = Carbon::now()->toDateTimeString();            
+            $rows_message[$row_index]->row['file_id'] = $this->file->id;
+            $rows_message[$row_index]->row['updated_by'] = $this->user->id;
+            $rows_message[$row_index]->row['updated_at'] = Carbon::now()->toDateTimeString();            
             
             if (!empty($rows_message[$row_index]->exists))
             {
                 $query = DB::table($table->database . '.dbo.' . $table->name);
-                foreach ($rows_message[$row_index]->exists as $exist)
+                foreach ($rows_message[$row_index]->exists as $exist_id)
                 {
-                    $query->where($exist, $row[$exist]);
+                    $query->where($exist_id, $rows_message[$row_index]->row[$exist_id]);
                 }
-                $rows_message[$row_index]->status = $query->update($row);
+                $rows_message[$row_index]->updated = $query->update($rows_message[$row_index]->row);
             }
             else
             {
-                $row['created_by'] = $this->user->id;
-                $row['created_at'] = Carbon::now()->toDateTimeString();
-                array_push($rows_insert, $row);
+                $rows_message[$row_index]->row['created_by'] = $this->user->id;
+                $rows_message[$row_index]->row['created_at'] = Carbon::now()->toDateTimeString();
+                array_push($rows_insert, $rows_message[$row_index]->row);
             }         
         }    
         //var_dump($rows_message);exit;
@@ -270,21 +306,31 @@ class RowsFile extends CommFile {
     
     public function check_column($column, $column_value)
     {
-        $cloumn_errors = [];
+        $column_errors = [];
 
-        check_empty($column_value, $column->title, $cloumn_errors);
+        check_empty($column_value, $column->title, $column_errors);
 
         if( isset( $column->repeats[$column_value] ) && $column->repeats[$column_value] > 1 )
         {
-            array_push($cloumn_errors, $column->title . '資料重複');
+            array_push($column_errors, $column->title . '資料重複');
         }   
 
-        if( empty( $cloumn_errors ) )
-        {                    
-            function_exists('check_' . $column->rules) && call_user_func_array('check_' . $column->rules, array($column_value, $column->title, &$cloumn_errors));                
+        if( empty( $column_errors ) )
+        {   
+            $rules = $this->rules[$column->rules];
+            if (isset($rules['regex']) && !preg_match($rules['regex'], $column_value)) {
+                array_push($column_errors, $column->title . '格式錯誤');
+            }
+            if (isset($rules['validator'])) {
+                $validator = \Validator::make([$column->id => $column_value], [$column->id => $rules['validator']]);
+                $validator->fails() && array_push($column_errors, $column->title . '格式錯誤');
+            }
+            if (isset($rules['function'])) {
+                call_user_func_array($this->checker($rules['function']), array($column_value, $column, &$column_errors));
+            }           
         }
 
-        return $cloumn_errors; 
+        return $column_errors; 
     }
 
     public function put_information($information, $title = null)
@@ -663,14 +709,12 @@ class RowsFile extends CommFile {
 
     public function to_new()
     {
-        $information = $this->get_information();
-
-        if (isset($information->sheets)) {
-            foreach($information->sheets as $sheet) {
+        if (isset($this->information->sheets)) {
+            foreach($this->information->sheets as $sheet) {
                 $aa = $this->shareFile->isFile->sheets()->save(new Sheet(['title' => $sheet->name, 'editable' => $sheet->editable]));
                 foreach($sheet->tables as $table) {
                     //var_dump($table);exit;
-                    $bb = $aa->tables()->save(new Table(['name' => $table->database . '.dbo.' . $table->name]));
+                    $bb = $aa->tables()->save(new Table(['database' => $table->database, 'name' => $table->name]));
                     foreach($table->columns as $column) {
                         $bb->columns()->save(new Column([
                             'name'    => $column->name,
@@ -683,6 +727,8 @@ class RowsFile extends CommFile {
                     }
                 }
             }
+            $this->information->sheets = null;
+            $this->put_information($this->information);
         }
     }
     
