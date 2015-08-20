@@ -8,24 +8,28 @@ class RowsFile extends CommFile {
 
     public $columns;
 
+    public $temp; 
+
     public $rules = [  
-        'stdidnumber' => ['type' => 'string', 'title' => '身分證',                  'size' => 10, 'regex' => '/^\w+$/', 'function' => 'stdidnumber'],
-        'email'       => ['type' => 'string', 'title' => '信箱',                    'size' => 50, 'validator' => 'email'],        
-        'gender'      => ['type' => 'tinyInteger', 'title' => '性別: 1.男 2.女',         'regex' => '/^[1-2]{1}$/'],
-        'gender_id'   => ['type' => 'tinyInteger', 'title' => '性別: 1.男 2.女(身分證第2碼)', 'regex' => '/^[1-2]{1}$/'],
-        'date_six'    => ['type' => 'string',   'title' => '日期(yymmdd)',   'size' => 6, 'regex' => '/^[0-9]{6}$/'],
-        'bool'        => ['type' => 'boolean',  'title' => '是(1)與否(0)',   'validator' => 'boolean'],
-        'int'         => ['type' => 'string',  'title' => '整數',           'regex' => '/^\d+$/'],
-        'float'       => ['type' => 'float',    'title' => '小數',           'regex' => '/^[0-9]+.[0-9]+$/'],
-        'order'       => ['type' => 'string',    'title' => '順序',           'size' => 2, 'regex' => '/^\w+$/'],
-        'score'       => ['type' => 'string',   'title' => '成績(A++,A+,A,B++,B+,B,C,-9)', 'size' => 3, 'validator' => 'in:A++,A+,A,B++,B+,B,C,-9'],
-        'score_six'   => ['type' => 'string',   'title' => '成績(0~6,-9)', 'size' => 2, 'validator' => 'in:0,1,2,3,4,5,6,-9'],
-        'phone'       => ['type' => 'string', 'title' => '手機',                    'size' => 20, 'regex' => '/^\w+$/'],
-        'tel'         => ['type' => 'string', 'title' => '電話',                    'size' => 20, 'regex' => '/^\w+$/'],
-        'address'     => ['type' => 'string', 'title' => '地址',                    'size' => 50],
-        'text'        => ['type' => 'longText', 'title' => '文字(50字以內)', 'size' => 50],
-        'nvarchar'    => ['type' => 'string',   'title' => '文字(50字以上)', 'size' => 500],
-        'other'       => ['type' => 'string',   'title' => '其他',           'size' => 50],
+        'stdidnumber' => ['sort' => 1, 'type' => 'string', 'title' => '身分證',                  'size' => 10, 'regex' => '/^\w+$/', 'function' => 'stdidnumber'],
+        'email'       => ['sort' => 2, 'type' => 'string', 'title' => '信箱',                    'size' => 80, 'validator' => 'email'],        
+        'gender'      => ['sort' => 3, 'type' => 'tinyInteger', 'title' => '性別: 1.男 2.女',              'validator' => 'in:1,2'],
+        'gender_id'   => ['sort' => 4, 'type' => 'tinyInteger', 'title' => '性別: 1.男 2.女(身分證第2碼)', 'validator' => 'in:1,2'],
+        'date_six'    => ['sort' => 5, 'type' => 'string',   'title' => '日期(yymmdd)',   'size' => 6,     'regex' => '/^[0-9]{6}$/'],
+        'bool'        => ['sort' => 6, 'type' => 'boolean',  'title' => '是(1)與否(0)',                    'validator' => 'boolean'],
+        'int'         => ['sort' => 7, 'type' => 'string',  'title' => '整數',            'regex' => '/^\d+$/'],
+        'float'       => ['sort' => 8, 'type' => 'float',    'title' => '小數',           'regex' => '/^[0-9]+.[0-9]+$/'],
+        'order'       => ['sort' => 9, 'type' => 'string',    'title' => '順序(1-99,-9)',               'size' => 2, 'regex' => '/^\w+$/'],
+        'score'       => ['sort' => 1, 'type' => 'string',   'title' => '成績(A++,A+,A,B++,B+,B,C,-9)', 'size' => 3, 'validator' => 'in:A++,A+,A,B++,B+,B,C,-9'],
+        'score_six'   => ['sort' => 1, 'type' => 'string',   'title' => '成績(0~6,-9)',                 'size' => 2, 'validator' => 'in:0,1,2,3,4,5,6,-9'],
+        'phone'       => ['sort' => 1, 'type' => 'string', 'title' => '手機',                    'size' => 20, 'regex' => '/^\w+$/'],
+        'tel'         => ['sort' => 1, 'type' => 'string', 'title' => '電話',                    'size' => 20, 'regex' => '/^\w+$/'],
+        'address'     => ['sort' => 1, 'type' => 'string', 'title' => '地址',                    'size' => 50],
+        'schid_104'   => ['sort' => 1, 'type' => 'string',   'title' => '高中職學校代碼(104)', 'size' => 6, 'function' => 'schid_104'],
+        'depcode_104' => ['sort' => 1, 'type' => 'string',   'title' => '高中職科別代碼(104)', 'size' => 6],
+        'text'        => ['sort' => 1, 'type' => 'longText', 'title' => '文字(50字以內)', 'size' => 50],
+        'nvarchar'    => ['sort' => 1, 'type' => 'string',   'title' => '文字(50字以上)', 'size' => 500],
+        'other'       => ['sort' => 1, 'type' => 'string',   'title' => '其他',           'size' => 50],
     ]; 
 
     public function checker($name) {
@@ -33,14 +37,12 @@ class RowsFile extends CommFile {
             'stdidnumber' => function($column_value, $column, &$column_errors) {
                 !check_id_number($column_value) && array_push($column_errors, $column->title . '無效');
             },
-            'shid' => function($column_value, $column, &$column_errors) {
-                $name = '學校代碼';
-                $errors = [];    
-                check_empty($n, $name, $errors);
-                !preg_match("/^[0-9A-Za-z]{6}$/u", $n) && array_push($errors, $name . '錯誤');
-                !array_key_exists($n, $sch_id) && array_push($errors, '不是本校學生');
-                
-                return $errors;
+            'schid_104' => function($column_value, $column, &$column_errors) {
+                if (!isset($this->temp->works)) {
+                    $this->temp->works = \User_use::find($this->user->id)->works->lists('sch_id');
+                }  
+
+                !in_array($column_value, $this->temp->works) && array_push($column_errors, '不是本校代碼');
             },
             'depcode' => function($column_value, $column, &$column_errors) {
                 $name = '科系代碼';
@@ -62,6 +64,8 @@ class RowsFile extends CommFile {
         parent::__construct($shareFile);
 
         $this->information = json_decode($this->file->information);
+
+        $this->temp = (object)[]; 
     }
 
     public function is_full()
@@ -78,7 +82,7 @@ class RowsFile extends CommFile {
     {        
         $shareFile = parent::create($newFile);
 
-        $shareFile->isFile->information = '{"power":{"editable":true},"comment":""}';
+        $shareFile->isFile->information = '{"comment":""}';
 
         $shareFile->push();
 
@@ -103,6 +107,14 @@ class RowsFile extends CommFile {
     
 	public function import() 
     {        
+        $sheets = $this->file->sheets()->with(['tables', 'tables.columns'])->get()->filter(function($sheet) {return !$sheet->editable;})->each(function($sheet) {
+            $sheet->tables->each(function($table) {
+                if (!isset($table->builded_at) || $table->updated_at->diffInMinutes(new Carbon($table->builded_at)) > 0) {
+                    $this->create_schema_table($table);
+                }
+            });    
+        });
+
         return 'files.rows.table_import';        
     }
 
@@ -113,7 +125,10 @@ class RowsFile extends CommFile {
     
     public function get_status() 
     {        
-        $sheets = $this->shareFile->isFile->sheets()->with(['tables', 'tables.columns'])->get();
+        $sheets = $this->file->sheets()->with(['tables', 'tables.columns'])->get()->map(function($sheet) {
+            $sheet->editable = (boolean)$sheet->editable;
+            return $sheet;
+        });
 
         foreach($sheets as $sheet) {
             foreach($sheet->tables as $table) {
@@ -130,16 +145,15 @@ class RowsFile extends CommFile {
 
     public function get_file()
     {       
-        if ($this->shareFile->isFile->sheets->isEmpty()) {
-            $this->to_new();
-        }
-        $sheets = $this->shareFile->isFile->sheets()->with(['tables', 'tables.columns'])->get()->toArray();
+        $sheets = $this->file->sheets()->with(['tables', 'tables.columns'])->get()->map(function($sheet) {
+            $sheet->editable = (boolean)$sheet->editable;
+            return $sheet;
+        })->toArray();
         return [
             'title'    => $this->file->title,
             'sheets'   => $sheets,
             'rules'    => $this->rules,            
             'comment'  => isset($this->information->comment) ? $this->information->comment : '',
-            'editable' => isset($this->information->power->editable) ? $this->information->power->editable : true,
         ];
     }    
 
@@ -147,33 +161,39 @@ class RowsFile extends CommFile {
     {
         $sheet = $this->file->sheets()->with(['tables', 'tables.columns'])->find(Input::get('sheet')['id']);
 
-        $sheet->update(['title' => Input::get('sheet')['title']]);
+        $sheet->update(['title' => Input::get('sheet')['title'], 'editable' => Input::get('sheet')['editable']]);
 
-        return ['sheet' => $sheet]; 
+        return ['sheet' => $sheet->toArray()]; 
     }
 
     public function remove_column()
     {
-        Column::find(Input::get('id'))->delete();
+        $table = $this->file->sheets        
+            ->find(Input::get('sheet_id'))->tables
+            ->find(Input::get('table_id'));
 
-        return $this->get_file();
+        $table->columns->find(Input::get('column')['id'])->delete();
+
+        $table->touch();
+
+        return ['table' => $table->load('columns')->toArray()];
     }
 
-    public function update_column()
+    public function update_column()//touch table
     {
         $input = array_only(Input::get('column'), array('name', 'title', 'rules', 'unique', 'encrypt', 'isnull'));
 
+        $table = $this->file->sheets->find(Input::get('sheet_id'))->tables->find(Input::get('table_id'));
+
         if (!isset(Input::get('column')['id'])) {
-            $column = $this->file->sheets         
-            ->find(Input::get('sheet_id'))->tables
-            ->find(Input::get('table_id'))->columns()->create($input);
+            $column = $table->columns()->create($input);
+            
         } else {   
-            $column = $this->file->sheets
-            ->find(Input::get('sheet_id'))->tables
-            ->find(Input::get('table_id'))->columns
-            ->find(Input::get('column')['id']);
+            $column = $table->columns->find(Input::get('column')['id']);
             $column->update($input);
         }
+
+        $table->touch();
 
         return ['column' => $column];
     }
@@ -192,15 +212,15 @@ class RowsFile extends CommFile {
             
         })->get($table_columns)->toArray();
         
-        $head = head($rows);          
+        $head = head($rows);
 
         //check excel column head
-        $check_head = $table->columns->filter(function($column) use($head) {
-            return !array_key_exists($column->name, $head);
+        $checked_head = $table->columns->filter(function($column) use($head) {
+            return !array_key_exists($column->name, $head ? $head : []);
         });
 
-        if (!$check_head->isEmpty()) {
-            return ['messages' => ['head' => $check_head]];
+        if (!$checked_head->isEmpty()) {
+            return ['messages' => ['head' => $checked_head]];
         }        
 
         $columns = $table->columns->map(function($column) use($table, $rows, $head)
@@ -236,11 +256,6 @@ class RowsFile extends CommFile {
                 'exists'  => isset($column->exists) ? $column->exists : [],
             ];            
         });
-
-        $work_schools = ['011C31' => '測試'];//User_use::find($this->user->id)->schools->lists('sname', 'id');
-        $udepcode = DB::table('use_103.dbo.list_department_103')->wherein('shid', array_keys($work_schools))->distinct()->lists('depcode');
-        $param['sch_id'] = $work_schools;
-        $param['udepcode_list'] = $udepcode;
     
         $rows_insert = [];
         foreach ($rows as $row_index => $row)
@@ -301,7 +316,7 @@ class RowsFile extends CommFile {
         {
             DB::table($table->database . '.dbo.' . $table->name)->insert($rows_part);
         }     
-        
+
         return ['messages' => $rows_message];
     }    
     
@@ -351,6 +366,7 @@ class RowsFile extends CommFile {
     public function create_schema_table($table)
     {  
         $this->has_table($table) && Schema::drop($table->database . '.dbo.' . $table->name);
+
         Schema::create($table->database . '.dbo.' . $table->name, function($query) use($table) 
         {                
             $query->increments('id');
@@ -368,6 +384,8 @@ class RowsFile extends CommFile {
             $query->integer('created_by');
             $query->integer('deleted_by')->nullable();
         });
+
+        $table->update(['builded_at' => Carbon::now()->toDateTimeString()]);
     }
 
     public function drop_tables($schema)
@@ -394,19 +412,7 @@ class RowsFile extends CommFile {
     }
 
     public function request_to()
-    {
-        if( $this->information->power->editable ) {
-            foreach($this->file->sheets as $sheet) {                
-                foreach($sheet->tables as $table) {                    
-                    $this->create_schema_table($table);
-                }                
-            }
-        }
-
-        $this->information->power->editable = false;
-
-        $this->put_information($this->information);            
-        
+    {         
         $input = Input::only('groups', 'description');
 
         $myGroups = $this->user->groups;
@@ -708,6 +714,7 @@ class RowsFile extends CommFile {
         return $this->shareFile->id;
     }
 
+    //deprecated
     public function to_new()
     {
         if (isset($this->information->sheets)) {
