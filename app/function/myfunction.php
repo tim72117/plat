@@ -55,7 +55,7 @@ if ( ! function_exists('check_empty'))
 {
 	function check_empty($text, $name, &$errors)
 	{
-		empty($text) && array_push($errors, '未填入' . $name);
+		$text == '' && array_push($errors, '未填入' . $name);
 	}
 }
 

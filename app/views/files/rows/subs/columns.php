@@ -15,6 +15,12 @@
                 </div>                   
                 <!-- <div class="ui input"><input type="text" placeholder="表格名稱" ng-model="sheet.name" /></div> -->
                 <div class="ui right attached basic icon button disabled" ng-click="addSheet()" title="新增資料表"><i class="plus icon"></i></div>
+                <div class="ui red button" ng-click="sheet.editable=true;updateSheet(sheet)" ng-class="{loading: saving, disabled: sheet.editable}">
+                    <i class="save icon"></i>修改(會移除已上傳資料)
+                </div> 
+                <div class="ui green button" ng-click="sheet.editable=false;updateSheet(sheet)" ng-class="{loading: saving, disabled: !sheet.editable}">
+                    <i class="save icon"></i>完成(會移除已上傳資料)
+                </div> 
                 <div class="ui checkbox">
                     <input type="checkbox" id="readOnly" ng-true-value="'1'" ng-model="sheet.fillable">
                     <label for="readOnly">可匯入</label>
@@ -34,7 +40,7 @@
         </tr>
     </thead>
     <tbody ng-repeat="table in sheet.tables">
-        <tr ng-repeat="column in table.columns" ng-class="{active: !notNew(column), disabled: !file.editable || column.updating, error: column.error}">
+        <tr ng-repeat="column in table.columns" ng-class="{active: !notNew(column), disabled: sheet.editable == '0' || column.updating, error: column.error}">
             <td><i class="icon" ng-class="{columns: notNew(column), add: !notNew(column)}"></i>{{ $index+1 }}</td>
             <td>
                 <div class="ui large input">
@@ -75,7 +81,7 @@
                 </select>
             </td>
             <td>
-                <div class="ui basic mini button" ng-if="notNew(column)" ng-click="removeColumn(column)">
+                <div class="ui basic mini button" ng-if="notNew(column)" ng-click="removeColumn(sheet, table, column)">
                     <i class="remove icon"></i>刪除
                 </div>
             </td>

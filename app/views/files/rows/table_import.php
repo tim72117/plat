@@ -12,9 +12,11 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
         <form style="display:none">
             <input type="file" id="file_upload" nv-file-select uploader="uploader" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
         </form>
-        <label for="file_upload" class="ui basic button" ng-class="{loading: uploading}"><i class="icon upload"></i>上傳</label>           
+        <label for="file_upload" class="ui basic button" ng-class="{loading: uploading, disabled: sheet.editable}"><i class="icon upload"></i>上傳</label>
 
         <div class="ui green label">上傳名單用的資料表格 <a class="detail" href="javascript:void(0)" ng-click="exportSample()"><i class="icon download"></i>下載</a></div>
+
+        <div class="ui red message" ng-if="sheet.editable">資料表修改中，暫時無法上傳資料。</div>    
 
         <br />
         <div class="ui compact message" ng-bind-html="file.comment"></div> 
@@ -31,19 +33,45 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
             <thead>
                 <tr>
                     <th>欄位代號</th>
-                    <th ng-repeat="column in table.columns">{{ column.name }}</th>
-                    <th></th>
+                    <th class="one wide" ng-repeat="column in table.columns">{{ column.name }}</th>
+                    <th style="min-width:300px"></th>
                 </tr>
                 <tr>	
                     <th>欄位名稱</th>
-                    <th ng-repeat="column in table.columns">{{ column.title }}</th>
+                    <th class="one wide" ng-repeat="column in table.columns">{{ column.title }}</th>
                     <th>錯誤資訊</th>
                 </tr>
             </thead>
+            <tbody>
+                <tr>   
+                    <td></td>
+                    <td colspan="{{ table.columns.length+1 }}">
+                        <div class="ui statistics">
+                            <div class="grey statistic">
+                                <div class="value">{{ rows_count }}</div>
+                                <div class="label">已上傳 </div>
+                            </div>
+                            <div class="green statistic" ng-if="messages.length > 0">
+                                <div class="value">{{ (messages | filter: insert).length }}</div>
+                                <div class="label">這次上傳 新增 </div>
+                            </div>
+                            <div class="yellow statistic" ng-if="messages.length > 0">
+                                <div class="value">{{ (messages | filter: update).length }}</div>
+                                <div class="label">這次上傳 更新 </div>
+                            </div>  
+                            <div class="red statistic" ng-if="messages.length > 0">
+                                <div class="value">{{ (messages | filter: {pass: false}).length }}</div>
+                                <div class="label">錯誤 </div>
+                            </div>                      
+                        </div>
+                        <p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p>
+                    </td>
+                </tr>
+            </tbody>
             <tbody ng-if="messages.length > 0">
-                <tr ng-repeat="message in messages" ng-class="{positive: message.pass, error1: message.empty}">                        
+                <tr ng-repeat="message in messages" ng-class="{positive: message.pass, error: message.empty, warning: message.exists.length > 0}">                        
                     <td>
-                        <div class="ui label" ng-if="message.pass && !message.empty" ng-class="{yellow: message.exist, green: !message.exist}">                                
+                        <div class="ui label" ng-if="message.pass && !message.empty" ng-class="{yellow: message.exists.length > 0, green: message.exists.length < 1}">                                
                             <div ng-if="message.exists.length < 1">新增</div>
                             <div ng-if="message.exists.length > 0">更新</div>
                             <div ng-if="message.exists.length > 0 && !message.updated">更新失敗</div>
@@ -60,23 +88,6 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
                     </td>
                 </tr>
             </tbody>
-            <tfoot>
-                <tr>   
-                    <td></td>
-                    <td class="warning" colspan="{{ table.columns.length+1 }}">
-                        <p>
-                            共有 
-                            {{ rows_count }} 
-                            筆資料 這次上傳 新增
-                            {{ (message.rows | filter:{pass: true, empty: false, exist: false}).length }}
-                            筆，更新
-                            {{ (message.rows | filter:{pass: true, empty: false, exist: true}).length }}
-                            筆 資料
-                        </p>
-                        <p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p>
-                    </td>
-                </tr>
-            </tfoot>
         </table>    
     </div> 
 
@@ -166,6 +177,14 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
     $scope.uploader.onCompleteAll = function() {
         $scope.uploading = false;
     };
+
+    $scope.update = function(value, index, array) {
+        return value.pass && !value.empty && value.exists.length > 0;
+    };
+
+    $scope.insert = function(value, index, array) {
+        return value.pass && !value.empty && value.exists.length < 1;
+    };   
 
 });
 </script>

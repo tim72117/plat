@@ -56,7 +56,8 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
     $scope.updateSheet = function(sheet) {
         $scope.saving = true;
         $http({method: 'POST', url: 'update_sheet', data:{sheet: sheet} })
-        .success(function(data, status, headers, config) {          
+        .success(function(data, status, headers, config) {  
+            console.log(data);         
             angular.extend(sheet, data.sheet);
             $scope.saving = false; 
         }).error(function(e){
@@ -69,7 +70,8 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
 
         $scope.saving = true;
         $http({method: 'POST', url: 'update_column', data:{sheet_id: sheet.id, table_id: table.id, column: column} })
-        .success(function(data, status, headers, config) {           
+        .success(function(data, status, headers, config) {   
+            console.log(data);         
             angular.extend(column, data.column);
             $scope.saving = false; 
         }).error(function(e){
@@ -77,11 +79,12 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         });
     };
 
-    $scope.removeColumn = function(column) {
+    $scope.removeColumn = function(sheet, table, column) {
         $scope.saving = true;
-        $http({method: 'POST', url: 'remove_column', data:{id: column.id} })
-        .success(function(data, status, headers, config) {           
-            $scope.setFile(data);
+        $http({method: 'POST', url: 'remove_column', data:{sheet_id: sheet.id, table_id: table.id, column: column} })
+        .success(function(data, status, headers, config) {   
+            console.log(data);        
+            angular.extend(table, data.table);
             $scope.saving = false; 
         }).error(function(e){
             console.log(e);
@@ -128,7 +131,6 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         $scope.file.title = file.title;
         $scope.file.sheets = file.sheets;        
         $scope.file.comment = file.comment;
-        $scope.file.editable = file.editable;
         if( $scope.file.sheets.length > 0 ) {
             $scope.file.sheets[0].selected = true;
         }else{
@@ -144,7 +146,7 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
     };  
 
     $scope.checkColumn = function(column) {        
-        column.error = !column.name || !column.title || !column.rules || !/^\w{1,50}$/.test(column.name) || !/^[a-z_]+$/.test(column.rules);
+        column.error = !column.name || !column.title || !column.rules || !/^\w{1,50}$/.test(column.name) || !/^[a-z0-9_]+$/.test(column.rules);
 
         return column.error;
     };
@@ -159,7 +161,7 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
                     if( !$scope.notNew(column) )
                         return false;
 
-                    column.error = !/^\w{1,50}$/.test(column.name ) || !column.rules || !/^[a-z_]+$/.test(column.rules);
+                    column.error = !/^\w{1,50}$/.test(column.name ) || !column.rules || !/^[a-z0-9_]+$/.test(column.rules);
 
                     return column.error;
 
