@@ -126,7 +126,7 @@
                             </div>
                             <div class="item" ng-if="file.type==='5'">
                                 <i class="icon retweet"></i>
-                                <div class="floating ui label" ng-class="{blue: file.shared.user>0}">{{ file.shared.user || 0 }}</div>
+                                <div class="floating ui label" ng-class="{blue: file.requested.user>0 || file.requested.group>0}">{{ file.requested.user || 0 }} {{ file.requested.group || 0 }}</div>
                             </div>
                         </div>
                         
@@ -230,17 +230,16 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     $scope.getFiles();
     
     $scope.deleteFile = function() {
-        var files = $scope.info.pickeds.map(function(file) {
+        $filter("filter")($scope.files, {selected: true}).map(function(file) {
             $http({method: 'POST', url: '/file/'+file.intent_key+'/delete', data:{} })
             .success(function(data, status, headers, config) {
                 console.log(data);
-                angular.forEach($scope.info.pickeds, function(file){
+                if (data.deleted) {
                     $scope.files.splice($scope.files.indexOf(file), 1);
-                });  
+                };
             }).error(function(e){
                 console.log(e);
             });
-            return file.intent_key;
         });
     };
     

@@ -1,9 +1,7 @@
-<?php
-$work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lists('sname', 'id');
-?>
-<div ng-cloak ng-controller="uploadController" style="position: absolute;left: 10px;right: 10px;top: 10px;bottom: 10px">
 
-    <div class="ui segment" ng-class="{loading: sheetLoading}" ng-repeat="sheet in file.sheets">        
+<div ng-cloak ng-controller="uploadController" style="position: absolute;left: 10px;top: 10px;bottom: 10px;overflow-x: scroll">
+
+    <div class="ui segment" ng-class="{loading: sheetLoading}" ng-repeat="sheet in file.sheets">      
 
         <div class="ui top attached orange progress" ng-class="{disabled: progress<1}">
             <div class="bar" style="width: {{ progress }}%"></div>
@@ -12,64 +10,72 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
         <form style="display:none">
             <input type="file" id="file_upload" nv-file-select uploader="uploader" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
         </form>
-        <label for="file_upload" class="ui basic button" ng-class="{loading: uploading, disabled: sheet.editable}"><i class="icon upload"></i>上傳</label>
+        <label for="file_upload" class="ui red button" ng-class="{loading: uploading, disabled: sheet.editable}"><i class="icon upload"></i>上傳</label>
 
-        <div class="ui green label">上傳名單用的資料表格 <a class="detail" href="javascript:void(0)" ng-click="exportSample()"><i class="icon download"></i>下載</a></div>
+        <div class="ui green button" ng-click="exportSample(sheet)">
+            <i class="download icon"></i>下載上傳名單用的資料表格
+        </div> 
 
-        <div class="ui red message" ng-if="sheet.editable">資料表修改中，暫時無法上傳資料。</div>    
+        <div class="ui green button" ng-click="exportRows(sheet)">
+            <i class="download icon"></i>下載已上傳名單
+        </div> 
 
-        <br />
-        <div class="ui compact message" ng-bind-html="file.comment"></div> 
-
-        <br />{{ message.head }}
-        <div class="ui negative compact message" ng-if="messages.head">
-            <div class="header">檔案錯誤</div> 
-            <p ng-repeat="error in messages.head">沒有{{ error.title }}欄位</p>              
+        <div class="ui attached red message" ng-if="sheet.editable">資料表修改中，暫時無法上傳資料。</div>
+        <div class="ui attached message" ng-bind-html="file.comment"></div>
+        <div class="ui attached segment">若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</div>
+        <div class="ui attached segment" ng-if="messages.head">
+            <h4 class="ui header">沒有欄位</h4>
+            <div  class="ui red label" ng-repeat="error in messages.head">{{ error.title }}</div >           
         </div> 
 
         <!-- <h4 class="ui header">欄位說明 <a href="javascript:void(0)" ng-click="exportDescribe()">下載</a></h4> -->        
 
-        <table ng-repeat="table in sheet.tables" class="ui compact collapsing definition table">
+        <table ng-repeat="table in sheet.tables" class="ui very compact table">
             <thead>
-                <tr>
-                    <th>欄位代號</th>
-                    <th class="one wide" ng-repeat="column in table.columns">{{ column.name }}</th>
-                    <th style="min-width:300px"></th>
-                </tr>
-                <tr>	
-                    <th>欄位名稱</th>
-                    <th class="one wide" ng-repeat="column in table.columns">{{ column.title }}</th>
-                    <th>錯誤資訊</th>
-                </tr>
-            </thead>
-            <tbody>
                 <tr>   
-                    <td></td>
-                    <td colspan="{{ table.columns.length+1 }}">
-                        <div class="ui statistics">
+                    <td colspan="{{ table.columns.length+3 }}">
+                        <div class="ui basic segment">
+                        <div class="ui mini statistics">
                             <div class="grey statistic">
-                                <div class="value">{{ rows_count }}</div>
-                                <div class="label">已上傳 </div>
+                                <div class="value">{{ table.count }}</div>
+                                <div class="label">已上傳</div>
                             </div>
                             <div class="green statistic" ng-if="messages.length > 0">
                                 <div class="value">{{ (messages | filter: insert).length }}</div>
-                                <div class="label">這次上傳 新增 </div>
+                                <div class="label">這次上傳 新增</div>
                             </div>
                             <div class="yellow statistic" ng-if="messages.length > 0">
                                 <div class="value">{{ (messages | filter: update).length }}</div>
-                                <div class="label">這次上傳 更新 </div>
+                                <div class="label">這次上傳 更新</div>
                             </div>  
                             <div class="red statistic" ng-if="messages.length > 0">
                                 <div class="value">{{ (messages | filter: {pass: false}).length }}</div>
-                                <div class="label">錯誤 </div>
+                                <div class="label"> 
+                                    <div class="ui checkbox">
+                                        <input type="checkbox" id="messagefilter" ng-model="messagefilter.pass" ng-true-value="false" ng-false-value="''" />
+                                        <label for="messagefilter">只顯示錯誤資料</label>
+                                    </div>
+                                </div>
                             </div>                      
-                        </div>
-                        <p>若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p>
+                        </div> 
+                        </div>                        
                     </td>
                 </tr>
-            </tbody>
+                <tr>	
+                    <th>欄位名稱</th>
+                    <th></th>
+                    <th>錯誤資訊</th>
+                    <th style="max-width:70px;overflow-x: hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ column.title }}" ng-repeat="column in table.columns">{{ column.title }}</th>                    
+                </tr>
+                <tr>
+                    <th>欄位代號</th>
+                    <th></th>
+                    <th style="min-width:100px"></th>
+                    <th style="max-width:70px;overflow-x: hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ column.name }}" ng-repeat="column in table.columns">{{ column.name }}</th>                    
+                </tr>
+            </thead>
             <tbody ng-if="messages.length > 0">
-                <tr ng-repeat="message in messages" ng-class="{positive: message.pass, error: message.empty, warning: message.exists.length > 0}">                        
+                <tr ng-repeat="(index, message) in messages | filter: messagefilter" ng-class="{positive: message.pass, warning: message.pass && message.exists.length > 0}">
                     <td>
                         <div class="ui label" ng-if="message.pass && !message.empty" ng-class="{yellow: message.exists.length > 0, green: message.exists.length < 1}">                                
                             <div ng-if="message.exists.length < 1">新增</div>
@@ -80,15 +86,17 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
                         <div class="ui red label" ng-if="!message.pass && !message.empty">錯誤</div>
                         <div class="ui grey label" ng-if="message.empty">空白</div>
                     </td>
-                    <td ng-repeat="column in table.columns" ng-class="{error: message.errors[column.id]}">{{ message.row['C' + column.id] }}</td>
+                    <td>{{ index+2 }}</td> 
                     <td class="error">
                         <div ng-repeat="errors in message.errors">
                             <div ng-repeat="error in errors"><i class="attention icon"></i>{{ error }}</div>
                         </div>   
                     </td>
+                    <td ng-repeat="column in table.columns" ng-class="{error: message.errors[column.id]}">{{ message.row['C' + column.id] }}</td>
                 </tr>
             </tbody>
-        </table>    
+        </table> 
+
     </div> 
 
 </div>
@@ -98,18 +106,16 @@ $work_schools = ['011C31' => '測試'];//User_use::find($user->id)->schools->lis
 
 <script>
 app.requires.push('angularFileUpload');
-app.controller('uploadController', function($scope, $http, $timeout, FileUploader) {
-    $scope.schools = angular.fromJson(<?=(isset($work_schools) ? json_encode($work_schools) : '[]')?>);    
+app.controller('uploadController', function($scope, $http, $timeout, FileUploader) {   
     $scope.messages = [];
     $scope.file = {sheets: [], comment: ''};
     $scope.uploading = false;
     $scope.sheetLoading = false;
+    $scope.messagefilter = {};
     
     $scope.getStatus = function(input) {
-        $http({method: 'POST', url: 'get_status', data:{} })
+        $http({method: 'POST', url: 'get_file', data:{editor: false} })
         .success(function(data, status, headers, config) {
-            console.log(data);
-            $scope.rows_count = data.rows_count;
             $scope.file.sheets = data.sheets;
             $scope.file.comment = data.comment;
         }).error(function(e){
@@ -123,6 +129,14 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
         jQuery.fileDownload('export_sample', {
             httpMethod: "POST",
             data: {index: 1},
+            failCallback: function (responseHtml, url) { console.log(responseHtml); }
+        }); 
+    };
+
+    $scope.exportRows = function(sheet) {
+        jQuery.fileDownload('export_my_rows', {
+            httpMethod: "POST",
+            data: {sheet_id: sheet.id},
             failCallback: function (responseHtml, url) { console.log(responseHtml); }
         }); 
     };
@@ -152,7 +166,6 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
     };
 
     $scope.uploader.onCompleteItem = function(fileItem, response, status, headers) {
-        console.log(response);
         if( headers['content-type'] != 'application/json' )
             return;        
 
@@ -171,10 +184,11 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
 
     $scope.uploader.onErrorItem = function(fileItem, response, status, headers) {
         console.log(response);
-        angular.element('.queryLog').append(response);        
+        //angular.element('.queryLog').append(response);        
     };
 
     $scope.uploader.onCompleteAll = function() {
+        $scope.getStatus();
         $scope.uploading = false;
     };
 

@@ -38,12 +38,13 @@ class ShareFile extends Eloquent {
 		return $this->hasOne('Files', 'id', 'file_id');
 	}
     
-    public function hasSharedDocs() {
-        return $this->hasMany('ShareFile', 'file_id', 'file_id')->where('created_by', '=', Auth::user()->id)->where(function($query){
-            $query->where('target', '<>', 'user')->orWhere('target_id', '<>', Auth::user()->id);
-        });
+    public function shareds() {
+    	return $this->hasMany('ShareFile', 'file_id', 'file_id')->where('created_by', '=', Auth::user()->id)->where('id' , '<>', $this->id);
     }
-    
+
+    public function requesteds() {
+    	return $this->hasMany('RequestFile', 'doc_id', 'id');
+    }
 }
 	
 class Apps extends Eloquent {
@@ -161,9 +162,12 @@ class Struct_file
 	        'type'       => $shareFile->isFile->type,
 	        'intent_key' => $intent_key,
 	        'tools'      => isset($tools) ? $tools : [],
-	        'shared'     => array_count_values($shareFile->hasSharedDocs->map(function($sharedDocs){
-	            return $sharedDocs->target;
-	        })->all())
+	        'shared'     => array_count_values($shareFile->shareds->map(function($shared){
+				            	return $shared->target;
+				        	})->all()),
+	        'requested'  => array_count_values($shareFile->requesteds->map(function($requested){
+				            	return $requested->target;
+				        	})->all()),
 	    ];
     }
 }

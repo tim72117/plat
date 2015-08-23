@@ -1,4 +1,6 @@
-<table ng-repeat="($tindex, sheet) in file.sheets" ng-if="sheet.selected" class="ui compact collapsing table">
+<div ng-repeat="sheet in file.sheets" ng-if="sheet.selected">
+
+<table ng-repeat="table in sheet.tables" class="ui attached very compact collapsing table">
     <thead>
         <tr>                            
             <th colspan="9">
@@ -13,14 +15,14 @@
                         <div class="item" ng-repeat="sheet in file.sheets" ng-click="action.toSelect(sheet)">{{ sheet.title }}</div>
                     </div>
                 </div>                   
-                <!-- <div class="ui input"><input type="text" placeholder="表格名稱" ng-model="sheet.name" /></div> -->
                 <div class="ui right attached basic icon button disabled" ng-click="addSheet()" title="新增資料表"><i class="plus icon"></i></div>
-                <div class="ui red button" ng-click="sheet.editable=true;updateSheet(sheet)" ng-class="{loading: saving, disabled: sheet.editable}">
+                <div class="ui red button" ng-click="sheet.editable=true;updateSheet(sheet)" ng-class="{loading: saving, disabled: sheet.editable || table.lock}">
                     <i class="save icon"></i>修改(會移除已上傳資料)
                 </div> 
-                <div class="ui green button" ng-click="sheet.editable=false;updateSheet(sheet)" ng-class="{loading: saving, disabled: !sheet.editable}">
+                <div class="ui green button" ng-click="sheet.editable=false;updateSheet(sheet)" ng-class="{loading: saving, disabled: !sheet.editable || table.lock}">
                     <i class="save icon"></i>完成(會移除已上傳資料)
                 </div> 
+                <div class="ui red label" ng-if="table.lock"><i class="lock icon"></i>資料已鎖定<div class="detail">{{ table.count }}筆</div></div>
                 <div class="ui checkbox">
                     <input type="checkbox" id="readOnly" ng-true-value="'1'" ng-model="sheet.fillable">
                     <label for="readOnly">可匯入</label>
@@ -39,8 +41,8 @@
             <th></th>
         </tr>
     </thead>
-    <tbody ng-repeat="table in sheet.tables">
-        <tr ng-repeat="column in table.columns" ng-class="{active: !notNew(column), disabled: sheet.editable == '0' || column.updating, error: column.error}">
+    <tbody>
+        <tr ng-repeat="column in table.columns" ng-class="{active: !notNew(column), disabled: column.updating, error: column.error}">
             <td><i class="icon" ng-class="{columns: notNew(column), add: !notNew(column)}"></i>{{ $index+1 }}</td>
             <td>
                 <div class="ui large input">
@@ -52,8 +54,8 @@
                     <input type="text" placeholder="欄位名稱" ng-model="column.title" ng-model-options="{ debounce: 500 }" ng-change="updateColumn(sheet, table, column)" />
                 </div>
             </td>
-            <td>
-                <select class="ui dropdown" ng-model="column.rules" ng-options="key as rule.title for (key , rule) in rules" ng-change="updateColumn(sheet, table, column)">
+            <td ng-class="{disabled: !sheet.editable || table.lock}">
+                <select class="ui dropdown" ng-model="column.rules" ng-options="key as rule.title for (key , rule) in file.rules" ng-change="updateColumn(sheet, table, column, true)">
                     <option value="">過濾規則</option>
                 </select>
             </td>
@@ -80,7 +82,7 @@
                     <option value="">資料表</option>
                 </select>
             </td>
-            <td>
+            <td ng-class="{disabled: !sheet.editable || table.lock}">
                 <div class="ui basic mini button" ng-if="notNew(column)" ng-click="removeColumn(sheet, table, column)">
                     <i class="remove icon"></i>刪除
                 </div>
@@ -88,3 +90,5 @@
         </tr>
     </tbody>
 </table>
+
+</div>

@@ -108,13 +108,13 @@ class ShareController extends BaseController {
 
 
             //未處理 - sheet
-            if( isset($file->power) ) {
-                $power = json_decode($file->power);
-                foreach($columns as $index => $column) {
-                    if( !in_array($column, $power) )
-                        unset($columns[$index]);                        
-                }
-            }
+            // if( isset($file->power) ) {
+            //     $power = json_decode($file->power);
+            //     foreach($columns as $index => $column) {
+            //         if( !in_array($column, $power) )
+            //             unset($columns[$index]);                        
+            //     }
+            // }
             
             foreach($input['groups'] as $group) {
                 if( count($group['users']) == 0 && $myGroups->contains($group['id']) && $myFiles->contains($shareFile['id']) ){                    

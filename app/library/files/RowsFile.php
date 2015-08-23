@@ -11,28 +11,28 @@ class RowsFile extends CommFile {
     public $temp; 
 
     public $rules = [  
-        'stdidnumber' => ['sort' => 1, 'type' => 'string', 'title' => '身分證',                  'size' => 10, 'regex' => '/^\w+$/', 'function' => 'stdidnumber'],
-        'email'       => ['sort' => 2, 'type' => 'string', 'title' => '信箱',                    'size' => 80, 'validator' => 'email'],        
-        'gender'      => ['sort' => 3, 'type' => 'tinyInteger', 'title' => '性別: 1.男 2.女',              'validator' => 'in:1,2'],
-        'gender_id'   => ['sort' => 4, 'type' => 'tinyInteger', 'title' => '性別: 1.男 2.女(身分證第2碼)', 'validator' => 'in:1,2'],
-        'date_six'    => ['sort' => 5, 'type' => 'string',   'title' => '日期(yymmdd)',   'size' => 6,     'regex' => '/^[0-9]{6}$/'],
-        'bool'        => ['sort' => 6, 'type' => 'boolean',  'title' => '是(1)與否(0)',                    'validator' => 'boolean'],
-        'int'         => ['sort' => 7, 'type' => 'string',  'title' => '整數',            'regex' => '/^\d+$/'],
-        'float'       => ['sort' => 8, 'type' => 'float',    'title' => '小數',           'regex' => '/^[0-9]+.[0-9]+$/'],
-        'order'       => ['sort' => 9, 'type' => 'string',    'title' => '順序(1-99,-7)',               'size' => 2, 'validator' =>'between:-7,99|not_in:-6,-5,-4,-3,-2,-1,0'],
-        'score'       => ['sort' => 1, 'type' => 'string',   'title' => '成績(A++,A+,A,B++,B+,B,C,-7)', 'size' => 4, 'validator' => 'in:A++,A+,A,B++,B+,B,C,-1'],
-        'score_six'   => ['sort' => 1, 'type' => 'string',   'title' => '成績(0~6,-7)',                 'size' => 4, 'validator' => 'in:0,1,2,3,4,5,6,-1'],
-        'phone'       => ['sort' => 1, 'type' => 'string', 'title' => '手機',                    'size' => 20, 'regex' => '/^\w+$/'],
-        'tel'         => ['sort' => 1, 'type' => 'string', 'title' => '電話',                    'size' => 20, 'regex' => '/^\w+$/'],
-        'address'     => ['sort' => 1, 'type' => 'string', 'title' => '地址',                    'size' => 50],
-        'schid_104'   => ['sort' => 1, 'type' => 'string',   'title' => '高中職學校代碼(104)', 'size' => 6, 'function' => 'schid_104'],
-        'depcode_104' => ['sort' => 1, 'type' => 'string',   'title' => '高中職科別代碼(104)', 'size' => 6],
-        'text'        => ['sort' => 1, 'type' => 'longText', 'title' => '文字(50字以內)', 'size' => 50],
-        'nvarchar'    => ['sort' => 1, 'type' => 'string',   'title' => '文字(50字以上)', 'size' => 500],
-        'other'       => ['sort' => 1, 'type' => 'string',   'title' => '其他',           'size' => 50],
+        'gender'      => ['sort' => 3, 'type' => 'tinyInteger',             'title' => '性別: 1.男 2.女',              'validator' => 'in:1,2'],
+        'gender_id'   => ['sort' => 4, 'type' => 'tinyInteger',             'title' => '性別: 1.男 2.女(身分證第2碼)', 'validator' => 'in:1,2'],
+        'bool'        => ['sort' => 6, 'type' => 'boolean',                 'title' => '是(1)與否(0)',                 'validator' => 'boolean'],
+        'stdidnumber' => ['sort' => 1, 'type' => 'string',   'size' => 10,  'title' => '身分證',            'function' => 'stdidnumber'],
+        'email'       => ['sort' => 2, 'type' => 'string',   'size' => 80,  'title' => '信箱',              'validator' => 'email'],       
+        'date_six'    => ['sort' => 5, 'type' => 'string',   'size' => 6,   'title' => '日期(yymmdd)',      'validator' => ['regex:/^([0-9][0-9])(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$/']],
+        'order'       => ['sort' => 9, 'type' => 'string',   'size' => 2,   'title' => '順序(1-99,-7)',                 'validator' =>'between:-7,99|not_in:-6,-5,-4,-3,-2,-1,0'],
+        'score'       => ['sort' => 1, 'type' => 'string',   'size' => 3,   'title' => '成績(A++,A+,A,B++,B+,B,C,-7)',  'validator' => 'in:A++,A+,A,B++,B+,B,C,-7'],
+        'score_six'   => ['sort' => 1, 'type' => 'string',   'size' => 2,   'title' => '成績(0~6,-7)',                  'validator' => 'in:0,1,2,3,4,5,6,-7'],
+        'phone'       => ['sort' => 1, 'type' => 'string',   'size' => 20,  'title' => '手機',                 'regex' => '/^\w+$/'],
+        'tel'         => ['sort' => 1, 'type' => 'string',   'size' => 20,  'title' => '電話',                 'regex' => '/^\w+$/'],
+        'address'     => ['sort' => 1, 'type' => 'string',   'size' => 80,  'title' => '地址'],
+        'schid_104'   => ['sort' => 1, 'type' => 'string',   'size' => 6,   'title' => '高中職學校代碼(104)', 'function' => 'schid_104'],
+        'depcode_104' => ['sort' => 1, 'type' => 'string',   'size' => 3,   'title' => '高中職科別代碼(104)', 'function' => 'depcode_104'],
+        'text'        => ['sort' => 1, 'type' => 'string',   'size' => 50,  'title' => '文字(50字以內)'],
+        'nvarchar'    => ['sort' => 1, 'type' => 'string',   'size' => 500, 'title' => '文字(500字以內)'],
+        'int'         => ['sort' => 7, 'type' => 'integer',                 'title' => '整數',                         'regex' => '/^\d+$/'],
+        'float'       => ['sort' => 8, 'type' => 'float',                   'title' => '小數',                         'regex' => '/^[0-9]+.[0-9]+$/'],
     ]; 
 
     public function checker($name) {
+
         $checkers = [
             'stdidnumber' => function($column_value, $column, &$column_errors) {
                 !check_id_number($column_value) && array_push($column_errors, $column->title . '無效');
@@ -44,14 +44,15 @@ class RowsFile extends CommFile {
 
                 !in_array($column_value, $this->temp->works) && array_push($column_errors, '不是本校代碼');
             },
-            'depcode' => function($column_value, $column, &$column_errors) {
-                $name = '科系代碼';
-                $errors = [];
-                check_empty($n, $name, $errors);
-                !preg_match("/^[a-zA-Z0-9]{3,6}$/u", $n) && array_push($errors, $name . '錯誤');
-                !in_array($n, $m) && array_push($errors, '非貴校科系代碼');
-                
-                return $errors;
+            'depcode_104' => function($column_value, $column, &$column_errors) {
+                if (!isset($this->temp->works)) {
+                    $this->temp->works = \User_use::find($this->user->id)->works->lists('sch_id');
+                }  
+                if (!isset($this->temp->dep_codes)) {
+                    $this->temp->dep_codes = DB::table('pub_depcode')->whereIn('sch_id', $this->temp->works)->lists('dep_code');
+                }                
+
+                !in_array($column_value, $this->temp->dep_codes) && array_push($column_errors, '不是本校科別代碼');
             },
         ];
         return $checkers[$name];
@@ -88,7 +89,7 @@ class RowsFile extends CommFile {
 
         $sheet = $shareFile->isFile->sheets()->create(['title' => '']);
 
-        $sheet->tables()->create(['database' => self::$database, 'name' => self::generate_table()]);
+        $sheet->tables()->create(['database' => self::$database, 'name' => self::generate_table(), 'construct_at' => Carbon::now()->toDateTimeString()]);
 
         return $shareFile;
     }
@@ -106,15 +107,7 @@ class RowsFile extends CommFile {
     }
     
 	public function import() 
-    {        
-        $sheets = $this->file->sheets()->with(['tables', 'tables.columns'])->get()->filter(function($sheet) {return !$sheet->editable;})->each(function($sheet) {
-            $sheet->tables->each(function($table) {
-                if (!isset($table->builded_at) || $table->updated_at->diffInMinutes(new Carbon($table->builded_at)) > 0) {
-                    $this->create_schema_table($table);
-                }
-            });    
-        });
-
+    {     
         return 'files.rows.table_import';        
     }
 
@@ -122,36 +115,27 @@ class RowsFile extends CommFile {
     {
         return 'row_' . Carbon::now()->formatLocalized('%Y%m%d_%H%M%S') . '_' . strtolower(str_random(5));
     }
-    
-    public function get_status() 
-    {        
-        $sheets = $this->file->sheets()->with(['tables', 'tables.columns'])->get()->map(function($sheet) {
-            $sheet->editable = (boolean)$sheet->editable;
-            return $sheet;
-        });
-
-        foreach($sheets as $sheet) {
-            foreach($sheet->tables as $table) {
-                if (Schema::hasTable($table->name)) {
-                    $rows_count = DB::table($table->name)->whereNull('deleted_at')->where('created_by', $this->user->id)->count();
-                } else {
-                    $rows_count = 0;
-                }
-            }
-        }
-
-        return ['rows_count' => $rows_count, 'sheets' => $sheets->toArray(), 'comment' => $this->information->comment];
-    }
 
     public function get_file()
-    {       
-        $sheets = $this->file->sheets()->with(['tables', 'tables.columns'])->get()->map(function($sheet) {
-            $sheet->editable = (boolean)$sheet->editable;
-            return $sheet;
-        })->toArray();
+    { 
+        $sheets = $this->file->sheets()->with(['tables', 'tables.columns'])->get()->each(function($sheet) {
+            $sheet->tables->each(function($table) use($sheet) {
+                !$sheet->editable && $this->table_construct($table);
+                if ($this->has_table($table)) {
+                    $query = DB::table($table->database. '.dbo.' . $table->name)->whereNull('deleted_at');
+                    if ($this->shareFile->created_by != $this->user->id || !Input::get('editor', false)) {
+                        $query->where('created_by', $this->user->id);
+                    }
+                    $table->count = $query->count();
+                }
+            });
+        });
+
+        $sheets->first()->selected = true;
+
         return [
             'title'    => $this->file->title,
-            'sheets'   => $sheets,
+            'sheets'   => $sheets->toArray(),
             'rules'    => $this->rules,            
             'comment'  => isset($this->information->comment) ? $this->information->comment : '',
         ];
@@ -168,35 +152,46 @@ class RowsFile extends CommFile {
 
     public function remove_column()
     {
-        $table = $this->file->sheets        
-            ->find(Input::get('sheet_id'))->tables
-            ->find(Input::get('table_id'));
+        $table = $this->file->sheets->find(Input::get('sheet_id'))->tables->find(Input::get('table_id'));
 
         $table->columns->find(Input::get('column')['id'])->delete();
-
-        $table->touch();
 
         return ['table' => $table->load('columns')->toArray()];
     }
 
-    public function update_column()//touch table
+    public function update_column()
     {
         $input = array_only(Input::get('column'), array('name', 'title', 'rules', 'unique', 'encrypt', 'isnull'));
 
         $table = $this->file->sheets->find(Input::get('sheet_id'))->tables->find(Input::get('table_id'));
 
-        if (!isset(Input::get('column')['id'])) {
-            $column = $table->columns()->create($input);
-            
-        } else {   
+        if (isset(Input::get('column')['id'])) {
             $column = $table->columns->find(Input::get('column')['id']);
-            $column->update($input);
-        }
-
-        $table->touch();
+            $column->update($input);            
+        } else {   
+            $column = $table->columns()->create($input);
+        }        
 
         return ['column' => $column];
     }
+
+    public function update_comment()
+    {
+        $this->information = (object)['comment' => urldecode(base64_decode(Input::get('comment', '')))];
+
+        $this->put_information($this->information);
+
+        return ['comment' => $this->information->comment];
+    }
+
+    public function put_information($information, $title = null)
+    {        
+        isset($title) && $this->file->title = $title;
+
+        $this->file->information = json_encode($information);
+        
+        $this->file->save();        
+    }    
 
     public function import_upload() 
     {        
@@ -310,12 +305,17 @@ class RowsFile extends CommFile {
                 $rows_message[$row_index]->row['created_at'] = Carbon::now()->toDateTimeString();
                 array_push($rows_insert, $rows_message[$row_index]->row);
             }         
-        }    
-        //var_dump($rows_message);exit;
+        }   
+
+        if (!$table->lock && count($rows_insert)>0) {
+            $table->lock = true;
+            $table->save();            
+        }
+
         foreach(array_chunk($rows_insert, 50) as $rows_part)
         {
             DB::table($table->database . '.dbo.' . $table->name)->insert($rows_part);
-        }     
+        }
 
         return ['messages' => $rows_message];
     }    
@@ -349,21 +349,19 @@ class RowsFile extends CommFile {
         return $column_errors; 
     }
 
-    public function put_information($information, $title = null)
-    {        
-        isset($title) && $this->file->title = $title;
-
-        $this->file->information = json_encode($information);
-        
-        $this->file->save();        
-    }    
-
     public function has_table($table)
     {
         return DB::table($table->database . '.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table->name)->exists();
     }
+
+    private function table_construct($table)
+    {
+        if (!isset($table->builded_at) || Carbon::parse($table->builded_at)->diffInSeconds(new Carbon($table->construct_at), false) > 0) {
+            $this->table_build($table);
+        }
+    }
     
-    public function create_schema_table($table)
+    public function table_build($table)
     {  
         $this->has_table($table) && Schema::drop($table->database . '.dbo.' . $table->name);
 
@@ -373,7 +371,7 @@ class RowsFile extends CommFile {
 
             foreach($table->columns as $column)
             {
-                $this->add_schema_column($query, 'C' . $column->id, $this->rules[$column->rules]);
+                $this->column_bulid($query, 'C' . $column->id, $column->rules);
             }
 
             $query->integer('file_id');
@@ -388,27 +386,16 @@ class RowsFile extends CommFile {
         $table->update(['builded_at' => Carbon::now()->toDateTimeString()]);
     }
 
-    public function drop_tables($schema)
-    {
-        foreach($schema->sheets as $sheet)
-        {
-            foreach($sheet->tables as $table)
-            {       
-                Schema::drop($table->database . '.dbo.' . $table->name);
-            }            
-        }
-    }
- 
-    private function add_schema_column($query, $name, $rule, $indexs = [])
+    private function column_bulid($query, $name, $rule_key, $indexs = [])
     {   
-        if( isset($rule['size']) )  {
-            $schema = $query->$rule['type']($name, $rule['size']);
-        } else {
-            $schema = $query->$rule['type']($name);
-        }
-        foreach($indexs as $index) {        
-            $schema->$index();          
-        }      
+        if (isset($this->rules[$rule_key])) {
+            $rule = $this->rules[$rule_key];
+            $para = isset($rule['size']) ? [$name, $rule['size']] : [$name];
+            call_user_func_array([$query, $rule['type']], $para);
+            foreach($indexs as $index) {        
+                $query->$index();          
+            }  
+        }    
     }
 
     public function request_to()
@@ -417,81 +404,27 @@ class RowsFile extends CommFile {
 
         $myGroups = $this->user->groups;
         
-        if( $this->shareFile->created_by == $this->user->id ) {            
-            foreach($input['groups'] as $group) {                
-                if( $myGroups->contains($group['id']) ) {
-                    RequestFile::updateOrCreate(['target' => 'group', 'target_id' => $group['id'], 'doc_id' => $this->shareFile->id, 'created_by' => $this->user->id], ['description' => $input['description']]);
-                }                
-            }            
+        if( $this->shareFile->created_by == $this->user->id ) {  
+            foreach($input['groups'] as $group) {
+                if (count($group['users']) == 0 && $myGroups->contains($group['id'])){                    
+                    RequestFile::updateOrCreate(
+                        ['target' => 'group', 'target_id' => $group['id'], 'doc_id' => $this->shareFile->id, 'created_by' => $this->user->id],
+                        ['description' => $input['description']]
+                    );
+                }
+                if (count($group['users']) != 0){
+                    foreach($group['users'] as $user){
+                        RequestFile::updateOrCreate(
+                            ['target' => 'user', 'target_id' => $user['id'], 'doc_id' => $this->shareFile->id, 'created_by' => $this->user->id], 
+                            ['description' => $input['description']]
+                        );
+                    }
+                }
+            }          
         }
 
         return Response::json(Input::all());
     }    
-    
-    private function get_rows_query($index_sheet) 
-    {        
-        $schema = $this->get_information();
-        
-        $sheets = $schema->sheets;        
-        
-        $tables = $sheets[$index_sheet]->tables; 
-        
-        $power = array();
-        
-        foreach($tables as $index => $table){
-            
-            $database = $table->database;
-
-            if( $index==0 ){
-                $rows_query = DB::table($database.'.dbo.'.$table->name.' AS t0');
-            }else{
-                $rows_query->leftJoin($database.'.dbo.'.$table->name.' AS t'.$index, 't'.$index.'.'.$table->primaryKey, '=', 't0.'.$table->primaryKey);
-            }    
-
-            if( $this->shareFile->created_by == $this->user->id ) {              
-                //$power = array_map(function($column){return $column->name;}, $table->columns);
-                $power = array_merge($power, array('t0.id'), array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
-                //$power = array_fetch($table->columns, 'name');
-            }else{
-                $power = array_merge($power, array('t0.id'), array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
-            }
-
-        }
-		
-        return [$rows_query, $power];
-    }
-    
-    public function get_rows() 
-    {        
-        //權限未設定
-        
-        $index = Input::get('index');
-
-        list($rows_query, $power) = $this->get_rows_query($index);
-        
-        $rows = $rows_query->select($power)->paginate(Input::get('limit'));
-        //$rows =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
-
-        return Response::json($rows);
-    }	
-    
-    public function get_import_rows() 
-    {        
-        $index = Input::only('index')['index'];
-        
-        list($rows_query, $power) = $this->get_rows_query($index);
-        
-        $rows = $rows_query->select($power)->paginate(Input::only('limit')['limit']);//->where('created_by', $this->user->id)
-
-        return Response::json($rows);
-    }
-
-    public function get_columns($schema)
-    {
-        $table = $schema->sheets[0]->tables[0];
-
-        return $table->columns;
-    }
 
     public function export_sample()
     {
@@ -529,6 +462,70 @@ class RowsFile extends CommFile {
             });
 
         })->download('xlsx');
+    }
+    
+    public function export_my_rows() 
+    {
+        \Excel::create('sample', function($excel) {
+
+            $excel->sheet('sample', function($sheet) {
+
+                $tables = $this->file->sheets->find(Input::get('sheet_id'))->tables;
+
+                list($query, $power) = $this->get_rows_query($tables);
+
+                $head = $tables[0]->columns->map(function($column) { return 'C' . $column->id . ' AS ' . $column->name; })->toArray();
+                
+                $rows = array_map(function($row) {
+                    return array_values(get_object_vars($row));
+                }, $query->where('created_by', $this->user->id)->select($head)->get());
+
+                array_unshift($rows, $tables[0]->columns->fetch('name')->toArray());                  
+
+                $sheet->freezeFirstRow();
+
+                $sheet->fromArray($rows, null, 'A1', false, false);
+
+            });
+
+        })->download('xls');
+    }
+
+    public function get_rows() 
+    {        
+        //權限未設定
+        
+        $index = Input::get('index');
+
+        list($rows_query, $power) = $this->get_rows_query($index);
+        
+        $rows = $rows_query->select($power)->paginate(Input::get('limit'));
+        //$rows =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
+
+        return Response::json($rows);
+    }   
+
+    private function get_rows_query($tables) 
+    {        
+        foreach($tables as $index => $table) {
+            if( $index==0 ){
+                $query = DB::table($table->database . '.dbo.' . $table->name.' AS t0');
+            }else{
+                //join not complete
+                //$rows_query->leftJoin($table->database . '.dbo.' . $table->name . ' AS t' . $index, 't' . $index . '.' . $table->primaryKey, '=', 't0.'.$table->primaryKey);
+            }    
+
+            //share power not complete
+            // if( $this->shareFile->created_by == $this->user->id ) {              
+            //     $power = array_merge($power, array('t0.id'), array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
+            // }else{
+            //     $power = array_merge($power, array('t0.id'), array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
+            // }
+
+        }
+		$power = [];
+
+        return [$query, $power];
     }
 
 	public function export() 
@@ -705,15 +702,43 @@ class RowsFile extends CommFile {
         return Response::json($rows);
     }
     
+    // uncomplete
     public function delete() 
     {
-        $this->file->delete();
+        //$this->file->delete();
 
-        $this->shareFile->delete();
+        //$this->shareFile->delete();
+        $this->shareFile->shareds->each(function($requested) {
+            $requested->delete();
+        });       
 
-        return $this->shareFile->id;
+        $this->shareFile->requesteds->each(function($requested) {
+            $requested->delete();
+        });       
+
+        return ['deleted' => true];
     }
 
+    //deprecated
+    public function get_columns($schema)
+    {
+        $table = $schema->sheets[0]->tables[0];
+
+        return $table->columns;
+    }
+
+    //deprecated
+    public function drop_tables($schema)
+    {
+        foreach($schema->sheets as $sheet)
+        {
+            foreach($sheet->tables as $table)
+            {       
+                Schema::drop($table->database . '.dbo.' . $table->name);
+            }            
+        }
+    }
+ 
     //deprecated
     public function to_new()
     {
@@ -739,7 +764,7 @@ class RowsFile extends CommFile {
             $this->put_information($this->information);
         }
     }
-    
+
     //deprecated (update comment)
     public function save_file()
     {

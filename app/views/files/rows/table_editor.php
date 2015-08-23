@@ -8,7 +8,7 @@
             <a class="item" href="javascript:void(0)" ng-class="{active: tool=='comment'}" ng-click="changeTool('comment')">說明文件</a>
             <div class="item"><p><a href="import">預覽</a></p></div>
             <a class="item" href="javascript:void(0)">
-                <div class="ui basic button" ng-click="saveFile()" ng-class="{loading: saving, disabled: tool=='columns'}"><i class="save icon"></i>儲存</div> 
+                <div class="ui basic button" ng-click="saveComment()" ng-class="{loading: saving, disabled: tool=='columns'}"><i class="save icon"></i>儲存</div> 
                 <span ng-if="saving">儲存中...</span>
             </a>
         </div>
@@ -37,6 +37,23 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
     $scope.sheetsPage = 1;
     $scope.loading = true; 
     
+    $scope.getFile = function() {
+        $scope.loading = true;
+        $http({method: 'POST', url: 'get_file', data:{editor: true} })
+        .success(function(data, status, headers, config) {
+            console.log(data);  
+            $scope.file.rules = data.rules;
+            $scope.file.title = data.title;
+            $scope.file.sheets = data.sheets;        
+            $scope.file.comment = data.comment;
+            $scope.loading = false;
+        }).error(function(e){
+            console.log(e);
+        });
+    }; 
+
+    $scope.getFile();       
+
     $scope.addSheet = function() {
         var sheet = {name:'', tables: [{columns:[]}]};
         $scope.file.sheets.push(sheet);
@@ -44,7 +61,11 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
     };
 
     $scope.$watch('file.sheets | filter: {selected: true}', function(sheets) {
-        if( !sheets ) return;
+        if (!sheets) return;
+        if (!sheets[0].editable) return;
+        for(var i in sheets[0].tables) {
+            if (sheets[0].tables[i].lock) { return; };
+        }
 
         var columns = sheets[0].tables[0].columns;
         
@@ -65,11 +86,11 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         });
     }
 
-    $scope.updateColumn = function(sheet, table, column) {
+    $scope.updateColumn = function(sheet, table, column, rebuild) {
         if ($scope.checkColumn(column)) return;
 
         $scope.saving = true;
-        $http({method: 'POST', url: 'update_column', data:{sheet_id: sheet.id, table_id: table.id, column: column} })
+        $http({method: 'POST', url: 'update_column', data:{sheet_id: sheet.id, table_id: table.id, column: column, rebuild: rebuild} })
         .success(function(data, status, headers, config) {   
             console.log(data);         
             angular.extend(column, data.column);
@@ -90,6 +111,21 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
             console.log(e);
         });
     };
+    
+    $scope.saveComment = function() {
+        $scope.saving = true;
+        $http({method: 'POST', url: 'update_comment', data:{comment: $scope.btoa($scope.file.comment)} })
+        .success(function(data, status, headers, config) {
+            angular.extend($scope.file.comment, data.comment);
+            $scope.saving = false; 
+        }).error(function(e){
+            console.log(e);
+        });
+    }; 
+
+    $scope.btoa = function(text) {
+        return btoa(encodeURIComponent(text));
+    };
 
     $scope.action.toSelect = function(sheet) {
         angular.forEach($filter('filter')($scope.file.sheets, {selected: true}), function(sheet) {
@@ -97,46 +133,6 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         });
         sheet.selected = true;        
     }; 
-    
-    $scope.getFile = function() {
-        $scope.loading = true;
-        $http({method: 'POST', url: 'get_file', data:{} })
-        .success(function(data, status, headers, config) {
-            console.log(data);  
-            $scope.setFile(data);
-            $scope.loading = false;
-        }).error(function(e){
-            console.log(e);
-        });
-    }; 
-
-    $scope.getFile();   
-    
-    $scope.saveFile = function() {
-        if( $scope.isEmpty($scope.file.sheets) )
-            return false;
-        console.log($scope.file);
-        $scope.saving = true;
-        $http({method: 'POST', url: 'save_file', data:{file: $scope.file} })
-        .success(function(data, status, headers, config) {
-            $scope.setFile(data);
-            $scope.saving = false; 
-        }).error(function(e){
-            console.log(e);
-        });
-    }; 
-
-    $scope.setFile = function(file) {
-        $scope.rules = file.rules;
-        $scope.file.title = file.title;
-        $scope.file.sheets = file.sheets;        
-        $scope.file.comment = file.comment;
-        if( $scope.file.sheets.length > 0 ) {
-            $scope.file.sheets[0].selected = true;
-        }else{
-            $scope.addSheet();
-        } 
-    };      
 
     $scope.setAutocomplete = function(colHeader) {
         colHeader.link.enable = !!colHeader.link.table;
