@@ -94,34 +94,20 @@ function getCookie(value) {
         <div class="ui inverted secondary menu use-green">
             <div class=" item"> 
                 <div class="ui transparent inverted icon input">
-                    <input type="text" placeholder="Search...">
-                    <i class="search icon"></i>
+<!--                     <input type="text" placeholder="Search...">
+                    <i class="search icon"></i> -->
                 </div>
-            </div>
-<?
-if( isset($power->files) && $power->files ) { 
-?>
-            <a class="item use-green" href="/file/<?=app\library\files\v0\FileProvider::make()->app_intent_key('open', 18, 'app\\library\\files\\v0\\CustomFile')?>/open">我的檔案</a>
-<? } 
-if( Auth::user()->id==1 && Request::is('file/*') ) { 
-?>
-            <a class="item use-green" href="javascript:void(0)" ng-click="getGroupForApp()"><i class="share alternate icon"></i>分享</a>
-<? } ?>
+            </div>            
             <div class="right menu">
-<?
-if( Auth::user()->id==1 ) { 
-?>
-                <a class="item use-green" href="javascript:void(0)" ng-click="queryLog()">queryLog</a>
-<? } ?>
+                <a class="item use-green" href="/file/<?=app\library\files\v0\FileProvider::make()->app_intent_key('open', 18, 'app\\library\\files\\v0\\CustomFile')?>/open" ng-if="<?=(isset($power->files) && $power->files)?>">我的檔案</a>
+                <a class="item use-green" href="javascript:void(0)" ng-cloak ng-if="<?=(Auth::user()->id==1)?>" ng-click="queryLog()">queryLog</a>
                 <a class="item use-green" href="/page/project"><i class="home icon"></i>首頁</a>
                 <a class="item use-green" href="/page/project/profile">個人資料</a>
                 <a class="item use-green" href="/auth/password/change">更改密碼</a>
                 <a class="item use-green" href="/auth/logout">登出</a>
             </div>
         </div>   
-<!--        <div style="position:absolute;left:602px" ng-hide="hideRequestFile" ng-init="hideRequestFile=true" ng-cloak>
-            <div style="width:80px;text-align: center;box-sizing: border-box;font-size:16px" class="button-share" ng-click="requestFile()">共用</div>
-        </div>-->
+
 	</div>
 	
     <div style="position: absolute;left: 0;right: 0;top: 30px;bottom: 0" ng-controller="mainController">
@@ -134,7 +120,7 @@ if( Auth::user()->id==1 ) {
                     </div>                    
                     <?php
                     foreach($apps as $app) {                        
-                        echo '<a class="item teal' . (Request::path()=='app/' . $app['intent_key']?' active':'').'" style="font-size:16px;font-weight:600" href="/file/' . $app['intent_key'] . '/open">' . $app['title'] . '</a>';
+                        echo '<a class="item teal' . (Request::path()==$app['link']?' active':'') . '" style="font-size:16px;font-weight:600" href="/' . $app['link'] . '">' . $app['title'] . '</a>';
                     }             
                     ?>  
                     <div class="header item">
@@ -142,7 +128,7 @@ if( Auth::user()->id==1 ) {
                     </div>	
                     <?php     
                     foreach($requests as $request) {   
-                        echo '<a class="item teal' . (Request::path()==$request['link']?' active':'').'" style="font-size:16px;font-weight:600" href="/' . $request['link'] . '">' . $request['title'] . '</a>';
+                        echo '<a class="item teal' . (Request::path()==$request['link']?' active':'') . '" style="font-size:16px;font-weight:600" href="/' . $request['link'] . '">' . $request['title'] . '</a>';
                     }
                     ?>
                 </div>

@@ -10,6 +10,10 @@ class Files extends Eloquent {
 	public function sheets() {
 		return $this->hasMany('Row\Sheet', 'file_id', 'id');
 	}
+
+	public function isType() {
+		return $this->hasOne('FileType', 'id', 'type');
+	}
 }
 
 class RequestFile extends Eloquent {
@@ -23,7 +27,15 @@ class RequestFile extends Eloquent {
 	public function isDoc() {
 		return $this->hasOne('ShareFile', 'id', 'doc_id');
 	}
+}
+
+class FileType extends Eloquent {
     
+    protected $table = 'files_type';
+    
+    public $timestamps = false;
+    
+    protected $fillable = array();
 }
 
 class ShareFile extends Eloquent {

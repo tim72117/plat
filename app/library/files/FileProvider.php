@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, Session, Auth, Apps, RequestApp, RequestFile;
+use DB, Session, Auth, Apps, RequestFile;
 class FileProvider {
     
     private $files = array();
@@ -24,56 +24,43 @@ class FileProvider {
      */    
 	public function lists() {
 
-        $apps = [];
+        $apps = Apps::with(['isFile', 'isFile.isType'])->whereHas('isFile', function($query) {
 
-        Apps::with(['isFile' => function($query){
-            $query->leftJoin('files_type', 'files.type', '=', 'files_type.id')->select('files.id', 'files.title', 'files_type.class');
-        }])->whereHas('isFile', function($query){
             $query->where('files.type', 2);
-        })->where('user_id', $this->user_id)->where('visible', true)->get()->each(function($app) use(&$apps) {
+
+        })->where('user_id', $this->user_id)->where('visible', true)->get()->map(function($app) {
             
-            $fileClass = 'app\\library\\files\\v0\\' . $app->isFile->class;
-            
-            if( class_exists($fileClass) ) {                
-                array_push($apps, [
+            $fileClass = 'app\\library\\files\\v0\\' . $app->isFile->isType->class;
+
+            if (class_exists($fileClass)) {
+                return [
                     'title'      => $app->isFile->title,
-                    'intent_key' => $this->app_intent_key('open', $app->id, $fileClass),
-                ]);
-            }   
-            
-        });
+                    'link'  => 'file/' . $this->app_intent_key('open', $app->id, $fileClass) . '/open',
+                ];
+            }
+
+        })->toArray();
         
-        $requests = [];
+        $requests = RequestFile::where(function($query) {
 
-        $inGroups = $this->user->inGroups->lists('id');
+            $query->where('target', 'user')->where('target_id', $this->user->id);
 
-        RequestFile::where(function($query) use($inGroups){
-            
-            empty($inGroups) ? $query->whereNull('id') : $query->where('disabled', false)->where('target', 'group')->whereIn('target_id', $inGroups);
-            
-        })->get()->each(function($requestFile) use(&$requests){
+        })->orWhere(function($query) {
 
-            $intent_key = $this->doc_intent_key('import', $requestFile->doc_id, 'app\\library\\files\\v0\\RowsFile', ['requested_file_id' => $requestFile->id]);
-            array_push($requests, [
-                'title' => $requestFile->description,
+            $inGroups = $this->user->inGroups->lists('id');
+
+            $query->where('target', 'group')->whereIn('target_id', $inGroups);
+
+        })->where('disabled', false)->get()->map(function($request) {
+
+            $intent_key = $this->doc_intent_key('import', $request->doc_id, 'app\\library\\files\\v0\\RowsFile', ['requested_file_id' => $request->id]);
+
+            return [
+                'title' => $request->description,
                 'link'  => 'file/' . $intent_key . '/import',
-            ]);
+            ];
             
-        });
-        
-        RequestApp::where(function($query) use($inGroups){
-            
-            empty($inGroups) ? $query->whereNull('id') : $query->where('disabled', false)->where('target', 'group')->whereIn('target_id', $inGroups);
-            
-        })->get()->each(function($requestApp) use(&$requests){
-            
-            $intent_key = $this->app_intent_key('open', $requestApp->app_id, 'app\\library\\files\\v0\\CustomFile');
-            array_push($requests, [
-                'title' => $requestApp->description,
-                'link'  => 'app/' . $intent_key . '/',
-            ]);
-
-        });
+        })->toArray();
                 
         return [$apps, $requests];
     }

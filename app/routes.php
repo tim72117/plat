@@ -15,7 +15,7 @@ Route::get('test', function() {
     return;
 });
 
-Route::patterns(['project' => '[a-z]+', 'token' => '[a-z0-9]+']);
+Route::patterns(['project' => '[a-z]+', 'token' => '[a-z0-9]+', 'project_id' => '[0-9]+']);
 
 Route::get('/', function(){ return Redirect::to('user/auth/cher'); });
 Route::get('project', 'UserController@project');
@@ -34,8 +34,8 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::any('file/{intent_key}/{method}', 'FileController@open');
     Route::any('file/{intent_key}/ajax/{method}', 'FileController@appAjax');
 
-    Route::get('page/project/{context?}', array('before' => '', 'uses' => 'PageController@project'));
-    Route::post('page/project/{context?}', array('before' => 'csrf', 'uses' => 'PageController@project'));
+    Route::get('page/project/{context?}/{parameter?}', array('before' => '', 'uses' => 'PageController@project'));
+    Route::post('page/project/{context?}/{parameter?}', array('before' => 'csrf', 'uses' => 'PageController@project'));
 
     Route::get('offline/{context?}', array('before' => '', 'uses' => 'OfflineController@offline'));
     Route::post('offline/{context?}', array('before' => 'csrf', 'uses' => 'OfflineController@offline'));
@@ -69,6 +69,9 @@ Route::get('project/{project}/register/help', 'UserController@help');
 Route::post('project/{project}/register/save', array('before' => 'csrf|post_delay', 'uses' => 'UserController@registerSave'));
 Route::get('project/{project}/register/finish/{token}', 'UserController@registerFinish');
 Route::get('project/{project}/register/print/{token}', 'UserController@registerPrint');
+
+Route::get('api/projects', 'ApiController@projects');
+Route::get('api/news/{project_id}/{to}/{from?}', 'ApiController@news');
 //平台--------------------------------------------------------------------------------------------------------------------------------- 
 
 Route::filter('auth_logined', function() {
