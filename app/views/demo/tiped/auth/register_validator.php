@@ -1,5 +1,5 @@
 <?php	
-$input = Input::only('email', 'name', 'title', 'tel', 'sch_id');	
+$input = Input::only('email', 'name', 'title', 'tel', 'sch_id', 'dep_id');	
 
 $rulls = array(
     'email'               => 'required|email|unique:users',
@@ -7,6 +7,7 @@ $rulls = array(
     'title'               => 'required|max:10',
     'tel'                 => 'required|max:20',
     'sch_id'              => 'required|alpha_num|max:4',
+    'dep_id'              => 'required_if:sch_id,1028|alpha_num|max:6',
 );
 
 $rulls_message = array(
@@ -15,6 +16,7 @@ $rulls_message = array(
     'title.required'         => '職稱必填',
     'tel.required'           => '連絡電話必填',
     'sch_id.required'        => '服務單位必填',
+    'dep_id.required_if'     => '服務系所必填',
 
     'email.email'            => '電子郵件格式錯誤',
     'email.unique'           => '電子郵件已被註冊',
@@ -23,6 +25,8 @@ $rulls_message = array(
     'tel.max'                => '連絡電話最多20個字',
     'sch_id.alpha_num'       => '服務單位格式錯誤',
     'sch_id.max'             => '服務單位格式錯誤',	
+    'dep_id.alpha_num'       => '服務系所格式錯誤', 
+    'dep_id.max'             => '服務系所格式錯誤', 
 );
 
 $validator = Validator::make($input, $rulls, $rulls_message);
@@ -30,7 +34,7 @@ $validator = Validator::make($input, $rulls, $rulls_message);
 if( $validator->fails() ){	
     throw new app\library\files\v0\ValidateException($validator);
 }
-		
+
 $user = new User_tiped;
 $user->username    = $input['name'];
 $user->email       = $input['email'];
@@ -52,7 +56,9 @@ $user->save();
 
 $user->contacts()->save($contact_tiped);
 
-$user->schools()->attach($input['sch_id'], array());
+$other_infos = isset($input['dep_id']) ? ['dep_id' => $input['dep_id']] : [];
+
+$user->schools()->attach($input['sch_id'], $other_infos);
 
 DB::commit();
 

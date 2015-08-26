@@ -1,92 +1,144 @@
-<div style="height: 100px"></div>
-<div ng-app="app" ng-controller="register">
     
-    <div class="ui two column grid" style="width: 1000px;min-height: 650px;margin: 0 auto">
-        <div class="column">
-            <div class="ui horizontal segment">
-                <div style="position: relative;margin: 0 auto;width:400px">
-                    <div class="img" style="top:0;left:0;width:128px;height:128px;background-image: url('/images/register/pencil.png')"><div style="margin-top:138px">線上填寫申請表</div></div>
-                    <div class="img" style="top:0;left:128px;width:128px;height:128px;background-image: url('/images/register/ArrowRight.png')"></div>
-                    <div class="img" style="top:0;left:256px;width:128px;height:128px;background-image: url('/images/register/printer.png')"><div style="margin-top:138px">列印申請表</div></div>
-                    <div class="img" style="top:140px;left:0;width:128px;height:128px;background-image: url('/images/register/ArrowDown.png')"></div>
-                    <div class="img" style="top:140px;left:256px;width:128px;height:128px;background-image: url('/images/register/ArrowDown.png')"></div>
-                    <div class="img" style="top:248px;left:0;width:128px;height:128px;background-image: url('/images/register/email.png')"><div style="margin-top:138px">到您註冊的信箱收取更改密碼的信件</div></div>
-                    <div class="img" style="top:248px;left:256px;width:128px;height:128px;background-image: url('/images/register/letter.png')"><div style="margin-top:138px">主管簽核後，將申請表傳真或郵寄給我們</div></div>
-                    <div class="img" style="top:426px;left:64px;width:256px;height:128px;background-image: url('/images/register/key.png')"><div style="margin-top:138px">我們收到您的申請表後，確認您已經完成修改密碼，即為您開通帳號</div></div>
-                </div>
+<div class="ui centered stackable grid" ng-app="app" ng-controller="register">
+    <div class="two column row">
+    <div class="five wide column">
+        <div class="ui three column centered grid">
+            <div class="center aligned column">
+                <h4 class="ui header">
+                    <img class="ui tiny image" src="/images/register/pencil.png">
+                    <div class="content">線上填寫申請表</div>
+                </h4>
             </div>
-        </div>
-        <div class="column">
-            <div class="ui horizontal segment">
-                <?=Form::open(array('url' => 'project/' . Request::segment(2) . '/register/save', 'method' => 'post', 'class' => 'ui form segment attached ' . ($errors->isEmpty() ? '' : 'error'), 'name' => 'registerForm'))?>                
-                    <h5 class="ui dividing header"><p>申請資料查詢平台使用權限
-                        <u><font color="#336666">請填完下列資料後點選申請表送出</font></u></p>
-                    </h5>
-                
-                    <div class="field">
-                        <label>登入帳號 (e-mail)</label>
-                        <?=Form::text('email', '', array())?>
-                    </div>
-
-                    <div class="two fields">
-                        <div class="field">
-                            <label>姓名</label>
-                            <?=Form::text('name', '', array())?>
-                        </div>
-                        <div class="field">                            
-                            <label>職稱</label>
-                            <?=Form::text('title', '', array())?>
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <label>聯絡電話(服務單位)</label>
-                        <?=Form::text('tel', '', array())?>
-                    </div>
-
-                    <div class="field">
-                        <label>單位名稱</label>
-                        <?=Form::select('sch_id', array('' => '選擇您服務的單位', '0016' => '國立陽明大學'))?>
-                    </div>                  
-                
-                    <div class="ui error message">
-                        <div class="header">資料錯誤</div>
-                        <p><?=implode('、', array_filter($errors->all()))?></p>
-                    </div>
-                
-                    <div class="field">
-                        <label>一旦點擊註冊，即表示你同意 <a href="register/terms" target="_blank">使用條款</a>。</label>
-                    </div>
-                
-                    <div class="ui submit positive button" onclick="registerForm.submit()">註冊</div>
-                <?=Form::close()?>
-                    
-                <div class="ui bottom attached warning message">
-                    我已經註冊過了，我要<?=link_to('project/' . Request::segment(2), '登入')?>
-                    <br />
-                    <i class="icon help"></i>
-                    <?=link_to('project/'. Request::segment(2) . '/register/help', '需要幫助嗎')?>
-                </div>
+            <div class="middle aligned column"><i class="arrow right large icon"></i></div>
+            <div class="center aligned column">
+                <h4 class="ui header">
+                    <img class="ui tiny image" src="/images/register/printer.png">
+                    <div class="content">列印申請表</div>
+                </h4>
+            </div>
+            <div class="middle aligned column"><i class="arrow down large icon"></i></div>
+            <div class="middle aligned column"></div>
+            <div class="middle aligned column"><i class="arrow down large icon"></i></div>
+            <div class="center aligned column">
+                <h4 class="ui header">
+                    <img class="ui tiny image" src="/images/register/email.png">
+                    <div class="content">到您註冊的信箱收取更改密碼的信件</div>
+                </h4>
+            </div>
+            <div class="middle aligned column"></div>
+            <div class="center aligned column">
+                <h4 class="ui header">
+                    <img class="ui tiny image" src="/images/register/letter.png">
+                    <div class="content">主管簽核後，將申請表正本寄給我們</div>
+                </h4>
+            </div>
+            <div class="center aligned sixteen wide column">
+                <h4 class="ui header">
+                    <img class="ui tiny image" src="/images/register/key.png">
+                    <div class="content">我們收到您的申請表後，確認您已經完成修改密碼，即為您開通帳號</div>
+                </h4>
             </div>
         </div>
     </div>
+    
+    <div class="six wide column">
+        <h3 class="ui top attached center aligned header">教育資料庫資料查詢平台</h3>
+        <?=Form::open(array('url' => 'project/' . Request::segment(2) . '/register/save', 'method' => 'post', 'class' => 'ui form segment attached ' . ($errors->isEmpty() ? '' : 'error'), 'name' => 'registerForm'))?>                
+            <h5 class="ui dividing header"><p>申請帳號
+                <u><font color="#336666">請填完下列資料後點選申請表送出</font></u></p>
+            </h5>
+        
+            <div class="field">
+                <label>登入帳號 (e-mail)</label>
+                <?=Form::text('email', '', array())?>
+            </div>
+
+            <div class="two fields">
+                <div class="field">
+                    <label>姓名</label>
+                    <?=Form::text('name', '', array())?>
+                </div>
+                <div class="field">                            
+                    <label>職稱</label>
+                    <?=Form::text('title', '', array())?>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>聯絡電話(服務單位)</label>
+                <?=Form::text('tel', '', array())?>
+            </div>
+
+            <div class="field">
+                <label>單位名稱</label>
+                <?=Form::select('sch_id', ['' => '選擇您服務的單位', '0016' => '國立陽明大學', '1028' => '臺北醫學大學'], Input::get('sch_id'), ['ng-model' => 'sch_id'])?>
+            </div>
+            <div class="field" ng-if="sch_id=='1028'">
+                <?=Form::select('dep_id', [
+                    ''       => '選擇您服務系所',
+                    '000000' => '校級承辦人',
+                    '229903' => '醫學人文研究所',
+                    '340901' => '醫務管理學系',
+                    '380215' => '醫療暨生物科技法律研究所',
+                    '521107' => '生醫材料暨(組織)工程研究所',
+                    '720101' => '醫學系',
+                    '720102' => '臨床醫學研究所',
+                    '720117' => '醫學科學系',
+                    '720131' => '轉譯醫學學位學程',
+                    '720135' => '神經再生醫學學位學程',
+                    '720201' => '公共衛生學系',
+                    '720213' => '傷害防治學研究所',
+                    '720224' => '全球衛生暨發展學位學程',
+                    '720301' => '藥學系',
+                    '720309' => '生(物)藥(科)學系',
+                    '720323' => '癌症生物(學)與藥物研發學位學程',
+                    '720328' => '臨床藥物基汍樴[蛋白質體學學位學程',
+                    '720329' => '中草藥臨床藥物研發學位學程',
+                    '720504' => '保健營養(技術)學系',
+                    '720601' => '護理學系',
+                    '720607' => '長期照護系',
+                    '720613' => '呼吸治療學系',
+                    '720708' => '醫學檢驗(暨)生物技術學系',
+                    '720714' => '醫學資訊學系',
+                    '720801' => '牙醫(科學)學系',
+                    '720803' => '牙體技術(暨材料)系',
+                    '720804' => '口腔衛生(科學)學系',
+                    '729988' => '醫藥衛生類產業研發專班',
+                    '760219' => '高齡健康管理學系'
+                ], '')?>
+            </div>           
+        
+            <div class="ui error message">
+                <div class="header">資料錯誤</div>
+                <p><?=implode('、', array_filter($errors->all()))?></p>
+            </div>
+        
+            <div class="field">
+                <label>一旦點擊註冊，即表示你同意 <a href="register/terms" target="_blank">使用條款</a>。</label>
+            </div>
+        
+            <div class="ui submit positive button" onclick="registerForm.submit()">註冊</div>
+        <?=Form::close()?>
+        <div class="ui bottom attached warning message">
+            我已經註冊過了，我要<?=link_to('project/' . Request::segment(2), '登入')?>
+            <br />
+            <i class="icon help"></i>
+            <?=link_to('project/'. Request::segment(2) . '/register/help', '需要幫助嗎')?>
+        </div>
+    </div>
+    </div>
+</div>
 
 <script>
+angular.module('app', [])
+.controller('register', function($scope) {
+
+});
 </script>
 
 <script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
 <script src="/js/angular-semantic-ui/dropdown.js"></script>
 
-<link rel="stylesheet" href="/css/ui/Semantic-UI-1.11.4/components/form.min.css" />
-
 <style>
-div.img {
-    position: absolute;
-    background-repeat:no-repeat;
-    background-position:center center;    
-    text-align:center
-}
+
 </style>
-</div>
-
-

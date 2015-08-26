@@ -1,5 +1,5 @@
-<?=Form::open(array('url' => URL::current(), 'method' => 'post', 'class' => 'ui warning form segment attached ' . ($errors->isEmpty() ? '' : 'error'), 'name' => 'loginForm'))?>	
-    <h4 class="ui dividing header">登入資料查詢平台</h4>
+<?=Form::open(array('url' => URL::current(), 'method' => 'post', 'class' => 'ui warning form ' . ($errors->isEmpty() ? '' : 'error'), 'name' => 'loginForm'))?>	
+    <h4 class="ui dividing center aligned header">使用者登入</h4>
     <div class="ui error message">
         <div class="header">資料錯誤</div>
         <p><?=implode('、', array_filter($errors->all()))?></p>
