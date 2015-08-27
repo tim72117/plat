@@ -65,7 +65,19 @@ class CommFile {
         return $this->doc_id;
     }
 	
-	public function rename() {	}
+	public function rename()
+	{
+		if( $this->shareFile->created_by == $this->user->id )
+		{
+			$this->file->title = Input::get('title');
+
+			$this->shareFile->touch();
+
+			$this->shareFile->push();
+		}
+
+		return ['file' => \Struct_file::open($this->shareFile)];
+	}
 
 	public static function upload($visible = true)
 	{

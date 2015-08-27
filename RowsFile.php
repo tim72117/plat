@@ -184,7 +184,7 @@ class RowsFile extends CommFile {
         return ['comment' => $this->information->comment];
     }
 
-    public function put_information($information, $title = null)
+    private function put_information($information, $title = null)
     {        
         isset($title) && $this->file->title = $title;
 
@@ -320,7 +320,7 @@ class RowsFile extends CommFile {
         return ['messages' => $rows_message];
     }    
     
-    public function check_column($column, $column_value)
+    private function check_column($column, $column_value)
     {
         $column_errors = [];
 
@@ -349,7 +349,7 @@ class RowsFile extends CommFile {
         return $column_errors; 
     }
 
-    public function has_table($table)
+    private function has_table($table)
     {
         return DB::table($table->database . '.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table->name)->exists();
     }
@@ -361,7 +361,7 @@ class RowsFile extends CommFile {
         }
     }
     
-    public function table_build($table)
+    private function table_build($table)
     {  
         $this->has_table($table) && Schema::drop($table->database . '.dbo.' . $table->name);
 
