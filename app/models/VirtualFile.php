@@ -168,7 +168,7 @@ class Struct_file
 	    return [
 	        'id'         => $shareFile->id,
 	        'title'      => $shareFile->isFile->title,
-	        'created_by' => $shareFile->created_by,
+	        'created_by' => $shareFile->created_by == Auth::user()->id ? '我' : $shareFile->created_by,
 	        'created_at' => $shareFile->created_at->toIso8601String(),
 	        'link'       => $link,
 	        'type'       => $shareFile->isFile->type,
