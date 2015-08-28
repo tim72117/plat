@@ -262,6 +262,7 @@ class RowsFile extends CommFile {
                 'rules'   => $column->rules,                
                 'unique'  => $column->unique,                
                 'encrypt' => $column->encrypt,
+                'isnull'  => $column->isnull,
                 'uniques' => isset($column->uniques) ? $column->uniques : [],
                 'repeats' => isset($column->repeats) ? $column->repeats : [],
                 'exists'  => isset($column->exists) ? $column->exists : [],
@@ -287,13 +288,13 @@ class RowsFile extends CommFile {
                     $rows_message[$row_index]->limit = $rows_message[$row_index]->limit || $column->exists[$value] != $this->user->id;
 
                     array_push($rows_message[$row_index]->exists, 'C' . $column->id);
-                }    
+                }
 
-                $column_errors = $this->check_column($column, $value);
-
-                if (!empty($column_errors)) 
+                if (!$column->isnull || !empty($value))
                 {
-                    $rows_message[$row_index]->errors[$column->id] = $column_errors;
+                    $column_errors = $this->check_column($column, $value);
+
+                    !empty($column_errors) && $rows_message[$row_index]->errors[$column->id] = $column_errors;
                 }
             }
 
