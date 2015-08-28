@@ -1,15 +1,16 @@
-<?
+<?php
 	
 $input = Input::only('email','name','title','scope','department_class','tel','fax','sch_id','operational');	
 
 $rulls = array(
     'email'               => 'required|email|unique:users',
-    'department_class'    => 'required|in:0,1,2',
+    'department_class'    => 'required|in:0,1',
     'sch_id'              => 'required|alpha_num|max:6',
     'scope'               => 'required',
     'scope.plat'          => 'in:1',
     'scope.das'           => 'in:1',
     'operational'         => 'required',
+    'operational.gov'     => 'in:1',
     'operational.schpeo'  => 'in:1',
     'operational.senior1' => 'in:1',
     'operational.senior2' => 'in:1',
@@ -31,6 +32,7 @@ $rulls_message = array(
     'sch_id.max'             => '代號不能格式錯誤',	
     'scope.plat.in'          => '申請權限格式錯誤',
     'scope.das.in'           => '申請權限格式錯誤',
+    'operational.gov.in'     => '承辦業務格式錯誤',
     'operational.schpeo.in'  => '承辦業務格式錯誤',
     'operational.senior1.in' => '承辦業務格式錯誤',
     'operational.senior2.in' => '承辦業務格式錯誤',
@@ -95,16 +97,12 @@ if( Input::get('scope.das') == 1 ){
 
 $user->schools()->attach($input['sch_id'],array(
     'department_class' => $input['department_class'],
+    'gov'              => Input::get('operational.gov',    '0'),
     'schpeo'           => Input::get('operational.schpeo', '0'),
     'senior1'          => Input::get('operational.senior1','0'),
     'senior2'          => Input::get('operational.senior2','0'),
     'tutor'            => Input::get('operational.tutor',  '0'),
     'parent'           => Input::get('operational.parent', '0'),
-));		
-
-    
-$credentials = array('email' => $input['email']);
-
-Password::remind($credentials);
+));
 
 return $user;

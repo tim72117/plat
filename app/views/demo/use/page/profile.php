@@ -1,112 +1,186 @@
-<?
-##########################################################################################
-#
-# filename: 1isms_create_user.php
-# function: 申請use查詢平台使用者資料
-#
-# 維護者  : 周家吉
-# 維護日期: 2013/05/20
-#
-##########################################################################################	
-$user = Auth::user();
+<?php
 
-if( is_null($user->contact) ){
-	$contact = new Contact(array(
-        'project'    => $user->getProject(),
-        'active'     => 1,
-		'created_ip' => Request::getClientIp(),
-		'created_by' => $user->id,
-	));
-	$contact_new = $user->contact()->save($contact);
-	$user->push();
-	$user->contact = $contact_new;
-}
+$user = User_use::find(Auth::user()->id);
 
-if( Request::isMethod('post') ){
-    
-    $input = Input::only('title', 'tel', 'fax', 'email2');	
-    
-    $rulls = array(
-        'title'  => 'required|max:10',
-        'tel'    => 'required|regex:/^[0-9-#]+$/',
-        'fax'    => 'regex:/^[0-9-#]+$/',
-        'email2' => 'email',
-    );
-    
-    $rulls_message = array(
-    'title.required'  => '職稱必填',
-    'tel.required'    => '聯絡電話必填',	
-    'title.max'       => '職稱格式錯誤',
-    'tel.regex'       => '聯絡電話格式錯誤',	
-    'fax.regex'       => '傳真電話格式錯誤',	
-    'email2.email'    => '備用信箱格式錯誤',				
-);
-    
-    $validator = Validator::make($input, $rulls, $rulls_message);
+$parameter = $parameter ? $parameter : 0;
 
-    if( $validator->fails() ){	
-        throw new app\library\files\v0\ValidateException($validator);
+if (Request::isMethod('post')) {
+
+    if ($parameter == 3) {
+
+        $user->set_project('das')->member;
+
+        $contact_das = Contact::firstOrNew([
+            'user_id' => $user->id,
+            'project' => 'das',
+        ]);
+
+        $contact_das->created_ip = Request::getClientIp();
+
+        $user->set_project('das')->member()->save($contact_das);  
+
+        //DB::table('register_print')->where('user_id', $user->id)->delete();
+
+    } else {
+
+        $user->contact->title = Input::get('title');
+        $user->contact->tel = Input::get('tel');
+        $user->contact->fax = Input::get('fax');
+        $user->contact->email2 = Input::get('email2');
+
+        User::saved(function() use ($errors){
+            $errors->add('saved','儲存成功');
+        });
+
+        $user->push(); 
+
     }
 
-	$user->contact->title = Input::get('title');
-	$user->contact->tel = Input::get('tel');
-	$user->contact->fax = Input::get('fax');
-    $user->contact->email2 = Input::get('email2');
-	
-	User::saved(function() use ($errors){
-		$errors->add('saved','儲存成功');
-	});
+}
 
-	$user->push();	
-	
+$project_das_status = $user->project_actived('das');
+
+$register_print_query = DB::table('register_print')->where('user_id', $user ->id);
+
+if ($project_das_status['registered'] && !$project_das_status['actived'])
+{      
+    if (!$register_print_query->exists())
+    {
+        $token = str_shuffle(sha1($user->email . spl_object_hash($user) . microtime(true)));
+
+        DB::table('register_print')->insert(['token' => $token, 'user_id' => $user->id, 'created_at' => new Carbon\Carbon]);  
+    } else {
+        $token = DB::table('register_print')->where('user_id', $user ->id)->orderBy('created_at', 'desc')->first()->token;
+    }  
 }
 
 ?>
+
+<div ng-controller="profileController" style="position: absolute;left:10px;right:10px;top:10px;bottom:10px;overflow: auto;padding:1px">
+
+    <div class="ui styled accordion">
+
+        <div class="title" ng-class="{active: block==0}" ng-click="switchBlock(0)"><i class="user icon"></i>帳號資訊</div>
+        <div class="content" ng-class="{active: block==0}">
+
+            <div class="ui list">
+                <div class="item">
+                    <i class="user icon"></i>
+                    <div class="content"><?=$user->username?></div>
+                </div>
+                <div class="item">
+                    <i class="mail icon"></i>
+                    <div class="content"><?=$user->email?><span style="color:#f00">(登入帳號)</span></div>
+                </div>
+            </div>            
+
+        </div>
+
+        <div class="title" ng-class="{active: block==1}" ng-click="switchBlock(1)"><i class="user icon"></i>個人資料</div>
+        <div class="content" ng-class="{active: block==1}">
+
+            <?=Form::open(array('url' => '/page/project/profile/1', 'method' => 'post', 'name'=>'profile', 'class'=>'ui form' . ($errors->isEmpty() ? '' : ' error')))?>
+
+                <div class="five wide field">
+                    <label>職稱</label>
+                    <?=Form::text('title', $user->contact->title, array('placeholder'=>'職稱'))?>
+                </div>  
+                <div class="two fields">
+                    <div class="field">
+                        <label>聯絡電話(Tel)</label>
+                        <?=Form::text('tel', $user->contact->tel, array('placeholder'=>'聯絡電話'))?>
+                    </div>
+                    <div class="field">
+                        <label>傳真電話(Fax)</label>
+                        <?=Form::text('fax', $user->contact->fax, array('placeholder'=>'傳真電話'))?>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>備用信箱</label>
+                    <?=Form::text('email2', $user->contact->email2, array('placeholder'=>'備用信箱'))?>
+                </div>  
+                <div class="ui error message">
+                    <div class="header"></div>
+                    <p><?=implode('、', array_filter($errors->all()));?></p>
+                </div>
+
+                <button class="ui submit button" onclick="profile.submit()">送出</button>
+
+            <?=Form::close()?>
+
+        </div> 
+
+        <div class="title" ng-class="{active: block==2}" ng-click="switchBlock(2)"><i class="building outline icon"></i>服務單位</div>  
+        <div class="content" ng-class="{active: block==2}">
+
+                <table class="ui very basic table">
+                    <tr><td>學校</td><td>啟用</td></tr>
+                    <?php
+                    User_use::find($user->id)->works->each(function($work) {
+                        $work->schools->each(function($school) use($work) {
+                            $label_id = $school->id . '-' . $school->year;
+                            echo '<tr>';
+                            echo '<td>' . $school->id . ' (' . $school->year . ') - ' . $school->sname . '</td>';
+                            echo '<td><div class="ui checkbox"><input type="checkbox"' . ((bool)$work->active ? ' checked="checked" ' : '') . 'id="'. $label_id .'"><label for="'. $label_id .'"></label></div></td>';
+                            echo '</tr>';
+                        });
+                    });
+                    ?>
+                </table >
+
+        </div>  
+
+        <div class="title" ng-class="{active: block==3}" ng-click="switchBlock(3)"><i class="setting icon"></i>其他系統權限</div>  
+        <div class="content" ng-class="{active: block==3}">
+
+            <?=Form::open(array('url' => '/page/project/profile/3', 'method' => 'post', 'name'=>'profilePower', 'class'=>'ui form'))?>
+
+                <table class="ui very basic table">
+                    <thead>
+                        <tr>
+                            <th>項目</th>
+                            <th>狀態</th>
+                        </tr> 
+                    </thead>
+                    <tr>
+                        <td>線上分析系統</td>                    
+                        <td>
+                            <?php if ($project_das_status['registered'] && !$project_das_status['actived']) { ?>
+                            <div class="ui read-only checkbox">
+                                <input type="checkbox">
+                                <label>申請中 <a target="_blank" href="<?=URL::to('project/use/register/print/' . $token)?>">(列印申請表)</a></label>
+                            </div>
+                            <?php } ?>
+                            <div class="ui read-only checkbox" ng-if="<?=$project_das_status['actived']?>">
+                                <input type="checkbox" checked="checked">
+                                <label>已開通</label>
+                            </div>
+                            <button class="ui submit button" ng-if="<?=!$project_das_status['registered']?>" onclick="profilePower.submit()">申請</button>
+                        </td>
+                        <td>
+                            
+                        </td>
+                    </tr>
+                </table >
+
+            <?=Form::close()?>
+
+        </div>  
+
+    </div>    
+
+</div>
+
+<script>
+app.controller('profileController', function($scope, $filter, $http) {
+    $scope.block = <?=$parameter?>;
+
+    $scope.switchBlock = function(block) {
+        $scope.block = block;
+    }
+});
+</script>
+
 <style>
-.profile input{
-	padding: 5px;
-	font-size: 15px;
-}	
+
 </style>
-<?=Form::open(array('url' => URL::to('page/project/profile'), 'method' => 'post'))?>
-    <table align="left" style="background-color: #fff;border: 1px solid #aaa;text-align: center;margin-left: 20px"  cellpadding="0" cellspacing="0" border="0" class="profile">  
-
-        <tr>
-            <th width="175" align="left" style="padding:20px">E-mail <span style="color:#f00">(登入帳號)</span></th>		
-            <td width="175" align="left" style="padding:20px"><?=$user->email?></td>
-        </tr>
-        <tr>
-            <th width="175" align="left" style="padding:20px">姓名</th>
-            <td width="175" align="left" style="padding:20px"><?=$user->username?></td>
-        </tr>
-        <tr>
-            <th width="175" align="left" style="padding:0 0 0 20px">職稱</th>
-            <td width="175" align="left" style="padding:0 0 0 20px"><?=Form::text('title', $user->contact->title, array('size'=>20, 'class'=>'register-block'))?></td>
-        </tr>
-        <tr>
-            <th width="175" align="left" style="padding:0 0 0 20px">聯絡電話(Tel)</th>
-            <td width="175" align="left" style="padding:0 0 0 20px"><?=Form::text('tel', $user->contact->tel, array('size'=>20, 'class'=>'register-block'))?></td>
-        </tr>
-        <tr>
-            <th width="175" align="left" style="padding:0 0 0 20px">傳真電話(Fax)</th>
-            <td width="175" align="left" style="padding:0 0 0 20px"><?=Form::text('fax', $user->contact->fax, array('size'=>20, 'class'=>'register-block'))?></td>
-        </tr>
-        <tr>
-            <th width="175" align="left" style="padding:0 0 0 20px">備用信箱</th>
-            <td width="175" align="left" style="padding:0 0 0 20px"><?=Form::text('email2', $user->contact->email2, array('size'=>50, 'class'=>'register-block'))?></td>
-        </tr> 
-
-
-        <tr>
-            <td colspan="2" style="color:#f00;line-height: 20px"><?=implode('、',array_filter($errors->all()));?></td>
-        </tr>
-        <tr>
-            <td align="center" colspan="2" style="padding:20px 20px 20px 20px">
-                <input type="submit" value="送出">
-            </td>
-        </tr>
-    </table>
-<?=Form::close()?>
-
-
-

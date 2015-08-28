@@ -175,4 +175,26 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 		return $this->belongsToMany('Group', 'user_in_group', 'user_id', 'group_id');
 	}
 
+	public function member() {
+		return $this->hasOne('Contact', 'user_id', 'id')->where('contact.project', $this->project);
+	}
+
+	/*
+	| Project
+	*/
+
+	public function set_project($project)
+	{
+		$this->project = $project;
+
+		return $this;
+	}
+
+	public function project_actived($project)
+	{
+		$member = $this->set_project($project)->member();
+
+		return ['registered' => $member->exists(), 'actived' => $member->exists() ? (bool)$member->first()->active : false];
+	}
+
 }
