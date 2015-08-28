@@ -24,7 +24,7 @@ class RowsFile extends CommFile {
         'tel'         => ['sort' => 1, 'type' => 'string',   'size' => 20,  'title' => '電話',                 'regex' => '/^\w+$/'],
         'address'     => ['sort' => 1, 'type' => 'string',   'size' => 80,  'title' => '地址'],
         'schid_104'   => ['sort' => 1, 'type' => 'string',   'size' => 6,   'title' => '高中職學校代碼(104)', 'function' => 'schid_104'],
-        'depcode_104' => ['sort' => 1, 'type' => 'string',   'size' => 3,   'title' => '高中職科別代碼(104)', 'function' => 'depcode_104'],
+        'depcode_104' => ['sort' => 1, 'type' => 'string',   'size' => 6,   'title' => '高中職科別代碼(104)', 'function' => 'depcode_104'],
         'text'        => ['sort' => 1, 'type' => 'string',   'size' => 50,  'title' => '文字(50字以內)'],
         'nvarchar'    => ['sort' => 1, 'type' => 'string',   'size' => 500, 'title' => '文字(500字以內)'],
         'int'         => ['sort' => 7, 'type' => 'integer',                 'title' => '整數',                         'regex' => '/^\d+$/'],
@@ -116,8 +116,24 @@ class RowsFile extends CommFile {
         return 'row_' . Carbon::now()->formatLocalized('%Y%m%d_%H%M%S') . '_' . strtolower(str_random(5));
     }
 
+    private function init_sheets()
+    {
+        if ($this->file->sheets->isEmpty()) {
+            $this->file
+            ->sheets()->create(['title' => ''])  
+            ->tables()->create(['database' => self::$database, 'name' => self::generate_table(), 'construct_at' => Carbon::now()->toDateTimeString()]);     
+        }
+        $this->file->sheets->each(function($sheet) {
+            if ($sheet->tables->isEmpty()) {
+                $sheet->tables()->create(['database' => self::$database, 'name' => self::generate_table(), 'construct_at' => Carbon::now()->toDateTimeString()]);
+            }
+        });
+    }
+
     public function get_file()
     { 
+        $this->init_sheets();
+
         $sheets = $this->file->sheets()->with(['tables', 'tables.columns'])->get()->each(function($sheet) {
             $sheet->tables->each(function($table) use($sheet) {
                 !$sheet->editable && $this->table_construct($table);
@@ -424,6 +440,40 @@ class RowsFile extends CommFile {
         }
 
         return Response::json(Input::all());
+    } 
+
+    public function generate_uniques()
+    {
+        $table = $this->file->sheets->each(function($sheet) {
+            $sheet->tables->each(function($table) {                
+                $columns = $table->columns->filter(function($column) {
+                    return $column->unique && $column->rules=='stdidnumber';
+                });    
+
+                list($query, $power) = $this->get_rows_query([$table]); 
+
+                $rows = $query->whereNotExists(function($query) use($table, $columns) {
+                    $query->from($table->database . '.dbo.' . $table->name . '_map AS map');
+                    foreach($columns as $column) {
+                        $query->whereRaw('C' . $column->id . ' = stdidnumber');
+                    }
+                    $query->select(DB::raw(1));
+                })
+                ->select($columns->map(function($column) { return 'C' . $column->id . ' AS stdidnumber'; })->toArray())
+                ->get();
+
+                foreach(array_chunk($rows, 100) as $part) {
+                    $newcids = array_map(function($row) {
+                        return [
+                            'stdidnumber' => $row->stdidnumber,
+                            'newcid' => createnewcid(strtoupper($row->stdidnumber))
+                        ];
+                    }, $part);
+
+                    DB::table($table->database . '.dbo.' . $table->name . '_map')->insert($newcids);
+                }
+            }); 
+        }); 
     }    
 
     public function export_sample()
