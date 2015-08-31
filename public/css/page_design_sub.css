@@ -1,9 +1,0 @@
-@charset "utf-8";
-
-a.noline {	
-	color: #000;
-	text-decoration: none;
-}
-a.noline:hover {	
-	text-decoration: underline;
-}

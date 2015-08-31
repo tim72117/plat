@@ -340,17 +340,9 @@ function read($xmlfile,&$table_array){
 
 ?>
 <head>
-
-<link href="../css/text.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="<?=asset('css/onepcssgrid.css')?>" />
-<link rel="stylesheet" href="<?=asset('css/management/share.css')?>" />
-<link rel="stylesheet" href="<?=asset('css/management/share.index.css')?>" />
-
 <style type="text/css">
-<!--
 td { border:1px solid #000; }
 th { border:1px solid #000; }
--->
 .codebook th {
 	font-size: 12px;
 }
@@ -361,21 +353,6 @@ th { border:1px solid #000; }
 	color:#ff80ff;
 }
 </style>
-<script language='javascript'>
-$(document).ready(function(){
-
-	
-	$('textarea').blur(function(){
-		$('#'+$(this).attr('mapid')).html(	$(this).val());
-	});
-	
-	$('#qn').change(function(){
-		$('form[name=form2]').submit();		
-	});
-	
-	$('.schoolsname').html('<span style="color:#995500"> (學校) </span>');
-});		
-</script>
 </head>
 
 
