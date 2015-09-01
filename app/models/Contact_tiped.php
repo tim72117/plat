@@ -1,6 +1,9 @@
 <?php
-
-class User_tiped extends User {
+class User_tiped extends User
+{
+    public function contact() { 
+		return $this->hasOne('Contact_tiped', 'user_id', 'id')->use();
+	}
 
     public function schools() { 
 		return $this->belongsToMany('School_tiped', 'work_tiped', 'user_id', 'sch_id');
@@ -12,9 +15,16 @@ class User_tiped extends User {
 	
 }
 
+class Contact_tiped extends Contact
+{
+    public function scopeUse($query) {
+        return $query->where('contact.project', 'tiped');
+    }
+}
+
 class School_tiped extends Eloquent {
 	
-	protected $table = 'pub_uschool';
+	protected $table = 'pub_school_u';
 
 	public $timestamps = false;
 		
@@ -26,4 +36,25 @@ class Department_tiped extends Eloquent {
 
 	public $timestamps = false;
 	
+}
+
+class Struct_tiped
+{  
+    static function auth($user) 
+    {
+        return array(
+            'id'          => (int)$user->id,
+            'active'      => (bool)$user->active,
+            'disabled'    => (bool)$user->disabled,
+            'password'    => $user->password=='',
+            'email'       => $user->email,
+            'name'        => $user->username,
+            'schools'     => $user->schools->toArray(),
+            'departments' => $user->departments->toArray(),
+            'title'  => $user->contact->title,
+            'tel'    => $user->contact->tel,
+            'fax'    => $user->contact->fax,
+            'email2' => $user->contact->email2,
+        );   
+    }
 }
