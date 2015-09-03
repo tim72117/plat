@@ -1,47 +1,25 @@
 <?php
 $buildQuestion_editor_ver = app_path().'/views/editor/buildQuestion_editor__v2.0.laravel.php';
 
-$editor_save_structure_ver = 'class/editor_save_structure__v1.9.laravel.php';
-$editor_save_analysis_ver = 'class/editor_save_analysis__v1.11.php';
-$editor_save_pageskip_ver = 'class/editor_save_pageskip__v1.11.php';
+include_once($buildQuestion_editor_ver);   
 
-$editor_str_id_save_ver = 'class/editor_str_id_save.php';
+$pages = $ques_doc->pages;
 
-$qid = $ques_doc->qid;
-$can_edit = $ques_doc->edit ? 'enable' : false;
+$page = $pages->filter(function($page) {
+	return $page->page == Input::get('page', 1);
+})->first();
 
-$page = Input::get('page', Session::get('page', 1));
-
-Session::put('page', $page);
-
-$options_page = DB::table('ques_page')->where('qid', $qid)->orderBy('page')->select('page')->lists('page', 'page');
-
-$page_xml = DB::table('ques_page')->where('qid', $qid)->where('page', $page)->select('xml')->first();
-if( isset($page_xml) ){
-    $question_array = simplexml_load_string($page_xml->xml);
-}else{
-    $question_array = array();
-}
+$question_array = simplexml_load_string($page->xml);
 ?>
 <head>
 
-<script src="/editor/js/jquery-ui-1.9.2.custom.min.js"></script>
-<script src="/editor/js/ckeditor_v4.1/ckeditor.js"></script>
+<script src="/js/jquery-1.11.2.min.js"></script>
+<script src="/js/ckeditor/ckeditor_v4.1/ckeditor.js"></script>
 
-<link rel="stylesheet" href="/editor/css/editor/structure_new.css" />
+<link rel="stylesheet" href="/editor/structure_new.css" />
 
-<script type="text/javascript">
-
+<script>
 $(document).ready(function() {	
-	
-	$('#contents').on('focus blur','input[name=qlab],input[name=tablesize]',function(){
-		if( event.type=='focus' ){
-			$('label[for='+$(this).attr('id')+']').css('display','none');
-		}
-		if( event.type=='blur' && $(this).val()=='' ){
-			$('label[for='+$(this).attr('id')+']').css('display','');
-		}
-	});	
 	
 	var valInObj = {
 		qn:$('#qn').val(),
@@ -49,23 +27,6 @@ $(document).ready(function() {
 		obj:[]
 	};	
 	
-	//---------------------------------------------------------------------------------check
-	$('#btn_check').click(function(){
-		$('div.question_box.removed').each(function(){
-			var targetID = $(this).attr('id');
-			alert( targetID );
-			var addqid_array = $.grep(valInObj.obj,function(n){ return n.id });
-			alert(addqid_array[0]);
-			alert( $.inArray(targetID,addqid_array) );
-		});		
-	});
-	//---------------------------------------------------------------------------------重編Table
-	$('#btn_creattb').click(function(){	
-		$.post('<?=$editor_save_structure_ver?>',function(data){
-			alert(data);
-			location.reload();			
-		}).error(function(e){alert(e);});
-	});		
 	//---------------------------------------------------------------------------------新增一頁
 	$('#btn_cpage').click(function(){
 		$.post('add_page',function(data){
@@ -75,38 +36,6 @@ $(document).ready(function() {
             console.log(e);
         });
 	});	
-	//---------------------------------------------------------------------------------重編Id
-	$('#btn_resetid').click(function(){
-		$.post('<?=$editor_str_id_save_ver?>',function(data){
-			location.reload();
-			//alert(data);
-		});
-	});	
-	//---------------------------------------------------------------------------------線上分析存檔
-	$('#btn_analysis').click(function(){
-		analysis_name = $('input[name=analysis_name]').map(function(){ return {type:'name',name:$(this).val(),analysis:$(this).is(':checked')} });
-		analysis_item = $('input[name=analysis_item]').map(function(){ return {type:'item',name:$(this).val(),analysis:$(this).is(':checked')} });
-
-		valInObj.obj = analysis_name.get().concat(analysis_item.get());
-		valInObj.part = $('input[name=part]').val();
-		valInObj.part_name = $('input[name=part_name]').val();
-		$.post('<?=$editor_save_analysis_ver?>',valInObj,function(data){
-			//location.reload();
-			valInObj.obj = [];
-			alert(data);
-		});
-	});
-	//---------------------------------------------------------------------------------跳頁存檔
-	$('#btn_pageskip').click(function(){
-		pageskip = $('input[name=pageskip]').map(function(){ return {type:'pageskip',name:$(this).attr('target'),value:$(this).attr('targetV'),skiptext:$(this).val()} });
-		
-		valInObj.obj = pageskip.get();
-		$.post('<?=$editor_save_pageskip_ver?>',valInObj,function(data){
-			//location.reload();
-			valInObj.obj = [];
-			alert(data);
-		});
-	});
 	//---------------------------------------------------------------------------------存檔
 	$('#btn_save').click(function(){
 
@@ -148,17 +77,6 @@ $(document).ready(function() {
 			valInObj.obj.push(valInObj_one);
 			//alert('修改文字欄位_標題');
 		}
-		//-------------------------------------------------------------------------修改隨機排列
-		$('input[name=randomQuesRoot].changed').each(function(){
-			var valInObj_one = {
-				target: 'randomQuesRoot',
-				isChecked: $(this).is(':checked')?'y':'n',
-				id: $(this).parent('div.question_box').attr('id')
-			};
-			//alert(valInObj_one.id);
-			valInObj.obj.push(valInObj_one);
-			//alert('修改文字欄位_標題');
-		});
 		//-------------------------------------------------------------------------修改文字欄位_標題
 		$('div[target=title].text_changed').each(function(){
 			var valInObj_one = {
@@ -180,12 +98,22 @@ $(document).ready(function() {
 			//valInObj.obj.push(valInObj_one);
 			//alert('修改文字欄位_標題');
 		});
-		//-------------------------------------------------------------------------修改文字欄位_選項		
+		//-------------------------------------------------------------------------修改文字欄位_選項	
+		$('div.fieldA:not(.changed) > div.var_box> table input[target=item].text_changed').each(function(){	
+			var target = $(this).parent('div').parent('td').parent('tr').parent('tbody').parent('table');
+			var valInObj_one = {
+				target: 'item',
+				id: target.parent('div.var_box').parent('div.fieldA').parent('div.question_box').attr('id'),				
+				title: $(this).val(),
+				sub_title: target.parent('div.var_box').is('.text') ? target.find('input[target=item_sub]').val() : '',
+				value: target.find('input[name=v_value]').val()
+			};
+			valInObj.obj.push(valInObj_one);
+		});
 		$('div.fieldA:not(.changed) > div.var_box> table div[target=item].text_changed').each(function(){
 			var target = $(this).parent('td').parent('tr').parent('tbody').parent('table');
 			var onvalue = target.children('tbody').children('tr:eq(0)').find('input').attr('index');
 			var sub_title = target.parent('div.var_box').is('.text')?target.children('tbody').children('tr:eq(0)').find('div[target=item_sub]').text():'';
-			
 			var valInObj_one = {
 				target: 'item',
 				id: target.parent('div.var_box').parent('div.fieldA').parent('div.question_box').attr('id'),				
@@ -193,29 +121,24 @@ $(document).ready(function() {
 				sub_title: sub_title,
 				value: onvalue
 			};
-			//alert( valInObj_one.value );
 			valInObj.obj.push(valInObj_one);
-			//alert('修改文字欄位_選項');
 		});
 		//-------------------------------------------------------------------------修改文字欄位_量表選項
-		$('div.fieldA:not(.changed) > div.var_scale_box div[target=degree].text_changed').each(function(){
-
-			var target = $(this).parent('td').parent('tr').parent('tbody').parent('table');
-			onvalue = target.find('input').is('[index]')?target.find('input').attr('index'):target.find('input').val();
+		$('div.fieldA:not(.changed) > div.var_scale_box input[target=degree].text_changed').each(function(){
+			var target = $(this).parent('div').parent('td').parent('tr').parent('tbody').parent('table');
+			onvalue = target.find('input[name=v_value]').val();
 			var valInObj_one = {
 				target: 'degree',
 				id: target.parent('div.var_scale_box').parent('div.fieldA').parent('div.question_box').attr('id'),				
-				title: $(this).html(),
+				title: $(this).val(),
 				value: onvalue
-			};
-			//alert(valInObj_one.value);
+			};			
 			valInObj.obj.push(valInObj_one);
-			//alert('修改文字欄位_量表選項');
 		});
 		//-------------------------------------------------------------------------修改題目類型
 		$('div.qtype_box.changed').each(function(){
 			if( $(this).children('table').find('tbody > tr > td > select[name=qtype]').val()=='text' ){
-				var tablesize = $(this).children('table').find('tbody > tr > td input[name=tablesize]').val();
+				var tablesize = $(this).children('table').find('tbody > tr > td > div input[name=tablesize]').val();
 			}else{
 				var tablesize = 0;
 			}
@@ -224,7 +147,7 @@ $(document).ready(function() {
 				target: 'type',
 				id: $(this).parent('div.question_box').attr('id'),
 				qtype: $(this).children('table').find('tbody > tr > td > select[name=qtype]').val(),
-				qlab: $(this).parent('div').children('div.title_box').children('table').find('tbody > tr > td > input[name=qlab]').val(),
+				qlab: $(this).parent('div').children('div.title_box').children('table').find('tbody > tr > td > div > input[name=qlab]').val(),
 				tablesize: tablesize
 			};
 			//alert(valInObj_one.id+' '+valInObj_one.qtype+' '+valInObj_one.qlab);		
@@ -236,7 +159,7 @@ $(document).ready(function() {
 			var qid = $(this).parent('div.question_box').attr('id');
 			var qtype = $(this).parent('div.question_box').children('div.qtype_box').find('select[name=qtype]').val();
 			var code = $(this).parent('div.question_box').find('div.initv_box').find('select[name=code]').val();
-			var auto_hide = $(this).attr('auto_hide');
+			var auto_hide = $(this).is('.hide');
 
 			var itemArray = [];			
 			
@@ -259,42 +182,51 @@ $(document).ready(function() {
 					});	
 				}
 			
-				var onvalue = $(this).children('table').find('input').val();
-				var sub_title = qtype=='text'?$(this).children('table').children('tbody').children('tr:eq(0)').find('div[target=item_sub]').text():'';
+				var onvalue = $(this).children('table').find('input[name=v_value]').val();
 				var ccheckbox = $(this).children('table').find('span.ccheckbox').hasClass('enable');
 
-
-				if( qtype=='text' || qtype=='textarea' ){
-					
-					var size = $(this).children('table').find('input[name=tablesize]').val();
+				if( qtype=='text' || qtype=='textarea' ){					
+					var size = $(this).find('input[name=tablesize]').val();
 				}else{
 					var size = 0;
 				}
 				
-				
-				
-				
-				if( qtype!='scale' && qtype!='select' )
-				itemArray.push({
-					value: onvalue,
-					subid_array: subid_array,
-					skipArray: skipArray,
-					othervArray: othervArray,
-					ccheckbox: ccheckbox,
-					size: size,
-					title: $(this).find('div.editor').html(),
-					sub_title: sub_title,
-					ruletip: ''//$(this).find('div.ruletip').html()
-				});		
+				if (qtype!='scale' && qtype!='select' && qtype!='text')	{
+					itemArray.push({
+						value: onvalue,
+						subid_array: subid_array,
+						skipArray: skipArray,
+						othervArray: othervArray,
+						ccheckbox: ccheckbox,
+						size: size,
+						title: $(this).find('div.editor').html(),
+						sub_title: '',
+						ruletip: ''
+					});	
+				}
+
+				if (qtype=='text') {
+					itemArray.push({
+						value: onvalue,
+						subid_array: subid_array,
+						skipArray: skipArray,
+						othervArray: othervArray,
+						ccheckbox: ccheckbox,
+						size: size,
+						title: $(this).find('.editor[target="item"]').val(),
+						sub_title: $(this).find('.editor[target=item_sub]').val(),
+						ruletip: ''
+					});	
+				};
 
 				if( qtype=='scale' )
 				itemArray.push( { value:onvalue ,title:$(this).find('div.editor').html() } );	
 				
 				if( qtype=='select' )
-				itemArray.push( { value:onvalue ,subid_array:subid_array ,skipArray:skipArray ,othervArray:othervArray ,title:$(this).find('div.editor').html() } );
-				
+				itemArray.push( { value:onvalue ,subid_array:subid_array ,skipArray:skipArray ,othervArray:othervArray ,title:$(this).find('div.editor').html() } );				
 				
 			});	
+
 			if( qtype!='explain' && qtype!='textarea' )
 			if( itemArray.length==0 ){
 				alert('沒有加入選項');
@@ -309,11 +241,9 @@ $(document).ready(function() {
 			
 			if( qtype=='scale' )
 			$(this).children('div.var_scale_box').each(function(){
-				var onvalue = $(this).children('table').find('input').is('[index]')?$(this).children('table').find('input').attr('index'):$(this).children('table').find('input').val();
-				degreeArray.push( { value:onvalue, title:$(this).find('div.editor').html(), ruletip:$(this).find('div.ruletip').html() } );
+				degreeArray.push( { value: $(this).find('input[name=v_value]').val(), title: $(this).find('input.editor').val() } );
 			});	
 			
-			var textarea_inf = {};
 			if( qtype=='textarea' ){
 				itemArray.push( { 
 					value:1 ,
@@ -350,20 +280,20 @@ $(document).ready(function() {
 			//alert('修改選項');
 		});
 		//-------------------------------------------------------------------------開始儲存
+		console.log(valInObj);
 		if( valInObj.obj.length>0 && !checkerror )
 		$.post('save_data', valInObj, function(data){
-			alert(data);
+			console.log(data);
 			for(var i in valInObj.obj){
 				//$('div[qid='+valInObj.obj[i].id+']').attr('text_changed','false');
 			}
 			$('div.fieldA').removeClass('changed');
 			$('div.editor').removeClass('text_changed');
 			$('div.qtype_box').removeClass('changed');
-			$('input[name=randomQuesRoot].changed').removeClass('changed');
 						
-			valInObj.obj = [];
-			alert('儲存成功');
 			
+			alert('儲存成功');
+			//valInObj.obj = [];
             location.reload();
 			
 			
@@ -379,14 +309,9 @@ $(document).ready(function() {
 	$("div.isShunt").on("click", "input[name=isShunt]", function() {
 		$(this).parent('div').addClass('changed');
 	});	
-	//---------------------------------------------------------------------------------事件觸發_修改題號
+	//---------------------------------------------------------------------------------事件觸發_修改題號 uncomplete check
 	$("#contents").on("change", "input[name=qlab]", function() {
-		$(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.title_box').parent('div').children('div.qtype_box').addClass('changed');
-		//$(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.qtype_box').addClass('changed');
-	});	
-	//---------------------------------------------------------------------------------事件觸發_隨機排列
-	$("#contents").on("click", "input[name=randomQuesRoot]", function() {
-		$(this).addClass('changed');
+		$(this).parent('div').parent('td').parent('tr').parent('tbody').parent('table').parent('div.title_box').parent('div').children('div.qtype_box').addClass('changed');
 	});	
 	//---------------------------------------------------------------------------------事件觸發_修改題目類型
 	$("#contents").on("change", "select[name=qtype]", function() {
@@ -394,8 +319,7 @@ $(document).ready(function() {
 		
 		
 		var qtype = target.find('select[name=qtype]').val();
-		var qtype_org = target.find('select[name=qtype]').attr('qtype_org');
-		
+		var qtype_org = target.find('select[name=qtype]').attr('qtype_org');	
 		
 		
 		var select_bkcolor_array = {};
@@ -425,15 +349,14 @@ $(document).ready(function() {
 		if( qtype!='textarea' )
 			target.siblings('div.fieldA').children('div.var_textarea_box').remove();
 			
-		if( qtype=='scale' )
+		if( qtype=='scale' )//uncomplete
 		target.siblings('div.fieldA').children('div.initv_box').after(
 			'<div class="var_scale_box_init" style="margin-right:0px;border:0px dashed #A0A0A4">'+
-			'<table class="nb-tab"><tr>'+
+			'<table class="ui very basic very compact table"><tr>'+
 			'<td><div class="title" style=";border-top:1px dashed #aaa;background-color:#D7E6FC"></div></td>'+
 			'<td width="16px"></td>'+
-			'<td width="16px"><span class="adddegree" anchor="var" addlayer="" title="加入選項" /></td>'+
+			'<td width="16px"><i class="add icon adddegree" anchor="var" addlayer="" title="加入選項"></i></td>'+
 			'<td width="16px"></td>'+
-			'<td width="1px"><div style="font-size:10px;color:red;background-color:#D4BFFF;width:170px;position:absolute;margin-left:20px"></div></td>'+
 			'</tr></table>'+
 			'</div>'
 		);
@@ -471,7 +394,11 @@ $(document).ready(function() {
 	});	
 	//---------------------------------------------------------------------------------事件觸發_文字欄位大小
 	$("#contents").on("change", "input[name=tablesize]", function() {
-		$(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.var_box,div.var_textarea_box').parent('div.fieldA').addClass('changed');
+		if ($(this).parent().is('div')) {
+			$(this).parent('div').parent('td').parent('tr').parent('tbody').parent('table').parent('div.var_box,div.var_textarea_box').parent('div.fieldA').addClass('changed');
+		}else{
+			$(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.var_box,div.var_textarea_box').parent('div.fieldA').addClass('changed');
+		}	
 	});	
 	$("#contents").on("change", "input[name=tableheight]", function() {
 		$(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.var_box,div.var_textarea_box').parent('div.fieldA').addClass('changed');
@@ -479,29 +406,6 @@ $(document).ready(function() {
 	$("#contents").on("change", "input[name=tablewidth]", function() {
 		$(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.var_box,div.var_textarea_box').parent('div.fieldA').addClass('changed');
 	});	
-	//---------------------------------------------------------------------------------
-	$("#contents").on("click", "div.main img.toggle_hide", function() {
-		$(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.initv_box').css('backgroundColor','#88cc88');		
-		if( $(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.initv_box').parent('div.fieldA').children('div.var_box').length>200 ){
-			$(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.initv_box').parent('div.fieldA').children('div.var_box').hide();
-		}else{
-			$(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.initv_box').parent('div.fieldA').children('div.var_box').slideUp('fast');
-		}
-		$(this).attr('title','展開選項').attr('alt','展開選項').removeClass('toggle_hide').addClass('toggle_show');
-		$(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.initv_box').parent('div.fieldA').attr('auto_hide','true');
-		$(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.initv_box').parent('div.fieldA').addClass('changed');
-	});
-	$("#contents").on("click", "div.main img.toggle_show", function() {
-		$(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.initv_box').css('backgroundColor','');
-		if( $(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.initv_box').parent('div.fieldA').children('div.var_box').length>200 ){
-			$(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.initv_box').parent('div.fieldA').children('div.var_box').show();
-		}else{
-			$(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.initv_box').parent('div.fieldA').children('div.var_box').slideDown('fast');
-		}
-		$(this).attr('title','隱藏選項').attr('alt','隱藏選項').removeClass('toggle_show').addClass('toggle_hide');
-		$(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.initv_box').parent('div.fieldA').attr('auto_hide','false');
-		$(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.initv_box').parent('div.fieldA').addClass('changed');
-	});
 	//---------------------------------------------------------------------------------事件觸發_開始編輯文字
 	$("#contents").on("click", "div.main img.edittext", function() {
 		if ( !editor ){
@@ -602,38 +506,8 @@ $(document).ready(function() {
 		});
 		target.next('div.addq_box').remove();
 	});
-	//---------------------------------------------------------------------------------事件觸發_增加量表選項
-	$("#contents").on("click", "div.main span.adddegree", function() {
-		var target = $(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div');
-		var addlayer = Number($(this).attr('addlayer'));
-		var qtype = target.parent('div.fieldA').parent('div.question_box').children('div.qtype_box').find('select[name=qtype]').val();
-		
-		target.after(
-			'<div class="var_scale_box">'+
-			
-			'<table class="nb-tab"><tr>'+
-			
-			'<td width="30px"><input name="v_value" type="text" size="1" disabled="disabled" value="" /></td>'+
-			
-			'<td><div class="editor item text_changed" target="degree" contenteditable="true" style="border:1px solid #A0A0A4;min-height:22px"></div></td>'+
-						
-			//'<td width="16px"><img class="edittext" anchor="var" src="images/edit.png" title="修改文字" alt="修改文字" /></td>'+
-			'<td width="16px"><span class="adddegree" anchor="var" addlayer="'+addlayer+'" title="加入量表選項" /></td>'+
-			'<td width="16px"><span class="deletevar scale" title="刪除量表選項" /></td>'+
-			//'<td width="16px"></td>'+
-			//'<td width="1px"><div class="ruletip" style="font-size:10px;color:red;background-color:#D4BFFF;width:170px;position:absolute;margin-left:20px"></div></td>'+
-			'<td width="1px"></td>'+
-			'</tr></table>'+
-			'</div>'
-		);				
-		
-		var code = target.parent('div.fieldA').children('div.initv_box').find('select[name=code]').val();
-		recodeValue(target.parent('div').children('div.var_scale_box'),qtype,code);		
-		
-		target.parent('div.fieldA').addClass('changed');
-	});
 	//---------------------------------------------------------------------------------事件觸發_增加選項
-	$("#contents").on("click", "div.main span.addvar", function() {
+	$("#contents").on("click", "div.main .addvar", function() {
 		var target = $(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div');
 		var addlayer = Number($(this).attr('addlayer'));
 		var qtype = target.parent('div.fieldA').parent('div.question_box').children('div.qtype_box').find('select[name=qtype]').val();
@@ -644,20 +518,13 @@ $(document).ready(function() {
 		target.after(
 			'<div class="var_box">'+
 			
-			'<table class="nb-tab"><tr>'+			
+			'<table class="ui very basic very compact table"><tr>'+			
 			(( qtype=='radio' || qtype=='select' || qtype=='checkbox' )?'<td width="30px"><input name="v_value" type="text" size="1" disabled="disabled" value="" /></td>':'')+
-			(( qtype=='text' || qtype=='textarea' || qtype=='scale' || qtype=='list' )?'<td style="display:none"><input name="v_value" type="hidden" size="1" disabled="disabled" value="" /></td>':'')+
-			
-			(( qtype=='text' )?'<td width="1px"><input name="tablesize" type="text" size="2" value="" /></td>':'')+
-			
-			
+			(( qtype=='textarea' || qtype=='scale' || qtype=='list' )?'<td style="display:none"><input name="v_value" type="hidden" size="1" disabled="disabled" value="" /></td>':'')+
+
 			'<td><div class="editor item text_changed" target="item" contenteditable="true" style="border:1px solid #A0A0A4;min-height:22px"></div></td>'+
-					
-			//'<td width="16px"><img class="edittext" anchor="var" src="images/edit.png" title="修改文字" alt="修改文字" /></td>'+
 			
 			(( qtype=='radio' || qtype=='select' )?'<td width="16px"><span class="skipq" title="設定跳題" /></td>':'')+
-			
-			(( qtype=='text' )?'<td width="300px"><div class="editor item text_changed" target="item_sub" contenteditable="true" style="border:1px solid #A0A0A4"></div></td>':'')+
 			
 			'<td width="16px"><span class="addvar" anchor="var" addlayer="'+addlayer+'" title="加入'+edittext+'" /></td>'+
 			'<td width="16px"><span class="deletevar" title="刪除'+edittext+'" /></td>'+
@@ -665,9 +532,7 @@ $(document).ready(function() {
 				?'<td width="16px"><span class="addquestion" anchor="var" addlayer="'+(addlayer+1)+'" title="加入題目" /></td>'
 				:''
 			)+
-			
-			'<td width="1px"></td>'+
-			//'<td width="1px"><div class="ruletip" style="font-size:10px;color:red;background-color:#D4BFFF;width:170px;position:absolute;margin-left:20px"></div></td>'+
+
 			'</tr></table>'+
 			'</div>'
 		);				
@@ -679,7 +544,7 @@ $(document).ready(function() {
 		target.parent('div.fieldA').addClass('changed');
 	});
 	//---------------------------------------------------------------------------------事件觸發_刪除選項
-	$("#contents").on("click", "div.main span.deletevar", function() {
+	$("#contents").on("click", "div.main .deletevar", function() {
 
 		var target = $(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div');
 		var target_parent = target.parent('div');
@@ -689,18 +554,16 @@ $(document).ready(function() {
 
 		if(target.next().is('.question_box'))
 		target.next().remove();
-		
-		//if(target_parent.children('div.var_box').length>1){		
+	
 		target.remove();	
 
 		var code = target_parent.children('div.initv_box').find('select[name=code]').val();			
 		recodeValue(target_parent.children('div.var_box'),qtype,code);
 		recodeIndex(target_parent.children('div.var_box'));
-		//}
 	
 	});
 	//---------------------------------------------------------------------------------事件觸發_匯入選項
-	$("#contents").on("click", "div.main span.addvar_list", function() {
+	$("#contents").on("click", "div.main .addvar_list", function() {
 		var target = $(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.initv_box');
 		var addvarlist_box = $(
 			'<div class="addvarlist_box" style="margin-right:0px;border:0px dashed #A0A0A4">'+		
@@ -772,7 +635,7 @@ $(document).ready(function() {
 				//}
 				newv_string +=
 					'<div class="var_box">'+
-					'<table class="nb-tab"><tr>'+
+					'<table class="ui very basic very compact table"><tr>'+
 					(( qtype=='radio' || qtype=='select' || qtype=='checkbox' )?'<td width="30px"><input name="v_value" type="text" size="1" disabled="disabled" value="'+value+'" /></td>':'')+
 					(( other!='' )?'<td width="1px" name="otherv">'+other+'</td>':'')+
 					(( qtype=='text' || qtype=='scale' )?'<td width="1px"><input name="v_value" type="hidden" size="1" disabled="disabled" value="" /></td>':'')+
@@ -818,46 +681,41 @@ $(document).ready(function() {
 		});
 	});	
 	//---------------------------------------------------------------------------------事件觸發_增加題目
-	$("#contents").on("click", "div.main span.addquestion", function() {	
+	$("#contents").on("click", "div.main .addquestion", function() {	
 		
 		var qanchor =  $(this).attr('anchor');		
 		var addlayer = $(this).attr('addlayer');		
 		var newid = 'QID_'+getPassword(8);
 		var qlab_length = newid.length;
-		var question_box_style = 'display:none';
 
 		if( addlayer==0 ){
-			var target = $(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.addq_box').parent('div.main');
-			var newq = $('<div class="question_box new" id="'+newid+'" uqid="'+newid+'" parrent="" layer="'+addlayer+'" style="'+question_box_style+'">').appendTo( $('<div class="main"></div>').insertAfter( target ) );
+			var target = $(this).parent('.addq_box').parent('div.main');
+			var newq = $('<div class="question_box ui tertiary segment" id="'+newid+'" uqid="'+newid+'" parrent="" layer="'+addlayer+'" style="display:none">').appendTo( $('<div class="main"></div>').insertAfter( target ) );
 		}
 		if( addlayer!=0 ){
-			var target = $(this).parent('td').parent('tr').parent('tbody').parent('table');
-			if( target.parent().is('.addq_box') )
-			var newq = $('<div class="question_box new" id="'+newid+'" uqid="'+newid+'" parrent="" layer="'+addlayer+'" style="'+question_box_style+';border-right:0;margin-left:45px">').insertAfter( target.parent('div.addq_box') );
+			var target = $(this).parent().is('.addq_box') ? $(this) : $(this).parent('td').parent('tr').parent('tbody').parent('table');
+			if( target.parent().is('.addq_box') ) {
+				var newq = $('<div class="question_box ui tertiary segment" id="'+newid+'" uqid="'+newid+'" parrent="" layer="'+addlayer+'" style="display:none;margin-left:45px">').insertAfter( target.parent('div.addq_box') );
+			}			
 			
 			if( target.parent().is('.var_box') )
 			if( target.next('div').is('.sub') ){
-				var newq = $('<div class="question_box new" id="'+newid+'" uqid="'+newid+'" parrent="" layer="'+addlayer+'" style="'+question_box_style+';border-right:0;margin-left:45px">').prependTo( target.next('div.sub') );
+				var newq = $('<div class="question_box ui tertiary segment" id="'+newid+'" uqid="'+newid+'" parrent="" layer="'+addlayer+'" style="display:none;margin-left:45px">').prependTo( target.next('div.sub') );
 			}else{
 				var sub_box = $('<div class="sub"></div>').insertAfter( target );
-				var newq = $('<div class="question_box new" id="'+newid+'" uqid="'+newid+'" parrent="" layer="'+addlayer+'" style="'+question_box_style+';border-right:0;margin-left:45px">').prependTo( sub_box );
+				var newq = $('<div class="question_box ui tertiary segment" id="'+newid+'" uqid="'+newid+'" parrent="" layer="'+addlayer+'" style="display:none;margin-left:45px">').prependTo( sub_box );
 			}
 		}
 			
-			
-			<? if( isset($_SESSION['randomQuesRoot']) && $_SESSION['randomQuesRoot']==1 ){ ?>
-			var randomQuesRoot = $('<input name="randomQuesRoot" id="randomQuesRoot'+newid+'" type="checkbox" class="changed" />'+
-												 '<label for="randomQuesRoot'+newid+'" style="cursor: pointer;font-size:13px">隨機排列</label>').appendTo(newq);
-			<? } ?>
 						
 			var type_box = $(
-				'<div class="qtype_box changed" style="padding-right:0px;background-color:#58b5e1">'+
-					(addlayer!=0?'<div style="position:absolute;margin-left:-30px"><img src="/editor/images/link.png" alt="" /></div>':'')+
-					'<span style="font-size:10px;background-color:#D4BFFF;width:170px;position:absolute;margin-left:-'+(180+addlayer*46)+'px">Table:;QID:'+newid+'</span>'+
-					'<table style="width:100%"><tr>'+
+				'<div class="qtype_box changed">'+
+					(addlayer!=0?'<span class="ui left ribbon label"><i class="level down icon"></i></span>':'')+
+					'<h5 class="ui header">' + '' + '<div class="sub header">' + newid + '</div></h5>'+
+					'<table class="ui very basic very compact table">'+
+					'<tr>'+
 					'<td>'+
-					'<select name="qtype">'+
-						//'<option value="init">請選擇題型..</option>'+
+					'<select class="ui dropdown" name="qtype">'+
 						'<option value="select">單選題(下拉式)</option>'+
 						'<option value="radio">單選題(點選)</option>'+
 						'<option value="checkbox">複選題</option>'+
@@ -867,8 +725,6 @@ $(document).ready(function() {
 						'<option value="list">題組</option>'+
 						'<option value="explain">文字標題</option>'+				
 					'</select>'+
-					
-					'<span></span>'+
 					'</td>'+
 					'<td width="16px"><span class="deletequestion" alt="刪除題目" /></td>'+
 					'<td width="1px"><div style="font-size:10px;color:red;background-color:#D4BFFF;width:170px;position:absolute;margin-left:20px"></div></td>'+
@@ -876,10 +732,14 @@ $(document).ready(function() {
 					'</table>'+
 				'</div>'	+
 				
-				'<div class="title_box" style="background-color:#fff">'+					
-					'<table style="width:100%"><tr>'+
-					'<td width="65px" valign="top"><input name="qlab" type="text" size="4" value="" /></td>'+
-					'<td><div id="title_'+newid+'" class="editor title" contenteditable="true" target="title" style="padding:5px;border:1px dashed #A0A0A4">請修改文字</div></td>'+
+				'<div class="title_box">'+					
+					'<table class="ui very basic very compact table"><tr>'+
+					'<td width="65px" valign="top">'+
+						'<div class="ui fluid mini input">'+
+							'<input type="text" name="qlab" placeholder="題號" value="" />'+
+						'</div>'+
+					'</td>'+
+					'<td><div id="title_'+newid+'" class="editor title ui segment" contenteditable="true" target="title">請修改文字</div></td>'+
 	 				//'<td width="16px"><img class="edittext" anchor="ques" src="images/edit.png" title="修改文字" alt="修改文字" /></td>'+
 					'<td width="1px"><div style="font-size:10px;color:red;background-color:#D4BFFF;width:170px;position:absolute;margin-left:20px"></div></td>'+
 					'</tr></table>'+
@@ -889,14 +749,14 @@ $(document).ready(function() {
 			var var_box = $(			
 				'<div class="fieldA changed" init="" style="background-color:#b3e373">'+
 					'<div class="initv_box" style="margin-right:0px;border:0px dashed #A0A0A4">'+
-					'<table class="nb-tab"><tr>'+
+					'<table class="ui very basic very compact table"><tr>'+
 					'<td width="16px"><select name="code">'+
 						'<option value="auto">自動編碼</option>'+
 						'<option value="manual">手動編碼</option>'+
 					'</select></td>'+
 					'<td><div class="editor title" style=";border:0px dashed #A0A0A4;background-color:#D7E6FC"></div></td>'+
 							
-					'<td width="16px"><span class="addvar" anchor="var" addlayer="'+addlayer+'" title="加入選項" /></td>'+
+					'<td width="16px"><i class="add icon addvar" anchor="var" addlayer="' + addlayer + '" title="加入選項"></i></td>'+
 					'<td width="16px"><span class="addvar_list" anchor="var" addlayer="1" title="匯入選項" /></td>'+
 					'<td width="16px"><span class="deletevar_list" anchor="var" addlayer="1" title="刪除全部選項" /></td>'+
 					'<td width="1px"></td>'+
@@ -906,13 +766,9 @@ $(document).ready(function() {
 				'<p class="contribute"></p>'
 			).appendTo(newq);
 			
-			var addq_box = $(
-				'<div class="addq_box '+(addlayer==0?'root':'sub')+'" append="false" align="center" style="">'+
-					'<table style="width:100%"><tr>'+
-					'<td><div></div></td>'+
-					'<td width="16px"><span class="addquestion" anchor="'+qanchor+'" addlayer="'+addlayer+'" title="加入題目" /></td>'+
-					'<td width="1px"><div style="font-size:10px;color:red;background-color:#D4BFFF;width:170px;position:absolute;margin-left:20px"></div></td>'+
-					'</tr></table>'+
+			var addq_box = $(				
+				'<div class="addq_box '+(addlayer==0?'root':'sub')+'" append="false">' +
+					'<div class="ui horizontal divider addquestion" anchor="' + qanchor + '" addlayer="' + addlayer + '"><i class="add icon"></i> 加入題目 </div>' +
 				'</div>'
 			).insertAfter(newq);
 				
@@ -977,12 +833,16 @@ $(document).ready(function() {
 		//createEditor( $(this).get(0) );
 	});
 	
-	$('#contents').on('blur', 'div.editor', function(e){	
+	$('#contents').on('blur', 'div.editor', function(e){		
 		textChanged(e.currentTarget);
 		setTimeout(function(){
 			$(e.currentTarget).next('.style_edit').remove();
 		},200);
 	});
+
+	$('#contents').on('blur', 'input.editor', function(e){
+		textChanged(e.currentTarget);
+	});	
 	
 	$('#contents').on('click', 'span.style_edit', function(){		
 		createEditor( $(this).prev('div.editor').get(0) );
@@ -1020,7 +880,7 @@ var database = {};
 
 
 function textChanged(currentTarget) {
-	
+
 	if( $(currentTarget).is('[target=item]') ){
 			
 		$(currentTarget).addClass('text_changed');
@@ -1038,8 +898,8 @@ function textChanged(currentTarget) {
 		$(currentTarget).addClass('text_changed');
 			
 	}else if( $(currentTarget).is('[target=item_sub]') ){
-			
-		$(currentTarget).parent('td').parent('tr').find('div[target=item]').addClass('text_changed');
+
+		$(currentTarget).parent('div').parent('td').parent('tr').find('input[target=item]').addClass('text_changed');
 			
 	}
 }
@@ -1141,7 +1001,7 @@ function createEditor(target) {
 			
 		}else if( $(target).is('[target=item_sub]') ){
 			
-			$(target).parent('td').parent('tr').find('div[target=item]').addClass('text_changed');
+			$(target).parent('td').parent('tr').find('input[target=item]').addClass('text_changed');
 			
 		}
 		
@@ -1158,13 +1018,12 @@ function recodeValue(target,qtype,code){
 	var value = 1; 
 	
 	target.each(function(){
-		if( qtype!='checkbox' )
-		if( code=='auto' ){
+		if( qtype!='checkbox' && code=='auto' ){
 			$(this).children('table').find('tbody > tr > td > input[name=v_value]').val(value);
 		}
 		if( qtype=='checkbox' ){
 			$(this).children('table').find('tbody > tr > td > input[name=v_value]').attr('value','0,1');
-		}		
+		}	
 		value++;
 	});
 	target.children('table').find('tbody > tr > td > input[name=v_value]').prop('disabled',!(code=='manual'));	
@@ -1219,34 +1078,25 @@ function getPassword(length) {
 	<div style="position:fixed;width:120px;background-color:#fff;border-top:0;z-index:1">
 		<div style="background-color:#fff"> 
 				
-            <form style="display:inline" name="form1" action="" method="post">	
+            <form style="display:inline" name="form1" action="" method="get">	
                 <div>
-                    頁數<input name="pages" type="text" size="2" value="<?=count($options_page)?>" disabled="disabled" />
-                    <?=Form::select('page', $options_page, $page, array('style'=>'font-size:15px', 'onChange'=>'this.form.submit()'))?>
+                    頁數<input name="pages" type="text" size="2" value="<?=$pages->count()?>" disabled="disabled" />
+                    <?=Form::select('page', $pages->lists('page', 'page'), $page->page, array('id' => 'page', 'onChange'=>'this.form.submit()'))?>
                     <!--<input id="btn_dpage" type="button" value="刪除整頁" disabled="disabled" />-->
                 </div>
-                <div class="ui basic mini button <?=($can_edit=='enable'?'':'disabled')?>" id="btn_cpage">                    
+                <div class="ui basic mini button <?=($ques_doc->edit ? '' : 'disabled')?>" id="btn_cpage">                    
                     <i class="file outline icon"></i>
                     新增一頁
                 </div>  
-                <div class="ui basic mini button <?=($can_edit=='enable'?'':'disabled')?>" id="btn_save">
+                <div class="ui basic mini button <?=($ques_doc->edit ? '' : 'disabled')?>" id="btn_save">
                     <i class="save icon"></i>
                     儲存檔案
-                </div>    
-                
-                
-                <!--<input id="btn_analysis" type="button" value="線上分析存檔" />
-                <input id="btn_pageskip" type="button" value="跳頁存檔" />-->
+                </div>
             </form>  
             
 		</div>
-		<!--<div style="background-color:#fff">        
-				<input id="btn_check" type="button" value="check" disabled="disabled" />            
-				<input id="btn_creattb" type="button" value="重編Table" <?=($can_edit=='enable'?'':'disabled="disabled"')?> />
-				<input id="btn_resetid" type="button" value="重編ID" disabled="disabled" />		
-		</div>-->
 		
-		<div style="">
+		<div>
 			<div style=""><?//=$changetime_text?></div>
 			<div style=""><div><a href="demo?page=1" target="_blank">預覽</a></div><div></div></div>
 			<!--<div style="float:left;margin-left:40px"><div><a href="creatTable">建立問卷</a></div></div>-->
@@ -1282,25 +1132,24 @@ function getPassword(length) {
     </div>
 </div>
 	
-<div id="building" style="border:0px dashed #A0A0A4;border-top:0;border-bottom:0;z-index:1">
+<div ng-controller="quesEditorController" id="building" class="ui text container">
 
-	<div id="contents" style="margin-left:0px">
+	<div ng-cloak id="contents">
+
+	    <div class="main">	    	
+	        <div class="addq_box" append="false">
+	        	<div class="ui horizontal divider addquestion" anchor="ques" addlayer="0"><i class="add icon"></i> 加入題目 </div>
+	        </div>
+	    </div>
+    <?     
     
-    <?	
-    include_once($buildQuestion_editor_ver);    
+	
     
-    echo '<div class="main">';
-        echo '<div class="addq_box" append="false" align="center" style="padding-right:0px;background-color:#fff;border:1px dashed #ccc">';
-            echo '<table style="width:100%" cellpadding="1" cellspacing="1"><tr>';	
-            echo '<td><div></div></td>';	
-            echo '<td width="16px"><span class="addquestion" anchor="ques" addlayer="0" title="加入題目" /></td>';
-            echo '<td width="1px"><div style="font-size:10px;color:red;background-color:#D4BFFF;width:170px;position:absolute;margin-left:20px"></div></td>';	
-            echo '</tr></table>';
-        echo '</div>';
-    echo '</div>';	
-    
-    global $q_allsub;
+    global $q_allsub, $items_text, $items_degree, $items_ques;
     $q_allsub = array();
+    $items_text = [];
+    $items_degree = [];
+    $items_ques = [];
 
     if( $question_array  )
     foreach($question_array as $question){
@@ -1315,7 +1164,9 @@ function getPassword(length) {
         }
     }
 
-    echo '<div class="main" style="margin-top:100px;border:2px dashed red">';
+    echo '<div class="main">';
+
+    echo '<div class="ui horizontal divider" anchor="ques" addlayer="0">錯誤項目 </div>';
 
     if( $question_array )
     foreach($question_array as $question){		
@@ -1330,7 +1181,55 @@ function getPassword(length) {
     ?>
         
 	</div>
-
-	<div id="footer" style="margin-bottom:20px"></div>
     
 </div>
+
+<script>
+app.controller('quesEditorController', function($scope, $filter, $http) {
+	$scope.items_text = angular.fromJson('<?=json_encode($items_text)?>');
+	$scope.items_degree = angular.fromJson('<?=json_encode($items_degree)?>');
+	$scope.items_ques = angular.fromJson('<?=json_encode($items_ques)?>');
+
+	$scope.hide = function(event) {
+		$(event.target).parent('td').parent('tr').parent('tbody').parent('table').parent('div.initv_box').parent('div.fieldA').addClass('changed');
+	}
+
+	$scope.addtext = function(items, item, event) {
+		var newItem = angular.copy(item);
+		newItem.answer = '';
+		newItem.attr = {size: 20};
+		items.splice(items.indexOf(item)+1, 0, newItem);
+		for(var i in items) {
+			items[i].attr.value = i*1+1;
+		}
+		$(event.target).parent('td').parent('tr').parent('tbody').parent('table').parent('div').parent('.fieldA').addClass('changed');
+	}
+
+	$scope.removetext = function(items, item, event) {
+		items.splice(items.indexOf(item), 1);
+		for(var i in items) {
+			items[i].attr.value = i*1+1;
+		}
+		$(event.target).parent('td').parent('tr').parent('tbody').parent('table').parent('div').parent('.fieldA').addClass('changed');
+	}
+
+	$scope.addDegree = function(items, item, event) {
+		var newItem = angular.copy(item);
+		newItem.degree = '';
+		newItem.attr = {};
+		items.splice(items.indexOf(item)+1, 0, newItem);
+		for(var i in items) {
+			items[i].attr.value = i*1+1;
+		}
+		$(event.target).parent('td').parent('tr').parent('tbody').parent('table').parent('div').parent('.fieldA').addClass('changed');
+	}
+
+	$scope.removeDegree = function(items, item, event) {
+		items.splice(items.indexOf(item), 1);
+		for(var i in items) {
+			items[i].attr.value = i*1+1;
+		}
+		$(event.target).parent('td').parent('tr').parent('tbody').parent('table').parent('div').parent('.fieldA').addClass('changed');
+	}
+});
+</script>

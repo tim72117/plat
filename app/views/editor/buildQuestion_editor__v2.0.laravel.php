@@ -14,157 +14,63 @@
 //--版本:1.1
 //--日期:2010-09-03
 //------------------------------------------------------------------------------------------------
-function buildQuestion($question,$question_array,$layer,$parrent){	
+function buildType($question, $layer) {
+	echo '<div class="qtype_box">';
+		if($layer!=0)
+			echo '<span class="ui left ribbon label"><i class="level down icon"></i></span>';
+
+		if( ($question->type=='radio' || $question->type=='select' || $question->type=='textarea') ) {		
+			echo '<h5 class="ui header">' . $question->answer->name . '<div class="sub header">' . $question->id . '</div></h5>';	
+		}
+
+		//if($question->type=='checkbox')
+		//echo '<span style="font-size:10px;background-color:#D4BFFF;width:170px;position:absolute;margin-left:-'.(180+$layer*46).'px">QID:'.$question->id.'</span>';
+		echo '<table class="ui very basic very compact table"><tr>';
+		echo '<td>';
+		echo '<select class="ui dropdown" name="qtype" qtype_org="'.$question->type.'">';
+		echo '<option'.($question->type=='select'?' selected':'').' value="select">題型 : 單選題(下拉式)</option>';
+		echo '<option'.($question->type=='radio'?' selected':'').' value="radio">題型 : 單選題(點選)</option>';
+		echo '<option'.($question->type=='checkbox'?' selected':'').' value="checkbox">題型 : 複選題</option>';
+		echo '<option'.($question->type=='text'?' selected':'').' value="text">題型 : 文字欄位</option>';
+		echo '<option'.($question->type=='textarea'?' selected':'').' value="textarea">題型 : 文字欄位(大型欄位)</option>';
+		echo '<option'.($question->type=='scale'?' selected':'').' value="scale">題型 : 量表</option>';
+		echo '<option'.($question->type=='list'?' selected':'').' value="list">題型 : 題組</option>';
+		echo '<option'.($question->type=='explain'?' selected':'').' value="explain">題型 : 說明文字</option>';
+		echo '</select>';		
+		echo '</td>';		
+		echo '<td width="16px"><span class="rulladd" title="增加跳答條件" /></td>';
+		echo '<td width="16px"><span class="deletequestion" title="刪除題目" /></td>';	
+		echo '</tr></table>';
+	echo '</div>';	
+}
+function buildQuestion($question,$question_array,$layer,$parrent) {	
 
 	$is_hint = false;
-	$fieldA_display_style = '';
-	$skipfrom_text = '';
-   
+	!isset($culume_count) && $culume_count = 1;
 
+    global $q_allsub, $items_text, $items_degree, $items_ques;
 
-    global $q_allsub;
-    //global $culume_count;
     array_push($q_allsub,(string)$question->id);
     Session::push('buildQuestion.q_allsub', (string)$question->id);
+   	
 
-    /*
-	$questionAttr = $question->attributes();
-	if( $questionAttr['skipfrom']!='' ){
-		$json = new Services_JSON();
-		$skipfrom_obj = $json->decode($questionAttr['skipfrom']);
-		$skipfrom_obj_type = $skipfrom_obj->type;
-		$skipfrom_obj_from = $skipfrom_obj->from;
-		$skipfrom_obj_case = $skipfrom_obj->case;
-		//$skipfrom_obj_act = $skipfrom_obj->act;
-		
-		if( isset($_SESSION['tablename']) )
-		$tablename = $_SESSION['tablename'];
-		
-		switch($skipfrom_obj_type){
-		case 'session':
-			$fullcase = $skipfrom_obj_case;
-			foreach( explode(',',$skipfrom_obj_from) as $v_key => $v ){
-				$fullcase = ereg_replace ('v'.($v_key+1), $v,$fullcase);
-			}
-			$skipfrom_text = '已設定條件'.$fullcase;
-		break;
-		case 'db':
-			$page = $skipfrom_obj->page;
-			$name = $skipfrom_obj->name;
-			$value = $skipfrom_obj->value;
-			$value_array = explode(",",$value);
-			if( class_exists('mod_db') )
-			if( isset($_SESSION[$tablename.'_newcid']) ){
-				$newcid = $_SESSION[$tablename.'_newcid'];
-				$sqlStr = "SELECT ".$name." FROM [".$tablename."_page".$page."] WHERE newcid='$newcid'";
-	
-				$sql = new mod_db();
-				$obj=$sql->objects($sqlStr);
-				$sql->disconnect();
-	
-				if( in_array($obj->$name,$value_array) ){
-					$fieldA_display_style = ' display:none';
-				}
-			}
-		break;
-		}
-	
-	}
-   */
-   	if( !isset($culume_count) )
-	$culume_count = 1;   
-   $display_style = '';
-
-   //$display_style = ($layer==0||$parrent=='list')?'':' display:none';
-
-   if($layer==0)
-   echo '<div class="question_box" id="'.$question->id.'" uqid="'.$question->id.'" parrent="'.$parrent.'" layer="'.$layer.'" style="'.$display_style.'">';
+	echo '<div class="question_box ui green segment" id="'.$question->id.'" uqid="'.$question->id.'" parrent="'.$parrent.'" layer="'.$layer.'" style="' . ($layer!=0 ? 'margin-left:45px' : '') . '">';
    
-   if($layer!=0)
-   echo '<div class="question_box" id="'.$question->id.'" uqid="'.$question->id.'" parrent="'.$parrent.'" layer="'.$layer.'" style="margin-left:45px'.$display_style.'">';
+	$title = $question->title;
    
-   $title = '';
-	if((string)$question->title!='')
-	$title .= (string)$question->title;
-   
-   if( $is_hint )
-   if( $question->ruletip!='' )
-   $title .= '<p><span class="small-purple">'.$question->ruletip.'</span></p>';
-
-	
-	$qid_label = (string)$question->idlab;
-	$qid_label_input = '<label name="qlab_label" for="qlab_'.$question->id.'" class="title-label" style="'.($qid_label==''?'':'display:none').'">題號</label>
-	<input id="qlab_'.$question->id.'" name="qlab" type="text" size="2" value="'.$qid_label.'" />';
+	if( $is_hint && $question->ruletip!='' )
+	$title .= '<p><span class="small-purple">'.$question->ruletip.'</span></p>';
 	
 	$answer_box = $question->answer;
 	$answer_attr = $answer_box->attributes();
 	
-	if( isset($_SESSION['randomQuesRoot']) && $_SESSION['randomQuesRoot']==1 )
-	if( $layer==0 ){
-		echo '<input name="randomQuesRoot" id="randomQuesRoot'.$question->id.'" type="checkbox" '.(isset($questionAttr['fixed'])?'':' checked="checked"').' />';
-		echo '<label for="randomQuesRoot'.$question->id.'" style="cursor: pointer;font-size:13px;'.(isset($questionAttr['fixed'])?'':'font-weight:bold;color:#f50').'">隨機排列</label>';
-	}
-	
-
-	echo '<div class="qtype_box" style="background-color:#63bd2b;color:#000">';
-		if($layer!=0)
-		echo '<div style="position:absolute;margin-left:-30px"><img src="css/editor/images/link.png" alt="" /></div>';
-		
-		
-		if( ($question->type=='radio' || $question->type=='select') ){
-			$nameAttr = $question->answer->name->attributes();
-			echo '<span style="font-size:10px;background-color:#eee;width:70px;position:absolute;margin-left:-'.(180+$layer*46+100).'px">';
-			//echo '<input type="checkbox" name="analysis_name" value="'.(string)$question->answer->name.'" '.( !isset($nameAttr['analysis'])?'checked="checked"':($nameAttr['analysis']==1?'checked="checked"':'') ).' />';
-			echo '線上分析</span>';
-		}
-		//表單名稱
-		if( ($question->type=='radio' || $question->type=='select' || $question->type=='textarea') ){
-			echo '<span style="font-size:10px;background-color:#b3e373;width:170px;position:absolute;margin-left:-'.(180+$layer*46).'px">'.$question->answer->name.'</span>';
-			echo '<span style="font-size:10px;background-color:#b3e373;width:18px;position:absolute;margin-left:-'.(28+$layer*46).'px;text-align:center">'.$culume_count.'</span>';
-			$culume_count++;
-		}
-
-
-		//if($question->type=='checkbox')
-		//echo '<span style="font-size:10px;background-color:#D4BFFF;width:170px;position:absolute;margin-left:-'.(180+$layer*46).'px">QID:'.$question->id.'</span>';
-		echo '<table class="nb-tab"><tr>';
-		echo '<td>';
-		//echo $qid_label_input;v1.10_change
-		$select_bkcolor_array = array('checkbox'=>'#b3ffb3');
-		$select_bkcolor = isset($select_bkcolor_array[(string)$question->type])?$select_bkcolor_array[(string)$question->type]:'';
-		echo '<span style="font-size:13px;font-weight:bold">回答方式 </span><select name="qtype" style="font-size:13px;background-color:'.$select_bkcolor.'" qtype_org="'.$question->type.'">';
-		echo '<option'.($question->type=='select'?' selected':'').' value="select">單選題(下拉式)</option>';
-		echo '<option'.($question->type=='radio'?' selected':'').' value="radio">單選題(點選)</option>';
-		echo '<option'.($question->type=='checkbox'?' selected':'').' value="checkbox">複選題</option>';
-		echo '<option'.($question->type=='text'?' selected':'').' value="text">文字欄位</option>';
-		echo '<option'.($question->type=='textarea'?' selected':'').' value="textarea">文字欄位(大型欄位)</option>';
-		echo '<option'.($question->type=='scale'?' selected':'').' value="scale">量表</option>';
-		echo '<option'.($question->type=='list'?' selected':'').' value="list">題組</option>';
-		echo '<option'.($question->type=='explain'?' selected':'').' value="explain">說明文字</option>';
-		echo '</select>'.'<span style="font-size:10px">QID:'.$question->id.'</span>';
-		
-		echo '<span style="color:red">'.$skipfrom_text.'</span>';
-		//.'<span style="font-size:10px">QID:'.$question->id.'</span>';
-		
-
-		//if($question->type=='text')
-		//echo '<span>Size:<input type="text" name="tablesize" size="1" value="'.$question->size.'" /></span>';
-		
-		echo '</td>';
-		
-		echo '<td width="16px"><span class="rulladd" title="增加跳答條件" /></td>';
-		echo '<td width="16px"><span class="deletequestion" title="刪除題目" /></td>';
-		echo '<td width="1px"><div class="ruletip"></div></td>';	
-		echo '</tr></table>';
-	echo '</div>';	
-	
+	buildType($question, $layer);	
 	
 	if( count($question->rulls)>0 ){
 	echo '<div class="rull_box" style="background-color:#FFBF55;font-size:10px">';		
 		if( count($question->rulls->rull)>0 )
 		foreach($question->rulls->rull as $rull){
-			echo '<table class="nb-tab"><tr>';
-
+			echo '<table class="ui very basic very compact table"><tr>';
 		
 			$rullAttr = $rull->attributes();
 			$q_data_array = $question_array->xpath("data/column[@qid='".$rullAttr['id']."']");
@@ -184,38 +90,35 @@ function buildQuestion($question,$question_array,$layer,$parrent){
 			echo '時，本題跳答';
 		
 			echo '</td>';
-			echo '<td width="16px"><img class="rulldelete" src="images/q_rull_delete.png" title="刪除規則" alt="刪除規則" /></td>';
-			echo '<td width="1px"><div class="ruletip"></div></td>';	
+			echo '<td width="16px"><img class="rulldelete" src="images/q_rull_delete.png" title="刪除規則" alt="刪除規則" /></td>';	
 			echo '</tr></table>';
 		}
 	echo '</div>'; 
 	}
 
-	echo '<div class="title_box" style="background-color:#fff">';		
-		echo '<table class="nb-tab"><tr>';
-		echo '<td width="55px" valign="top">'.$qid_label_input.'</td>';
-		echo '<td><div class="editor title" contenteditable="true" target="title">'.$title.'</div></td>';
-	 	//echo '<td width="16px" valign="top" style="padding-top:8px"><img class="edittext" anchor="ques" src="images/edit.png" title="修改文字" alt="修改文字" /></td>';
-		echo '<td width="1px"><div class="ruletip"></div></td>';	
+	echo '<div class="title_box">';		
+		echo '<table class="ui very basic very compact table"><tr>';
+		echo '<td width="65px" valign="top"><div class="ui fluid mini input"><input type="text" name="qlab" placeholder="題號" value="' . (string)$question->idlab . '" /></div></td>';
+		echo '<td><div class="editor title ui segment" contenteditable="true" target="title">'.$title.'</div></td>';	
 		echo '</tr></table>';
 	echo '</div>';   
 	
 
 
-	echo '<div class="fieldA" variable_changed="fasle" auto_hide="'.($answer_attr['auto_hide']==''?'false':$answer_attr['auto_hide']).'" style="">';
+	echo '<div class="fieldA" variable_changed="fasle" ng-class="{hide: hide.'.(string)$question->id.'}">';
    
    $option = "";
-   $table = '';
-    
+   $table = '';    
 
-		  	echo '<div class="initv_box '.$question->type.'" style="'.($answer_attr['auto_hide']=='true'?';background-color:#88cc88':'').'">';		
-		   	echo '<table class="nb-tab"><tr>';
+		  	echo '<div class="initv_box '.$question->type.'">';		
+		   	echo '<table class="ui very basic very compact table"><tr>';
 			
-			if( $question->type=='select' )
-			if( $answer_attr['auto_hide']=='true' ){
-				echo '<td width="16px"><img class="toggle_show" title="展開選項" alt="展開選項" /></td>';
-			}else{
-				echo '<td width="16px"><img class="toggle_hide" title="隱藏選項" alt="隱藏選項" /></td>';
+			if( $question->type=='select' ) {
+				echo '<td width="16px"><i class="icon" title="{{ hide.'.(string)$question->id.' }}"
+						ng-class="{hide: !hide.'.(string)$question->id.', unhide: hide.'.(string)$question->id.'}" 
+						ng-init="hide.'.(string)$question->id.'='.var_export($answer_attr['auto_hide']=='true', true).'"
+						ng-click="hide.'.(string)$question->id.'=!hide.'.(string)$question->id.';hide($event)"></i>';
+				echo '</td>';
 			}
 			
 			if( $question->type=='text' )			
@@ -225,30 +128,39 @@ function buildQuestion($question,$question_array,$layer,$parrent){
 			echo '<td width="16px" style="'.$enable_autocode.'"><select name="code" '.(( $question->type=='checkbox' || $question->type=='text' )?' disabled="disabled"':'').'>';
 				echo '<option'.(( $answer_attr['code']=='auto' || $question->type=='checkbox' || $question->type=='text' )?' selected':'').' value="auto">自動編碼</option>';
 				echo '<option'.( $answer_attr['code']=='manual'?' selected':'' ).' value="manual">手動編碼</option>';
-			echo '</select></td>';
-			
+			echo '</select></td>';			
 			
 			echo '<td></td>';
 						
-			//if( $question->type!='list' ){	
-			$enable_add = ($question->type!='textarea' && $question->type!='explain')?'':'display:none';
-			echo '<td width="16px" style="'.$enable_add.'"><span class="addvar" anchor="var" addlayer="'.$layer.'" title="加入選項" /></td>';
-				
+			if ($question->type!='textarea' && $question->type!='explain') {
+				echo '<td width="16px"><i class="add icon addvar" anchor="var" addlayer="'.$layer.'" title="加入選項"></i></td>';
+			}
 
-			//if( $question->type!='scale' )
-			$enable_import = ($question->type=='radio' || $question->type=='select')?'':'display:none';	
-			echo '<td width="16px" style="'.$enable_import.'"><span class="addvar_list" anchor="var" addlayer="'.$layer.'" title="匯入選項" /></td>';	
+			if ($question->type=='radio' || $question->type=='select') {
+				echo '<td width="16px"><i class="table icon addvar_list" anchor="var" addlayer="'.$layer.'" title="匯入選項"></i></td>';	
+			}			
 				
 			$enable_delectall = ($question->type!='textarea' && $question->type!='explain')?'':'display:none';	
 			echo '<td width="16px" style="'.$enable_delectall.'"><span class="deletevar_list" anchor="var" addlayer="'.$layer.'" title="刪除全部選項" /></td>';
 
-			//}
-
 			
-			echo '<td width="1px"></td>';
 			echo '</tr></table>';
-			echo '</div>';
-			
+			echo '</div>';		
+
+			if ($question->type=='text') {
+				echo '<div class="var_box text" ng-repeat="item in items_text.' . (string)$question->id . '">';
+				echo '<span style="font-size:10px;background-color:#D4BFFF;width:170px;position:absolute;margin-left:-{{ 180+item.layer*46 }}px">{{ item.attr.name }}</span>';			
+				echo '<table class="ui very basic very compact table"><tr>';	
+				echo '<td width="16"><input name="v_value" type="text" size="1" disabled="disabled" ng-model="item.attr.value" /></td>';
+				echo '<td width="65"><div class="ui fluid mini input"><input type="text" name="tablesize" placeholder="字數" ng-model="item.attr.size" /></div></td>';	
+				echo '<td><div class="ui fluid input"><input type="text" class="editor item" ng-class="{text_changed: item.changed}" target="item" placeholder="題目" ng-model="item.answer" /></div></td>';
+				echo '<td><div class="ui fluid input"><input type="text" class="editor item" target="item_sub" placeholder="註解" ng-model="item.attr.sub_title" /></div></td>';		
+				echo '<td width="16px"><i class="add icon" ng-click="addtext(items_text.' . (string)$question->id . ', item, $event)" title="加入選項"></i></td>';
+				echo '<td width="16px"><i class="minus icon" ng-click="removetext(items_text.' . (string)$question->id . ', item, $event)" title="刪除選項"></i></td>';
+				echo '</tr></table>'; 
+				echo '</div>';	
+			}
+
 
 
 	$item_count = 1;
@@ -260,40 +172,23 @@ function buildQuestion($question,$question_array,$layer,$parrent){
 		   
 		//------------------------------------------------radio
 		case "radio":
-		  	echo '<div class="var_box radio">';		
-		   	echo '<table class="nb-tab"><tr>';	
+		  	echo '<div class="var_box radio">';
+		   	echo '<table class="ui very basic very compact table"><tr>';
 			echo '<td width="30px"><input name="v_value" type="text" size="1" '.($answer_attr['code']=='manual'?'':'disabled="disabled"').' value="'.$attr['value'].'" index="'.$index_item.'" /></td>';
-			echo '<td><div class="editor item" qid="'.$question->id.'" contenteditable="true" target="item">'.(string)$answer.'</div></td>';	
-			
-			//echo '<td width="16px"><img class="edittext" anchor="var" src="images/edit.png" title="修改文字" alt="修改文字" /></td>';
-
+			echo '<td><div class="editor item" qid="'.$question->id.'" contenteditable="true" target="item">'.(string)$answer.'</div></td>';
 			echo '<td width="16px"><span class="skipq" title="設定跳題" /></td>';
 			echo '<td width="16px"><span class="addvar" anchor="var" addlayer="'.$layer.'" title="加入選項" /></td>';
-			echo '<td width="16px"><span class="deletevar" title="刪除選項" /></td>';			
-			echo '<td width="16px"><span class="addquestion" anchor="var" addlayer="'.($layer+1).'" title="加入題目" /></td>';
-			
-			//if( isset($attr['ruletip']) )
-			//echo '<td width="1px"><div class="ruletip" style="font-size:10px;color:red;background-color:#eee;width:170px;position:absolute;margin-left:20px">'.$attr['ruletip'].'</div></td>';
-			
-			
-	
-			
-
-			echo '<td width="1px"><div class="ruletip"><input type="text" size="20" name="pageskip" target="'.(string)$question->answer->name.'" targetV="'.$attr['value'].'" value="'.$attr['pageskip'].'" /></div></td>';	
-
-			
-			
+			echo '<td width="16px"><span class="deletevar" title="刪除選項" /></td>';
+			echo '<td width="16px"><i class="add icon addquestion" anchor="var" addlayer="'.($layer+1).'" title="加入題目"></i></td>';
 			echo '</tr>';
+
+			if (isset($attr['pageskip']))
+			echo '<div class="ruletip"><input type="text" size="20" name="pageskip" target="'.(string)$question->answer->name.'" targetV="'.$attr['value'].'" value="'.$attr['pageskip'].'" /></div>';		
 			
 					
 			//-----------------skip_box
-			if( $attr["skip"]!='' ){
+			if ($attr["skip"]!='') {
 				$sub_array = explode(",", $attr["skip"]);
-			}else{
-				$sub_array = '';
-			}
-			if( is_array($sub_array) ){
-				//echo '<div class="skip">'; 
 				echo '<tr>';
 				echo '<td width="30px"></td>';
 				echo '<td><div class="skipbox" target="item" style="border:1px dashed #A0A0A4;background-color:#FFAC55">';
@@ -302,17 +197,13 @@ function buildQuestion($question,$question_array,$layer,$parrent){
 				}
 				echo '</div></td>';
 				echo '</tr>';
-			}			
+			}	
 			
 			echo '</table>';
 			
 			//-----------------sub_box
-			if( $attr["sub"]!='' ){
+			if ($attr["sub"]!='') {
 				$sub_array = explode(",", $attr["sub"]);
-			}else{
-				$sub_array = '';
-			}
-			if( is_array($sub_array) ){
 				echo '<div class="sub">'; 
 				foreach($sub_array as $attr_i){
 					$sub = $question_array->xpath("/page/question_sub/id[.='".$attr_i."']/parent::*");			   
@@ -322,7 +213,6 @@ function buildQuestion($question,$question_array,$layer,$parrent){
 				}
 				echo '</div>'; 
 			}
-			//-----------------
 			
 			echo '</div>';
 			$value_count++;
@@ -331,31 +221,21 @@ function buildQuestion($question,$question_array,$layer,$parrent){
 		
 		//------------------------------------------------text
 		case "text":
-			echo '<div class="var_box text">';
-			
-			//表單名稱
-			echo '<span style="font-size:10px;background-color:#D4BFFF;width:170px;position:absolute;margin-left:-'.(180+$layer*46).'px">'.$attr["name"].'</span>';
+			!isset($items_text[(string)$question->id]) && $items_text[(string)$question->id] = [];
+			$attr_array = (array)$attr;
+			array_push($items_text[(string)$question->id], ['answer' => (string)$answer, 'attr' => $attr_array["@attributes"], 'layer' => $layer]);
 
-			
-			
-		   	echo '<table class="nb-tab"><tr>';	
-			echo '<td style="display:none"><input name="v_value" type="hidden" size="1" disabled="disabled" value="'.$attr['value'].'" index="'.$index_item.'" /></td>';
-			echo '<td width="1px">';
-			echo '<label name="qlab_label" for="textsize_'.$question->id.$index_item.'" style="position:absolute;'.($attr['size']==''?'':'display:none').';color:#666;padding:5px;padding-left:7px;font-size:14px">字數</label>';
-			echo '<input id="textsize_'.$question->id.$index_item.'" name="tablesize" type="text" size="2" value="'.$attr['size'].'" /></td>';
-			
-			echo '<td><div class="editor item" target="item" contenteditable="true">'.(string)$answer.'</div></td>';
-			echo '<td width="300px"><div class="editor item" target="item_sub" contenteditable="true">'.(string)$attr['sub_title'].'</div></td>';			
-			echo '<td width="16px"><span class="addvar" anchor="var" addlayer="'.$layer.'" title="加入選項" /></td>';
-			echo '<td width="16px"><span class="deletevar" title="刪除選項" /></td>';
-
-			//if( isset($attr['ruletip']) )
-			//echo '<td width="1px"><div class="ruletip">'.$attr['ruletip'].'</div></td>';	
-			echo '<td width="1px"></td>';
-			echo '</tr></table>'; 
-			echo '</div>';   
-			
 			$index_item++;
+		break;
+
+		//------------------------------------------------scale
+		case "scale":
+
+			!isset($items_ques[(string)$question->id]) && $items_ques[(string)$question->id] = [];
+			$attr_ques_array = (array)$attr;
+			array_push($items_ques[(string)$question->id], ['answer' => (string)$answer, 'attr' => $attr_ques_array["@attributes"], 'layer' => $layer]);
+			
+			$item_count++;
 		break;
 		
 		//------------------------------------------------select
@@ -378,32 +258,19 @@ function buildQuestion($question,$question_array,$layer,$parrent){
 		   	$value_input = (string)$attr['value'];
 			$value_input_length = strlen($value_input);			
 			
-			echo '<div class="var_box select" style="'.($answer_attr['auto_hide']=='true'?';display:none':'').'">';		
-		   	echo '<table class="nb-tab"><tr>';
+			echo '<div class="var_box select" ng-hide="hide.'.(string)$question->id.'">';
+		   	echo '<table class="ui very basic very compact table"><tr>';
 			echo '<td width="30px"><input name="v_value" type="text" size="'.$value_input_length.'" '.($answer_attr['code']=='manual'?'':'disabled="disabled"').' value="'.$attr['value'].'" index="'.$index_item.'" /></td>';
-			
-			echo '<td><div class="editor item" target="item" contenteditable="true">'.(string)$answer.'</div></td>';	
-
+			echo '<td><div class="ui fluid input"><input type="text" class="editor item" target="item" placeholder="題目" value="' . (string)$answer . '" /></div>';
 			echo '<td width="16px"><span class="skipq" title="設定跳題" /></td>';
-			echo '<td width="16px"><span class="addvar" anchor="var" addlayer="'.$layer.'" title="加入選項" /></td>';
-			echo '<td width="16px"><span class="deletevar" title="刪除選項" /></td>';
-			echo '<td width="16px"><span class="addquestion" anchor="var" addlayer="'.($layer+1).'" title="加入題目" /></td>';
-			
-			
-			echo '<td width="1px">';
-			if( isset($attr['ruletip']) )
-				echo '<div class="ruletip">'.$attr['ruletip'].'</div>';
-			echo '</td>';
+			echo '<td width="16px"><i class="add icon addvar" anchor="var" addlayer="'.$layer.'" title="加入選項"></i></td>';
+			echo '<td width="16px"><i class="minus icon deletevar" title="刪除選項"></i></td>';
+			echo '<td width="16px"><i class="caret down icon addquestion" anchor="var" addlayer="'.($layer+1).'" title="加入題目"></i></td>';
 			echo '</tr>';
 			
 			//-----------------skip_box
-			if( $attr["skip"]!='' ){
+			if ($attr["skip"]!='') {
 				$sub_array = explode(",", $attr["skip"]);
-			}else{
-				$sub_array = '';
-			}
-			if( is_array($sub_array) ){
-				//echo '<div class="skip">'; 
 				echo '<tr>';
 				echo '<td width="30px"></td>';
 				echo '<td><div class="skipbox" target="item" style="border:1px dashed #A0A0A4;background-color:#FFAC55">';
@@ -414,14 +281,10 @@ function buildQuestion($question,$question_array,$layer,$parrent){
 				echo '</tr>';
 			}		
 			
-			echo '</table>';
+			echo '</table>';			
 			
-			if( $attr["sub"]!='' ){
+			if ($attr["sub"]!='') {
 				$sub_array = explode(",", $attr["sub"]);
-			}else{
-				$sub_array = '';
-			}
-			if( is_array($sub_array) ){
 				echo '<div class="sub">'; 
 				foreach($sub_array as $attr_i){
 					$sub = $question_array->xpath("/page/question_sub/id[.='".$attr_i."']/parent::*");			   
@@ -430,6 +293,8 @@ function buildQuestion($question,$question_array,$layer,$parrent){
 				}
 				echo '</div>'; 
 			}
+
+			echo isset($attr['ruletip']) ? '<div class="ruletip">'.$attr['ruletip'].'</div>' : '';	
 			
 			echo '</div>';
 			$value_count++;
@@ -446,36 +311,21 @@ function buildQuestion($question,$question_array,$layer,$parrent){
 			$subs_string = 'sub="'.implode(",",$subs_array).'"';
 						
 			echo '<div class="var_box checkbox">';
-
-			echo '<span style="font-size:10px;background-color:#eee;width:70px;position:absolute;margin-left:-'.(180+$layer*46+100).'px">';
-			echo '<input type="checkbox" name="analysis_item" value="'.(string)$attr['name'].'" '.( !isset($attr['analysis'])?'checked="checked"':($attr['analysis']==1?'checked="checked"':'') ).' />';
-			echo '線上分析</span>';
 			
 			echo '<span style="font-size:10px;background-color:#b3e373;width:170px;position:absolute;margin-left:-'.(180+$layer*46).'px">'.$attr["name"].'</span>';
-			echo '<span style="font-size:10px;background-color:#b3e373;width:18px;position:absolute;margin-left:-'.(28+$layer*46).'px;text-align:center">'.$culume_count.'</span>';
-			$culume_count++;
+			echo '<span style="font-size:10px;background-color:#b3e373;width:18px;position:absolute;margin-left:-'.(28+$layer*46).'px;text-align:center">'.$culume_count.'</span>';			
 			
-		   	echo '<table class="nb-tab"><tr>';
+		   	echo '<table class="ui very basic very compact table"><tr>';
 			echo '<td width="30px"><input name="v_value" type="text" size="1" disabled="disabled" value="0,1" index="'.$index_item.'" /></td>';
-			echo '<td><div class="editor item" target="item" contenteditable="true">'.(string)$answer.'</div></td>';	
+			echo '<td><div class="ui fluid input"><input type="text" class="editor item" target="item" placeholder="題目" value="' . (string)$answer . '" /></div>';
 			echo '<td width="16px"><span class="ccheckbox'.((string)$attr['reset']=='all'?' enable':'').'" anchor="var" title="清除勾選項目" /></td>';
-			echo '<td width="16px"><span class="addvar" anchor="var" addlayer="'.$layer.'" title="加入選項" /></td>';
-			echo '<td width="16px"><span class="deletevar" title="刪除選項" /></td>';
-			echo '<td width="16px"><span class="addquestion" anchor="var" addlayer="'.($layer+1).'" title="加入題目" /></td>';
+			echo '<td width="16px"><i class="add icon addvar" anchor="var" addlayer="'.$layer.'" title="加入選項"></i></td>';
+			echo '<td width="16px"><i class="minus icon deletevar" title="刪除選項"></i></td>';
+			echo '<td width="16px"><i class="caret down icon addquestion" anchor="var" addlayer="'.($layer+1).'" title="加入題目"></i></td>';		
+			echo '</tr></table>';			
 			
-
-			echo '<td width="1px">';
-			if( isset($attr['ruletip']) )
-				echo '<div class="ruletip">'.$attr['ruletip'].'</div>';	
-			echo '</td>';
-			echo '</tr></table>';
-			
-			if( $attr["sub"]!='' ){
+			if ($attr["sub"]!='') {
 				$sub_array = explode(",", $attr["sub"]);
-			}else{
-				$sub_array = '';
-			}
-			if( is_array($sub_array) ){
 				echo '<div class="sub">'; 
 				foreach($sub_array as $attr_i){
 					$sub = $question_array->xpath("/page/question_sub/id[.='".$attr_i."']/parent::*");
@@ -484,43 +334,18 @@ function buildQuestion($question,$question_array,$layer,$parrent){
 				}
 				echo '</div>'; 
 			}
+
+			echo isset($attr['ruletip']) ? '<div class="ruletip">'.$attr['ruletip'].'</div>' : '';	
 			
 			echo '</div>';
 			$index_item++;
-		break;
-
-		//------------------------------------------------scale
-		case "scale":	
-  
-			echo '<div class="var_box scale">';	
-
-			echo '<span style="font-size:10px;background-color:#eee;width:70px;position:absolute;margin-left:-'.(180+$layer*46+100).'px">';
-			echo '<input type="checkbox" name="analysis_item" value="'.(string)$attr['name'].'" '.( !isset($attr['analysis'])?'checked="checked"':($attr['analysis']==1?'checked="checked"':'') ).' />';
-			echo '線上分析</span>';
-			
-			echo '<span style="font-size:10px;background-color:#b3e373;width:170px;position:absolute;margin-left:-'.(180+$layer*46).'px">'.$attr["name"].'</span>';
-			echo '<span style="font-size:10px;background-color:#b3e373;width:18px;position:absolute;margin-left:-'.(28+$layer*46).'px;text-align:center">'.$culume_count.'</span>';
 			$culume_count++;
-		   	echo '<table class="nb-tab"><tr>';	
-			echo '<td style="display:none"><input name="v_value" type="hidden" size="1" disabled="disabled" value="'.$attr['value'].'" index="'.$index_item.'" /></td>';
-			echo '<td><div class="editor item" qid="'.$question->id.'" target="item" contenteditable="true">'.(string)$answer.'</div></td>';	
-			echo '<td width="16px"><span class="addvar" anchor="var" addlayer="'.$layer.'" title="加入量表子題" /></td>';
-			echo '<td width="16px"><span class="deletevar" title="刪除量表子題" /></td>';
-			//echo '<td width="16px"><img class="addquestion" anchor="var" addlayer="'.($layer+1).'" src="images/add_q.png" title="加入題目" alt="加入題目" /></td>';
-			
-			//if( isset($attr['ruletip']) )
-			//echo '<td width="1px"><div class="ruletip">'.$attr['ruletip'].'</div></td>';	
-			echo '<td width="1px"></td>';
-			echo '</tr></table>'; 
-			echo '</div>';  
-			
-			$item_count++;
-			$index_item++;
 		break;
+
 		//------------------------------------------------scale_text
 		case "scale_text":
-		   $table .= "<tr class=\"scale\">";
-		   $table .= "<td><p class=\"scale\" style=\"margin-left:1em;text-indent:-1em\">".$answer."</p></td>";
+		   $table .= '<tr class="scale">';
+		   $table .= '<td><p class="scale" style="margin-left:1em;text-indent:-1em">'.$answer.'</p></td>';
 		   foreach($question->answer->degree as $degree){		
 		      $attr_degree = $degree->attributes();
 			  $table .= "<td class=\"scale\"><input type=\"text\" size=\"10\" name=\"".$attr["name"]."\" value=\"\" /></td>";
@@ -529,34 +354,20 @@ function buildQuestion($question,$question_array,$layer,$parrent){
 		   break;
 		   //------------------------------------------------list
 		case "list":
-		   echo '<div class="var_box list">';		
-		   	echo '<table class="nb-tab"><tr>';	
-			echo '<td style="display:none"><input name="v_value" type="hidden" size="1" disabled="disabled" value="'.$attr['value'].'" index="'.$index_item.'" /></td>';
-			
+		   echo '<div class="var_box list">';	
+
+		   	echo '<table class="ui very basic very compact table"><tr>';	
+			echo '<td style="display:none"><input name="v_value" type="hidden" size="1" disabled="disabled" value="'.$attr['value'].'" index="'.$index_item.'" /></td>';			
 			echo '<td><div class="editor item" qid="'.$question->id.'" target="item" contenteditable="true">'.(string)$answer.'</div></td>';				
-			//echo '<td width="16px"><img class="edittext" anchor="var" src="images/edit.png" title="修改文字" alt="修改文字" /></td>';
-			
-			//echo '<td width="16px"><img class="skipq" src="images/skip_q.png" title="設定跳題" alt="設定跳題" /></td>';
-			echo '<td width="16px"><span class="addvar" anchor="var" addlayer="'.$layer.'" title="加入選項" /></td>';
-			echo '<td width="16px"><span class="deletevar" title="刪除選項" /></td>';			
-			echo '<td width="16px"><span class="addquestion" anchor="var" addlayer="'.($layer+1).'" title="加入題目" /></td>';
-			
-			
-			echo '<td width="1px">';
-			if( isset($attr['ruletip']) )
-				echo '<div class="ruletip">'.$attr['ruletip'].'</div>';
-			echo '</td>';	
-			echo '</tr>';
-	
+			echo '<td width="16px"><i class="add icon addvar" anchor="var" addlayer="'.$layer.'" title="加入子題串"></i></td>';
+			echo '<td width="16px"><i class="minus icon deletevar" title="刪除子題串"></i></td>';			
+			echo '<td width="16px"><i class="add icon addquestion" anchor="var" addlayer="'.($layer+1).'" title="加入題目"></i></td>';
+			echo '</tr>';	
 			echo '</table>';
 			
 			//-----------------sub_box
-			if( $attr["sub"]!='' ){
+			if ($attr["sub"]!='') {
 				$sub_array = explode(",", $attr["sub"]);
-			}else{
-				$sub_array = '';
-			}
-			if( is_array($sub_array) ){
 				echo '<div class="sub">'; 
 				foreach($sub_array as $attr_i){
 					$sub = $question_array->xpath("/page/question_sub/id[.='".$attr_i."']/parent::*");			   
@@ -565,7 +376,8 @@ function buildQuestion($question,$question_array,$layer,$parrent){
 				}
 				echo '</div>'; 
 			}
-			//-----------------
+
+			echo isset($attr['ruletip']) ? '<div class="ruletip">'.$attr['ruletip'].'</div>' : '';	
 			
 			echo '</div>';
 			$value_count++;
@@ -579,16 +391,16 @@ function buildQuestion($question,$question_array,$layer,$parrent){
 		   //------------------------------------------------textarea
 		case "textarea":
 			echo '<div class="var_textarea_box" style="margin-right:0px;border:0px dashed #A0A0A4">';		
-		   	echo '<table class="nb-tab"><tr>';
+		   	echo '<table class="ui very basic very compact table"><tr>';
 			echo '<td width="1px"><input name="v_value" type="hidden" size="1" disabled="disabled" value="1" index="1" /></td>';
 			echo '<td width="86px"><span style="font-size:13px">字數</span><input name="tablesize" type="text" size="2" value="'.$attr['size'].'" /></td>';
 			echo '<td width="86px"><span style="font-size:13px">高</span><input name="tableheight" type="text" size="2" value="'.$attr['rows'].'" /></td>';
 			echo '<td width="86px"><span style="font-size:13px">寬</span><input name="tablewidth" type="text" size="2" value="'.$attr['cols'].'" /></td>';
 			echo '<td><div class="" target="" style="border:0px solid #A0A0A4;min-height:22px"></td>';
-			
-			if( isset($attr['ruletip']) )
-			echo '<td width="1px"><div class="ruletip">'.$attr['ruletip'].'</div></td>';	
 			echo '</tr></table>'; 
+
+			echo isset($attr['ruletip']) ? '<div class="ruletip">'.$attr['ruletip'].'</div>' : '';
+
 			echo '</div>';   
 			
 			$index_item++;
@@ -610,38 +422,42 @@ function buildQuestion($question,$question_array,$layer,$parrent){
 		   
    }
    
-   	if($question->type=='scale'){
-		echo '<div class="var_scale_box_init" style="margin-right:0px;border:0px dashed #A0A0A4">';
-		echo '<table class="nb-tab"><tr>';
-		echo '<td><div class="title" style=";border-top:1px dashed #aaa;background-color:#D7E6FC"></div></td>';	
+	$tableHead = '';
+   	if($question->type=='scale'){   
+
+		echo '<div class="var_box scale" ng-repeat="item in items_ques.' . (string)$question->id . '">';			
+		echo '<span style="font-size:10px;background-color:#b3e373;width:170px;position:absolute;margin-left:-'.(180+$layer*46).'px">'.$attr["name"].'</span>';			
+		echo '<table class="ui very basic very compact table"><tr>';	
+		echo '<td style="display:none"><input name="v_value" type="text" size="1" disabled="disabled" ng-model="item.attr.value" /></td>';
+		echo '<td><div class="ui fluid input"><input type="text" class="editor item" target="item" placeholder="題目" ng-model="item.answer" /></td>';
+		echo '<td width="16px"><i class="add icon addvar" title="加入量表子題"></i></td>';
+		echo '<td width="16px"><i class="minus icon deletevar" title="刪除量表子題"></i></td>';
+		echo '</tr></table>'; 
+		echo '</div>';  
+
+		echo '<div class="var_scale_box_init">';
+		echo '<div class="ui horizontal divider">選項</div>';
+		echo '<table class="ui very basic very compact table"><tr>';
+		echo '<td></td>';
+		echo '<td width="16px"><i class="add icon adddegree" anchor="var" addlayer="'.$layer.'" title="加入選項"></i></td>';
 		echo '<td width="16px"></td>';
-		echo '<td width="16px"><span class="adddegree" anchor="var" addlayer="'.$layer.'" title="加入選項" /></td>';
-		echo '<td width="16px"></td>';
-		echo '<td width="1px"></td>';
 		echo '</tr></table>';
 		echo '</div>';
-  	}
-   
-   $tableHead = '';
-   if($question->type == "scale"){
+
+		echo '<div class="var_scale_box" ng-repeat="item in items_degree.' . (string)$question->id . '">';
+		echo '<table class="ui very basic very compact table"><tr>';
+		echo '<td width="30px"><input name="v_value" type="text" size="1" disabled="disabled" ng-model="item.attr.value" /></td>';
+		echo '<td><div class="ui fluid input"><input type="text" class="editor item" target="degree" placeholder="選項" ng-model="item.degree" /></td>';
+		echo '<td width="16px"><i class="add icon" ng-click="addDegree(items_degree.' . (string)$question->id . ', item, $event)" title="加入選項"></i></td>';
+		echo '<td width="16px"><i class="minus icon" ng-click="removeDegree(items_degree.' . (string)$question->id . ', item, $event)" title="刪除選項"></i></td>';
+		echo '</tr></table>';
+		echo '</div>';
+
 	   foreach($question->answer->degree as $degree){		
 			$attr_degree = $degree->attributes();
-			
-			echo '<div class="var_scale_box" style="margin-right:0px;border:0px dashed #A0A0A4">';
-			echo '<table class="nb-tab"><tr>';
-			echo '<td width="30px"><input name="v_value" type="text" size="1" disabled="disabled" value="'.$attr_degree['value'].'" /></td>';
-			
-			echo '<td><div class="editor item" target="degree" contenteditable="true">'.(string)$degree.'</div></td>';
-						
-			//echo '<td width="16px"><img class="edittext" anchor="var" src="images/edit.png" title="修改文字" alt="修改文字" /></td>';
-			echo '<td width="16px"><span class="adddegree" anchor="var" addlayer="'.$layer.'" title="加入選項" /></td>';
-			echo '<td width="16px"><span class="deletevar scale" title="刪除選項" /></td>';
-			
-			//if( isset($attr['ruletip']) )
-			//echo '<td width="1px"><div class="ruletip">'.$attr['ruletip'].'</div></td>';
-			echo '<td width="1px"></td>';
-			echo '</tr></table>';
-			echo '</div>';
+			!isset($items_degree[(string)$question->id]) && $items_degree[(string)$question->id] = [];
+			$attr_degree_array = (array)$attr_degree;
+			array_push($items_degree[(string)$question->id], ['degree' => (string)$degree, 'attr' => $attr_degree_array["@attributes"], 'layer' => $layer]);
 			$value_count++;
 		}
    }
@@ -653,20 +469,14 @@ function buildQuestion($question,$question_array,$layer,$parrent){
 	   echo "<table><thead><tr><th></th>".$tableHead."</tr></thead><tbody>".$table."</tbody></table>";
    }
    
-   echo "</div>";
-   //if($layer==0)
-   echo '<div class="contribute" style="background-color:#63bd2b;height:5px"></div>';
-  
-   echo "</div>";
-   
+	echo "</div>";
 
-	$anchor = $layer==0?'ques':'var';
-	echo '<div class="addq_box '.($layer==0?'root':'sub').'" append="false" align="center" style="">';
-		echo '<table class="nb-tab"><tr>';
-		echo '<td><div></div></td>';
-	 	echo '<td width="16px"><span class="addquestion" anchor="'.$anchor.'" addlayer="'.$layer.'" title="加入題目" /></td>';
-		echo '<td width="1px"></td>';
-		echo '</tr></table>';
+
+	echo "</div>";
+
+
+	echo '<div class="addq_box '.($layer==0?'root':'sub').'" append="false">';
+	echo '<div class="ui horizontal divider addquestion" anchor="' . ($layer==0?'ques':'var') . '" addlayer="' . $layer . '"><i class="add icon"></i> 加入題目 </div>';
 	echo '</div>';
    
 }
