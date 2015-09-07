@@ -62,3 +62,25 @@ class Column extends Eloquent
         return $this->belongsTo('Row\Table', 'table_id');
     }
 }
+
+class Cencus extends Eloquent
+{
+    protected $table = 'ques_doc';
+
+    public $timestamps = false;
+
+    protected $fillable = array('year', 'dir', 'edit', 'host');
+
+    public function pages() {
+        return $this->hasMany('Row\Pages', 'file_id', 'file_id');
+    }
+}
+
+class Pages extends Eloquent
+{
+    protected $table = 'ques_page';
+
+    public $timestamps = true;
+
+    protected $fillable = array('xml');
+}

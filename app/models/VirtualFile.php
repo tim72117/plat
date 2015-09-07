@@ -11,6 +11,10 @@ class Files extends Eloquent {
 		return $this->hasMany('Row\Sheet', 'file_id', 'id');
 	}
 
+	public function cencus() {
+		return $this->hasOne('Row\Cencus', 'file_id', 'id');
+	}
+
 	public function isType() {
 		return $this->hasOne('FileType', 'id', 'type');
 	}

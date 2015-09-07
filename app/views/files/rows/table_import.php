@@ -20,6 +20,10 @@
             <i class="download icon"></i>下載已上傳名單
         </div> 
 
+        <a class="ui green button" href="rows">
+            <i class="download icon"></i>編輯名單
+        </a> 
+
         <div class="ui attached red message" ng-if="sheet.editable">資料表修改中，暫時無法上傳資料。</div>
         <div class="ui attached message" ng-bind-html="file.comment"></div>
         <div class="ui attached segment">若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</div>
