@@ -46,7 +46,7 @@ return array(
         $cacheName = Auth::user()->id.'-school-lookup-tiped-'.$input['table'];        
         $input['reflash'] && Cache::forget($cacheName);
         
-        $schools = User_tiped::find(Auth::user()->id)->schools->lists('uname', 'id');
+        $schools = User_tiped::find(Auth::user()->id)->schools->lists('name', 'id');
         
         if( count($schools)>0 ) {
             $school_selected = isset($schools[$input['school_selected']]) ? $input['school_selected'] : array_keys($schools)[0];                

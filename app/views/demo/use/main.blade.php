@@ -15,12 +15,12 @@ isset($power_global->power) && ($power = json_decode($power_global->power));
 <script src="/js/angular-1.3.14/angular.min.js"></script>
 <script src="/js/angular-1.3.14/angular-sanitize.min.js"></script>
 <script src="/js/angular-1.3.14/angular-cookies.min.js"></script>
-<script src="/css/ui/Semantic-UI-1.11.4/components/transition.min.js"></script>
-<script src="/css/ui/Semantic-UI-1.11.4/components/popup.min.js"></script>
+<script src="/css/Semantic-UI/Semantic-UI-2.0.7/components/transition.min.js"></script>
+<script src="/css/Semantic-UI/Semantic-UI-2.0.7/components/popup.min.js"></script>
 <script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
 <script src="/js/angular-semantic-ui/dropdown.js"></script>
 
-<link rel="stylesheet" href="/css/ui/Semantic-UI-1.11.4/semantic.min.css" />
+<link rel="stylesheet" href="/css/Semantic-UI/Semantic-UI-2.0.7/semantic.min.css" />
 
 <style>
 body {
@@ -50,7 +50,7 @@ body {
 }
 </style>
 
-<script type="text/javascript">
+<script>
 var app = angular.module('app', ['ngSanitize', 'ngCookies']);
 app.filter('startFrom', function() {
     return function(input, start) {         
@@ -89,7 +89,7 @@ function getCookie(value) {
 @section('body')
 <div style="width: 100%;height: 100%">
 
-	<div style="position: absolute;left: 0;right: 0;height: 30px;z-index: 130" ng-controller="topMenuController">
+	<div style="position: absolute;left: 0;right: 0;height: 40px;z-index: 130" ng-controller="topMenuController">
         
         <div class="ui inverted secondary menu use-green">
             <div class=" item"> 
@@ -110,7 +110,7 @@ function getCookie(value) {
 
 	</div>
 	
-    <div style="position: absolute;left: 0;right: 0;top: 30px;bottom: 0" ng-controller="mainController">
+    <div style="position: absolute;left: 0;right: 0;top: 40px;bottom: 0" ng-controller="mainController">
         
 		<div ng-cloak style="position: absolute;top:0;bottom:0;width:360px;overflow-y: hidden" ng-class="{'left-menu-max': !menuMin, 'left-menu-min': menuMin}">
             <div style="position: absolute;left: 5px;right: 5px;top: 5px;bottom:45px;padding:5px;overflow-y: auto">

@@ -41,7 +41,7 @@
                     <th></th>   
                     <th>
                         <div class="ui checkbox">
-                            <input type="checkbox" id="user-disabled-head" ng-model="searchText.disabled" ng-init="searchText.disabled=''" />
+                            <input type="checkbox" id="user-disabled-head" ng-model="searchText.disabled" ng-init="searchText.disabled=false" />
                             <label for="user-disabled-head"></label>
                         </div>
                     </th>   
@@ -148,15 +148,17 @@ app.filter('inSchool', function($filter) {
     };
     
     $scope.disabled = function(user) {
+        console.log(user);
         user.saving = true;
-        $http({method: 'POST', url: 'ajax/disabled', data:{user_id: user.id, disabled: user.disabled}})
-        .success(function(data, status, headers, config) {
-            angular.extend(user, data.user);
-            user.saving = false;
-        })
-        .error(function(e){
-            console.log(e);
-        });
+        // $http({method: 'POST', url: 'ajax/disabled', data:{user_id: user.id, disabled: user.disabled}})
+        // .success(function(data, status, headers, config) {
+        //     console.log(data);
+        //     angular.extend(user, data.user);
+        //     user.saving = false;
+        // })
+        // .error(function(e){
+        //     console.log(e);
+        // });
     };
     
     $scope.getUsers = function(reflash) {

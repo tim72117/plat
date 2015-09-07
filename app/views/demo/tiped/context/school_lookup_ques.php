@@ -1,42 +1,40 @@
 
-<div ng-controller="Ctrl" style="position: absolute;left: 10px;right: 10px;top: 10px;bottom: 10px">
+<div ng-controller="rateCtrl" style="position: absolute;left: 10px;right: 10px;top: 10px;bottom: 10px">
     
-    <div class="ui segment active" ng-cloak ng-class="{loading: sheetLoading}" style="position:absolute;left:0;right:0;top:0;bottom:0;overflow: auto">
+    <div class="ui segment active" ng-cloak ng-class="{loading: sheetLoading}" style="">
         
         <div class="ui basic segment">
-            <div class="ui secondary menu">
-                <div class="item">
-                    <div class="ui mini statistic">
-                        <div class="value">{{ rate.finish }}</div>
-                        <div class="label">回收數</div>
-                    </div>
-                    <div class="ui mini statistic">
-                        <div class="value">{{ rate.rows }}</div>
-                        <div class="label">總人數</div>
-                    </div>
-                    <div class="ui mini statistic">
-                        <div class="value">{{ rate.rate }}%</div>
-                        <div class="label">回收率</div>
-                    </div>
-                </div>  
-                <div class="item">
-                    <select class="ui search dropdown" ng-model="table" ng-change="changeTable()">
-                        <option value="tiped_103_0016_ba">大專應屆畢業生</option>
-                        <option value="tiped_103_0016_ma">碩士應屆畢業生</option>
-                        <option value="tiped_103_0016_phd">博士應屆畢業生</option>
-                    </select>
-                </div>    
-<!--                                <select ng-model="school_selected" ng-options="id as school for (id, school) in schools" ng-change="changeSchool()" style="padding:5px"></select>-->                                
-                <div class="item" style="width:400px">    
-                    <div ng-dropdown-search-menu class="ui fluid search selection dropdown" ng-model="school_selected" ng-change="changeSchool()"  items="schools" title="選擇學校">
-<!--                                    <input type="hidden" name="country" />-->
-                        <i class="dropdown icon"></i>                                    
-                    </div>    
+
+			<div class="ui mini statistic">
+				<div class="value">{{ rate.finish }}</div>
+				<div class="label">回收數</div>
+			</div>
+			<div class="ui mini statistic">
+				<div class="value">{{ rate.rows }}</div>
+				<div class="label">總人數</div>
+			</div>
+			<div class="ui mini statistic">
+				<div class="value">{{ rate.rate }}%</div>
+				<div class="label">回收率</div>
+			</div>
+
+            <div class="ui secondary menu">                    
+                <div class="item" style="width:200px"> 
+					<div ng-dropdown-search-menu class="ui fluid search selection dropdown" ng-model="school_selected" ng-change="changeSchool()" items="schools" title="選擇學校">
+						<i class="dropdown icon"></i>                                    
+					</div>  
+                </div> 
+                <div class="item">    
+					<select class="ui search dropdown" ng-model="table" ng-change="changeTable()">
+						<option value="tiped_103_0016_ba">大專應屆畢業生</option>
+						<option value="tiped_103_0016_ma">碩士應屆畢業生</option>
+						<option value="tiped_103_0016_phd">博士應屆畢業生</option>
+					</select>
                 </div>
             </div>
-        </div>
-        
-        <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
+        </div>   
+
+        <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>    
         
         <div class="ui basic mini buttons">
             <div class="ui button" ng-click="prev()"><i class="icon angle left arrow"></i></div>                    
@@ -81,9 +79,9 @@
                         </div>
                     </th>
                     <th ng-repeat="column in columns">
-                        <div class="ui icon small input" >
+<!--                         <div class="ui icon small input" >
                             <input type="text" ng-model="searchText[column]" /><i class="filter icon"></i>
-                        </div>                        
+                        </div>    -->                     
                     </th>
                 </tr>
             </thead>
@@ -107,7 +105,7 @@
 
 <script>
 app.requires.push('angularify.semantic.dropdown');
-app.controller('Ctrl', function($scope, $http, $filter) {
+app.controller('rateCtrl', function($scope, $http, $filter) {
     $scope.rows = [];
     $scope.predicate = 'page';
     $scope.page = 1;

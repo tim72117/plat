@@ -21,7 +21,7 @@
         </div> 
 
         <a class="ui green button" href="rows">
-            <i class="download icon"></i>編輯名單
+            <i class="edit icon"></i>編輯名單
         </a> 
 
         <div class="ui attached red message" ng-if="sheet.editable">資料表修改中，暫時無法上傳資料。</div>

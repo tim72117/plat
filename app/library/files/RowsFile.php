@@ -534,7 +534,7 @@ class RowsFile extends CommFile {
                 
                 $rows = array_map(function($row) {
                     return array_values(get_object_vars($row));
-                }, $query->where('created_by', $this->user->id)->select($head)->get());
+                }, $query->where('created_by', $this->user->id)->whereNull('deleted_at')->select($head)->get());
 
                 array_unshift($rows, $tables[0]->columns->fetch('name')->toArray());                  
 
@@ -548,8 +548,7 @@ class RowsFile extends CommFile {
     }
 
     public function get_my_rows() 
-    {        
-
+    {    
         $tables = $this->file->sheets->first()->tables;
 
         list($query, $power) = $this->get_rows_query($tables);
@@ -601,96 +600,6 @@ class RowsFile extends CommFile {
 		$power = [];
 
         return [$query, $power];
-    }
-
-	public function export() 
-    {        
-        //權限未設定
-
-        $index = Input::only('index')['index'];
-
-        list($rows_query, $power) = $this->get_rows_query($index);        
-        
-//        if( $shareFile->created_by==$this->user->id ) {
-//            $power = array_fetch($schema->tables[0]->columns, 'name');
-//        }else{
-//            $power = json_decode($shareFile->power);
-//        }        
-        
-        $rows = $rows_query->select($power)->get();
-        
-        $output = '';
-        $output .= implode(",", array_keys((array)$rows[0]));
-        $output .=  "\n"; 
-        foreach($rows as $row){       
-            $row_new = [];
-            foreach($row as $column){ 
-                array_push($row_new, preg_replace(array("/\"/", "/,/", "/'/", "/\s/"), "" , $column));
-            }
-            $output .= "\"".iconv("UTF-8", "big5//IGNORE", implode("\",=\"", $row_new))."\"";
-            $output .= "\n";
-        }
-        $headers = array(
-            //'Content-Encoding' => 'UTF-8',
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="ExportFileName.csv"',
-        );
-
-        return Response::make($output, 200, $headers);        
-    }
-
-	 public function save_import_rows() 
-     {
-		$input_sheets = Input::only('sheets')['sheets'];
-
-        $schema = $this->get_information();
-
-		foreach($schema->sheets as $index => $sheets){
-			
-            $table = $sheets->tables[0];
-            empty($input_sheets[$index]['rows'][count($input_sheets[$index]['rows'])-1]) && array_pop($input_sheets[$index]['rows']);
-			
-			$row_insert = array();
-            $row_update = array();
-			
-			foreach($input_sheets[$index]['rows'] as $row){
-                if( !empty($row) ) 
-				if( isset($row['id']) ){
-                    $row_update[$row['id']] = (array)$row;					
-				}else{                    
-                    array_push($row_insert , (array)$row); 		
-                }
-			}
-
-            $colHeaders = array_fetch($table->columns, 'name');
-			
-			$data = array_map(function($row_insert) use($colHeaders) {		
-                $row_insert = array_only($row_insert, $colHeaders);
-                $row_insert['created_by'] = $this->user->id;
-                $row_insert['created_at'] = date("Y-n-d H:i:s");
-                $row_insert['updated_at'] = date("Y-n-d H:i:s");
-                return $row_insert;
-            }, $row_insert);
-			
-			$data_page_max = count($row_insert)==0 ? 0 : floor(count($row_insert) / 50)+1;
-            
-            for($i=0 ; $i<$data_page_max ; $i++){
-                $data_page = array_slice($data, $i*50, 50);
-                DB::table($table->database.'.dbo.'.$table->name)->insert($data_page);
-			}
-			
-            foreach($row_update as $id => $row){
-                
-                $data = array_only($row, $colHeaders);
-                $data['updated_at'] = date("Y-n-d H:i:s");
-                
-				DB::table($table->database.'.dbo.'.$table->name)->where('id', $id)->update($data);
-                
-			}
-            
-		}
-		
-        return Response::json([]);
     }
     
     public function get_compact_files() 
@@ -795,7 +704,62 @@ class RowsFile extends CommFile {
     }
 
     //deprecated
-    public function get_columns($schema)
+    private function save_import_rows() 
+    {
+        $input_sheets = Input::only('sheets')['sheets'];
+
+        $schema = $this->get_information();
+
+        foreach($schema->sheets as $index => $sheets){
+            
+            $table = $sheets->tables[0];
+            empty($input_sheets[$index]['rows'][count($input_sheets[$index]['rows'])-1]) && array_pop($input_sheets[$index]['rows']);
+            
+            $row_insert = array();
+            $row_update = array();
+            
+            foreach($input_sheets[$index]['rows'] as $row){
+                if( !empty($row) ) 
+                if( isset($row['id']) ){
+                    $row_update[$row['id']] = (array)$row;                  
+                }else{                    
+                    array_push($row_insert , (array)$row);      
+                }
+            }
+
+            $colHeaders = array_fetch($table->columns, 'name');
+            
+            $data = array_map(function($row_insert) use($colHeaders) {      
+                $row_insert = array_only($row_insert, $colHeaders);
+                $row_insert['created_by'] = $this->user->id;
+                $row_insert['created_at'] = date("Y-n-d H:i:s");
+                $row_insert['updated_at'] = date("Y-n-d H:i:s");
+                return $row_insert;
+            }, $row_insert);
+            
+            $data_page_max = count($row_insert)==0 ? 0 : floor(count($row_insert) / 50)+1;
+            
+            for($i=0 ; $i<$data_page_max ; $i++){
+                $data_page = array_slice($data, $i*50, 50);
+                DB::table($table->database.'.dbo.'.$table->name)->insert($data_page);
+            }
+            
+            foreach($row_update as $id => $row){
+                
+                $data = array_only($row, $colHeaders);
+                $data['updated_at'] = date("Y-n-d H:i:s");
+                
+                DB::table($table->database.'.dbo.'.$table->name)->where('id', $id)->update($data);
+                
+            }
+            
+        }
+        
+        return Response::json([]);
+    }
+
+    //deprecated
+    private function get_columns($schema)
     {
         $table = $schema->sheets[0]->tables[0];
 
@@ -803,7 +767,7 @@ class RowsFile extends CommFile {
     }
 
     //deprecated
-    public function drop_tables($schema)
+    private function drop_tables($schema)
     {
         foreach($schema->sheets as $sheet)
         {
@@ -815,7 +779,7 @@ class RowsFile extends CommFile {
     }
  
     //deprecated
-    public function to_new()
+    private function to_new()
     {
         if (isset($this->information->sheets)) {
             foreach($this->information->sheets as $sheet) {
@@ -841,7 +805,7 @@ class RowsFile extends CommFile {
     }
 
     //deprecated (update comment)
-    public function save_file()
+    private function save_file()
     {
         if( $this->shareFile->created_by == $this->user->id )
         {
@@ -872,13 +836,13 @@ class RowsFile extends CommFile {
     }
 
     //deprecated
-    public function get_information()
+    private function get_information()
     {        
         return json_decode($this->file->information);
     }
        
     //deprecated
-    public function update_sheets($sheets_old, $sheets)
+    private function update_sheets($sheets_old, $sheets)
     {        
         return array_map(function($sheet) use($sheets_old) {
             $sheet_org = array_first($sheets_old, function($key, $sheet_org) use($sheet) {
