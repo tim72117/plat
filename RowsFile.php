@@ -76,7 +76,7 @@ class RowsFile extends CommFile {
 
     public function get_views()
     {
-        return ['open', 'import'];
+        return ['open', 'import', 'rows'];
     }
     
     public static function create($newFile)
@@ -108,7 +108,12 @@ class RowsFile extends CommFile {
     
 	public function import() 
     {     
-        return 'files.rows.table_import';        
+        return 'files.rows.table_import';
+    }
+
+    public function rows()
+    {
+        return 'files.rows.rows_editor';
     }
 
     public static function generate_table()
@@ -463,7 +468,7 @@ class RowsFile extends CommFile {
                 ->select($columns->map(function($column) { return 'C' . $column->id . ' AS stdidnumber'; })->toArray())
                 ->get();
 
-                foreach(array_chunk($rows, 100) as $part) {
+                foreach(array_chunk($rows, 50) as $part) {
                     $newcids = array_map(function($row) {
                         return [
                             'stdidnumber' => $row->stdidnumber,
@@ -542,19 +547,38 @@ class RowsFile extends CommFile {
         })->download('xls');
     }
 
-    public function get_rows() 
+    public function get_my_rows() 
     {        
-        //權限未設定
-        
-        $index = Input::get('index');
 
-        list($rows_query, $power) = $this->get_rows_query($index);
-        
-        $rows = $rows_query->select($power)->paginate(Input::get('limit'));
-        //$rows =  DB::connection('sqlsrv')->table($database.'.dbo.'.$table)->select($power)->paginate(50);//->forPage(2000, 20)->get();
+        $tables = $this->file->sheets->first()->tables;
 
-        return Response::json($rows);
+        list($query, $power) = $this->get_rows_query($tables);
+
+        $head = $tables[0]->columns->map(function($column) { return 'C' . $column->id; })->toArray();
+
+        $rows = array_map(function($row) {
+            return $row;
+        }, $query->where('created_by', $this->user->id)->whereNull('deleted_at')->select($head)->addSelect('id')->get());
+
+        return ['rows' => $rows];
     }   
+
+    public function delete_my_rows()
+    {
+        $tables = $this->file->sheets->first()->tables->filter(function($table) {                
+            $uniques = $table->columns->filter(function($column) { return $column->unique; })->map(function($column) {
+                return 'C' . $column->id;
+            })->toArray();
+
+            $updates = array_merge(array_fill_keys($uniques, ''), ['deleted_by' => $this->user->id, 'deleted_at' => Carbon::now()->toDateTimeString()]);
+
+            $query = DB::table($table->database . '.dbo.' . $table->name);
+
+            return $query->whereIn('id', Input::get('rows'))->where('created_by', $this->user->id)->update($updates);
+        });
+
+        return ['tables' => $tables];
+    }
 
     private function get_rows_query($tables) 
     {        
