@@ -13,8 +13,9 @@ angular.module('ngQuestion.services', [])
         answers: answers,
         setPage: function(v) { page = v; },
         setUser: function(v) { user_id = v; },
+        setVisit: function(v) { visit = v;},
         setAnswers: function(values) { 
-            //answers = v;
+            for (var i in answers) delete answers[i];
             angular.forEach(values, function(v, k) {
                 answers[k] = v;
             });
@@ -56,8 +57,8 @@ angular.module('ngQuestion.services', [])
         save: function(question) {
             
             if( navigator.onLine ) { 
-            
-                $http({method: 'POST', url: 'ajax/save_answers', data:{page_id: page.id, doc_id: page.doc_id, ques_id: question.id, answer: answers[question.id]} })
+                //console.log(baby.id);
+                $http({method: 'POST', url: 'ajax/save_answers', data:{visit_id:visit.id, baby_id: visit.baby_id, page_id: page.id, doc_id: page.doc_id, ques_id: question.id, answer: answers[question.id]} })
                 .success(function(data, status, headers, config) {
                     console.log(data);
                 }).error(function(e){
@@ -65,10 +66,11 @@ angular.module('ngQuestion.services', [])
                 });
                 
             }else{              
+            if( !navigator.onLine ) {             
                 
                 var item = window.localStorage ? window.localStorage.setItem(key, angular.toJson(answers)) : null;
                 
-            }
+            }}
         }
     };
 }]);
