@@ -205,14 +205,17 @@ class InterViewFile extends CommFile {
 
         return array_map(function($page) {
             $questions = Question::with('answers', 'subs.answers', 'subs.subs', 'subs.subs.answers')->whereIn('id', json_decode($page->questions))->get();//->toArray();
+            //var_dump($questions);exit;
             $this->get_all_subs($questions);
             
             return (object)[
                 'id' => $page->id,
                 'doc_id' => $this->shareFile->id,
                 'value' => $page->value,
+                'rewrite' => (boolean)$page->rewrite,
                 'questions' => $questions->toArray()
             ];
+
         }, $pages);
     }
     
@@ -222,8 +225,8 @@ class InterViewFile extends CommFile {
 
         $ques = Question::find(Input::get('ques_id'));
         
-        $ques_data = DB::table($information->table)->where('ques_id', Input::get('ques_id'))->where('created_by', $this->user->id);
-        
+        $ques_data = DB::table($information->table)->where('created_by', $this->user->id)->where('ques_id', Input::get('ques_id'))->where('baby_id', Input::get('baby_id'))->where('visit_id', Input::get('visit_id'));
+
         $input = Input::get('answer');
         
         $answer = is_array($input) ? implode(' ', $input) : $input;
@@ -233,7 +236,7 @@ class InterViewFile extends CommFile {
             if( $ques->type == 'text' || $ques->type == 'textarea' ) {
                 $ques_data->update(['string' => $answer, 'updated_at' => Carbon::now()->toDateTimeString()]);
             }else{
-                $ques_data->update(['value' => $answer, 'updated_at' => Carbon::now()->toDateTimeString()]);  
+                $ques_data->update(['value' => $answer, 'visit_id' =>Input::get('visit_id'), 'updated_at' => Carbon::now()->toDateTimeString()]);  
             }       
             
         }else{
@@ -245,7 +248,8 @@ class InterViewFile extends CommFile {
                     'string' => $answer,                
                     'updated_at' => Carbon::now()->toDateTimeString(),
                     'created_at' => Carbon::now()->toDateTimeString(),
-                    'baby_id' => 1, 
+                    'baby_id' => Input::get('baby_id'), 
+                    'visit_id' => Input::get('visit_id'), 
                     'created_by' => $this->user->id,
                 ]);   
             }else{
@@ -255,7 +259,8 @@ class InterViewFile extends CommFile {
                     'value' => $answer,                
                     'updated_at' => Carbon::now()->toDateTimeString(),
                     'created_at' => Carbon::now()->toDateTimeString(),
-                    'baby_id' => 1,
+                    'baby_id' => Input::get('baby_id'), 
+                    'visit_id' => Input::get('visit_id'),
                     'created_by' => $this->user->id,
                 ]);                
             }         
@@ -269,7 +274,9 @@ class InterViewFile extends CommFile {
     {
         $information = json_decode($this->file->information);
 
-        $answers = DB::table($information->table)->where('created_by', $this->user->id)->where('created_by', $this->user->id)->get();
+        //var_dump($information);exit;
+
+        $answers = DB::table($information->table)->where('visit_id', Input::get('visit_id'))->where('baby_id', Input::get('baby_id'))->where('created_by', $this->user->id)->get();
 
         $ques_data = [];
 
