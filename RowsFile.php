@@ -216,7 +216,7 @@ class RowsFile extends CommFile {
 
     public function import_upload() 
     {        
-        $rows_message = [];
+        $messages = [];
 
         $upload_file = $this->upload(false);
 
@@ -246,9 +246,9 @@ class RowsFile extends CommFile {
             {                 
                 $cells = array_pluck($rows, $column->name);                
                 
-                $column->repeats = array_count_values(array_map('strval', $cells));                     
+                $repeats = array_count_values(array_map('strval', $cells));                     
                 
-                $column->uniques = array_filter($cells, function($cell) use($column)
+                $uniques = array_filter($cells, function($cell) use($column)
                 {
                     $column_value = remove_space($cell);
                     
@@ -257,7 +257,7 @@ class RowsFile extends CommFile {
                     return empty($column_checked);                    
                 });    
                 
-                $column->exists = DB::table($table->database . '.dbo.' . $table->name)->whereIn('C' . $column->id, $column->uniques)->lists('created_by', 'C' . $column->id);
+                $exists = DB::table($table->database . '.dbo.' . $table->name)->whereIn('C' . $column->id, $uniques)->lists('created_by', 'C' . $column->id);
             }
             
             return (object)[
@@ -268,9 +268,9 @@ class RowsFile extends CommFile {
                 'unique'  => $column->unique,                
                 'encrypt' => $column->encrypt,
                 'isnull'  => $column->isnull,
-                'uniques' => isset($column->uniques) ? $column->uniques : [],
-                'repeats' => isset($column->repeats) ? $column->repeats : [],
-                'exists'  => isset($column->exists) ? $column->exists : [],
+                'uniques' => isset($uniques) ? $uniques : [],
+                'repeats' => isset($repeats) ? $repeats : [],
+                'exists'  => isset($exists) ? $exists : [],
             ];            
         });
     
@@ -279,53 +279,53 @@ class RowsFile extends CommFile {
         {
             $row_filted = array_filter(array_map('strval', $row));
 
-            $rows_message[$row_index] = (object)['pass' => false, 'limit' => false, 'empty' => empty($row_filted), 'updated' => false, 'exists' => [], 'errors' => [], 'row' => []];            
+            $messages[$row_index] = (object)['pass' => false, 'limit' => false, 'empty' => empty($row_filted), 'updated' => false, 'exists' => [], 'errors' => [], 'row' => []];            
             
             //skip if empty
-            if ($rows_message[$row_index]->empty) continue;
+            if ($messages[$row_index]->empty) continue;
 
             foreach ($columns as $column)
             {             
-                $value = $rows_message[$row_index]->row['C' . $column->id] = isset($row[$column->name]) ? remove_space($row[$column->name]) : '';                            
+                $value = $messages[$row_index]->row['C' . $column->id] = isset($row[$column->name]) ? remove_space($row[$column->name]) : '';                            
 
                 if ($column->unique && array_key_exists($value, $column->exists))
                 {
-                    $rows_message[$row_index]->limit = $rows_message[$row_index]->limit || $column->exists[$value] != $this->user->id;
+                    $messages[$row_index]->limit = $messages[$row_index]->limit || $column->exists[$value] != $this->user->id;
 
-                    array_push($rows_message[$row_index]->exists, 'C' . $column->id);
+                    array_push($messages[$row_index]->exists, 'C' . $column->id);
                 }
 
                 if (!$column->isnull || !empty($value))
                 {
                     $column_errors = $this->check_column($column, $value);
 
-                    !empty($column_errors) && $rows_message[$row_index]->errors[$column->id] = $column_errors;
+                    !empty($column_errors) && $messages[$row_index]->errors[$column->id] = $column_errors;
                 }
             }
 
-            $rows_message[$row_index]->pass = !$rows_message[$row_index]->limit && empty($rows_message[$row_index]->errors);
+            $messages[$row_index]->pass = !$messages[$row_index]->limit && empty($messages[$row_index]->errors);
     
             //skip if not pass
-            if (!$rows_message[$row_index]->pass) continue;            
+            if (!$messages[$row_index]->pass) continue;           
             
-            $rows_message[$row_index]->row['file_id'] = $this->file->id;
-            $rows_message[$row_index]->row['updated_by'] = $this->user->id;
-            $rows_message[$row_index]->row['updated_at'] = Carbon::now()->toDateTimeString();            
+            $messages[$row_index]->row['file_id'] = $this->file->id;
+            $messages[$row_index]->row['updated_by'] = $this->user->id;
+            $messages[$row_index]->row['updated_at'] = Carbon::now()->toDateTimeString();            
             
-            if (!empty($rows_message[$row_index]->exists))
+            if (!empty($messages[$row_index]->exists))
             {
                 $query = DB::table($table->database . '.dbo.' . $table->name);
-                foreach ($rows_message[$row_index]->exists as $exist_id)
+                foreach ($messages[$row_index]->exists as $exist_id)
                 {
-                    $query->where($exist_id, $rows_message[$row_index]->row[$exist_id]);
+                    $query->where($exist_id, $messages[$row_index]->row[$exist_id]);
                 }
-                $rows_message[$row_index]->updated = $query->update($rows_message[$row_index]->row);
+                $messages[$row_index]->updated = $query->update($messages[$row_index]->row);
             }
             else
             {
-                $rows_message[$row_index]->row['created_by'] = $this->user->id;
-                $rows_message[$row_index]->row['created_at'] = Carbon::now()->toDateTimeString();
-                array_push($rows_insert, $rows_message[$row_index]->row);
+                $messages[$row_index]->row['created_by'] = $this->user->id;
+                $messages[$row_index]->row['created_at'] = Carbon::now()->toDateTimeString();
+                array_push($rows_insert, $messages[$row_index]->row);
             }         
         }   
 
@@ -339,7 +339,7 @@ class RowsFile extends CommFile {
             DB::table($table->database . '.dbo.' . $table->name)->insert($rows_part);
         }
 
-        return ['messages' => $rows_message];
+        return ['messages' => $messages];
     }    
     
     private function check_column($column, $column_value)
