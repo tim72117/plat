@@ -163,6 +163,10 @@ class Struct_file
 	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\CountFile');
 	            $link['open'] = 'file/'.$intent_key.'/open';
 	        break;
+	        case 11:
+	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\AccountFile');
+	            $link['open'] = 'file/'.$intent_key.'/open';
+	        break;
 	        default:              
 	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\CommFile');    
 	            $link['open'] = 'file/'.$intent_key.'/open';

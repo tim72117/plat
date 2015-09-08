@@ -85,6 +85,11 @@ class Contact extends Eloquent {
     public function user() {
 		return $this->hasOne('User', 'id', 'user_id');
 	}
+
+	public function validator(array $options = array())
+	{
+		return Validator::make($options, $this->rules, $this->rulls_message);
+	}
 	
 }
 
