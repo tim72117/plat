@@ -56,7 +56,7 @@
                                 <div class="value">{{ (messages | filter: {pass: false}).length }}</div>
                                 <div class="label"> 
                                     <div class="ui checkbox">
-                                        <input type="checkbox" id="messagefilter" ng-model="messagefilter.pass" ng-true-value="false" ng-false-value="''" />
+                                        <input type="checkbox" id="messagefilter" class="hidden" ng-model="messagefilter.pass" ng-true-value="false" ng-false-value="''" />
                                         <label for="messagefilter">只顯示錯誤資料</label>
                                     </div>
                                 </div>
@@ -81,20 +81,18 @@
             <tbody ng-if="messages.length > 0">
                 <tr ng-repeat="(index, message) in messages | filter: messagefilter" ng-class="{positive: message.pass, warning: message.pass && message.exists.length > 0}">
                     <td>
-                        <div class="ui label" ng-if="message.pass && !message.empty" ng-class="{yellow: message.exists.length > 0, green: message.exists.length < 1}">                                
-                            <div ng-if="message.exists.length < 1">新增</div>
-                            <div ng-if="message.exists.length > 0">更新</div>
-                            <div ng-if="message.exists.length > 0 && !message.updated">更新失敗</div>
-                            <div ng-if="message.limit">此學生資料已由他人上傳，欲更新資料請與本中心聯繫。</div>               
-                        </div>
-                        <div class="ui red label" ng-if="!message.pass && !message.empty">錯誤</div>
-                        <div class="ui grey label" ng-if="message.empty">空白</div>
+                        <div class="ui green label" ng-if="message.pass && message.exists.length < 1">新增</div>
+                        <div class="ui yellow label" ng-if="message.pass && message.exists.length > 0">更新</div>   
+                        <div class="ui red label" ng-if="!message.pass">錯誤</div>                        
                     </td>
                     <td>{{ index+2 }}</td> 
-                    <td class="error">
-                        <div ng-repeat="errors in message.errors">
-                            <div ng-repeat="error in errors"><i class="attention icon"></i>{{ error }}</div>
-                        </div>   
+                    <td ng-class="{error: !message.pass}">
+                        <span ng-repeat="errors in message.errors">
+                            <a class="ui label" ng-repeat="error in errors"><i class="attention red icon"></i>{{ error }}</a>
+                        </span>   
+                        <a class="ui label" ng-if="message.exists.length > 0 && !message.updated && !message.limit"><i class="attention red icon"></i>更新失敗</a>   
+                        <a class="ui label" ng-if="message.limit"><i class="attention red icon"></i>此資料已由他人上傳，欲更新資料請與本中心聯繫。</a>
+                        <a class="ui label" ng-if="message.empty"><i class="attention red icon"></i>空白</a>
                     </td>
                     <td ng-repeat="column in table.columns" ng-class="{error: message.errors[column.id]}">{{ message.row['C' + column.id] }}</td>
                 </tr>
