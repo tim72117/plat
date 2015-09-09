@@ -11,24 +11,35 @@ class RowsFile extends CommFile {
     public $temp; 
 
     public $rules = [  
-        'gender'      => ['sort' => 3, 'type' => 'tinyInteger',             'title' => '性別: 1.男 2.女',              'validator' => 'in:1,2'],
-        'gender_id'   => ['sort' => 4, 'type' => 'tinyInteger',             'title' => '性別: 1.男 2.女(身分證第2碼)', 'validator' => 'in:1,2'],
-        'bool'        => ['sort' => 6, 'type' => 'boolean',                 'title' => '是(1)與否(0)',                 'validator' => 'boolean'],
-        'stdidnumber' => ['sort' => 1, 'type' => 'string',   'size' => 10,  'title' => '身分證',            'function' => 'stdidnumber'],
-        'email'       => ['sort' => 2, 'type' => 'string',   'size' => 80,  'title' => '信箱',              'validator' => 'email'],       
-        'date_six'    => ['sort' => 5, 'type' => 'string',   'size' => 6,   'title' => '日期(yymmdd)',      'validator' => ['regex:/^([0-9][0-9])(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$/']],
-        'order'       => ['sort' => 9, 'type' => 'string',   'size' => 2,   'title' => '順序(1-99,-7)',                 'validator' =>'between:-7,99|not_in:-6,-5,-4,-3,-2,-1,0'],
-        'score'       => ['sort' => 1, 'type' => 'string',   'size' => 3,   'title' => '成績(A++,A+,A,B++,B+,B,C,-7)',  'validator' => 'in:A++,A+,A,B++,B+,B,C,-7'],
-        'score_six'   => ['sort' => 1, 'type' => 'string',   'size' => 2,   'title' => '成績(0~6,-7)',                  'validator' => 'in:0,1,2,3,4,5,6,-7'],
-        'phone'       => ['sort' => 1, 'type' => 'string',   'size' => 20,  'title' => '手機',                 'regex' => '/^\w+$/'],
-        'tel'         => ['sort' => 1, 'type' => 'string',   'size' => 20,  'title' => '電話',                 'regex' => '/^\w+$/'],
-        'address'     => ['sort' => 1, 'type' => 'string',   'size' => 80,  'title' => '地址'],
-        'schid_104'   => ['sort' => 1, 'type' => 'string',   'size' => 6,   'title' => '高中職學校代碼(104)', 'function' => 'schid_104'],
-        'depcode_104' => ['sort' => 1, 'type' => 'string',   'size' => 6,   'title' => '高中職科別代碼(104)', 'function' => 'depcode_104'],
-        'text'        => ['sort' => 1, 'type' => 'string',   'size' => 50,  'title' => '文字(50字以內)'],
-        'nvarchar'    => ['sort' => 1, 'type' => 'string',   'size' => 500, 'title' => '文字(500字以內)'],
-        'int'         => ['sort' => 7, 'type' => 'integer',                 'title' => '整數',                         'regex' => '/^\d+$/'],
-        'float'       => ['sort' => 8, 'type' => 'float',                   'title' => '小數',                         'regex' => '/^[0-9]+.[0-9]+$/'],
+        'gender'      => ['sort' => 1,  'type' => 'tinyInteger',             'title' => '性別: 1.男 2.女',              'validator' => 'in:1,2'],
+        'gender_id'   => ['sort' => 2,  'type' => 'tinyInteger',             'title' => '性別: 1.男 2.女(身分證第2碼)', 'validator' => 'in:1,2'],
+        'bool'        => ['sort' => 3,  'type' => 'boolean',                 'title' => '是(1)與否(0)',                 'validator' => 'boolean'],
+        'stdidnumber' => ['sort' => 4,  'type' => 'string',   'size' => 10,  'title' => '身分證',            'function' => 'stdidnumber'],
+        'email'       => ['sort' => 5,  'type' => 'string',   'size' => 80,  'title' => '信箱',              'validator' => 'email'],       
+        'date_six'    => ['sort' => 6,  'type' => 'string',   'size' => 6,   'title' => '日期(yymmdd)',      'validator' => ['regex:/^([0-9][0-9])(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$/']],
+        'order'       => ['sort' => 7,  'type' => 'string',   'size' => 2,   'title' => '順序(1-99,-7)',                 'validator' =>'between:-7,99|not_in:-6,-5,-4,-3,-2,-1,0'],
+        'score'       => ['sort' => 8,  'type' => 'string',   'size' => 3,   'title' => '成績(A++,A+,A,B++,B+,B,C,-7)',  'validator' => 'in:A++,A+,A,B++,B+,B,C,-7'],
+        'score_six'   => ['sort' => 9,  'type' => 'string',   'size' => 2,   'title' => '成績(0~6,-7)',                  'validator' => 'in:0,1,2,3,4,5,6,-7'],
+        'phone'       => ['sort' => 10, 'type' => 'string',   'size' => 20,  'title' => '手機',                 'regex' => '/^\w+$/'],
+        'tel'         => ['sort' => 11, 'type' => 'string',   'size' => 20,  'title' => '電話',                 'regex' => '/^\w+$/'],
+        'address'     => ['sort' => 12, 'type' => 'string',   'size' => 80,  'title' => '地址'],
+        'schid_104'   => ['sort' => 13, 'type' => 'string',   'size' => 6,   'title' => '高中職學校代碼(104)', 'function' => 'schid_104'],
+        'depcode_104' => ['sort' => 14, 'type' => 'string',   'size' => 6,   'title' => '高中職科別代碼(104)', 'function' => 'depcode_104'],
+        'text'        => ['sort' => 15, 'type' => 'string',   'size' => 50,  'title' => '文字(50字以內)'],
+        'nvarchar'    => ['sort' => 16, 'type' => 'string',   'size' => 500, 'title' => '文字(500字以內)'],
+        'int'         => ['sort' => 17, 'type' => 'integer',                 'title' => '整數',                         'regex' => '/^\d+$/'],
+        'float'       => ['sort' => 18, 'type' => 'float',                   'title' => '小數',                         'regex' => '/^[0-9]+.[0-9]+$/'],
+        'year_four'   => ['sort' => 19, 'type' => 'string',   'size' => 4,   'title' => '西元年(yyyy)',          'validator' => ['regex:/^([09])\w+$/']],
+        //師培
+        'tted_sch'        => ['sort' => 10, 'type' => 'string',   'size' => 4,   'title' => 'TTED大專院校學校代碼',      'function' => 'tted_sch'],
+        'tted_depcod_103' => ['sort' => 11, 'type' => 'string',   'size' => 6,   'title' => 'TTED大專院校系所代碼103年', 'function' => 'tted_depcod_103'],
+        'tted_depcod_104' => ['sort' => 11, 'type' => 'string',   'size' => 6,   'title' => 'TTED大專院校系所代碼104年', 'function' => 'tted_depcod_104'],
+        'stdschoolstage'  => ['sort' => 12, 'type' => 'tinyInteger',             'title' => 'TTED教育階段',              'validator' => 'in:1,2,3'],
+        'schoolsys'       => ['sort' => 13, 'type' => 'tinyInteger',             'title' => 'TTED學制別',                'validator' => 'in:1,2'],
+        'program'         => ['sort' => 14, 'type' => 'tinyInteger',             'title' => 'TTED修課資格',              'validator' => 'in:0,1,2,3'],
+        'govexp'          => ['sort' => 15, 'type' => 'tinyInteger',             'title' => 'TTED公費生',                'validator' => 'in:0,1,2,3,4'],
+        'other'           => ['sort' => 16, 'type' => 'tinyInteger',             'title' => 'TTED外加名額',              'validator' => 'in:0,1,2,3,4,5,6,7,8,9,10'],        
+        'stdyear'         => ['sort' => 18, 'type' => 'string',   'size' => 1,   'title' => 'TTED年級',                  'validator' => 'in:1,2,3,4,5,6,7'],
     ]; 
 
     public function checker($name) {
@@ -53,6 +64,32 @@ class RowsFile extends CommFile {
                 }                
 
                 !in_array($column_value, $this->temp->dep_codes) && array_push($column_errors, '不是本校科別代碼');
+            },
+            'tted_sch' => function($column_value, $column, &$column_errors) {
+                if (!isset($this->temp->works)) {
+                    $this->temp->works = \User_tted::find($this->user->id)->works->lists('ushid');
+                } 
+                !in_array($column_value, $this->temp->works) && array_push($column_errors, '不是本校代碼');
+            },
+            'tted_depcod_103' => function($column_value, $column, &$column_errors) {
+                if (!isset($this->temp->works)) {
+                    $this->temp->works = \User_tted::find($this->user->id)->works->lists('ushid');
+                }  
+                if (!isset($this->temp->dep_codes)) {
+                   $this->temp->dep_codes = DB::table('pub_depcode_tted')->whereIn('sch_id', $this->temp->works)->where('year','=','103')->lists('id');
+                }                
+
+                !in_array($column_value, $this->temp->dep_codes) && array_push($column_errors, '不是本校系統代碼');
+            },
+            'tted_depcod_104' => function($column_value, $column, &$column_errors) {
+                if (!isset($this->temp->works)) {
+                    $this->temp->works = \User_tted::find($this->user->id)->works->lists('ushid');
+                }  
+                if (!isset($this->temp->dep_codes)) {
+                   $this->temp->dep_codes = DB::table('pub_depcode_tted')->whereIn('sch_id', $this->temp->works)->where('year','=','103')->lists('id');
+                }                
+
+                !in_array($column_value, $this->temp->dep_codes) && array_push($column_errors, '不是本校系統代碼');
             },
         ];
         return $checkers[$name];
@@ -95,7 +132,7 @@ class RowsFile extends CommFile {
     }
 
     public function open() 
-    {
+    {   
         $view = $this->shareFile->created_by == $this->user->id ? 'files.rows.table_editor' : 'files.rows.table_open';
 
         return $view;    
@@ -464,6 +501,11 @@ class RowsFile extends CommFile {
                         $query->whereRaw('C' . $column->id . ' = stdidnumber');
                     }
                     $query->select(DB::raw(1));
+                })
+                ->where(function($query) use($columns) {
+                    foreach($columns as $column) {
+                        $query->where('C' . $column->id, '<>', '');
+                    }
                 })
                 ->select($columns->map(function($column) { return 'C' . $column->id . ' AS stdidnumber'; })->toArray())
                 ->get();
