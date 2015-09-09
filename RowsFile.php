@@ -345,7 +345,7 @@ class RowsFile extends CommFile {
             //skip if not pass
             if (!$messages[$row_index]->pass) continue;           
             
-            $messages[$row_index]->row['file_id'] = $this->file->id;
+            $messages[$row_index]->row['file_id'] = $upload_file->id;
             $messages[$row_index]->row['updated_by'] = $this->user->id;
             $messages[$row_index]->row['updated_at'] = Carbon::now()->toDateTimeString();            
             
