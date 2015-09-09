@@ -31,15 +31,15 @@ class RowsFile extends CommFile {
         'float'       => ['sort' => 18, 'type' => 'float',                   'title' => '小數',                         'regex' => '/^[0-9]+.[0-9]+$/'],
         'year_four'   => ['sort' => 19, 'type' => 'string',   'size' => 4,   'title' => '西元年(yyyy)',          'validator' => ['regex:/^([09])\w+$/']],
         //師培
-        'tted_sch'        => ['sort' => 10, 'type' => 'string',   'size' => 4,   'title' => 'TTED大專院校學校代碼',      'function' => 'tted_sch'],
-        'tted_depcod_103' => ['sort' => 11, 'type' => 'string',   'size' => 6,   'title' => 'TTED大專院校系所代碼103年', 'function' => 'tted_depcod_103'],
-        'tted_depcod_104' => ['sort' => 11, 'type' => 'string',   'size' => 6,   'title' => 'TTED大專院校系所代碼104年', 'function' => 'tted_depcod_104'],
-        'stdschoolstage'  => ['sort' => 12, 'type' => 'tinyInteger',             'title' => 'TTED教育階段',              'validator' => 'in:1,2,3'],
-        'schoolsys'       => ['sort' => 13, 'type' => 'tinyInteger',             'title' => 'TTED學制別',                'validator' => 'in:1,2'],
-        'program'         => ['sort' => 14, 'type' => 'tinyInteger',             'title' => 'TTED修課資格',              'validator' => 'in:0,1,2,3'],
-        'govexp'          => ['sort' => 15, 'type' => 'tinyInteger',             'title' => 'TTED公費生',                'validator' => 'in:0,1,2,3,4'],
-        'other'           => ['sort' => 16, 'type' => 'tinyInteger',             'title' => 'TTED外加名額',              'validator' => 'in:0,1,2,3,4,5,6,7,8,9,10'],        
-        'stdyear'         => ['sort' => 18, 'type' => 'string',   'size' => 1,   'title' => 'TTED年級',                  'validator' => 'in:1,2,3,4,5,6,7'],
+        'tted_sch'         => ['sort' => 10, 'type' => 'string',   'size' => 4,   'title' => 'TTED大專院校學校代碼',      'function' => 'tted_sch'],
+        'tted_depcode_103' => ['sort' => 11, 'type' => 'string',   'size' => 6,   'title' => 'TTED大專院校系所代碼103年', 'function' => 'tted_depcode_103'],
+        'tted_depcode_104' => ['sort' => 11, 'type' => 'string',   'size' => 6,   'title' => 'TTED大專院校系所代碼104年', 'function' => 'tted_depcode_104'],
+        'stdschoolstage'   => ['sort' => 12, 'type' => 'tinyInteger',             'title' => 'TTED教育階段',              'validator' => 'in:1,2,3'],
+        'schoolsys'        => ['sort' => 13, 'type' => 'tinyInteger',             'title' => 'TTED學制別',                'validator' => 'in:1,2'],
+        'program'          => ['sort' => 14, 'type' => 'tinyInteger',             'title' => 'TTED修課資格',              'validator' => 'in:0,1,2,3'],
+        'govexp'           => ['sort' => 15, 'type' => 'tinyInteger',             'title' => 'TTED公費生',                'validator' => 'in:0,1,2,3,4'],
+        'other'            => ['sort' => 16, 'type' => 'tinyInteger',             'title' => 'TTED外加名額',              'validator' => 'in:0,1,2,3,4,5,6,7,8,9,10'],        
+        'stdyear'          => ['sort' => 18, 'type' => 'string',   'size' => 1,   'title' => 'TTED年級',                  'validator' => 'in:1,2,3,4,5,6,7'],
     ]; 
 
     public function checker($name) {
@@ -49,47 +49,24 @@ class RowsFile extends CommFile {
                 !check_id_number($column_value) && array_push($column_errors, $column->title . '無效');
             },
             'schid_104' => function($column_value, $column, &$column_errors) {
-                if (!isset($this->temp->works)) {
-                    $this->temp->works = \User_use::find($this->user->id)->works->lists('sch_id');
-                }  
-
-                !in_array($column_value, $this->temp->works) && array_push($column_errors, '不是本校代碼');
+                !isset($this->temp->works) && $this->temp->works = \User_use::find($this->user->id)->works->lists('sch_id');
+                !in_array($column_value, $this->temp->works, true) && array_push($column_errors, '不是本校代碼');
             },
             'depcode_104' => function($column_value, $column, &$column_errors) {
-                if (!isset($this->temp->works)) {
-                    $this->temp->works = \User_use::find($this->user->id)->works->lists('sch_id');
-                }  
-                if (!isset($this->temp->dep_codes)) {
-                    $this->temp->dep_codes = DB::table('pub_depcode')->whereIn('sch_id', $this->temp->works)->lists('dep_code');
-                }                
-
-                !in_array($column_value, $this->temp->dep_codes) && array_push($column_errors, '不是本校科別代碼');
+                !isset($this->temp->dep_codes) && $this->temp->dep_codes = DB::table('pub_depcode')->whereIn('sch_id', \User_use::find($this->user->id)->works->lists('sch_id'))->lists('dep_code');
+                !in_array($column_value, $this->temp->dep_codes, true) && array_push($column_errors, '不是本校科別代碼');
             },
             'tted_sch' => function($column_value, $column, &$column_errors) {
-                if (!isset($this->temp->works)) {
-                    $this->temp->works = \User_tted::find($this->user->id)->works->lists('ushid');
-                } 
-                !in_array($column_value, $this->temp->works) && array_push($column_errors, '不是本校代碼');
+                !isset($this->temp->schools) && $this->temp->schools = \User_tted::find($this->user->id)->works->lists('ushid');
+                !in_array($column_value, $this->temp->schools, true) && array_push($column_errors, '不是本校代碼');
             },
-            'tted_depcod_103' => function($column_value, $column, &$column_errors) {
-                if (!isset($this->temp->works)) {
-                    $this->temp->works = \User_tted::find($this->user->id)->works->lists('ushid');
-                }  
-                if (!isset($this->temp->dep_codes)) {
-                   $this->temp->dep_codes = DB::table('pub_depcode_tted')->whereIn('sch_id', $this->temp->works)->where('year','=','103')->lists('id');
-                }                
-
-                !in_array($column_value, $this->temp->dep_codes) && array_push($column_errors, '不是本校系統代碼');
+            'tted_depcode_103' => function($column_value, $column, &$column_errors) {
+                !isset($this->temp->dep_codes_103) && $this->temp->dep_codes_103 = DB::table('pub_depcode_tted')->whereIn('sch_id', \User_tted::find($this->user->id)->works->lists('ushid'))->where('year','=','103')->lists('id');
+                !in_array($column_value, $this->temp->dep_codes_103, true) && array_push($column_errors, '不是本校系所代碼');
             },
-            'tted_depcod_104' => function($column_value, $column, &$column_errors) {
-                if (!isset($this->temp->works)) {
-                    $this->temp->works = \User_tted::find($this->user->id)->works->lists('ushid');
-                }  
-                if (!isset($this->temp->dep_codes)) {
-                   $this->temp->dep_codes = DB::table('pub_depcode_tted')->whereIn('sch_id', $this->temp->works)->where('year','=','103')->lists('id');
-                }                
-
-                !in_array($column_value, $this->temp->dep_codes) && array_push($column_errors, '不是本校系統代碼');
+            'tted_depcode_104' => function($column_value, $column, &$column_errors) {
+                !isset($this->temp->dep_codes_104) && $this->temp->dep_codes_104 = DB::table('pub_depcode_tted')->whereIn('sch_id', \User_tted::find($this->user->id)->works->lists('ushid'))->where('year','=','103')->lists('id');
+                !in_array($column_value, $this->temp->dep_codes_104, true) && array_push($column_errors, '不是本校系所代碼');
             },
         ];
         return $checkers[$name];
@@ -132,7 +109,7 @@ class RowsFile extends CommFile {
     }
 
     public function open() 
-    {   
+    {
         $view = $this->shareFile->created_by == $this->user->id ? 'files.rows.table_editor' : 'files.rows.table_open';
 
         return $view;    
