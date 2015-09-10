@@ -64,9 +64,9 @@
         
         <table class="ui very compact small table">
             <thead>
-<!--                <tr>
+                <tr>
                     <th colspan="{{ columns.length+1 }}"></th>
-                </tr>-->
+                </tr>
                 <tr>
                     <th></th>
                     <th ng-repeat="column in columns">{{ columnsName[column] }}</th>
@@ -79,9 +79,9 @@
                         </div>
                     </th>
                     <th ng-repeat="column in columns">
-<!--                         <div class="ui icon small input" >
+                        <div class="ui fluid icon mini input" >
                             <input type="text" ng-model="searchText[column]" /><i class="filter icon"></i>
-                        </div>    -->                     
+                        </div>
                     </th>
                 </tr>
             </thead>
