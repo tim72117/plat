@@ -53,7 +53,8 @@ class RowsFile extends CommFile {
                 !in_array($column_value, $this->temp->works, true) && array_push($column_errors, '不是本校代碼');
             },
             'depcode_104' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->dep_codes) && $this->temp->dep_codes = DB::table('pub_depcode')->whereIn('sch_id', \User_use::find($this->user->id)->works->lists('sch_id'))->lists('dep_code');
+                !isset($this->temp->dep_codes) && $this->temp->dep_codes = DB::table('rows.dbo.row_20150910_175955_h23of')
+                    ->whereIn('C246', \User_use::find($this->user->id)->works->lists('sch_id'))->lists('C248');
                 !in_array($column_value, $this->temp->dep_codes, true) && array_push($column_errors, '不是本校科別代碼');
             },
             'tted_sch' => function($column_value, $column, &$column_errors) {
