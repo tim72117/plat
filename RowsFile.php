@@ -476,15 +476,11 @@ class RowsFile extends CommFile {
                 $rows = $query->whereNotExists(function($query) use($table, $columns) {
                     $query->from($table->database . '.dbo.' . $table->name . '_map AS map');
                     foreach($columns as $column) {
-                        $query->whereRaw('C' . $column->id . ' = stdidnumber');
+                        $query->whereRaw('C' . $column->id . ' = map.stdidnumber');
                     }
                     $query->select(DB::raw(1));
                 })
-                ->where(function($query) use($columns) {
-                    foreach($columns as $column) {
-                        $query->where('C' . $column->id, '<>', '');
-                    }
-                })
+                ->whereNull('deleted_at')
                 ->select($columns->map(function($column) { return 'C' . $column->id . ' AS stdidnumber'; })->toArray())
                 ->get();
 
