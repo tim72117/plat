@@ -563,22 +563,32 @@ class RowsFile extends CommFile {
         })->download('xls');
     }
 
-    public function get_my_rows() 
-    {    
+    //uncomplete only first sheet, only first table
+    public function get_rows()
+    {
+        $is_owner = $this->shareFile->created_by == $this->user->id;
+
         $tables = $this->file->sheets->first()->tables;
 
         list($query, $power) = $this->get_rows_query($tables);
 
         $head = $tables[0]->columns->map(function($column) { return 'C' . $column->id; })->toArray();
 
-        $rows = array_map(function($row) {
-            return $row;
-        }, $query->where('created_by', $this->user->id)->whereNull('deleted_at')->select($head)->addSelect('id')->get());
+        Input::has('searchText') && $tables[0]->columns->each(function($column) use($query) {
+            $column->unique && $query->where('C' . $column->id, Input::get('searchText'));
+        });
 
-        return ['rows' => $rows];
-    }   
+        $query->whereNull('deleted_at')->select($head)->addSelect('id');     
 
-    public function delete_my_rows()
+        return [
+            'paginate' => $is_owner
+            ? $query->addSelect('created_by')->paginate(10)->toArray()
+            : ['data' => $query->where('created_by', $this->user->id)->get()]
+        ];
+    } 
+
+    //uncomplete only first sheet
+    public function delete_rows()
     {
         $tables = $this->file->sheets->first()->tables->filter(function($table) {                
             $uniques = $table->columns->filter(function($column) { return $column->unique; })->map(function($column) {
@@ -589,12 +599,15 @@ class RowsFile extends CommFile {
 
             $query = DB::table($table->database . '.dbo.' . $table->name);
 
-            return $query->whereIn('id', Input::get('rows'))->where('created_by', $this->user->id)->update($updates);
+            $this->shareFile->created_by != $this->user->id && $query->where('created_by', $this->user->id);
+
+            return $query->whereIn('id', Input::get('rows'))->update($updates);
         });
 
         return ['tables' => $tables];
     }
 
+    //uncomplete
     private function get_rows_query($tables) 
     {        
         foreach($tables as $index => $table) {
@@ -618,6 +631,7 @@ class RowsFile extends CommFile {
         return [$query, $power];
     }
     
+    //uncomplete
     public function get_compact_files() 
     {
         $fileProvider = FileProvider::make();
@@ -642,6 +656,7 @@ class RowsFile extends CommFile {
         return $files;
     }
     
+    //uncomplete
     public function get_compact_sheet() 
     {        
         $index = Input::only('index')['index'];
@@ -673,6 +688,7 @@ class RowsFile extends CommFile {
         return Response::json(['sheet_compact'=>$sheet_new]);
     }
     
+    //uncomplete
     public function get_compact_rows() 
     {        
         $sheet_info = Input::only('sheet_info')['sheet_info'];
