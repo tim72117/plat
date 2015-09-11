@@ -1,6 +1,6 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Response, Config, Schema, Session, Input, ShareFile, Auth, app\library\files\v0\FileProvider, Question, Answer, Carbon\Carbon;
+use DB, View, Response, Config, Schema, Session, Input, ShareFile, Auth, app\library\files\v0\FileProvider, Question, Answer, Ques_page, Carbon\Carbon;
 
 class InterViewFile extends CommFile {
 	
@@ -191,6 +191,7 @@ class InterViewFile extends CommFile {
 
     public function get_all_subs($questions)
     {
+        
         foreach($questions as $question) {
             if( !$question->subs->isEmpty() ) {
                 $this->get_all_subs($question->subs);
@@ -201,22 +202,18 @@ class InterViewFile extends CommFile {
     
     public function get_ques_from_db()
     {
-        $pages = DB::table('ques_page_new')->where('file_id', $this->file->id)->get();
+        
+        $pages = Ques_page::with('questions', 'questions.answers', 'questions.subs.answers',
+                                 'questions.subs.subs.answers', 'questions.subs.subs.subs.answers', 
+                                 'questions.subs.subs.subs.answers', 'questions.subs.subs.subs.subs.answers', 
+                                 'questions.subs.subs.subs.subs.subs.answers', 'questions.subs.subs.subs.subs.subs.subs.answers', 
+                                 'questions.subs.subs.subs.subs.subs.subs.subs.answers', 'questions.subs.subs.subs.subs.subs.subs.subs.subs.answers'
+                                 , 'questions.subs.subs.subs.subs.subs.subs.subs.subs.subs.answers')->remember(1)->get();
+        
+        return $pages->each(function($page){
+            $this->get_all_subs($page->questions);
+        })->toArray();
 
-        return array_map(function($page) {
-            $questions = Question::with('answers', 'subs.answers', 'subs.subs', 'subs.subs.answers')->whereIn('id', json_decode($page->questions))->get();//->toArray();
-            //var_dump($questions);exit;
-            $this->get_all_subs($questions);
-            
-            return (object)[
-                'id' => $page->id,
-                'doc_id' => $this->shareFile->id,
-                'value' => $page->value,
-                'rewrite' => (boolean)$page->rewrite,
-                'questions' => $questions->toArray()
-            ];
-
-        }, $pages);
     }
     
     public function save_answers()
