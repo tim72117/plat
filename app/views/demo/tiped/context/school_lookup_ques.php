@@ -1,38 +1,37 @@
 
 <div ng-controller="rateCtrl" style="position: absolute;left: 10px;right: 10px;top: 10px;bottom: 10px">
     
-    <div class="ui segment active" ng-cloak ng-class="{loading: sheetLoading}" style="">
+    <div class="ui segment active" ng-cloak ng-class="{loading: sheetLoading}">
+
+        <div class="ui warning message"><i class="warning icon"></i>名單刪除功能已移至上傳頁面，請進入上傳名單功能後，點選編輯名單。</div>
         
-        <div class="ui basic segment">
+        <div class="ui mini statistic">
+            <div class="value">{{ rate.finish }}</div>
+            <div class="label">回收數</div>
+        </div>
+        <div class="ui mini statistic">
+            <div class="value">{{ rate.rows }}</div>
+            <div class="label">總人數</div>
+        </div>
+        <div class="ui mini statistic">
+            <div class="value">{{ rate.rate }}%</div>
+            <div class="label">回收率</div>
+        </div>
 
-			<div class="ui mini statistic">
-				<div class="value">{{ rate.finish }}</div>
-				<div class="label">回收數</div>
-			</div>
-			<div class="ui mini statistic">
-				<div class="value">{{ rate.rows }}</div>
-				<div class="label">總人數</div>
-			</div>
-			<div class="ui mini statistic">
-				<div class="value">{{ rate.rate }}%</div>
-				<div class="label">回收率</div>
-			</div>
-
-            <div class="ui secondary menu">                    
-                <div class="item" style="width:200px"> 
-					<div ng-dropdown-search-menu class="ui fluid search selection dropdown" ng-model="school_selected" ng-change="changeSchool()" items="schools" title="選擇學校">
-						<i class="dropdown icon"></i>                                    
-					</div>  
-                </div> 
-                <div class="item">    
-					<select class="ui search dropdown" ng-model="table" ng-change="changeTable()">
-						<option value="tiped_103_0016_ba">大專應屆畢業生</option>
-						<option value="tiped_103_0016_ma">碩士應屆畢業生</option>
-						<option value="tiped_103_0016_phd">博士應屆畢業生</option>
-					</select>
-                </div>
+        <div class="ui secondary menu">                    
+            <div class="item" style="width:200px"> 
+                <div ng-dropdown-search-menu class="ui fluid search selection dropdown" ng-model="school_selected" ng-change="changeSchool()" items="schools" title="選擇學校">
+                    <i class="dropdown icon"></i>                                    
+                </div>  
+            </div> 
+            <div class="item">    
+                <select class="ui search dropdown" ng-model="table" ng-change="changeTable()">
+                    <option value="tiped_103_0016_ba">大專應屆畢業生</option>
+                    <option value="tiped_103_0016_ma">碩士應屆畢業生</option>
+                    <option value="tiped_103_0016_phd">博士應屆畢業生</option>
+                </select>
             </div>
-        </div>   
+        </div> 
 
         <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>    
         
@@ -65,19 +64,19 @@
         <table class="ui very compact small table">
             <thead>
                 <tr>
-                    <th colspan="{{ columns.length+1 }}"></th>
+                    <th colspan="{{ columns.length }}"></th>
                 </tr>
                 <tr>
-                    <th></th>
+<!--                     <th></th> -->
                     <th ng-repeat="column in columns">{{ columnsName[column] }}</th>
                 </tr>
                 <tr>
-                    <th>
+<!--                     <th>
                         <div class="ui checkbox">
                             <input type="checkbox" id="user-selected-all" ng-checked="(rows | filter: {selected: true}).length > 0" ng-click="toggleSelected()">
                             <label for="user-selected-all"></label>
                         </div>
-                    </th>
+                    </th> -->
                     <th ng-repeat="column in columns">
                         <div class="ui fluid icon mini input" >
                             <input type="text" ng-model="searchText[column]" /><i class="filter icon"></i>
@@ -87,12 +86,12 @@
             </thead>
             <tbody>
                 <tr ng-repeat="user in rows | orderBy:predicate:reverse | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
-                    <td style="width: 40px">
+<!--                     <td style="width: 40px">
                         <div class="ui checkbox">
                             <input type="checkbox" id="user-selected-{{ $index }}" ng-model="user.selected" ng-click="deleteStatus.confrim=false">
                             <label for="user-selected-{{ $index }}"></label>
                         </div>
-                    </td>
+                    </td> -->
                     <td ng-repeat="column in columns">{{ user[column] }}</td>
                 </tr>   
             </tbody>    
