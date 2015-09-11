@@ -1,7 +1,7 @@
 <?php
 $tables = [
 	'tiped_103_0016_ba' => (object)[
-		'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150826_162604_ca32f', 'primaryKey' => 'C191', 'school' => 'C185', 'map' => 'stdidnumber'],
+		'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150826_162604_ca32f', 'primaryKey' => 'C189', 'school' => 'C185', 'map' => 'stdnumber'],
 		'pstat'    => (object)['database' => 'rowdata', 'table' => 'tiped_103_0016_ba_pstat', 'primaryKey' => 'newcid'],
 		'pages'    => 9,
 		'stdschoolsys' => [1],
@@ -9,7 +9,7 @@ $tables = [
 		'hidden'   => ['id'],
 	],
 	'tiped_103_0016_ma' => (object)[
-		'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150826_162604_ca32f', 'primaryKey' => 'C191', 'school' => 'C185', 'map' => 'stdidnumber'],
+		'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150826_162604_ca32f', 'primaryKey' => 'C189', 'school' => 'C185', 'map' => 'stdnumber'],
 		'pstat'    => (object)['database' => 'rowdata', 'table' => 'tiped_103_0016_ma_pstat', 'primaryKey' => 'newcid'],
 		'pages'    => 10,
 		'stdschoolsys' => [7, 20],
@@ -17,7 +17,7 @@ $tables = [
 		'hidden'   => ['id'],
 	],
 	'tiped_103_0016_phd' => (object)[
-		'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150826_162604_ca32f', 'primaryKey' => 'C191', 'school' => 'C185', 'map' => 'stdidnumber'],
+		'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150826_162604_ca32f', 'primaryKey' => 'C189', 'school' => 'C185', 'map' => 'stdnumber'],
 		'pstat'    => (object)['database' => 'rowdata', 'table' => 'tiped_103_0016_phd_pstat', 'primaryKey' => 'newcid'],
 		'pages'    => 7,
 		'stdschoolsys' => [8],

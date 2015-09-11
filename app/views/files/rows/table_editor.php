@@ -6,7 +6,8 @@
             <div class="header item"><i class="file text icon"></i>{{ file.title }}</div>
             <a class="item" href="javascript:void(0)" ng-class="{active: tool=='columns'}" ng-click="changeTool('columns')">欄位定義</a>
             <a class="item" href="javascript:void(0)" ng-class="{active: tool=='comment'}" ng-click="changeTool('comment')">說明文件</a>
-            <div class="item"><p><a href="import">預覽</a></p></div>
+            <a class="item" href="rows">資料列</a>
+            <a class="item" href="import">預覽</a>
             <a class="item" href="javascript:void(0)">
                 <div class="ui basic button" ng-click="saveComment()" ng-class="{loading: saving, disabled: tool=='columns'}"><i class="save icon"></i>儲存</div> 
                 <span ng-if="saving">儲存中...</span>
