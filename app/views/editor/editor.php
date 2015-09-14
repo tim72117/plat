@@ -3,7 +3,7 @@ $buildQuestion_editor_ver = app_path().'/views/editor/buildQuestion_editor__v2.0
 
 include_once($buildQuestion_editor_ver);   
 
-$pages = $ques_doc->pages;
+$pages = $cencus->pages;
 
 $page = $pages->filter(function($page) {
 	return $page->page == Input::get('page', 1);
@@ -1084,11 +1084,11 @@ function getPassword(length) {
                     <?=Form::select('page', $pages->lists('page', 'page'), $page->page, array('id' => 'page', 'onChange'=>'this.form.submit()'))?>
                     <!--<input id="btn_dpage" type="button" value="刪除整頁" disabled="disabled" />-->
                 </div>
-                <div class="ui basic mini button <?=($ques_doc->edit ? '' : 'disabled')?>" id="btn_cpage">                    
+                <div class="ui basic mini button <?=($cencus->edit ? '' : 'disabled')?>" id="btn_cpage">                    
                     <i class="file outline icon"></i>
                     新增一頁
                 </div>  
-                <div class="ui basic mini button <?=($ques_doc->edit ? '' : 'disabled')?>" id="btn_save">
+                <div class="ui basic mini button <?=($cencus->edit ? '' : 'disabled')?>" id="btn_save">
                     <i class="save icon"></i>
                     儲存檔案
                 </div>
@@ -1107,27 +1107,6 @@ function getPassword(length) {
 				部分名稱<input name="part_name" type="text" size="20" value="<?//=$part_name?>" />
 				<div style="float:right"></div>
 		</div>-->
-        
-		<div class="isShunt">
-		<?		
-
-		if( isset($isShunt) && $isShunt!='' )
-		if( is_array(explode(',',$isShunt)) ){
-			$page_attr = $question_array->attributes();
-			if( isset($page_attr['shunt']) ){				
-				$shunt_inpage = $page_attr['shunt'];
-				$shunt_inpage_array = explode(',',$shunt_inpage);
-			}else{
-				$shunt_inpage_array = array();
-			}
-			echo '填寫身分';
-			foreach(explode(',',$isShunt) as $shunt_n){
-				echo '<input type="checkbox" name="isShunt" value="'.$shunt_n.'" '.(in_array($shunt_n,$shunt_inpage_array)?'checked="checked"':'').' />'.$shunt_n;
-			}
-			
-		}
-		?>
-		</div>
         
     </div>
 </div>
@@ -1151,7 +1130,6 @@ function getPassword(length) {
     $items_degree = [];
     $items_ques = [];
 
-    if( $question_array  )
     foreach($question_array as $question){
 
         if($question->getName()=="question"){
@@ -1168,7 +1146,6 @@ function getPassword(length) {
 
     echo '<div class="ui horizontal divider" anchor="ques" addlayer="0">錯誤項目 </div>';
 
-    if( $question_array )
     foreach($question_array as $question){		
         if($question->getName()=="question_sub"){
             if( !in_array($question->id,$q_allsub) ){	
