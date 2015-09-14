@@ -36,15 +36,10 @@ class QuesFile extends CommFile {
     {
         return false;
     }
-
-	public static function get_intent() 
-    {
-		return array_merge(parent::$intent,self::$intent);
-	}
-	     
+    
     public function get_views() 
     {
-        return ['open', 'codebook', 'receives', 'spss', 'report', 'analysis'];
+		return ['open', 'open_ng', 'codebook', 'receives', 'spss', 'report', 'analysis'];
     }
     
     public static function create($newFile) 
@@ -74,21 +69,18 @@ class QuesFile extends CommFile {
 		parent::create();
 	}
 
-    public function open() {
-        
-        View::share('ques_id', $this->file->file);
-        
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid', 'edit')->first();
-        View::share('ques_doc', $ques_doc);
-        
-        return 'editor.editor';
+    public function open()
+    {        
+		View::share('cencus', $this->file->cencus);
+
+		return 'editor.editor';
     }
     
-    public function open_ng() {
-        
-        View::share('ques_id', $this->file->file);
-        
-        return View::make('html5-layer')->nest('context', 'editor.editor-ng'); 
+    public function open_ng()
+    {
+		View::share('cencus', $this->file->cencus);
+
+		return 'editor.editor-ng';
     }
 
     public function add_page() {
@@ -120,15 +112,15 @@ class QuesFile extends CommFile {
     
     public function save_data() {
         
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid')->first();
-        
-        $qid = $ques_doc->qid;
-        
-        $page = Session::get('page');
+        if (!Input::has('page')) {
+            return 'page miss';
+        }
 
         //-------------------------------------------------------------------載入XML開始
-        $page_xml = DB::table('ques_page')->where('qid', $qid)->where('page', $page)->select('xml')->first();
-        $question_array = simplexml_load_string($page_xml->xml);
+        $page = $this->file->cencus->pages->filter(function($page) {
+            return $page->page == Input::get('page');
+        })->first();
+        $question_array = simplexml_load_string($page->xml);
         if( !$question_array ){ exit; }
         //-------------------------------------------------------------------載入XML結束
 
@@ -454,16 +446,17 @@ class QuesFile extends CommFile {
 
         }
 
-        $name = 'p'.$page;
+		$name = 'p'.$page->page;
         $this->write($question_array,$name,'q','question');
     	$this->write($question_array,$name,'s','question_sub');
 
 
         $dom = dom_import_simplexml($question_array);
         $xml = $dom->ownerDocument->saveXML( $dom->ownerDocument->documentElement );
-        DB::table('ques_page')->where('qid', $qid)->where('page', $page)->update(array('xml'=>$xml, 'updated_at' => date("Y-m-d H:i:s")));
+
+		$page->update(array('xml' => $xml));
         
-        return '';
+		return '';
         
     } 
     
