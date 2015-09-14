@@ -54,6 +54,7 @@ class QuesFile extends CommFile {
         $file = $shareFile->isFile;
 
         $ques_doc_id = DB::table('ques_admin.dbo.ques_doc')->insertGetId([
+        	'file_id' => $file->id,
             'qid'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))'),
             'title' => Input::get('title'),
             'year'  => 103,
