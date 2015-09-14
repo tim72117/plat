@@ -246,35 +246,6 @@ class QuesFile extends CommFile {
             echo 'item'."\n";
         }
 
-        if( $question_target=='randomQuesRoot' ){
-
-            $question_notfixed = $question['isChecked'];
-            $question_id = $question['id'];
-
-            $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*");
-
-            $node = $questionInSub[0];
-
-            $domnode = dom_import_simplexml($node);
-            $domnode->setAttribute("fixed", 'true');
-
-            if( $question_notfixed=='n' ){
-                $domnode->setAttribute("fixed", 'true');
-            }else{
-                $domnode->removeAttribute('fixed');
-            }
-
-            echo 'randomQuesRoot'."\n";
-        }
-
-        if( $question_target=='isShunt' ){	
-
-            $shunt = $question['shunt'];	
-            $question_array[0]['shunt'] = $shunt;
-
-            echo 'isShunt'."\n";
-        }
-
         if( $question_target=='degree' ){
             $question_id = $question['id'];
             $question_title = $question['title'];
@@ -567,8 +538,6 @@ class QuesFile extends CommFile {
         
         $question_amount = count($this->question_array->question);
         
-        $_SESSION['randomQuesRoot'] = 0;
-        
         for($i=0;$i<$question_amount;$i++){
             $question = $this->question_array->question[$i];
             if($question->getName()=="question"){
@@ -583,10 +552,11 @@ class QuesFile extends CommFile {
 		return View::make('editor.page',array(
 			'question' => $question_html,
 			'questionEvent' => $questionEvent,
-			//'init_value' => $init_value
+            'questionEvent_check' => '',
+			'init_value'          => ''
  		))
 		->nest('child_sub', 'editor.page_demo');
-		//->nest('child_footer', $loginView['footer']);
+		->nest('child_footer', 'demo.use.footer');
     }
     
 	public function save_info() {	}
@@ -795,36 +765,25 @@ class QuesFile extends CommFile {
         return $subs;
     }  
     
-    public function get_ques_from_xml() {
+    public function xml_to_array()
+    {        
+        include_once(app_path().'/views/editor/buildQuestion_editor__v2.0.laravel-ng.php');
         
-        include_once(app_path().'/views/editor/buildQuestion_editor__v2.0.laravel-ng.php'); 
-        
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid', 'edit')->first();
-        
-        $pages = DB::table('ques_page')->where('qid', $ques_doc->qid)->orderBy('page')->select('page', DB::raw('CAST(page AS varchar) AS label'), 'xml')->remember(10)->get();
-        
-        Session::put('page', Input::get('page'));
-        
-        $question_box = array();
-        
-        foreach($pages as $index => $page) {
-            $question_box[$index] = (object)['data'=>[]];
-            $question_array = simplexml_load_string($page->xml);
-            foreach($question_array as $question){
+		$pages = $this->file->cencus->pages->map(function($page) {
+			$question_box = (object)['index' => $page->page, 'questions' => []];
+			$questions = simplexml_load_string($page->xml);
+            foreach($questions as $question){
                 if( $question->getName()=='question' ){
-                    array_push($question_box[$index]->data, buildQuestion_ng($question, $question_array, 0, "no"));
+                    array_push($question_box->questions, buildQuestion_ng($question, $questions, 0, "no"));
                 }                
             }
         }
         
-        $can_edit = $ques_doc->edit ? true : false;
-        
-        return ['data'=>$question_box, 'edit'=>$can_edit];
+        return ['pages' => $pages, 'edit' => $this->file->cencus->edit];
     } 
 
     public function to_interview_file() {
-        $pages = $this->get_ques_from_xml()['data'];
-        //var_dump($pages);exit;
+        $pages = $this->get_ques_from_xml()['pages'];
         $shareFile = InterViewFile::create((object)['title' => $this->file->title, 'type' => 9]);
         $interViewFile = new InterViewFile($shareFile->id);
         
