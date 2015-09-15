@@ -89,20 +89,6 @@ class Apps extends Eloquent {
 
 }
 
-class RequestApp extends Eloquent {
-    
-    protected $table = 'apps_requested';
-    
-    public $timestamps = true;
-    
-    protected $fillable = array('app_id', 'target', 'target_id', 'created_by', 'description');
-    
-	public function isApp() {
-		return $this->hasOne('Apps', 'id', 'app_id');
-	}
-    
-}
-
 class ShareApp extends Eloquent {
     
     protected $table = 'apps_shared';
