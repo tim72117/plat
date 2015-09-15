@@ -6,8 +6,7 @@
         </a> -->
         <div class="fitted item">
             <select class="ui dropdown" ng-model="question.type" ng-change="typeChange(question)">
-                <option value="?">請選擇題型</option>
-                <option ng-repeat="type in quesTypes" value="{{ type.type }}" ng-selected="{{type.type === question.type}}">{{ type.name }}</option>
+                <option ng-repeat="type in quesTypes" value="{{ type.type }}" ng-selected="{{type.type === question.type}}">題型 : {{ type.name }}</option>
             </select>
         </div>
 
@@ -251,4 +250,7 @@
             </tr>
         </table>
     </div>
+
+    <div class="ui horizontal divider addquestion" anchor="ques" addlayer="0"><i class="add icon"></i> 加入題目 </div>
+
 </div>

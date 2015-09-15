@@ -48,7 +48,7 @@ function buildQuestion($question,$question_array,$layer,$parrent) {
 	$is_hint = false;
 	!isset($culume_count) && $culume_count = 1;
 
-    global $q_allsub, $items_text, $items_degree, $items_ques;
+    global $q_allsub, $items_text, $items_select, $items_scale, $items_checkbox;
 
     array_push($q_allsub,(string)$question->id);
     Session::push('buildQuestion.q_allsub', (string)$question->id);
@@ -107,7 +107,6 @@ function buildQuestion($question,$question_array,$layer,$parrent) {
 
 	echo '<div class="fieldA" variable_changed="fasle" ng-class="{hide: hide.'.(string)$question->id.'}">';
    
-   $option = "";
    $table = '';    
 
 		  	echo '<div class="initv_box '.$question->type.'">';		
@@ -151,6 +150,7 @@ function buildQuestion($question,$question_array,$layer,$parrent) {
 				echo '<div class="var_box text" ng-repeat="item in items_text.' . (string)$question->id . '">';
 				echo '<span style="font-size:10px;background-color:#D4BFFF;width:170px;position:absolute;margin-left:-{{ 180+item.layer*46 }}px">{{ item.attr.name }}</span>';			
 				echo '<table class="ui very basic very compact table"><tr>';	
+				echo '<td width="80"><div class="ui fluid mini input"><input type="text" disabled="disabled" ng-model="item.attr.name" /></td>';
 				echo '<td width="16"><input name="v_value" type="text" size="1" disabled="disabled" ng-model="item.attr.value" /></td>';
 				echo '<td width="65"><div class="ui fluid mini input"><input type="text" name="tablesize" placeholder="字數" ng-model="item.attr.size" /></div></td>';	
 				echo '<td><div class="ui fluid input"><input type="text" class="editor item" ng-class="{text_changed: item.changed}" target="item" placeholder="題目" ng-model="item.answer" /></div></td>';
@@ -161,6 +161,56 @@ function buildQuestion($question,$question_array,$layer,$parrent) {
 				echo '</div>';	
 			}
 
+			if($question->type=='scale'){
+				echo '<div class="var_box scale" ng-repeat="item in items_scale.' . (string)$question->id . '.ques">';
+				echo '<table class="ui very basic very compact table"><tr>';
+				echo '<td width="80"><div class="ui fluid mini input"><input type="text" disabled="disabled" ng-model="item.attr.name" /></td>';
+				echo '<td width="50"><div class="ui fluid mini input"><input type="text" name="v_value" disabled="disabled" ng-model="item.attr.value" /></td>';
+				echo '<td><div class="ui fluid mini input"><input type="text" class="editor item" target="item" placeholder="題目" ng-model="item.answer" /></td>';
+				echo '<td width="16"><i class="add icon" ng-click="addQues(items_scale.' . (string)$question->id . '.ques, item, $event)" title="加入量表子題"></i></td>';
+				echo '<td width="16"><i class="minus icon" ng-click="removeQues(items_scale.' . (string)$question->id . '.ques, item, $event)" title="刪除量表子題"></i></td>';
+				echo '</tr></table>'; 
+				echo '</div>';  
+
+				echo '<div class="ui horizontal divider var_scale_box_init" ng-click="addDegree(items_scale.' . (string)$question->id . '.degree, {}, $event)"><i class="add icon"></i>加入選項</div>';
+
+				echo '<div class="var_scale_box" ng-repeat="item in items_scale.' . (string)$question->id . '.degree">';
+				echo '<table class="ui very basic very compact table"><tr>';
+				echo '<td width="50"><div class="ui fluid mini input"><input type="text" name="v_value" disabled="disabled" ng-model="item.attr.value" /></td>';
+				echo '<td><div class="ui fluid mini input"><input type="text" class="editor item" target="degree" placeholder="選項" ng-model="item.degree" ng-change="editDegree(item, \'' . (string)$question->id . '\')" /></td>';
+				echo '<td width="16px"><i class="add icon" ng-click="addDegree(items_scale, item, $event, \'' . (string)$question->id . '\')" title="加入選項"></i></td>';
+				echo '<td width="16px"><i class="minus icon" ng-click="removeDegree(items_scale, item, $event, \'' . (string)$question->id . '\')" title="刪除選項"></i></td>';
+				echo '</tr></table>';
+				echo '</div>';
+			}
+
+			//code uncomplete
+			if ($question->type=='select') {
+				echo '<div class="var_box select" ng-repeat="item in items_select.' . (string)$question->id . '" ng-hide="hide.'.(string)$question->id.'">';
+				echo '<table class="ui very basic very compact table"><tr>';
+				echo '<td width="50"><div class="ui fluid mini input"><input type="text" name="v_value" ng-disabled="item.code==\'auto\'" ng-model="item.attr.value" /></td>';
+				echo '<td><div class="ui fluid mini input"><input type="text" class="editor item" target="item" placeholder="題目" ng-model="item.answer" /></td>';
+				echo '<td width="16"><i class="add icon" ng-click="addQues(items_select.' . (string)$question->id . ', item, $event)" title="加入選項"></i></td>';
+				echo '<td width="16"><i class="minus icon" ng-click="removeQues(items_select.' . (string)$question->id . ', item, $event)" title="刪除選項"></i></td>';
+				echo '<td width="16px"><span class="skipq" title="設定跳題" /></td>';
+				echo '<td width="16px"><i class="caret down icon addquestion" anchor="var" addlayer="{{ item.layer+1 }}" title="加入題目"></i></td>';
+				echo '</tr></table>'; 
+				echo '</div>';
+			}
+
+			if ($question->type=='checkbox') {
+				echo '<div class="var_box checkbox" ng-repeat="item in items_checkbox.' . (string)$question->id . '">';
+				echo '<table class="ui very basic very compact table"><tr>';
+				echo '<td width="80"><div class="ui fluid mini input"><input type="text" disabled="disabled" ng-model="item.attr.name" /></td>';
+				echo '<td width="50"><div class="ui fluid mini input"><input type="text" name="v_value" ng-model="item.attr.value" /></td>';
+				echo '<td><div class="ui fluid mini input"><input type="text" class="editor item" target="item" placeholder="題目" ng-model="item.answer" /></td>';
+				echo '<td width="16"><i class="add icon" ng-click="addQues(items_checkbox.' . (string)$question->id . ', item, $event)" title="加入選項"></i></td>';
+				echo '<td width="16"><i class="minus icon" ng-click="removeQues(items_checkbox.' . (string)$question->id . ', item, $event)" title="刪除選項"></i></td>';
+				echo '<td width="16"><span class="skipq" title="清除勾選項目" />{{ item.attr.reset }}</td>';
+				echo '<td width="16"><i class="caret down icon addquestion" anchor="var" addlayer="{{ item.layer+1 }}" title="加入題目"></i></td>';
+				echo '</tr></table>'; 
+				echo '</div>';
+			}
 
 
 	$item_count = 1;
@@ -230,99 +280,52 @@ function buildQuestion($question,$question_array,$layer,$parrent) {
 
 		//------------------------------------------------scale
 		case "scale":
-
-			!isset($items_ques[(string)$question->id]) && $items_ques[(string)$question->id] = [];
+			!array_key_exists((string)$question->id, $items_scale) && $items_scale[(string)$question->id] = (object)['id' => (string)$question->id, 'ques' => [], 'degree' => []];
 			$attr_ques_array = (array)$attr;
-			array_push($items_ques[(string)$question->id], ['answer' => (string)$answer, 'attr' => $attr_ques_array["@attributes"], 'layer' => $layer]);
+			array_push($items_scale[(string)$question->id]->ques, ['answer' => (string)$answer, 'attr' => $attr_ques_array["@attributes"], 'layer' => $layer]);
 			
 			$item_count++;
 		break;
-		
+
 		//------------------------------------------------select
 		case "select":
-		   if($attr["type"]=="range"){
-				$range = explode(",",$attr["value"]);
-				for($i=$range[0];$i<=$range[1];$i++){
-					$option .= '<option value="'.$i.'">'.$i.'</option>';
-				}
-		   }elseif($attr["type"]=="list"){
-				$list = file_get_contents('question/'.$attr['value']);
-				$option .= $list;
-		   }else{
-			   	if( isset($attr["uplv"]) ){
-					$option .= '<option value="'.$attr["value"].'" uplv="'.$attr["uplv"].'">'.$answer.'</option>';
-				}else{
-					$option .= '<option value="'.$attr["value"].'">'.$answer.'</option>';
-				}
-		   }
-		   	$value_input = (string)$attr['value'];
-			$value_input_length = strlen($value_input);			
-			
-			echo '<div class="var_box select" ng-hide="hide.'.(string)$question->id.'">';
-		   	echo '<table class="ui very basic very compact table"><tr>';
-			echo '<td width="30px"><input name="v_value" type="text" size="'.$value_input_length.'" '.($answer_attr['code']=='manual'?'':'disabled="disabled"').' value="'.$attr['value'].'" index="'.$index_item.'" /></td>';
-			echo '<td><div class="ui fluid input"><input type="text" class="editor item" target="item" placeholder="題目" value="' . (string)$answer . '" /></div>';
-			echo '<td width="16px"><span class="skipq" title="設定跳題" /></td>';
-			echo '<td width="16px"><i class="add icon addvar" anchor="var" addlayer="'.$layer.'" title="加入選項"></i></td>';
-			echo '<td width="16px"><i class="minus icon deletevar" title="刪除選項"></i></td>';
-			echo '<td width="16px"><i class="caret down icon addquestion" anchor="var" addlayer="'.($layer+1).'" title="加入題目"></i></td>';
-			echo '</tr>';
+			!isset($items_select[(string)$question->id]) && $items_select[(string)$question->id] = [];
+			$attr_ques_array = (array)$attr;
+			array_push($items_select[(string)$question->id], ['answer' => (string)$answer, 'attr' => $attr_ques_array["@attributes"], 'layer' => $layer, 'code' => $answer_attr['code']]);
+			!isset($select) && $select = '';
 			
 			//-----------------skip_box
 			if ($attr["skip"]!='') {
 				$sub_array = explode(",", $attr["skip"]);
-				echo '<tr>';
-				echo '<td width="30px"></td>';
-				echo '<td><div class="skipbox" target="item" style="border:1px dashed #A0A0A4;background-color:#FFAC55">';
+				$select .= '<tr>';
+				$select .= '<td width="30px"></td>';
+				$select .= '<td><div class="skipbox" target="item" style="border:1px dashed #A0A0A4;background-color:#FFAC55">';
 				foreach($sub_array as $attr_i){						
-					echo '<img class="skipq_lab" src="images/qtag.png" style="margin-left:2px;" title="跳題('.$attr_i.')" alt="跳題('.$attr_i.')" target="'.$attr_i.'" />';
+					$select .= '<img class="skipq_lab" src="images/qtag.png" style="margin-left:2px;" title="跳題('.$attr_i.')" alt="跳題('.$attr_i.')" target="'.$attr_i.'" />';
 				}
-				echo '</div></td>';
-				echo '</tr>';
-			}		
-			
-			echo '</table>';			
+				$select .= '</div></td>';
+				$select .= '</tr>';
+			}			
 			
 			if ($attr["sub"]!='') {
 				$sub_array = explode(",", $attr["sub"]);
-				echo '<div class="sub">'; 
+				$select .= '<div class="sub">'; 
 				foreach($sub_array as $attr_i){
 					$sub = $question_array->xpath("/page/question_sub/id[.='".$attr_i."']/parent::*");			   
-					if($sub[0])			   
+					if(isset($sub[0]))			   
 						buildQuestion($sub[0],$question_array,$layer+1,(string)$question->type);	
 				}
 				echo '</div>'; 
-			}
-
-			echo isset($attr['ruletip']) ? '<div class="ruletip">'.$attr['ruletip'].'</div>' : '';	
+			}	
 			
-			echo '</div>';
 			$value_count++;
 			$index_item++;
 		break;
 		//------------------------------------------------checkbox
 		case "checkbox":
-
-			$subs_array = NULL;
-			if($attr['sub']!='')
-			$subs_array = array_map( create_function('$id', 'return "#".$id;'),explode(",",$attr["sub"]) );
-			$subs_string = '';
-			if(is_array($subs_array))
-			$subs_string = 'sub="'.implode(",",$subs_array).'"';
-						
-			echo '<div class="var_box checkbox">';
-			
-			echo '<span style="font-size:10px;background-color:#b3e373;width:170px;position:absolute;margin-left:-'.(180+$layer*46).'px">'.$attr["name"].'</span>';
-			echo '<span style="font-size:10px;background-color:#b3e373;width:18px;position:absolute;margin-left:-'.(28+$layer*46).'px;text-align:center">'.$culume_count.'</span>';			
-			
-		   	echo '<table class="ui very basic very compact table"><tr>';
-			echo '<td width="30px"><input name="v_value" type="text" size="1" disabled="disabled" value="0,1" index="'.$index_item.'" /></td>';
-			echo '<td><div class="ui fluid input"><input type="text" class="editor item" target="item" placeholder="題目" value="' . (string)$answer . '" /></div>';
-			echo '<td width="16px"><span class="ccheckbox'.((string)$attr['reset']=='all'?' enable':'').'" anchor="var" title="清除勾選項目" /></td>';
-			echo '<td width="16px"><i class="add icon addvar" anchor="var" addlayer="'.$layer.'" title="加入選項"></i></td>';
-			echo '<td width="16px"><i class="minus icon deletevar" title="刪除選項"></i></td>';
-			echo '<td width="16px"><i class="caret down icon addquestion" anchor="var" addlayer="'.($layer+1).'" title="加入題目"></i></td>';		
-			echo '</tr></table>';			
+			!array_key_exists((string)$question->id, $items_checkbox) && $items_checkbox[(string)$question->id] = [];
+			$attr_ques_array = (array)$attr;
+			array_push($items_checkbox[(string)$question->id], ['answer' => (string)$answer, 'attr' => $attr_ques_array["@attributes"], 'layer' => $layer]);	
 			
 			if ($attr["sub"]!='') {
 				$sub_array = explode(",", $attr["sub"]);
@@ -335,9 +338,6 @@ function buildQuestion($question,$question_array,$layer,$parrent) {
 				echo '</div>'; 
 			}
 
-			echo isset($attr['ruletip']) ? '<div class="ruletip">'.$attr['ruletip'].'</div>' : '';	
-			
-			echo '</div>';
 			$index_item++;
 			$culume_count++;
 		break;
@@ -422,53 +422,25 @@ function buildQuestion($question,$question_array,$layer,$parrent) {
 		   
    }
    
-	$tableHead = '';
-   	if($question->type=='scale'){   
-
-		echo '<div class="var_box scale" ng-repeat="item in items_ques.' . (string)$question->id . '">';			
-		echo '<span style="font-size:10px;background-color:#b3e373;width:170px;position:absolute;margin-left:-'.(180+$layer*46).'px">'.$attr["name"].'</span>';			
-		echo '<table class="ui very basic very compact table"><tr>';	
-		echo '<td style="display:none"><input name="v_value" type="text" size="1" disabled="disabled" ng-model="item.attr.value" /></td>';
-		echo '<td><div class="ui fluid input"><input type="text" class="editor item" target="item" placeholder="題目" ng-model="item.answer" /></td>';
-		echo '<td width="16px"><i class="add icon addvar" title="加入量表子題"></i></td>';
-		echo '<td width="16px"><i class="minus icon deletevar" title="刪除量表子題"></i></td>';
-		echo '</tr></table>'; 
-		echo '</div>';  
-
-		echo '<div class="var_scale_box_init">';
-		echo '<div class="ui horizontal divider">選項</div>';
-		echo '<table class="ui very basic very compact table"><tr>';
-		echo '<td></td>';
-		echo '<td width="16px"><i class="add icon adddegree" anchor="var" addlayer="'.$layer.'" title="加入選項"></i></td>';
-		echo '<td width="16px"></td>';
-		echo '</tr></table>';
-		echo '</div>';
-
-		echo '<div class="var_scale_box" ng-repeat="item in items_degree.' . (string)$question->id . '">';
-		echo '<table class="ui very basic very compact table"><tr>';
-		echo '<td width="30px"><input name="v_value" type="text" size="1" disabled="disabled" ng-model="item.attr.value" /></td>';
-		echo '<td><div class="ui fluid input"><input type="text" class="editor item" target="degree" placeholder="選項" ng-model="item.degree" /></td>';
-		echo '<td width="16px"><i class="add icon" ng-click="addDegree(items_degree.' . (string)$question->id . ', item, $event)" title="加入選項"></i></td>';
-		echo '<td width="16px"><i class="minus icon" ng-click="removeDegree(items_degree.' . (string)$question->id . ', item, $event)" title="刪除選項"></i></td>';
-		echo '</tr></table>';
-		echo '</div>';
-
-	   foreach($question->answer->degree as $degree){		
+	
+	if($question->type=='scale'){ 
+		foreach($question->answer->degree as $degree){		
 			$attr_degree = $degree->attributes();
-			!isset($items_degree[(string)$question->id]) && $items_degree[(string)$question->id] = [];
+			!isset($items_scale[(string)$question->id]->degree) && $items_scale[(string)$question->id]->degree = [];
 			$attr_degree_array = (array)$attr_degree;
-			array_push($items_degree[(string)$question->id], ['degree' => (string)$degree, 'attr' => $attr_degree_array["@attributes"], 'layer' => $layer]);
+			array_push($items_scale[(string)$question->id]->degree, ['degree' => (string)$degree, 'attr' => $attr_degree_array["@attributes"], 'layer' => $layer]);
 			$value_count++;
 		}
-   }
-   if($question->type == "scale_text"){
-	   foreach($question->answer->degree as $degree){
-		   $attr_degree = $degree->attributes();
-		   $tableHead .= '<th style="font-size:0.8em;width:'.$attr_degree["width"].'"><b>'.$degree.'</b></th>';
+	}
+	if($question->type == "scale_text"){
+		$tableHead = '';
+		foreach($question->answer->degree as $degree){
+			$attr_degree = $degree->attributes();
+			$tableHead .= '<th style="font-size:0.8em;width:'.$attr_degree["width"].'"><b>'.$degree.'</b></th>';
 		}
-	   echo "<table><thead><tr><th></th>".$tableHead."</tr></thead><tbody>".$table."</tbody></table>";
-   }
-   
+		echo "<table><thead><tr><th></th>".$tableHead."</tr></thead><tbody>".$table."</tbody></table>";
+	}
+
 	echo "</div>";
 
 

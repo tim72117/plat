@@ -13,17 +13,6 @@ class QuesFile extends CommFile {
 	 * @var info
 	 */
 	public $info;
-
-	public static $intent = array(
-		'read_info',
-		'save_info',
-        'open',	
-        'add_page',
-        'save_data',
-        'write',
-        'creatTable',
-        'create'
-	);
         
     function __construct($doc_id) 
     {
@@ -111,7 +100,7 @@ class QuesFile extends CommFile {
     }
     
     public function save_data() {
-        
+
         if (!Input::has('page')) {
             return 'page miss';
         }
@@ -147,273 +136,265 @@ class QuesFile extends CommFile {
         foreach( $q_array as $qi => $question ){
 
 
-        $question_target = $question['target'];
-        //echo 'qi:'.$qi.$question['target']."\n";
+            $question_target = $question['target'];
+            //echo 'qi:'.$qi.$question['target']."\n";
 
 
-        if( $question_target=='newq' ){
-            if( isset($question['qanchor']) )
-            $question_qanchor = $question['qanchor'];
-            $question_id = $question['id'];
-            $question_layer = $question['layer'];
-            if( isset($question['itemArray']) )
-            $itemArray = $question['itemArray'];	
+            if( $question_target=='newq' ){
+                if( isset($question['qanchor']) )
+                $question_qanchor = $question['qanchor'];
+                $question_id = $question['id'];
+                $question_layer = $question['layer'];
+                if( isset($question['itemArray']) )
+                $itemArray = $question['itemArray'];	
 
-            if( !isset($question_qanchor) || $question_qanchor=='' ){
-                $questionInSub = $question_array->xpath("/page/init");	
-            }else{
-                $questionInSub = $question_array->xpath("//id[.='".$question_qanchor."']/parent::*");
+                if( !isset($question_qanchor) || $question_qanchor=='' ){
+                    $questionInSub = $question_array->xpath("/page/init");	
+                }else{
+                    $questionInSub = $question_array->xpath("//id[.='".$question_qanchor."']/parent::*");
+                }
+                $node = $questionInSub[0];
+
+
+                $qlabel = $question_layer==0?'question':'question_sub';
+                //echo $question_qanchor.'------'.$question_id.'---';
+                $domnode = dom_import_simplexml($node);
+                $newitem = new DOMElement($qlabel);
+
+                if($domnode->nextSibling) {
+                    $newq = $domnode->parentNode->insertBefore($newitem, $domnode->nextSibling);
+                } else {
+                    $newq = $domnode->parentNode->appendChild($newitem);
+                }
+
+                $newcont = new DOMElement('type','');
+                $newq->appendChild( $newcont );
+                $newcont = new DOMElement('id',$question_id);
+                $newq->appendChild( $newcont );
+                $newcont = new DOMElement('idlab','');
+                $newq->appendChild( $newcont );
+                $newcont = new DOMElement('title','');
+                $newq->appendChild( $newcont );	
+                $newcont = new DOMElement('answer');
+                $newanswer = $newq->appendChild( $newcont );
+
+
+                $dom = dom_import_simplexml($question_array);
+                $xml = $dom->ownerDocument->saveXML( $dom->ownerDocument->documentElement );
+                $page->update(array('xml' => $xml));
+
+                echo 'newq'."\n";
             }
-            $node = $questionInSub[0];
 
+            if( $question_target=='deleteq' ){
+                $quesArray = $question['quesArray'];
+                foreach($quesArray as $ques){
+                    $question_id = $ques['targetID'];
 
-            $qlabel = $question_layer==0?'question':'question_sub';
-            //echo $question_qanchor.'------'.$question_id.'---';
-            $domnode = dom_import_simplexml($node);
-            $newitem = new DOMElement($qlabel);
+                    $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*");	
+                    $node = $questionInSub[0];
 
-            if($domnode->nextSibling) {
-                $newq = $domnode->parentNode->insertBefore($newitem, $domnode->nextSibling);
-            } else {
-                $newq = $domnode->parentNode->appendChild($newitem);
+                    $domnode = dom_import_simplexml($node);
+                    $domnode->parentNode->removeChild($domnode);
+                }
+                echo 'deleteq:'.$question_id."\n";
             }
-            //$QID = generatorID();
 
-            $newcont = new DOMElement('type','');
-            $newq->appendChild( $newcont );
-            $newcont = new DOMElement('id',$question_id);
-            $newq->appendChild( $newcont );
-            $newcont = new DOMElement('idlab','');
-            $newq->appendChild( $newcont );
-            $newcont = new DOMElement('title','');
-            $newq->appendChild( $newcont );	
-            $newcont = new DOMElement('answer');
-            $newanswer = $newq->appendChild( $newcont );
+            if( $question_target=='title' ){
+                $question_id = $question['id'];
+                //$question_title = preg_replace("​","",$question['title']);
+                $question_title = $question['title'];
+                $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*");
+                //echo $question_title;
+                $node = $questionInSub[0]->title;
 
+                $domnode = dom_import_simplexml($node);
+                $domnode->nodeValue = '';
+                $domnode->appendChild( new DOMCdataSection($question_title) );
+                echo 'title'."\n";
 
-            $dom = dom_import_simplexml($question_array);
-            $xml = $dom->ownerDocument->saveXML( $dom->ownerDocument->documentElement );
-            DB::table('ques_page')->where('qid', $qid)->where('page', $page)->update(array('xml'=>$xml, 'updated_at' => date("Y-m-d H:i:s")));
-            echo 'newq'."\n";
-        }
+            }
 
-        if( $question_target=='deleteq' ){
-            $quesArray = $question['quesArray'];
-            foreach($quesArray as $ques){
-                $question_id = $ques['targetID'];
+            if( $question_target=='item' ){
+                $question_id = $question['id'];
+                $question_title = preg_replace("/​/","",$question['title']);
+                $question_sub_title = preg_replace("/​/","",$question['sub_title']);
+                $question_onvalue = $question['value'];
+                $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*/answer/item[".$question_onvalue."]");
+                //echo $question_title;
+                //echo "//id[.='".$question_id."']/parent::*/answer/item[".$question_onvalue."]";
 
-                $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*");	
                 $node = $questionInSub[0];
 
                 $domnode = dom_import_simplexml($node);
-                $domnode->parentNode->removeChild($domnode);
-            }
-            echo 'deleteq:'.$question_id."\n";
-        }
+                $domnode->nodeValue = '';
+                $domnode->appendChild( new DOMCdataSection($question_title) );
 
-        if( $question_target=='title' ){
-            $question_id = $question['id'];
-            //$question_title = preg_replace("​","",$question['title']);
-            $question_title = $question['title'];
-            $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*");
-            //echo $question_title;
-            $node = $questionInSub[0]->title;
-
-            $domnode = dom_import_simplexml($node);
-            $domnode->nodeValue = '';
-            $domnode->appendChild( new DOMCdataSection($question_title) );
-            echo 'title'."\n";
-
-        }
-
-        if( $question_target=='item' ){
-            $question_id = $question['id'];
-            $question_title = preg_replace("/​/","",$question['title']);
-            $question_sub_title = preg_replace("/​/","",$question['sub_title']);
-            $question_onvalue = $question['value'];
-            $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*/answer/item[".$question_onvalue."]");
-            //echo $question_title;
-            //echo "//id[.='".$question_id."']/parent::*/answer/item[".$question_onvalue."]";
-
-            $node = $questionInSub[0];
-
-            $domnode = dom_import_simplexml($node);
-            $domnode->nodeValue = '';
-            $domnode->appendChild( new DOMCdataSection($question_title) );
-
-            if( isset($question_sub_title) )
-            $domnode->setAttribute("sub_title", $question_sub_title);
-            echo 'item'."\n";
-        }
-
-        if( $question_target=='degree' ){
-            $question_id = $question['id'];
-            $question_title = $question['title'];
-            $question_onvalue = $question['value'];
-            $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*/answer/degree[@value=".$question_onvalue."]");
-            //echo $question_title;
-            $node = $questionInSub[0];
-
-            $domnode = dom_import_simplexml($node);
-            $domnode->nodeValue = '';
-            $domnode->appendChild( new DOMCdataSection($question_title) );
-            echo 'degree'."\n";
-            
-            //$questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*");
-            //$node = $questionInSub[0];
-            //$domnode = dom_import_simplexml($node);
-            //$domnode->getElementsByTagName('type')->item(0)->setAttribute("sstyle", 2);
-        }
-
-        if( $question_target=='type' ){
-            $question_id = $question['id'];
-            $question_qtype = $question['qtype'];
-            $question_qlab = $question['qlab'];
-            if( isset($question['tablesize']) )
-            $question_tablesize = $question['tablesize'];
-
-            $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*");
-            $node = $questionInSub[0];
-            $domnode = dom_import_simplexml($node);
-
-            echo 'length'.$domnode->getElementsByTagName('size')->length."\n";	
-
-            if( $domnode->getElementsByTagName('idlab')->length==0 ){
-                $newcont = new DOMElement('idlab','');
-                $domnode->appendChild( $newcont );
-            }
-            if( $question_qtype=='text' )
-            if( $domnode->getElementsByTagName('size')->length==0 ){
-                $newcont = new DOMElement('size','');
-                $domnode->appendChild( $newcont );
+                if( isset($question_sub_title) )
+                $domnode->setAttribute("sub_title", $question_sub_title);
+                echo 'item'."\n";
             }
 
+            if( $question_target=='degree' ){
+                $question_id = $question['id'];
+                $question_title = $question['title'];
+                $question_onvalue = $question['value'];
+                $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*/answer/degree[@value=".$question_onvalue."]");
+                //echo $question_title;
+                $node = $questionInSub[0];
 
-
-            $domnode->getElementsByTagName('type')->item(0)->nodeValue = $question_qtype;
-            $domnode->getElementsByTagName('idlab')->item(0)->nodeValue = $question_qlab;
-            if( $question_qtype=='text' && isset($question_tablesize) )
-            $domnode->getElementsByTagName('size')->item(0)->nodeValue = $question_tablesize;
-
-
-            echo 'type'."\n";	
-        }
-
-        if( $question_target=='item_array' ){
-            unset($itemArray);
-            unset($degreeArray);
-
-            $question_id = $question['id'];
-            $question_qtype = $question['qtype'];
-            $question_code = $question['code'];	
-
-            if( isset($question['auto_hide']) )
-            $question_auto_hide = $question['auto_hide'];
-
-            if( isset($question['itemArray']) )
-            $itemArray = $question['itemArray'];
-
-            if( isset($question['degreeArray']) )
-            $degreeArray = $question['degreeArray'];
-
-            if( isset($question['textarea_inf']) )
-            $textarea_inf = $question['textarea_inf'];
-
-            $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*/answer");
-            $node = $questionInSub[0];
-            $domnode = dom_import_simplexml($node);
-            $nodelist = $domnode->getElementsByTagName('item');
-
-            $domnode->setAttribute("code", $question_code);
-            if( isset($question['auto_hide']) )
-            $domnode->setAttribute("auto_hide", $question_auto_hide);
-
-            while($elem = $nodelist->item(0)) {
-                $elem->parentNode->removeChild($elem);
+                $domnode = dom_import_simplexml($node);
+                $domnode->nodeValue = '';
+                $domnode->appendChild( new DOMCdataSection($question_title) );
+                echo 'degree'."\n";
+                
+                //$questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*");
+                //$node = $questionInSub[0];
+                //$domnode = dom_import_simplexml($node);
+                //$domnode->getElementsByTagName('type')->item(0)->setAttribute("sstyle", 2);
             }
 
-            if( isset($itemArray) && is_array($itemArray) )
-            foreach($itemArray as $item){
+            if( $question_target=='type' ){
+                $question_id = $question['id'];
+                $question_qtype = $question['qtype'];
+                $question_qlab = $question['qlab'];
+                if( isset($question['tablesize']) )
+                $question_tablesize = $question['tablesize'];
 
-                if( isset($item['title']) )
-                $item_title = preg_replace("/​/","",$item['title']);
+                $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*");
+                $node = $questionInSub[0];
+                $domnode = dom_import_simplexml($node);
 
-                if( isset($item['sub_title']) )
-                $item_sub_title = preg_replace("/​/","",$item['sub_title']);
+                echo 'length'.$domnode->getElementsByTagName('size')->length."\n";	
 
-                $newitem = new DOMElement('item');	
-                $innode = $domnode->appendChild( $newitem );
-                $innode->setAttribute("value", $item['value']);
-
-                echo ',tar'.$question_id;
-                if( isset($item['subid_array']) && is_array($item['subid_array']) )
-                echo ',sub'.implode(',',$item['subid_array']);
-
-                if( isset($item['subid_array']) && is_array($item['subid_array']) )
-                $innode->setAttribute("sub", implode(',',$item['subid_array']));
-
-                if( isset($item['skipArray']) && is_array($item['skipArray']) )
-                $innode->setAttribute("skip", implode(',',$item['skipArray']));
-
-                if( isset($item['othervArray']) && is_array($item['othervArray']) )
-                foreach($item['othervArray'] as $otherv){
-                    $innode->setAttribute($otherv['name'], $otherv['value']);
+                if( $domnode->getElementsByTagName('idlab')->length==0 ){
+                    $newcont = new DOMElement('idlab','');
+                    $domnode->appendChild( $newcont );
+                }
+                if( $question_qtype=='text' )
+                if( $domnode->getElementsByTagName('size')->length==0 ){
+                    $newcont = new DOMElement('size','');
+                    $domnode->appendChild( $newcont );
                 }
 
-                if( $question_qtype=='text' || $question_qtype=='textarea' ){
-                    if( isset($item['sub_title']) )
-                    $innode->setAttribute("sub_title", $item_sub_title);
-                    if( isset($item['size']) )
-                    $innode->setAttribute("size", $item['size']);
-                    if( isset($item['width']) )
-                    $innode->setAttribute("cols", $item['width']);
-                    if( isset($item['height']) )
-                    $innode->setAttribute("rows", $item['height']);
-                }
 
-                if( $question_qtype=='checkbox' ){
-                    if( isset($item['ccheckbox']) && $item['ccheckbox']=='true' )
-                    $innode->setAttribute("reset", 'all');
-                }
 
-                if( isset($item['ruletip']) )
-                $innode->setAttribute("ruletip", $item['ruletip']);
-                //$innode->setAttribute("ruletip", '');
-                if( isset($item['title']) )
-                $innode->appendChild( new DOMCdataSection($item_title) );
+                $domnode->getElementsByTagName('type')->item(0)->nodeValue = $question_qtype;
+                $domnode->getElementsByTagName('idlab')->item(0)->nodeValue = $question_qlab;
+                if( $question_qtype=='text' && isset($question_tablesize) )
+                $domnode->getElementsByTagName('size')->item(0)->nodeValue = $question_tablesize;
+
+
+                echo 'type'."\n";	
             }
 
-            if( $question_qtype=='scale' ){
+            if( $question_target=='item_array' ){
+                unset($itemArray);
 
-                $nodelist = $domnode->getElementsByTagName('degree');
+                $question_id = $question['id'];
+                $question_qtype = $question['qtype'];
+                $question_code = $question['code'];	
+
+                if( isset($question['auto_hide']) )
+                $question_auto_hide = $question['auto_hide'];
+
+                if( isset($question['itemArray']) )
+                $itemArray = $question['itemArray'];
+
+                if( isset($question['textarea_inf']) )
+                $textarea_inf = $question['textarea_inf'];
+
+                $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*/answer");
+                $node = $questionInSub[0];
+                $domnode = dom_import_simplexml($node);
+                $nodelist = $domnode->getElementsByTagName('item');
+
+                $domnode->setAttribute("code", $question_code);
+                if( isset($question['auto_hide']) )
+                $domnode->setAttribute("auto_hide", $question_auto_hide);
 
                 while($elem = $nodelist->item(0)) {
                     $elem->parentNode->removeChild($elem);
                 }
 
-                if( is_array($degreeArray) ){
-                    foreach($degreeArray as $degree){
-                        $degree_title = $degree['title'];//preg_replace("​//", "", $degree['title']);
-                        $newitem = new DOMElement('degree');	
-                        $innode = $domnode->appendChild( $newitem );
-                        $innode->setAttribute("value", $degree['value']);
+                if( isset($itemArray) && is_array($itemArray) )
+                foreach($itemArray as $item){
 
-                        if( isset($degree['ruletip']) )
-                        $innode->setAttribute("ruletip", $degree['ruletip']);
-                        $innode->appendChild( new DOMCdataSection($degree_title) );
+                    if( isset($item['title']) )
+                    $item_title = preg_replace("/​/","",$item['title']);
+
+                    if( isset($item['sub_title']) )
+                    $item_sub_title = preg_replace("/​/","",$item['sub_title']);
+
+                    $newitem = new DOMElement('item');	
+                    $innode = $domnode->appendChild( $newitem );
+                    $innode->setAttribute("value", $item['value']);
+
+                    echo ',tar'.$question_id;
+                    if( isset($item['subid_array']) && is_array($item['subid_array']) )
+                    echo ',sub'.implode(',',$item['subid_array']);
+
+                    if( isset($item['subid_array']) && is_array($item['subid_array']) )
+                    $innode->setAttribute("sub", implode(',',$item['subid_array']));
+
+                    if( isset($item['skipArray']) && is_array($item['skipArray']) )
+                    $innode->setAttribute("skip", implode(',',$item['skipArray']));
+
+                    if( isset($item['othervArray']) && is_array($item['othervArray']) )
+                    foreach($item['othervArray'] as $otherv){
+                        $innode->setAttribute($otherv['name'], $otherv['value']);
                     }
+
+                    if( $question_qtype=='text' || $question_qtype=='textarea' ){
+                        if( isset($item['sub_title']) )
+                        $innode->setAttribute("sub_title", $item_sub_title);
+                        if( isset($item['size']) )
+                        $innode->setAttribute("size", $item['size']);
+                        if( isset($item['width']) )
+                        $innode->setAttribute("cols", $item['width']);
+                        if( isset($item['height']) )
+                        $innode->setAttribute("rows", $item['height']);
+                    }
+
+                    if( $question_qtype=='checkbox' ){
+                        if( isset($item['ccheckbox']) && $item['ccheckbox']=='true' )
+                        $innode->setAttribute("reset", 'all');
+                    }
+
+                    if( isset($item['ruletip']) )
+                    $innode->setAttribute("ruletip", $item['ruletip']);
+                    //$innode->setAttribute("ruletip", '');
+                    if( isset($item['title']) )
+                    $innode->appendChild( new DOMCdataSection($item_title) );
                 }
 
+                echo 'item_array'."\n";	
             }
 
-            echo 'item_array'."\n";	
-        }
+            if( $question_target=='degrees' ){
+                $question_id = $question['id'];              
 
+                $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*/answer");
+                $node = $questionInSub[0];
 
+                $domnode = dom_import_simplexml($node);
 
+                $nodelist = $domnode->getElementsByTagName('degree');
 
+                while($elem = $nodelist->item(0)) {
+                 $elem->parentNode->removeChild($elem);
+                }
 
+                $degreeArray = isset($question['degreeArray']) ? $question['degreeArray'] : [];
 
+                foreach($degreeArray as $degree){
+                 $degree_title = $degree['title'];
+                 $newitem = new DOMElement('degree');    
+                 $innode = $domnode->appendChild( $newitem );
+                 $innode->setAttribute("value", $degree['value']);
+                 $innode->appendChild( new DOMCdataSection($degree_title) );
+                }
+            }
 
         }
 
@@ -548,14 +529,13 @@ class QuesFile extends CommFile {
         $buildQuestionEvent = 'app\\library\\v10\\buildQuestionEvent';
 		$questionEvent = $buildQuestionEvent::buildEvent($this->question_array);
         
-		View::share(array('page'=>$page, 'ques_doc'=>$ques_doc));
+		View::share(array('page' => $page, 'ques_doc' => $ques_doc));
 		return View::make('editor.page',array(
-			'question' => $question_html,
-			'questionEvent' => $questionEvent,
+			'question'            => $question_html,
+			'questionEvent'       => $questionEvent,
             'questionEvent_check' => '',
 			'init_value'          => ''
  		))
-		->nest('child_sub', 'editor.page_demo');
 		->nest('child_footer', 'demo.use.footer');
     }
     
@@ -763,12 +743,12 @@ class QuesFile extends CommFile {
             
         }
         return $subs;
-    }  
-    
+    } 
+
     public function xml_to_array()
     {        
         include_once(app_path().'/views/editor/buildQuestion_editor__v2.0.laravel-ng.php');
-        
+
 		$pages = $this->file->cencus->pages->map(function($page) {
 			$question_box = (object)['index' => $page->page, 'questions' => []];
 			$questions = simplexml_load_string($page->xml);
@@ -777,7 +757,8 @@ class QuesFile extends CommFile {
                     array_push($question_box->questions, buildQuestion_ng($question, $questions, 0, "no"));
                 }                
             }
-        }
+			return $question_box;
+		})->toArray();
         
         return ['pages' => $pages, 'edit' => $this->file->cencus->edit];
     } 
@@ -931,5 +912,42 @@ class QuesFile extends CommFile {
         return $GLOBALS['variableSQL'];
 
     }
+
+    public function update_question()
+    {
+        if (!Input::has('question')) {
+            return 'page miss';
+        }
+
+        var_dump(json_decode(urldecode(base64_decode(Input::get('question')))));exit;
+
+        //-------------------------------------------------------------------載入XML開始
+        $page = $this->file->cencus->pages->filter(function($page) {
+            return $page->page == Input::get('page');
+        })->first();
+        $question_array = simplexml_load_string($page->xml);
+        if( !$question_array ){ exit; }
+        //-------------------------------------------------------------------載入XML結束
+
+        $init = $question_array->xpath("/page");    
+        $initnode = $init[0];
+        $domnode = dom_import_simplexml($initnode);
+        if( $domnode->getElementsByTagName('init')->length==0 ){
+            $newcont = new DOMElement('init','');
+
+            if( $domnode->getElementsByTagName('question')->length>0 ){
+                $domnode->insertBefore($newcont, $domnode->getElementsByTagName('question')->item(0));
+            }else{
+                $domnode->appendChild($newcont);
+            }
+            $question_array->asXML($page_name);
+        }
+
+        $dom = dom_import_simplexml($question_array);
+
+        $xml = $dom->ownerDocument->saveXML( $dom->ownerDocument->documentElement );
+
+        return $page->update(['xml' => $xml]);
+    } 
     
 }

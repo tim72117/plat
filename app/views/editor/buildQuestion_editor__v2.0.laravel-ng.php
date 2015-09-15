@@ -25,7 +25,7 @@ function buildQuestion_ng($question, $question_array, $layer, $parrent){
 	$answer_attr = $answer_box->attributes();
    
     array_push($question_box, (object)[
-        'id' => null,
+        'id' => (string)$question->id,
         'name' => (string)$question->answer->name,
         'type' => (string)$question->type,
         'layer' => $layer,

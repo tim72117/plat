@@ -2,34 +2,29 @@
 <script src="/js/ckeditor/4.4.7-basic-source/ckeditor.js"></script>
 <!--<script src="/js/textAngular/ng-ckeditor.js"></script>-->
 
-<link rel="stylesheet" href="/css/ui/Semantic-UI-1.12.3/semantic.min.css" />
 </head>
 	
-<div ng-controller="editorController" ng-click="resetEditor()">
+<div ng-controller="editorController" ng-click="resetEditor()" style="width:800px">
     
-    <div class="ui left floated basic segment">
-        <div class="ui vertical mini basic buttons">
+    <div class="ui basic segment">
+        <div class="ui mini basic buttons">
             <div class="ui button disabled"><i class="icon trash"></i>刪除整頁</div>
             <div class="ui button" ng-click="save_to_db()" ng-disabled="false&&!edit"><i class="icon trash"></i>儲存db</div>
             <div class="ui button" ng-click="prev_page()"><i class="icon trash"></i>前一頁{{ page.value }}</div>
             <div class="ui button" ng-click="next_page()"><i class="icon trash"></i>下一頁</div>  
             <div class="ui button" ng-click="to_interview_file()"><i class="icon trash"></i>轉成面訪問卷檔</div>  
+            <a  class="ui button" href="demo" target="_blank">預覽</a>
+            <div class="ui mini basic button" ng-click="addQues(questions, $index+1, question.layer)"><i class="icon file outline"></i>加入分頁</div>
+            <div class="ui mini basic button" ng-click="adding=true"><i class="icon help circle"></i>加入題目</div>
         </div>
-        <br />
-        <div class="ui vertical text menu">
-            <a class="item" href="demo" target="_blank">預覽</a>
-        </div>
-		
-		<div class="ui mini basic button" ng-click="addQues(questions, $index+1, question.layer)"><i class="icon file outline"></i>加入分頁</div>
-		<div class="ui mini basic button" ng-click="adding=true"><i class="icon help circle"></i>加入題目</div>
-    </div>
-    
-    <div style="float:left;font-size:16px" ng-if="update_mis>1">儲存中{{ update_mis }}...</div>
-    <div style="width:150px;float:left;font-size:14px;color:#aaa" ng-if="update_mis===1">所有變更都已經儲存</div>
+    </div>   
 	
-    <div ng-cloak class="ui left floated basic segment" style="min-height: 600px;min-width: 800px">		
+    <div ng-cloak class="ui basic segment" style="min-height: 600px;min-width: 800px">	
 
-        <div class="ui segment" ng-repeat="question in page.questions">
+        <div style="float:left;font-size:16px" ng-if="update_mis>1">儲存中{{ update_mis }}...</div>
+        <div style="width:150px;float:left;font-size:14px;color:#aaa" ng-if="update_mis===1">所有變更都已經儲存</div>
+
+        <div class="ui green segment" ng-repeat="question in page.questions">
 
             <div ng-if="question.type == 'list'">
                 <div class="ui form">
@@ -54,7 +49,7 @@
             </div>
 
             <div ng-if="question.type != 'list'">
-                <div question="question" layer="0" update="update" ng-mouseover="question.hover = true" ng-mouseleave="question.hover = false"></div>
+                <div question="question" layer="0" update="update" page="page" ng-mouseover="question.hover = true" ng-mouseleave="question.hover = false"></div>
             </div> 
 
         </div>
@@ -64,8 +59,7 @@
 </div>
 
 <script>
-angular.module('app', [])
-.filter('startFrom', function() {
+app.filter('startFrom', function() {
     return function(input, start) {
         if( typeof(input) !== 'undefined' )
             return input.slice(start);
@@ -123,7 +117,7 @@ angular.module('app', [])
     };    
 
     $scope.save_to_db = function() {
-        $http({method: 'POST', url: 'save_ques_to_db', data:{pages: btoa(encodeURIComponent(angular.toJson($scope.pages)))} })
+        $http({method: 'POST', url: 'save_editor_questions', data:{pages: btoa(encodeURIComponent(angular.toJson($scope.pages)))} })
         .success(function(data, status, headers, config) {
             console.log(data);
             $scope.pages = data.struct;            
@@ -133,10 +127,10 @@ angular.module('app', [])
     };  
     
     $scope.get_from_db = function() {
-        $http({method: 'POST', url: 'get_ques_from_db', data:{} })
+        $http({method: 'POST', url: 'get_editor_questions', data:{} })
         .success(function(data, status, headers, config) {
             console.log(data);
-            $scope.pages = data;
+            $scope.pages = data.pages;
             $scope.page = $scope.pages[1];            
         }).error(function(e) {
             console.log(e);
@@ -294,7 +288,7 @@ angular.module('app', [])
             };
 
             $scope.update = function(question) {
-                console.log(question);
+                console.log($scope);
                 $http({method: 'POST', url: 'update_question', data:{question: btoa(encodeURIComponent(angular.toJson(question)))} })
                 .success(function(data, status, headers, config) {
                     console.log(data);          

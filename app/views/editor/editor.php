@@ -19,13 +19,10 @@ $question_array = simplexml_load_string($page->xml);
 <link rel="stylesheet" href="/editor/structure_new.css" />
 
 <script>
+var valInObj = {page: 1, obj:[]};	
 $(document).ready(function() {	
 	
-	var valInObj = {
-		qn:$('#qn').val(),
-		page:$('#page').val(),
-		obj:[]
-	};	
+	valInObj.page = $('#page').val();
 	
 	//---------------------------------------------------------------------------------新增一頁
 	$('#btn_cpage').click(function(){
@@ -73,7 +70,6 @@ $(document).ready(function() {
 				target: 'isShunt',
 				shunt: $('input[name=isShunt]:checked').map(function(){ return $(this).val(); }).get().join(',')
 			};
-			//alert(valInObj_one.id);
 			valInObj.obj.push(valInObj_one);
 			//alert('修改文字欄位_標題');
 		}
@@ -85,7 +81,6 @@ $(document).ready(function() {
 				title: $(this).html()
 			};
 			valInObj.obj.push(valInObj_one);
-			//alert('修改文字欄位_標題');
 		});
 		//-------------------------------------------------------------------------修改文字欄位_大標題
 		$('div[target=explain].text_changed').each(function(){
@@ -94,9 +89,7 @@ $(document).ready(function() {
 				id: $(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.explain_box').attr('index'),				
 				title: $(this).html()
 			};
-			alert(valInObj_one.id);
 			//valInObj.obj.push(valInObj_one);
-			//alert('修改文字欄位_標題');
 		});
 		//-------------------------------------------------------------------------修改文字欄位_選項	
 		$('div.fieldA:not(.changed) > div.var_box> table input[target=item].text_changed').each(function(){	
@@ -121,18 +114,6 @@ $(document).ready(function() {
 				sub_title: sub_title,
 				value: onvalue
 			};
-			valInObj.obj.push(valInObj_one);
-		});
-		//-------------------------------------------------------------------------修改文字欄位_量表選項
-		$('div.fieldA:not(.changed) > div.var_scale_box input[target=degree].text_changed').each(function(){
-			var target = $(this).parent('div').parent('td').parent('tr').parent('tbody').parent('table');
-			onvalue = target.find('input[name=v_value]').val();
-			var valInObj_one = {
-				target: 'degree',
-				id: target.parent('div.var_scale_box').parent('div.fieldA').parent('div.question_box').attr('id'),				
-				title: $(this).val(),
-				value: onvalue
-			};			
 			valInObj.obj.push(valInObj_one);
 		});
 		//-------------------------------------------------------------------------修改題目類型
@@ -236,13 +217,6 @@ $(document).ready(function() {
 				alert('沒有選擇題目類型');
 				checkerror = true;
 			}
-						
-			var degreeArray = [];
-			
-			if( qtype=='scale' )
-			$(this).children('div.var_scale_box').each(function(){
-				degreeArray.push( { value: $(this).find('input[name=v_value]').val(), title: $(this).find('input.editor').val() } );
-			});	
 			
 			if( qtype=='textarea' ){
 				itemArray.push( { 
@@ -272,8 +246,7 @@ $(document).ready(function() {
 				qtype: qtype,
 				code: code,
 				auto_hide: auto_hide,
-				itemArray: itemArray,
-				degreeArray: degreeArray
+				itemArray: itemArray
 			};				
 
 			valInObj.obj.push(valInObj_one);
@@ -315,12 +288,10 @@ $(document).ready(function() {
 	});	
 	//---------------------------------------------------------------------------------事件觸發_修改題目類型
 	$("#contents").on("change", "select[name=qtype]", function() {
-		var target = $(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.qtype_box');
-		
+		var target = $(this).parent('td').parent('tr').parent('tbody').parent('table').parent('div.qtype_box');		
 		
 		var qtype = target.find('select[name=qtype]').val();
-		var qtype_org = target.find('select[name=qtype]').attr('qtype_org');	
-		
+		var qtype_org = target.find('select[name=qtype]').attr('qtype_org');		
 		
 		var select_bkcolor_array = {};
 		select_bkcolor_array.checkbox = '#b3ffb3';
@@ -351,14 +322,7 @@ $(document).ready(function() {
 			
 		if( qtype=='scale' )//uncomplete
 		target.siblings('div.fieldA').children('div.initv_box').after(
-			'<div class="var_scale_box_init" style="margin-right:0px;border:0px dashed #A0A0A4">'+
-			'<table class="ui very basic very compact table"><tr>'+
-			'<td><div class="title" style=";border-top:1px dashed #aaa;background-color:#D7E6FC"></div></td>'+
-			'<td width="16px"></td>'+
-			'<td width="16px"><i class="add icon adddegree" anchor="var" addlayer="" title="加入選項"></i></td>'+
-			'<td width="16px"></td>'+
-			'</tr></table>'+
-			'</div>'
+			//'<div class="ui horizontal divider var_scale_box_init" ng-click="addDegree(items_scale.degree.' . (string)$question->id . ', {}, $event)"><i class="add icon"></i>加入選項</div>'
 		);
 		
 		if( qtype=='textarea' )
@@ -512,22 +476,20 @@ $(document).ready(function() {
 		var addlayer = Number($(this).attr('addlayer'));
 		var qtype = target.parent('div.fieldA').parent('div.question_box').children('div.qtype_box').find('select[name=qtype]').val();
 		var amountV = target.parent('div.fieldA').children('div.var_box').length;	
-
-		var edittext = qtype=='scale'?'量表子題':'選項';
 		
 		target.after(
 			'<div class="var_box">'+
 			
 			'<table class="ui very basic very compact table"><tr>'+			
 			(( qtype=='radio' || qtype=='select' || qtype=='checkbox' )?'<td width="30px"><input name="v_value" type="text" size="1" disabled="disabled" value="" /></td>':'')+
-			(( qtype=='textarea' || qtype=='scale' || qtype=='list' )?'<td style="display:none"><input name="v_value" type="hidden" size="1" disabled="disabled" value="" /></td>':'')+
+			(( qtype=='textarea' || qtype=='list' )?'<td style="display:none"><input name="v_value" type="hidden" size="1" disabled="disabled" value="" /></td>':'')+
 
 			'<td><div class="editor item text_changed" target="item" contenteditable="true" style="border:1px solid #A0A0A4;min-height:22px"></div></td>'+
 			
 			(( qtype=='radio' || qtype=='select' )?'<td width="16px"><span class="skipq" title="設定跳題" /></td>':'')+
 			
-			'<td width="16px"><span class="addvar" anchor="var" addlayer="'+addlayer+'" title="加入'+edittext+'" /></td>'+
-			'<td width="16px"><span class="deletevar" title="刪除'+edittext+'" /></td>'+
+			'<td width="16px"><span class="addvar" anchor="var" addlayer="'+addlayer+'" title="加入選項" /></td>'+
+			'<td width="16px"><span class="deletevar" title="刪除選項" /></td>'+
 			(( qtype=='radio' || qtype=='select' || qtype=='checkbox' || qtype=='list' )
 				?'<td width="16px"><span class="addquestion" anchor="var" addlayer="'+(addlayer+1)+'" title="加入題目" /></td>'
 				:''
@@ -1072,46 +1034,22 @@ function getPassword(length) {
 
 
 </head>
-	
-<div style="margin:0 auto;width:120px;text-align: left;float:left">
-	
-	<div style="position:fixed;width:120px;background-color:#fff;border-top:0;z-index:1">
-		<div style="background-color:#fff"> 
-				
-            <form style="display:inline" name="form1" action="" method="get">	
-                <div>
-                    頁數<input name="pages" type="text" size="2" value="<?=$pages->count()?>" disabled="disabled" />
-                    <?=Form::select('page', $pages->lists('page', 'page'), $page->page, array('id' => 'page', 'onChange'=>'this.form.submit()'))?>
-                    <!--<input id="btn_dpage" type="button" value="刪除整頁" disabled="disabled" />-->
-                </div>
-                <div class="ui basic mini button <?=($cencus->edit ? '' : 'disabled')?>" id="btn_cpage">                    
-                    <i class="file outline icon"></i>
-                    新增一頁
-                </div>  
-                <div class="ui basic mini button <?=($cencus->edit ? '' : 'disabled')?>" id="btn_save">
-                    <i class="save icon"></i>
-                    儲存檔案
-                </div>
-            </form>  
-            
-		</div>
-		
-		<div>
-			<div style=""><?//=$changetime_text?></div>
-			<div style=""><div><a href="demo?page=1" target="_blank">預覽</a></div><div></div></div>
-			<!--<div style="float:left;margin-left:40px"><div><a href="creatTable">建立問卷</a></div></div>-->
-		</div>
 
-		<!--<div style="background-color:#fff">        
-				部分<input name="part" type="text" size="2" value="<?//=$part?>" />         
-				部分名稱<input name="part_name" type="text" size="20" value="<?//=$part_name?>" />
-				<div style="float:right"></div>
-		</div>-->
-        
-    </div>
-</div>
-	
-<div ng-controller="quesEditorController" id="building" class="ui text container">
+<form name="form1" action="" method="get">
+	<?=Form::select('page', $pages->lists('page', 'page'), $page->page, array('id' => 'page', 'onChange'=>'this.form.submit()'))?>  /  <?=$pages->count()?>
+	<!--<input id="btn_dpage" type="button" value="刪除整頁" disabled="disabled" />-->
+	<div class="ui basic mini button <?=($cencus->edit ? '' : 'disabled')?>" id="btn_cpage">                    
+		<i class="file outline icon"></i>
+		新增一頁
+	</div>  
+	<div class="ui basic mini button <?=($cencus->edit ? '' : 'disabled')?>" id="btn_save">
+		<i class="save icon"></i>
+		儲存
+	</div>
+	<a href="demo?page=1" target="_blank">預覽</a>
+</form>
+		
+<div ng-controller="quesEditorController" id="building" style="width:800px">
 
 	<div ng-cloak id="contents">
 
@@ -1120,40 +1058,39 @@ function getPassword(length) {
 	        	<div class="ui horizontal divider addquestion" anchor="ques" addlayer="0"><i class="add icon"></i> 加入題目 </div>
 	        </div>
 	    </div>
-    <?     
+    <?	
     
-	
-    
-    global $q_allsub, $items_text, $items_degree, $items_ques;
+    global $q_allsub, $items_text, $items_select, $items_scale, $items_checkbox;
     $q_allsub = array();
     $items_text = [];
-    $items_degree = [];
-    $items_ques = [];
+    $items_select = [];
+    $items_scale = [];
+    $items_checkbox = [];
 
-    foreach($question_array as $question){
+	foreach($question_array as $question){
 
-        if($question->getName()=="question"){
-            if($question->explain!="")
-            echo '<div class="readme"><h3><b>'.iconv('utf-8', 'big5',$question->explain).'</b></h3></div>';
+	    if($question->getName()=="question"){
+	        if($question->explain!="")
+	        echo '<div class="readme"><h3><b>'.iconv('utf-8', 'big5',$question->explain).'</b></h3></div>';
 
-            echo '<div class="main">';
-            buildQuestion($question,$question_array,0,"no");
-            echo '</div>';
-        }
-    }
+	        echo '<div class="main">';
+	        buildQuestion($question,$question_array,0,"no");
+	        echo '</div>';
+	    }
+	}
 
-    echo '<div class="main">';
+	echo '<div class="main">';
 
-    echo '<div class="ui horizontal divider" anchor="ques" addlayer="0">錯誤項目 </div>';
+	echo '<div class="ui horizontal divider" anchor="ques" addlayer="0">錯誤項目 </div>';
 
-    foreach($question_array as $question){		
-        if($question->getName()=="question_sub"){
-            if( !in_array($question->id,$q_allsub) ){	
-                buildQuestion($question,$question_array,0,"no");
-            }
-        }
-    }		
-    echo '</div>';
+	foreach($question_array as $question){		
+	    if($question->getName()=="question_sub"){
+	        if( !in_array($question->id,$q_allsub) ){	
+	            buildQuestion($question,$question_array,0,"no");
+	        }
+	    }
+	}		
+	echo '</div>';
 		
     ?>
         
@@ -1164,8 +1101,11 @@ function getPassword(length) {
 <script>
 app.controller('quesEditorController', function($scope, $filter, $http) {
 	$scope.items_text = angular.fromJson('<?=json_encode($items_text)?>');
-	$scope.items_degree = angular.fromJson('<?=json_encode($items_degree)?>');
-	$scope.items_ques = angular.fromJson('<?=json_encode($items_ques)?>');
+	$scope.items_select = angular.fromJson('<?=json_encode($items_select)?>');
+	$scope.items_scale = angular.fromJson('<?=json_encode($items_scale)?>');
+	$scope.items_checkbox = angular.fromJson('<?=json_encode($items_checkbox)?>');
+
+	console.log($scope.items_scale);
 
 	$scope.hide = function(event) {
 		$(event.target).parent('td').parent('tr').parent('tbody').parent('table').parent('div.initv_box').parent('div.fieldA').addClass('changed');
@@ -1190,9 +1130,68 @@ app.controller('quesEditorController', function($scope, $filter, $http) {
 		$(event.target).parent('td').parent('tr').parent('tbody').parent('table').parent('div').parent('.fieldA').addClass('changed');
 	}
 
-	$scope.addDegree = function(items, item, event) {
+	$scope.addDegree = function(items, item, event, id) {
+		var degree = items[id].degree;
+		var degreeArray = [];
 		var newItem = angular.copy(item);
 		newItem.degree = '';
+		newItem.attr = {};
+		degree.splice(degree.indexOf(item)+1, 0, newItem);
+		for(var i in degree) {
+			degree[i].attr.value = i*1+1;
+			degreeArray.push({ value: degree[i].attr.value, title: degree[i].degree } );
+		}
+		var aa = $filter("filter")(valInObj.obj, {target: 'degrees', id: id})[0];
+		if (aa) {
+			valInObj.obj[valInObj.obj.indexOf(aa)].degreeArray = degreeArray;
+		} else {
+			valInObj.obj.push({
+				target: 'degrees',
+				id: id,
+				degreeArray: degreeArray
+			});
+		}
+	}
+
+	$scope.removeDegree = function(items, item, event, id) {
+		var degree = items[id].degree;
+		var degreeArray = [];
+		degree.splice(degree.indexOf(item), 1);
+		for(var i in degree) {
+			degree[i].attr.value = i*1+1;
+			degreeArray.push({ value: degree[i].attr.value, title: degree[i].degree } );
+		}		
+			
+		var aa = $filter("filter")(valInObj.obj, {target: 'degrees', id: id})[0];
+		if (aa) {
+			valInObj.obj[valInObj.obj.indexOf(aa)].degreeArray = degreeArray;
+		} else {
+			valInObj.obj.push({
+				target: 'degrees',
+				id: id,
+				degreeArray: degreeArray
+			});
+		}
+	}
+
+	$scope.editDegree = function(item, id) {
+		var valInObj_one = {
+			target: 'degree',
+			id: id,				
+			title: item.degree,
+			value: item.attr.value
+		};	
+		var aa = $filter("filter")(valInObj.obj, {target: 'degree', id: id, value: item.attr.value})[0];
+		if (aa) {
+			valInObj.obj[valInObj.obj.indexOf(aa)].title = item.degree;
+		} else {
+			valInObj.obj.push(valInObj_one);
+		}
+	}
+
+	$scope.addQues = function(items, item, event) {
+		var newItem = angular.copy(item);
+		newItem.answer = '';
 		newItem.attr = {};
 		items.splice(items.indexOf(item)+1, 0, newItem);
 		for(var i in items) {
@@ -1201,7 +1200,7 @@ app.controller('quesEditorController', function($scope, $filter, $http) {
 		$(event.target).parent('td').parent('tr').parent('tbody').parent('table').parent('div').parent('.fieldA').addClass('changed');
 	}
 
-	$scope.removeDegree = function(items, item, event) {
+	$scope.removeQues = function(items, item, event) {
 		items.splice(items.indexOf(item), 1);
 		for(var i in items) {
 			items[i].attr.value = i*1+1;
