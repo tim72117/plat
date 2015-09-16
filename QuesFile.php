@@ -747,21 +747,27 @@ class QuesFile extends CommFile {
 
     public function xml_to_array()
     {        
-        include_once(app_path().'/views/editor/buildQuestion_editor__v2.0.laravel-ng.php');
-
 		$pages = $this->file->cencus->pages->map(function($page) {
 			$question_box = (object)['index' => $page->page, 'questions' => []];
 			$questions = simplexml_load_string($page->xml);
+            \app\library\v10\QuestionXML::$questions = $questions;
             foreach($questions as $question){
-                if( $question->getName()=='question' ){
-                    array_push($question_box->questions, buildQuestion_ng($question, $questions, 0, "no"));
+                if ($question->getName()=='question') {
+                    array_push($question_box->questions, \app\library\v10\QuestionXML::to_array($question, 0, "no"));
                 }                
             }
 			return $question_box;
 		})->toArray();
+
+        //echo '<script>console.log(' . json_encode($pages) . ');</script>';exit;    
         
         return ['pages' => $pages, 'edit' => $this->file->cencus->edit];
     } 
+
+    public function get_questions()
+    {
+        return $this->xml_to_array();
+    }
 
     public function to_interview_file() {
         $pages = $this->get_ques_from_xml()['pages'];
@@ -786,7 +792,7 @@ class QuesFile extends CommFile {
         ];
     }
 
-    public function get_questions()
+    public function get_questions_()
     {
         $questions = [];
 
