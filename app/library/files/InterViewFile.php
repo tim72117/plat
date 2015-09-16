@@ -25,15 +25,15 @@ class InterViewFile extends CommFile {
 
         parent::__construct($shareFile);
     }
-	
-	public static function get_intent() 
+
+    public function is_full()
     {
-		return array_merge(parent::$intent,self::$intent);
-	}
+        return false;
+    }
 	     
     public function get_views() 
     {
-        return [];
+        return ['open'];
     }
     
     public static function create($newFile) 
@@ -45,7 +45,7 @@ class InterViewFile extends CommFile {
     
     public function open()
     {        
-        return View::make('html5-layer')->nest('context', 'editor.editor-ng'); 
+        return 'editor.editor-ng'; 
     }
 
     public function demo()
@@ -180,7 +180,7 @@ class InterViewFile extends CommFile {
         DB::table('ques_page_new')->truncate();
         
         $ques_struct = array_walk($pages, function($page, $index) {            
-            $questions = $this->get_struct_from_view($page->data, function($question) {              
+            $questions = $this->get_struct_from_view($page->questions, function($question) {              
                 return $this->updateOrCreateQuestion($question);
             });
             DB::table('ques_page_new')->insert(['file_id' => $this->file->id, 'value' => $index+1, 'questions' => json_encode($questions)]);
@@ -200,9 +200,8 @@ class InterViewFile extends CommFile {
         }
     }
     
-    public function get_ques_from_db()
-    {
-        
+    public function get_editor_questions()
+    {       
         $pages = Ques_page::with('questions', 'questions.answers', 'questions.subs.answers',
                                  'questions.subs.subs.answers', 'questions.subs.subs.subs.answers', 
                                  'questions.subs.subs.subs.answers', 'questions.subs.subs.subs.subs.answers', 
@@ -210,10 +209,11 @@ class InterViewFile extends CommFile {
                                  'questions.subs.subs.subs.subs.subs.subs.subs.answers', 'questions.subs.subs.subs.subs.subs.subs.subs.subs.answers'
                                  , 'questions.subs.subs.subs.subs.subs.subs.subs.subs.subs.answers')->remember(1)->get();
         
-        return $pages->each(function($page){
+        $pages->each(function($page){
             $this->get_all_subs($page->questions);
         })->toArray();
 
+        return ['pages' => $pages, 'edit' => true];
     }
     
     public function save_answers()
