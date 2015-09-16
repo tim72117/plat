@@ -1,27 +1,53 @@
 <?php
 $tables = [
 	'tiped_103_0016_ba' => (object)[
+		'title'    => '大專應屆畢業生',
 		'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150826_162604_ca32f', 'primaryKey' => 'C189', 'school' => 'C185', 'map' => 'stdnumber'],
 		'pstat'    => (object)['database' => 'rowdata', 'table' => 'tiped_103_0016_ba_pstat', 'primaryKey' => 'newcid'],
 		'pages'    => 9,
 		'stdschoolsys' => [1],
+		'filters'   => [],
 		'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at', 'C191', 'C195', 'C196'],
 		'hidden'   => ['id'],
 	],
 	'tiped_103_0016_ma' => (object)[
+		'title'    => '碩士應屆畢業生',
 		'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150826_162604_ca32f', 'primaryKey' => 'C189', 'school' => 'C185', 'map' => 'stdnumber'],
 		'pstat'    => (object)['database' => 'rowdata', 'table' => 'tiped_103_0016_ma_pstat', 'primaryKey' => 'newcid'],
 		'pages'    => 10,
 		'stdschoolsys' => [7, 20],
+		'filters'   => [],
 		'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at', 'C191', 'C195', 'C196'],
 		'hidden'   => ['id'],
 	],
 	'tiped_103_0016_phd' => (object)[
+		'title'    => '博士應屆畢業生',
 		'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150826_162604_ca32f', 'primaryKey' => 'C189', 'school' => 'C185', 'map' => 'stdnumber'],
 		'pstat'    => (object)['database' => 'rowdata', 'table' => 'tiped_103_0016_phd_pstat', 'primaryKey' => 'newcid'],
 		'pages'    => 7,
 		'stdschoolsys' => [8],
+		'filters'   => [],
 		'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at', 'C191', 'C195', 'C196'],
+		'hidden'   => ['id'],
+	],
+	'tiped_103_0016_p1' => (object)[
+		'title'    => '102學年度畢業後一年現況調查',
+		'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150826_154415_lfr66', 'primaryKey' => 'id', 'school' => 'C172'],
+		'pstat'    => (object)['database' => 'rowdata', 'table' => 'tiped_103_0016_p1_pstat', 'primaryKey' => 'newcid'],
+		'pages'    => 8,
+		'stdschoolsys' => [],
+		'filters'   => ['C171' => [102]],
+		'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at'],
+		'hidden'   => ['id'],
+	],
+	'tiped_103_0016_p3' => (object)[
+		'title'    => '100學年度畢業後三年現況調查',
+		'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150826_154415_lfr66', 'primaryKey' => 'id', 'school' => 'C172'],
+		'pstat'    => (object)['database' => 'rowdata', 'table' => 'tiped_103_0016_p3_pstat', 'primaryKey' => 'newcid'],
+		'pages'    => 8,
+		'stdschoolsys' => [],
+		'filters'   => ['C171' => [100]],
+		'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at'],
 		'hidden'   => ['id'],
 	],
 ];
@@ -60,6 +86,7 @@ return array(
 		$userinfo = $tables[Input::get('table')]->userinfo;
 		$pstat = $tables[Input::get('table')]->pstat;
 		$stdschoolsys = $tables[Input::get('table')]->stdschoolsys;
+		$filters = $tables[Input::get('table')]->filters;
 		$against = $tables[Input::get('table')]->against;
 		$hidden = $tables[Input::get('table')]->hidden;
 
@@ -76,17 +103,23 @@ return array(
 
                 $query->leftJoin($pstat->database . '.dbo.' . $pstat->table . ' AS pstat', 'userinfo_map.newcid', '=', 'pstat.newcid');
             } else {
-                $query->leftJoin($pstat->database . '.dbo.' . $pstat->table . ' AS pstat', 'userinfo.newcid', '=', 'pstat.newcid');
+                $query->leftJoin($pstat->database . '.dbo.' . $pstat->table . ' AS pstat', 'userinfo.' . $userinfo->primaryKey, '=', 'pstat.newcid');
             }
 
             $query
-				->whereNull('userinfo.deleted_at')
-				->whereIn('C188', $stdschoolsys)
+				->whereNull('userinfo.deleted_at')				
 				//->where('userinfo.' . $userinfo->school, $school_selected)
 				->select(array_map(function($column){ return 'userinfo.' . $column; }, $columns))
 				->addSelect(DB::raw('CASE WHEN pstat.page IS NULL THEN 0 ELSE pstat.page END AS page'))                
 				->limit(10000)
 				->remember(1);
+
+			!empty($stdschoolsys) && $query->whereIn('C188', $stdschoolsys);
+			if (!empty($filters)) {
+				foreach ($filters as $column => $filter) {
+					$query->whereIn($column, $filter);
+				}
+			}
 
             Input::get('reflash') && Cache::forget($query->getCacheKey());
 
@@ -99,6 +132,7 @@ return array(
         }
 
         return array(
+            'tables' => $tables,
             'students' => $students,
             'columns'  => array_merge(array_diff($columns, $hidden), ['page']),
             'columnsName' => $cname_columns,

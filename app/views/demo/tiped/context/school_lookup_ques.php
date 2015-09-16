@@ -25,11 +25,7 @@
                 </div>  
             </div> 
             <div class="item">    
-                <select class="ui search dropdown" ng-model="table" ng-change="changeTable()">
-                    <option value="tiped_103_0016_ba">大專應屆畢業生</option>
-                    <option value="tiped_103_0016_ma">碩士應屆畢業生</option>
-                    <option value="tiped_103_0016_phd">博士應屆畢業生</option>
-                </select>
+                <select class="ui search dropdown" ng-options="key as table.title for (key, table) in tables" ng-model="table" ng-change="changeTable()"></select>
             </div>
         </div> 
 
@@ -52,13 +48,6 @@
         
         <div class="ui mini basic button" ng-click="downloadRate()" ng-show="false"><i class="download icon"></i>下載回收率</div>
         
-        <div class="ui mini red button" ng-class="{'left attached': deleteStatus.confrim, loading: deleteStatus.deleting}" ng-show="(rows | filter: {selected: true}).length > 0" ng-click="deleteStatus.confrim=true">
-            <i class="trash icon"></i>刪除調查名單 ({{ (rows | filter: {selected: true}).length }}筆資料)
-        </div>
-        <div class="ui mini right attached button" ng-show="(rows | filter: {selected: true}).length > 0 && deleteStatus.confrim" ng-click="delete()">
-            <i class="checkmark icon"></i> 確定
-        </div>
-        
 <!--        <div class="ui item search selection dropdown" ng-dropdown ng-model="sheet" title="資料表" ng-change="action.toSelect(sheet)" style="z-index:104;width:250px"></div>-->
         
         <table class="ui very compact small table">
@@ -67,16 +56,9 @@
                     <th colspan="{{ columns.length }}"></th>
                 </tr>
                 <tr>
-<!--                     <th></th> -->
                     <th ng-repeat="column in columns">{{ columnsName[column] }}</th>
                 </tr>
                 <tr>
-<!--                     <th>
-                        <div class="ui checkbox">
-                            <input type="checkbox" id="user-selected-all" ng-checked="(rows | filter: {selected: true}).length > 0" ng-click="toggleSelected()">
-                            <label for="user-selected-all"></label>
-                        </div>
-                    </th> -->
                     <th ng-repeat="column in columns">
                         <div class="ui fluid icon mini input" >
                             <input type="text" ng-model="searchText[column]" /><i class="filter icon"></i>
@@ -86,12 +68,6 @@
             </thead>
             <tbody>
                 <tr ng-repeat="user in rows | orderBy:predicate:reverse | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
-<!--                     <td style="width: 40px">
-                        <div class="ui checkbox">
-                            <input type="checkbox" id="user-selected-{{ $index }}" ng-model="user.selected" ng-click="deleteStatus.confrim=false">
-                            <label for="user-selected-{{ $index }}"></label>
-                        </div>
-                    </td> -->
                     <td ng-repeat="column in columns">{{ user[column] }}</td>
                 </tr>   
             </tbody>    
@@ -112,17 +88,9 @@ app.controller('rateCtrl', function($scope, $http, $filter) {
     $scope.max = 0;
     $scope.pages = 0; 
     $scope.searchText = {};
-    $scope.table = 'tiped_103_0016_ba';
+    $scope.tables = [];
+    $scope.table = 'tiped_103_0016_phd';
     $scope.rate = {};
-    $scope.deleteStatus = {confirm: false, deleting: false};
-    
-    $scope.groups = [{id:1, name:'use'}];
-    
-    $scope.ques = {
-        tiped_103_0016_ba: {name:'大專應屆畢業生', pages:9},
-        tiped_103_0016_ma: {name:'碩士應屆畢業生', pages:10},
-        tiped_103_0016_phd: {name:'博士應屆畢業生', pages:7}
-    };
 
     $scope.$watchCollection('searchText', function(query) {
         $scope.max = $filter("filter")($scope.rows, query).length;
@@ -133,9 +101,11 @@ app.controller('rateCtrl', function($scope, $http, $filter) {
     });  
     
     $scope.getRate = function() {   
-        var finish = $filter("filter")($scope.rows_filted, {page: $scope.ques[$scope.table].pages+1});
-        var rate = $scope.rows_filted.length>0 ? Math.floor(finish.length/$scope.rows_filted.length*1000)/10 : 0;
-        $scope.rate = {finish: finish.length, rows: $scope.rows_filted.length, rate: rate};
+        if ($scope.table in $scope.tables) {
+            var finish = $filter("filter")($scope.rows_filted, {page: $scope.tables[$scope.table].pages+1});
+            var rate = $scope.rows_filted.length>0 ? Math.floor(finish.length/$scope.rows_filted.length*1000)/10 : 0;
+            $scope.rate = {finish: finish.length, rows: $scope.rows_filted.length, rate: rate}; 
+        };       
     };
     
     $scope.next = function() {
@@ -167,6 +137,7 @@ app.controller('rateCtrl', function($scope, $http, $filter) {
         reflash = typeof reflash !== 'undefined' ? reflash : false;
         $http({method: 'POST', url: 'ajax/getStudents', data:{ reflash: reflash, table: $scope.table, school_selected: $scope.school_selected }})
         .success(function(data, status, headers, config) {
+            $scope.tables = data.tables;  
             $scope.rows = data.students;            
             $scope.rows_filted = data.students;
             $scope.schools = data.schools;
@@ -224,31 +195,6 @@ app.controller('rateCtrl', function($scope, $http, $filter) {
         }
         return Object.keys(input).length;      
     };    
-    
-    $scope.toggleSelected = function() {
-        $scope.deleteStatus = {confirm: false, deleting: false};
-        var set_value = $filter("filter")($scope.rows, {selected: true}).length === 0;
-        angular.forEach($scope.rows, function(row){
-            row.selected = set_value;
-        });
-    };
-    
-    $scope.delete = function() {
-        $scope.deleteStatus = {confirm: false, deleting: true};
-        var students_id = [];
-        var students = $filter("filter")($scope.rows, {selected: true});
-        angular.forEach(students, function(row){
-            students_id.push(row.id);
-        });
-        $http({method: 'POST', url: 'ajax/delete', data:{ table: $scope.table, students_id: students_id }})
-        .success(function(data, status, headers, config) {
-            $scope.deleteStatus.deleting = false;
-            $scope.getUser(true);
-        })
-        .error(function(e){
-            console.log(e);
-        });
-    };
     
     $scope.getUser();
 

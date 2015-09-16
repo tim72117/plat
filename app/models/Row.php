@@ -74,6 +74,10 @@ class Cencus extends Eloquent
     public function pages() {
         return $this->hasMany('Row\Pages', 'file_id', 'file_id');
     }
+
+    public function ques() {
+        return $this->hasOne('Row\Pages', 'file_id', 'file_id');
+    }
 }
 
 class Pages extends Eloquent
@@ -83,4 +87,11 @@ class Pages extends Eloquent
     public $timestamps = true;
 
     protected $fillable = array('xml');
+}
+
+class Analysis extends Eloquent
+{
+    protected $table = 'file_analysis';
+
+    public $timestamps = false;
 }
