@@ -24,7 +24,9 @@
         <div style="float:left;font-size:16px" ng-if="update_mis>1">儲存中{{ update_mis }}...</div>
         <div style="width:150px;float:left;font-size:14px;color:#aaa" ng-if="update_mis===1">所有變更都已經儲存</div>
 
-        <div class="ui green segment" ng-repeat="question in page.questions">
+        <div class="ui horizontal divider addquestion" anchor="ques" addlayer="0"><i class="add icon"></i> 加入題目 </div>
+
+        <div class="ui green segment" ng-repeat-start="question in page.questions">
 
             <div ng-if="question.type == 'list'">
                 <div class="ui form">
@@ -50,9 +52,11 @@
 
             <div ng-if="question.type != 'list'">
                 <div question="question" layer="0" update="update" page="page" ng-mouseover="question.hover = true" ng-mouseleave="question.hover = false"></div>
-            </div> 
+            </div>            
 
         </div>
+
+        <div ng-repeat-end class="ui horizontal divider addquestion" anchor="ques" addlayer="0"><i class="add icon"></i> 加入題目 </div>
 
     </div>
     
@@ -126,18 +130,18 @@ app.filter('startFrom', function() {
         });
     };  
     
-    $scope.get_from_db = function() {
+    $scope.getQuestions = function() {
         $http({method: 'POST', url: 'get_editor_questions', data:{} })
         .success(function(data, status, headers, config) {
             console.log(data);
             $scope.pages = data.pages;
-            $scope.page = $scope.pages[1];            
+            $scope.page = $scope.pages[3];            
         }).error(function(e) {
             console.log(e);
         });
     };
 	
-	$scope.get_from_db(); 
+	$scope.getQuestions(); 
 
     $scope.next_page = function() {
         var index = $scope.pages.indexOf($scope.page);
@@ -240,12 +244,15 @@ app.filter('startFrom', function() {
                     subs: [],
                     parent_value: answer.value || null 
                 });                
-                //$scope.updateStruct(questions);
             };
             
             $scope.removeQues = function(question, index) {
                 question.removed = true;
                 //$scope.updateStruct(questions);
+            };
+
+            $scope.removeQuestion = function(questions, index) {
+                questions.splice(index, 1);
             };
 
             $scope.addSub = function(subs, index, obj) {
@@ -425,24 +432,5 @@ app.filter('startFrom', function() {
 });
 </script>
 <style>
-div.title-editor {
-    border: 1px solid #aaa;
-    min-height: 30px;
-    line-height: 30px;
-    padding: 0 0 0 2px;
-    font-size: 13px;
-}
-textarea.title-editor {
-    resize: none;
-    vertical-align: middle;
-    box-sizing: border-box;
-    padding: 6px 0 0 2px;
-    height: 30px;
-    width: 350px;    
-}
-input.editor {
-    box-sizing: border-box;
-    height: 30px;
-    padding: 0 0 0 2px;
-}
+
 </style>
