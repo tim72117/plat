@@ -54,15 +54,16 @@
                     <th>
                         <div ng-dropdown-menu class="ui floating top left pointing labeled icon dropdown basic button">
                             <i class="filter icon"></i>
-                            <span class="text"><i class="icon" ng-class="types[searchText.type]"></i></span>
+                            <span class="text"><i class="icon" ng-class="!searchText.type ? 'file outline' : types[searchText.type]"></i></span>
                             <div class="menu transition" tabindex="-1">
-                                <div class="item" ng-click="searchText = {type: 5}"><i class="file text icon"></i>資料檔</div>
-                                <div class="item" ng-click="searchText = {type: 1}"><i class="file text outline icon"></i>問卷</div>
-                                <div class="item" ng-click="searchText = {type: 9}"><i class="file text outline icon red"></i>面訪問卷</div>
-                                <div class="item" ng-click="searchText = {type: 3}"><i class="file outline blue icon"></i>一般檔案</div>
-                                <div class="item" ng-click="searchText = {type: 2}"><i class="code icon"></i>程式</div>
-                                <div class="item" ng-click="searchText = {type: 7}"><i class="bar chart icon"></i>線上分析</div>
-                                <div class="item" ng-click="searchText = {type: ''}"><i class="file outline icon"></i>所有檔案</div>                    
+                                <div class="item" ng-click="searchText = {type: '5'}"><i class="file text icon"></i>資料檔</div>
+                                <div class="item" ng-click="searchText = {type: '1'}"><i class="file text outline icon"></i>問卷</div>
+                                <div class="item" ng-click="searchText = {type: '9'}"><i class="file text outline icon red"></i>面訪問卷</div>
+                                <div class="item" ng-click="searchText = {type: '3'}"><i class="file outline blue icon"></i>一般檔案</div>
+                                <div class="item" ng-click="searchText = {type: '2'}"><i class="code icon"></i>程式</div>
+                                <div class="item" ng-click="searchText = {type: '7'}"><i class="bar chart icon"></i>線上分析</div>
+                                <div class="item" ng-click="searchText = {type: '10'}"><i class="red bar chart icon"></i>線上分析</div>  
+                                <div class="item" ng-click="searchText = {}"><i class="file outline icon"></i>所有檔案</div> 
                             </div>
                         </div>
                         <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋..."><i class="search icon"></i></div>
@@ -85,7 +86,7 @@
                     <td></td><td></td>
                     <td></td><td></td>
                 </tr>
-                <tr ng-repeat="file in files | orderBy:'created_at':true | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
+                <tr ng-repeat="file in files | orderBy:'created_at':true | filter:searchText:true | startFrom:(page-1)*limit | limitTo:limit">
                     <td width="50">
                         <div class="ui checkbox">
                             <input type="checkbox" id="file-{{ $index }}" ng-model="file.selected">
@@ -161,7 +162,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     $scope.pages = Math.ceil($scope.max/$scope.limit);
     $scope.timenow = new Date();
     $scope.info = {pickeds:0};
-    $scope.types = {1: 'file text outline', 2: 'code', 3: 'file outline blue', 5: 'file text', 6: 'file outline blue', 9: 'file text outline red', 7: 'bar chart', '': 'file outline'};
+    $scope.types = {1: 'file text outline', 2: 'code', 3: 'file outline blue', 5: 'file text', 6: 'file outline blue', 9: 'file text outline red', 7: 'bar chart', 10: 'red bar chart'};
     $scope.uploading = false;
     $scope.loading = false;
     $scope.information = {};
