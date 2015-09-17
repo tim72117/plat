@@ -1,28 +1,28 @@
 <?php
 namespace app\library\files\v0;
-use Input, Auth, DB, Response, Validator, Files, ShareFile, Session, Illuminate\Filesystem\Filesystem, Illuminate\Support\MessageBag;
+
+use User;
+use Files;
+use Input, DB, Response, Validator, Session;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\MessageBag;
 
 class CommFile {
-	
-	public $doc_id;
+
+	protected $doc;
     
     public $storage_path;
 	
-	public function __construct($shareFile)
-	{      
-		if( gettype($shareFile) != 'object' )
-			$shareFile = ShareFile::find($shareFile);//暫時
+	public function __construct(Files $file, User $user)
+	{ 
+        if (is_null($file))
+			throw new FileFailedException; 
 
-		$this->shareFile = $shareFile;
+		$this->file = $file;
 
-		$this->file = $this->shareFile->isFile;
-
-		$this->user = Auth::user();
+		$this->user = $user;
 
         $this->storage_path = storage_path() . '/file_upload';
-
-        if( is_null($this->file) )
-			throw new FileFailedException; 
 	}
 
 	public function get_views() 
@@ -30,27 +30,16 @@ class CommFile {
 		return [];
 	}
     
-	public static function create($newFile)
-	{        
-        $file = Files::create([      
-        	'title'      => $newFile->title,          
-            'type'       => $newFile->type,
+	public static function create($fileInfo)
+	{
+        $file = Files::create([
+        	'title'      => $fileInfo->title,
+            'type'       => $fileInfo->type,
             'owner'      => 0,
-            'created_by' => Auth::user()->id,
-        ], [
-            
-        ]);
-        
-        $shareFile = ShareFile::create([
-        	'file_id'    => $file->id,
-            'target'     => 'user',
-            'target_id'  => Auth::user()->id,            
-            'created_by' => Auth::user()->id,
-        ], [
-            //'power'      => json_encode([]),
-        ]); 
-        
-        return $shareFile;            
+            'created_by' => $this->user->id,
+        ], []);
+
+        return new self($file);
 	}
 
 	public function open()
@@ -58,25 +47,23 @@ class CommFile {
         return $this->download();
     }	
 	
+    //uncomplete
 	public function delete()
 	{    
-        $shareFile = ShareFile::find($this->doc_id);
-
-        return $this->doc_id;
+        return $this->doc->id;
     }
 	
 	public function rename()
 	{
-		if( $this->shareFile->created_by == $this->user->id )
-		{
+		if ($this->isCreater()) {
 			$this->file->title = Input::get('title');
 
-			$this->shareFile->touch();
+			$this->doc->touch();
 
-			$this->shareFile->push();
+			$this->doc->push();
 		}
 
-		return ['file' => \Struct_file::open($this->shareFile)];
+		return ['file' => \Struct_file::open($this->doc)];
 	}
 
 	public static function upload($visible = true)
@@ -85,7 +72,7 @@ class CommFile {
 			$file_upload = Input::file('file_upload');
 			//$mime = $file->getMimeType();
 			$name_real = $file_upload->getClientOriginalName();
-			$user_id = Auth::user()->id;
+			$user_id = $this->user->id;
 			
 			$validator = Validator::make(
 				array('file_upload'     => $file_upload),
@@ -153,6 +140,21 @@ class CommFile {
         
         return Response::download($this->storage_path . '/' . $file_path, $this->file->title);
 	}
+
+	public function getId()
+	{
+		return $this->file->id;
+	}
+
+	public function setDoc($doc)
+	{
+		$this->doc = $doc;
+	}
+
+    public function isCreater()
+    {
+        return isset($this->doc) && $this->doc->created_by == $this->user->id;
+    }
 	
 	public function save_as() { }
 	

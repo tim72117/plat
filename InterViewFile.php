@@ -1,29 +1,16 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Response, Config, Schema, Session, Input, ShareFile, Auth, app\library\files\v0\FileProvider, Question, Answer, Ques_page, Carbon\Carbon;
+
+use User;
+use Files;
+use DB, View, Response, Config, Schema, Session, Input, ShareFile, Auth;
+use Question, Answer, Ques_page, Carbon\Carbon;
 
 class InterViewFile extends CommFile {
-	
-	/**
-	 * @var rows
-	 */
-	public $rows;
-
-	/**
-	 * @var info
-	 */
-	public $info;
-
-	public static $intent = array(
-        'open',	
-        'create'
-	);
-        
-    function __construct($doc_id) 
+	      
+    function __construct(Files $file, User $user) 
     {
-        $shareFile = ShareFile::find($doc_id);
-
-        parent::__construct($shareFile);
+        parent::__construct($file, $user);
     }
 
     public function is_full()
@@ -36,11 +23,11 @@ class InterViewFile extends CommFile {
         return ['open'];
     }
     
-    public static function create($newFile) 
+    public static function create($fileInfo) 
     {
-        $shareFile = parent::create($newFile);
+        $commFile = parent::create($fileInfo);
 
-        return $shareFile;
+        return new self($this->file);  
     }
     
     public function open()

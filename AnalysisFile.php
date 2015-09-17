@@ -1,18 +1,20 @@
 <?php
 namespace app\library\files\v0;
-use DB, ShareFile, Auth, Input, Cache, View, Session;
 
-class AnalysisFile extends CommFile
-{        
-    function __construct($doc_id)
-    {       
-        $shareFile = ShareFile::find($doc_id);   
+use User;
+use Files;
+use DB, Input, Cache, View, Session;
+use ShareFile;
 
-        parent::__construct($shareFile);  
+class AnalysisFile extends CommFile {
+
+    function __construct(Files $file, User $user)
+    {
+        parent::__construct($file, $user);  
 
         $this->information = json_decode($this->file->information);
         
-        $this->census = DB::table('ques_census')->where('file_id', $this->file->id)->first();        
+        $this->census = DB::table('file_analysis')->where('file_id', $this->file->id)->first();        
         
         //def_city = 30;
     }
@@ -52,17 +54,10 @@ class AnalysisFile extends CommFile
         return 'files.analysis.menu_option_' . $this->census->site;        
     }
 
-    public function information() 
-    {
-        return ['information' => $this->census];
-    }
-
     public function get_census()
     {
-        $quesFile = new QuesFile($this->information->doc_id);
-
         return [
-            'title'     => $this->shareFile->isFile->title,
+            'title'     => $this->file->title,
             'questions' => $this->get_questions(),
         ];
     }
@@ -100,10 +95,9 @@ class AnalysisFile extends CommFile
         //$census_parts = DB::reconnect('sqlsrv_analysis')->table('census_part')->where('CID', $this->census->CID)->get();
     }
 
+    //uncomplete ShareFile
     public function all_census()
     {
-        $fileProvider = FileProvider::make();
-
         return [
             'docs' => ShareFile::with('isFile')
             ->whereHas('isFile', function($query) {
@@ -120,9 +114,8 @@ class AnalysisFile extends CommFile
                 });
             })
             ->select('docs.*', 'ques_census.target_people')
-            ->get()->map(function($doc) use($fileProvider) {
+            ->get()->map(function($doc) {
 
-                $doc->intent_key = $fileProvider->doc_intent_key('open', $doc->id, 'app\\library\\files\\v0\\AnalysisFile');
                 $doc->selected = $this->shareFile->file_id == $doc->file_id ? true : false;
                 return $doc;
 
