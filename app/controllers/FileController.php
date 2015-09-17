@@ -1,66 +1,71 @@
 <?php
-use Illuminate\Filesystem\Filesystem;
+
 class FileController extends BaseController {
 
-	/*
-	|--------------------------------------------------------------------------
-	| Default Home Controller
-	|--------------------------------------------------------------------------
-	|
-	| You may wish to use controllers instead of, or in addition to, Closure
-	| based routes. That's great! Here is an example controller method to
-	| get you started. To route to this controller, just add the route:
-	|
-	|	Route::get('/', 'HomeController@showWelcome');
-	|
-	*/
     protected $layout = 'demo.layout-main';
-	protected $fileAcitver;
 	
 	public function __construct()
     {
-		$this->beforeFilter(function($route) {            
-            if( !Session::has('file.'.$route->getParameter('intent_key')) ){
-                return $this->timeOut();
+		$this->beforeFilter(function($route) {
+            $this->doc = ShareFile::find($route->getParameter('doc_id'));
+            if (!isset($this->doc)) {
+            	return $this->no(); 
             }
-            Event::fire('ques.open', array());
-            $this->intent = Session::get('file')[$route->getParameter('intent_key')];            
+
+            $this->user = Auth::user();
+            $inGroups = $this->user->inGroups->lists('id');
+            if (($this->doc->target=='user' && $this->doc->target_id!=$this->user->id) || ($this->doc->target=='group' && !in_array($this->doc->target_id, $inGroups))) {
+				return $this->deny(); 
+            } 
+
+            Event::fire('ques.open', array());       
 		});
 	}
-    
-    public function appAjax($intent_key, $method)
-    {        
-        $file = Apps::find(Session::get('file')[$intent_key]['doc_id']);
 
-        $fileLoader = new Illuminate\Config\FileLoader(new Filesystem, app_path().'/views/demo');
-        
-        $ajax = new Illuminate\Config\Repository($fileLoader, '');
+    public function open($doc_id, $method = null)
+    {
+        $class = 'app\\library\\files\\v0\\' . $this->doc->isFile->isType->class;
 
-        $func = $ajax->get($file->isFile->controller.'.'.$method);
-        
-        if( is_callable($func) ) {
-            return call_user_func($func);
-        }
-    }   
+        $this->file = new $class($this->doc->isFile, $this->user);
 
-    public function open($intent_key, $method = null)
-    {             
-        $file = new $this->intent['fileClass']($this->intent['doc_id']);
-        
-        if( in_array($method, $file->get_views()) )
+        $this->file->setDoc($this->doc);
+
+        if (in_array($method, $this->file->get_views()))
         {
-            if( $file->is_full() )
-                return View::make($file->$method());
+            if ($this->file->is_full())
+                return View::make($this->file->$method());
 
-            $view = View::make('demo.use.main')->nest('context', $file->$method());
-		
+            $view = View::make('demo.use.main')->nest('context', $this->file->$method());
+        
             return $this->createView($view);
         }
         
-        return $file->$method();        
+        return $this->file->$method();
+    }
+
+    public function create()
+    {
+        $fileInfo = (object)Input::get('fileInfo');
+
+        $class = DB::table('files_type')->where('id', $fileInfo->type)->first()->class;
+        
+        $class = 'app\\library\\files\\v0\\' . $class;
+
+        $file = $class::create($fileInfo);
+
+        $shareFile = ShareFile::create([
+            'file_id'    => $file->id(),
+            'target'     => 'user',
+            'target_id'  => $file->created_by,            
+            'created_by' => $file->created_by,
+        ], [
+            //'power'      => json_encode([]),
+        ]); 
+
+        return ['file' => Struct_file::open($shareFile)];
     }
     
-    public function createView($view)
+    private function createView($view)
     {        
         $this->layout->content = $view;
         
@@ -72,7 +77,12 @@ class FileController extends BaseController {
         return $response; 
     }
 	
-	public function timeOut()
+	public function no()
+    {
+        return Response::view('demo.timeout', array(), 404);
+	}	
+
+	public function deny()
     {
         return Response::view('demo.timeout', array(), 404);
 	}	
@@ -80,21 +90,9 @@ class FileController extends BaseController {
 	public function showQuery()
     {
 		$queries = DB::getQueryLog();
-		foreach($queries as $query){
+		foreach ($queries as $query) {
 			var_dump($query);echo '<br /><br />';
 		}
 	}
 
 }
-Event::listen('ques.open', function()
-{
-    $host = gethostname();
-    $session_id = Session::getId();
-    $now = date("Y/n/d H:i:s");
-    $ques_update_log_query = DB::table('ques_admin.dbo.ques_update_log')->where('host', $host)->where('session', $session_id);
-    if( $ques_update_log_query->exists() ) {
-        $ques_update_log_query->update(['updated_at' => $now]);
-    }else{
-        $ques_update_log_query->insert(['host' => $host, 'session' => $session_id, 'updated_at' => $now, 'created_at' => $now]);
-    }
-});

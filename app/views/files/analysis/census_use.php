@@ -108,10 +108,15 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 		</div>
 
 		<div class="eight wide column">
-			<div class="ui segment" style="min-height:550px">
-				<h4 class="ui header">資料庫資訊<div class="sub header">{{ doc.is_file.title }}</div></h4>
-				<div class="ui divider"></div>
-				<table class="ui definition table">
+			<div class="ui top attached segment">
+				<button class="ui button">回上一頁</button>	
+				<button class="ui olive button" ng-class="{disabled: (docs | filter:{selected: true}).length < 1}" ng-click="enterDoc()">
+					<i class="puzzle icon"></i> 步驟 3 進入資料庫
+				</button>
+			</div>
+			<div class="ui attached segment" style="min-height:550px">
+				<div class="ui top attached segment">{{ doc.is_file.title }}</div>
+				<table class="ui attached table">
 					<tbody>
 						<tr>
 							<td class="collapsing">調查開始時間 :</td>
@@ -157,38 +162,15 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 
 	</div>
 
-	<div class="ui basic segment">
-		<div class="ui two attached buttons">
-			<button class="ui button">回上一頁</button>
-			<button class="ui button" ng-class="{disabled: (docs | filter:{selected: true}).length < 1}" ng-click="enterDoc()">
-				進入資料庫
-				<div class="ui pointing left olive large label"><i class="puzzle icon"></i> 步驟 3 </div>
-			</button>
-		</div>
-	</div>
 
-	<div class="ui hidden divider"></div>
-
-	<div class="ui inverted vertical footer segment" style="background-color: rgba(62,97,6,0.8);">
-		<div class="ui container">
-			<div class="ui stackable inverted divided equal height stackable grid">
-				<div class="three wide column">
-					<h4 class="ui inverted header">...</h4>
-					<div class="ui inverted link list">
-						<a href="#" class="item">...</a>
-						<a href="#" class="item">...</a>
-					</div>
-				</div>
-				<div class="three wide column">
-					<h4 class="ui inverted header">....</h4>
-					<div class="ui inverted link list">
-						<a href="#" class="item">...</a>
-						<a href="#" class="item">...</a>
-					</div>
-				</div>
+	<div class="ui container">
+		<div class="ui divider"></div>
+		<div class="ui center aligned basic segment">
+			<div class="ui horizontal bulleted link list">				
+				<span class="item">© 2013 國立台灣師範大學 教育研究與評鑑中心</span>
 			</div>
 		</div>
-	</div>
+	</div>	 
 
 </div>
 

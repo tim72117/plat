@@ -1,24 +1,19 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Response, Config, Schema, Session, Input, DOMElement, DOMCdataSection, ShareFile, Auth, app\library\files\v0\FileProvider, Question, Answer, Carbon\Carbon, app\library\v10\buildQuestionAnalysis;
+
+use User;
+use Files;
+use DB, View, Response, Config, Schema, Session, Input, Auth;
+use DOMElement, DOMCdataSection, ShareFile;
+use Question, Answer;
+use Carbon\Carbon;
+use app\library\v10\buildQuestionAnalysis;
 
 class QuesFile extends CommFile {
-	
-	/**
-	 * @var rows
-	 */
-	public $rows;
-
-	/**
-	 * @var info
-	 */
-	public $info;
         
-    function __construct($doc_id) 
+    function __construct(Files $file, User $user) 
     {
-        $shareFile = ShareFile::find($doc_id);
-
-        parent::__construct($shareFile);
+        parent::__construct($file, $user);
     }
 
     public function is_full()
@@ -31,9 +26,9 @@ class QuesFile extends CommFile {
 		return ['open', 'open_ng', 'codebook', 'receives', 'spss', 'report', 'analysis'];
     }
     
-    public static function create($newFile) 
+    public static function create($fileInfo) 
     {
-        $shareFile = parent::create($newFile);
+        $commFile = parent::create($fileInfo);
 
         $file = $shareFile->isFile;
 
@@ -769,9 +764,13 @@ class QuesFile extends CommFile {
         return $this->xml_to_array();
     }
 
-    public function to_interview_file() {
+    // uncomplete
+    public function to_interview_file()
+    {
         $pages = $this->get_ques_from_xml()['pages'];
+
         $shareFile = InterViewFile::create((object)['title' => $this->file->title, 'type' => 9]);
+
         $interViewFile = new InterViewFile($shareFile->id);
         
         $interViewFile->save_ques_to_db($pages);
@@ -781,7 +780,7 @@ class QuesFile extends CommFile {
 
     public function title()
     {
-        return $this->shareFile->isFile->title;
+        return $this->file->title;
     }
 
     public function get_census()
@@ -865,8 +864,6 @@ class QuesFile extends CommFile {
         foreach($pages as $index => $page) {
             get_subs($page->data, $index, $questions);
         }
-
-        //$analysisFile = new AnalysisFile($this->shareFile->id);
                 
         return $questions;
     }

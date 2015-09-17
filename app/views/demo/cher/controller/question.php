@@ -18,9 +18,6 @@ return array(
         $count_report = DB::table('report')->where('solve', 'False')->groupBy('root')->select(DB::raw('root,count(root) AS count'))->lists('count','root');
 
         $docs = DB::table('ques_doc')->orderBy('ver')->orderBy('qid')->orderBy('year', 'desc')->get();
-        
-        //$fileProvider = app\library\files\v0\FileProvider::make();
-        //$intent_key = $fileProvider->doc_intent_key('open', '', 'app\\library\\files\\v0\\QuesFile')
 
         return ['questions' => array_map(function($doc){
             return [

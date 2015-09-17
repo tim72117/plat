@@ -1,11 +1,9 @@
 <?php
-$fileProvider = app\library\files\v0\FileProvider::make();
 $doc = ShareFile::with('isFile')->whereHas('isFile', function($query) {
     $query->where('files.type', 7);
 })->where(function($query) {
     $query->where('target', 'user')->where('target_id', Auth::user()->id);
 })->first();
-$intent_key = $fileProvider->doc_intent_key('open', $doc->id, 'app\\library\\files\\v0\\AnalysisFile');
 ?>
 
 <script type="text/javascript">
@@ -16,7 +14,7 @@ $(document).ready(function(){
 		location = "search.php";
 	});
 	$('#btn2').mousedown(function(){
-		location.replace('/file/<?=$intent_key?>/open');
+		location.replace('/doc/<?= $doc->id ?>/open');
 	});
 });
 </script>

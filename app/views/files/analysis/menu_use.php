@@ -124,7 +124,7 @@ foreach($questions as $ques) {
 	        </div>
 	        <div class="item">
 				<div class="ui small breadcrumb">
-					<a class="section" href="/page/project">首頁</a>
+					<a class="section" href="/page/project">查詢平台</a>
 					<i class="right chevron icon divider"></i>
 					<a class="section" href="open">{{ title }}</a>
 					<i class="right chevron icon divider"></i>
@@ -146,7 +146,12 @@ foreach($questions as $ques) {
 
 			<div class="eleven wide column">
 
-				<div class="ui segment">
+				<div class="ui basic top attached segment">
+					<a class="ui button" href="open">上一步</a>
+					<a class="ui button" href="javascript:void(0)" ng-click="nextStep()">下一步</a>
+				</div>
+
+				<div class="ui attached segment">
 
 					<div class="ui checkbox">
 						<input type="checkbox" id="selectAll" ng-model="isSelectAll" ng-change="selectAll()">
@@ -179,33 +184,14 @@ foreach($questions as $ques) {
 
 		</div>
 
-		<div class="ui basic segment">
-			<div class="ui two attached buttons">
-				<a class="ui button" href="open">上一步</a>
-				<a class="ui button" href="javascript:void(0)" ng-click="nextStep()">下一步</a>
-			</div>
-		</div>
-
-		<div class="ui hidden divider"></div>
-
-		<div class="ui inverted vertical footer segment" style="background-color: rgba(62,97,6,0.8);">
-			<div class="ui container">
-				<div class="ui stackable inverted divided equal height stackable grid">
-					<div class="three wide column">
-						<h4 class="ui inverted header">...</h4>
-						<div class="ui inverted link list">
-							<a href="#" class="item">...</a>
-						</div>
-					</div>
-					<div class="three wide column">
-						<h4 class="ui inverted header">....</h4>
-						<div class="ui inverted link list">
-							<a href="#" class="item">...</a>
-						</div>
-					</div>
+		<div class="ui container">
+			<div class="ui divider"></div>
+			<div class="ui center aligned basic segment">
+				<div class="ui horizontal bulleted link list">				
+					<span class="item">© 2013 國立台灣師範大學 教育研究與評鑑中心</span>
 				</div>
 			</div>
-		</div>
+		</div>	
 
 	</div>
 

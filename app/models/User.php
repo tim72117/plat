@@ -2,7 +2,6 @@
 
 use Illuminate\Auth\UserInterface;
 use Illuminate\Auth\Reminders\RemindableInterface;
-use app\library\files\v0\FileProvider;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Eloquent implements UserInterface, RemindableInterface {
@@ -130,10 +129,7 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 
 		return parent::save($options);
 	}
-			
 
-	
-	public $fileProvider;
     
  	public function getProject(){
         return Session::get('user.project');
@@ -142,11 +138,7 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 	public function setProject($project){
         Session::put('user.project', $project);
 	}
-	
-	public function get_file_provider() {
-		$this->fileProvider = new FileProvider();
-		return $this->fileProvider;
-	}
+
     
     /*
 	| Relations
@@ -179,6 +171,10 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 		return $this->hasOne('Contact', 'user_id', 'id')->where('contact.project', $this->project);
 	}
 
+	public function applying() {
+		return $this->hasOne('UserApply', 'user_id', 'id')->where('applied', false);
+	}
+
 	/*
 	| Project
 	*/
@@ -197,4 +193,8 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 		return ['registered' => $member->exists(), 'actived' => $member->exists() ? (bool)$member->first()->active : false];
 	}
 
+}
+
+class UserApply extends Eloquent {
+	protected $table = 'users_apply';
 }

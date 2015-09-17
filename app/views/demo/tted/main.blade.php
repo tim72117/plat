@@ -76,7 +76,7 @@ $(document).ready(function(){	//選單功能
 				<div>				
 				<?
 				$user = Auth::user();
-				$packageDocs = $user->get_file_provider()->lists();
+				$packageDocs = app\library\files\v0\FileProvider::make()->lists();
 				
                 $intent_key = is_null(@$fileAcitver) ? '' : $fileAcitver->intent_key;
 				

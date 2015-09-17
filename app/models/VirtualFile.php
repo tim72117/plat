@@ -15,6 +15,10 @@ class Files extends Eloquent {
 		return $this->hasOne('Row\Cencus', 'file_id', 'id');
 	}
 
+	public function analysis() {
+		return $this->hasOne('Row\Analysis', 'file_id', 'id');
+	}
+
 	public function isType() {
 		return $this->hasOne('FileType', 'id', 'type');
 	}
@@ -55,70 +59,24 @@ class ShareFile extends Eloquent {
 	}
     
     public function shareds() {
-    	return $this->hasMany('ShareFile', 'file_id', 'file_id')->where('created_by', '=', Auth::user()->id)->where('id' , '<>', $this->id);
+    	return $this->hasMany('ShareFile', 'file_id', 'file_id')->where('created_by', '=', Auth::user()->id)->where(function($query){
+    		$query->where('target', '<>', 'user')->orWhere('target_id', '<>', Auth::user()->id);
+    	});
     }
 
     public function requesteds() {
     	return $this->hasMany('RequestFile', 'doc_id', 'id');
     }
 }
-	
-class Apps extends Eloquent {
 
-	protected $table = 'apps';
-	
-	public $timestamps = true;
-	
-	protected $fillable = array('user_id', 'file_id');
-	
-	public function user() {
-		return $this->hasOne('User', 'id', 'user_id');
-	}
-	
-	public function hasFiles() {
-		return $this->hasMany('Files', 'owner');
-	}
-	
-	public function isFile() {
-		return $this->hasOne('Files', 'id', 'file_id');
-	}
-	
-	public function scopeFile($query) {
-		return $query->leftJoin('files','docs.file_id','=','files.id');
-	}
+class Struct_file {
 
-}
-
-class ShareApp extends Eloquent {
-    
-    protected $table = 'apps_shared';
-    
-    public $timestamps = true;
-    
-    protected $fillable = array('target', 'target_id', 'app_id', 'active');
-    
-    public function target($target) {
-        return $this->where('target', $target);
-    }
-    
-    public function isApp() {
-        return $this->hasOne('Apps', 'id', 'app_id');
-    }
-    
-}
-
-class Struct_file
-{  
-    static function open($shareFile) 
+    static function open($doc) 
     {
-    	$fileProvider = app\library\files\v0\FileProvider::make();
-
-		$link = [];
+		$link['open'] = 'doc/' . $doc->id . '/open';
 	    
-	    switch($shareFile->isFile->type) {
-	        case 1:
-	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\QuesFile');
-	            $link['open'] = 'file/'.$intent_key.'/open';
+	    switch($doc->isFile->type) {
+	        case 1:	            
 	            $tools = [
 	            	['name' => 'codebook', 'title' => 'codebook', 'method' => 'codebook', 'icon' => 'book'],
 	            	['name' => 'receives', 'title' => '回收狀況', 'method' => 'receives', 'icon' => 'line chart'],
@@ -128,50 +86,27 @@ class Struct_file
 	            ];
 	        break;
 	        case 5:
-	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\RowsFile');
-	            $link['open'] = 'file/'.$intent_key.'/open';
 	            $tools = [['name' => 'edit_information', 'title' => '編輯檔案資訊', 'method' => 'edit_information', 'icon' => 'edit']];
 	        break;
 	        case 7:
-	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\AnalysisFile');
-	            $link['open'] = 'file/'.$intent_key.'/open';
 	            $tools = [['name' => 'information', 'title' => '調查資訊', 'method' => 'information', 'icon' => 'edit']];
 	        break;
-	        case 8:
-	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\ExamFile');
-	            $link['open'] = 'file/'.$intent_key.'/open';
-	        break;
-	        case 9:
-	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\InterViewFile');
-	            $link['open'] = 'file/'.$intent_key.'/open';
-	        break;
-	        case 10:
-	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\CountFile');
-	            $link['open'] = 'file/'.$intent_key.'/open';
-	        break;
-	        case 11:
-	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\AccountFile');
-	            $link['open'] = 'file/'.$intent_key.'/open';
-	        break;
 	        default:              
-	            $intent_key = $fileProvider->doc_intent_key('open', $shareFile->id, 'app\\library\\files\\v0\\CommFile');    
-	            $link['open'] = 'file/'.$intent_key.'/open';
 	        break;    
 	    }
 
 	    return [
-	        'id'         => $shareFile->id,
-	        'title'      => $shareFile->isFile->title,
-	        'created_by' => $shareFile->created_by == Auth::user()->id ? '我' : $shareFile->created_by,
-	        'created_at' => $shareFile->created_at->toIso8601String(),
+	        'id'         => $doc->id,
+	        'title'      => $doc->isFile->title,
+	        'created_by' => $doc->created_by == Auth::user()->id ? '我' : $doc->created_by,
+	        'created_at' => $doc->created_at->toIso8601String(),
 	        'link'       => $link,
-	        'type'       => $shareFile->isFile->type,
-	        'intent_key' => $intent_key,
+	        'type'       => $doc->isFile->type,
 	        'tools'      => isset($tools) ? $tools : [],
-	        'shared'     => array_count_values($shareFile->shareds->map(function($shared){
+	        'shared'     => array_count_values($doc->shareds->map(function($shared){
 				            	return $shared->target;
 				        	})->all()),
-	        'requested'  => array_count_values($shareFile->requesteds->map(function($requested){
+	        'requested'  => array_count_values($doc->requesteds->map(function($requested){
 				            	return $requested->target;
 				        	})->all()),
 	    ];

@@ -224,6 +224,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         $scope.loading = true;
         $http({method: 'POST', url: 'ajax/getFiles', data:{} })
         .success(function(data, status, headers, config) {
+            console.log(data);
             $scope.files = data.files;
             $scope.max = $scope.files.length;
             $scope.pages = Math.ceil($scope.max/$scope.limit);
@@ -290,7 +291,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     }; 
     
     $scope.createFile = function(type) {
-        $http({method: 'POST', url: 'ajax/createFile', data:{newFile: $scope.newFile} })
+        $http({method: 'POST', url: '/file/create', data:{fileInfo: $scope.newFile} })
         .success(function(data, status, headers, config) {    
             $scope.files.push(data.file); 
             $scope.newFile = null;

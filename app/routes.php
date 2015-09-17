@@ -15,7 +15,7 @@ Route::get('test', function() {
     return;
 });
 
-Route::patterns(['project' => '[a-z]+', 'token' => '[a-z0-9]+', 'project_id' => '[0-9]+']);
+Route::patterns(['doc_id' => '[0-9]+', 'project' => '[a-z]+', 'token' => '[a-z0-9]+', 'project_id' => '[0-9]+']);
 
 Route::get('/', function(){ return Redirect::to('user/auth/cher'); });
 Route::get('project', 'UserController@project');
@@ -31,8 +31,9 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::get('app/{intent_key}/my/group', 'ShareController@getSharedApp');
     Route::post('app/{intent_key}/share/group', 'ShareController@shareAppTo');
 
-    Route::any('file/{intent_key}/{method}', 'FileController@open');
-    Route::any('file/{intent_key}/ajax/{method}', 'FileController@appAjax');
+    Route::any('doc/{doc_id}/{method}', 'FileController@open');
+    Route::any('doc/{doc_id}/ajax/{method}', 'FileController@open');
+    Route::post('file/create', 'FileController@create');
 
     Route::get('page/project/{context?}/{parameter?}', array('before' => '', 'uses' => 'PageController@project'));
     Route::post('page/project/{context?}/{parameter?}', array('before' => 'csrf', 'uses' => 'PageController@project'));

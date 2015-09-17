@@ -1,6 +1,14 @@
 <?php
 namespace app\library\files\v0;
-use DB, View, Schema, Response, ShareFile, RequestFile, Files, Auth, Input, Session, Redirect, Carbon\Carbon, app\library\files\v0\FileProvider, Row\Sheet, Row\Table, Row\Column;
+
+use User;
+use Files;
+use DB, View, Schema, Response, Input, Session;
+use ShareFile, RequestFile;
+use Row\Sheet;
+use Row\Table;
+use Row\Column;
+use Carbon\Carbon;
 
 class RowsFile extends CommFile {
 
@@ -73,11 +81,9 @@ class RowsFile extends CommFile {
         return $checkers[$name];
     }
     
-    function __construct($doc_id) 
+    function __construct(Files $file, User $user) 
     {
-        $shareFile = ShareFile::find($doc_id);
-
-        parent::__construct($shareFile);
+        parent::__construct($file, $user);
 
         $this->information = json_decode($this->file->information);
 
@@ -94,11 +100,12 @@ class RowsFile extends CommFile {
         return ['open', 'import', 'rows'];
     }
     
-    public static function create($newFile)
+    // uncomplete
+    public static function create($fileInfo)
     {        
-        $shareFile = parent::create($newFile);
+        $commFile = parent::create($fileInfo);//shareFile
 
-        $shareFile->isFile->information = '{"comment":""}';
+        $commFile->file->information = '{"comment":""}';
 
         $shareFile->push();
 
@@ -111,7 +118,7 @@ class RowsFile extends CommFile {
 
     public function open() 
     {
-        $view = $this->shareFile->created_by == $this->user->id ? 'files.rows.table_editor' : 'files.rows.table_open';
+        $view = $this->isCreater() ? 'files.rows.table_editor' : 'files.rows.table_open';
 
         return $view;    
     }
@@ -159,7 +166,7 @@ class RowsFile extends CommFile {
                 !$sheet->editable && $this->table_construct($table);
                 if ($this->has_table($table)) {
                     $query = DB::table($table->database. '.dbo.' . $table->name)->whereNull('deleted_at');
-                    if ($this->shareFile->created_by != $this->user->id || !Input::get('editor', false)) {
+                    if (!$this->isCreater() || !Input::get('editor', false)) {
                         $query->where('created_by', $this->user->id);
                     }
                     $table->count = $query->count();
@@ -441,18 +448,18 @@ class RowsFile extends CommFile {
 
         $myGroups = $this->user->groups;
         
-        if( $this->shareFile->created_by == $this->user->id ) {  
+        if ($this->isCreater()) {  
             foreach($input['groups'] as $group) {
                 if (count($group['users']) == 0 && $myGroups->contains($group['id'])){                    
                     RequestFile::updateOrCreate(
-                        ['target' => 'group', 'target_id' => $group['id'], 'doc_id' => $this->shareFile->id, 'created_by' => $this->user->id],
+                        ['target' => 'group', 'target_id' => $group['id'], 'doc_id' => $this->doc->id, 'created_by' => $this->user->id],
                         ['description' => $input['description']]
                     );
                 }
                 if (count($group['users']) != 0){
                     foreach($group['users'] as $user){
                         RequestFile::updateOrCreate(
-                            ['target' => 'user', 'target_id' => $user['id'], 'doc_id' => $this->shareFile->id, 'created_by' => $this->user->id], 
+                            ['target' => 'user', 'target_id' => $user['id'], 'doc_id' => $this->doc->id, 'created_by' => $this->user->id], 
                             ['description' => $input['description']]
                         );
                     }
@@ -566,8 +573,6 @@ class RowsFile extends CommFile {
     //uncomplete only first sheet, only first table
     public function get_rows()
     {
-        $is_owner = $this->shareFile->created_by == $this->user->id;
-
         $tables = $this->file->sheets->first()->tables;
 
         list($query, $power) = $this->get_rows_query($tables);
@@ -581,7 +586,7 @@ class RowsFile extends CommFile {
         $query->whereNull('deleted_at')->select($head)->addSelect('id');     
 
         return [
-            'paginate' => $is_owner
+            'paginate' => $this->isCreater()
             ? $query->addSelect('created_by')->paginate(10)->toArray()
             : ['data' => $query->where('created_by', $this->user->id)->get()]
         ];
@@ -599,7 +604,7 @@ class RowsFile extends CommFile {
 
             $query = DB::table($table->database . '.dbo.' . $table->name);
 
-            $this->shareFile->created_by != $this->user->id && $query->where('created_by', $this->user->id);
+            !$this->isCreater() && $query->where('created_by', $this->user->id);
 
             return $query->whereIn('id', Input::get('rows'))->update($updates);
         });
@@ -619,7 +624,7 @@ class RowsFile extends CommFile {
             }    
 
             //share power not complete
-            // if( $this->shareFile->created_by == $this->user->id ) {              
+            // if ($this->isCreater()) {              
             //     $power = array_merge($power, array('t0.id'), array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
             // }else{
             //     $power = array_merge($power, array('t0.id'), array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
@@ -631,11 +636,9 @@ class RowsFile extends CommFile {
         return [$query, $power];
     }
     
-    //uncomplete
+    //uncomplete deprecated shareFile
     public function get_compact_files() 
     {
-        $fileProvider = FileProvider::make();
-        
         $inGroups = $this->user->inGroups->lists('id');
         
         $myRowFiles = ShareFile::with('isFile')->whereHas('isFile', function($query){
@@ -646,17 +649,16 @@ class RowsFile extends CommFile {
             count($inGroups)>0 && $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $this->user->id);
         })->orderBy('created_at', 'desc')->get();
         
-        $files = $myRowFiles->map(function($myRowFile) use($fileProvider){    
-            $intent_key = $fileProvider->doc_intent_key('open', $myRowFile->id, 'app\\library\\files\\v0\\RowsFile');
+        $files = $myRowFiles->map(function($myRowFile) {    
             return [
-                'title' => $myRowFile->is_file->title,
-                'intent_key' => $intent_key
+                'title'  => $myRowFile->is_file->title,
+                'doc_ic' => $myRowFile->id
             ];
         });
         return $files;
     }
     
-    //uncomplete
+    //uncomplete deprecated doc_id shareFile
     public function get_compact_sheet() 
     {        
         $index = Input::only('index')['index'];
@@ -688,7 +690,7 @@ class RowsFile extends CommFile {
         return Response::json(['sheet_compact'=>$sheet_new]);
     }
     
-    //uncomplete
+    //uncomplete deprecated doc_id shareFile
     public function get_compact_rows() 
     {        
         $sheet_info = Input::only('sheet_info')['sheet_info'];
@@ -723,79 +725,16 @@ class RowsFile extends CommFile {
     {
         //$this->file->delete();
 
-        //$this->shareFile->delete();
-        $this->shareFile->shareds->each(function($requested) {
+        //$this->doc->delete();
+        $this->doc->shareds->each(function($requested) {
             $requested->delete();
         });       
 
-        $this->shareFile->requesteds->each(function($requested) {
+        $this->doc->requesteds->each(function($requested) {
             $requested->delete();
         });       
 
         return ['deleted' => true];
-    }
-
-    //deprecated
-    private function save_import_rows() 
-    {
-        $input_sheets = Input::only('sheets')['sheets'];
-
-        $schema = $this->get_information();
-
-        foreach($schema->sheets as $index => $sheets){
-            
-            $table = $sheets->tables[0];
-            empty($input_sheets[$index]['rows'][count($input_sheets[$index]['rows'])-1]) && array_pop($input_sheets[$index]['rows']);
-            
-            $row_insert = array();
-            $row_update = array();
-            
-            foreach($input_sheets[$index]['rows'] as $row){
-                if( !empty($row) ) 
-                if( isset($row['id']) ){
-                    $row_update[$row['id']] = (array)$row;                  
-                }else{                    
-                    array_push($row_insert , (array)$row);      
-                }
-            }
-
-            $colHeaders = array_fetch($table->columns, 'name');
-            
-            $data = array_map(function($row_insert) use($colHeaders) {      
-                $row_insert = array_only($row_insert, $colHeaders);
-                $row_insert['created_by'] = $this->user->id;
-                $row_insert['created_at'] = date("Y-n-d H:i:s");
-                $row_insert['updated_at'] = date("Y-n-d H:i:s");
-                return $row_insert;
-            }, $row_insert);
-            
-            $data_page_max = count($row_insert)==0 ? 0 : floor(count($row_insert) / 50)+1;
-            
-            for($i=0 ; $i<$data_page_max ; $i++){
-                $data_page = array_slice($data, $i*50, 50);
-                DB::table($table->database.'.dbo.'.$table->name)->insert($data_page);
-            }
-            
-            foreach($row_update as $id => $row){
-                
-                $data = array_only($row, $colHeaders);
-                $data['updated_at'] = date("Y-n-d H:i:s");
-                
-                DB::table($table->database.'.dbo.'.$table->name)->where('id', $id)->update($data);
-                
-            }
-            
-        }
-        
-        return Response::json([]);
-    }
-
-    //deprecated
-    private function get_columns($schema)
-    {
-        $table = $schema->sheets[0]->tables[0];
-
-        return $table->columns;
     }
 
     //deprecated
@@ -809,106 +748,11 @@ class RowsFile extends CommFile {
             }            
         }
     }
- 
-    //deprecated
-    private function to_new()
-    {
-        if (isset($this->information->sheets)) {
-            foreach($this->information->sheets as $sheet) {
-                $aa = $this->shareFile->isFile->sheets()->save(new Sheet(['title' => $sheet->name, 'editable' => $sheet->editable]));
-                foreach($sheet->tables as $table) {
-                    //var_dump($table);exit;
-                    $bb = $aa->tables()->save(new Table(['database' => $table->database, 'name' => $table->name]));
-                    foreach($table->columns as $column) {
-                        $bb->columns()->save(new Column([
-                            'name'    => $column->name,
-                            'title'   => $column->title,
-                            'rules'   => $column->rules,
-                            'unique'  => $column->unique,
-                            'encrypt' => $column->encrypt,
-                            'isnull'  => $column->isnull,
-                        ]));
-                    }
-                }
-            }
-            $this->information->sheets = null;
-            $this->put_information($this->information);
-        }
-    }
-
-    //deprecated (update comment)
-    private function save_file()
-    {
-        if( $this->shareFile->created_by == $this->user->id )
-        {
-            $sheets = $this->file->sheets;
-            foreach (Input::get('file')['sheets'] as $sheet) {
-                $sheets->find($sheet['id'])->update(['title' => $sheet['title']]);
-                foreach ($sheet['tables'] as $table) {
-                    $tables = $sheets->find($sheet['id'])->tables;
-                    $tables->find($table['id']);
-                    foreach ($table['columns'] as $column) {
-                        $columns = $tables->find($table['id'])->columns;
-                        if (isset($column['id'])) {
-                            $columns->find($column['id'])->update([
-                                'name'  => $column['name'],
-                                'title' => $column['title'],
-                            ]);
-                        }
-                    }
-                }
-            }
-
-            $this->information->comment = isset(Input::get('file')['comment']) ? Input::get('file')['comment'] : '';
-
-            $this->put_information($this->information);
-        }
-
-        return $this->get_file();
-    }
 
     //deprecated
     private function get_information()
     {        
         return json_decode($this->file->information);
-    }
-       
-    //deprecated
-    private function update_sheets($sheets_old, $sheets)
-    {        
-        return array_map(function($sheet) use($sheets_old) {
-            $sheet_org = array_first($sheets_old, function($key, $sheet_org) use($sheet) {
-                return isset($sheet['id']) && isset($sheet_org->id) ? $sheet['id'] == $sheet_org->id : false;
-            });
-
-            return [
-                'id'        => isset($sheet_org) ? $sheet_org->id : strtolower(str_random(10)),
-                'name'      => isset($sheet['name']) ? $sheet['name'] : '',
-                'editable'  => isset($sheet['editable']) ? $sheet['editable'] : false,
-                'tables'    => array_map(function($table) use($sheet_org) {                    
-                    $table_org = isset($sheet_org) && isset($sheet_org->tables[0]) ? $sheet_org->tables[0] : null;                    
-                    return (object)[
-                        'database'   => isset($table_org) && isset($table_org->database) ? $table_org->database : $this->database,
-                        'name'       => isset($table_org) && isset($table_org->name) 
-                                        ? $table_org->name : 'row_' . Carbon::now()->formatLocalized('%Y%m%d_%H%M%S_') . $this->user->id . '_' . strtolower(str_random(5)),
-                        'primaryKey' => 'id',
-                        'encrypt'    => false,
-                        'columns'    => array_map(function($columns) {
-                            return (object)[
-                                'name'     => $columns["name"],
-                                'title'    => $columns["title"],
-                                // 'describe' => $columns["describe"],
-                                'rules'    => $columns["rules"],
-                                'unique'   => isset($columns["unique"]) ? $columns["unique"] : false,
-                                'encrypt'  => isset($columns["encrypt"]) ? $columns["encrypt"] : false,
-                                'isnull'   => isset($columns["isnull"]) ? $columns["isnull"] : false,
-                                //'link'   => $columns["link"],
-                            ];
-                        }, array_filter($table['columns'])),
-                    ];
-                }, $sheet['tables']),
-            ];
-        }, $sheets);
     }
 
 }

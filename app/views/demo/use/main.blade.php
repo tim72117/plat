@@ -1,6 +1,6 @@
 <?php
 $user = Auth::user();
-list($apps, $requests) = $user->get_file_provider()->lists();
+list($apps, $requests) = app\library\files\v0\FileProvider::make()->lists();
 $project = DB::table('projects')->where('code', $user->getProject())->first();
 $power_global = DB::table('power_global')->where('user_id', $user->id)->first();
 isset($power_global->power) && ($power = json_decode($power_global->power));
@@ -99,7 +99,7 @@ function getCookie(value) {
                 </div>
             </div>            
             <div class="right menu">
-                <a class="item use-green" href="/file/<?=app\library\files\v0\FileProvider::make()->app_intent_key('open', 18, 'app\\library\\files\\v0\\CustomFile')?>/open" ng-if="<?=(isset($power->files) && $power->files)?>">我的檔案</a>
+                <a class="item use-green" href="/doc/415/open" ng-if="<?=(isset($power->files) && $power->files)?>">我的檔案</a>
                 <a class="item use-green" href="javascript:void(0)" ng-cloak ng-if="<?=(Auth::user()->id==1)?>" ng-click="queryLog()">queryLog</a>
                 <a class="item use-green" href="/page/project"><i class="home icon"></i>首頁</a>
                 <a class="item use-green" href="/page/project/profile">個人資料</a>

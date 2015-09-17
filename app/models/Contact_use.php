@@ -13,11 +13,11 @@ class User_use extends User
 		return $this->hasMany('Work_use', 'user_id', 'id');
 	}
 
-    public function dascontact() { 
-		return $this->hasOne('Contact_das', 'user_id', 'id')->use();
+    public function contactdas() { 
+		return $this->hasOne('Contact_das', 'user_id', 'id')->das();
 	}
     
-    public function dasworks(){
+    public function worksdas(){
         return $this->hasMany('Work_das', 'user_id', 'id');
     }
 }
@@ -38,11 +38,11 @@ class Work_use extends Eloquent
 	}
 }
 
-class School_use extends Eloquent
+class Contact_das extends Contact
 {
-	protected $table = 'pub_school';
-
-	public $timestamps = false;	
+    public function scopeDas($query) {
+        return $query->where('project', 'das');
+    }
 }
 
 class Work_das extends Eloquent
@@ -55,11 +55,11 @@ class Work_das extends Eloquent
     public $timestamps = false;	
 }
 
-class Contact_das extends Contact
+class School_use extends Eloquent
 {
-    public function scopeUse($query) {
-        return $query->where('project', 'das');
-    }
+    protected $table = 'pub_school';
+
+    public $timestamps = false; 
 }
 
 class Struct_use
