@@ -29,7 +29,7 @@ class RowsFile extends CommFile {
         'nvarchar'    => ['sort' => 16, 'type' => 'string',   'size' => 500, 'title' => '文字(500字以內)'],
         'int'         => ['sort' => 17, 'type' => 'integer',                 'title' => '整數',                         'validator' => 'integer'],
         'float'       => ['sort' => 18, 'type' => 'string',   'size' => 80,  'title' => '小數',                         'validator' => ['regex:/^([0-9]|[1-9][0-9]{1,40})(\\.[0-9]{1,39})?$/']],
-        'year_four'   => ['sort' => 19, 'type' => 'string',   'size' => 4,   'title' => '西元年(yyyy)',                 'validator' => ['regex:/^([0-9]|[1-9][0-9]{1,3})$/']],
+        'year_four'   => ['sort' => 19, 'type' => 'string',   'size' => 4,   'title' => '西元年(yyyy)',                 'validator' => ['regex:/^(19[0-9]{2})$/']],
         //師培
         'tted_sch'         => ['sort' => 10, 'type' => 'string',   'size' => 4,   'title' => 'TTED大專院校學校代碼',      'function' => 'tted_sch'],
         'tted_depcode_103' => ['sort' => 11, 'type' => 'string',   'size' => 6,   'title' => 'TTED大專院校系所代碼103年', 'function' => 'tted_depcode_103'],
