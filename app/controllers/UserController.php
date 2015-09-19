@@ -88,7 +88,7 @@ class UserController extends BaseController {
                 
             Auth::login($user, true);
             
-            return Redirect::to('page/project');
+            return Redirect::back();
 			
 		}else{			
 			$validator->getMessageBag()->add('login_error', '帳號密碼錯誤');

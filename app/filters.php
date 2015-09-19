@@ -36,7 +36,7 @@ App::after(function($request, $response)
 Route::filter('auth', function($route)
 {
 	if( Auth::guest() ) {
-        return Redirect::guest('/login/' . $route->getParameter('project'));
+        return Redirect::guest('project/' . $route->getParameter('project'));
     }
 });
 
