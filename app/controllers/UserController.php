@@ -1,25 +1,16 @@
 <?php
+
 class UserController extends BaseController {
 
-	/*
-	|--------------------------------------------------------------------------
-	| Default Home Controller
-	|--------------------------------------------------------------------------
-	|
-	| You may wish to use controllers instead of, or in addition to, Closure
-	| based routes. That's great! Here is an example controller method to
-	| get you started. To route to this controller, just add the route:
-	|
-	|	Route::get('/', 'HomeController@showWelcome');
-	|
-	*/
     protected $layout = 'demo.layout-main';
-	protected $auth_rull = array(
+
+    protected $auth_rull = array(
         'email'                 => 'required|email',
         'username'              => 'required|regex:/^[0-9a-zA-Z!@_]+$/|between:3,20',
         'password'              => 'required|regex:/^[0-9a-zA-Z!@#$%^&*]+$/|between:6,20',
         'password_confirmation' => 'required|regex:/^[0-9a-zA-Z!@#$%^&*]+$/|between:6,20|confirmed',
     );
+
     protected $rulls_message = array(
         'email.required'                 => '電子郵件必填',
         'email.email'                    => '電子郵件格式錯誤',
@@ -31,49 +22,49 @@ class UserController extends BaseController {
         'password_confirmation.between'  => '確認密碼格式必須介於 6 - 20 個字元',
         'password.confirmed'             => '確認密碼必須相同',	
     );
-	
-	public function __construct(){
-		$this->beforeFilter(function($route){
-		});
-	}
-	
-	public function project() {
-		return View::make('demo.project');
-	}
-	
-	public function logout() {
-		$project = Auth::user()->getProject();
-		Auth::logout();
-		return Redirect::to('project/'.$project);
-	}	
 
-	public function loginPage($project) {        
+    public function __construct(){
+        $this->beforeFilter(function($route){
+        });
+    }
+
+    public function project() {
+        return View::make('demo.project');
+    }
+
+    public function logout() {
+        $project = Auth::user()->getProject();
+        Auth::logout();
+        return Redirect::to('project/'.$project);
+    }
+
+    public function loginPage($project) {
         if( $project=='das' ){exit;
             return Redirect::to('project/use');
         }
         
         View::share('project', $project);
-		
-		return View::make('demo.' . $project . '.home')
-			->nest('context', 'demo.' . $project . '.auth.login')
-			->nest('child_footer', 'demo.' . $project . '.footer');
-	}
-	
-	public function login($project) {
-		$input = Input::only('email', 'password');
-        
-		$rulls = array(
-			'email'    => $this->auth_rull['email'],
-			'password' => $this->auth_rull['password'],
-		);
-        
-		$validator = Validator::make($input, $rulls, $this->rulls_message);
 
-		if( $validator->fails() ){
-			throw new app\library\files\v0\ValidateException($validator);
-		}		
-				
-		if( Auth::once(array('email'=>$input['email'], 'password'=>$input['password'])) ){     
+        return View::make('demo.' . $project . '.home')
+            ->nest('context', 'demo.' . $project . '.auth.login')
+            ->nest('child_footer', 'demo.' . $project . '.footer');
+    }
+
+    public function login($project) {
+        $input = Input::only('email', 'password');
+
+        $rulls = array(
+            'email'    => $this->auth_rull['email'],
+            'password' => $this->auth_rull['password'],
+        );
+
+        $validator = Validator::make($input, $rulls, $this->rulls_message);
+
+        if( $validator->fails() ){
+            throw new app\library\files\v0\ValidateException($validator);
+        }
+
+        if( Auth::once(array('email'=>$input['email'], 'password'=>$input['password'])) ){
             
             $user = Auth::user();            
             
@@ -89,125 +80,124 @@ class UserController extends BaseController {
             Auth::login($user, true);
             
             return Redirect::back();
-			
-		}else{			
-			$validator->getMessageBag()->add('login_error', '帳號密碼錯誤');
-			throw new app\library\files\v0\ValidateException($validator);
-		}
-		
-	}
-	
-	public function remindPage($project) {
-		return View::make('demo.' . $project . '.home')
-			->nest('context','demo.' . $project . '.auth.remind')
-			->nest('child_footer','demo.' . $project . '.footer');
-	}
 
-	public function remind($project) {
-		$credentials = array('email' => Input::get('email'));
-		Config::set('auth.reminder.email', 'emails.auth.reminder_'.$project);
-		$response = Password::remind($credentials, function($message) {
-			$message->subject('重設您的查詢平台帳戶密碼');
-		});
-		switch($response) {
-			case Password::INVALID_USER:				
-				return Redirect::back()->withErrors(['error' => Lang::get($response)]);
+        }else{
+            $validator->getMessageBag()->add('login_error', '帳號密碼錯誤');
+            throw new app\library\files\v0\ValidateException($validator);
+        }
+    }
 
-			case Password::REMINDER_SENT:
-				return View::make('demo.' . $project . '.home', array('contextFile'=>'remind', 'title'=>'重設密碼信件已寄出'))
+    public function remindPage($project) {
+        return View::make('demo.' . $project . '.home')
+            ->nest('context','demo.' . $project . '.auth.remind')
+            ->nest('child_footer','demo.' . $project . '.footer');
+    }
+
+    public function remind($project) {
+        $credentials = array('email' => Input::get('email'));
+        Config::set('auth.reminder.email', 'emails.auth.reminder_'.$project);
+        $response = Password::remind($credentials, function($message) {
+            $message->subject('重設您的查詢平台帳戶密碼');
+        });
+        switch($response) {
+            case Password::INVALID_USER:
+                return Redirect::back()->withErrors(['error' => Lang::get($response)]);
+
+            case Password::REMINDER_SENT:
+                return View::make('demo.' . $project . '.home', array('contextFile'=>'remind', 'title'=>'重設密碼信件已寄出'))
                     ->with('context', '<div style="margin:30px auto;width:300px;color:#f00">重設密碼信件已寄出，請到您的電子郵件信箱收取信件</div>')
                     ->nest('child_footer','demo.'.$project.'.footer');
-		}
-	}
-	
-	public function resetPage($project, $token) {
+        }
+    }
+
+    public function resetPage($project, $token) {
         return View::make('demo.' . $project . '.home')
-			->nest('context', 'demo.' . $project . '.auth.reset', array('token' => $token))
-			->nest('child_footer','demo.' . $project . '.footer');
-	}
-		
-	public function reset($project, $token) {
-		$input = Input::only('email', 'password', 'password_confirmation');
-        
-		$rulls = array(
-			'email'                 => $this->auth_rull['email'],
-			'password'              => $this->auth_rull['password_confirmation'],
-			'password_confirmation' => $this->auth_rull['password'],
-		);
-        
+            ->nest('context', 'demo.' . $project . '.auth.reset', array('token' => $token))
+            ->nest('child_footer','demo.' . $project . '.footer');
+    }
+
+    public function reset($project, $token) {
+        $input = Input::only('email', 'password', 'password_confirmation');
+
+        $rulls = array(
+            'email'                 => $this->auth_rull['email'],
+            'password'              => $this->auth_rull['password_confirmation'],
+            'password_confirmation' => $this->auth_rull['password'],
+        );
+
         $validator = Validator::make($input, $rulls, $this->rulls_message);
-        
+
         if( $validator->fails() ){
-			throw new app\library\files\v0\ValidateException($validator);
-		}
+            throw new app\library\files\v0\ValidateException($validator);
+        }
 
-		$response = Password::reset(array_merge($input, ['token' => $token]), function($user, $password) {
-			$user->password = Hash::make($password);
+        $response = Password::reset(array_merge($input, ['token' => $token]), function($user, $password) {
+            $user->password = Hash::make($password);
 
-			$user->save();	
-		});
-	
-		switch($response) {
-			case Password::INVALID_PASSWORD:
-			case Password::INVALID_TOKEN:
-			case Password::INVALID_USER:				
-				return Redirect::back()->withErrors(['error' => Lang::get($response)]);
+            $user->save();
+        });
 
-			case Password::PASSWORD_RESET:
-				return Redirect::to('user/auth/' . $project);
-		}
-	}
-	
-	public function passwordChangePage() {
-        
-		$contents = View::make('demo.use.main')->nest('context','demo.page.passwordChange')->nest('share', 'demo.share');
+        switch($response) {
+            case Password::INVALID_PASSWORD:
+            case Password::INVALID_TOKEN:
+            case Password::INVALID_USER:
+                return Redirect::back()->withErrors(['error' => Lang::get($response)]);
+
+            case Password::PASSWORD_RESET:
+                return Redirect::to('user/auth/' . $project);
+        }
+    }
+
+    public function passwordChangePage()
+    {
+        $contents = View::make('demo.use.main')->nest('context','demo.page.passwordChange');
         
         $this->layout->content = $contents;
-        
-	}
-	
-	public function passwordChange() {		
-		$input = Input::only('passwordold', 'password', 'password_confirmation');
-        
-		$rulls = array(
-			'passwordold'            => $this->auth_rull['password'],
-			'password'               => $this->auth_rull['password_confirmation'],
-			'password_confirmation'  => $this->auth_rull['password'],
-		);
+    }
 
-		$validator = Validator::make($input, $rulls, $this->rulls_message);
-		
-		if( $validator->fails() ){
-			throw new app\library\files\v0\ValidateException($validator);
-		}
-		$user = Auth::User();
-		
-		if( Hash::check($input['passwordold'], $user->password) ){
-			$user->password = Hash::make($input['password']);
-			$user->save();
-			return Redirect::route('project');
-		}else{
-			$validator->getMessageBag()->add('passwordold', '舊密碼錯誤');
-			return Redirect::back()->withErrors($validator);
-		}
-	}
+    public function passwordChange()
+    {
+        $input = Input::only('passwordold', 'password', 'password_confirmation');
+
+        $rulls = array(
+            'passwordold'            => $this->auth_rull['password'],
+            'password'               => $this->auth_rull['password_confirmation'],
+            'password_confirmation'  => $this->auth_rull['password'],
+        );
+
+        $validator = Validator::make($input, $rulls, $this->rulls_message);
+
+        if( $validator->fails() ){
+            throw new app\library\files\v0\ValidateException($validator);
+        }
+        $user = Auth::User();
+
+        if( Hash::check($input['passwordold'], $user->password) ){
+            $user->password = Hash::make($input['password']);
+            $user->save();
+            return Redirect::route('project');
+        }else{
+            $validator->getMessageBag()->add('passwordold', '舊密碼錯誤');
+            return Redirect::back()->withErrors($validator);
+        }
+    }
 
     public function registerPage($project) {
         $project_info = DB::table('projects')->where('code', $project)->first();
-        if( $project_info->register ) {
+        if ($project_info->register) {
             $context = 'demo.' . $project . '.auth.register';
-        }else{
+        } else {
             $context = 'demo.' . $project . '.auth.register_stop';
         }
         return View::make('demo.' . $project . '.home')
-			->nest('context', $context)
-			->nest('child_footer','demo.' . $project . '.footer');
+            ->nest('context', $context)
+            ->nest('child_footer','demo.' . $project . '.footer');
     }
-	
-	public function registerSave($project) { 
+
+    public function registerSave($project) {
         $user = require app_path() . '\\views\\demo\\' . $project . '\\auth\\register_validator.php';
         
-        if( $user ) {
+        if ($user) {
             $email = $user->getReminderEmail();
             
             $token = str_shuffle(sha1($email.spl_object_hash($this).microtime(true)));
@@ -223,10 +213,10 @@ class UserController extends BaseController {
             });
             
             return Redirect::to('project/' . $project . '/register/finish/' . $token);
-        }else{
+        } else {
             return Redirect::back();
         }
-	}
+    }
 
     public function registerFinish($project, $token) {
         return View::make('demo.' . $project . '.home')
@@ -242,17 +232,16 @@ class UserController extends BaseController {
             return View::make('demo.' . $project . '.auth.register_print', array('user_id' => $register_print_query->first()->user_id));
         }       
     }
-    
+
     public function terms($project) {
         return View::make('demo.' . $project . '.home')->nest('context', 'demo.' . $project . '.auth.register_terms')->nest('child_footer', 'demo.' . $project . '.footer');
     }
-    
+
     public function help($project) {
         return View::make('demo.' . $project . '.home')->nest('context', 'demo.' . $project . '.auth.register_help')->nest('child_footer', 'demo.' . $project . '.footer');
     }
-    
+
     public function check($project) {
         return $project;
     }
-
 }

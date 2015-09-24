@@ -37,42 +37,30 @@ function read_sql($doc_page, &$table_array) {
             buildQuestion($question,$question_array,$table_array);
     }
 }
-if( $doc->host=='1' ){
-    $table_array = array();
-    $doc_pages = DB::table('ques_admin.dbo.ques_page')->where('qid', $doc->qid)->select('xml', 'page')->get(); 
 
-    foreach($doc_pages as $doc_page){
-        $tdobj = new tdobj();
-        $tdobj->objtype = "title";
-        $tdobj->page = $doc_page->page;
-        array_push($table_array, $tdobj);
-        read_sql($doc_page, $table_array);
-    }
-}else{
-    $dataroot = ques_path().'/ques/data/'.$config['rootdir'];
-
-    $pageinfo_file = $dataroot.'/data/pageinfo.xml';
-    if( !file_exists($pageinfo_file) ){
-        header('Location: ./');
-        echo 'error pageinfo.xml';
-        exit; 
-    };
-    $pageinfo = simplexml_load_file($pageinfo_file);
-    $page_array = $pageinfo->p;
-
-
-    $table_array = array();
-
-    $page = 0;
-    foreach($page_array as $xmlfile){
-        $tdobj = new tdobj();
-        $tdobj->objtype = "title";
-        $tdobj->page = $page+1;
-        array_push($table_array,$tdobj);
-        $xmlfile_real = $dataroot.'/data/'.$xmlfile->xmlfile;
-        read($xmlfile_real,$table_array);
-        $page++;
-    }
+function read($xmlfile,&$table_array){
+	if( !is_file($xmlfile) )
+		return false;
+	$question_array = simplexml_load_file($xmlfile); 												
+	//-------------------------------------------------------欄位開始
+	foreach($question_array as $question){
+				
+		if( $question->getName()=="explain" ){
+			$tdobj = new tdobj();
+			$tdobj->objtype = "question";
+			$tdobj->name = '';
+			$tdobj->id = '';
+			$tdobj->question_type = "explain";
+			$tdobj->nullvalue = '';
+			$tdobj->tablesize = '';
+			$tdobj->title = (string)$question;
+			$tdobj->ruletip = '';
+			array_push($table_array,$tdobj);			
+		}
+		
+		if( $question->getName()=='question' )
+			buildQuestion($question,$question_array,$table_array);
+	}
 }
 
 function buildQuestion($question,$question_array,&$table_array){
@@ -310,45 +298,47 @@ function buildQuestion($question,$question_array,&$table_array){
 	}
 }
 		
-function read($xmlfile,&$table_array){
-	if( !is_file($xmlfile) )
-		return false;
-	$question_array = simplexml_load_file($xmlfile); 												
-	//-------------------------------------------------------欄位開始
-	foreach($question_array as $question){
-				
-		if( $question->getName()=="explain" ){
-			$tdobj = new tdobj();
-			$tdobj->objtype = "question";
-			$tdobj->name = '';
-			$tdobj->id = '';
-			$tdobj->question_type = "explain";
-			$tdobj->nullvalue = '';
-			$tdobj->tablesize = '';
-			$tdobj->title = (string)$question;
-			$tdobj->ruletip = '';
-			array_push($table_array,$tdobj);			
-		}
-		
-		if( $question->getName()=='question' )
-			buildQuestion($question,$question_array,$table_array);
-	}
+
+
+$table_array = array();
+foreach($cencus->pages as $page){
+    $tdobj = new tdobj();
+    $tdobj->objtype = "title";
+    $tdobj->page = $page->page;
+    array_push($table_array, $tdobj);
+    read_sql($page, $table_array);
 }
 
+// old xml file
+// $dataroot = ques_path().'/ques/data/'.$config['rootdir'];
 
+// $pageinfo_file = $dataroot.'/data/pageinfo.xml';
+// if( !file_exists($pageinfo_file) ){
+//     header('Location: ./');
+//     echo 'error pageinfo.xml';
+//     exit; 
+// };
+// $pageinfo = simplexml_load_file($pageinfo_file);
+// $page_array = $pageinfo->p;
+
+
+// $table_array = array();
+
+// $page = 0;
+// foreach($page_array as $xmlfile){
+//     $tdobj = new tdobj();
+//     $tdobj->objtype = "title";
+//     $tdobj->page = $page+1;
+//     array_push($table_array,$tdobj);
+//     $xmlfile_real = $dataroot.'/data/'.$xmlfile->xmlfile;
+//     read($xmlfile_real,$table_array);
+//     $page++;
+// }
 
 
 ?>
 <head>
-<style type="text/css">
-td { border:1px solid #000; }
-th { border:1px solid #000; }
-.codebook th {
-	font-size: 12px;
-}
-.codebook td {
-	font-size: 12px;
-}
+<style>
 .ruletip {
 	color:#ff80ff;
 }
@@ -356,7 +346,8 @@ th { border:1px solid #000; }
 </head>
 
 
-<table class="codebook" cellspacing="0" cellpadding="0" border="0">
+<div style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
+<table class="ui celled table">
 <?
 $q_count = 0;
 $tr_color_array = array('text_head'=>'#ccffcc','checkbox_head'=>'#ccffcc','list'=>'#ccffcc','scale_head'=>'#ccffcc','scale'=>'#f0f0f0','text'=>'#ddd');
@@ -413,3 +404,4 @@ foreach($table_array as $table){
 echo $outtable;
 ?>
 </table>
+</div>

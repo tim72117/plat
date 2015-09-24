@@ -17,7 +17,7 @@ class FileProvider {
         return new FileProvider;
     }
    
-	public function lists()
+    public function lists()
     {
         $apps = ShareFile::with(['isFile', 'isFile.isType'])->whereHas('isFile', function($query) {
 
@@ -54,7 +54,7 @@ class FileProvider {
 
             return [
                 'title' => $request->description,
-                'link'  => 'doc/' . $request->id . '/import',
+                'link'  => 'request/' . $request->id . '/import',
             ];
             
         })->toArray();

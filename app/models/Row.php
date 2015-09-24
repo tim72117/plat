@@ -1,13 +1,14 @@
 <?php
 namespace Row;
+
 use Eloquent;
 
-class Sheet extends Eloquent
-{
-	protected $table = 'row_sheets';
+class Sheet extends Eloquent {
 
-	public $timestamps = true;
-    
+    protected $table = 'row_sheets';
+
+    public $timestamps = true;
+
     protected $fillable = array('title', 'editable');
 
     public function getEditableAttribute($value) {
@@ -15,16 +16,16 @@ class Sheet extends Eloquent
     }
 
     public function tables() {
-    	return $this->hasMany('Row\Table', 'sheet_id', 'id');
+        return $this->hasMany('Row\Table', 'sheet_id', 'id');
     }
 }
 
-class Table extends Eloquent
-{
-	protected $table = 'row_tables';
+class Table extends Eloquent {
 
-	public $timestamps = true;
-    
+    protected $table = 'row_tables';
+
+    public $timestamps = true;
+
     protected $fillable = array('database', 'name', 'lock', 'builded_at', 'construct_at');
 
     public function getLockAttribute($value) {
@@ -32,15 +33,15 @@ class Table extends Eloquent
     }
 
     public function columns() {
-    	return $this->hasMany('Row\Column', 'table_id', 'id');
+        return $this->hasMany('Row\Column', 'table_id', 'id');
     }
 }
 
-class Column extends Eloquent
-{
-	protected $table = 'row_columns';
+class Column extends Eloquent {
 
-	public $timestamps = true;
+    protected $table = 'row_columns';
+
+    public $timestamps = true;
     
     protected $fillable = array('name', 'title', 'rules', 'unique', 'encrypt', 'isnull');
 
@@ -63,34 +64,34 @@ class Column extends Eloquent
     }
 }
 
-class Cencus extends Eloquent
-{
+class Cencus extends Eloquent {
+
     protected $table = 'ques_doc';
 
     public $timestamps = false;
 
-    protected $fillable = array('year', 'dir', 'edit', 'host');
+    protected $fillable = array('title', 'dir', 'edit');
 
     public function pages() {
         return $this->hasMany('Row\Pages', 'file_id', 'file_id');
     }
 
     public function ques() {
-        return $this->hasOne('Row\Pages', 'file_id', 'file_id');
+        return $this->hasOne('Row\...', 'file_id', 'file_id');
     }
 }
 
-class Pages extends Eloquent
-{
+class Pages extends Eloquent {
+
     protected $table = 'ques_page';
 
     public $timestamps = true;
 
-    protected $fillable = array('xml');
+    protected $fillable = array('page', 'xml');
 }
 
-class Analysis extends Eloquent
-{
+class Analysis extends Eloquent {
+
     protected $table = 'file_analysis';
 
     public $timestamps = false;

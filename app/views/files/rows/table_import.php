@@ -30,9 +30,7 @@
         <div class="ui attached segment" ng-if="messages.head">
             <h4 class="ui header">沒有欄位</h4>
             <div  class="ui red label" ng-repeat="error in messages.head">{{ error.title }}</div >           
-        </div> 
-
-        <!-- <h4 class="ui header">欄位說明 <a href="javascript:void(0)" ng-click="exportDescribe()">下載</a></h4> -->        
+        </div>
 
         <table ng-repeat="table in sheet.tables" class="ui very compact table">
             <thead>
@@ -143,17 +141,9 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
         }); 
     };
 
-    $scope.exportDescribe = function() {
-        jQuery.fileDownload('export_describe', {
-            httpMethod: "POST",
-            data: {index: 1},
-            failCallback: function (responseHtml, url) { console.log(responseHtml); }
-        }); 
-    };
-
     $scope.uploader = new FileUploader({
         alias: 'file_upload',
-        url: 'import_upload',
+        url: '/file/upload',
         //autoUpload: true,
         removeAfterUpload: true
     });
@@ -185,8 +175,7 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
     };
 
     $scope.uploader.onErrorItem = function(fileItem, response, status, headers) {
-        console.log(response);
-        //angular.element('.queryLog').append(response);        
+        angular.element('.queryLog').append(response);
     };
 
     $scope.uploader.onCompleteAll = function() {

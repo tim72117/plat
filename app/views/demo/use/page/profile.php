@@ -56,7 +56,7 @@ if ($project_das_status['registered'] && !$project_das_status['actived'])
 
 ?>
 
-<div ng-controller="profileController" style="position: absolute;left:10px;right:10px;top:10px;bottom:10px;overflow: auto;padding:1px">
+<div ng-controller="profileController">
 
     <div class="ui styled accordion">
 

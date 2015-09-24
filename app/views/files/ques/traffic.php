@@ -1,31 +1,22 @@
+<?php
 
-<title>問卷CodeBook</title>
-
-
-<script type="text/javascript" src="<?=asset('js/highstock.js')?>"></script>
-
-
-
-<?
-
-	
-set_time_limit(0);
 $val_array = array();
 $sum_array = array();
 $sum_writein_array = array();
 $sum = 0;
 
 
-$pstat_table = DB::table($doc->database.'.dbo.'.$doc->table.'_pstat AS p')
-	->where('page','<>','0')
+$pstat_table = DB::table($cencus->database . '.dbo.' . $cencus->table . '_pstat AS p')
+	->where('page', '<>', '0')
 	->groupBy(DB::raw('page,CONVERT(char(10), updated_at, 120)'))
 	->orderBy('tStamp_new')
 	->select(DB::raw('page,count(*) as tStamp_count,CONVERT(char(10), updated_at, 120) as tStamp_new'))
 	->get();
 
-$page_max = DB::table('ques_page')->where('qid', $doc->qid)->max('page')+1;
+$page_max = $cencus->pages->max('page')+1;
 
-$table = '<table>';
+
+$table = '';
 foreach($pstat_table as $pstat){
 	if( strtotime($pstat->tStamp_new)!=false ){
 		$utc_time = strtotime($pstat->tStamp_new)*1000;		
@@ -40,28 +31,29 @@ foreach($pstat_table as $pstat){
 		$table .= '<td>'.$pstat->tStamp_count.'</td>';
 		$table .= '</tr>';	
 
-		if( strtotime($pstat->tStamp_new)!=false ){			
+		if (strtotime($pstat->tStamp_new)!=false) {			
 			$sum = $sum + $pstat->tStamp_count;
 			$val_array[$pstat->tStamp_new] = [$utc_time,(int)$pstat->tStamp_count];
 			$sum_array[$pstat->tStamp_new] = [$utc_time,$sum];
 		}
 		
 	}else{
-		if( strtotime($pstat->tStamp_new)!=false ){
+		if (strtotime($pstat->tStamp_new)!=false) {
 			$sum_writein_array[$pstat->tStamp_new][1] += (int)$pstat->tStamp_count;
 		}
 	}
 
 }
-$table .= '</table>';
+
 
 ?>
+<script src="/js/Highcharts-4.0.3/highstock.js"></script>
 <script>
 
 $(function () {
         $('#container').highcharts('StockChart',{
             title: {
-                text: '<?=$doc->title?>'
+                text: '<?=$cencus->title?>'
             },
             xAxis: {
 				type: 'datetime',	
@@ -137,13 +129,12 @@ $(function () {
         });
     });
 </script>
-<style>
-body {
-	font-family: '微軟正黑體';
-}
-</style>
 
+<div style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
 
-<div id="container"></div>
-<?=$table?>
-    
+	<div id="container"></div>
+	<table class="ui collapsing table">
+		<?=$table?>
+	</table>
+
+</div>   

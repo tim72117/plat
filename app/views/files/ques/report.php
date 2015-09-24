@@ -1,6 +1,6 @@
 <?php
 
-$reports = DB::table('report')->where('root', $doc->dir)->select('id','contact','text','explorer','solve','time')->orderBy('time','desc')->get();
+$reports = DB::table('report')->where('root', $cencus->dir)->select('id', 'contact', 'text', 'explorer', 'solve', 'time')->orderBy('time', 'desc')->get();
 $out = '';
 foreach($reports as $report){
     $out .= '<tr>';
@@ -13,7 +13,9 @@ foreach($reports as $report){
 }
 
 ?>
-<table>
+
+<div style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
+<table class="ui table">
 	<thead>
 		<th width="200">時間</th>
 		<th width="300">聯絡方法</th>
@@ -23,3 +25,4 @@ foreach($reports as $report){
 	</thead>
 	<tbody><?=$out?></tbody>
 </table>
+<div>
