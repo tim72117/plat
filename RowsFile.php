@@ -12,11 +12,9 @@ use Carbon\Carbon;
 
 class RowsFile extends CommFile {
 
-    public static $database = 'rows';
+    protected $database = 'rows';
 
-    public $columns;
-
-    public $temp; 
+    protected $temp;
 
     public $rules = [  
         'gender'      => ['sort' => 1,  'type' => 'tinyInteger',             'title' => '性別: 1.男 2.女',               'validator' => 'in:1,2'],
@@ -50,42 +48,9 @@ class RowsFile extends CommFile {
         'stdyear'          => ['sort' => 18, 'type' => 'string',   'size' => 1,   'title' => 'TTED年級',                  'validator' => 'in:1,2,3,4,5,6,7'],
     ]; 
 
-    public function checker($name) {
-
-        $checkers = [
-            'stdidnumber' => function($column_value, $column, &$column_errors) {
-                !check_id_number($column_value) && array_push($column_errors, $column->title . '無效');
-            },
-            'schid_104' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->works) && $this->temp->works = \User_use::find($this->user->id)->works->lists('sch_id');
-                !in_array($column_value, $this->temp->works, true) && array_push($column_errors, '不是本校代碼');
-            },
-            'depcode_104' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->dep_codes) && $this->temp->dep_codes = DB::table('rows.dbo.row_20150910_175955_h23of')
-                    ->whereIn('C246', \User_use::find($this->user->id)->works->lists('sch_id'))->lists('C248');
-                !in_array($column_value, $this->temp->dep_codes, true) && array_push($column_errors, '不是本校科別代碼');
-            },
-            'tted_sch' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->schools) && $this->temp->schools = \User_tted::find($this->user->id)->works->lists('ushid');
-                !in_array($column_value, $this->temp->schools, true) && array_push($column_errors, '不是本校代碼');
-            },
-            'tted_depcode_103' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->dep_codes_103) && $this->temp->dep_codes_103 = DB::table('pub_depcode_tted')->whereIn('sch_id', \User_tted::find($this->user->id)->works->lists('ushid'))->where('year','=','103')->lists('id');
-                !in_array($column_value, $this->temp->dep_codes_103, true) && array_push($column_errors, '不是本校系所代碼');
-            },
-            'tted_depcode_104' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->dep_codes_104) && $this->temp->dep_codes_104 = DB::table('pub_depcode_tted')->whereIn('sch_id', \User_tted::find($this->user->id)->works->lists('ushid'))->where('year','=','103')->lists('id');
-                !in_array($column_value, $this->temp->dep_codes_104, true) && array_push($column_errors, '不是本校系所代碼');
-            },
-        ];
-        return $checkers[$name];
-    }
-    
     function __construct(Files $file, User $user) 
     {
         parent::__construct($file, $user);
-
-        $this->information = json_decode($this->file->information);
 
         $this->temp = (object)[]; 
     }
@@ -100,20 +65,13 @@ class RowsFile extends CommFile {
         return ['open', 'import', 'rows'];
     }
     
-    // uncomplete
-    public static function create($fileInfo)
-    {        
-        $commFile = parent::create($fileInfo);//shareFile
+    public function create()
+    {
+        parent::create();
 
-        $commFile->file->information = '{"comment":""}';
+        $sheet = $this->add_sheet();
 
-        $shareFile->push();
-
-        $sheet = $shareFile->isFile->sheets()->create(['title' => '']);
-
-        $sheet->tables()->create(['database' => self::$database, 'name' => self::generate_table(), 'construct_at' => Carbon::now()->toDateTimeString()]);
-
-        return $shareFile;
+        $this->add_table($sheet);
     }
 
     public function open() 
@@ -123,13 +81,13 @@ class RowsFile extends CommFile {
         return $view;    
     }
 
-    public function subs() 
+    public function subs()
     {
-        return  View::make('files.rows.subs.' . Input::get('tool', ''))->render();  
+        return View::make('files.rows.subs.' . Input::get('tool', ''))->render();
     }
     
-	public function import() 
-    {     
+    public function import()
+    {
         return 'files.rows.table_import';
     }
 
@@ -138,21 +96,29 @@ class RowsFile extends CommFile {
         return 'files.rows.rows_editor';
     }
 
-    public static function generate_table()
+    public function generate_table()
     {
         return 'row_' . Carbon::now()->formatLocalized('%Y%m%d_%H%M%S') . '_' . strtolower(str_random(5));
     }
 
+    private function add_sheet()
+    {
+        return $this->file->sheets()->create(['title' => '']);
+    }
+
+    private function add_table($sheet)
+    {
+        $sheet->tables()->create(['database' => $this->database, 'name' => $this->generate_table(), 'construct_at' => Carbon::now()->toDateTimeString()]);
+    }
+
     private function init_sheets()
     {
-        if ($this->file->sheets->isEmpty()) {
-            $this->file
-            ->sheets()->create(['title' => ''])  
-            ->tables()->create(['database' => self::$database, 'name' => self::generate_table(), 'construct_at' => Carbon::now()->toDateTimeString()]);     
+        if (!$this->file->sheets()->getQuery()->exists()) {
+            $this->add_sheet();
         }
         $this->file->sheets->each(function($sheet) {
-            if ($sheet->tables->isEmpty()) {
-                $sheet->tables()->create(['database' => self::$database, 'name' => self::generate_table(), 'construct_at' => Carbon::now()->toDateTimeString()]);
+            if (!$sheet->tables()->getQuery()->exists()) {
+                $this->add_table($sheet);
             }
         });
     }
@@ -180,7 +146,7 @@ class RowsFile extends CommFile {
             'title'    => $this->file->title,
             'sheets'   => $sheets->toArray(),
             'rules'    => $this->rules,            
-            'comment'  => isset($this->information->comment) ? $this->information->comment : '',
+            'comment'  => $this->get_information()->comment,
         ];
     }    
 
@@ -220,21 +186,26 @@ class RowsFile extends CommFile {
 
     public function update_comment()
     {
-        $this->information = (object)['comment' => urldecode(base64_decode(Input::get('comment', '')))];
+        $information = $this->get_information();
 
-        $this->put_information($this->information);
+        $information->comment = urldecode(base64_decode(Input::get('comment', '')));
 
-        return ['comment' => $this->information->comment];
+        $this->put_information($information);
+
+        return ['comment' => $information->comment];
     }
 
-    private function put_information($information, $title = null)
+    private function put_information($information)
     {        
-        isset($title) && $this->file->title = $title;
-
         $this->file->information = json_encode($information);
         
         $this->file->save();        
     }    
+
+    private function get_information()
+    {
+        return isset($this->file->information) ? json_decode($this->file->information) : (object)['comment' => ''];
+    }
 
     public function import_upload() 
     {        
@@ -406,15 +377,13 @@ class RowsFile extends CommFile {
     }
     
     private function table_build($table)
-    {  
+    {
         $this->has_table($table) && Schema::drop($table->database . '.dbo.' . $table->name);
 
-        Schema::create($table->database . '.dbo.' . $table->name, function($query) use($table) 
-        {                
+        Schema::create($table->database . '.dbo.' . $table->name, function($query) use($table) {
             $query->increments('id');
 
-            foreach($table->columns as $column)
-            {
+            foreach ($table->columns as $column) {
                 $this->column_bulid($query, 'C' . $column->id, $column->rules);
             }
 
@@ -431,12 +400,12 @@ class RowsFile extends CommFile {
     }
 
     private function column_bulid($query, $name, $rule_key, $indexs = [])
-    {   
+    {
         if (isset($this->rules[$rule_key])) {
             $rule = $this->rules[$rule_key];
             $para = isset($rule['size']) ? [$name, $rule['size']] : [$name];
             call_user_func_array([$query, $rule['type']], $para);
-            foreach($indexs as $index) {        
+            foreach ($indexs as $index) {
                 $query->$index();          
             }  
         }    
@@ -521,27 +490,6 @@ class RowsFile extends CommFile {
 
         })->download('xls');
     }
-
-    public function export_describe()
-    {
-        \Excel::create('describe', function($excel) {
-
-            $excel->sheet('describe', function($sheet) {
-
-                $schema = $this->get_information();
-
-                $table = $schema->sheets[0]->tables[0];
-
-                $sheet->rows([
-                    array_pluck($table->columns, 'name'),
-                    array_pluck($table->columns, 'title'),
-                    // array_pluck($table->columns, 'describe'),
-                ]);
-
-            });
-
-        })->download('xlsx');
-    }
     
     public function export_my_rows() 
     {
@@ -621,19 +569,42 @@ class RowsFile extends CommFile {
             }else{
                 //join not complete
                 //$rows_query->leftJoin($table->database . '.dbo.' . $table->name . ' AS t' . $index, 't' . $index . '.' . $table->primaryKey, '=', 't0.'.$table->primaryKey);
-            }    
-
-            //share power not complete
-            // if ($this->isCreater()) {              
-            //     $power = array_merge($power, array('t0.id'), array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
-            // }else{
-            //     $power = array_merge($power, array('t0.id'), array_map(function($column)use($index){return 't'.$index.'.'.$column->name;}, $table->columns));
-            // }
-
+            }
         }
-		$power = [];
+        $power = [];
 
         return [$query, $power];
+    }
+
+    public function checker($name)
+    {
+        $checkers = [
+            'stdidnumber' => function($column_value, $column, &$column_errors) {
+                !check_id_number($column_value) && array_push($column_errors, $column->title . '無效');
+            },
+            'schid_104' => function($column_value, $column, &$column_errors) {
+                !isset($this->temp->works) && $this->temp->works = \User_use::find($this->user->id)->works->lists('sch_id');
+                !in_array($column_value, $this->temp->works, true) && array_push($column_errors, '不是本校代碼');
+            },
+            'depcode_104' => function($column_value, $column, &$column_errors) {
+                !isset($this->temp->dep_codes) && $this->temp->dep_codes = DB::table('rows.dbo.row_20150910_175955_h23of')
+                    ->whereIn('C246', \User_use::find($this->user->id)->works->lists('sch_id'))->lists('C248');
+                !in_array($column_value, $this->temp->dep_codes, true) && array_push($column_errors, '不是本校科別代碼');
+            },
+            'tted_sch' => function($column_value, $column, &$column_errors) {
+                !isset($this->temp->schools) && $this->temp->schools = \User_tted::find($this->user->id)->works->lists('ushid');
+                !in_array($column_value, $this->temp->schools, true) && array_push($column_errors, '不是本校代碼');
+            },
+            'tted_depcode_103' => function($column_value, $column, &$column_errors) {
+                !isset($this->temp->dep_codes_103) && $this->temp->dep_codes_103 = DB::table('pub_depcode_tted')->whereIn('sch_id', \User_tted::find($this->user->id)->works->lists('ushid'))->where('year','=','103')->lists('id');
+                !in_array($column_value, $this->temp->dep_codes_103, true) && array_push($column_errors, '不是本校系所代碼');
+            },
+            'tted_depcode_104' => function($column_value, $column, &$column_errors) {
+                !isset($this->temp->dep_codes_104) && $this->temp->dep_codes_104 = DB::table('pub_depcode_tted')->whereIn('sch_id', \User_tted::find($this->user->id)->works->lists('ushid'))->where('year','=','103')->lists('id');
+                !in_array($column_value, $this->temp->dep_codes_104, true) && array_push($column_errors, '不是本校系所代碼');
+            },
+        ];
+        return $checkers[$name];
     }
     
     //uncomplete deprecated shareFile
@@ -658,7 +629,7 @@ class RowsFile extends CommFile {
         return $files;
     }
     
-    //uncomplete deprecated doc_id shareFile
+    //uncomplete deprecated doc_id shareFile get_information
     public function get_compact_sheet() 
     {        
         $index = Input::only('index')['index'];
@@ -690,7 +661,7 @@ class RowsFile extends CommFile {
         return Response::json(['sheet_compact'=>$sheet_new]);
     }
     
-    //uncomplete deprecated doc_id shareFile
+    //uncomplete deprecated doc_id shareFile get_information
     public function get_compact_rows() 
     {        
         $sheet_info = Input::only('sheet_info')['sheet_info'];
@@ -748,11 +719,4 @@ class RowsFile extends CommFile {
             }            
         }
     }
-
-    //deprecated
-    private function get_information()
-    {        
-        return json_decode($this->file->information);
-    }
-
 }

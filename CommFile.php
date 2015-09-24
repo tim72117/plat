@@ -6,157 +6,122 @@ use Files;
 use Input, DB, Response, Validator, Session;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\MessageBag;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class CommFile {
 
-	protected $doc;
-    
+    protected $doc;
+
     public $storage_path;
-	
-	public function __construct(Files $file, User $user)
-	{ 
+
+    public function __construct(Files $file, User $user)
+    {
         if (is_null($file))
-			throw new FileFailedException; 
+            throw new FileFailedException;
 
-		$this->file = $file;
+        $this->file = $file;
 
-		$this->user = $user;
+        $this->user = $user;
 
         $this->storage_path = storage_path() . '/file_upload';
-	}
+    }
 
-	public function get_views() 
-	{
-		return [];
-	}
-    
-	public static function create($fileInfo)
-	{
-        $file = Files::create([
-        	'title'      => $fileInfo->title,
-            'type'       => $fileInfo->type,
-            'owner'      => 0,
-            'created_by' => $this->user->id,
-        ], []);
+    public function get_views()
+    {
+        return [];
+    }
 
-        return new self($file);
-	}
-
-	public function open()
-	{ 
+    public function open()
+    {
         return $this->download();
-    }	
-	
+    }
+
     //uncomplete
-	public function delete()
-	{    
+    public function delete()
+    {
         return $this->doc->id;
     }
-	
-	public function rename()
-	{
-		if ($this->isCreater()) {
-			$this->file->title = Input::get('title');
 
-			$this->doc->touch();
+    public function rename()
+    {
+        if ($this->isCreater()) {
+            $this->file->title = Input::get('title');
 
-			$this->doc->push();
-		}
+            $this->doc->touch();
 
-		return ['file' => \Struct_file::open($this->doc)];
-	}
+            $this->doc->push();
 
-	public static function upload($visible = true)
-	{
-		if( Input::hasFile('file_upload') ) {			
-			$file_upload = Input::file('file_upload');
-			//$mime = $file->getMimeType();
-			$name_real = $file_upload->getClientOriginalName();
-			$user_id = $this->user->id;
-			
-			$validator = Validator::make(
-				array('file_upload'     => $file_upload),
-				array('file_upload'     => 'required|max:8000000'),
-				array('file_upload.max' => '檔案太大')    
-			);
-			
-			if( $validator->fails() ) {
-                throw new ValidateException($validator);
-			}			
-			
-			$name = hash_file('md5', $file_upload->getRealPath());
-			
-			$parts = array_slice(str_split($hash = md5($user_id), 2), 0, 2);
-			$path = join('/', $parts);	    
+            return ['doc' => \Struct_file::open($this->doc)];
+        }
+    }
 
-			self::move($file_upload, $path . '/' . $name);
+    public function create()
+    {
+        $this->file->save();
+    }
 
-			$file = Files::updateOrCreate([
-				'file'       => $path . '/' . $name,
-				'created_by' => $user_id
-			], [
-				'title'      => $name_real,
-				'type'       => 3,
-				'owner'      => 0,
-			]);
+    public function upload(UploadedFile $file_upload, $visible = true)
+    {
+        $validator =  Validator::make(
+            array('file_upload'     => $file_upload),
+            array('file_upload'     => 'required|max:8000000'),
+            array('file_upload.max' => '檔案太大')
+        );
 
-			return $file;
-			
-		}else{
+        if ($validator->fails())
+            throw new ValidateException($validator);
 
-            throw new ValidateException(new MessageBag(array('no_upload'=>'檔案大小錯誤')));
-            
-        }        
-	}
-
-	public static function move($file, $path)
-	{
-		$storage_path = storage_path() . '/file_upload';
-
-		if( file_exists($storage_path . '/' . $path) )
-			return;
-
-		try	
-		{
-			$filesystem = new Filesystem();
-
-			$filesystem->makeDirectory(dirname($storage_path . '/' . $path), 0777, true, true);									
-
-			$file->move(dirname($storage_path . '/' . $path), basename($path));
-		}
-		catch (\Exception $e)
-		{
-			throw $e;
-		}
-	}
-	
-	public function download()
-	{
+        $hash_name = hash_file('md5', $file_upload->getRealPath()) . '-' . uniqid(rand(0, 99));
         
-		$file_path = $this->file->file;
-        
-        if( !file_exists($this->storage_path . '/' . $file_path) )
+        $parts = array_slice(str_split($hash = md5($this->user->id), 2), 0, 2);
+
+        $this->file->file = join('/', $parts) . '/' . $hash_name;
+
+        $this->move($file_upload, $this->storage_path . '/' . $this->file->file);
+
+        $this->file->save();
+    }
+
+    public function move(UploadedFile $file_upload, $path)
+    {
+        try
+        {
+            $filesystem = new Filesystem();
+
+            $filesystem->makeDirectory(dirname($path), 0777, true, true);
+
+            $file_upload->move(dirname($path), basename($path));
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function download()
+    {
+        $file_path = $this->storage_path . '/' . $this->file->file;
+
+        if (!file_exists($file_path))
             throw new FileFailedException;
-        
-        return Response::download($this->storage_path . '/' . $file_path, $this->file->title);
-	}
 
-	public function getId()
-	{
-		return $this->file->id;
-	}
+        return Response::download($file_path, $this->file->title);
+    }
 
-	public function setDoc($doc)
-	{
-		$this->doc = $doc;
-	}
+    public function save_as() { }
+
+    public function share_to() { }
+
+    public function id()
+    {
+        return $this->file->id;
+    }
+
+    public function setDoc($doc)
+    {
+        $this->doc = $doc;
+    }
 
     public function isCreater()
     {
         return isset($this->doc) && $this->doc->created_by == $this->user->id;
     }
-	
-	public function save_as() { }
-	
-	public function share_to() { }    
 }

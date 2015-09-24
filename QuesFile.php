@@ -23,79 +23,49 @@ class QuesFile extends CommFile {
     
     public function get_views() 
     {
-		return ['open', 'open_ng', 'codebook', 'receives', 'spss', 'report', 'analysis'];
+        return ['open', 'open_ng', 'codebook', 'receives', 'spss', 'report', 'analysis'];
     }
     
-    public static function create($fileInfo) 
+    public function create()
     {
-        $commFile = parent::create($fileInfo);
+        parent::create();
 
-        $file = $shareFile->isFile;
-
-        $ques_doc_id = DB::table('ques_admin.dbo.ques_doc')->insertGetId([
-        	'file_id' => $file->id,
-            'qid'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))'),
-            'title' => Input::get('title'),
-            'year'  => 103,
+        $cencus = $this->file->cencus()->create([
+            'title' => $this->file->title,
             'dir'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))'),
             'edit'  => true,
-            'host'  => 1,
         ]);
-
-        $file->file = $ques_doc_id;
-        
-        $file->save(); 
-
-        return $shareFile;
     }
-    
-	public function read_info() {
-		parent::create();
-	}
 
     public function open()
-    {        
-		View::share('cencus', $this->file->cencus);
+    {
+        if (!$this->file->cencus->pages()->getQuery()->exists())
+            $this->add_page();
 
-		return 'editor.editor';
+        View::share('cencus', $this->file->cencus);
+
+        return 'editor.editor';
     }
     
     public function open_ng()
     {
-		View::share('cencus', $this->file->cencus);
+        View::share('cencus', $this->file->cencus);
 
-		return 'editor.editor-ng';
+        return 'editor.editor-ng';
     }
 
-    public function add_page() {
-        
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid')->first();
+    public function add_page()
+    {
+        $index = $this->file->cencus->pages()->getQuery()->max('page')+1;
 
-        $page = Session::get('page');
-
-        if( DB::table('ques_page')->where('qid', $ques_doc->qid)->exists() ){
-
-            DB::table('ques_page')->where('qid', $ques_doc->qid)->where('page', '>', $page)->increment('page');
-
-            DB::table('ques_page')->insert(array(
-                'qid'        => $ques_doc->qid,
-                'page'       => $page+1,
-                'xml'        => '<?xml version="1.0"?><page>'."\n".'<init/></page>',
-                'updated_at' => date("Y-m-d H:i:s")
-            ));
-        }else{
-            DB::table('ques_page')->insert(array(
-                'qid'        => $ques_doc->qid,
-                'page'       => 1,
-                'xml'        => '<?xml version="1.0"?><page>'."\n".'<init/></page>',
-                'updated_at' => date("Y-m-d H:i:s")
-            ));  
-        }
-        return '';
+        $this->file->cencus->pages()->create([
+            'page' => $index,
+            'xml'  => '<?xml version="1.0"?><page><init/></page>',
+        ]);
     }
     
-    public function save_data() {
-
+    public function save_data()
+    {
         if (!Input::has('page')) {
             return 'page miss';
         }
@@ -111,7 +81,7 @@ class QuesFile extends CommFile {
         $obj = Input::get('obj');
         $q_array = $obj;
 
-        $init = $question_array->xpath("/page");	
+        $init = $question_array->xpath("/page");
         $initnode = $init[0];
         $domnode = dom_import_simplexml($initnode);
         if( $domnode->getElementsByTagName('init')->length==0 ){
@@ -141,10 +111,10 @@ class QuesFile extends CommFile {
                 $question_id = $question['id'];
                 $question_layer = $question['layer'];
                 if( isset($question['itemArray']) )
-                $itemArray = $question['itemArray'];	
+                $itemArray = $question['itemArray'];
 
                 if( !isset($question_qanchor) || $question_qanchor=='' ){
-                    $questionInSub = $question_array->xpath("/page/init");	
+                    $questionInSub = $question_array->xpath("/page/init");
                 }else{
                     $questionInSub = $question_array->xpath("//id[.='".$question_qanchor."']/parent::*");
                 }
@@ -186,7 +156,7 @@ class QuesFile extends CommFile {
                 foreach($quesArray as $ques){
                     $question_id = $ques['targetID'];
 
-                    $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*");	
+                    $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*");
                     $node = $questionInSub[0];
 
                     $domnode = dom_import_simplexml($node);
@@ -260,7 +230,7 @@ class QuesFile extends CommFile {
                 $node = $questionInSub[0];
                 $domnode = dom_import_simplexml($node);
 
-                echo 'length'.$domnode->getElementsByTagName('size')->length."\n";	
+                echo 'length'.$domnode->getElementsByTagName('size')->length."\n";
 
                 if( $domnode->getElementsByTagName('idlab')->length==0 ){
                     $newcont = new DOMElement('idlab','');
@@ -280,7 +250,7 @@ class QuesFile extends CommFile {
                 $domnode->getElementsByTagName('size')->item(0)->nodeValue = $question_tablesize;
 
 
-                echo 'type'."\n";	
+                echo 'type'."\n";
             }
 
             if( $question_target=='item_array' ){
@@ -321,7 +291,7 @@ class QuesFile extends CommFile {
                     if( isset($item['sub_title']) )
                     $item_sub_title = preg_replace("/​/","",$item['sub_title']);
 
-                    $newitem = new DOMElement('item');	
+                    $newitem = new DOMElement('item');
                     $innode = $domnode->appendChild( $newitem );
                     $innode->setAttribute("value", $item['value']);
 
@@ -363,11 +333,11 @@ class QuesFile extends CommFile {
                     $innode->appendChild( new DOMCdataSection($item_title) );
                 }
 
-                echo 'item_array'."\n";	
+                echo 'item_array'."\n";
             }
 
             if( $question_target=='degrees' ){
-                $question_id = $question['id'];              
+                $question_id = $question['id'];
 
                 $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*/answer");
                 $node = $questionInSub[0];
@@ -383,158 +353,70 @@ class QuesFile extends CommFile {
                 $degreeArray = isset($question['degreeArray']) ? $question['degreeArray'] : [];
 
                 foreach($degreeArray as $degree){
-                 $degree_title = $degree['title'];
-                 $newitem = new DOMElement('degree');    
-                 $innode = $domnode->appendChild( $newitem );
-                 $innode->setAttribute("value", $degree['value']);
-                 $innode->appendChild( new DOMCdataSection($degree_title) );
+                    $degree_title = $degree['title'];
+                    $newitem = new DOMElement('degree');
+                    $innode = $domnode->appendChild( $newitem );
+                    $innode->setAttribute("value", $degree['value']);
+                    $innode->appendChild( new DOMCdataSection($degree_title) );
                 }
             }
 
         }
 
-		$name = 'p'.$page->page;
+        $name = 'p'.$page->page;
         $this->write($question_array,$name,'q','question');
-    	$this->write($question_array,$name,'s','question_sub');
+        $this->write($question_array,$name,'s','question_sub');
 
 
         $dom = dom_import_simplexml($question_array);
         $xml = $dom->ownerDocument->saveXML( $dom->ownerDocument->documentElement );
 
-		$page->update(array('xml' => $xml));
-        
-		return '';
+        $page->update(array('xml' => $xml));
+
+        return '';
         
     } 
     
-    public function write($question_array,$name,$layer,$type){
+    public function write($question_array, $name, $layer, $type){
         $root = 1;
         $question_root_array = $question_array->xpath($type);
-        foreach($question_root_array as $question){		
+        foreach ($question_root_array as $question) {
 
             $questionInSub = $question->xpath("answer");
             $node = $questionInSub[0];
             $domnode = dom_import_simplexml($node);
 
-
-
-            switch($question->type){
-            case "checkbox":
-                while($elem = $domnode->getElementsByTagName('name')->item(0)) {
-                    $elem->parentNode->removeChild($elem);
-                }
-                $cindex = 1;
-                $nodelist = $domnode->getElementsByTagName('item');
-                foreach ($nodelist as $item) {
-                    $item->setAttribute("name", $name.$layer.$root.'c'.$cindex);
-                    $cindex++;
-                }
-                $root++;
-            break;
-            case "scale":
-                $domnode->setAttribute("randomOrder", $name.$layer.$root);
-                while($elem = $domnode->getElementsByTagName('name')->item(0)) {
-                    $elem->parentNode->removeChild($elem);
-                }
-                $cindex = 1;
-                $nodelist = $domnode->getElementsByTagName('item');
-                foreach ($nodelist as $item) {
-                    $item->setAttribute("name", $name.$layer.$root.'sc'.$cindex);
-                    $cindex++;
-                }
-                $root++;
-            break;
-            case "text":
-                while($elem = $domnode->getElementsByTagName('name')->item(0)) {
-                    $elem->parentNode->removeChild($elem);
-                }
-                $tindex = 1;
-                $nodelist = $domnode->getElementsByTagName('item');
-                foreach ($nodelist as $item) {
-                    $item->setAttribute("name", $name.$layer.$root.'t'.$tindex);
-                    $tindex++;
-                }
-                $root++;
-            break;
-            case "radio":
-            case "select":
-                while($elem = $domnode->getElementsByTagName('name')->item(0)) {
-                    $elem->parentNode->removeChild($elem);
-                }
-                $newitem = new DOMElement('name');			
-                $innode = $domnode->appendChild( $newitem );
-                $innode->nodeValue = $name.$layer.$root;
-                $root++;
-            break;
-            case "textarea":
-                while($elem = $domnode->getElementsByTagName('name')->item(0)) {
-                    $elem->parentNode->removeChild($elem);
-                }
-                $newitem = new DOMElement('name');			
-                $innode = $domnode->appendChild( $newitem );
-                $innode->nodeValue = $name.$layer.$root;
-                $root++;
-            break;
-            case "list":
-            break;	
+            while($elem = $domnode->getElementsByTagName('name')->item(0)) {
+                $elem->parentNode->removeChild($elem);
             }
 
+            switch ($question->type) {
+                case 'checkbox':
+                case 'scale':
+                case 'text':
+                    $index = 1;
+                    $prefixs = ['checkbox' => 'c', 'scale' => 'sc', 'text' => 't'];
+                    $prefix = $prefixs[$question->type];
+                    $nodelist = $domnode->getElementsByTagName('item');
+                    foreach ($nodelist as $item) {
+                        $item->setAttribute('name', $name.$layer.$root.$prefix.$index);
+                        $index++;
+                    }
+                    $root++;
+                    break;
+                case 'radio':
+                case 'select':
+                case 'textarea':
+                    $newitem = new DOMElement('name');
+                    $innode = $domnode->appendChild($newitem);
+                    $innode->nodeValue = $name.$layer.$root;
+                    $root++;
+                    break;
+                case 'list':
+                    break;
+            }
         }
-
     }
-    
-	public function saveAnalysis($root) {
-		echo $root;
-		//echo Input::get('qn');
-		//echo Input::get('obj');
-		
-		$config = Config::get('ques/'.$root);
-		
-		$newpage = new app\library\page;
-		$newpage->root = app_path().'/views/ques/'.$root;
-		$newpage->page = 0;
-		
-		echo file_exists($qroot)?1:2;
-		
-		return '';
-	}
-
-    public function demo() {
-        
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid', 'title')->first();
-        
-        $page = Input::get('page', 1);
-        $question_html = '';    
-        
-        $ques_page = DB::table('ques_admin.dbo.ques_page')->where('qid', $ques_doc->qid)->where('page', $page)->select('xml', 'page')->first();
-        
-        $this->question_array = simplexml_load_string($ques_page->xml);
-        
-        $buildQuestion = 'app\\library\\v10\\buildQuestion';
-        
-        $question_amount = count($this->question_array->question);
-        
-        for($i=0;$i<$question_amount;$i++){
-            $question = $this->question_array->question[$i];
-            if($question->getName()=="question"){
-				$question_html .= $buildQuestion::build($question,$this->question_array,0,"no");
-			}            
-        }
-        
-        $buildQuestionEvent = 'app\\library\\v10\\buildQuestionEvent';
-		$questionEvent = $buildQuestionEvent::buildEvent($this->question_array);
-        
-		View::share(array('page' => $page, 'ques_doc' => $ques_doc));
-		return View::make('editor.page',array(
-			'question'            => $question_html,
-			'questionEvent'       => $questionEvent,
-            'questionEvent_check' => '',
-			'init_value'          => ''
- 		))
-		->nest('child_footer', 'demo.use.footer');
-    }
-    
-	public function save_info() {	}
 
     public function creatTable() {
         
@@ -550,39 +432,39 @@ class QuesFile extends CommFile {
         Config::set('database.default', 'sqlsrv');
         Config::set('database.connections.sqlsrv.database', $ques_doc->database);
         DB::reconnect('sqlsrv');
-		
-        foreach($ques_pages as $ques_page){			
-			$page = $ques_page->page;
+
+        foreach($ques_pages as $ques_page){
+            $page = $ques_page->page;
 
             $question_array = simplexml_load_string($ques_page->xml);            
-						
-			//Schema::hasTable($tablename.'_page'.$page) && Schema::drop($tablename.'_page'.$page);
+
+            //Schema::hasTable($tablename.'_page'.$page) && Schema::drop($tablename.'_page'.$page);
             
-			Schema::create($tablename.'_page'.$page, function($table) use($question_array, $page){
+            Schema::create($tablename.'_page'.$page, function($table) use($question_array, $page){
                 
-				$table->string('newcid', 50)->primary();
+                $table->string('newcid', 50)->primary();
                 
-				foreach($question_array as $question){                    
-					if ($question->getName()=="question" || $question->getName()=="question_sub"){                        
+                foreach($question_array as $question){
+                    if ($question->getName()=="question" || $question->getName()=="question_sub"){
                         switch($question->type){
 
                             case "checkbox":
                                 foreach($question->answer->item as $item){
-                                    $attr = $item->attributes();	
+                                    $attr = $item->attributes();
                                     $table->string((string)$attr["name"], 2)->nullable();
                                 }
-                            break;
+                                break;
                             case "scale":
                                 $size = strlen(count($question->answer->degree))+1;
                                 foreach($question->answer->item as $item){
                                     $attr = $item->attributes();
                                     $table->string((string)$attr["name"], $size)->nullable();
                                 }
-                            break;
+                                break;
                             case "radio":
                                 $size = strlen(count($question->answer->item))+1;
                                 $table->string((string)$question->answer->name, $size)->nullable();
-                            break;
+                                break;
                             case "select":
                                 $answerAttr = $question->answer->attributes();
                                 $code = $answerAttr['code'];
@@ -598,7 +480,7 @@ class QuesFile extends CommFile {
                                     $size++;
                                 }
                                 $table->string((string)$question->answer->name, $size)->nullable();
-                            break;
+                                break;
                             case "text":
                                 foreach($question->answer->item as $item){
                                     $attr = $item->attributes();
@@ -608,68 +490,30 @@ class QuesFile extends CommFile {
                                         $table->string((string)$attr['name'].'_isconfirm', 1)->nullable();
                                     }
                                 }
-                            break;
+                                break;
                             case "textarea":
                                 $table->text((string)$question->answer->name)->nullable();
-                            break;
+                                break;
                             case "text_phone":
                                 foreach($question->answer->item as $item){
                                     $attr = $item->attributes();
                                     $table->string((string)$attr["name"], $attr["size"])->nullable();
                                 }
-                            break;
-
+                                break;
                         }
                     }
-				}
-				$table->dateTime('ctime'.$page)->nullable();
-				$table->dateTime('stime'.$page)->nullable();
-				$table->dateTime('etime'.$page)->nullable();
-			});
+                }
+                $table->dateTime('ctime'.$page)->nullable();
+                $table->dateTime('stime'.$page)->nullable();
+                $table->dateTime('etime'.$page)->nullable();
+            });
 
-			
-		}
+        }
 
-		DB::table($tablename.'_pstat')->update(array('page'=>1, 'updated_at'=>NULL));
-    }
-
-    public function codebook() {
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid', 'host')->first();
-        
-        View::share('doc', $ques_doc);
-        
-        return 'files.ques.codebook';
-    }
-    
-    public function receives() {
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id',  $this->file->file)->select('dir', 'qid', 'host', 'database', 'table', 'title')->first();
-        
-        View::share('doc', $ques_doc);
-        
-        return 'files.ques.traffic';
-    }
-    
-    public function spss() {
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id',  $this->file->file)->select('dir', 'qid', 'host', 'database', 'table')->first();
-        
-        View::share('doc', $ques_doc);
-        
-        return 'files.ques.spss';
-    }
-    
-    public function report() {
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id',  $this->file->file)->select('dir', 'qid', 'host', 'database', 'table')->first();
-        
-        View::share('doc', $ques_doc);
-        
-        return 'files.ques.report';
+        //DB::table($tablename.'_pstat')->update(array('page'=>1, 'updated_at'=>NULL));
     }
 
-    public function analysis() {
-        return 'files.ques.analysis';
-    }
-
-    public function create_pstat($tablename) {		
+    public function create_pstat($tablename) {
         !Schema::hasTable($tablename.'_pstat') && Schema::create($tablename.'_pstat', function($table){
             $table->integer('id', true);
             $table->string('newcid', 20)->unique();
@@ -677,6 +521,69 @@ class QuesFile extends CommFile {
             $table->dateTime('updated_at')->nullable();
             $table->dateTime('created_at');
         });
+    }
+
+    public function demo()
+    {
+        $page = $this->file->cencus->pages->filter(function($page) {
+            return $page->page == Input::get('page', 1);
+        })->first();
+
+        $questions = simplexml_load_string($page->xml);
+
+        $buildQuestionHTML = 'app\\library\\v10\\buildQuestion';
+        $buildQuestionEvent = 'app\\library\\v10\\buildQuestionEvent';
+
+        $questionHTML = '';
+        foreach ($questions as $key => $question) {
+            if($question->getName()=='question'){
+                $questionHTML .= $buildQuestionHTML::build($question, $questions, 0, 'no');
+            }
+        }
+
+        $questionEvent = $buildQuestionEvent::buildEvent($questions);
+
+        return View::make('editor.page', [
+            'question'            => $questionHTML,
+            'questionEvent'       => $questionEvent,
+            'questionEvent_check' => '',
+            'init_value'          => '',
+            'isPhone'             => false,
+            'cencus'              => $this->file->cencus,
+        ])->nest('child_footer', 'demo.use.footer');
+    }
+
+    public function codebook()
+    {
+        View::share('cencus', $this->file->cencus);
+        
+        return 'files.ques.codebook';
+    }
+    
+    public function receives()
+    {
+        View::share('cencus', $this->file->cencus);
+        
+        return 'files.ques.traffic';
+    }
+    
+    public function spss()
+    {
+        View::share('cencus', $this->file->cencus);
+        
+        return 'files.ques.spss';
+    }
+    
+    public function report()
+    {
+        View::share('cencus', $this->file->cencus);
+        
+        return 'files.ques.report';
+    }
+
+    public function analysis()
+    {
+        return 'files.ques.analysis';
     }
 
     public function template() {
@@ -689,12 +596,13 @@ class QuesFile extends CommFile {
         return View::make('editor.question_demo');        
     }
     
-    function decodeInput($input) {
-        
+    function decodeInput($input)
+    {
         return json_decode(urldecode(base64_decode($input)));
     }
-    
-    function get_struct_from_view($questions, $call = null, $parent_id = null, $parent_value = null) {  
+
+    function get_struct_from_view($questions, $call = null, $parent_id = null, $parent_value = null)
+    {
         $subs = [];
         foreach($questions as $question){
             
@@ -705,7 +613,7 @@ class QuesFile extends CommFile {
             ];
             
             $question->parent_id = $parent_id;
-			$question->parent_value = $parent_value;
+            $question->parent_value = $parent_value;
             
             if( isset($question->answers) ) {               
 
@@ -713,8 +621,8 @@ class QuesFile extends CommFile {
                 
                 foreach($question->answers as $index => $anwser){
                     if( isset($anwser->subs) ){
-						
-						$value = isset($anwser->value) ? $anwser->value : null;
+
+                        $value = isset($anwser->value) ? $anwser->value : null;
 
                         $this->get_struct_from_view($anwser->subs, $call, $sub->id, $value);
 
@@ -742,17 +650,17 @@ class QuesFile extends CommFile {
 
     public function xml_to_array()
     {        
-		$pages = $this->file->cencus->pages->map(function($page) {
-			$question_box = (object)['index' => $page->page, 'questions' => []];
-			$questions = simplexml_load_string($page->xml);
+        $pages = $this->file->cencus->pages->map(function($page) {
+            $question_box = (object)['index' => $page->page, 'questions' => []];
+            $questions = simplexml_load_string($page->xml);
             \app\library\v10\QuestionXML::$questions = $questions;
             foreach($questions as $question){
                 if ($question->getName()=='question') {
                     array_push($question_box->questions, \app\library\v10\QuestionXML::to_array($question, 0, "no"));
                 }                
             }
-			return $question_box;
-		})->toArray();
+            return $question_box;
+        })->toArray();
 
         //echo '<script>console.log(' . json_encode($pages) . ');</script>';exit;    
         
@@ -868,8 +776,8 @@ class QuesFile extends CommFile {
         return $questions;
     }
 
-    public function get_frequence() {
-
+    public function get_frequence()
+    {
         $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('database', 'table')->first();
 
         $question = Input::get('question');
@@ -882,11 +790,10 @@ class QuesFile extends CommFile {
 
         //var_dump($frequencesTable);exit;
         return ['frequence' => $frequence];
-
     }
 
-    public function to_old_analysis() {
-
+    public function to_old_analysis()
+    {
         //DB::connection('sqlsrv_analysis')->table('question')->get();exit;
         
         $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid', 'edit', 'table')->first();
@@ -913,7 +820,6 @@ class QuesFile extends CommFile {
         }
 
         return $GLOBALS['variableSQL'];
-
     }
 
     public function update_question()
@@ -951,6 +857,5 @@ class QuesFile extends CommFile {
         $xml = $dom->ownerDocument->saveXML( $dom->ownerDocument->documentElement );
 
         return $page->update(['xml' => $xml]);
-    } 
-    
+    }
 }
