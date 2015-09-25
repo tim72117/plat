@@ -1,5 +1,5 @@
 
-<div ng-cloak ng-controller="rowsEditorController" style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
+<div ng-cloak ng-controller="rowsEditorController">
 	<div class="ui segment" ng-repeat="sheet in file.sheets">
 
 	    <a class="ui button" href="import">

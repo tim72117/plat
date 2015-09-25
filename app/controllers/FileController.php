@@ -5,54 +5,66 @@ use app\library\files\v0\CommFile;
 class FileController extends BaseController {
 
     protected $layout = 'demo.layout-main';
-	
-	public function __construct()
+
+    public function __construct()
     {
-		$this->beforeFilter(function($route) {
+        $this->beforeFilter(function($route) {
             $this->user = Auth::user();
 
             Event::fire('ques.open', array());
-		});
-	}
+        });
+    }
 
     public function request($request_id, $method = null)
     {
         $doc_id = RequestFile::find($request_id)->doc_id;
 
-        return $this->open($doc_id, $method);
+        $doc = ShareFile::find($doc_id);
+        if (!isset($doc)) {
+            return $this->no();
+        }
+
+        return $this->active($doc, $method);
     }
 
     public function open($doc_id, $method = null)
     {
-        $this->doc = ShareFile::find($doc_id);
-        if (!isset($this->doc)) {
+        $doc = ShareFile::find($doc_id);
+        if (!isset($doc)) {
             return $this->no();
         }
 
         $inGroups = $this->user->inGroups->lists('id');
         if (
-            ($this->doc->target=='user' && $this->doc->target_id!=$this->user->id) ||
-            ($this->doc->target=='group' && !in_array($this->doc->target_id, $inGroups))
+            ($doc->target == 'user' && $doc->target_id != $this->user->id) ||
+            ($doc->target == 'group' && !in_array($doc->target_id, $inGroups))
         ) {
             return $this->deny();
         }
 
-        $class = 'app\\library\\files\\v0\\' . $this->doc->isFile->isType->class;
+        return $this->active($doc, $method);
+    }
 
-        $this->file = new $class($this->doc->isFile, $this->user);
+    private function active($doc, $method)
+    {
+        $class = 'app\\library\\files\\v0\\' . $doc->isFile->isType->class;
 
-        $this->file->setDoc($this->doc);
+        $file = new $class($doc->isFile, $this->user);
 
-        if (in_array($method, $this->file->get_views())) {
-            if ($this->file->is_full())
-                return View::make($this->file->$method());
+        $file->setDoc($doc);
 
-            $view = View::make('demo.use.main')->nest('context', $this->file->$method());
-        
-            return $this->createView($view);
+        if (in_array($method, $file->get_views())) {
+            if ($file->is_full()) {
+                $view = View::make($file->$method());
+            } else {
+                $context = View::make('demo.use.main')->nest('context', $file->$method());
+                $view = $this->createView($context);
+            }
+        } else {
+            $view = $file->$method();
         }
         
-        return $this->file->$method();
+        return $view;
     }
 
     public function upload()
@@ -189,11 +201,7 @@ class FileController extends BaseController {
 
     private function createFile($type_id, $title)
     {
-        $file = new Files([
-            'type'       => $type_id,
-            'title'      => $title,
-            'created_by' => $this->user->id,
-        ]);
+        $file = new Files(['type' => $type_id, 'title' => $title]);
 
         $type = DB::table('files_type')->where('id', $type_id)->first();
 
@@ -224,22 +232,21 @@ class FileController extends BaseController {
         return $response; 
     }
 
-	private function no()
+    private function no()
     {
         return Response::view('noFile', array(), 404);
-	}
+    }
 
-	private function deny()
+    private function deny()
     {
         return Response::view('timeout', array(), 404);
-	}
+    }
 
-	private function showQuery()
+    private function showQuery()
     {
-		$queries = DB::getQueryLog();
-		foreach ($queries as $query) {
-			var_dump($query);echo '<br /><br />';
-		}
-	}
-
+        $queries = DB::getQueryLog();
+        foreach ($queries as $query) {
+            var_dump($query);echo '<br /><br />';
+        }
+    }
 }

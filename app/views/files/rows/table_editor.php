@@ -1,4 +1,5 @@
-<div ng-cloak ng-controller="newTableController" style="position: absolute;top: 10px;bottom: 10px;left: 10px; right: 10px">
+
+<div ng-cloak ng-controller="newTableController">
         
     <div class="ui segment" ng-class="{loading: loading}"> 
 

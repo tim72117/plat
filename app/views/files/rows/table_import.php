@@ -1,7 +1,7 @@
 
-<div ng-cloak ng-controller="uploadController" style="position: absolute;left: 10px;top: 10px;bottom: 10px;overflow-x: scroll">
+<div ng-cloak ng-controller="uploadController">
 
-    <div class="ui segment" ng-class="{loading: sheetLoading}" ng-repeat="sheet in file.sheets">      
+    <div class="ui basic segment" ng-class="{loading: sheetLoading}" ng-repeat="sheet in file.sheets">
 
         <div class="ui top attached orange progress" ng-class="{disabled: progress<1}">
             <div class="bar" style="width: {{ progress }}%"></div>
@@ -143,7 +143,7 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
 
     $scope.uploader = new FileUploader({
         alias: 'file_upload',
-        url: '/file/upload',
+        url: 'import_upload',
         //autoUpload: true,
         removeAfterUpload: true
     });
@@ -158,7 +158,7 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
     };
 
     $scope.uploader.onCompleteItem = function(fileItem, response, status, headers) {
-        if( headers['content-type'] != 'application/json' )
+        if (headers['content-type'] != 'application/json')
             return;        
 
         $scope.messages = response.messages;
@@ -175,7 +175,7 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
     };
 
     $scope.uploader.onErrorItem = function(fileItem, response, status, headers) {
-        angular.element('.queryLog').append(response);
+        angular.element('body').append(response);
     };
 
     $scope.uploader.onCompleteAll = function() {
@@ -193,8 +193,3 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
 
 });
 </script>
-
-<style></style>
-<?php
-//$explorer = $_SERVER['HTTP_USER_AGENT'];
-//DB::table('user_info')->insert(array('user_id'=>$user->id, 'info'=>$explorer));
