@@ -57,6 +57,8 @@ class CommFile {
 
     public function create()
     {
+        $this->file->created_by = $this->user->id;
+
         $this->file->save();
     }
 
@@ -79,7 +81,7 @@ class CommFile {
 
         $this->move($file_upload, $this->storage_path . '/' . $this->file->file);
 
-        $this->file->save();
+        $this->create();
     }
 
     public function move(UploadedFile $file_upload, $path)

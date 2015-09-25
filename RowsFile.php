@@ -208,16 +208,21 @@ class RowsFile extends CommFile {
     }
 
     public function import_upload() 
-    {        
-        $messages = [];
+    {
+        if (!Input::hasFile('file_upload'))
+            throw new ValidateException(new MessageBag(array('no_file_upload' => '檔案錯誤')));
 
-        $upload_file = $this->upload(false);
+        $file = new Files(['type' => 3, 'title' => Input::file('file_upload')->getClientOriginalName()]);
+
+        $file_upload = new \app\library\files\v0\CommFile($file, $this->user);
+
+        $file_upload->upload(Input::file('file_upload'));
 
         $table = $this->file->sheets[0]->tables[0]; 
 
         $table_columns = $table->columns->fetch('name')->toArray();      
         
-        $rows = \Excel::load(storage_path() . '/file_upload/' . $upload_file->file, function($reader) {
+        $rows = \Excel::load(storage_path() . '/file_upload/' . $file_upload->file->file, function($reader) {
             
         })->get($table_columns)->toArray();
         
@@ -266,8 +271,10 @@ class RowsFile extends CommFile {
                 'exists'  => isset($exists) ? $exists : [],
             ];            
         });
-    
+
+        $messages = [];
         $rows_insert = [];
+
         foreach ($rows as $row_index => $row)
         {
             $row_filted = array_filter(array_map('strval', $row));
@@ -301,7 +308,7 @@ class RowsFile extends CommFile {
             //skip if not pass
             if (!$messages[$row_index]->pass) continue;           
             
-            $messages[$row_index]->row['file_id'] = $upload_file->id;
+            $messages[$row_index]->row['file_id'] = $file_upload->file->id;
             $messages[$row_index]->row['updated_by'] = $this->user->id;
             $messages[$row_index]->row['updated_at'] = Carbon::now()->toDateTimeString();            
             
