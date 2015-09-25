@@ -24,7 +24,7 @@ class Contact_tted extends Contact {
 
 class School_tted extends Eloquent {
 	
-	protected $table = 'pub_uschool';
+	protected $table = 'pub_school_u';
 
 	public $timestamps = false;
 	
