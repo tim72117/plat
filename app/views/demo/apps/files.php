@@ -39,7 +39,7 @@
     <div class="pusher">
     <div ng-cloak ng-controller="fileController" id="fileController">
         
-        <div class="ui basic segment" ng-class="{loading: loading}">
+        <div class="ui basic segment" ng-class="{loading: loading}" style="min-height:800px">
 
             <div class="ui top attached orange progress">
                 <div class="bar" style="width: {{ progress }}%"></div>
@@ -93,8 +93,8 @@
                         <th>
                             <div ng-dropdown-menu class="ui floating top left pointing labeled icon dropdown basic button">
                                 <i class="filter icon"></i>
-                                <span class="text"><i class="icon" ng-class="!searchText.type ? 'file outline' : types[searchText.type]"></i></span>
-                                <div class="menu transition" tabindex="-1">
+                                <span class="text file-filter-button"><i class="icon" ng-class="!searchText.type ? 'file outline' : types[searchText.type]"></i></span>
+                                <div class="menu transition hidden file-filter">
                                     <div class="item" ng-click="searchType = {type: '5'}"><i class="file text icon"></i>資料檔</div>
                                     <div class="item" ng-click="searchType = {type: '1'}"><i class="file text outline icon"></i>問卷</div>
                                     <div class="item" ng-click="searchType = {type: '9'}"><i class="file text outline icon red"></i>面訪問卷</div>
@@ -105,6 +105,7 @@
                                     <div class="item" ng-click="searchType = {}"><i class="file outline icon"></i>所有檔案</div> 
                                 </div>
                             </div>
+
                             <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋..."><i class="search icon"></i></div>
                         </th>
                         <th></th>
@@ -197,7 +198,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     $scope.docs = [];
     $scope.predicate = 'created_at';    
     $scope.searchText = getCookie($cookies.file_text_filter) || {};
-    $scope.searchType = getCookie($cookies.file_type_filter) || {type: ''};
+    $scope.searchType = getCookie($cookies.file_type_filter) || {};
     $scope.page = getCookie($cookies.file_page) || 1;
     $scope.limit = 12;
     $scope.max = $scope.docs.length;
@@ -420,7 +421,9 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         } else {
             $('#whatNews').popup('destroy');
         }        
-    }
+    };
+
+    
     
 });
 
