@@ -1,72 +1,29 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-TW" lang="zh-TW">
+<html xmlns:ng="http://angularjs.org" xml:lang="zh-TW" lang="zh-TW">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta http-equiv="X-UA-Compatible" content="IE=10" />
-<meta http-equiv="X-UA-Compatible" content="IE=9" />
-<meta http-equiv="X-UA-Compatible" content="IE=8" />
-<title>師資培育資料庫資料查詢平台</title>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<title>中小學師資資料庫整合平台</title>
 
-<script type="text/javascript" src="<?=asset('js/twcaseal_v3.js')?>" charset="utf-8"></script>
+<!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
+<script src="/js/twcaseal_v3.js"></script>
+<script src="/js/angular-1.3.14/angular.min.js"></script>
 
-<link href="<?=asset('demo/use/css/use100.css')?>" rel="stylesheet" type="text/css">
-	    
+<link rel="stylesheet" href="/css/Semantic-UI/Semantic-UI-2.0.7/semantic.min.css" />
+
 </head>
-    
-<body bgcolor="white" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginwidth="0" marginheight="0" class="intd">
 
-<div align="center" style="margin:0 auto;font-size:18px;line-height: 60px;font-weight: bold">師資培育資料庫資料查詢平台</div>
+<body>
+	<div class="ui container">	
 
-<table cellpadding="3" cellspacing="2" border="0" width="50%" align="center">
-	<tr>
-	  <td class="header1" align="center" style="line-height: 40px;font-size:16px"><?=$title?></td>
-	</tr>
-	<tr>
-	  <td class="intd2">
-			<?=$context?>	
-		  	
-        	
-			<?
-			echo '<p align="center">';
-			if( $contextFile!='remind' && $contextFile!='register' )
-				echo link_to('auth/password/remind/tted', '忘記密碼');
-			echo '</p>';
-			echo '<p align="center">';
-				if( $contextFile!='login' )
-					echo link_to('user/auth/tted', '登入');
+		<?=$context?>	
 
-				if( $contextFile=='login' ){
-					echo link_to('user/auth/register/tted', '帳號申請');
-				}
-			echo '</p>';
-			?>
-			<!--\ <a href="isms_sel_acc" target="_blank">帳號註銷</a> <br>
-        	<a href="AccountApplyProcess.pdf" target="_blank">帳號申請說明</a> \ <a href="AccountCancelProcess.pdf" target="_blank">帳號註銷說明</a><br>
-        	<a href="accountQA.pdf" target="_blank">帳號申請Q&amp;A</a>--> 
-			
-		  <div style="float:right;margin:10px">
-			  <div id="twcaseal" class="SMALL"><img src="<?=asset('images/twca.gif')?>"/></div>
-		  </div>
-	  </td>	
-	</tr>
-    <tr>
-	    <td>      
+		<div class="ui divider"></div>
 
- 
-        </td>
-</tr>
-	<tr>
-	  <td class="intd">
-		您於&nbsp;<b><?=Session::get('now')?></b>&nbsp;&nbsp;從&nbsp;<b><?=Session::get('ip'); ?></b>&nbsp;連結至本網站。
-      </td>
-	</tr>
-	<?=@$news?>
-    
-</table>
+		<?=$child_footer?>
 
-		
-        
-<?=$child_footer?>
+    	<div id="twcaseal" style="float:right;margin:10px;display: none" class="SMALL"><img src="/images/twca.gif" /></div>
 
+    </div>
 </body>
 </html>
