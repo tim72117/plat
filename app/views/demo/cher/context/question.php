@@ -1,4 +1,5 @@
-<div ng-controller="QuesStatusController" ng-cloak style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
+<div ng-cloak ng-controller="QuesStatusController">
+
     <div class="ui segment">
         <div class="ui mini statistics">
             <div class="statistic" ng-repeat="server in servers | serverTypeFilter:'QUESNLB'">
@@ -9,16 +10,6 @@
                     <div class="ui empty circular label" ng-class="{red: server.totalTime>3, green: server.totalTime<3}"></div>                        
                 </div>
             </div> 
-        </div>   
-        <div class="ui mini statistics">
-            <div class="statistic" ng-repeat="server in servers | serverTypeFilter:'SOURCENLB'">
-                <div class="value">
-                    <i class="server green icon"></i> {{ server.count }}
-                </div>
-                <div class="label">{{ server.host }}</div>
-            </div> 
-        </div>   
-        <div class="ui mini statistics">
             <div class="statistic">
                 <div class="value">
                     <i class="users icon"></i> {{ (servers | serverTypeFilter:'QUESNLB' | serverSum) }}
@@ -30,45 +21,55 @@
                     <i class="server icon"></i> {{ server.count }}
                 </div>
                 <div class="label">{{ server.host }}</div>
-            </div>          
+            </div>  
         </div>   
-        
-        <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
-        
-        <div class="ui basic mini buttons">
-            <div class="ui button" ng-click="prev()"><i class="icon angle left arrow"></i></div>                    
-            <div class="ui button" ng-click="next()"><i class="icon angle right arrow"></i></div>
-        </div>
-                
-        <table class="ui compact table">	
-            <thead>
-                <tr>
-                    <th width="60">年度</th>
-                    <th width="400">問卷名稱</th>
-                    <th width="100">codebook</th>
-                    <th width="60">spss</th>
-                    <th width="80">回收數</th>
-                    <th width="100">問題回報</th>
-                    <th>開始時間</th>
-                    <th>結束時間</th>
-                    <th>關閉</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="question in questions | startFrom:(page-1)*limit | limitTo:limit">
-                    <td>{{ question.year }}</td>
-                    <td>{{ question.title }}</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>{{ question.start_at }}</td>
-                    <td>{{ question.close_at }}</td>
-                    <td>{{ question.closed }}</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="ui mini statistics">
+            <div class="statistic" ng-repeat="server in servers | serverTypeFilter:'SOURCENLB'">
+                <div class="value">
+                    <i class="server green icon"></i> {{ server.count }}
+                </div>
+                <div class="label">{{ server.host }}</div>
+            </div> 
+        </div>       
+
     </div>
+    
+    <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
+    
+    <div class="ui basic mini buttons">
+        <div class="ui button" ng-click="prev()"><i class="icon angle left arrow"></i></div>                    
+        <div class="ui button" ng-click="next()"><i class="icon angle right arrow"></i></div>
+    </div>
+            
+    <table class="ui compact table">	
+        <thead>
+            <tr>
+                <th width="60">年度</th>
+                <th width="400">問卷名稱</th>
+                <th width="100">codebook</th>
+                <th width="60">spss</th>
+                <th width="80">回收數</th>
+                <th width="100">問題回報</th>
+                <th>開始時間</th>
+                <th>結束時間</th>
+                <th>關閉</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="question in questions | startFrom:(page-1)*limit | limitTo:limit">
+                <td>{{ question.year }}</td>
+                <td>{{ question.title }}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>{{ question.start_at }}</td>
+                <td>{{ question.close_at }}</td>
+                <td>{{ question.closed }}</td>
+            </tr>
+        </tbody>
+    </table>
+    
 </div>  
     
 

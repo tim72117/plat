@@ -1,0 +1,21 @@
+@charset "utf-8";
+
+.layer1 {
+	padding-left: 25px;
+}
+.layer2 {
+	padding-left: 50px;
+}
+
+div.mark {
+	background-color: #e65a5a;
+	background-color: rgba(200,60,60,0.3);
+}
+
+a.noline {	
+	color: #000;
+	text-decoration: none;
+}
+a.noline:hover {	
+	text-decoration: underline;
+}

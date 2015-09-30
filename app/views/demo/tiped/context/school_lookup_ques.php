@@ -2,8 +2,6 @@
 <div ng-controller="rateCtrl" style="position: absolute;left: 10px;right: 10px;top: 10px;bottom: 10px">
     
     <div class="ui segment active" ng-cloak ng-class="{loading: sheetLoading}">
-
-        <div class="ui warning message"><i class="warning icon"></i>名單刪除功能已移至上傳頁面，請進入上傳名單功能後，點選編輯名單。</div>
         
         <div class="ui mini statistic">
             <div class="value">{{ rate.finish }}</div>
@@ -89,7 +87,7 @@ app.controller('rateCtrl', function($scope, $http, $filter) {
     $scope.pages = 0; 
     $scope.searchText = {};
     $scope.tables = [];
-    $scope.table = 'tiped_103_0016_phd';
+    $scope.table = '';
     $scope.rate = {};
 
     $scope.$watchCollection('searchText', function(query) {
@@ -130,14 +128,25 @@ app.controller('rateCtrl', function($scope, $http, $filter) {
     
     $scope.changeSchool = function() {
         $scope.getUser(true);        
-    };    
+    };
+
+    $scope.getTables = function(reflash) {
+        $http({method: 'POST', url: 'ajax/getTables', data:{}})
+        .success(function(data, status, headers, config) {
+            $scope.tables = data.tables;
+            $scope.table = Object.keys($scope.tables)[0];
+            $scope.getUser(false);
+        })
+        .error(function(e){
+            console.log(e);
+        });
+    };
     
     $scope.getUser = function(reflash) {
         $scope.sheetLoading = true;
         reflash = typeof reflash !== 'undefined' ? reflash : false;
         $http({method: 'POST', url: 'ajax/getStudents', data:{ reflash: reflash, table: $scope.table, school_selected: $scope.school_selected }})
         .success(function(data, status, headers, config) {
-            $scope.tables = data.tables;  
             $scope.rows = data.students;            
             $scope.rows_filted = data.students;
             $scope.schools = data.schools;
@@ -147,8 +156,8 @@ app.controller('rateCtrl', function($scope, $http, $filter) {
             $scope.max = $scope.rows.length;
             $scope.pages = Math.ceil($scope.max/$scope.limit);
             $scope.page = 1;
-            $scope.sheetLoading = false;  
-            $scope.getRate();            
+            $scope.sheetLoading = false;
+            $scope.getRate();
         })
         .error(function(e){
             console.log(e);
@@ -179,16 +188,6 @@ app.controller('rateCtrl', function($scope, $http, $filter) {
         }
     };   
     
-    $scope.downloadRate = function(){
-        jQuery.fileDownload('ajax/export', {
-            httpMethod: "POST",
-            data: {table: $scope.table},
-            failCallback: function (responseHtml, url) {
-                //console.log(responseHtml);
-            }
-        }); 
-    };
-    
     $scope.countSchool = function(input) {
         if( !angular.isObject(input) ) {
             return 0;
@@ -196,9 +195,7 @@ app.controller('rateCtrl', function($scope, $http, $filter) {
         return Object.keys(input).length;      
     };    
     
-    $scope.getUser();
+    $scope.getTables();
 
 });
 </script>
-<style> 
-</style>

@@ -1,55 +1,38 @@
 <?php
 $tables = [
-	'tiped_103_0016_ba' => (object)[
-		'title'    => '大專應屆畢業生',
-		'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150826_162604_ca32f', 'primaryKey' => 'C189', 'school' => 'C185', 'map' => 'stdnumber'],
-		'pstat'    => (object)['database' => 'rowdata', 'table' => 'tiped_103_0016_ba_pstat', 'primaryKey' => 'newcid'],
-		'pages'    => 9,
-		'stdschoolsys' => [1],
-		'filters'   => [],
-		'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at', 'C191', 'C195', 'C196'],
-		'hidden'   => ['id'],
-	],
-	'tiped_103_0016_ma' => (object)[
-		'title'    => '碩士應屆畢業生',
-		'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150826_162604_ca32f', 'primaryKey' => 'C189', 'school' => 'C185', 'map' => 'stdnumber'],
-		'pstat'    => (object)['database' => 'rowdata', 'table' => 'tiped_103_0016_ma_pstat', 'primaryKey' => 'newcid'],
-		'pages'    => 10,
-		'stdschoolsys' => [7, 20],
-		'filters'   => [],
-		'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at', 'C191', 'C195', 'C196'],
-		'hidden'   => ['id'],
-	],
-	'tiped_103_0016_phd' => (object)[
-		'title'    => '博士應屆畢業生',
-		'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150826_162604_ca32f', 'primaryKey' => 'C189', 'school' => 'C185', 'map' => 'stdnumber'],
-		'pstat'    => (object)['database' => 'rowdata', 'table' => 'tiped_103_0016_phd_pstat', 'primaryKey' => 'newcid'],
-		'pages'    => 7,
-		'stdschoolsys' => [8],
-		'filters'   => [],
-		'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at', 'C191', 'C195', 'C196'],
-		'hidden'   => ['id'],
-	],
-	'tiped_103_0016_p1' => (object)[
-		'title'    => '102學年度畢業後一年現況調查',
-		'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150826_154415_lfr66', 'primaryKey' => 'id', 'school' => 'C172'],
-		'pstat'    => (object)['database' => 'rowdata', 'table' => 'tiped_103_0016_p1_pstat', 'primaryKey' => 'newcid'],
-		'pages'    => 8,
-		'stdschoolsys' => [],
-		'filters'   => ['C171' => [102]],
-		'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at'],
-		'hidden'   => ['id'],
-	],
-	'tiped_103_0016_p3' => (object)[
-		'title'    => '100學年度畢業後三年現況調查',
-		'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150826_154415_lfr66', 'primaryKey' => 'id', 'school' => 'C172'],
-		'pstat'    => (object)['database' => 'rowdata', 'table' => 'tiped_103_0016_p3_pstat', 'primaryKey' => 'newcid'],
-		'pages'    => 8,
-		'stdschoolsys' => [],
-		'filters'   => ['C171' => [100]],
-		'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at'],
-		'hidden'   => ['id'],
-	],
+    'tiped_1028_p3' => (object)[
+        'title'    => '100畢後3年調查（母卷）',
+        'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150824_110353_p9bqx', 'primaryKey' => 'id', 'school' => 'C159'],
+        'pstat'    => (object)['database' => 'tiped_1028', 'table' => 'u1028p_pstat', 'primaryKey' => 'newcid'],
+        'pages'    => 11,
+        'stdschoolsys' => [],
+        'filters'   => ['C158' => [100]],
+        'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at'],
+        'hidden'   => ['id'],
+        'school'   => '1028',
+    ],
+    'tiped_1028_p2' => (object)[
+        'title'    => '101畢後2年調查（母卷）',
+        'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150824_110353_p9bqx', 'primaryKey' => 'id', 'school' => 'C159'],
+        'pstat'    => (object)['database' => 'tiped_1028', 'table' => 'u1028p_pstat', 'primaryKey' => 'newcid'],
+        'pages'    => 11,
+        'stdschoolsys' => [],
+        'filters'   => ['C158' => [101]],
+        'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at'],
+        'hidden'   => ['id'],
+        'school'   => '1028',
+    ],
+    'tiped_1028_p1' => (object)[
+        'title'    => '102畢後1年調查（母卷）',
+        'userinfo' => (object)['database' => 'rows', 'table' => 'row_20150824_110353_p9bqx', 'primaryKey' => 'id', 'school' => 'C159'],
+        'pstat'    => (object)['database' => 'tiped_1028', 'table' => 'u1028p_pstat', 'primaryKey' => 'newcid'],
+        'pages'    => 11,
+        'stdschoolsys' => [],
+        'filters'   => ['C158' => [102]],
+        'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at'],
+        'hidden'   => ['id'],
+        'school'   => '1028',
+    ],
 ];
 
 Input::has('table') && !array_key_exists(Input::get('table'), $tables) && exit;
@@ -81,7 +64,7 @@ return array(
     },
     'getStudents' => function() use($cname_columns, $recode_columns, $tables) {
 
-        $schools = ['0016' => '國立陽明大學'];
+        $schools = ['1028' => '臺北醫學大學'];
 
         $userinfo = $tables[Input::get('table')]->userinfo;
         $pstat = $tables[Input::get('table')]->pstat;
