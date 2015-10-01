@@ -23,9 +23,9 @@ class InterViewFile extends CommFile {
         return ['open'];
     }
     
-    public static function create($fileInfo) 
+    public function create() 
     {
-        $commFile = parent::create($fileInfo);
+        $commFile = parent::create();
 
         return new self($this->file);  
     }
