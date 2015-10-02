@@ -75,10 +75,6 @@ class Cencus extends Eloquent {
     public function pages() {
         return $this->hasMany('Row\Pages', 'file_id', 'file_id');
     }
-
-    public function ques() {
-        return $this->hasOne('Row\...', 'file_id', 'file_id');
-    }
 }
 
 class Pages extends Eloquent {
@@ -95,4 +91,12 @@ class Analysis extends Eloquent {
     protected $table = 'file_analysis';
 
     public $timestamps = false;
+
+    public function pages() {
+        return $this->hasMany('Row\Pages', 'file_id', 'file_id_ques');
+    }
+
+    public function ques() {
+        return $this->hasOne('Files', 'id', 'file_id_ques');
+    }
 }

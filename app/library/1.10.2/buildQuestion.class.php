@@ -1,27 +1,8 @@
 <?php
-/*
- * 
-------------------------------------------------------------------------------------------------
-------------------------------------產生問卷HTML---------------------------------------------
---功能說明:
---產生radio,text,text_phone,textarea,select,checkbox,scale,list的物件
---------------------------------------------
---版本:1.0
---日期:2010-09-03
-------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------
---功能說明:
---加入選單上下層連結
-  * 加入新的checkbox
-  * 轉換成UTF8
---------------------------------------------
---版本:1.10.2
---日期:2013-10-16
-------------------------------------------------------------------------------------------------
- * 
- */
 namespace app\library\v10;
+
 use Form, Input;
+
 class buildQuestion {
 	
 	static $name = [];
@@ -62,14 +43,6 @@ class buildQuestion {
 		$display_style = ($layer==0||$parrent=='list')?'':' display:none';
 
 
-		if( isset($_SESSION['isShuntN']) && isset($_SESSION['isShuntArray']) )
-		if( in_array($_SESSION['isShuntN'],$_SESSION['isShuntArray']) ){
-			if( isset($questionAttr['shunt']) )
-			if( !in_array($_SESSION['isShuntN'],explode(',',$questionAttr['shunt'])) ){
-				$display_style = ' display:none';
-			}
-		}
-
 		if( $question->getName()=="question" && $question->type=='explain' ){
 			$html .= '<div class="main_explain">';
 		}elseif( $question->getName()=="question" ){
@@ -103,16 +76,12 @@ class buildQuestion {
 		$ans_option_voc = '';
 
 		if( $question->type=='explain' ){
-			if( isset($_SESSION['voice']) && $_SESSION['voice']==1 ){
-					$html .= '<div class="readme" style="background-color:transparent"><b class="voice" target="voice_'.$question->id.'">'.(string)$question->title.'</b></div>';
-				}else{
-					$html .= '<div class="readme" style="background-color:transparent">'.(string)$question->title.'</div>';
-				}
+			$html .= '<div class="readme" style="background-color:transparent">'.(string)$question->title.'</div>';
 		}else{
 			
 			if( (string)$question->title!='' ){
 				if($layer==0){
-					$title_string = '<strong>'.($_SESSION['randomQuesRoot']==1?'':(string)$question->idlab).'</strong> '.$title.($fieldA_display_style==' display:none'?'<p style="font-size:10px;color:red">此題無須填答</p>':'');
+					$title_string = '<strong>'.((string)$question->idlab).'</strong> '.$title.($fieldA_display_style==' display:none'?'<p style="font-size:10px;color:red">此題無須填答</p>':'');
 				}else{
 					if( (string)$question->idlab=='' ){
 						$title_string = ''.$title;
@@ -121,11 +90,7 @@ class buildQuestion {
 					}
 				}
 
-				if( isset($_SESSION['voice']) && $_SESSION['voice']==1 ){
-					$html .= '<h4 class="title voice" target="voice_'.$question->id.'" style="'.$hn_style.'">'.$title_string.'</h4>';
-				}else{				
-					$html .= '<h4 class="title" style="'.$hn_style.'">'.$title_string.'</h4>';
-				}
+				$html .= '<h4 class="title" style="'.$hn_style.'">'.$title_string.'</h4>';
 
 			}else{
 				$title_string = '';
@@ -147,15 +112,6 @@ class buildQuestion {
 		if( $question->type=='scale' ){	
 			$question_amount = count($question->answer->item);
 			$nofixedQArray = range(0,$question_amount-1);
-
-			$randomQuesScaleControlSessionName = isset($_SESSION['randomQuesScaleControlSessionName'])?$_SESSION['randomQuesScaleControlSessionName']:NULL;
-			$randomQuesScaleControlSession = (!is_null($randomQuesScaleControlSessionName) && isset($_SESSION[$randomQuesScaleControlSessionName]))?$_SESSION[$randomQuesScaleControlSessionName]:NULL;
-
-
-			if( isset($_SESSION['randomQuesScale']) && $_SESSION['randomQuesScale']==1 )
-			if( is_null($randomQuesScaleControlSession) || (!is_null($randomQuesScaleControlSession) && $randomQuesScaleControlSession==1) ) 
-			shuffle($nofixedQArray);
-
 			$nofixedQArray_text = implode(',',$nofixedQArray);		 
 		}
 
@@ -518,9 +474,6 @@ class buildQuestion {
 
 
 		$html .= '</div>';
-
-		if( isset($_SESSION['voice']) && $_SESSION['voice']==1 )
-			$html .= '<div class="voice_box" id="voice_'.$question->id.'" style="display:none">'.$ans_option_voc.'</div>';
 
 		if( $question->type!='explain' && $layer==0 )
 			$html .= '<p class="contribute"></p>';
