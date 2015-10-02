@@ -81,7 +81,7 @@ class QuesFile extends CommFile {
         $obj = Input::get('obj');
         $q_array = $obj;
 
-        $init = $question_array->xpath("/page");
+        $init = $question_array->xpath('/page');
         $initnode = $init[0];
         $domnode = dom_import_simplexml($initnode);
         if( $domnode->getElementsByTagName('init')->length==0 ){
@@ -114,9 +114,9 @@ class QuesFile extends CommFile {
                 $itemArray = $question['itemArray'];
 
                 if( !isset($question_qanchor) || $question_qanchor=='' ){
-                    $questionInSub = $question_array->xpath("/page/init");
+                    $questionInSub = $question_array->xpath('/page/init');
                 }else{
-                    $questionInSub = $question_array->xpath("//id[.='".$question_qanchor."']/parent::*");
+                    $questionInSub = $question_array->xpath('//id[.=\''.$question_qanchor.'\']/parent::*');
                 }
                 $node = $questionInSub[0];
 
@@ -156,7 +156,7 @@ class QuesFile extends CommFile {
                 foreach($quesArray as $ques){
                     $question_id = $ques['targetID'];
 
-                    $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*");
+                    $questionInSub = $question_array->xpath('//id[.=\''.$question_id.'\']/parent::*');
                     $node = $questionInSub[0];
 
                     $domnode = dom_import_simplexml($node);
@@ -169,7 +169,7 @@ class QuesFile extends CommFile {
                 $question_id = $question['id'];
                 //$question_title = preg_replace("​","",$question['title']);
                 $question_title = $question['title'];
-                $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*");
+                $questionInSub = $question_array->xpath('//id[.=\''.$question_id.'\']/parent::*');
                 //echo $question_title;
                 $node = $questionInSub[0]->title;
 
@@ -182,8 +182,8 @@ class QuesFile extends CommFile {
 
             if( $question_target=='item' ){
                 $question_id = $question['id'];
-                $question_title = preg_replace("/​/","",$question['title']);
-                $question_sub_title = preg_replace("/​/","",$question['sub_title']);
+                $question_title = preg_replace("/​/", '', $question['title']);
+                $question_sub_title = preg_replace("/​/", '', $question['sub_title']);
                 $question_onvalue = $question['value'];
                 $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*/answer/item[".$question_onvalue."]");
                 //echo $question_title;
@@ -196,7 +196,7 @@ class QuesFile extends CommFile {
                 $domnode->appendChild( new DOMCdataSection($question_title) );
 
                 if( isset($question_sub_title) )
-                $domnode->setAttribute("sub_title", $question_sub_title);
+                $domnode->setAttribute('sub_title', $question_sub_title);
                 echo 'item'."\n";
             }
 
@@ -274,9 +274,9 @@ class QuesFile extends CommFile {
                 $domnode = dom_import_simplexml($node);
                 $nodelist = $domnode->getElementsByTagName('item');
 
-                $domnode->setAttribute("code", $question_code);
+                $domnode->setAttribute('code', $question_code);
                 if( isset($question['auto_hide']) )
-                $domnode->setAttribute("auto_hide", $question_auto_hide);
+                $domnode->setAttribute('auto_hide', $question_auto_hide);
 
                 while($elem = $nodelist->item(0)) {
                     $elem->parentNode->removeChild($elem);
@@ -293,17 +293,17 @@ class QuesFile extends CommFile {
 
                     $newitem = new DOMElement('item');
                     $innode = $domnode->appendChild( $newitem );
-                    $innode->setAttribute("value", $item['value']);
+                    $innode->setAttribute('value', $item['value']);
 
                     echo ',tar'.$question_id;
                     if( isset($item['subid_array']) && is_array($item['subid_array']) )
                     echo ',sub'.implode(',',$item['subid_array']);
 
                     if( isset($item['subid_array']) && is_array($item['subid_array']) )
-                    $innode->setAttribute("sub", implode(',',$item['subid_array']));
+                    $innode->setAttribute('sub', implode(',',$item['subid_array']));
 
                     if( isset($item['skipArray']) && is_array($item['skipArray']) )
-                    $innode->setAttribute("skip", implode(',',$item['skipArray']));
+                    $innode->setAttribute('skip', implode(',',$item['skipArray']));
 
                     if( isset($item['othervArray']) && is_array($item['othervArray']) )
                     foreach($item['othervArray'] as $otherv){
@@ -312,22 +312,22 @@ class QuesFile extends CommFile {
 
                     if( $question_qtype=='text' || $question_qtype=='textarea' ){
                         if( isset($item['sub_title']) )
-                        $innode->setAttribute("sub_title", $item_sub_title);
+                        $innode->setAttribute('sub_title', $item_sub_title);
                         if( isset($item['size']) )
-                        $innode->setAttribute("size", $item['size']);
+                        $innode->setAttribute('size', $item['size']);
                         if( isset($item['width']) )
-                        $innode->setAttribute("cols", $item['width']);
+                        $innode->setAttribute('cols', $item['width']);
                         if( isset($item['height']) )
-                        $innode->setAttribute("rows", $item['height']);
+                        $innode->setAttribute('rows', $item['height']);
                     }
 
                     if( $question_qtype=='checkbox' ){
                         if( isset($item['ccheckbox']) && $item['ccheckbox']=='true' )
-                        $innode->setAttribute("reset", 'all');
+                        $innode->setAttribute('reset', 'all');
                     }
 
                     if( isset($item['ruletip']) )
-                    $innode->setAttribute("ruletip", $item['ruletip']);
+                    $innode->setAttribute('ruletip', $item['ruletip']);
                     //$innode->setAttribute("ruletip", '');
                     if( isset($item['title']) )
                     $innode->appendChild( new DOMCdataSection($item_title) );
@@ -356,7 +356,7 @@ class QuesFile extends CommFile {
                     $degree_title = $degree['title'];
                     $newitem = new DOMElement('degree');
                     $innode = $domnode->appendChild( $newitem );
-                    $innode->setAttribute("value", $degree['value']);
+                    $innode->setAttribute('value', $degree['value']);
                     $innode->appendChild( new DOMCdataSection($degree_title) );
                 }
             }
@@ -382,7 +382,7 @@ class QuesFile extends CommFile {
         $question_root_array = $question_array->xpath($type);
         foreach ($question_root_array as $question) {
 
-            $questionInSub = $question->xpath("answer");
+            $questionInSub = $question->xpath('answer');
             $node = $questionInSub[0];
             $domnode = dom_import_simplexml($node);
 
@@ -445,7 +445,7 @@ class QuesFile extends CommFile {
                 $table->string('newcid', 50)->primary();
                 
                 foreach($question_array as $question){
-                    if ($question->getName()=="question" || $question->getName()=="question_sub"){
+                    if ($question->getName()=='question' || $question->getName()=='question_sub'){
                         switch($question->type){
 
                             case "checkbox":
@@ -656,7 +656,7 @@ class QuesFile extends CommFile {
             \app\library\v10\QuestionXML::$questions = $questions;
             foreach($questions as $question){
                 if ($question->getName()=='question') {
-                    array_push($question_box->questions, \app\library\v10\QuestionXML::to_array($question, 0, "no"));
+                    array_push($question_box->questions, \app\library\v10\QuestionXML::to_array($question, 0, 'no'));
                 }                
             }
             return $question_box;
@@ -697,83 +697,6 @@ class QuesFile extends CommFile {
             'title'     => $this->title(),
             'questions' => $this->get_questions(),
         ];
-    }
-
-    public function get_questions_()
-    {
-        $questions = [];
-
-        function get_subs($subs, $index, &$questions, $parent_title = null) {
-            foreach($subs as $sub) {
-
-                $sub->title = str_replace(PHP_EOL, '', $sub->title);
-
-                if( $sub->type != 'explain' && $sub->type != 'list' && $sub->type != 'checkbox' && $sub->type != 'checkbox_i' && $sub->type != 'scale'  && $sub->type != 'text'  && $sub->type != 'textarea' ) {                    
-
-                    if( isset($parent_title) )
-                        $sub->title = $parent_title . '-' . $sub->title;
-                    
-                    $answers = array_map(function($answer) {
-                        if( !isset($answer['value']) )
-                            return (object)[];
-                        return (object)['value' => $answer['value'], 'title' => strip_tags($answer['title'])];
-                    }, $sub->answers);
-
-                    array_push($questions, (object)['name' => $sub->name, 'title' => strip_tags($sub->title), 'page' => $index, 'type' => $sub->type, 'answers' => $answers, 'obj' => $sub]);
-
-                    //var_dump($sub);exit; 
-
-                    foreach($sub->answers as $answer) {
-                        if( isset($answer['subs']) )
-                            get_subs($answer['subs'], $index, $questions, $sub->title . '-' . $answer['title']);
-                    }
-                }
-
-                if( $sub->type == 'scale' )
-                {                   
-                    $answers = array_map(function($answer) {
-                        return (object)['value' => $answer['value'], 'title' => strip_tags($answer['title'])];
-                    }, $sub->answers);
-                    foreach($sub->subs as $scale) {
-                        array_push($questions, (object)[
-                            'name'  => $scale->name,
-                            'title' => strip_tags($sub->title) . strip_tags($scale->title),
-                            'page'  => $index,
-                            'type'  => $sub->type,
-                            'answers' => $answers,
-                            'obj' => $sub
-                        ]);
-                    }                    
-                }  
-
-                if( $sub->type == 'checkbox' )
-                {
-                    get_subs($sub->subs, $index, $questions, $sub->title); 
-                }  
-
-                if( $sub->type == 'checkbox_i' ) {
-
-                    if( isset($parent_title) )
-                        $sub->title = $parent_title . '-' . $sub->title;
-
-                    $answers = [(object)['value' => '1', 'title' => '是'], (object)['value' => '0', 'title' => '否']];
-
-                    array_push($questions, (object)['name' => $sub->name, 'title' => strip_tags($sub->title), 'page' => $index, 'type' => $sub->type, 'answers' => $answers]);
-
-                    // foreach($sub->subs as $sub) {
-                    //     get_subs($answer['subs'], $index, $questions, $sub->title . '-' . $answer['title']);                            
-                    // }
-                }   
-            }
-        }
-
-        $pages = $this->get_ques_from_xml()['data'];
-
-        foreach($pages as $index => $page) {
-            get_subs($page->data, $index, $questions);
-        }
-                
-        return $questions;
     }
 
     public function get_frequence()
@@ -838,7 +761,7 @@ class QuesFile extends CommFile {
         if( !$question_array ){ exit; }
         //-------------------------------------------------------------------載入XML結束
 
-        $init = $question_array->xpath("/page");    
+        $init = $question_array->xpath('/page');
         $initnode = $init[0];
         $domnode = dom_import_simplexml($initnode);
         if( $domnode->getElementsByTagName('init')->length==0 ){
