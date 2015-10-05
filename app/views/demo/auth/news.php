@@ -1,7 +1,7 @@
 <?php
 $project_id = DB::table('projects')->where('code', $project)->first()->id;
 
-$news = DB::table('news')->where('project', $project_id)->orderBy('publish_at', 'desc')->limit(3)->get();
+$news = DB::table('news')->where('project', $project_id)->whereNull('deleted_at')->orderBy('publish_at', 'desc')->limit(3)->get();
 
 echo '<div class="ui list">';
 

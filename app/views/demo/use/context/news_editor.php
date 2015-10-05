@@ -69,19 +69,16 @@ angular.module('app')
         $scope.saving = false;
     };
     
-    $scope.setDisplay = function(anews) {        
-        anews.display_at.intro = anews.display_at.intro || false;
+    $scope.setDisplay = function(anews) {
         if( anews.disabled )
             return false;
-        
-        var anews_ = angular.copy(anews);
-        anews_.display_at.intro=!anews_.display_at.intro;
+
+        anews.display_at.intro = anews.display_at.intro || false;
 
         anews.disabled = true;
-
-        $http({method: 'POST', url: 'ajax/setDisplay', data:{id: anews.id, display_at: anews_.display_at} })
-        .success(function(data, status, headers, config) { 
-            anews.display_at = data.display_at;
+        $http({method: 'POST', url: 'ajax/setDisplay', data:{id: anews.id, display_at: anews.display_at} })
+        .success(function(data, status, headers, config) {
+            angular.extend(anews.display_at, data.display_at);
             anews.disabled = false;
         }).error(function(e){
             console.log(e);
@@ -109,8 +106,9 @@ angular.module('app')
     };
 
     $scope.delete = function(news_old) {
-        $http({method: 'POST', url: 'ajax/delete', data:{id: news_old.id} })
+        $http({method: 'POST', url: 'ajax/deleteNews', data:{id: news_old.id} })
         .success(function(data, status, headers, config) { 
+            console.log(data);
             if (data.news) {
                 data.news.display_at = angular.fromJson(data.news.display_at) || {};
                 angular.extend(news_old, data.news);
@@ -143,9 +141,3 @@ angular.module('app')
     
 });
 </script>
-
-<script src="/css/ui/Semantic-UI-1.11.1/components/popup.js"></script>
-
-<style>
-
-</style>

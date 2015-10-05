@@ -11,6 +11,7 @@ return [
                 'title' => Input::get('title'),
                 'context' => $context,
                 'publish_at' => Input::get('publish_at'),
+                'display_at' => '{"intro":false}',
                 'created_by' => Auth::user()->id,
                 'created_at' => Carbon\Carbon::now()->toDateTimeString(),
             ]);
@@ -36,7 +37,7 @@ return [
         }
         return ['display_at'=>Input::get('display_at')];
     },
-    'delete' => function() {
+    'deleteNews' => function() {
         DB::table('news')->where('project', 1)->where('id', Input::get('id'))->update(['deleted_at' => Carbon\Carbon::now()->toDateTimeString()]);
         return [
             'news' => DB::table('news')->where('project', 1)->where('id', Input::get('id'))->first()
