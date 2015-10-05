@@ -10,13 +10,7 @@ class AnalysisFile extends CommFile {
 
     function __construct(Files $file, User $user)
     {
-        parent::__construct($file, $user);  
-
-        $this->information = json_decode($this->file->information);
-        
-        $this->census = DB::table('file_analysis')->where('file_id', $this->file->id)->first();        
-        
-        //def_city = 30;
+        parent::__construct($file, $user);
     }
 
     public function is_full()
@@ -31,53 +25,77 @@ class AnalysisFile extends CommFile {
 
     public function open()
     {
-        return 'files.analysis.census_' . $this->census->site;        
+        return 'files.analysis.census';
     }
 
     public function menu()
-    {   
-        $columns_selected = Session::pull('analysis-columns-selected', []);
-
-        !empty($columns_selected) && Session::put('analysis-columns-choosed', $columns_selected);
-
-        return 'files.analysis.menu_' . $this->census->site;        
+    {
+        return 'files.analysis.menu';
     }
     
     public function analysis()
-    {       
-        $columns_selected = Input::get('columns_selected', []);
+    {
+        Input::has('columns_choosed') && Session::put('analysis-columns-choosed', Input::get('columns_choosed', []));
 
-        !empty($columns_selected) && Session::put('analysis-columns-selected', $columns_selected);    
-
-        Session::forget('analysis-columns-choosed');    
-
-        return 'files.analysis.menu_option_' . $this->census->site;        
+        return 'files.analysis.analysis';
     }
 
-    public function get_census()
+    public function get_subs($subs, $index, &$questions, $parent_title = null)
     {
-        return [
-            'title'     => $this->file->title,
-            'questions' => $this->get_questions(),
-        ];
+        foreach($subs as $sub) {
+
+            $sub->title = strip_tags(str_replace(PHP_EOL, '', $sub->title));
+
+            if ($sub->type=='radio' || $sub->type=='select') {
+                if (isset($parent_title))
+                    $sub->title = $parent_title . '-' . $sub->title;
+
+                foreach($sub->answers as $answer) {
+                    $answer->title = strip_tags(str_replace(PHP_EOL, '', $answer->title));
+                }
+
+                array_push($questions, $sub);
+
+                foreach($sub->answers as $answer) {
+                    $this->get_subs($answer->subs, $index, $questions, $sub->title . '-' . $answer->title);                        
+                }
+            }
+
+            if ($sub->type=='scale') {
+                foreach ($sub->questions as $question) {
+                    $question->title = strip_tags(str_replace(PHP_EOL, '', $question->title));
+                    $question->title = $sub->title . '-' . $question->title;
+                    $question->answers = $sub->answers;
+                    array_push($questions, $question);
+                }
+            }
+
+            if ($sub->type=='checkbox') {
+                foreach ($sub->questions as $question) {
+                    $question->title = strip_tags(str_replace(PHP_EOL, '', $question->title));
+                    $question->title = $sub->title . '-' . $question->title;
+                    $question->answers = [(object)['title' => '是', 'value' => '1'], (object)['title' => '否', 'value' => '0']];
+                    array_push($questions, $question);
+
+                    $this->get_subs($question->subs, $index, $questions, $question->title);
+                }
+            }
+        }
     }
 
     public function get_questions()
-    {
-        $quesFile = new QuesFile($this->information->doc_id);
+    {        
+        $quesFile = new QuesFile($this->file->analysis->ques, $this->user);
 
-        $columns = DB::table('analysis_data.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $this->census->tablename)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
+        $questions = [];
+        foreach($quesFile->get_questions()['pages'] as $index => $page) {
+            $this->get_subs($page->questions, $index, $questions);
+        }
 
-        $columns_selected = Session::get('analysis-columns-selected', []);
-        $columns_choosed = Session::get('analysis-columns-choosed', []);
+        $columns = DB::table('analysis_data.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $this->file->analysis->tablename)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
 
-        $questions = array_values(array_filter($quesFile->get_questions(), function(&$question) use($columns, $columns_selected, $columns_choosed) {
-            if (!empty($columns_choosed)) {
-                in_array($question->name, $columns_choosed) && $question->selected = true;
-            }            
-            if (!empty($columns_selected)) {
-                return in_array($question->name, $columns) && in_array($question->name, $columns_selected);
-            }
+        $questions = array_values(array_filter($questions, function(&$question) use($columns) {       
+            $question->choosed = in_array($question->name, Session::get('analysis-columns-choosed', []), true);
             return in_array($question->name, $columns);
         }));
 
@@ -90,49 +108,34 @@ class AnalysisFile extends CommFile {
             }
         }
 
-        return $questions;
-
-        //$census_parts = DB::reconnect('sqlsrv_analysis')->table('census_part')->where('CID', $this->census->CID)->get();
+        return ['questions' => $questions, 'title' => $this->file->analysis->title];
     }
 
-    //uncomplete ShareFile
     public function all_census()
     {
-        return [
-            'docs' => ShareFile::with('isFile')
-            ->whereHas('isFile', function($query) {
-                $query->where('files.type', 7);
-            })
-            ->leftJoin('ques_census', 'docs.file_id', '=', 'ques_census.file_id')
-            ->whereNotNull('ques_census.file_id')
-            ->where(function($query) {
-                $user = Auth::user();                
-                $query->where('target', 'user')->where('target_id', $user->id);
-                $query->orWhere(function($query) use($user) {    
-                    $inGroups = $user->inGroups->lists('id');                
-                    $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $user->id);
-                });
-            })
-            ->select('docs.*', 'ques_census.target_people')
-            ->get()->map(function($doc) {
+        $docs = ShareFile::with(['isFile', 'isFile.analysis'])
+        ->whereHas('isFile', function($query) {
+            $query->where('files.type', 7);
+        })
+        ->has('isFile.analysis')
+        ->where(function($query) {           
+            $query->where('target', 'user')->where('target_id', $this->user->id);
+            $query->orWhere(function($query) {
+                $inGroups = $this->user->inGroups->lists('id');
+                $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $this->user->id);
+            });
+        })->get()->map(function($doc) {
+            $doc->analysis = $doc->isFile->analysis;
+            $doc->selected = $this->file->id == $doc->file_id;
+            return $doc;
+        });
 
-                $doc->selected = $this->shareFile->file_id == $doc->file_id ? true : false;
-                return $doc;
-
-            })
-        ];
-    }
-    
-    public function get_variables($QID = null)
-    {
-        $variables = DB::reconnect('sqlsrv_analysis')->table('variable')->where('QID', Input::get('QID', $QID))
-                ->where('variable', '<>', '')->orderBy('variable')->get();
-        return ['variables' => $variables];
+        return ['docs' => $docs];
     }
     
     public function get_targets()
     {
-        return ['targets' => require(app_path() . '/views/files/analysis/filter_' . $this->information->target . '.php')];
+        return ['targets' => require(app_path() . '/views/files/analysis/filter_' . $this->file->analysis->site . '.php')];
     }
 
     public function get_frequence()
@@ -176,7 +179,7 @@ class AnalysisFile extends CommFile {
 
         $name = Input::get('name');
         
-        $get_data_query = DB::table('analysis_data.dbo.' . $this->census->tablename);  
+        $get_data_query = DB::table('analysis_data.dbo.' . $this->file->analysis->tablename);  
 
         foreach ($names as $name) {
             $get_data_query->where($name, '<>', '')->where($name, '<>', '-8')->where($name, '<>', '-9');

@@ -286,10 +286,10 @@ class QuesFile extends CommFile {
                 foreach($itemArray as $item){
 
                     if( isset($item['title']) )
-                    $item_title = preg_replace("/​/","",$item['title']);
+                    $item_title = preg_replace("/​/", '', $item['title']);
 
                     if( isset($item['sub_title']) )
-                    $item_sub_title = preg_replace("/​/","",$item['sub_title']);
+                    $item_sub_title = preg_replace("/​/", '', $item['sub_title']);
 
                     $newitem = new DOMElement('item');
                     $innode = $domnode->appendChild( $newitem );
@@ -326,9 +326,6 @@ class QuesFile extends CommFile {
                         $innode->setAttribute('reset', 'all');
                     }
 
-                    if( isset($item['ruletip']) )
-                    $innode->setAttribute('ruletip', $item['ruletip']);
-                    //$innode->setAttribute("ruletip", '');
                     if( isset($item['title']) )
                     $innode->appendChild( new DOMCdataSection($item_title) );
                 }
@@ -347,7 +344,7 @@ class QuesFile extends CommFile {
                 $nodelist = $domnode->getElementsByTagName('degree');
 
                 while($elem = $nodelist->item(0)) {
-                 $elem->parentNode->removeChild($elem);
+                    $elem->parentNode->removeChild($elem);
                 }
 
                 $degreeArray = isset($question['degreeArray']) ? $question['degreeArray'] : [];
