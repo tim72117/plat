@@ -47,7 +47,7 @@ foreach($pstat_table as $pstat){
 
 
 ?>
-<script src="/js/Highcharts-4.0.3/highstock.js"></script>
+<script src="/js/Highstock-2.1.8/js/highstock.js"></script>
 <script>
 
 $(function () {

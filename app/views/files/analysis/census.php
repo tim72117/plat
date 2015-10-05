@@ -6,86 +6,65 @@
 
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
 <script src="/js/angular-1.3.14/angular.min.js"></script>
-<script src="/js/jquery-1.11.2.min.js"></script>
-<script src="/js/jquery-ui-1.11.4/jquery-ui.min.js"></script>
 
-<link rel="stylesheet" href="/js/jquery-ui-1.11.4/jquery-ui.min.css" />
+<link rel="stylesheet" href="/css/Semantic-UI/2.1.4/semantic.min.css" />
 
-<link rel="stylesheet" href="/css/Semantic-UI/Semantic-UI-2.0.7/semantic.min.css" />
-
-<script type="text/javascript">
+<script>
 var app = angular.module('app', []);
 app.controller('analysisController', function($scope, $filter, $interval, $http) {
-	$scope.docs = [];
-	$scope.doc = {};
-	$scope.clouds = 'C10';
-	$scope.information = {};
-	$scope.methods = {census: '普查', sampling: '抽樣調查'};
+    $scope.docs = [];
+    $scope.doc = {};
+    $scope.clouds = 'C10';
+    $scope.information = {};
+    $scope.methods = {census: '普查', sampling: '抽樣調查'};
 
     $scope.allCensus = function() {
-        $http({method: 'POST', url: 'all_census', data:{} })
+        $http({method: 'POST', url: 'all_census', data:{}})
         .success(function(data, status, headers, config) {
+            console.log(data);
             $scope.docs = data.docs;
             var docs = $filter('filter')($scope.docs, {selected: true});
             if (docs.length > 0) {
-            	$scope.selectDoc(docs[0]);
-            	$scope.clouds = $scope.doc.target_people;
+                $scope.selectDoc(docs[0]);
+                $scope.clouds = $scope.doc.is_file.analysis.target_people;
             }
         }).error(function(e){
             console.log(e);
         });
     };
 
-    $scope.getInformation = function(doc) {
-        $http({method: 'POST', url: '/file/' + doc.intent_key + '/information', data:{} })
-        .success(function(data, status, headers, config) {
-            $scope.information = data.information;
-        }).error(function(e){
-            console.log(e);
-        });
-    };
-
-    $scope.selectDoc = function(doc) {
-    	$scope.getInformation(doc);    	
+    $scope.selectDoc = function(doc) { 
+        $scope.information = doc.analysis;  	
     	$scope.doc.selected = false;
     	$scope.doc = doc;
     	doc.selected = true;
     };
 
     $scope.enterDoc = function() {
-    	var docs = $filter('filter')($scope.docs, {selected: true});
-    	if (docs.length > 0) {
-    		location.replace('/file/' + docs[0].intent_key + '/menu'); 
-    	};    	
+        if ($scope.doc.id) {
+            location.replace('/doc/' + $scope.doc.id + '/menu'); 
+        };
     };
 
     $scope.allCensus();
 });
 
 </script>
-<style>
-
-</style>
 </head>
 
 <body ng-controller="analysisController">
 	
 <div class="ui container">
 
-		<div class="ui secondary menu">
-	        <div class="item">
-	            <img class="ui image" src="/analysis/use/images/logo_top.png" />
-	        </div>
-	        <div class="item">
-				<div class="ui small breadcrumb">
-					<a class="section" href="/page/project">首頁</a>
-					<i class="right chevron icon divider"></i>
-					<div class="active section">選擇資料庫</div>
-				</div>
-			</div>
-	    </div>  
+    <div class="ui hidden divider"></div>
 
-	<h3 class="ui block center aligned header"><i class="database icon"></i>選擇資料庫 </h3>
+    <div class="ui basic segment">
+        <div class="ui small breadcrumb">
+            <a class="section" href="/page/project">查詢平台</a>
+            <i class="right chevron icon divider"></i>
+            <div class="active section">選擇資料庫</div>
+        </div>
+    </div>
 
 	<div class="ui grid">
 		
@@ -101,7 +80,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 		<div class="four wide column">	
 			<div class="ui fluid vertical menu">
 				<div class="header item">資料庫 <div class="ui pointing left olive large label"><i class="puzzle icon"></i> 步驟 2 </div></div>
-				<a href="javascript:void(0)" class="item" ng-repeat="doc in docs | filter: {target_people: clouds}" ng-class="{active: doc.selected}" ng-click="selectDoc(doc)">
+				<a href="javascript:void(0)" class="item" ng-repeat="doc in docs | filter: {analysis: {target_people: clouds}}" ng-class="{active: doc.selected}" ng-click="selectDoc(doc)">
 					{{ doc.is_file.title }}
 				</a>
 			</div>
@@ -110,12 +89,12 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 		<div class="eight wide column">
 			<div class="ui top attached segment">
 				<button class="ui button">回上一頁</button>	
-				<button class="ui olive button" ng-class="{disabled: (docs | filter:{selected: true}).length < 1}" ng-click="enterDoc()">
+				<button class="ui olive button" ng-class="{disabled: (docs | filter: {selected: true}).length < 1}" ng-click="enterDoc()">
 					<i class="puzzle icon"></i> 步驟 3 進入資料庫
 				</button>
 			</div>
 			<div class="ui attached segment" style="min-height:550px">
-				<div class="ui top attached segment">{{ doc.is_file.title }}</div>
+				<div class="ui top attached segment">{{ information.title }}</div>
 				<table class="ui attached table">
 					<tbody>
 						<tr>

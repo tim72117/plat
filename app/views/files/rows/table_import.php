@@ -1,7 +1,7 @@
 
 <div ng-cloak ng-controller="uploadController">
 
-    <div class="ui basic segment" ng-class="{loading: sheetLoading}" ng-repeat="sheet in file.sheets">
+    <div class="ui basic segment" ng-class="{loading: sheetLoading}" ng-repeat="sheet in file.sheets" style="overflow:scroll">
 
         <div class="ui top attached orange progress" ng-class="{disabled: progress<1}">
             <div class="bar" style="width: {{ progress }}%"></div>
