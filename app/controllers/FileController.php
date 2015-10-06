@@ -15,6 +15,51 @@ class FileController extends BaseController {
         });
     }
 
+    public function lists()
+    {
+        $apps = ShareFile::with(['isFile', 'isFile.isType'])->whereHas('isFile', function($query) {
+
+            $query->where('files.type', 2);
+
+        })->where(function($query) {
+
+            $query->where(function($query) {
+                $query->where('target', 'user')->where('target_id', $this->user->id);
+            })->orWhere(function($query) {
+                $inGroups = $this->user->inGroups->lists('id');
+                $query->where('target', 'group')->whereIn('target_id', $inGroups);
+            });
+
+        })->where('visible', true)->get()->map(function($app) {
+
+            return [
+                'title' => $app->isFile->title,
+                'link'  => 'doc/' . $app->id . '/open',
+            ];
+
+        })->toArray();
+
+        $requests = RequestFile::where(function($query) {
+
+            $query->where(function($query) {
+                $query->where('target', 'user')->where('target_id', $this->user->id);
+            })->orWhere(function($query) {
+                $inGroups = $this->user->inGroups->lists('id');
+                $query->where('target', 'group')->whereIn('target_id', $inGroups);
+            });
+
+        })->where('disabled', false)->get()->map(function($request) {
+
+            return [
+                'title' => $request->description,
+                'link'  => 'request/' . $request->id . '/import',
+            ];
+
+        })->toArray();
+
+        return ['apps' => $apps, 'requests' => $requests];
+    }
+
     public function request($request_id, $method = null)
     {
         $doc_id = RequestFile::find($request_id)->doc_id;
@@ -57,7 +102,8 @@ class FileController extends BaseController {
             if ($file->is_full()) {
                 $view = View::make($file->$method());
             } else {
-                $context = View::make('demo.use.main')->nest('context', $file->$method());
+                $project = DB::table('projects')->where('code', Auth::user()->getProject())->first();
+                $context = View::make('demo.use.main', ['project' => $project])->nest('context', $file->$method());
                 $view = $this->createView($context);
             }
         } else {

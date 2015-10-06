@@ -21,15 +21,15 @@
 
 <div class="ui hidden fitted divider"></div>
 
-<div class="ui basic segment">
+<div class="ui basic segment" ng-class="{loading: loading}">
 
-    <div ng-if="result == 'bar'">
+    <div ng-if="result == 'bar' || result == 'pie'">
         <h4 class="ui header" ng-repeat="column in selected.columns">{{ column.title }}</h4>
         <div id="bar-container"></div>
     </div>
 
     <div style="overflow:auto" ng-if="result == 'table' && selected.rows.length == 0">
-        <div style="width:{{ selected.columns[0].answers.length*120 }}px">
+        <div style="width:{{ selected.columns[0].answers.length*120 }}px;min-width:500px">
             <table class="ui fixed single line table">
                 <thead>
                     <tr>
@@ -54,7 +54,7 @@
     </div>
 
     <div style="overflow:auto" ng-if="result == 'table' && selected.rows.length > 0">
-        <div style="width:{{ selected.columns[0].answers.length*120+120 }}px">
+        <div style="width:{{ selected.columns[0].answers.length*120+120 }}px;min-width:600px">
 
             <table class="ui structured fixed single line table">
                 <thead>

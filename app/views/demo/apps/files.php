@@ -93,7 +93,7 @@
                         <th>
                             <div ng-dropdown-menu class="ui floating top left pointing labeled icon dropdown basic button">
                                 <i class="filter icon"></i>
-                                <span class="text file-filter-button"><i class="icon" ng-class="!searchText.type ? 'file outline' : types[searchText.type]"></i></span>
+                                <span class="text file-filter-button"><i class="icon" ng-class="!searchType.type ? 'file outline' : types[searchType.type]"></i></span>
                                 <div class="menu transition hidden file-filter">
                                     <div class="item" ng-click="searchType = {type: '5'}"><i class="file text icon"></i>資料檔</div>
                                     <div class="item" ng-click="searchType = {type: '1'}"><i class="file text outline icon"></i>問卷</div>
@@ -304,7 +304,6 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         $filter("filter")($scope.docs, {selected: true}).map(function(doc) {
             $http({method: 'POST', url: '/doc/' + doc.id + '/delete', data:{} })
             .success(function(data, status, headers, config) {
-                console.log(data);
                 if (data.deleted) {
                     $scope.docs.splice($scope.docs.indexOf(doc), 1);
                 };
@@ -368,7 +367,6 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     };
 
     $scope.uploader.onCompleteItem = function(fileItem, response, status, headers) {
-        console.log(response);
         if( headers['content-type'] != 'application/json' )
             return;
 
@@ -388,7 +386,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     };
 
     $scope.uploader.onErrorItem = function(fileItem, response, status, headers) {
-        angular.element('.queryLog').append(response);        
+        angular.element('body').append(response);
     };
 
     $scope.uploader.onCompleteAll = function() {
@@ -476,7 +474,6 @@ app.controller('shareController', function($scope, $filter, $http) {
 
         $http({method: 'POST', url: '/docs/share/get', data:{docs: $scope.docs}})
         .success(function(data, status, headers, config) {
-            console.log(data);
             $scope.groups = data.groups;
             $scope.users = [];
             $scope.boxOpen('share');
@@ -491,7 +488,6 @@ app.controller('shareController', function($scope, $filter, $http) {
 
         $http({method: 'POST', url: '/docs/request/get', data:{docs: $scope.docs}})
         .success(function(data, status, headers, config) {
-            console.log(data);
             $scope.groups = data.groups;
             $scope.users = [];
             $scope.boxOpen('request');

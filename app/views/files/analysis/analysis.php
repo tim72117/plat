@@ -1,65 +1,61 @@
-<!DOCTYPE html>
-<html xml:lang="zh-TW" lang="zh-TW" ng-app="app">
-<head>
-<meta charset="utf-8" />
-<title><?//=$title?></title>
 
-<!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
-<script src="/js/angular-1.3.14/angular.min.js"></script>
-<script src="/js/jquery-1.11.2.min.js"></script>
 <script src="/js/Highcharts-4.1.8/js/highcharts.js"></script>
 <script src="/css/Semantic-UI/2.1.4/semantic.min.js"></script>
 <script src="/js/chart/bar.js"></script>
+<script src="/js/chart/pie.js"></script>
 
-<link rel="stylesheet" href="/css/Semantic-UI/2.1.4/semantic.min.css" />
-</head>
+<div ng-cloak ng-controller="analysisController" ng-class="{'ui container': full}" style="{{ !full ? 'max-width:1127px' : '' }}">
 
-<body ng-controller="analysisController">
-
-<div ng-cloak class="ui container">
-
-    <div class="ui hidden divider"></div>
-
-    <div class="ui basic segment">
+    <div class="ui basic segment" ng-if="full">
         <div class="ui small breadcrumb">
-            <a class="section" href="/page/project">首頁</a>
+            <a class="section" href="/page/project">查詢平台</a>
             <i class="right chevron icon divider"></i>
             <a class="section" href="open">選擇資料庫</a>
             <i class="right chevron icon divider"></i>
             <a class="section" href="menu">選擇題目</a>
             <i class="right chevron icon divider"></i>
             <div class="active section">開始分析</div>
-        </div>  
-    </div> 
+        </div>
+    </div>
 
-    <div class="ui grid" style="min-height:600px">
+    <div class="ui basic segment">
+
+    <div class="ui grid">
         
-        <div class="five wide column">
-            <div class="ui segment">
-                <div class="ui list" style="overflow-y: auto;max-height:600px">
-                    <div class="item" ng-repeat="column in columns | filter: {choosed: true}">
-                        <div class="content">
-                            <div class="ui checkbox">
-                                <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.selected" ng-click="setColumns(column);getCount()" />
-                                <label for="column-{{ $index }}">{{ column.title }}</label>
-                            </div>
-                        </div>
-                    </div>                        
-                </div>
+        <div class="five wide column dimmable dimmed">
+
+            <div class="ui inverted dimmer" ng-class="{active: loading}">
+                <div class="ui text loader">Loading</div>
             </div>
 
-            <div class="ui left pointing labeled icon dropdown button active visible" ng-click="target.show=!target.show">
-                <i class="add icon"></i>
-                <span class="text">加入分析對象</span>                        
-                
-                <div class="menu transition" ng-class="{visible: target.show}" ng-click="$event.stopPropagation()">
-                    
-                    <div class="ui basic segment">
-                        <div class="ui basic button" ng-repeat="(group_key, group) in targets.groups" ng-class="{active: group.selected}" ng-click="setGroup(group)">{{ group.name }}</div>
+            <div class="ui small fluid vertical accordion menu" style="margin-top:0">
+                <div class="item">
+                    <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋欄位..."><i class="search icon"></i></div>
+                </div>
+                <div class="item">
+                    <div class="content">
+                        <div class="menu" style="overflow-y: auto;max-height:{{ targets.size > 1 ? 250 : 500 }}px">
+                            <div class="item" ng-repeat="column in columns | filter: {choosed: true} | filter: searchText">
+                                <div class="content">
+                                    <div class="ui checkbox" style="display: block">
+                                        <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.selected" ng-change="setColumns(column);getCount()" />
+                                        <label for="column-{{ $index }}" style="overflow:hidden;white-space: nowrap;text-overflow: ellipsis">{{ column.title }}</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <div class="ui basic segment" ng-repeat="group in targets.groups" ng-if="group.selected">
-                        <div class="ui list">
+                </div>
+                <div class="item">
+                    <h4 class="ui header">加入篩選條件</h4>
+                </div>
+                <div class="item" ng-repeat="(group_key, group) in targets.groups">
+                    <a class="title" ng-class="{active: group.selected}" ng-click="setGroup(group)">
+                        <i class="dropdown icon"></i>
+                        {{ group.name }}
+                    </a>
+                    <div class="content" ng-class="{active: group.selected}">
+                        <div class="menu" style="overflow-y: auto;max-height:200px">
                             <div class="item" ng-repeat="(target_key, target) in group.targets">
                                 <div class="ui checkbox">
                                     <input type="checkbox" class="hidden" id="target-{{ target_key }}" ng-model="target.selected" ng-change="getCount()" />
@@ -68,23 +64,12 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="ui basic segment" ng-show="target_group==='my'">                                
-                        <div class="ui checkbox">
-                            <input type="checkbox" class="hidden" id="target-my" ng-model="targets['my'].selected" />
-                            <label for="target-my">本校</label>
-                        </div>
-                    </div>
-                    
                 </div>
-                
             </div>
-
 
         </div>
     
         <div class="eleven wide column">
-
 
             <div class="ui top attached tabular menu">
                 <div class="item" ng-class="{active: tool===1}" ng-click="tool=1">次數分配 / 交叉表</div>
@@ -103,6 +88,9 @@
                                 </div>
                                 <div class="item" data-value="bar">
                                     <i class="bar chart icon"></i>長條圖
+                                </div>
+                                <div class="item" data-value="pie">
+                                    <i class="pie chart icon"></i>圓餅圖
                                 </div>
                             </div>
                         </div>
@@ -126,15 +114,14 @@
 
         </div>
 
-    </div>    
+    </div>
+    </div>
 
 </div>
-</body>
 
 <script>
-var app = angular.module('app', []);
+var full = full | false;
 app.controller('analysisController', function($scope, $filter, $interval, $http) {
-    $scope.authority = 1;
     $scope.tool = 1;
     $scope.frequence = {};
     $scope.crosstable = {};
@@ -144,13 +131,16 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
     $scope.limit = 2;
     $scope.selected = {columns: [], rows: []};
     $scope.result = 'table';
+    $scope.loading = false;
+    $scope.full = full;
     
     $scope.getColumns = function() {
-        $http({method: 'POST', url: 'get_questions', data:{} })
+        $scope.loading = true;
+        $http({method: 'POST', url: 'get_analysis_questions', data:{} })
         .success(function(data, status, headers, config) {
-            console.log(data);
             $scope.columns = data.questions;
             $scope.title = data.title;
+            $scope.loading = false;
         }).error(function(e){
             console.log(e);
         });
@@ -159,7 +149,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 	$scope.getGroups = function (items) {
         var groupArray = [];
         angular.forEach(items, function (item, idx) {
-            if( groupArray.indexOf(item.GroupByFieldName) === -1 )
+            if (groupArray.indexOf(item.GroupByFieldName) == -1)
 				groupArray.push(item.GroupByFieldName);
         });
         return groupArray.sort();
@@ -185,20 +175,18 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
     };
 
     $scope.setColumns = function(column) {
-        if (!column.selected) {
+        if (column.selected) {
+            if ($scope.selected.columns.length == 0) {
+                $scope.selected.columns.push(column);
+            } else if ($scope.selected.rows.length == 0) {
+                $scope.selected.rows.push(column);
+            }
+        } else {
             if ($scope.selected.columns.indexOf(column) > -1) {
                 $scope.selected.columns.length = 0;
             }
             if ($scope.selected.rows.indexOf(column) > -1) {
                 $scope.selected.rows.length = 0;
-            }
-        } else {
-            if ($scope.selected.columns.length == 0) {
-                $scope.selected.columns[0] = column;
-            } else {
-                if ($scope.selected.rows.length == 0) {
-                    $scope.selected.rows[0] = column;
-                };
             }
         } 
         if ($filter("filter")($scope.columns, {selected: true}).length > $scope.limit) {
@@ -208,7 +196,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 
     $scope.setGroup = function(group) {
         angular.forEach($scope.targets.groups, function(group, key) {
-            if( group.selected )
+            if (group.selected)
                 group.selected = false;
         });
         group.selected = true;
@@ -217,8 +205,8 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
     $scope.getTargets = function() {
         $http({method: 'POST', url: 'get_targets', data:{} })
 		.success(function(data, status, headers, config) {
-            console.log(data);		
             $scope.targets = data.targets;
+            $scope.targets.size = Object.keys($scope.targets.groups).length;
             //$scope.targets['my'].selected = true;
             angular.forEach($scope.targets.groups, function(group, group_key) {
                 angular.forEach(group.targets, function(target, target_key) {
@@ -245,55 +233,53 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
             var names = [$scope.selected.columns[0].name, $scope.selected.rows[0].name];
             $scope.getResults($scope.getCrossTable, names);
         }
+        if ($scope.selected.columns.length == 0 && $scope.selected.rows.length == 0) {
+            $scope.reset();
+        };
     }
     
     $scope.getResults = function(method, names) { 
-        console.log(names);  
+        $scope.loading = true;
         $scope.results = {};
         var groups = $scope.targets.groups;
-        for( group_key in groups ) {
-            for( target_key in groups[group_key].targets ) {
-                if( groups[group_key].targets[target_key].selected )
+        for (group_key in groups) {
+            for (target_key in groups[group_key].targets) {
+                if (groups[group_key].targets[target_key].selected)
                     method(names, group_key, target_key);
             }       
         }
+        $scope.loading = false;
     };
 
     $scope.getFrequence = function(names, group_key, target_key) {  
         $scope.targets.groups[group_key].targets[target_key].loading = true;
-        $scope.loading = true;        
         $http({method: 'POST', url: 'get_frequence', data:{name: names[0], group_key: group_key, target_key: target_key} })
-        .success(function(data, status, headers, config) {    
-            console.log(data);
+        .success(function(data, status, headers, config) {
             $scope.frequence[target_key] = data.frequence;
             $scope.total = 0 ;
             angular.forEach($scope.frequences, function(value) {
                 $scope.total += (value.total || 0)*1;
             });
             $scope.targets.groups[group_key].targets[target_key].loading = false;
-            $scope.loading = false;
-            if ($scope.result == 'bar')
-                $scope.drawBar();
+
+            $scope.drawChart();
         }).error(function(e){
             console.log(e);
         });
     };
 
     $scope.getCrossTable = function(names, group_key, target_key) {  
-        $scope.targets.groups[group_key].targets[target_key].loading = true; 
-        $scope.loading = true;     
+        $scope.targets.groups[group_key].targets[target_key].loading = true;
         $http({method: 'POST', url: 'get_crosstable', data:{name1: names[0], name2: names[1], group_key: group_key, target_key: target_key} })
         .success(function(data, status, headers, config) {
-            
             $scope.crosstable[target_key] = data.crosstable;
             $scope.total = 0 ;
             angular.forEach($scope.frequences, function(value) {
                 $scope.total += (value.total || 0)*1;
             });
             $scope.targets.groups[group_key].targets[target_key].loading = false;
-            $scope.loading = false;
-            if ($scope.result == 'bar')
-                $scope.drawCrossBar();
+
+            $scope.drawChart();
         }).error(function(e){
             console.log(e);
         });
@@ -318,7 +304,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         }
 
         bar.xAxis.categories = $scope.selected.columns[0].answers.map(function(answer) { return answer.title; });
-        $('#bar-container').highcharts(bar);console.log(bar.xAxis.categories);
+        $('#bar-container').highcharts(bar);
     };
 
     $scope.drawCrossBar = function() {
@@ -343,14 +329,47 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         $('#bar-container').highcharts(bar);
     };
 
+    $scope.drawPie = function() {
+        var targets = $scope.targetsSelected();
+
+        pie.series = [];
+        for (var target in targets) {
+            var series = {
+                name: targets[target].name,
+                colorByPoint: true,
+                data: []
+            };
+            for(var j in $scope.selected.columns[0].answers) {
+                series.data.push({
+                    name: $scope.selected.columns[0].answers[j].title,
+                    y: $scope.frequence[target][$scope.selected.columns[0].answers[j].value] | 0
+                });
+            }
+            pie.series.push(series);
+        }
+
+        $('#bar-container').highcharts(pie);
+    };
+
+    $scope.reset = function() {
+        if ($('#bar-container').highcharts())
+            $('#bar-container').highcharts().destroy();
+    };
+
+    $scope.drawChart = function() {
+        if ($scope.result == 'bar' && $scope.selected.columns.length > 0 && $scope.selected.rows.length == 0)
+            $scope.drawBar();
+        if ($scope.result == 'bar' && $scope.selected.columns.length > 0 && $scope.selected.rows.length > 0)
+            $scope.drawCrossBar();
+        if ($scope.result == 'pie' && $scope.selected.columns.length > 0 && $scope.selected.rows.length == 0)
+            $scope.drawPie();
+    };
+
     $('.chart.dropdown').dropdown({onChange: function(value) {
         $scope.$apply(function() {
             $scope.result = value;
         });        
-        if ($scope.result == 'bar' && $scope.selected.rows.length == 0)
-            $scope.drawBar();
-        if ($scope.result == 'bar' && $scope.selected.rows.length > 0)
-            $scope.drawCrossBar();
+        $scope.drawChart();
     }});
 	
 });
@@ -362,4 +381,3 @@ app.filter('groupby', function(){
     };
 });
 </script>
-</html>

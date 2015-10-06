@@ -29,6 +29,7 @@ Route::group(array('before' => 'auth_logined'), function() {
     Route::any('request/{doc_id}/{method}', 'FileController@request');
     Route::post('file/create', 'FileController@create');
     Route::post('file/upload', 'FileController@upload');
+    Route::post('docs/lists', 'FileController@lists');
     Route::post('docs/share/get', 'FileController@shared');
     Route::post('docs/share/put', 'FileController@shareTo');
     Route::post('docs/request/get', 'FileController@requested');

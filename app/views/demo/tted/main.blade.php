@@ -1,131 +1,148 @@
-
-@extends('layout-main')
+@extends('demo.layout-main')
 
 @section('head')
-<title>師資培育資料庫查詢平台</title>
-<script src="<?=asset('js/jquery-1.10.2.min.js')?>"></script>
-<script src="<?=asset('js/angular.min.js')?>"></script>
-<!--[if lt IE 9]>
-<script src="<?=asset('js/html5shiv.js')?>"></script>
-<![endif]-->
+<title>{{ $project->name }}</title>
 
-<link rel="stylesheet" href="<?=asset('demo/use/css/use100_content.css')?>" />
+<!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
+<script src="/js/jquery-1.11.2.min.js"></script>
+<script src="/js/angular-1.3.14/angular.min.js"></script>
+<script src="/js/angular-1.3.14/angular-sanitize.min.js"></script>
+<script src="/js/angular-1.3.14/angular-cookies.min.js"></script>
+<script src="/css/Semantic-UI/2.1.4/components/transition.min.js"></script>
+<script src="/css/Semantic-UI/2.1.4/components/popup.min.js"></script>
+<script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
+<script src="/js/angular-semantic-ui/dropdown.js"></script>
 
-<script type="text/javascript">
-$(document).ready(function(){	//選單功能
+<link rel="stylesheet" href="/css/Semantic-UI/2.1.4/semantic.min.css" />
 
-    $('.queryLogBtn').click(function(){
-        if( $('.queryLog').css('height')==='0px' ){
-            $('.queryLog').animate({height: '50%'}); 
-        }else{            
-            $('.queryLog').animate({height: '0%'}); 
-        }
-    });
-    $('.context').click(function(){
-        $('.queryLog').height(0);
-    });
+<style>
+::-webkit-scrollbar {
+    width: 10px;
+    background: #fff;
+}
+::-webkit-scrollbar-thumb {
+    background: #aaa;
+}
+.flex {
+    display:-webkit-flex;
+    display:flex;
+}
+.menu-left {
+    -webkit-flex: initial;
+            flex: initial;
+    width: 350px;
+    min-width: 100px;
+    padding: 5px;
+}
+.main {
+    -webkit-flex: 1;
+            flex: 1;
+    padding: 5px;
+}
+</style>
 
-    $('.shareBtn').click(function(){
-        if( $('.share').css('left')==='0px' ){
-            $('.share').animate({left: -501}); 
-        }else{
-            $('.share').animate({left: 0}); 
-        }
-    });
+<script>
+var app = angular.module('app', ['ngSanitize', 'ngCookies']);
+app.filter('startFrom', function() {
+    return function(input, start) {
+        return input.slice(start);
+    };
+})
+.controller('topMenuController', function($scope, $filter, $http) {
+    $scope.queryLog = function() {
+        angular.element('.queryLog').css('height', '50%');
+    };
+})
+.controller('leftMenuController', function($scope, $filter, $http, $cookies) {
+    $scope.menuMin = getCookie($cookies.menuMin) || false;
+    $scope.pathname = window.location.pathname;
+    $scope.closeLeftMenu = function() {
+        $scope.menuMin = !$scope.menuMin;
+        $cookies.menuMin = $scope.menuMin;
+    };
+    $scope.getDocs = function() {
+        $scope.loading = true;
+        $http({method: 'POST', url: '/docs/lists', data:{} })
+        .success(function(data, status, headers, config) {
+            $scope.apps = data.apps;
+            $scope.requests = data.requests;
+            $scope.loading = false;
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+    $scope.getDocs();
 });
+function getCookie(value) {
+    try {
+        return angular.fromJson(value);
+    } catch(e) {
+        console.log(e);
+        return null;
+    };
+}
 </script>
-
 @stop
 
 @section('body')
+<div style="position:absolute;top:0;right:0;bottom:0;left:0">
 
-<div style="width: 100%;height: 100%;max-height:100%">
+        <div>
 
-	<div style="width:100%;height: 30px;position: absolute;z-index:10;background-color: #fff">
-		<div style="background-color: #ffffff;width:100%;height:0px"></div>
-		<div style="background-color: #458A00;width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #ddd;color:#fff" align="right">			
-			<div style="float:left">
-				<? if( Auth::user()->id==1 ){ ?>
-				<a href="<?=URL::to('page/upload')?>" style="margin-left:10px" class="login-bar">上傳檔案</a>
-				<? } ?>
-			</div>
-			<div style="float:right">
-				<? if( Auth::user()->id==1 ){ ?>
-                <span style="margin-right:10px;cursor: pointer" class="login-bar shareBtn">share</span>
-				<span style="margin-right:10px;cursor: pointer" class="login-bar queryLogBtn">queryLog</span>
-				<? } ?>
-				<a href="<?=URL::to('page/project')?>" style="margin-right:10px" class="login-bar">回首頁</a>
-				<a href="<?=URL::to('page/project/profile')?>" style="margin-right:10px" class="login-bar">個人資料</a>
-				<a href="<?=URL::to('auth/password/change')?>" style="margin-right:10px" class="login-bar">更改密碼</a>
-				<a href="<?=URL::to('auth/logout')?>" style="margin-right:10px" class="login-bar">登出</a>
-			</div>
-        </div>
-	</div>
-	
-	<div class="border-box" style="height:100%;width:100%;background-color: #fff;padding-top:30px">
-		
-		<div style="height:100%;overflow-y: hidden;float:left">
-			<div style="width: 350px;height:100%;background-color: #fff;border-right: 1px solid #ddd;overflow-y: auto;margin-top:0">
-
-				
-				<div style="font-size:18px;margin-top:30px;margin-left:10px">
-					檔案夾
-				</div>
-				
-				<h2>【 師資培育資料庫查詢平台 】</h2>
-				<div>				
-				<?
-				$user = Auth::user();
-				$packageDocs = app\library\files\v0\FileProvider::make()->lists();
-				
-                $intent_key = is_null(@$fileAcitver) ? '' : $fileAcitver->intent_key;
-				
-				foreach($packageDocs as $packageDoc){
-					foreach($packageDoc['actives'] as $active){		
-
-						if( $active['active']=='open' ){
-							echo '<div class="inbox" style="clear:both;overflow: hidden;cursor:default;margin-top:10px">';
-							echo '<div class="count button page-menu '.($intent_key==$active['intent_key']?'active':'').'" folder="" style="font-size:16px;text-decoration: none;float:left;margin-left:10px">';
-							//echo '<div class="intent button" intent_key="'.$active['intent_key'].'">'.$active['active'].'</div>';
-							echo '<a href="'.URL::to('user/doc/'.$active['intent_key']).'">'.$packageDoc['title'].'</a>';
-							echo '</div>';
-							echo '</div>';
-						}
-
-					}
-				}
-
-				?>
-				</div>
-				
-			</div>
-		</div>
-
-		<div style="height: 100%;overflow-y: hidden;margin:0 0 0 200px; position: relative" class="context">
-            
-            <div style="width:500px;position: absolute;top:0;background-color: #fff;border-right: 1px solid #ddd;height: 100%;left:-501px;font-size:16px;overflow: auto" class="share">
-                <div style="margin:10px"><?=$request?></div>
+            <div class="ui attached inverted secondary menu green" ng-controller="topMenuController">
+                <div class="menu">
+                    <a class="item" ng-click="closeLeftMenu()"><i class="sidebar icon"></i></a>
+                    <div class="item">{{ $project->name }}</div>
+                </div>
+                <div class="right menu">
+                    <a class="item" href="/page/project"><i class="home icon"></i>首頁</a>
+                    <a class="item" href="/page/project/profile">個人資料</a>
+                    <a class="item" href="/auth/password/change">更改密碼</a>
+                    <a class="item" href="/auth/logout">登出</a>
+                    <a class="item" href="javascript:void(0)" ng-cloak ng-if="<?=(Auth::user()->id==1)?>" ng-click="queryLog()">queryLog</a>
+                </div>
             </div>
-            
-			<div style="height: 100%;overflow: auto;background-color: #fff;font-size:16px;text-align: left;margin-top:0">		              
-                <div style="margin:10px"><?=$context?></div>
-			</div>		
-            
-		</div>
-		
-		<div class="queryLog" style="position: absolute;bottom:0;height:0;width:100%;background-color: #fff;overflow-y: scroll;border-top:1px solid #000">			
-			<?
-				if( Auth::user()->id==1 ){
-					$queries = DB::getQueryLog();
-					foreach($queries as $key => $query){
-						echo $key.' - ';var_dump($query);echo '<br /><br />';
-					}
-				}
-			?>
-		</div>
-		
-	</div>
-	
-</div>	
+
+            <div class="flex">
+                <div class="menu-left dimmable dimmed" ng-controller="leftMenuController">
+                    <div class="ui inverted dimmer" ng-class="{active: loading}">
+                        <div class="ui text loader">Loading</div>
+                    </div>
+                    <div class="ui large fluid vertical menu">
+                        <div class="item">
+                            <div class="ui icon small input"><input type="text" ng-model="searchText.title" placeholder="搜尋..."><i class="search icon"></i></div>
+                        </div>
+                        <div class="item">
+                            <div ng-cloak class="menu" style="overflow-y: auto;max-height:400px">
+                                <a class="header green item" ng-class="{active: pathname == '/'+app.link}" ng-repeat="app in apps | filter: searchText" href="/@{{ app.link }}">@{{ app.title }}</a>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="header"><i class="cloud upload large icon"></i>待上傳資料</div>
+                            <div ng-cloak class="menu" style="overflow-y: auto;max-height:200px">
+                                <a class="header green item" ng-class="{active: pathname == '/'+request.link}" ng-repeat="request in requests" href="/@{{ request.link }}">@{{ request.title }}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="main">
+                    <?=$context?>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="queryLog" style="display:none;position: absolute;bottom:0;height:0;width:100%;background-color: #fff;overflow-y: scroll;border-top:1px solid #000">
+        <?
+            if( Auth::user()->id==1 ){
+                $queries = DB::getQueryLog();
+                foreach($queries as $key => $query){
+                    echo $key.' - ';var_dump($query);echo '<br /><br />';
+                }
+            }
+        ?>
+        </div>
+
+</div>
 
 @stop

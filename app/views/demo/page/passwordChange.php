@@ -1,4 +1,5 @@
-<div style="max-width:300px">
+
+<div class="ui basic segment" style="max-width:300px">
     <?=Form::open(array('url' => '/auth/password/change', 'method' => 'post', 'name'=>'change', 'class'=>'ui form segment'.(count($errors->all())>0 ? ' error' : '')))?>
         <h4 class="ui dividing header">修改聯絡人密碼</h4>
               

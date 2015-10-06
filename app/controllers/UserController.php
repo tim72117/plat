@@ -150,7 +150,8 @@ class UserController extends BaseController {
 
     public function passwordChangePage()
     {
-        $contents = View::make('demo.use.main')->nest('context','demo.page.passwordChange');
+        $project = DB::table('projects')->where('code', Auth::user()->getProject())->first();
+        $contents = View::make('demo.use.main', ['project' => $project])->nest('context','demo.page.passwordChange');
         
         $this->layout->content = $contents;
     }

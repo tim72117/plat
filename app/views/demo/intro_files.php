@@ -1,6 +1,5 @@
 <?php
 $user = Auth::user();
-$fileProvider = app\library\files\v0\FileProvider::make();
 
 $inGroups = $user->inGroups->lists('id');
 
@@ -33,7 +32,7 @@ foreach($shareFiles as $shareFile) {
     switch($shareFile->isFile->type) {
         default:         
             echo '<div class="item"><i class="file outline icon"></i>';
-            echo '<div class="content">教育評鑑與研究中心傳送一個檔案給你：<a href="/'.$fileProvider->download($shareFile->id).'">'.$shareFile->isFile->title.'</a></div>';
+            echo '<div class="content">教育評鑑與研究中心傳送一個檔案給你：<a href="/doc/' . $shareFile->id . '/download' . '">' . $shareFile->isFile->title . '</a></div>';
             echo '</div>';
             break;    
     }

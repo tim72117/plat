@@ -15,13 +15,15 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
     $scope.columns = [];
     $scope.question = {};
     $scope.is_variable = false;
+    $scope.loading = false;
 
     $scope.getColumns = function() {
-        $http({method: 'POST', url: 'get_questions', data:{} })
+        $scope.loading = true;
+        $http({method: 'POST', url: 'get_analysis_questions', data:{} })
         .success(function(data, status, headers, config) {
-            console.log(data);
             $scope.columns = data.questions;
             $scope.title = data.title;
+            $scope.loading = false;
         }).error(function(e){
             console.log(e);
         });
@@ -49,16 +51,18 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         }
     };
 
+    $scope.closeVariable = function() {
+        $scope.is_variable = false;
+    };
+
     $scope.getColumns();
 });
 
 </script>
 </head>
-<body ng-controller="analysisController">
+<body ng-controller="analysisController" ng-click="closeVariable()">
 
 	<div class="ui container">
-
-        <div class="ui hidden divider"></div>
 
         <div class="ui basic segment">
             <div class="ui small breadcrumb">
@@ -70,68 +74,54 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
             </div>
         </div>
 
-		<div class="ui grid">
+        <div class="ui top attached segment">
+            <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋欄位..."><i class="search icon"></i></div>
+            <a class="ui button" href="open">上一步</a>
+            <a class="ui olive button" href="javascript:void(0)" ng-click="nextStep()">下一步</a>
+        </div>
 
-			<div class="five wide column">
-				<div class="ui fluid vertical pointing menu">
-					<div class="header item">題目類型</div>
-					<a class="item" ng-click="clouds = '1'" ng-class="{active: clouds == '1'}">1</a>
-				</div>
-			</div>
+        <div class="ui attached segment" ng-class="{loading: loading}">
 
-			<div class="eleven wide column">
+            <div class="ui checkbox">
+                <input type="checkbox" id="selectAll" ng-model="isSelectAll" ng-change="selectAll()">
+                <label for="selectAll">全選(勾選題目時，建議您參考問卷，以完整瞭解題目原意！)</label>
+            </div>
 
-				<div class="ui basic top attached segment">
-					<a class="ui button" href="open">上一步</a>
-					<a class="ui olive button" href="javascript:void(0)" ng-click="nextStep()">下一步</a>
-				</div>
+            <div class="ui divider"></div>
 
-				<div class="ui attached segment">
+            <div class="ui divided list" style="min-height:600px;max-height:600px;overflow-y:scroll">
 
-					<div class="ui checkbox">
-						<input type="checkbox" id="selectAll" ng-model="isSelectAll" ng-change="selectAll()">
-						<label for="selectAll">全選(勾選題目時，建議您參考問卷，以完整瞭解題目原意！)</label>
-					</div>
+                <div class="item" ng-repeat="column in columns | filter: searchText">
 
-					<div class="ui divider"></div>
+                    <div class="middle aligned content">
+                        <div class="ui checkbox" style="margin-right:120px">
+                            <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.choosed" ng-change="resetAll()" />
+                            <label for="column-{{ $index }}">{{ column.title }}</label>
+                        </div>
+                        <div class="ui right floated mini button" ng-click="$event.stopPropagation();getAnswers(column)">選項定義</div>
+                    </div>
 
-					<div class="ui divided list" style="min-height:500px;max-height:500px;overflow-y:scroll">
+                </div>
 
-						<div class="item" ng-repeat="column in columns">
+            </div>
 
-                            <div class="middle aligned content">
-								<div class="ui checkbox" style="margin-right:120px">
-                                    <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.choosed" ng-change="resetAll()" />
-                                    <label for="column-{{ $index }}">{{ column.title }}</label>
-                                </div>
-                                <div class="ui right floated mini button" ng-click="getAnswers(column)">選項定義</div>                             
-                            </div>
-
-						</div>
-
-					</div>
-
-				</div>
-
-
-
-			</div>
-
-		</div>
-
-		<div class="ui container">
-			<div class="ui divider"></div>
-			<div class="ui center aligned basic segment">
-				<div class="ui horizontal bulleted link list">				
-					<span class="item">© 2013 國立台灣師範大學 教育研究與評鑑中心</span>
-				</div>
-			</div>
-		</div>	
+        </div>
 
 	</div>
 
-    <div class="ui small test modal transition visible active" style="margin-top: -300px" ng-if="is_variable">
+    <div class="ui container">
+        <div class="ui divider"></div>
+        <div class="ui center aligned basic segment">
+            <div class="ui horizontal bulleted link list">
+                <span class="item">© 2013 國立台灣師範大學 教育研究與評鑑中心</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui modal transition visible active" style="margin-top: -300px" ng-if="is_variable" ng-click="$event.stopPropagation()">
+
         <h3 class="ui header">{{ question.title }}</h3>
+
         <div class="ui basic segment" style="max-height:500px;overflow-y:auto">
 
             <table class="ui celled table">

@@ -4,6 +4,49 @@ namespace app\library\v10;
 class QuestionXML {
     static $questions;
 
+    static function get_subs($subs, $index, &$questions, $parent_title = null)
+    {
+        foreach($subs as $sub) {
+
+            $sub->title = strip_tags(str_replace(PHP_EOL, '', $sub->title));
+
+            if ($sub->type=='radio' || $sub->type=='select') {
+                if (isset($parent_title))
+                    $sub->title = $parent_title . '-' . $sub->title;
+
+                foreach($sub->answers as $answer) {
+                    $answer->title = strip_tags(str_replace(PHP_EOL, '', $answer->title));
+                }
+
+                array_push($questions, $sub);
+
+                foreach($sub->answers as $answer) {
+                    self::get_subs($answer->subs, $index, $questions, $sub->title . '-' . $answer->title);
+                }
+            }
+
+            if ($sub->type=='scale') {
+                foreach ($sub->questions as $question) {
+                    $question->title = strip_tags(str_replace(PHP_EOL, '', $question->title));
+                    $question->title = $sub->title . '-' . $question->title;
+                    $question->answers = $sub->answers;
+                    array_push($questions, $question);
+                }
+            }
+
+            if ($sub->type=='checkbox') {
+                foreach ($sub->questions as $question) {
+                    $question->title = strip_tags(str_replace(PHP_EOL, '', $question->title));
+                    $question->title = $question->title . '-' . $sub->title;
+                    $question->answers = [(object)['title' => '是', 'value' => '1'], (object)['title' => '否', 'value' => '0']];
+                    array_push($questions, $question);
+
+                    self::get_subs($question->subs, $index, $questions, $question->title);
+                }
+            }
+        }
+    }
+
     static function to_array($question, $layer, $parrent)
     {
         $question_new = (object)[];

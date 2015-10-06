@@ -15,7 +15,8 @@ class PageController extends BaseController {
 
     public function project($context = 'intro', $parameter = null)
     {
-        $contents = View::make('demo.use.main')->nest('context','demo.' . $this->project . '.page.' . $context);	
+        $project = DB::table('projects')->where('code', $this->project)->first();
+        $contents = View::make('demo.use.main', ['project' => $project])->nest('context','demo.' . $this->project . '.page.' . $context);
 
         $this->layout->content = $contents;
 
@@ -31,7 +32,8 @@ class PageController extends BaseController {
 
     public function page($context)
     {
-        $contents = View::make('demo.use.main')->nest('context','demo.page.' . $context);
+        $project = DB::table('projects')->where('code', $this->project)->first();
+        $contents = View::make('demo.use.main', ['project' => $project])->nest('context','demo.page.' . $context);
         
         $this->layout->content = $contents;
         
@@ -42,5 +44,4 @@ class PageController extends BaseController {
 
         return $response;
     }
-
 }
