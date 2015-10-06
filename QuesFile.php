@@ -54,6 +54,11 @@ class QuesFile extends CommFile {
         return 'editor.editor-ng';
     }
 
+    public function analysis()
+    {
+        return 'files.analysis.analysis';
+    }
+
     public function add_page()
     {
         $index = $this->file->cencus->pages()->getQuery()->max('page')+1;
@@ -374,7 +379,7 @@ class QuesFile extends CommFile {
         
     } 
     
-    public function write($question_array, $name, $layer, $type){
+    private function write($question_array, $name, $layer, $type){
         $root = 1;
         $question_root_array = $question_array->xpath($type);
         foreach ($question_root_array as $question) {
@@ -510,7 +515,7 @@ class QuesFile extends CommFile {
         //DB::table($tablename.'_pstat')->update(array('page'=>1, 'updated_at'=>NULL));
     }
 
-    public function create_pstat($tablename) {
+    private function create_pstat($tablename) {
         !Schema::hasTable($tablename.'_pstat') && Schema::create($tablename.'_pstat', function($table){
             $table->integer('id', true);
             $table->string('newcid', 20)->unique();
@@ -578,11 +583,6 @@ class QuesFile extends CommFile {
         return 'files.ques.report';
     }
 
-    public function analysis()
-    {
-        return 'files.ques.analysis';
-    }
-
     public function template() {
         
         return View::make('editor.question');        
@@ -593,57 +593,10 @@ class QuesFile extends CommFile {
         return View::make('editor.question_demo');        
     }
     
-    function decodeInput($input)
+    private function decodeInput($input)
     {
         return json_decode(urldecode(base64_decode($input)));
     }
-
-    function get_struct_from_view($questions, $call = null, $parent_id = null, $parent_value = null)
-    {
-        $subs = [];
-        foreach($questions as $question){
-            
-            $sub = (object)[
-                'id' => null,
-                //'answers' => [],
-                //'subs' => [],
-            ];
-            
-            $question->parent_id = $parent_id;
-            $question->parent_value = $parent_value;
-            
-            if( isset($question->answers) ) {               
-
-                $sub->id = isset($question->id) ? $question->id : (is_callable($call) ? $call($question) : null);
-                
-                foreach($question->answers as $index => $anwser){
-                    if( isset($anwser->subs) ){
-
-                        $value = isset($anwser->value) ? $anwser->value : null;
-
-                        $this->get_struct_from_view($anwser->subs, $call, $sub->id, $value);
-
-                        //$sub->answers[$index] = ['subs' => ];
-
-                        //unset($anwser->subs);
-                    }else{
-
-                        //$sub->answers[$index] = ['subs' => []];
-
-                    } 
-                }
-                
-                array_push($subs, $sub->id);
-            }
-            
-            if( isset($question->subs) ) {
-                //$sub->subs = 
-                $this->get_struct_from_view($question->subs, $call, $question->id);                
-            }
-            
-        }
-        return $subs;
-    } 
 
     public function xml_to_array()
     {        
@@ -658,8 +611,6 @@ class QuesFile extends CommFile {
             }
             return $question_box;
         })->toArray();
-
-        //echo '<script>console.log(' . json_encode($pages) . ');</script>';exit;    
         
         return ['pages' => $pages, 'edit' => $this->file->cencus->edit];
     } 
@@ -667,6 +618,79 @@ class QuesFile extends CommFile {
     public function get_questions()
     {
         return $this->xml_to_array();
+    }
+
+    public function get_census()
+    {
+        return [
+            'title'     => $this->file->title,
+            'questions' => $this->get_questions(),
+        ];
+    }
+
+    public function get_analysis_questions()
+    {
+        $questions = [];
+        foreach($this->xml_to_array()['pages'] as $index => $page) {
+            \app\library\v10\QuestionXML::get_subs($page->questions, $index, $questions);
+        }
+        $questions = array_values(array_filter($questions, function(&$question) {       
+            $question->choosed = true;
+            return true;
+        }));
+        return ['questions' => $questions, 'title' => $this->file->title];
+    }    
+
+    public function get_targets()
+    {
+        return [
+            'targets' => [
+                'groups' => [
+                    'all' => ['key' => 'all', 'name' => '不篩選', 'targets' => ['all' => ['name' => '全部', 'selected' => true]]]
+                ]
+            ]
+        ];
+    }
+
+    public function get_frequence()
+    {
+        $name = Input::get('name');
+
+        $table = DB::table($this->file->cencus->database . '.INFORMATION_SCHEMA.COLUMNS')->where('COLUMN_NAME', $name)->select('TABLE_NAME')->first();
+
+        $data_query = DB::table($this->file->cencus->database . '.dbo.' . $table->TABLE_NAME);
+
+        $frequence = $data_query->groupBy($name)->select(DB::raw('count(*) AS total'), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->remember(3)->lists('total', 'name');
+
+        return ['frequence' => $frequence];
+    }
+
+    public function get_crosstable()
+    {
+        $name1 = Input::get('name1');
+        $name2 = Input::get('name2');
+
+        $tables = DB::table($this->file->cencus->database . '.INFORMATION_SCHEMA.COLUMNS')
+            ->whereIn('COLUMN_NAME', [$name1, $name2])->select('TABLE_NAME', 'COLUMN_NAME')->lists('TABLE_NAME', 'COLUMN_NAME');
+
+        $data_query = DB::table($this->file->cencus->database . '.dbo.' . $tables[$name1] . ' AS table1')
+            ->leftJoin($this->file->cencus->database . '.dbo.' . $tables[$name2] . ' AS table2', 'table1.newcid', '=', 'table2.newcid');
+
+        $frequences = $data_query->groupBy('table1.' . $name1, 'table2.' . $name2)
+            ->select(DB::raw('count(*) AS total, CAST(table1.' . $name1 . ' AS varchar) AS name1, CAST(table2.' . $name2 . ' AS varchar) AS name2'))->remember(3)->get();
+
+        //$columns_horizontal = [];
+        //$columns_vertical = [];
+        $crosstable = [];
+
+        foreach($frequences as $frequence) {
+            //$columns_horizontal = array_add($columns_horizontal, $frequence->name1, $frequence->name1);
+            //$columns_vertical = array_add($columns_vertical, $frequence->name2, $frequence->name2);
+            $crosstable = array_add($crosstable, $frequence->name1, []);
+            $crosstable[$frequence->name1][$frequence->name2] = $frequence->total;
+        }
+
+        return ['crosstable' => $crosstable];
     }
 
     // uncomplete
@@ -677,39 +701,10 @@ class QuesFile extends CommFile {
         $shareFile = InterViewFile::create((object)['title' => $this->file->title, 'type' => 9]);
 
         $interViewFile = new InterViewFile($shareFile->id);
-        
+
         $interViewFile->save_ques_to_db($pages);
-        
+
         return 1;
-    }
-
-    public function title()
-    {
-        return $this->file->title;
-    }
-
-    public function get_census()
-    {
-        return [
-            'title'     => $this->title(),
-            'questions' => $this->get_questions(),
-        ];
-    }
-
-    public function get_frequence()
-    {
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('database', 'table')->first();
-
-        $question = Input::get('question');
-
-        $frequence = DB::table($ques_doc->database . '.dbo.' . $ques_doc->table . '_page' . ($question['page']+1))
-            ->where($question['name'], '<>', '')
-            ->groupBy($question['name'])
-            ->select(DB::raw('count(*) AS total'), $question['name'])            
-            ->lists('total', $question['name']);
-
-        //var_dump($frequencesTable);exit;
-        return ['frequence' => $frequence];
     }
 
     public function to_old_analysis()
@@ -777,5 +772,52 @@ class QuesFile extends CommFile {
         $xml = $dom->ownerDocument->saveXML( $dom->ownerDocument->documentElement );
 
         return $page->update(['xml' => $xml]);
+    }
+
+    function get_struct_from_view($questions, $call = null, $parent_id = null, $parent_value = null)
+    {
+        $subs = [];
+        foreach($questions as $question){
+            
+            $sub = (object)[
+                'id' => null,
+                //'answers' => [],
+                //'subs' => [],
+            ];
+            
+            $question->parent_id = $parent_id;
+            $question->parent_value = $parent_value;
+            
+            if( isset($question->answers) ) {               
+
+                $sub->id = isset($question->id) ? $question->id : (is_callable($call) ? $call($question) : null);
+                
+                foreach($question->answers as $index => $anwser){
+                    if( isset($anwser->subs) ){
+
+                        $value = isset($anwser->value) ? $anwser->value : null;
+
+                        $this->get_struct_from_view($anwser->subs, $call, $sub->id, $value);
+
+                        //$sub->answers[$index] = ['subs' => ];
+
+                        //unset($anwser->subs);
+                    }else{
+
+                        //$sub->answers[$index] = ['subs' => []];
+
+                    } 
+                }
+                
+                array_push($subs, $sub->id);
+            }
+            
+            if( isset($question->subs) ) {
+                //$sub->subs = 
+                $this->get_struct_from_view($question->subs, $call, $question->id);                
+            }
+            
+        }
+        return $subs;
     }
 }

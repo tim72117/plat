@@ -37,59 +37,16 @@ class AnalysisFile extends CommFile {
     {
         Input::has('columns_choosed') && Session::put('analysis-columns-choosed', Input::get('columns_choosed', []));
 
-        return 'files.analysis.analysis';
+        return 'files.analysis.analysis-layout';
     }
 
-    public function get_subs($subs, $index, &$questions, $parent_title = null)
-    {
-        foreach($subs as $sub) {
-
-            $sub->title = strip_tags(str_replace(PHP_EOL, '', $sub->title));
-
-            if ($sub->type=='radio' || $sub->type=='select') {
-                if (isset($parent_title))
-                    $sub->title = $parent_title . '-' . $sub->title;
-
-                foreach($sub->answers as $answer) {
-                    $answer->title = strip_tags(str_replace(PHP_EOL, '', $answer->title));
-                }
-
-                array_push($questions, $sub);
-
-                foreach($sub->answers as $answer) {
-                    $this->get_subs($answer->subs, $index, $questions, $sub->title . '-' . $answer->title);                        
-                }
-            }
-
-            if ($sub->type=='scale') {
-                foreach ($sub->questions as $question) {
-                    $question->title = strip_tags(str_replace(PHP_EOL, '', $question->title));
-                    $question->title = $sub->title . '-' . $question->title;
-                    $question->answers = $sub->answers;
-                    array_push($questions, $question);
-                }
-            }
-
-            if ($sub->type=='checkbox') {
-                foreach ($sub->questions as $question) {
-                    $question->title = strip_tags(str_replace(PHP_EOL, '', $question->title));
-                    $question->title = $sub->title . '-' . $question->title;
-                    $question->answers = [(object)['title' => '是', 'value' => '1'], (object)['title' => '否', 'value' => '0']];
-                    array_push($questions, $question);
-
-                    $this->get_subs($question->subs, $index, $questions, $question->title);
-                }
-            }
-        }
-    }
-
-    public function get_questions()
+    public function get_analysis_questions()
     {        
         $quesFile = new QuesFile($this->file->analysis->ques, $this->user);
 
         $questions = [];
-        foreach($quesFile->get_questions()['pages'] as $index => $page) {
-            $this->get_subs($page->questions, $index, $questions);
+        foreach($quesFile->xml_to_array()['pages'] as $index => $page) {
+            \app\library\v10\QuestionXML::get_subs($page->questions, $index, $questions);
         }
 
         $columns = DB::table('analysis_data.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $this->file->analysis->tablename)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
