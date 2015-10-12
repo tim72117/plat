@@ -224,7 +224,7 @@ class AnalysisFile extends CommFile {
         $script_path = $path . '/' . $name . '.script.R';
         $output_path = $path . '/' . $name . '.out';
 
-        $filesystem->put($source_path, $r_intro_data);	
+        $filesystem->put($source_path, $r_intro_data);
 
         $r_intro_script .= 'source("' . $rscript_path .'f_Frequence.R")' . "\n";
         $r_intro_script .= 'source("' . $rscript_path .'json.R")' . "\n";
@@ -236,7 +236,7 @@ class AnalysisFile extends CommFile {
 
         //$r_intro_script = 'write(1,"'. $output_path . '");';
 
-        $filesystem->put($script_path, $r_intro_script);	
+        $filesystem->put($script_path, $r_intro_script);
 
         try {
 
@@ -245,9 +245,9 @@ class AnalysisFile extends CommFile {
             $ouput = shell_exec('C:\R\bin\x64\RScript.exe --vanilla ' . $script_path . ' ');
 
             //$filesystem->delete($source_path);
-            //$filesystem->delete($script_path);	
+            //$filesystem->delete($script_path);
             $ouput_data = json_decode(eval("return (" . substr($ouput, 4) . ");"));
-            //$ouput_data = json_decode($filesystem->get($output_path));	
+            //$ouput_data = json_decode($filesystem->get($output_path));
         } catch (Exception $e) {
             var_dump($e);exit;
         }
