@@ -17,8 +17,10 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
     $scope.clouds = 'C10';
     $scope.information = {};
     $scope.methods = {census: '普查', sampling: '抽樣調查'};
+    $scope.types = [{key: 'C10', title: '高一專一'}, {key: 'C11', title: '高二專二'}];
 
     $scope.allCensus = function() {
+        $scope.loading = true;
         $http({method: 'POST', url: 'all_census', data:{}})
         .success(function(data, status, headers, config) {
             console.log(data);
@@ -28,6 +30,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
                 $scope.selectDoc(docs[0]);
                 $scope.clouds = $scope.doc.is_file.analysis.target_people;
             }
+            $scope.loading = false;
         }).error(function(e){
             console.log(e);
         });
@@ -52,7 +55,11 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 </script>
 </head>
 
-<body ng-controller="analysisController">
+<body ng-cloak ng-controller="analysisController">
+
+    <div class="ui inverted dimmer" ng-class="{active: loading}">
+        <div class="ui text loader">Loading</div>
+    </div>
 
     <div class="ui container">
 
@@ -66,34 +73,31 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 
         <div class="ui grid">
 
-            <div class="four wide column">
-                <div class="ui fluid vertical pointing menu">
-                    <div class="header item">資料庫類型 <div class="ui olive large label"><i class="puzzle icon"></i> 步驟 1 </div></div>
-                    <a href="javascript:void(0)" class="item" ng-click="clouds = 'C10'" ng-class="{active: clouds == 'C10'}">高一專一</a>
-                    <a href="javascript:void(0)" class="item" ng-click="clouds = 'C11'" ng-class="{active: clouds == 'C11'}">高二專二</a>
-                    <a href="javascript:void(0)" class="item" ng-click="clouds = 'CT'" ng-class="{active: clouds == 'CT'}">教師</a>
-                    <a href="javascript:void(0)" class="item" ng-click="clouds = 'C11P'" ng-class="{active: clouds == 'C11P'}">高二家長</a>
-                </div>
-            </div>
-            <div class="four wide column">
-                <div class="ui fluid vertical menu">
-                    <div class="header item">資料庫 <div class="ui olive large label"><i class="puzzle icon"></i> 步驟 2 </div></div>
-                    <a href="javascript:void(0)" class="item" ng-repeat="doc in docs | filter: {analysis: {target_people: clouds}}" ng-class="{active: doc.selected}" ng-click="selectDoc(doc)">
-                        {{ doc.is_file.title }}
-                    </a>
+            <div class="five wide column">
+                <div class="ui vertical fluid large menu">
+                    <div class="item" ng-repeat="type in types">
+                        <div class="header">{{ type.title }}</div>
+                        <div class="menu">
+                            <a class="item" ng-repeat="doc in docs | filter: {analysis: {target_people: type.key}}" ng-class="{active: doc.selected}" ng-click="selectDoc(doc)">
+                                {{ doc.is_file.title }}
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="eight wide column" style="min-height:550px">
-                <div class="ui top attached segment">
-                    <button class="ui button">回上一頁</button>
-                    <button class="ui olive button" ng-class="{disabled: (docs | filter: {selected: true}).length < 1}" ng-click="enterDoc()">
-                        <i class="puzzle icon"></i> 步驟 3 進入資料庫
-                    </button>
-                </div>
-                <div class="ui attached segment">{{ information.title }}</div>
-                <table class="ui attached table">
+            <div class="eleven wide column" style="min-height:550px">
+
+                <table class="ui table">
                     <tbody>
+                        <tr>
+                            <td colspan="2">
+                                <h3 class="ui header">{{ information.title }} </h3>
+                                <button class="ui olive button" ng-class="{disabled: (docs | filter: {selected: true}).length < 1}" ng-click="enterDoc()">
+                                    <i class="puzzle icon"></i> 進入資料庫
+                                </button>
+                            </td>
+                        </tr>
                         <tr>
                             <td class="collapsing">調查開始時間 :</td>
                             <td>{{ information.time_start }}</td>

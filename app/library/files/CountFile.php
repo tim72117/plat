@@ -3,23 +3,8 @@ namespace app\library\files\v0;
 use DB, View, Response, Config, Schema, Session, Input, ShareFile, Auth, Question, Answer, Carbon\Carbon;
 
 class CountFile extends CommFile {
-	
-	/**
-	 * @var rows
-	 */
-	public $rows;
-
-	/**
-	 * @var info
-	 */
-	public $info;
-
-	public static $intent = array(
-        'open',	
-        'create'
-	);
         
-    function __construct($doc_id) 
+    function __construct($doc_id)
     {
         $shareFile = ShareFile::find($doc_id);
 
@@ -33,12 +18,7 @@ class CountFile extends CommFile {
         return false;
     }
 
-	public static function get_intent() 
-    {
-		return array_merge(parent::$intent,self::$intent);
-	}
-	     
-    public function get_views() 
+    public function get_views()
     {
         return ['open'];
     }
@@ -53,11 +33,6 @@ class CountFile extends CommFile {
     public function open()
     {        
         return 'files.count.count'; 
-    }
-
-    function decodeInput($input)
-    {        
-        return json_decode(urldecode(base64_decode($input)));
     }
 
     public function get_columns()

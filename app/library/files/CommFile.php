@@ -112,6 +112,11 @@ class CommFile {
 
     public function share_to() { }
 
+    private function decodeInput($input)
+    {
+        return json_decode(urldecode(base64_decode($input)));
+    }
+
     public function id()
     {
         return $this->file->id;

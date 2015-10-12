@@ -7,29 +7,29 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Config\FileLoader;
 use Illuminate\Config\Repository;
 
-class CustomFile extends CommFile {	
+class CustomFile extends CommFile {
 
-	function __construct(Files $file, User $user) 
-	{
-		parent::__construct($file, $user);
-	}
+    function __construct(Files $file, User $user)
+    {
+        parent::__construct($file, $user);
+    }
 
-	public function get_views() 
-	{
-		return ['open'];
-	}
+    public function get_views()
+    {
+        return ['open'];
+    }
 
-	public function open()
-	{
-		return $this->file->file;
-	}
+    public function open()
+    {
+        return $this->file->file;
+    }
 
-	public function is_full()
-	{
+    public function is_full()
+    {
         $information = json_decode($this->file->information);
 
-		return isset($information->full) && $information->full;
-	}
+        return isset($information->full) && $information->full;
+    }
 
     public function __call($method, $args)
     {
@@ -42,5 +42,5 @@ class CustomFile extends CommFile {
         if (is_callable($func)) {
             return call_user_func($func);
         }
-    }	
+    }
 }

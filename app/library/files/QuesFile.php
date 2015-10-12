@@ -46,6 +46,16 @@ class QuesFile extends CommFile {
 
         return 'editor.editor';
     }
+
+    public function open_temp()
+    {
+        if (!$this->file->cencus->pages()->getQuery()->exists())
+            $this->add_page();
+
+        View::share('cencus', $this->file->cencus);
+
+        return 'editor.editor-temp';
+    }
     
     public function open_ng()
     {
@@ -68,7 +78,165 @@ class QuesFile extends CommFile {
             'xml'  => '<?xml version="1.0"?><page><init/></page>',
         ]);
     }
-    
+
+    public function demo()
+    {
+        $page = $this->file->cencus->pages->filter(function($page) {
+            return $page->page == Input::get('page', 1);
+        })->first();
+
+        $questions = simplexml_load_string($page->xml);
+
+        $questionHTML = '';
+        foreach ($questions as $key => $question) {
+            if ($question->getName()=='question') {
+                $questionHTML .= \app\library\v10\buildQuestion::build($question, $questions, 0, 'no');
+            }
+        }
+
+        return View::make('editor.page', [
+            'question'            => $questionHTML,
+            'questionEvent'       => \app\library\v10\buildQuestionEvent::buildEvent($questions),
+            'questionEvent_check' => '',
+            'init_value'          => '',
+            'isPhone'             => false,
+            'cencus'              => $this->file->cencus,
+        ])->nest('child_footer', 'demo.use.footer');
+    }
+
+    public function codebook()
+    {
+        View::share('cencus', $this->file->cencus);
+
+        return 'files.ques.codebook';
+    }
+
+    public function receives()
+    {
+        View::share('cencus', $this->file->cencus);
+
+        return 'files.ques.traffic';
+    }
+
+    public function spss()
+    {
+        View::share('cencus', $this->file->cencus);
+
+        return 'files.ques.spss';
+    }
+
+    public function report()
+    {
+        View::share('cencus', $this->file->cencus);
+
+        return 'files.ques.report';
+    }
+
+    public function template()
+    {
+        return View::make('editor.question');
+    }
+
+    public function template_demo()
+    {
+        return View::make('editor.question_demo');
+    }
+
+    public function xml_to_array()
+    {
+        $pages = $this->file->cencus->pages->map(function($page) {
+            $question_box = (object)['index' => $page->page, 'questions' => []];
+            $questions = simplexml_load_string($page->xml);
+            \app\library\v10\QuestionXML::$questions = $questions;
+            foreach($questions as $question){
+                if ($question->getName()=='question') {
+                    array_push($question_box->questions, \app\library\v10\QuestionXML::to_array($question, 0, 'no'));
+                }
+            }
+            return $question_box;
+        })->toArray();
+
+        return ['pages' => $pages];
+    }
+
+    public function get_questions()
+    {
+        return ['pages' => $this->xml_to_array()['pages'], 'edit' => $this->file->cencus->edit];
+    }
+
+    public function get_census()
+    {
+        return [
+            'title'     => $this->file->title,
+            'questions' => $this->get_questions(),
+        ];
+    }
+
+    public function get_analysis_questions()
+    {
+        $questions = [];
+        foreach($this->xml_to_array()['pages'] as $index => $page) {
+            \app\library\v10\QuestionXML::get_subs($page->questions, $index, $questions);
+        }
+        $questions = array_values(array_filter($questions, function(&$question) {
+            $question->choosed = true;
+            return true;
+        }));
+        return ['questions' => $questions, 'title' => $this->file->title];
+    }
+
+    public function get_targets()
+    {
+        return [
+            'targets' => [
+                'groups' => [
+                    'all' => ['key' => 'all', 'name' => '不篩選', 'targets' => ['all' => ['name' => '全部', 'selected' => true]]]
+                ]
+            ]
+        ];
+    }
+
+    public function get_frequence()
+    {
+        $name = Input::get('name');
+
+        $table = DB::table($this->file->cencus->database . '.INFORMATION_SCHEMA.COLUMNS')->where('COLUMN_NAME', $name)->select('TABLE_NAME')->first();
+
+        $data_query = DB::table($this->file->cencus->database . '.dbo.' . $table->TABLE_NAME);
+
+        $frequence = $data_query->groupBy($name)->select(DB::raw('count(*) AS total'), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->remember(3)->lists('total', 'name');
+
+        return ['frequence' => $frequence];
+    }
+
+    public function get_crosstable()
+    {
+        $name1 = Input::get('name1');
+        $name2 = Input::get('name2');
+
+        $tables = DB::table($this->file->cencus->database . '.INFORMATION_SCHEMA.COLUMNS')
+            ->whereIn('COLUMN_NAME', [$name1, $name2])->select('TABLE_NAME', 'COLUMN_NAME')->lists('TABLE_NAME', 'COLUMN_NAME');
+
+        $data_query = DB::table($this->file->cencus->database . '.dbo.' . $tables[$name1] . ' AS table1')
+            ->leftJoin($this->file->cencus->database . '.dbo.' . $tables[$name2] . ' AS table2', 'table1.newcid', '=', 'table2.newcid');
+
+        $frequences = $data_query->groupBy('table1.' . $name1, 'table2.' . $name2)
+            ->select(DB::raw('count(*) AS total, CAST(table1.' . $name1 . ' AS varchar) AS name1, CAST(table2.' . $name2 . ' AS varchar) AS name2'))->remember(3)->get();
+
+        //$columns_horizontal = [];
+        //$columns_vertical = [];
+        $crosstable = [];
+
+        foreach($frequences as $frequence) {
+            //$columns_horizontal = array_add($columns_horizontal, $frequence->name1, $frequence->name1);
+            //$columns_vertical = array_add($columns_vertical, $frequence->name2, $frequence->name2);
+            $crosstable = array_add($crosstable, $frequence->name1, []);
+            $crosstable[$frequence->name1][$frequence->name2] = $frequence->total;
+        }
+
+        return ['crosstable' => $crosstable];
+    }
+
     public function save_data()
     {
         if (!Input::has('page')) {
@@ -76,11 +244,11 @@ class QuesFile extends CommFile {
         }
 
         //-------------------------------------------------------------------載入XML開始
-        $page = $this->file->cencus->pages->filter(function($page) {
+        $ques_page = $this->file->cencus->pages->filter(function($page) {
             return $page->page == Input::get('page');
         })->first();
-        $question_array = simplexml_load_string($page->xml);
-        if( !$question_array ){ exit; }
+        $question_array = simplexml_load_string($ques_page->xml);
+        if (!$question_array) { exit; }
         //-------------------------------------------------------------------載入XML結束
 
         $obj = Input::get('obj');
@@ -144,14 +312,14 @@ class QuesFile extends CommFile {
                 $newcont = new DOMElement('idlab','');
                 $newq->appendChild( $newcont );
                 $newcont = new DOMElement('title','');
-                $newq->appendChild( $newcont );	
+                $newq->appendChild( $newcont );
                 $newcont = new DOMElement('answer');
                 $newanswer = $newq->appendChild( $newcont );
 
 
                 $dom = dom_import_simplexml($question_array);
                 $xml = $dom->ownerDocument->saveXML( $dom->ownerDocument->documentElement );
-                $page->update(array('xml' => $xml));
+                $ques_page->update(array('xml' => $xml));
 
                 echo 'newq'."\n";
             }
@@ -263,7 +431,7 @@ class QuesFile extends CommFile {
 
                 $question_id = $question['id'];
                 $question_qtype = $question['qtype'];
-                $question_code = $question['code'];	
+                $question_code = $question['code'];
 
                 if( isset($question['auto_hide']) )
                 $question_auto_hide = $question['auto_hide'];
@@ -365,7 +533,7 @@ class QuesFile extends CommFile {
 
         }
 
-        $name = 'p'.$page->page;
+        $name = 'p' . $ques_page->page;
         $this->write($question_array,$name,'q','question');
         $this->write($question_array,$name,'s','question_sub');
 
@@ -373,12 +541,11 @@ class QuesFile extends CommFile {
         $dom = dom_import_simplexml($question_array);
         $xml = $dom->ownerDocument->saveXML( $dom->ownerDocument->documentElement );
 
-        $page->update(array('xml' => $xml));
+        $ques_page->update(array('xml' => $xml));
 
         return '';
         
-    } 
-    
+    }
     private function write($question_array, $name, $layer, $type){
         $root = 1;
         $question_root_array = $question_array->xpath($type);
@@ -398,7 +565,7 @@ class QuesFile extends CommFile {
                 case 'text':
                     $index = 1;
                     $prefixs = ['checkbox' => 'c', 'scale' => 'sc', 'text' => 't'];
-                    $prefix = $prefixs[$question->type];
+                    $prefix = $prefixs[(string)$question->type];
                     $nodelist = $domnode->getElementsByTagName('item');
                     foreach ($nodelist as $item) {
                         $item->setAttribute('name', $name.$layer.$root.$prefix.$index);
@@ -418,6 +585,16 @@ class QuesFile extends CommFile {
                     break;
             }
         }
+    }
+
+    private function create_pstat($tablename) {
+        !Schema::hasTable($tablename.'_pstat') && Schema::create($tablename.'_pstat', function($table){
+            $table->integer('id', true);
+            $table->string('newcid', 20)->unique();
+            $table->tinyInteger('page');
+            $table->dateTime('updated_at')->nullable();
+            $table->dateTime('created_at');
+        });
     }
 
     public function creatTable() {
@@ -476,7 +653,7 @@ class QuesFile extends CommFile {
                                     $size = 0;
                                     foreach($question->answer->item as $item){
                                         $itemAttr = $item->attributes();
-                                        if(	strlen($itemAttr['value']) > $size )
+                                        if(strlen($itemAttr['value']) > $size )
                                             $size = strlen($itemAttr['value']);
                                     }
                                     $size++;
@@ -513,184 +690,6 @@ class QuesFile extends CommFile {
         }
 
         //DB::table($tablename.'_pstat')->update(array('page'=>1, 'updated_at'=>NULL));
-    }
-
-    private function create_pstat($tablename) {
-        !Schema::hasTable($tablename.'_pstat') && Schema::create($tablename.'_pstat', function($table){
-            $table->integer('id', true);
-            $table->string('newcid', 20)->unique();
-            $table->tinyInteger('page');
-            $table->dateTime('updated_at')->nullable();
-            $table->dateTime('created_at');
-        });
-    }
-
-    public function demo()
-    {
-        $page = $this->file->cencus->pages->filter(function($page) {
-            return $page->page == Input::get('page', 1);
-        })->first();
-
-        $questions = simplexml_load_string($page->xml);
-
-        $buildQuestionHTML = 'app\\library\\v10\\buildQuestion';
-        $buildQuestionEvent = 'app\\library\\v10\\buildQuestionEvent';
-
-        $questionHTML = '';
-        foreach ($questions as $key => $question) {
-            if($question->getName()=='question'){
-                $questionHTML .= $buildQuestionHTML::build($question, $questions, 0, 'no');
-            }
-        }
-
-        $questionEvent = $buildQuestionEvent::buildEvent($questions);
-
-        return View::make('editor.page', [
-            'question'            => $questionHTML,
-            'questionEvent'       => $questionEvent,
-            'questionEvent_check' => '',
-            'init_value'          => '',
-            'isPhone'             => false,
-            'cencus'              => $this->file->cencus,
-        ])->nest('child_footer', 'demo.use.footer');
-    }
-
-    public function codebook()
-    {
-        View::share('cencus', $this->file->cencus);
-        
-        return 'files.ques.codebook';
-    }
-    
-    public function receives()
-    {
-        View::share('cencus', $this->file->cencus);
-        
-        return 'files.ques.traffic';
-    }
-    
-    public function spss()
-    {
-        View::share('cencus', $this->file->cencus);
-        
-        return 'files.ques.spss';
-    }
-    
-    public function report()
-    {
-        View::share('cencus', $this->file->cencus);
-        
-        return 'files.ques.report';
-    }
-
-    public function template() {
-        
-        return View::make('editor.question');        
-    }  
-    
-    public function template_demo() {
-        
-        return View::make('editor.question_demo');        
-    }
-    
-    private function decodeInput($input)
-    {
-        return json_decode(urldecode(base64_decode($input)));
-    }
-
-    public function xml_to_array()
-    {        
-        $pages = $this->file->cencus->pages->map(function($page) {
-            $question_box = (object)['index' => $page->page, 'questions' => []];
-            $questions = simplexml_load_string($page->xml);
-            \app\library\v10\QuestionXML::$questions = $questions;
-            foreach($questions as $question){
-                if ($question->getName()=='question') {
-                    array_push($question_box->questions, \app\library\v10\QuestionXML::to_array($question, 0, 'no'));
-                }                
-            }
-            return $question_box;
-        })->toArray();
-        
-        return ['pages' => $pages, 'edit' => $this->file->cencus->edit];
-    } 
-
-    public function get_questions()
-    {
-        return $this->xml_to_array();
-    }
-
-    public function get_census()
-    {
-        return [
-            'title'     => $this->file->title,
-            'questions' => $this->get_questions(),
-        ];
-    }
-
-    public function get_analysis_questions()
-    {
-        $questions = [];
-        foreach($this->xml_to_array()['pages'] as $index => $page) {
-            \app\library\v10\QuestionXML::get_subs($page->questions, $index, $questions);
-        }
-        $questions = array_values(array_filter($questions, function(&$question) {       
-            $question->choosed = true;
-            return true;
-        }));
-        return ['questions' => $questions, 'title' => $this->file->title];
-    }    
-
-    public function get_targets()
-    {
-        return [
-            'targets' => [
-                'groups' => [
-                    'all' => ['key' => 'all', 'name' => '不篩選', 'targets' => ['all' => ['name' => '全部', 'selected' => true]]]
-                ]
-            ]
-        ];
-    }
-
-    public function get_frequence()
-    {
-        $name = Input::get('name');
-
-        $table = DB::table($this->file->cencus->database . '.INFORMATION_SCHEMA.COLUMNS')->where('COLUMN_NAME', $name)->select('TABLE_NAME')->first();
-
-        $data_query = DB::table($this->file->cencus->database . '.dbo.' . $table->TABLE_NAME);
-
-        $frequence = $data_query->groupBy($name)->select(DB::raw('count(*) AS total'), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->remember(3)->lists('total', 'name');
-
-        return ['frequence' => $frequence];
-    }
-
-    public function get_crosstable()
-    {
-        $name1 = Input::get('name1');
-        $name2 = Input::get('name2');
-
-        $tables = DB::table($this->file->cencus->database . '.INFORMATION_SCHEMA.COLUMNS')
-            ->whereIn('COLUMN_NAME', [$name1, $name2])->select('TABLE_NAME', 'COLUMN_NAME')->lists('TABLE_NAME', 'COLUMN_NAME');
-
-        $data_query = DB::table($this->file->cencus->database . '.dbo.' . $tables[$name1] . ' AS table1')
-            ->leftJoin($this->file->cencus->database . '.dbo.' . $tables[$name2] . ' AS table2', 'table1.newcid', '=', 'table2.newcid');
-
-        $frequences = $data_query->groupBy('table1.' . $name1, 'table2.' . $name2)
-            ->select(DB::raw('count(*) AS total, CAST(table1.' . $name1 . ' AS varchar) AS name1, CAST(table2.' . $name2 . ' AS varchar) AS name2'))->remember(3)->get();
-
-        //$columns_horizontal = [];
-        //$columns_vertical = [];
-        $crosstable = [];
-
-        foreach($frequences as $frequence) {
-            //$columns_horizontal = array_add($columns_horizontal, $frequence->name1, $frequence->name1);
-            //$columns_vertical = array_add($columns_vertical, $frequence->name2, $frequence->name2);
-            $crosstable = array_add($crosstable, $frequence->name1, []);
-            $crosstable[$frequence->name1][$frequence->name2] = $frequence->total;
-        }
-
-        return ['crosstable' => $crosstable];
     }
 
     // uncomplete
