@@ -1050,7 +1050,7 @@ function getPassword(length) {
 </form>
 		
 <div ng-controller="quesEditorController" id="building" style="width:800px">
-
+	<div class="ui button" ng-click="to_interview_file()">轉成面訪問卷檔</div>
 	<div ng-cloak id="contents">
 
 	    <div class="main">	    	
@@ -1207,5 +1207,14 @@ app.controller('quesEditorController', function($scope, $filter, $http) {
 		}
 		$(event.target).parent('td').parent('tr').parent('tbody').parent('table').parent('div').parent('.fieldA').addClass('changed');
 	}
+
+	$scope.to_interview_file = function() {
+        $http({method: 'POST', url: 'to_interview_file', data:{} })
+        .success(function(data, status, headers, config) {
+            console.log(data);          
+        }).error(function(e) {
+            console.log(e);
+        });
+    };
 });
 </script>
