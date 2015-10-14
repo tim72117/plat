@@ -64,7 +64,7 @@ class InterViewFile extends CommFile {
                 //'answers' => [],
                 //'subs' => [],
             ];
-            //var_dump($question);exit;
+
             $question->parent_id = $parent_id;
 			$question->parent_value = $parent_value;
             $question->id = null;
@@ -72,12 +72,8 @@ class InterViewFile extends CommFile {
             if( !empty($question->answers) ) {   
 
                 is_callable($call) && $call($question);
-
                 $sub->id = Question:: select('id')->max('id');
-
                 Ques_middle::create(['ques_id' => $sub->id]);
-
-                //$sub->id = isset($question->id) ? $question->id : (is_callable($call) ? $call($question) : null);
                 
                 foreach($question->answers as $index => $answer) {                    
                     is_array($answer) && $answer = (object)$answer;
@@ -100,13 +96,10 @@ class InterViewFile extends CommFile {
                 array_push($subs, $sub->id);
             }
             
-            if( !empty($question->questions) ) {
+            elseif( !empty($question->questions) ) {
 
                 is_callable($call) && $call($question);
-
-                //$ques_new = Question:: select('id')->where('title', 'like', $question->title)->first();
                 $sub->id = Question:: select('id')->max('id');
-
                 Ques_middle::create(['ques_id' => $sub->id]);
 
                 foreach($question->questions as $index => $question) {                    
@@ -125,9 +118,13 @@ class InterViewFile extends CommFile {
                         //$sub->answers[$index] = ['subs' => []];
 
                     } 
-                }
+                }                
+            }
+            else{
+                is_callable($call) && $call($question);
+                $ques_id = Question:: select('id')->max('id');
+                Ques_middle::create(['ques_id' => $ques_id]);
 
-                //$this->get_struct_from_view($question->subs, $call, $question->id);                
             }
             
         }
@@ -141,7 +138,7 @@ class InterViewFile extends CommFile {
             return Question::updateOrCreate([
                 'id' => $question->id
             ], [
-                'title' => isset($question->title) ? $question->title : '',
+                'title' => isset($question->title) ? strip_tags($question->title) : '',
                 'type'  => isset($question->type) ? $question->type : '',
                 //'answers' => isset($question->answers) ? json_encode($question->answers) : null,
                 'setting' => isset($question->code) ? json_encode(['code'=>$question->code]) : null,
@@ -150,7 +147,7 @@ class InterViewFile extends CommFile {
         }else{		
             $question->id = DB::table('ques_new')->insertGetId([
                 'file_id'    => $this->file->id,
-                'title'        => isset($question->title) ? $question->title : '',
+                'title'        => isset($question->title) ? strip_tags($question->title) : '',
                 'type'         => isset($question->type) ? $question->type : '',
                 //'answers'      => isset($question->answers) ? json_encode($question->answers) : null,
                 'parent'       => $question->parent_id,
@@ -169,10 +166,10 @@ class InterViewFile extends CommFile {
 		if( isset($question->answers) && !empty($question->answers) && $question->type!='scale_i' && $question->type!='checkbox_i' ) {
 			foreach($question->answers as $answer) {
                 is_array($answer) && $answer = (object)$answer;
-                if( $question->type == 'textarea' ) {                  
-                    Answer::updateOrCreate(['ques_id' => $question->id, 'value' => '{"size": ' . $answer->struct->size . '}', 'title' => $answer->title], []);
+                if( $question->type == 'textarea' ) {                
+                    Answer::updateOrCreate(['ques_id' => $question->id, 'value' => '{"size": ' . $answer->struct->size . '}', 'title' => strip_tags($answer->title)], []);
                 }else{                    
-                    Answer::updateOrCreate(['ques_id' => $question->id, 'value' => $answer->value], ['title' => $answer->title]);
+                    Answer::updateOrCreate(['ques_id' => $question->id, 'value' => $answer->value], ['title' => strip_tags($answer->title)]);
                 }				
 			}
 		}
@@ -193,24 +190,19 @@ class InterViewFile extends CommFile {
     {        
         $input = Input::get('pages');
         
-        //$pages = json_decode(urldecode(base64_decode($input)));
-        
         DB::table('ques_new')->truncate();
         DB::table('ques_answers')->truncate();
         DB::table('ques_page_new')->truncate();
         DB::table('ques_middle')->truncate();
-        $a = [$pages[2]];
-        $ques_struct = array_walk($a, function($page, $index) {            
+
+        $ques_struct = array_walk($pages, function($page, $index) {            
             $questions = $this->get_struct_from_view($page->questions, function($question) {              
                 return $this->updateOrCreateQuestion($question);
             });
-            //DB::table('ques_page_new')->insert(['file_id' => $this->file->id, 'value' => $index+1, 'questions2' => json_encode($questions)]);
             DB::table('ques_page_new')->insert(['file_id' => $this->file->id, 'value' => $index+1, 'questions2' => 1 ]);
             Ques_middle:: where('page_id', '=', null)->get()->each(function($query)use($index){
                     Ques_middle::find($query->id)->update(['page_id' => $index+1]);
                 });
-            // $e=Ques_middle:: where('page_id', '=', null)->get();
-            // var_dump($e->toArray());exit;
         });
         
         return $ques_struct;        
