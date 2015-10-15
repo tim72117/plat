@@ -3,8 +3,8 @@
 <!--<script src="/js/textAngular/ng-ckeditor.js"></script>-->
 
 </head>
-	
-<div ng-controller="editorController" ng-click="resetEditor()" style="width:800px">
+
+<div ng-cloak ng-controller="editorController" ng-click="resetEditor()" style="width:800px">
     
     <div class="ui basic segment">
         <div class="ui mini basic buttons">
@@ -12,65 +12,60 @@
             <div class="ui button" ng-click="save_to_db()" ng-disabled="false&&!edit"><i class="icon trash"></i>儲存db</div>
             <div class="ui button" ng-click="prev_page()"><i class="icon trash"></i>前一頁{{ page.value }}</div>
             <div class="ui button" ng-click="next_page()"><i class="icon trash"></i>下一頁</div>  
-            <div class="ui button" ng-click="to_interview_file()"><i class="icon trash"></i>轉成面訪問卷檔</div>  
-            <a  class="ui button" href="demo" target="_blank">預覽</a>
-            <div class="ui mini basic button" ng-click="addQues(questions, $index+1, question.layer)"><i class="icon file outline"></i>加入分頁</div>
-            <div class="ui mini basic button" ng-click="adding=true"><i class="icon help circle"></i>加入題目</div>
+            <a class="ui button" href="demo" target="_blank">預覽</a>
+            <div class="ui button" ng-click="addQues(questions, $index+1, question.layer)"><i class="icon file outline"></i>加入分頁</div>
+            <div class="ui button" ng-click="adding=true"><i class="icon help circle"></i>加入題目</div>
         </div>
     </div>   
-	
-    <div ng-cloak class="ui basic segment" style="min-height: 600px;min-width: 800px">	
+
+    <div class="ui basic segment" style="min-height: 600px;min-width: 800px">
 
         <div style="float:left;font-size:16px" ng-if="update_mis>1">儲存中{{ update_mis }}...</div>
         <div style="width:150px;float:left;font-size:14px;color:#aaa" ng-if="update_mis===1">所有變更都已經儲存</div>
 
-        <div class="ui horizontal divider addquestion" anchor="ques" addlayer="0"><i class="add icon"></i> 加入題目 </div>
+        <div item-page>
 
-        <div class="ui green segment" ng-repeat-start="question in page.questions">
+            <div class="ui horizontal divider" ng-click="addItem(page, 0)"><a class="ui mini label"><i class="add icon"></i>加入題目</a></div>
 
-            <div ng-if="question.type == 'list'">
-                <div class="ui form">
-                    <div class="field">
-                        <textarea ng-model="question.title" placeholder="輸入題目標題..." style="resize: none"></textarea>
-                    </div>
-                </div>
-                
-                <div class="ui accordion field">
+            <div class="ui green segment" ng-repeat-start="question in page.questions">
 
-                    <div class="title" ng-class="{active: question.open.subs}" ng-click="question.open.subs = !question.open.subs">
-                        <i class="dropdown icon"></i>題目
-                    </div>
-
-                    <div class="content" ng-if="question.subs.length > 0" ng-class="{active: question.open.subs}">
-                        <div class="ui tertiary segment" ng-repeat="sub in question.subs">
-                            <div class="ui vertical segment" question="sub" layer="0" update="update"></div>
+                <div ng-if="question.type == 'list'">
+                    <div class="ui form">
+                        <div class="field">
+                            <textarea ng-model="question.title" placeholder="輸入題目標題..." style="resize: none"></textarea>
                         </div>
                     </div>
+                    <div class="ui accordion field">
 
-                </div>  
+                        <div class="title" ng-class="{active: question.open.subs}" ng-click="question.open.subs = !question.open.subs">
+                            <i class="dropdown icon"></i>題目
+                        </div>
+
+                        <div class="content" ng-if="question.subs.length > 0" ng-class="{active: question.open.subs}">
+                            <div class="ui tertiary segment" ng-repeat="sub in question.subs">
+                                <div class="ui vertical segment" question="sub" layer="0" update="update"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div ng-if="question.type != 'list'">
+                    <div question="question" layer="0" update="update" page="page" ng-mouseover="question.hover = true" ng-mouseleave="question.hover = false"></div>
+                </div>
+
             </div>
 
-            <div ng-if="question.type != 'list'">
-                <div question="question" layer="0" update="update" page="page" ng-mouseover="question.hover = true" ng-mouseleave="question.hover = false"></div>
-            </div>            
+            <div ng-repeat-end class="ui horizontal divider" ng-click="addItem($index+1)"><a class="ui mini label"><i class="add icon"></i>加入題目</a></div>
 
         </div>
-
-        <div ng-repeat-end class="ui horizontal divider addquestion" anchor="ques" addlayer="0"><i class="add icon"></i> 加入題目 </div>
 
     </div>
     
 </div>
 
 <script>
-app.filter('startFrom', function() {
-    return function(input, start) {
-        if( typeof(input) !== 'undefined' )
-            return input.slice(start);
-    };
-})
-.controller('editorController', function editorController($http, $scope, $sce, $interval, $filter) {
-		
+app.controller('editorController', function($http, $scope, $sce, $interval, $filter) {
     $scope.pages = [];
     $scope.page = {};
     $scope.update_mis = 0;
@@ -78,17 +73,17 @@ app.filter('startFrom', function() {
         language: 'ru',
         uiColor: '#000000'
     };
-	
-	$scope.adding = false;
-	$scope.added = function() {
-		$scope.adding = false;
-	};
+
+    $scope.adding = false;
+    $scope.added = function() {
+        $scope.adding = false;
+    };
     
     $scope.resetEditor = function() {
         for(var i in CKEDITOR.instances) {
             console.log(CKEDITOR.instances[i]);
             CKEDITOR.instances[i].destroy(false);
-        }        
+        }
     };
     
     $scope.update = function(update_mis) {
@@ -102,7 +97,7 @@ app.filter('startFrom', function() {
     $scope.ques_import_var = function(question) {        
         question.answers.length = 0;
         var list = question.importText.split('\n');
-        for(index in list){	
+        for(index in list){
             var itemn = list[index].split('	');
             question.answers.push({value:itemn[0], title:itemn[1]});
         }       
@@ -131,41 +126,31 @@ app.filter('startFrom', function() {
     };  
     
     $scope.getQuestions = function() {
-        $http({method: 'POST', url: 'get_editor_questions', data:{} })
+        $http({method: 'POST', url: 'get_questions', data:{} })
         .success(function(data, status, headers, config) {
             console.log(data);
             $scope.pages = data.pages;
-            $scope.page = $scope.pages[3];            
+            $scope.page = $scope.pages[0];
         }).error(function(e) {
             console.log(e);
         });
     };
-	
-	$scope.getQuestions(); 
+
+    $scope.getQuestions();
 
     $scope.next_page = function() {
         var index = $scope.pages.indexOf($scope.page);
-        if( index < $scope.pages.length-1 )
+        if (index < $scope.pages.length-1)
             $scope.page = $scope.pages[++index];
     };
     
     $scope.prev_page = function() {
         var index = $scope.pages.indexOf($scope.page);
-        if( index > 0 )
+        if (index > 0)
             $scope.page = $scope.pages[--index];
-    };
-
-    $scope.to_interview_file = function() {
-        $http({method: 'POST', url: 'to_interview_file', data:{} })
-        .success(function(data, status, headers, config) {
-            console.log(data);          
-        }).error(function(e) {
-            console.log(e);
-        });
     };
     
 })
-
 .directive('contenteditable', function(){
     return { 
         restrict: 'A',
@@ -182,6 +167,23 @@ app.filter('startFrom', function() {
         }
     };        
 })
+.directive('itemPage', function(){
+    return {
+        restrict: 'A',
+        link: function($scope, $element, $attrs) {
+            $scope.addItem = function(index) {
+                $scope.page.questions.splice(index, 0, {
+                    title: '',
+                    type: '?',
+                    code: 'auto',
+                    answers: [],
+                    subs: [],
+                    parent_value: null
+                });
+            };
+        }
+    };
+})
 .directive('question', function($compile){
     return {
         restrict: 'A',
@@ -189,9 +191,9 @@ app.filter('startFrom', function() {
         transclude: false,
         //require: '?ngAutoHeight',
         scope: {question: '=question', layer: '=layer', parts: '=', update: '=', index: '='},
-		templateUrl: 'template',
+        templateUrl: 'template',
         ///template: '<div ng-include src="\'template\'"></div>',
-        compile: function(tElement, tAttr) {            
+        compile: function(tElement, tAttr) {
             var contents = tElement.contents().remove();
             var compiledContents;
 
@@ -209,10 +211,8 @@ app.filter('startFrom', function() {
                 });
             };      
         },
-        link: function(scope, element, attrs) {			
-            return function(scope, iElement, iAttr) {
-                console.log(scope);
-            };
+        link: function($scope, $element, $attrs) {
+
         },
         controller: function($scope, $http, $interval, $timeout) {
             
@@ -312,7 +312,7 @@ app.filter('startFrom', function() {
                     $interval.cancel($scope.stopFight);
                     $scope.stopFight = undefined;
                 }
-                $scope.stopFight = $interval(function() {                    
+                $scope.stopFight = $interval(function() {
                     if( mis > 1 ) {
                         $scope.update(mis); 
                         mis--;
@@ -349,9 +349,8 @@ app.filter('startFrom', function() {
                     console.log(e);
                 });
             };
-    
         }
-    };    
+    };
 })
 .directive('ngAutoHeight', function(){
     return { 
@@ -431,6 +430,3 @@ app.filter('startFrom', function() {
     };
 });
 </script>
-<style>
-
-</style>

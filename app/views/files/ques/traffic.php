@@ -6,14 +6,14 @@ $sum_writein_array = array();
 $sum = 0;
 
 
-$pstat_table = DB::table($cencus->database . '.dbo.' . $cencus->table . '_pstat AS p')
+$pstat_table = DB::table($census->database . '.dbo.' . $census->table . '_pstat AS p')
 	->where('page', '<>', '0')
 	->groupBy(DB::raw('page,CONVERT(char(10), updated_at, 120)'))
 	->orderBy('tStamp_new')
 	->select(DB::raw('page,count(*) as tStamp_count,CONVERT(char(10), updated_at, 120) as tStamp_new'))
 	->get();
 
-$page_max = $cencus->pages->max('page')+1;
+$page_max = $census->pages->max('page')+1;
 
 
 $table = '';
@@ -53,7 +53,7 @@ foreach($pstat_table as $pstat){
 $(function () {
         $('#container').highcharts('StockChart',{
             title: {
-                text: '<?=$cencus->title?>'
+                text: '<?=$census->title?>'
             },
             xAxis: {
 				type: 'datetime',	

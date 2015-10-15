@@ -30,7 +30,7 @@ class QuesFile extends CommFile {
     {
         parent::create();
 
-        $cencus = $this->file->cencus()->create([
+        $census = $this->file->census()->create([
             'title' => $this->file->title,
             'dir'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))'),
             'edit'  => true,
@@ -39,27 +39,27 @@ class QuesFile extends CommFile {
 
     public function open()
     {
-        if (!$this->file->cencus->pages()->getQuery()->exists())
+        if (!$this->file->census->pages()->getQuery()->exists())
             $this->add_page();
 
-        View::share('cencus', $this->file->cencus);
+        View::share('census', $this->file->census);
 
         return 'editor.editor';
     }
 
     public function open_temp()
     {
-        if (!$this->file->cencus->pages()->getQuery()->exists())
+        if (!$this->file->census->pages()->getQuery()->exists())
             $this->add_page();
 
-        View::share('cencus', $this->file->cencus);
+        View::share('census', $this->file->census);
 
         return 'editor.editor-temp';
     }
     
     public function open_ng()
     {
-        View::share('cencus', $this->file->cencus);
+        View::share('census', $this->file->census);
 
         return 'editor.editor-ng';
     }
@@ -71,9 +71,9 @@ class QuesFile extends CommFile {
 
     public function add_page()
     {
-        $index = $this->file->cencus->pages()->getQuery()->max('page')+1;
+        $index = $this->file->census->pages()->getQuery()->max('page')+1;
 
-        $this->file->cencus->pages()->create([
+        $this->file->census->pages()->create([
             'page' => $index,
             'xml'  => '<?xml version="1.0"?><page><init/></page>',
         ]);
@@ -81,7 +81,7 @@ class QuesFile extends CommFile {
 
     public function demo()
     {
-        $page = $this->file->cencus->pages->filter(function($page) {
+        $page = $this->file->census->pages->filter(function($page) {
             return $page->page == Input::get('page', 1);
         })->first();
 
@@ -100,34 +100,34 @@ class QuesFile extends CommFile {
             'questionEvent_check' => '',
             'init_value'          => '',
             'isPhone'             => false,
-            'cencus'              => $this->file->cencus,
+            'census'              => $this->file->census,
         ])->nest('child_footer', 'demo.use.footer');
     }
 
     public function codebook()
     {
-        View::share('cencus', $this->file->cencus);
+        View::share('census', $this->file->census);
 
         return 'files.ques.codebook';
     }
 
     public function receives()
     {
-        View::share('cencus', $this->file->cencus);
+        View::share('census', $this->file->census);
 
         return 'files.ques.traffic';
     }
 
     public function spss()
     {
-        View::share('cencus', $this->file->cencus);
+        View::share('census', $this->file->census);
 
         return 'files.ques.spss';
     }
 
     public function report()
     {
-        View::share('cencus', $this->file->cencus);
+        View::share('census', $this->file->census);
 
         return 'files.ques.report';
     }
@@ -144,7 +144,7 @@ class QuesFile extends CommFile {
 
     public function xml_to_array()
     {
-        $pages = $this->file->cencus->pages->map(function($page) {
+        $pages = $this->file->census->pages->map(function($page) {
             $question_box = (object)['index' => $page->page, 'questions' => []];
             $questions = simplexml_load_string($page->xml);
             \app\library\v10\QuestionXML::$questions = $questions;
@@ -161,7 +161,7 @@ class QuesFile extends CommFile {
 
     public function get_questions()
     {
-        return ['pages' => $this->xml_to_array()['pages'], 'edit' => $this->file->cencus->edit];
+        return ['pages' => $this->xml_to_array()['pages'], 'edit' => $this->file->census->edit];
     }
 
     public function get_census()
@@ -200,9 +200,9 @@ class QuesFile extends CommFile {
     {
         $name = Input::get('name');
 
-        $table = DB::table($this->file->cencus->database . '.INFORMATION_SCHEMA.COLUMNS')->where('COLUMN_NAME', $name)->select('TABLE_NAME')->first();
+        $table = DB::table($this->file->census->database . '.INFORMATION_SCHEMA.COLUMNS')->where('COLUMN_NAME', $name)->select('TABLE_NAME')->first();
 
-        $data_query = DB::table($this->file->cencus->database . '.dbo.' . $table->TABLE_NAME);
+        $data_query = DB::table($this->file->census->database . '.dbo.' . $table->TABLE_NAME);
 
         $frequence = $data_query->groupBy($name)->select(DB::raw('count(*) AS total'), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->remember(3)->lists('total', 'name');
 
@@ -214,11 +214,11 @@ class QuesFile extends CommFile {
         $name1 = Input::get('name1');
         $name2 = Input::get('name2');
 
-        $tables = DB::table($this->file->cencus->database . '.INFORMATION_SCHEMA.COLUMNS')
+        $tables = DB::table($this->file->census->database . '.INFORMATION_SCHEMA.COLUMNS')
             ->whereIn('COLUMN_NAME', [$name1, $name2])->select('TABLE_NAME', 'COLUMN_NAME')->lists('TABLE_NAME', 'COLUMN_NAME');
 
-        $data_query = DB::table($this->file->cencus->database . '.dbo.' . $tables[$name1] . ' AS table1')
-            ->leftJoin($this->file->cencus->database . '.dbo.' . $tables[$name2] . ' AS table2', 'table1.newcid', '=', 'table2.newcid');
+        $data_query = DB::table($this->file->census->database . '.dbo.' . $tables[$name1] . ' AS table1')
+            ->leftJoin($this->file->census->database . '.dbo.' . $tables[$name2] . ' AS table2', 'table1.newcid', '=', 'table2.newcid');
 
         $frequences = $data_query->groupBy('table1.' . $name1, 'table2.' . $name2)
             ->select(DB::raw('count(*) AS total, CAST(table1.' . $name1 . ' AS varchar) AS name1, CAST(table2.' . $name2 . ' AS varchar) AS name2'))->remember(3)->get();
@@ -244,7 +244,7 @@ class QuesFile extends CommFile {
         }
 
         //-------------------------------------------------------------------載入XML開始
-        $ques_page = $this->file->cencus->pages->filter(function($page) {
+        $ques_page = $this->file->census->pages->filter(function($page) {
             return $page->page == Input::get('page');
         })->first();
         $question_array = simplexml_load_string($ques_page->xml);
@@ -546,6 +546,7 @@ class QuesFile extends CommFile {
         return '';
         
     }
+
     private function write($question_array, $name, $layer, $type){
         $root = 1;
         $question_root_array = $question_array->xpath($type);
@@ -653,7 +654,7 @@ class QuesFile extends CommFile {
                                     $size = 0;
                                     foreach($question->answer->item as $item){
                                         $itemAttr = $item->attributes();
-                                        if(strlen($itemAttr['value']) > $size )
+                                        if (strlen($itemAttr['value']) > $size)
                                             $size = strlen($itemAttr['value']);
                                     }
                                     $size++;
@@ -690,6 +691,45 @@ class QuesFile extends CommFile {
         }
 
         //DB::table($tablename.'_pstat')->update(array('page'=>1, 'updated_at'=>NULL));
+    }
+
+    public function to_data_file()
+    {
+        $file = new Files(['type' => 10, 'title' => $this->file->title]);
+
+        $rowsFile = new RowsFile($file, $this->user);
+
+        $rowsFile->create();
+
+        $doc = ShareFile::updateOrCreate([
+            'file_id'    => $file->id,
+            'target'     => 'user',
+            'target_id'  => $this->user->id,
+            'created_by' => $this->user->id,
+        ]);
+
+        $sheet = $rowsFile->file->sheets->first();
+        $database = $this->file->census->database;
+        $tablename = $this->file->census->table;
+
+        foreach($this->xml_to_array()['pages'] as $index => $page) {
+            $questions = [];
+            \app\library\v10\QuestionXML::get_subs($page->questions, $index, $questions);
+
+            if (count($questions) > 0) {
+                $table = $sheet->tables()->create(['database' => $database, 'name' => $tablename . '_page' . ($page->index), 'lock' => true, 'construct_at' => Carbon::now()->toDateTimeString()]);
+                foreach($questions as $question) {
+                    $table->columns()->create([
+                        'name' => $question->name,
+                        'title' => mb_substr($question->title, 0, 200, 'utf-8'),
+                        'rules' => 'nvarchar',
+                        'unique' => false,
+                        'encrypt' => false,
+                        'isnull' => false
+                    ]);
+                }
+            }
+        }
     }
 
     // uncomplete
@@ -747,7 +787,7 @@ class QuesFile extends CommFile {
         var_dump(json_decode(urldecode(base64_decode(Input::get('question')))));exit;
 
         //-------------------------------------------------------------------載入XML開始
-        $page = $this->file->cencus->pages->filter(function($page) {
+        $page = $this->file->census->pages->filter(function($page) {
             return $page->page == Input::get('page');
         })->first();
         $question_array = simplexml_load_string($page->xml);

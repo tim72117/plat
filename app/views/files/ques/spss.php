@@ -269,13 +269,13 @@ function get_parent_text($question_array,$item_text_array_temp,$id_this){
 $table_array = array();
 $item_text_array = array();
 
-foreach($cencus->pages as $page){
+foreach($census->pages as $page){
     $question_array = simplexml_load_string($page->xml);
     $item_text_array[$page->page] = readTextTemp($question_array);
 }
 
 
-foreach($cencus->pages as $page){
+foreach($census->pages as $page){
     $question_array = simplexml_load_string($page->xml);
     
     $tdobj = new tdobj();

@@ -68,7 +68,7 @@
                 <div class="right floated right aligned six wide column">   
                     <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
                     <div class="ui basic mini buttons">
-                        <div class="ui button" ng-click="prev()"><i class="icon angle left arrow"></i></div>                    
+                        <div class="ui button" ng-click="prev()"><i class="icon angle left arrow"></i></div>
                         <div class="ui button" ng-click="next()"><i class="icon angle right arrow"></i></div>
                     </div>
                     <div class="ui basic mini buttons">
@@ -83,7 +83,7 @@
                         <th></th>
                         <th>檔名</th>
                         <th></th>
-                        <th>設定</th>                    
+                        <th>設定</th>
                         <th>已共用</th>
                         <th>更新時間</th>
                         <th>擁有人</th>
@@ -101,11 +101,10 @@
                                     <div class="item" ng-click="searchType = {type: '3'}"><i class="file outline blue icon"></i>一般檔案</div>
                                     <div class="item" ng-click="searchType = {type: '2'}"><i class="code icon"></i>程式</div>
                                     <div class="item" ng-click="searchType = {type: '7'}"><i class="bar chart icon"></i>線上分析</div>
-                                    <div class="item" ng-click="searchType = {type: '10'}"><i class="red bar chart icon"></i>線上分析</div>  
+                                    <div class="item" ng-click="searchType = {type: '10'}"><i class="file excel outline icon"></i>資料檔</div>
                                     <div class="item" ng-click="searchType = {}"><i class="file outline icon"></i>所有檔案</div> 
                                 </div>
                             </div>
-
                             <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋..."><i class="search icon"></i></div>
                         </th>
                         <th></th>
@@ -135,7 +134,7 @@
                         </td>
                         <td ng-click="rename(doc)">
                             <i class="icon" ng-class="types[doc.type]"></i>
-                            <a href="{{ doc.link.open }}" ng-if="!doc.renaming" ng-click="$event.stopPropagation()" name="whatNew">{{ doc.title }}</a>
+                            <a href="{{ doc.link }}" ng-if="!doc.renaming" ng-click="$event.stopPropagation()" name="whatNew">{{ doc.title }}</a>
                             <div class="ui mini icon input" ng-class="{loading: doc.saving}" ng-if="doc.renaming" ng-click="$event.stopPropagation()">
                                 <input type="text" ng-model="doc.title" size="50" placeholder="檔案名稱">
                                 <i class="search icon" ng-if="doc.saving"></i>
@@ -197,14 +196,14 @@ app.requires.push('angularFileUpload');
 app.controller('fileController', function($scope, $filter, $interval, $http, $cookies, FileUploader) {
     $scope.docs = [];
     $scope.predicate = 'created_at';    
-    $scope.searchText = getCookie($cookies.file_text_filter) || {};
-    $scope.searchType = getCookie($cookies.file_type_filter) || {};
-    $scope.page = getCookie($cookies.file_page) || 1;
+    $scope.searchText = $cookies.getObject('file_text_filter') || {};
+    $scope.searchType = $cookies.getObject('file_type_filter') || {};
+    $scope.page = $cookies.getObject('file_page') || 1;
     $scope.limit = 12;
     $scope.max = $scope.docs.length;
     $scope.pages = Math.ceil($scope.max/$scope.limit);
     $scope.timenow = new Date();
-    $scope.types = {1: 'file text outline', 2: 'code', 3: 'file outline blue', 5: 'file text', 6: 'file outline blue', 9: 'file text outline red', 7: 'bar chart', 10: 'red bar chart'};
+    $scope.types = {1: 'file text outline', 2: 'code', 3: 'file outline blue', 5: 'file text', 6: 'file outline blue', 9: 'file text outline red', 7: 'bar chart', 10: 'file excel outline'};
     $scope.uploading = false;
     $scope.loading = false;
     $scope.information = {};   
@@ -255,7 +254,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     });
     
     $scope.$watch('page', function() {
-        $cookies.file_page = $scope.page;
+        $cookies.put('file_page', $scope.page);
     });
 
     $scope.$watchCollection('searchType', function(query) {
@@ -263,7 +262,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
             return;
 
         $scope.setPaginate();
-        $cookies.file_type_filter = angular.toJson($scope.searchType);
+        $cookies.putObject('file_type_filter', $scope.searchType);
     });
     
     $scope.$watchCollection('searchText', function(query) {  
@@ -274,7 +273,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
             delete $scope.searchText.title;
 
         $scope.setPaginate();
-        $cookies.file_text_filter = angular.toJson($scope.searchText);        
+        $cookies.putObject('file_text_filter', $scope.searchText);
     });  
 
     $scope.setPaginate = function() {

@@ -12,8 +12,8 @@ class Files extends Eloquent {
         return $this->hasMany('Row\Sheet', 'file_id', 'id');
     }
 
-    public function cencus() {
-        return $this->hasOne('Row\Cencus', 'file_id', 'id');
+    public function census() {
+        return $this->hasOne('Row\Census', 'file_id', 'id');
     }
 
     public function analysis() {
@@ -74,8 +74,6 @@ class Struct_file {
 
     static function open($doc) 
     {
-        $link['open'] = '/doc/' . $doc->id . '/open';
-
         switch($doc->isFile->type) {
             case 1:
                 $tools = [
@@ -101,7 +99,7 @@ class Struct_file {
             'title'      => $doc->isFile->title,
             'created_by' => $doc->created_by == Auth::user()->id ? '我' : $doc->created_by,
             'created_at' => $doc->created_at->toIso8601String(),
-            'link'       => $link,
+            'link'       => '/doc/' . $doc->id . '/open',
             'type'       => $doc->isFile->type,
             'tools'      => isset($tools) ? $tools : [],
             'shared'     => array_count_values($doc->shareds->map(function($shared){

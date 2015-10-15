@@ -64,7 +64,7 @@ class Column extends Eloquent {
     }
 }
 
-class Cencus extends Eloquent {
+class Census extends Eloquent {
 
     protected $table = 'ques_doc';
 

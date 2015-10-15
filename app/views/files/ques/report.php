@@ -1,6 +1,6 @@
 <?php
 
-$reports = DB::table('report')->where('root', $cencus->dir)->select('id', 'contact', 'text', 'explorer', 'solve', 'time')->orderBy('time', 'desc')->get();
+$reports = DB::table('report')->where('root', $census->dir)->select('id', 'contact', 'text', 'explorer', 'solve', 'time')->orderBy('time', 'desc')->get();
 $out = '';
 foreach($reports as $report){
     $out .= '<tr>';

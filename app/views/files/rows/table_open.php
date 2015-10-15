@@ -1,4 +1,4 @@
-<div ng-cloak ng-controller="newTableController" style="position: absolute;top: 10px;bottom: 0;left: 10px; right: 10px">  
+<div ng-cloak ng-controller="newTableController">
     
 
 
@@ -11,8 +11,10 @@
         <a class="item" ng-click="loadPage(sheet.pages.length)" ng-class="{active:sheet.page===sheet.pages.length}" ng-if="sheet.pages.length>1">{{ sheet.pages.length }}</a>
         <a class="icon item" ng-class="{disabled:sheet.page===sheet.pages.length}"><i class="right arrow icon"></i></a>
     </div> -->
-    
-    <div class="ui segment" ng-class="{loading: loading}">  
+
+    <div class="ui pagination menu" ng-repeat="sheet in file.sheets">
+        <a class="item" ng-repeat="table in sheet.tables" ng-click="action.toSelect(sheet)">{{ table.name }}</a>
+    </div>
 
     <div class="ui menu">    
         
@@ -20,17 +22,21 @@
             <div ng-click="download()" class="ui basic button"><i class="icon download"></i>下載</div>
         </div>
 
-        <div class="item">
+        <div class="item" ng-repeat="sheet in file.sheets">
             <div class="ui compact selection dropdown active visible" ng-click="service_countrys_visible=!service_countrys_visible;$event.stopPropagation()">
                 <i class="dropdown icon"></i>
-                <span class="text" ng-repeat="sheet in file.schema.sheets | filter: {selected: true}">{{ sheet.name }}</span>    
+                <span class="text" ng-repeat="table in sheet.tables | filter: {selected: true}">{{ table.name }}</span>
                 <div class="menu transition" ng-class="{visible: service_countrys_visible}" ng-click="$event.stopPropagation()">
-                    <div class="item" ng-repeat="sheet in file.schema.sheets" ng-click="action.toSelect(sheet)">{{ sheet.name }}</div>
+                    <div class="item" ng-repeat="table in sheet.tables" ng-click="action.toSelect(sheet)">{{ table.name }}</div>
                 </div>
             </div>
         </div>    
         
     </div>
+
+    <div class="ui segment" ng-class="{loading: loading}">
+
+
                
         <table ng-repeat="($tindex, sheet) in file.schema.sheets | filter: {selected: true}" class="ui small compact table"> 
             <thead ng-repeat="table in sheet.tables">
@@ -53,7 +59,6 @@
 <script>
 app.requires.push('angularify.semantic.dropdown');
 app.controller('newTableController', function($scope, $http, $filter, $timeout) {
-    
     $scope.file = {};    
     $scope.tool = 1;
     $scope.limit = 50;
@@ -63,22 +68,6 @@ app.controller('newTableController', function($scope, $http, $filter, $timeout) 
     $scope.saving = false;
     $scope.linkingData = false;
     $scope.linkedData = false;
-
-    $scope.rules = [
-        {name: '地址', key: 'address'},
-        {name: '手機', key: 'phone', validator: /^\w+$/},
-        {name: '電話', key: 'tel', validator: /^\w+$/},
-        {name: '信箱', key: 'email', validator: /^[a-zA-Z0-9_]+@[a-zA-Z0-9._]+$/},
-        {name: '身分證', key: 'stdidnumber', validator: /^\w+$/},
-        {name: '性別: 1.男 2.女', key: 'gender', validator: /^\w+$/},
-        {name: '日期(yymmdd)', key: 'date_six', validator: /^[0-9]+-[0-9]+-[0-9]+$/},
-        {name: '是與否', key: 'bool', validator: /^[0-1]+$/},
-        {name: '整數', key: 'int', validator: /^\d+$/},
-        {name: '小數', key: 'float', validator: /^[0-9]+.[0-9]+$/},        
-        {name: '文字(50字以內)', key: 'nvarchar'},
-        {name: '文字(50字以上)', key: 'text'},
-        {name: '其他', key: 'other'}
-    ];      
     
     $scope.getRowsIndex = function(index) {
         var sheet = $filter('filter')($scope.table.sheets, {selected: true})[0];
@@ -97,10 +86,10 @@ app.controller('newTableController', function($scope, $http, $filter, $timeout) 
         $http({method: 'POST', url: 'get_file', data:{} })
         .success(function(data, status, headers, config) {
             console.log(data);
-            $scope.file = data.file;
+            $scope.file.sheets = data.sheets;
             
-            if( $scope.file.schema.sheets.length > 0 )
-                $scope.file.schema.sheets[0].selected = true; 
+            if( $scope.file.sheets[0].tables.length > 0 )
+                $scope.file.sheets[0].tables[0].selected = true;
 
             $scope.sheetLoading = false;
             $scope.loadPage(1);
@@ -244,7 +233,3 @@ app.controller('newTableController', function($scope, $http, $filter, $timeout) 
     };
 });
 </script>
-
-<style>
-    
-</style>

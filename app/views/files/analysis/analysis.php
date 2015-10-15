@@ -39,7 +39,7 @@
                                 <div class="content">
                                     <div class="ui checkbox" style="display: block">
                                         <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.selected" ng-change="setColumns(column);getCount()" />
-                                        <label for="column-{{ $index }}" style="overflow:hidden;white-space: nowrap;text-overflow: ellipsis">{{ column.title }}</label>
+                                        <label for="column-{{ $index }}" style="overflow:hidden;white-space: nowrap;text-overflow: ellipsis" title="{{ column.title }}">{{ column.title }}</label>
                                     </div>
                                 </div>
                             </div>
@@ -57,9 +57,9 @@
                     <div class="content" ng-class="{active: group.selected}">
                         <div class="menu" style="overflow-y: auto;max-height:200px">
                             <div class="item" ng-repeat="(target_key, target) in group.targets">
-                                <div class="ui checkbox">
+                                <div class="ui checkbox" style="display: block">
                                     <input type="checkbox" class="hidden" id="target-{{ target_key }}" ng-model="target.selected" ng-change="getCount()" />
-                                    <label for="target-{{ target_key }}">{{ target.name }}</label>
+                                    <label for="target-{{ target_key }}" style="overflow:hidden;white-space: nowrap;text-overflow: ellipsis" title="{{ target.name }}">{{ target.name }}</label>
                                 </div>
                             </div>
                         </div>
@@ -78,22 +78,29 @@
                 <div class="item" ng-class="{active: tool===4}" ng-click="tool=5">迴歸分析</div> -->
                 <div class="right menu">
                     <div class="item">
-                        <div class="ui floating labeled icon dropdown button chart">
-                            <input type="hidden" value="table">
-                            <i class="wizard icon"></i>
-                            <div class="text"></div>
-                            <div class="menu">
-                                <div class="item" data-value="table">
-                                    <i class="table icon"></i>表格
-                                </div>
-                                <div class="item" data-value="bar">
-                                    <i class="bar chart icon"></i>長條圖
-                                </div>
-                                <div class="item" data-value="pie">
-                                    <i class="pie chart icon"></i>圓餅圖
+
+                        <div class="ui left labeled button">
+                            <div class="ui right pointing label">
+                                <i class="wizard icon"></i>
+                                輸出結果
+                            </div>
+                            <div class="ui dropdown orange button chart">
+                                <input type="hidden" value="table">
+                                <div class="text"></div>
+                                <div class="menu">
+                                    <div class="item" data-value="table">
+                                        <i class="table icon"></i>表格
+                                    </div>
+                                    <div class="item" data-value="bar">
+                                        <i class="bar chart icon"></i>長條圖
+                                    </div>
+                                    <div class="item" data-value="pie">
+                                        <i class="pie chart icon"></i>圓餅圖
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -172,6 +179,13 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
     $scope.clear = function(column) {
         var index = $scope.columns.indexOf(column);
         $scope.columns[index].selected = false;
+    };
+
+    $scope.exchange = function() {
+        var columns = $scope.selected.columns;
+        $scope.selected.columns = $scope.selected.rows;
+        $scope.selected.rows = columns;
+        $scope.getCount();
     };
 
     $scope.setColumns = function(column) {

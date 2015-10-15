@@ -1,25 +1,29 @@
+<div class="ui basic segment">
+    <div class="ui two column grid">
+        <div class="fifteen wide column">
+            <div class="ui fluid dropdown selection multiple" ng-class="{active: false, visible: false, disabled: loading}">
+                <a ng-repeat="column in selected.columns" class="ui label visible" style="max-width:100%;overflow:hidden;white-space: nowrap;text-overflow: ellipsis"
+                   ng-click="selected.columns.length = 0;clear(column)">
+                    <i class="columns icon"></i>
+                    {{ column.title }}
+                </a>
+                <div class="default text"><i class="columns icon"></i>Columns 行變數</div>
+            </div>
+            <div class="ui hidden fitted divider"></div>
+            <div class="ui fluid dropdown selection multiple" ng-class="{active: false, visible: false, disabled: loading}">
+                <a ng-repeat="column in selected.rows" class="ui label visible" style="max-width:100%;overflow:hidden;white-space: nowrap;text-overflow: ellipsis"
+                   ng-click="selected.rows.length = 0;clear(column)">
+                    <i class="columns icon"></i>
+                    {{ column.title }}
+                </a>
+                <div class="default text"><i class="columns icon"></i>Rows 列變數</div>
+            </div>
 
-<div class="ui fluid dropdown selection multiple" ng-class="{active: false, visible: false, disabled: loading}">
-    <a ng-repeat="column in selected.columns" class="ui label visible" ng-click="selected.columns.length = 0;clear(column)">
-        <i class="columns icon"></i>
-        <div class="detail" style="width:300px;overflow:hidden;white-space: nowrap;text-overflow: ellipsis">{{ column.title }}</div>
-        <i class="delete icon"></i>
-    </a>
-    <div class="default text"><i class="columns icon"></i>Columns 列變數</div>
+        </div>
+        <div class="ui vertical divider"><i class="refresh link icon" ng-click="exchange()"></i></div>
+        <div class="one wide column"></div>
+    </div>
 </div>
-
-<div class="ui hidden fitted divider"></div>
-
-<div class="ui fluid dropdown selection multiple" ng-class="{active: false, visible: false, disabled: loading}">
-    <a ng-repeat="column in selected.rows" class="ui label visible" ng-click="selected.rows.length = 0;clear(column)">
-        <i class="columns icon"></i>
-        <div class="detail" style="width:300px;overflow:hidden;white-space: nowrap;text-overflow: ellipsis">{{ column.title }}</div>
-        <i class="delete icon"></i>
-    </a>
-    <div class="default text"><i class="columns icon"></i>Rows 行變數</div>
-</div>
-
-<div class="ui hidden fitted divider"></div>
 
 <div class="ui basic segment" ng-class="{loading: loading}">
 
