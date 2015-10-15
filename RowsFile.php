@@ -71,7 +71,7 @@ class RowsFile extends CommFile {
 
         $sheet = $this->add_sheet();
 
-        $this->add_table($sheet);
+        $this->add_table($sheet, $this->database, $this->generate_table());
     }
 
     public function open() 
@@ -106,9 +106,9 @@ class RowsFile extends CommFile {
         return $this->file->sheets()->create(['title' => '']);
     }
 
-    private function add_table($sheet)
+    private function add_table($sheet, $database, $name)
     {
-        $sheet->tables()->create(['database' => $this->database, 'name' => $this->generate_table(), 'construct_at' => Carbon::now()->toDateTimeString()]);
+        $sheet->tables()->create(['database' => $database, 'name' => $name, 'construct_at' => Carbon::now()->toDateTimeString()]);
     }
 
     private function init_sheets()
@@ -118,7 +118,7 @@ class RowsFile extends CommFile {
         }
         $this->file->sheets->each(function($sheet) {
             if (!$sheet->tables()->getQuery()->exists()) {
-                $this->add_table($sheet);
+                $this->add_table($sheet, $this->database, $this->generate_table());
             }
         });
     }
@@ -514,7 +514,7 @@ class RowsFile extends CommFile {
                     return array_values(get_object_vars($row));
                 }, $query->where('created_by', $this->user->id)->whereNull('deleted_at')->select($head)->get());
 
-                array_unshift($rows, $tables[0]->columns->fetch('name')->toArray());                  
+                array_unshift($rows, $tables[0]->columns->fetch('name')->toArray());
 
                 $sheet->freezeFirstRow();
 
@@ -538,7 +538,7 @@ class RowsFile extends CommFile {
             $column->unique && $query->where('C' . $column->id, Input::get('searchText'));
         });
 
-        $query->whereNull('deleted_at')->select($head)->addSelect('id');     
+        $query->whereNull('deleted_at')->select($head)->addSelect('id');
 
         return [
             'paginate' => $this->isCreater()
