@@ -41,13 +41,8 @@ if( Request::isMethod('post') ){
 
 
 ?>
-<style>
-.profile input{
-	padding: 5px;
-	font-size: 15px;
-}	
-</style>
-<div style="position: absolute;left:0;right:0;top:0;bottom:0;overflow: auto;padding:10px;max-width:800px">
+
+<div class="ui basic segment" style="max-width:800px">
 <?=Form::open(array('url' => URL::to('page/project/profile'), 'method' => 'post', 'name'=>'profile', 'class'=>'ui form segment'.(count($errors->all())>0 ? ' error' : '')))?>
     
     <h4 class="ui dividing header">個人資料</h4>

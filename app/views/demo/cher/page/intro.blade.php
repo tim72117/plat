@@ -1,5 +1,5 @@
 
-<div style="position: absolute;left:0;right:0;top:0;bottom:0;overflow: auto;padding:10px;max-width:800px">
+<div class="ui basic segment" style="max-width:800px">
 
     <div class="ui top attached segment">
             <p>本系統不支援IE7以下版本，請更新您的瀏覽器版本</p>
