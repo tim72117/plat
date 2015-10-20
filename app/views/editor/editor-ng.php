@@ -126,7 +126,7 @@ app.controller('editorController', function($http, $scope, $sce, $interval, $fil
     };  
     
     $scope.getQuestions = function() {
-        $http({method: 'POST', url: 'get_questions', data:{} })
+        $http({method: 'POST', url: 'get_editor_questions', data:{} })
         .success(function(data, status, headers, config) {
             console.log(data);
             $scope.pages = data.pages;

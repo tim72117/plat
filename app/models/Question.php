@@ -16,9 +16,13 @@ class Question extends Eloquent
         return $this->hasMany('Question', 'parent', 'id');
     }
 
-    // public function subs() {
-    //     return $this->belongsToMany ('Question', 'Ques_middle', 'page_id', 'ques_id');
-    // }
+    public function questions() {
+        return $this->hasMany('Question', 'parent', 'id');
+    }
+
+     public function ques_page() {
+         return $this->belongsToMany ('Ques_page', 'Ques_middle', 'page_id', 'ques_id');
+     }
 }
 
 class Answer extends Eloquent

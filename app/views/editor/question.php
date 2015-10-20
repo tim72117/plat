@@ -103,6 +103,11 @@
         <div class="title" ng-class="{active: question.open.subs}" ng-click="question.open.subs = !question.open.subs" ng-if="question.subs.length > 0 || layer < 2">
             <i class="dropdown icon"></i>子題
         </div>
+        <div class="content" ng-if="question.subs.length > 0" ng-class="{active: question.open.subs}">
+            <div class="ui tertiary segment" ng-repeat="sub in question.subs">
+                <div class="ui vertical segment" question="sub" layer="0" update="update"></div>
+            </div>
+        </div>
         <div class="content" ng-if="question.answers.length > 0" ng-class="{active: question.open.subs}">
             <div class="ui tertiary segment" ng-repeat="answer in question.answers" ng-if="answer.subs.length > 0">
                 <a class="ui green top left attached label">{{ answer.title }}</a>
@@ -114,7 +119,7 @@
 
     <div class="ui accordion field" ng-if="question.type==='scale'">
         <div class="title" ng-class="{active: question.open.questions}" ng-click="question.open.questions = !question.open.questions">
-            <i class="dropdown icon"></i>題目({{ question.questions.length }}) 
+            <i class="dropdown icon"></i>題目({{ question.questions.length }})
             <a href="javascript:void(0)" ng-click="$event.stopPropagation();addSub(question.questions, 0);question.open.questions=true" title="新增題目">
                 <i class="add icon"></i>
             </a>
