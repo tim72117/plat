@@ -6,23 +6,20 @@
 <title>中小學師資資料庫整合平台</title>
 
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
-<script src="/js/twcaseal_v3.js"></script>
 <script src="/js/angular-1.3.14/angular.min.js"></script>
 
-<link rel="stylesheet" href="/css/Semantic-UI/Semantic-UI-2.0.7/semantic.min.css" />
+<link rel="stylesheet" href="/css/Semantic-UI/2.1.4/semantic.min.css" />
 
 </head>
 
 <body>
-	<div class="ui container">	
+    <div class="ui container">
 
-		<?=$context?>	
+        <?=$context?>
 
-		<div class="ui divider"></div>
+        <div class="ui divider"></div>
 
-		<?=$child_footer?>
-
-    	<div id="twcaseal" style="float:right;margin:10px;display: none" class="SMALL"><img src="/images/twca.gif" /></div>
+        <?=$child_footer?>
 
     </div>
 </body>

@@ -132,7 +132,7 @@
                                 <label for="doc-{{ $index }}"></label>
                             </div>            
                         </td>
-                        <td ng-click="rename(doc)">
+                        <td style="min-width:400px" ng-click="rename(doc)">
                             <i class="icon" ng-class="types[doc.type]"></i>
                             <a href="{{ doc.link }}" ng-if="!doc.renaming" ng-click="$event.stopPropagation()" name="whatNew">{{ doc.title }}</a>
                             <div class="ui mini icon input" ng-class="{loading: doc.saving}" ng-if="doc.renaming" ng-click="$event.stopPropagation()">

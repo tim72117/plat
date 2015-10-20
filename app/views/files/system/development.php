@@ -1,6 +1,6 @@
-<div ng-cloak ng-controller="newsController" style="position: absolute;top: 10px;bottom: 10px;left: 10px; right: 10px">
+<div ng-cloak ng-controller="developmentController">
     
-    <div class="ui segment" ng-class="{loading: loading}">
+    <div class="ui basic segment" ng-class="{loading: loading}">
         
         <table class="ui compact table">
             
@@ -110,46 +110,6 @@
             </tbody>
             
         </table>
-        
-
-        
-        
-        
-        <div class="ui feed">
-            <div class="event">
-                <div class="label">1</div>
-                <div class="content">
-                    
-                    <div class="summary">
-                    <a class="user">
-                        Elliot Fu
-                    </a> added you as a friend
-                    <div class="date">
-                        1 Hour Ago
-                    </div>
-                    </div>
-                    
-                    <div class="extra text">
-                        I'm having a BBQ this weekend. Come by around 4pm if you can.
-                    </div>
-                    
-                    <div class="extra text">
-                        排序方式<br />
-                        程式人員 處理完成 > 處理人員 > 時間<br />
-                        非程式人員 處理完成 > 貼文人員 > 時間
-                    </div>
-                    
-                    <div class="meta">
-                        dBBQ this weekend. Come by aroun
-                        
-                        <div class="ui label">
-                        Dogs
-                        <div class="detail">214</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <div class="ui flowing popup" id="newsEditor">   
             <form class="ui form" style="width:500px">
@@ -173,9 +133,9 @@
     </div>
         
 </div>
+
 <script>
-angular.module('app')
-.controller('newsController', function($scope, $http, $filter, $timeout) {
+app.controller('developmentController', function($scope, $http, $filter, $timeout) {
     
     $scope.is_add = false;
     $scope.new = {};
@@ -209,7 +169,7 @@ angular.module('app')
     
     $scope.updateOrCreate = function(request) {
         request.saving = true;
-        $http({method: 'POST', url: 'ajax/updateOrCreate', data:{
+        $http({method: 'POST', url: 'updateOrCreate_request', data:{
             id: request.id,
             type: request.type,
             handle: request.handle,
@@ -218,8 +178,8 @@ angular.module('app')
             git: request.git,
             rank: request.rank,
             completed: request.completed
-        } })
-        .success(function(data, status, headers, config) {              
+        }})
+        .success(function(data, status, headers, config) {          
             if( data.updated_by !== $scope.user_id )
             {
                 $scope.getRequests();
@@ -241,7 +201,7 @@ angular.module('app')
     
     $scope.getRequests = function() {
         $scope.loading = true;
-        $http({method: 'POST', url: 'ajax/getRequests', data:{} })
+        $http({method: 'POST', url: 'get_requests', data:{} })
         .success(function(data, status, headers, config) {      
             $scope.user_id = data.user_id;
             $scope.requests = data.requests;
@@ -282,9 +242,3 @@ angular.module('app')
     };
 }]);;
 </script>
-
-<script src="/css/ui/Semantic-UI-1.11.1/components/popup.js"></script>
-
-<style>
-
-</style>

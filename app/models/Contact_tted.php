@@ -2,7 +2,7 @@
 class User_tted extends User {
 
     public function schools() { 
-		return $this->belongsToMany('School_tted', 'work_tted', 'user_id', 'ushid')->where('year', '103');
+		return $this->belongsToMany('School_tted', 'work_tted', 'user_id', 'ushid');
 	}
     
     public function contact() { 
@@ -36,5 +36,28 @@ class Work_tted extends Eloquent
 
     public function schools() {
         return $this->hasMany('School_tted', 'id', 'ushid');
+    }
+}
+
+class Struct_tted
+{
+    static function auth($user, $groups)
+    {
+        return array(
+            'id'         => (int)$user->id,
+            'active'     => (bool)$user->active,
+            'disabled'   => (bool)$user->disabled,
+            'password'   => $user->password=='',
+            'email'      => $user->email,
+            'name'       => $user->username,
+            'schools'    => $user->schools->map(function($school){
+                                return array_only($school->toArray(), array('id', 'name', 'year'));
+                            }),
+            'title'  => $user->contact->title,
+            'tel'    => $user->contact->tel,
+            'fax'    => $user->contact->fax,
+            'email2' => $user->contact->email2,
+            'groups' => $user->groups->lists('id'),
+        );
     }
 }

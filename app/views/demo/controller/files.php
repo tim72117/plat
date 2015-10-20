@@ -5,7 +5,7 @@ return array(
 
         $inGroups = $user->inGroups->lists('id');
 
-        $docs = ShareFile::with(['isFile', 'shareds', 'requesteds'])->where(function($query) use($user) {
+        $docs = ShareFile::with(['isFile', 'isFile.isType', 'shareds', 'requesteds'])->where(function($query) use($user) {
 
             $query->where('target', 'user')->where('target_id', $user->id);
 
