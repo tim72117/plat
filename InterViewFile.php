@@ -68,71 +68,46 @@ class InterViewFile extends CommFile {
             $question->parent_id = $parent_id;
 			$question->parent_value = $parent_value;
             $question->id = null;
+
+            is_callable($call) && $call($question);
+            $sub->id = $question->id;
             
-            if( !empty($question->answers) ) {   
-
-                is_callable($call) && $call($question);
-                $sub->id = Question:: select('id')->max('id');
-                Ques_middle::create(['ques_id' => $sub->id]);
-                
-                foreach($question->answers as $index => $answer) {                    
-                    is_array($answer) && $answer = (object)$answer;
-                    if( isset($answer->subs) ){
-						
-						$value = isset($answer->value) ? $answer->value : null;
+            foreach($question->answers as $index => $answer) {                    
+                if( isset($answer->subs) ){
+                    
+                    $value = isset($answer->value) ? $answer->value : null;
                         
-                        $this->get_struct_from_view($answer->subs, $call, $sub->id, $value);
-
-                        //$sub->answers[$index] = ['subs' => ];
-
-                        //unset($answer->subs);
-                    }else{
-
-                        //$sub->answers[$index] = ['subs' => []];
-
-                    } 
+                    $this->get_struct_from_view($answer->subs, $call, $sub->id, $value);
                 }
+            }
+
+            foreach($question->questions as $index => $ques) { 
                 
-                array_push($subs, $sub->id);
-            }
-            
-            elseif( !empty($question->questions) ) {
+                if( $question->type == 'scale' || $question->type == 'checkbox' || $question->type == 'text'){
+                    $ques->parent_id = $sub->id;
+                    $question->type == 'checkbox' ? $ques->parent_value = 1 : $ques->parent_value = null; 
+                    $ques->type = $question->type;
+                    //$question->type == 'scale' ? $ques->type = 'scale' : ($question->type == 'text' ? $ques->type = 'text' : '');
 
-                is_callable($call) && $call($question);
-                $sub->id = Question:: select('id')->max('id');
-                Ques_middle::create(['ques_id' => $sub->id]);
+                    is_callable($call) && $call($ques);
+                    isset($ques->subs) && $this->get_struct_from_view($ques->subs, $call, $ques->id, null);
+                    //$sub->id = $ques->id;
+                }  
 
-                foreach($question->questions as $index => $question) {                    
-                    is_array($question) && $question = (object)$question;
-                    if( isset($question->subs) ){
+                if( isset($ques->subs) && $question->type == 'list'){
+                    //$sub->id = $ques->id;
+                    $value = isset($ques->value) ? $ques->value : null;
                         
-                        $value = isset($question->value) ? $question->value : null;
-                        
-                        $this->get_struct_from_view($question->subs, $call, $sub->id, $value);
-
-                        //$sub->answers[$index] = ['subs' => ];
-
-                        //unset($answer->subs);
-                    }else{
-
-                        //$sub->answers[$index] = ['subs' => []];
-
-                    } 
-                }                
-            }
-            else{
-                is_callable($call) && $call($question);
-                $ques_id = Question:: select('id')->max('id');
-                Ques_middle::create(['ques_id' => $ques_id]);
-
-            }
+                    $this->get_struct_from_view($ques->subs, $call, $sub->id, $value);
+                }
+            } 
             
         }
         return $subs;
     }
     
     public function updateOrCreateQuestion($question) {
-       // var_dump($question);exit;
+       //var_dump($question->id);exit;
         if( isset($question->id) ) {
             $this->updateOrCreateAnswer($question);
             return Question::updateOrCreate([
@@ -157,6 +132,7 @@ class InterViewFile extends CommFile {
                 'created_at'   => Carbon::now()->toDateTimeString(),
             ]);
 			$this->updateOrCreateAnswer($question);
+
 			return $question->id;
         }
     }
@@ -188,21 +164,24 @@ class InterViewFile extends CommFile {
     
     public function save_ques_to_db($pages)
     {        
+        
         $input = Input::get('pages');
+        //var_dump($pages);exit;
         
         DB::table('ques_new')->truncate();
         DB::table('ques_answers')->truncate();
         DB::table('ques_page_new')->truncate();
         DB::table('ques_middle')->truncate();
 
-        $ques_struct = array_walk($pages, function($page, $index) {            
-            $questions = $this->get_struct_from_view($page->questions, function($question) {              
-                return $this->updateOrCreateQuestion($question);
+        $ques_struct = array_walk($pages, function($page, $index) { 
+            DB::table('ques_page_new')->insert(['file_id' => $this->file->id, 'value' => $index+1, 'questions2' => 1 ]);   
+            $ques_page = Ques_page::find($index+1);        
+            $questions = $this->get_struct_from_view($page->questions, function($question) use($ques_page) {   
+                $id = $this->updateOrCreateQuestion($question);
+                $ques = Question:: find($id);
+                $ques_page->questions()->attach($ques->id);
+                return $id;
             });
-            DB::table('ques_page_new')->insert(['file_id' => $this->file->id, 'value' => $index+1, 'questions2' => 1 ]);
-            Ques_middle:: where('page_id', '=', null)->get()->each(function($query)use($index){
-                    Ques_middle::find($query->id)->update(['page_id' => $index+1]);
-                });
         });
         
         return $ques_struct;        
@@ -227,6 +206,7 @@ class InterViewFile extends CommFile {
                                  'questions.subs.subs.subs.subs.subs.answers', 'questions.subs.subs.subs.subs.subs.subs.answers', 
                                  'questions.subs.subs.subs.subs.subs.subs.subs.answers', 'questions.subs.subs.subs.subs.subs.subs.subs.subs.answers'
                                  , 'questions.subs.subs.subs.subs.subs.subs.subs.subs.subs.answers')->remember(1)->get();
+        //var_dump($pages->toArray());exit;
         
         $pages->each(function($page){
             $this->get_all_subs($page->questions);

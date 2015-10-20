@@ -739,6 +739,8 @@ class QuesFile extends CommFile {
 
         $file = Files::create(['title'=> $this->file->title, 'type' => 9]);
 
+        ShareFile::create(['file_id' => $file->id, 'target' => 'user', 'target_id' => $this->user->id, 'visibal' => true, 'created_by' => $this->user->id]);
+
         $interViewFile = new InterViewFile($file, $this->user);
 
         $interViewFile->create();
