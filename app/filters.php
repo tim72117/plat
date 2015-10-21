@@ -84,7 +84,9 @@ Route::filter('csrf', function()
 	}
 });
 
-Route::filter('post_delay', function() {
+
+Route::filter('post_delay', function()
+{
 	$ip = Request::server('REMOTE_ADDR');
     
     $ip_requested = sha1($ip.Request::url());
@@ -96,4 +98,42 @@ Route::filter('post_delay', function() {
     $ip_requested_cache++;
 
     Cache::put('post_delay' . $ip_requested, $ip_requested_cache, 10);
+});
+
+
+Route::filter('auth_logined', function() {
+    if (Auth::guest())
+        return Redirect::to('project');
+    
+    if (is_null(Auth::user()->getProject())){
+        Auth::logout();
+        return Redirect::to('project');        
+    }
+
+    if (Auth::check()) {
+        $user = Auth::user();
+        $limit = DB::table('limit')->where('user_id', $user->id)->select('ip')->first();
+        if (!is_null($limit)){
+            $ipAllows = explode(",",$limit->ip);
+            $ipPass = false;
+            $myIp = Request::getClientIp();
+            foreach ($ipAllows as $ipAllow ) {
+                $ipRange = explode("-", $ipAllow);
+                if (count($ipRange) > 1) {
+                    $ipLongs = array_map(function($ip){
+                        return ip2long($ip);
+                    }, $ipRange);
+                    $ipLongs[0]<=ip2long($myIp) && $ipLongs[1]>=ip2long($myIp) && $ipPass = true;
+                } else {
+                    $myIp == $ipRange[0] && $ipPass = true;
+                }
+            }
+
+            if (!$ipPass) {
+                $project = $user->getProject();
+                Auth::logout();
+                return Redirect::to('project/'.$project)->withErrors(array('limit'=>'您無法存取這個網站'));
+            }
+        }
+    }
 });
