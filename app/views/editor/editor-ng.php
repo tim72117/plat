@@ -235,14 +235,35 @@ app.controller('editorController', function($http, $scope, $sce, $interval, $fil
             
             $scope.addQues = function(question, index, answer) {
                 answer = answer || {};
-                question.subs = question.subs || [];
-                question.subs.splice(index, 0, {
+                console.log(answer);
+                question = question || [];
+                //console.log(question.subs);
+                //console.log(question);
+                question.splice(index, 0, {
                     title: '',    
                     type: '?',
                     code: 'auto',
                     answers: [],
                     subs: [],
-                    parent_value: answer.value || null 
+                    parent: answer.type == 'checkbox' ? answer.id : answer.ques_id,
+                    parent_value: answer.type == 'checkbox' ? 1 : answer.value || null 
+                });                
+            };
+
+            $scope.subQues = function(question, index, answer) {
+                answer = answer || {};
+                console.log(answer);
+                question = question || [];
+                console.log(question);
+                console.log(question);
+                question.splice(index, 0, {
+                    title: '',    
+                    type: '?',
+                    code: 'auto',
+                    answers: [],
+                    subs: [],
+                    parent: answer.id,
+                    parent_value: answer.type == 'checkbox' ? 1 : answer.parent_value
                 });                
             };
             

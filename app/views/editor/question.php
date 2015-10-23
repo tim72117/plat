@@ -1,6 +1,6 @@
 <div>
     
-    <div class="ui small secondary menu">        
+    <div class="ui small secondary menu" >        
 <!--         <a class="item" href="javascript:void(0)">{{ question.label }}</a> -->
         <div class="fitted item">
             <select class="ui dropdown" ng-model="question.type" ng-change="typeChange(question)">
@@ -27,27 +27,27 @@
     <div class="ui accordion field" ng-if="question.type==='checkbox'">
         
         <div class="title" ng-class="{active: question.open.checkboxs}" ng-click="question.open.checkboxs=!question.open.checkboxs">
-            <i class="dropdown icon"></i>題目({{ question.questions.length }})
+            <i class="dropdown icon"></i>題目({{ question.subs.length }})
             <a href="javascript:void(0)" ng-click="$event.stopPropagation();addQues(question, 0);question.open.checkboxs=true" title="新增題目"><i class="add icon"></i></a>
         </div>
     
-        <div class="content" ng-if="question.questions.length > 0" ng-class="{active: question.open.checkboxs}">            
+        <div class="content" ng-if="question.subs.length > 0" ng-class="{active: question.open.checkboxs}">            
             <div class="ui selection list">
-                <div class="item" ng-repeat="checkbox in question.questions">
+                <div class="item" ng-repeat="checkbox in question.subs">
                     <i class=" icon" ng-class="{'red warning': !checkbox.title, move: !!checkbox.title}"></i>
                     <div class="middle aligned ">
                         <div class="ui fluid mini input" ng-mouseenter="question.open.button[$index]=true" ng-mouseleave="question.open.button[$index]=false">
 <!--                             <div class="ui label">{{ checkbox.title }} </div> -->
                             <input type="text" ng-model="checkbox.title" placeholder="輸入選項...">
-<!--                             <div class="ui icon basic buttons">
-                                <div class="ui button" ng-click="addQues(checkbox, 0);question.open.subs=true" ng-if="question.open.button[$index]" title="新增子題">
+                            <div class="ui icon basic buttons">
+                                <div class="ui button" ng-click="addQues(checkbox.subs, 0, checkbox);question.open.subs=true" ng-if="question.open.button[$index]" title="新增子題">
                                     <i class="vertically flipped fork icon"></i>
                                 </div>
-                                <div class="ui button" ng-click="checkbox.reset=!checkbox.reset" ng-if="question.open.button[$index] || checkbox.reset" title="清除勾選項目">
+                                <!-- <div class="ui button" ng-click="checkbox.reset=!checkbox.reset" ng-if="question.open.button[$index] || checkbox.reset" title="清除勾選項目">
                                     <i class="refresh red icon"></i>
                                 </div>
-                                <div class="ui button" ng-click="removeQuestion(question.questions, $index)" title="刪除題目"><i class="close icon"></i></div>                                
-                            </div> -->
+                                <div class="ui button" ng-click="removeQuestion(question.questions, $index)" title="刪除題目"><i class="close icon"></i></div>  -->                               
+                            </div>
                         </div>
 <!--                         <a href="javascript:void(0)" ng-click="addQues(checkbox, 0);question.open.subs=true" title="新增子題"><i class="add icon"></i></a>  -->
                     </div>    
@@ -58,12 +58,14 @@
         <div class="title" ng-class="{active: question.open.subs}" ng-click="question.open.subs=!question.open.subs" ng-if="layer < 2">
             <i class="dropdown icon"></i>子題
         </div>
-
         <div class="content" ng-class="{active: question.open.subs}">
-            <div class="ui tertiary segment" ng-repeat="checkbox in question.questions" ng-if="checkbox.subs.length > 0">                
+            <div class="ui tertiary segment" ng-repeat="checkbox in question.subs" ng-if="checkbox.subs.length > 0">  
+                <!--<a class="ui green top left attached label" ng-repeat="answer in checkbox.subs" ng-if="answer.parent == checkbox.id ">{{checkbox.title}}</a>-->              
                 <h4 class="ui header">{{ checkbox.title }}</h4>
-                <div class="ui vertical segment" ng-repeat="sub in checkbox.subs" question="sub" layer="layer+2" update="update"></div>      
+                <div class="ui vertical segment" ng-repeat-start="sub in checkbox.subs" question="sub" layer="layer+2" update="update"></div>
+                <div class="ui horizontal divider" ng-repeat-end ng-click="subQues(checkbox.subs, $index+1, checkbox)"><a class="ui mini label"><i class="add icon"></i>加入題目</a></div>
             </div>
+
         </div>
         
     </div>
@@ -75,17 +77,18 @@
             <i class="dropdown icon"></i>選項 ({{ question.answers.length }})
             <a href="javascript:void(0)" ng-click="$event.stopPropagation();addAns(question.answers, 0);question.open.answers=true" title="新增選項">
                 <i class="add icon"></i>
-            </a>
+            </a>  
         </div>
         <div class="content" ng-if="question.answers.length > 0" ng-class="{active: question.open.answers}">
             <div class="ui selection list">
                 <div class="item" ng-repeat="answer in question.answers">
+
                     <div class="header">
                         <div class="ui transparent fluid action left icon input">
                             <i class="icon" ng-class="{'red warning': !answer.title, move: !!answer.title}"></i>
                             <input type="text" ng-model="answer.title" placeholder="輸入選項..." ng-focus="question.open.button[$index]=true" ng-blur="hideOptions(question, $index)" /> 
                             <div class="ui icon basic buttons">                                
-                                <div class="ui button" ng-click="addQues(answer, 0, answer);question.open.subs=true" title="新增子題" ng-if="question.open.button[$index]"><i class="vertically flipped fork icon"></i></div>
+                                <div class="ui button" ng-click="addQues(question.subs, 0, answer);question.open.subs=true" title="新增子題" ng-if="question.open.button[$index]"><i class="vertically flipped fork icon"></i></div>
                                 <div class="ui button" ng-click="addAns(question.answers, $index+1)" title="設定跳題" ng-if="question.open.button[$index]"><i class="refresh icon"></i></div>
                                 <div class="ui button" ng-click="removeAns(question.answers, $index)" title="刪除選項"><i class="close icon"></i></div>                                
                             </div>
@@ -99,19 +102,16 @@
                 </div>
             </div>                
         </div>
-
+        
         <div class="title" ng-class="{active: question.open.subs}" ng-click="question.open.subs = !question.open.subs" ng-if="question.subs.length > 0 || layer < 2">
             <i class="dropdown icon"></i>子題
         </div>
+
         <div class="content" ng-if="question.subs.length > 0" ng-class="{active: question.open.subs}">
-            <div class="ui tertiary segment" ng-repeat="sub in question.subs">
-                <div class="ui vertical segment" question="sub" layer="0" update="update"></div>
-            </div>
-        </div>
-        <div class="content" ng-if="question.answers.length > 0" ng-class="{active: question.open.subs}">
-            <div class="ui tertiary segment" ng-repeat="answer in question.answers" ng-if="answer.subs.length > 0">
-                <a class="ui green top left attached label">{{ answer.title }}</a>
-                <div class="ui vertical segment" ng-repeat="sub in answer.subs" question="sub" update="update"></div>
+            <div class="ui tertiary segment" ng-repeat="sub in question.subs" ng-if="question.subs.length > 0">
+                <a class="ui green top left attached label" ng-repeat="answer in question.answers" ng-if="answer.value == sub.parent_value">{{answer.title}}</a>
+                <div class="ui vertical segment" question="sub" update="update"></div>
+                <div class="ui horizontal divider" ng-click="subQues(question.subs, $index+1, sub)"><a class="ui mini label"><i class="add icon"></i>加入題目</a></div>
             </div>
         </div>
     </div>
@@ -119,14 +119,14 @@
 
     <div class="ui accordion field" ng-if="question.type==='scale'">
         <div class="title" ng-class="{active: question.open.questions}" ng-click="question.open.questions = !question.open.questions">
-            <i class="dropdown icon"></i>題目({{ question.questions.length }})
+            <i class="dropdown icon"></i>題目({{ question.subs.length }})
             <a href="javascript:void(0)" ng-click="$event.stopPropagation();addSub(question.questions, 0);question.open.questions=true" title="新增題目">
                 <i class="add icon"></i>
             </a>
         </div>
-        <div class="content" ng-if="question.questions.length > 0" ng-class="{active: question.open.questions}">
+        <div class="content" ng-if="question.subs.length > 0" ng-class="{active: question.open.questions}">
             <div class="ui bulleted list">
-                <div class="item" ng-repeat="q in question.questions">
+                <div class="item" ng-repeat="q in question.subs">
                     {{ q.name }} - {{ q.title }}
                     <a href="javascript:void(0)" ng-click="removeQues(question.questions, $index)" title="刪除子題"><i class="close icon"></i></a>
                 </div>

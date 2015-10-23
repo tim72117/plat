@@ -200,12 +200,15 @@ class InterViewFile extends CommFile {
     
     public function get_editor_questions()
     {       
-        $pages = Ques_page::with('questions', 'questions.answers', 'questions.subs.answers',
+        $pages = Ques_page::with(['questions' => function($query){
+                                                    $query->where('parent', '=', null);
+                                                },
+                                 'questions.answers', 'questions.subs.answers',
                                  'questions.subs.subs.answers', 'questions.subs.subs.subs.answers', 
                                  'questions.subs.subs.subs.answers', 'questions.subs.subs.subs.subs.answers', 
                                  'questions.subs.subs.subs.subs.subs.answers', 'questions.subs.subs.subs.subs.subs.subs.answers', 
                                  'questions.subs.subs.subs.subs.subs.subs.subs.answers', 'questions.subs.subs.subs.subs.subs.subs.subs.subs.answers'
-                                 , 'questions.subs.subs.subs.subs.subs.subs.subs.subs.subs.answers')->remember(1)->get();
+                                 , 'questions.subs.subs.subs.subs.subs.subs.subs.subs.subs.answers'])->remember(1)->get();
         //var_dump($pages->toArray());exit;
         
         $pages->each(function($page){

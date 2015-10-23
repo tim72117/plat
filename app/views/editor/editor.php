@@ -1074,12 +1074,12 @@ function getPassword(length) {
 }
 
 
+
 </script>
 
 
 </head>
 
-<div ng-controller="quesEditorController">
 <form name="form1" action="" method="get">
     <?=Form::select('page', $pages->lists('page', 'page'), $page->page, array('id' => 'page', 'onChange'=>'this.form.submit()'))?>  /  <?=$pages->count()?>
     <!--<input id="btn_dpage" type="button" value="刪除整頁" disabled="disabled" />-->
@@ -1090,7 +1090,6 @@ function getPassword(length) {
         <i class="save icon"></i> 儲存
     </div>   
     <a href="demo?page=1" target="_blank">預覽</a> 
-    <div class="ui button" ng-click="to_interview_file()">轉成面訪問卷檔</div>
 </form>
 
 <div id="building" style="width:800px">
@@ -1137,16 +1136,3 @@ function getPassword(length) {
     </div>
     
 </div>
-</div>
-<script>
-app.controller('quesEditorController', function($scope, $filter, $http) {
-	$scope.to_interview_file = function() {
-        $http({method: 'POST', url: 'to_interview_file', data:{} })
-        .success(function(data, status, headers, config) {
-            console.log(data);          
-        }).error(function(e) {
-            console.log(e);
-        });
-    };
-});
-</script>
