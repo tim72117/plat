@@ -31,6 +31,11 @@ class CommFile {
         return [];
     }
 
+    public static function get_tools()
+    {
+        return [];
+    }
+
     public function open()
     {
         return $this->download();

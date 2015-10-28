@@ -92,6 +92,8 @@ class Analysis extends Eloquent {
 
     public $timestamps = false;
 
+    protected $fillable = array('site', 'title', 'time_start', 'time_end', 'method', 'target_people', 'quantity_total', 'quantity_gets');
+
     public function pages() {
         return $this->hasMany('Row\Pages', 'file_id', 'file_id_ques');
     }

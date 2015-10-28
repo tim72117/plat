@@ -1,8 +1,8 @@
 
-<div style="position: absolute;left:0;right:0;top:0;bottom:0;overflow: auto;padding:10px;max-width:800px">
+<div class="ui basic segment" style="max-width:800px">
 
     <div class="ui top attached segment">
-                    <p>本系統不支援IE7以下版本，請更新您的瀏覽器版本</p>
+            <p>本系統不支援IE7以下版本，請更新您的瀏覽器版本</p>
             <p> 
                  <a href="http://windows.microsoft.com/zh-tw/internet-explorer/download-ie" target="_blank">下載IE瀏覽器
                  <img src="/images/browser_internet-explorer-20.png" height="20" border="0" style="margin-bottom:-4px" /></a>
@@ -19,10 +19,6 @@
         <div class="ui list large">
             @include('demo.intro_files')  
         </div>    
-    </div>
-    
-    <div class="ui bottom attached warning message">
-        <i class="warning icon"></i>後期中等教育資料查詢平台進行系統轉移，登入後請盡速確認承辦人個人資料。
     </div>
     
 </div>

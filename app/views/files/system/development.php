@@ -13,20 +13,22 @@
                     <th width="120">發佈時間</th>
                     <th width="120">處理人員</th>
                     <th>處理狀況</th>
-                    <th class="center aligned" width="60">完成</th>
-                    <th ng-if="developments.hasOwnProperty(user_id)">git紀錄</th>
+                    <th width="60">完成</th>
+                    <th width="60" ng-if="developments.hasOwnProperty(user_id)">git</th>
+                    <th width="150">部署</th>
+                    <th>發布信件</th>
                 </tr>  
             </thead>
             
             <tbody>
                 <tr>
-                    <td colspan="4">
+                    <td colspan="5">
                         <div class="fluid ui green mini button" ng-click="add_request()">
                             <i class="comment outline icon"></i>
                             新增
                         </div>                     
                     </td>
-                    <td colspan="5">
+                    <td colspan="6">
                         <div ng-if="saving">    
                             <i class="notched circle loading icon"></i>
                             資料儲存中...........
@@ -56,7 +58,7 @@
             </tbody>
             
             <tbody>
-                <tr ng-repeat="request in requests | orderBy:['completed', sortCreatedBy, 'created_at.days', 'created_at.h', 'created_at.i', 'created_at.s']:false" ng-class="{disabled: request.saving}">
+                <tr class="top aligned" ng-repeat="request in requests | orderBy:['completed', sortCreatedBy, 'created_at.days', 'created_at.h', 'created_at.i', 'created_at.s']:false" ng-class="{disabled: request.saving}">
                     <td><i class="child icon"></i>{{ request.creater }}</td>
                     
                     <td contenteditable ng-model="request.describe" ng-model-options="{ debounce: 3000 }" style="max-width: 350px;overflow-wrap: break-word" ng-change="updateOrCreate(request)"></td>                  
@@ -95,17 +97,20 @@
                     
                     <td ng-if="!developments.hasOwnProperty(user_id)" class="center aligned"><i class="thumbs outline up green icon" ng-if="request.completed"></i></td>
                     <td ng-if="developments.hasOwnProperty(user_id)">
-                        <div class="ui checkbox">
+                        <div class="ui fitted checkbox">
                             <input type="checkbox" id="completed-{{ request.id }}" ng-model="request.completed" ng-change="updateOrCreate(request)" />
                             <label for="completed-{{ request.id }}"></label>
                         </div>
                     </td>
                     
                     <td ng-if="developments.hasOwnProperty(user_id)">
-                        <div class="ui input">
+                        <div class="ui fluid input">
                             <input type="text" placeholder="git紀錄" ng-model="request.git" ng-model-options="{ debounce: 3000 }" ng-change="updateOrCreate(request)" />
                         </div>
                     </td>
+
+                    <td contenteditable ng-model="request.deploy" ng-model-options="{ debounce: 3000 }" ng-change="updateOrCreate(request)"></td>
+                    <td class="collapsing"><button class="ui icon button" ng-class="{loading: request.sending}" ng-click="sendMail(request)"><i class="mail icon"></i></button></td>
                 </tr>  
             </tbody>
             
@@ -177,7 +182,8 @@ app.controller('developmentController', function($scope, $http, $filter, $timeou
             describe: $scope.btoa(request.describe),
             git: request.git,
             rank: request.rank,
-            completed: request.completed
+            completed: request.completed,
+            deploy: request.deploy
         }})
         .success(function(data, status, headers, config) {          
             if( data.updated_by !== $scope.user_id )
@@ -202,11 +208,21 @@ app.controller('developmentController', function($scope, $http, $filter, $timeou
     $scope.getRequests = function() {
         $scope.loading = true;
         $http({method: 'POST', url: 'get_requests', data:{} })
-        .success(function(data, status, headers, config) {      
+        .success(function(data, status, headers, config) {
             $scope.user_id = data.user_id;
             $scope.requests = data.requests;
             $scope.developments = data.developments;
             $scope.loading = false;
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+
+    $scope.sendMail = function(request) {
+        request.sending = true;
+        $http({method: 'POST', url: 'send_mail', data:{request_id: request.id} })
+        .success(function(data, status, headers, config) {
+            request.sending = false;
         }).error(function(e){
             console.log(e);
         });
@@ -240,5 +256,5 @@ app.controller('developmentController', function($scope, $http, $filter, $timeou
             }
         }
     };
-}]);;
+}]);
 </script>
