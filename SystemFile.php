@@ -20,7 +20,9 @@ class SystemFile extends CommFile {
 
     public function get_views() 
     {
-        return ['open'];
+        return [
+            'open' => ['view' => 'files.system.development', 'full' => false],
+        ];
     }
 
     public function open()
@@ -45,7 +47,7 @@ class SystemFile extends CommFile {
     {
         $id = Input::get('id');
         $describe = urldecode(base64_decode(Input::get('describe')));
-        if( is_null($id) )
+        if (is_null($id))
         {
             $id = DB::table('development')->insertGetId([
                 'describe'   => $describe,
@@ -58,7 +60,7 @@ class SystemFile extends CommFile {
         }
         else
         {
-            $input = Input::only('type', 'handle', 'handler_id', 'rank', 'completed', 'git');
+            $input = Input::only('type', 'handle', 'handler_id', 'rank', 'completed', 'git', 'deploy');
             $input['describe'] = $describe;
             $input['updated_at'] = Carbon::now()->toDateTimeString();
             DB::table('development')->where('id', $id)->update($input);
@@ -91,6 +93,19 @@ class SystemFile extends CommFile {
             'created_at' => Carbon::parse($request->created_at)->diff(Carbon::now()),
             'creater'    => $request->creater,
             'completed'  => (bool)$request->completed,
+            'deploy'     => $request->deploy
         ];
+    }
+
+    public function send_mail()
+    {
+        $request = DB::table('development')->where('id', Input::get('request_id'))->first();
+        $context = '更新內容<br>' . $request->describe . '<br><br>' . $request->deploy;
+        foreach (\Group::find(3)->users as $user) {
+            \Mail::send('emails.empty', array('context' => $context), function($message) use($user) {
+                $message->to($user->email)->subject('程式上線');
+            });
+            usleep(500);
+        }
     }
 }

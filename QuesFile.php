@@ -598,22 +598,19 @@ class QuesFile extends CommFile {
         });
     }
 
-    public function creatTable() {
-        
-        $ques_doc = DB::table('ques_doc')->where('id', $this->file->file)->select('database', 'table', 'edit', 'qid')->first();
-        
-        if( !$ques_doc->edit )
+    public function creatTable()
+    {
+        if (!$this->file->cencus->edit)
             return '';
         
-        $tablename = $ques_doc->table;
-        
-        $ques_pages = DB::table('ques_page')->where('qid', $ques_doc->qid)->orderBy('page')->select('page', 'xml')->get();    
+        $tablename = $this->file->cencus->table;
+        $pages = $this->file->cencus->pages;
         
         Config::set('database.default', 'sqlsrv');
-        Config::set('database.connections.sqlsrv.database', $ques_doc->database);
+        Config::set('database.connections.sqlsrv.database', $this->file->cencus->database);
         DB::reconnect('sqlsrv');
 
-        foreach($ques_pages as $ques_page){
+        foreach($pages as $ques_page) {
             $page = $ques_page->page;
 
             $question_array = simplexml_load_string($ques_page->xml);            
