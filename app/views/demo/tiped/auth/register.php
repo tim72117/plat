@@ -1,52 +1,11 @@
     
 <div class="ui centered stackable grid" ng-app="app" ng-controller="register">
     <div class="two column row">
-    <div class="five wide column">
-        <div class="ui three column centered grid">
-            <div class="center aligned column">
-                <h4 class="ui header">
-                    <img class="ui tiny image" src="/images/register/pencil.png">
-                    <div class="content">線上填寫申請表</div>
-                </h4>
-            </div>
-            <div class="middle aligned column"><i class="arrow right large icon"></i></div>
-            <div class="center aligned column">
-                <h4 class="ui header">
-                    <img class="ui tiny image" src="/images/register/printer.png">
-                    <div class="content">列印申請表</div>
-                </h4>
-            </div>
-            <div class="middle aligned column"><i class="arrow down large icon"></i></div>
-            <div class="middle aligned column"></div>
-            <div class="middle aligned column"><i class="arrow down large icon"></i></div>
-            <div class="center aligned column">
-                <h4 class="ui header">
-                    <img class="ui tiny image" src="/images/register/email.png">
-                    <div class="content">到您註冊的信箱收取更改密碼的信件</div>
-                </h4>
-            </div>
-            <div class="middle aligned column"></div>
-            <div class="center aligned column">
-                <h4 class="ui header">
-                    <img class="ui tiny image" src="/images/register/letter.png">
-                    <div class="content">主管簽核後，將申請表正本寄給我們</div>
-                </h4>
-            </div>
-            <div class="center aligned sixteen wide column">
-                <h4 class="ui header">
-                    <img class="ui tiny image" src="/images/register/key.png">
-                    <div class="content">我們收到您的申請表後，確認您已經完成修改密碼，即為您開通帳號</div>
-                </h4>
-            </div>
-        </div>
-    </div>
     
     <div class="six wide column">
-        <h3 class="ui top attached center aligned header">教育資料庫資料查詢平台</h3>
+        <h3 class="ui top attached center aligned header">問卷調查管理平台</h3>
         <?=Form::open(array('url' => 'project/' . Request::segment(2) . '/register/save', 'method' => 'post', 'class' => 'ui form segment attached ' . ($errors->isEmpty() ? '' : 'error'), 'name' => 'registerForm'))?>                
-            <h5 class="ui dividing header"><p>申請帳號
-                <u><font color="#336666">請填完下列資料後點選申請表送出</font></u></p>
-            </h5>
+            <h5 class="ui dividing header">申請帳號</h5>
         
             <div class="field">
                 <label>登入帳號 (e-mail)</label>
@@ -70,8 +29,16 @@
             </div>
 
             <div class="field">
+                <label>服務單位</label>
+                <?=Form::select('sch_id', [
+                    '' => '選擇您服務的單位',
+                    '0016' => '國立陽明大學',
+                    '1028' => '臺北醫學大學',
+                    '9999' => '其他'], Input::old('sch_id'), ['ng-model' => 'sch_id', 'ng-init' => 'sch_id=\'' . Input::old('sch_id') . '\''])?>
+            </div>
+            <div class="field" ng-if="sch_id=='9999'">
                 <label>單位名稱</label>
-                <?=Form::select('sch_id', ['' => '選擇您服務的單位', '0016' => '國立陽明大學', '1028' => '臺北醫學大學'], Input::get('sch_id'), ['ng-model' => 'sch_id'])?>
+                <?=Form::text('sch_name', '', array())?>
             </div>
             <div class="field" ng-if="sch_id=='1028'">
                 <?=Form::select('dep_id', [
@@ -138,7 +105,3 @@ angular.module('app', [])
 
 <script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
 <script src="/js/angular-semantic-ui/dropdown.js"></script>
-
-<style>
-
-</style>

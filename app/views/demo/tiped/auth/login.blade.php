@@ -3,7 +3,7 @@
 <div class="ui centered stackable grid"> 
     <div class="one column row">
         <div class="six wide column">
-            <h3 class="ui top attached center aligned header">教育資料庫資料查詢平台</h3>
+            <h3 class="ui top attached center aligned header">問卷調查管理平台</h3>
 
             <div class="ui attached segment">                        
                 @include('demo.auth.login')
