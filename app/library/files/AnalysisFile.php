@@ -40,6 +40,11 @@ class AnalysisFile extends CommFile {
         return 'files.analysis.analysis-layout';
     }
 
+    public function editor()
+    {
+        return 'files.analysis.editor';
+    }
+
     public function get_analysis_questions()
     {        
         $quesFile = new QuesFile($this->file->analysis->ques, $this->user);
@@ -148,13 +153,14 @@ class AnalysisFile extends CommFile {
         $target = $group['targets'][Input::get('target_key')];        
 
         isset($target['shid']) && $get_data_query->whereIn('shid', $target['shid']);
-        isset($target['type_establish']) && $get_data_query->whereIn('type_establish', $target['type_establish']);
         isset($target['type2']) && $get_data_query->where('type2', $target['type2']);
         isset($target['type_school']) && $get_data_query->where('type_school', $target['type_school']);
         isset($target['type4']) && $get_data_query->where('type4', $target['type4']);
         isset($target['city']) && $get_data_query->where('city', $target['city']);
         isset($target['city_notest']) && $get_data_query->where('city_notest', $target['city_notest']);
+        isset($target['type_establish']) && $get_data_query->whereIn('type_establish', $target['type_establish']);
         isset($target['type_comprehensive']) && $get_data_query->where('type_comprehensive', $target['type_comprehensive']);
+        isset($target['type_pubpri']) && $get_data_query->where('type_pubpri', $target['type_pubpri']);
         
         isset($target['class_k']) && $get_data_query->where('class_k', $target['class_k']);
         isset($target['class_e']) && $get_data_query->where('class_e', $target['class_e']);
@@ -162,6 +168,18 @@ class AnalysisFile extends CommFile {
         isset($target['class_s']) && $get_data_query->where('class_s', $target['class_s']);
 
         return $get_data_query;
+    }
+
+    public function get_analysis()
+    {
+        return ['file' => $this->file->toArray(), 'analysis' => $this->file->analysis->toArray()];
+    }
+
+    public function save_analysis()
+    {
+        $input = array_only(Input::get('analysis'), ['site', 'title', 'time_start', 'time_end', 'method', 'target_people', 'quantity_total', 'quantity_gets']);
+        $this->file->analysis->update($input);
+        return $this->get_analysis();
     }
     
     public function get_count_frequence()

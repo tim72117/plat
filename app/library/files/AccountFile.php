@@ -7,11 +7,9 @@ use DB, View, Response, Config, Schema, Session, Input, ShareFile, Auth, Request
 
 class AccountFile extends CommFile {
         
-    function __construct($doc_id) 
+    function __construct(Files $file, User $user)
     {
-        $shareFile = ShareFile::find($doc_id);
-
-        parent::__construct($shareFile);
+        parent::__construct($file, $user);
     }
 
     public function is_full()
@@ -22,13 +20,6 @@ class AccountFile extends CommFile {
     public function get_views() 
     {
         return ['open'];
-    }
-
-    public static function create($newFile) 
-    {
-        $shareFile = parent::create($newFile);
-
-        return $shareFile;
     }
 
     public function open()

@@ -726,4 +726,47 @@ class RowsFile extends CommFile {
             }            
         }
     }
+
+    public function get_analysis_questions()
+    {
+        $questions = [];
+        $sheets = $this->file->sheets()->with(['tables', 'tables.columns'])->get()->each(function($sheet) use(&$questions) {
+            $sheet->tables->each(function($table) use(&$questions) {
+                $table->columns->each(function($column) use(&$questions, $table) {
+                    $answers = array_map(function($answer) {
+                        return ['title' => $answer->value, 'value' => $answer->value];
+                    }, DB::table($table->database . '.dbo.' . $table->name)->groupBy('C' . $column->id)->select('C' . $column->id . ' AS value')->get());
+                    array_push($questions, ['name' => $column->id, 'title' => $column->title, 'choosed' => true, 'answers' => $answers]);
+                });
+            });
+        });
+        return ['questions' => $questions, 'title' => ''];
+    }
+
+    public function get_targets()
+    {
+        return [
+            'targets' => [
+                'groups' => [
+                    'all' => ['key' => 'all', 'name' => '不篩選', 'targets' => ['all' => ['name' => '全部', 'selected' => true]]]
+                ]
+            ]
+        ];
+    }
+
+    public function get_frequence()
+    {
+        $id = Input::get('name');
+
+        $table = Column::find($id)->inTable;
+
+        // todo check column exist
+        //$table = DB::table($table->database . '.INFORMATION_SCHEMA.COLUMNS')->where('COLUMN_NAME', $name)->select('TABLE_NAME')->first();
+
+        $data_query = DB::table($table->database . '.dbo.' . $table->name);
+
+        $frequence = $data_query->groupBy('C' . $id)->select(DB::raw('count(*) AS total'), DB::raw('CAST(C' . $id . ' AS varchar) AS name'))->remember(3)->lists('total', 'name');
+
+        return ['frequence' => $frequence];
+    }
 }
