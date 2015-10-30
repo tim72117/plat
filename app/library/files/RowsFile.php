@@ -228,7 +228,7 @@ class RowsFile extends CommFile {
         
         $head = head($rows);
 
-        //check excel column head
+        // check excel column head
         $checked_head = $table->columns->filter(function($column) use($head) {
             return !array_key_exists($column->name, $head ? $head : []);
         });
@@ -255,7 +255,7 @@ class RowsFile extends CommFile {
                     return empty($column_checked);                    
                 });    
                 
-                $exists = DB::table($table->database . '.dbo.' . $table->name)->whereIn('C' . $column->id, $uniques)->lists('created_by', 'C' . $column->id);
+                $exists = $this->getUniqueExists($uniques, $table, $column);
             }
             
             return (object)[
@@ -281,7 +281,7 @@ class RowsFile extends CommFile {
 
             $messages[$row_index] = (object)['pass' => false, 'limit' => false, 'empty' => empty($row_filted), 'updated' => false, 'exists' => [], 'errors' => [], 'row' => []];            
             
-            //skip if empty
+            // skip if empty
             if ($messages[$row_index]->empty) continue;
 
             foreach ($columns as $column)
@@ -305,7 +305,7 @@ class RowsFile extends CommFile {
 
             $messages[$row_index]->pass = !$messages[$row_index]->limit && empty($messages[$row_index]->errors);
     
-            //skip if not pass
+            // skip if not pass
             if (!$messages[$row_index]->pass) continue;           
             
             $messages[$row_index]->row['file_id'] = $file_upload->file->id;
@@ -340,8 +340,11 @@ class RowsFile extends CommFile {
         }
 
         return ['messages' => $messages];
-    }    
-    
+    }
+
+    /**
+     * Get check columns errors.
+     */
     private function check_column($column, $column_value)
     {
         $column_errors = [];
@@ -371,11 +374,17 @@ class RowsFile extends CommFile {
         return $column_errors; 
     }
 
+    /**
+     * Determine if table is exist.
+     */
     private function has_table($table)
     {
         return DB::table($table->database . '.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table->name)->exists();
     }
 
+    /**
+     * Build table if sheet was changed.
+     */
     private function table_construct($table)
     {
         if (!isset($table->builded_at) || Carbon::parse($table->builded_at)->diffInSeconds(new Carbon($table->construct_at), false) > 0) {
@@ -418,6 +427,9 @@ class RowsFile extends CommFile {
         }    
     }
 
+    /**
+     * Sent a request to import file.
+     */
     public function request_to()
     {         
         $input = Input::only('groups', 'description');
@@ -614,7 +626,9 @@ class RowsFile extends CommFile {
         return $checkers[$name];
     }
     
-    //uncomplete deprecated shareFile
+    /**
+     * @todo deprecated shareFile
+     */
     public function get_compact_files() 
     {
         $inGroups = $this->user->inGroups->lists('id');
@@ -636,7 +650,9 @@ class RowsFile extends CommFile {
         return $files;
     }
     
-    //uncomplete deprecated doc_id shareFile get_information
+    /**
+     * @todo deprecated doc_id shareFile get_information
+     */
     public function get_compact_sheet() 
     {        
         $index = Input::only('index')['index'];
@@ -668,7 +684,9 @@ class RowsFile extends CommFile {
         return Response::json(['sheet_compact'=>$sheet_new]);
     }
     
-    //uncomplete deprecated doc_id shareFile get_information
+    /**
+     * @todo deprecated doc_id shareFile get_information
+     */
     public function get_compact_rows() 
     {        
         $sheet_info = Input::only('sheet_info')['sheet_info'];
@@ -698,7 +716,9 @@ class RowsFile extends CommFile {
         return Response::json($rows);
     }
     
-    // uncomplete
+    /**
+     * @todo delete all relation model
+     */
     public function delete() 
     {
         //$this->file->delete();
@@ -715,7 +735,9 @@ class RowsFile extends CommFile {
         return ['deleted' => true];
     }
 
-    //deprecated
+    /**
+     * @todo deprecated this function
+     */
     private function drop_tables($schema)
     {
         foreach($schema->sheets as $sheet)
@@ -727,6 +749,9 @@ class RowsFile extends CommFile {
         }
     }
 
+    /**
+     * Get analysis questions
+     */
     public function get_analysis_questions()
     {
         $questions = [];
@@ -743,6 +768,9 @@ class RowsFile extends CommFile {
         return ['questions' => $questions, 'title' => ''];
     }
 
+    /**
+     * Get analysis filter columns
+     */
     public function get_targets()
     {
         return [
@@ -754,19 +782,58 @@ class RowsFile extends CommFile {
         ];
     }
 
+    /**
+     * Analysis frequence
+     * @todo check table and columns exist
+     */
     public function get_frequence()
     {
         $id = Input::get('name');
 
         $table = Column::find($id)->inTable;
 
-        // todo check column exist
-        //$table = DB::table($table->database . '.INFORMATION_SCHEMA.COLUMNS')->where('COLUMN_NAME', $name)->select('TABLE_NAME')->first();
-
         $data_query = DB::table($table->database . '.dbo.' . $table->name);
 
         $frequence = $data_query->groupBy('C' . $id)->select(DB::raw('count(*) AS total'), DB::raw('CAST(C' . $id . ' AS varchar) AS name'))->remember(3)->lists('total', 'name');
 
         return ['frequence' => $frequence];
+    }
+
+    private function bulidCheckTable($prefix_table_name)
+    {
+        Schema::create('rows_check.dbo.' . $prefix_table_name, function($query) {
+            $query->string('unique', 50);
+        });
+    }
+
+    private function dropCheckTable($prefix_table_name)
+    {
+        Schema::drop('rows_check.dbo.' . $prefix_table_name);
+    }
+
+    private function getUniqueExists($uniques, $table, $column)
+    {
+        $exists = [];
+
+        $prefix_table_name = $table->name . '_' . $this->user->id . '_' . strtolower(str_random(5));
+
+        DB::beginTransaction();
+
+        $this->bulidCheckTable($prefix_table_name);
+
+        foreach (array_chunk($uniques, 1000) as $unique) {
+            $rows = array_map(function($value) { return ['unique' => $value]; }, $unique);
+            DB::table('rows_check.dbo.' . $prefix_table_name)->insert($rows);
+        }
+
+        $exists = DB::table($table->database . '.dbo.' . $table->name . ' AS table')->whereExists(function($query) use($prefix_table_name) {
+            $query->select(DB::raw(1))->from('rows_check.dbo.' . $prefix_table_name);
+        })->lists('table.created_by', 'C' . $column->id);
+
+        $this->dropCheckTable($prefix_table_name);
+
+        DB::commit();
+
+        return $exists;
     }
 }

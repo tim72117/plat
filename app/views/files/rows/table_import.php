@@ -18,7 +18,7 @@
 
         <div class="ui green button" ng-click="exportRows(sheet)">
             <i class="download icon"></i>下載已上傳名單
-        </div> 
+        </div>
 
         <a class="ui green button" href="rows">
             <i class="edit icon"></i>編輯名單
@@ -32,7 +32,7 @@
             <div  class="ui red label" ng-repeat="error in messages.head">{{ error.title }}</div >           
         </div>
 
-        <table ng-repeat="table in sheet.tables" class="ui very compact table">
+        <table ng-repeat="table in sheet.tables" class="ui very compact collapsing table">
             <thead>
                 <tr>   
                     <td colspan="{{ table.columns.length+3 }}">
@@ -63,14 +63,14 @@
                         </div>                        
                     </td>
                 </tr>
-                <tr>	
-                    <th>欄位名稱</th>
+                <tr>
+                    <th class="collapsing">欄位名稱</th>
                     <th></th>
                     <th>錯誤資訊</th>
                     <th style="max-width:70px;overflow-x: hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ column.title }}" ng-repeat="column in table.columns">{{ column.title }}</th>                    
                 </tr>
                 <tr>
-                    <th>欄位代號</th>
+                    <th class="collapsing">欄位代號</th>
                     <th></th>
                     <th style="min-width:100px"></th>
                     <th style="max-width:70px;overflow-x: hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ column.name }}" ng-repeat="column in table.columns">{{ column.name }}</th>                    
@@ -78,7 +78,7 @@
             </thead>
             <tbody ng-if="messages.length > 0">
                 <tr ng-repeat="(index, message) in messages | filter: messagefilter" ng-class="{positive: message.pass, warning: message.pass && message.exists.length > 0}">
-                    <td>
+                    <td class="collapsing">
                         <div class="ui green label" ng-if="message.pass && message.exists.length < 1">新增</div>
                         <div class="ui yellow label" ng-if="message.pass && message.exists.length > 0">更新</div>   
                         <div class="ui red label" ng-if="!message.pass">錯誤</div>                        
@@ -175,7 +175,7 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
     };
 
     $scope.uploader.onErrorItem = function(fileItem, response, status, headers) {
-        angular.element('body').append(response);
+        angular.element('html').html(response);
     };
 
     $scope.uploader.onCompleteAll = function() {

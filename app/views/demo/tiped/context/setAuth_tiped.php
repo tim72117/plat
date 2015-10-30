@@ -1,7 +1,7 @@
 
-<div ng-controller="usersCtrl" style="position: absolute;left: 10px;right: 10px;top: 10px;bottom: 10px">
+<div ng-controller="usersCtrl">
 
-    <div class="ui segment active" ng-cloak ng-class="{loading: sheetLoading}" style="position:absolute;left:0;right:0;top:0;bottom:0;overflow: auto">
+    <div class="ui basic segment" ng-cloak ng-class="{loading: sheetLoading}" style="overflow: auto">
         
         <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
         
