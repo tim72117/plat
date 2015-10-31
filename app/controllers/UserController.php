@@ -20,7 +20,7 @@ class UserController extends BaseController {
         'password_confirmation.required' => '確認密碼必填',
         'password_confirmation.regex'    => '確認密碼格式錯誤',  
         'password_confirmation.between'  => '確認密碼格式必須介於 6 - 20 個字元',
-        'password.confirmed'             => '確認密碼必須相同',	
+        'password.confirmed'             => '確認密碼必須相同',
     );
 
     public function __construct(){
@@ -38,7 +38,7 @@ class UserController extends BaseController {
         return Redirect::to('project/'.$project);
     }
 
-    public function loginPage($project) {
+    public function loginPage($project = 'cher') {
         if( $project=='das' ){exit;
             return Redirect::to('project/use');
         }
@@ -50,7 +50,7 @@ class UserController extends BaseController {
             ->nest('child_footer', 'demo.' . $project . '.footer');
     }
 
-    public function login($project) {
+    public function login($project = 'cher') {
         $input = Input::only('email', 'password');
 
         $rulls = array(
@@ -79,7 +79,7 @@ class UserController extends BaseController {
                 
             Auth::login($user, true);
             
-            return Redirect::back();
+            return Redirect::intended('page/project');
 
         }else{
             $validator->getMessageBag()->add('login_error', '帳號密碼錯誤');

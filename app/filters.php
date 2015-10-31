@@ -13,13 +13,13 @@
 
 App::before(function($request)
 {
-	//
+    //
 });
 
 
 App::after(function($request, $response)
 {
-	//
+    //
 });
 
 /*
@@ -33,17 +33,16 @@ App::after(function($request, $response)
 |
 */
 
-Route::filter('auth', function($route)
+Route::filter('auth', function()
 {
-	if( Auth::guest() ) {
-        return Redirect::guest('project/' . $route->getParameter('project'));
-    }
+    if (Auth::guest())
+        return Redirect::guest('project');
 });
 
 
 Route::filter('auth.basic', function()
 {
-	return Auth::basic();
+    return Auth::basic();
 });
 
 /*
@@ -59,7 +58,7 @@ Route::filter('auth.basic', function()
 
 Route::filter('guest', function()
 {
-	if (Auth::check()) return Redirect::to('page/project');
+    if (Auth::check()) return Redirect::to('page/project');
 });
 
 /*
@@ -75,19 +74,19 @@ Route::filter('guest', function()
 
 Route::filter('csrf', function()
 {
-	if (Session::token() != Input::get('_token'))
-	{		
-		//throw new Illuminate\Session\TokenMismatchException;
+    if (Session::token() != Input::get('_token'))
+    {
+        //throw new Illuminate\Session\TokenMismatchException;
         $messageBag = new Illuminate\Support\MessageBag();
         $messageBag->add('csrf', '畫面過期，請重新登入');
-		throw new app\library\files\v0\TokenMismatchException($messageBag);
-	}
+        throw new app\library\files\v0\TokenMismatchException($messageBag);
+    }
 });
 
 
 Route::filter('post_delay', function()
 {
-	$ip = Request::server('REMOTE_ADDR');
+    $ip = Request::server('REMOTE_ADDR');
     
     $ip_requested = sha1($ip.Request::url());
 
@@ -101,39 +100,29 @@ Route::filter('post_delay', function()
 });
 
 
-Route::filter('auth_logined', function() {
-    if (Auth::guest())
-        return Redirect::to('project');
-    
-    if (is_null(Auth::user()->getProject())){
-        Auth::logout();
-        return Redirect::to('project');        
-    }
-
-    if (Auth::check()) {
-        $user = Auth::user();
-        $limit = DB::table('limit')->where('user_id', $user->id)->select('ip')->first();
-        if (!is_null($limit)){
-            $ipAllows = explode(",",$limit->ip);
-            $ipPass = false;
-            $myIp = Request::getClientIp();
-            foreach ($ipAllows as $ipAllow ) {
-                $ipRange = explode("-", $ipAllow);
-                if (count($ipRange) > 1) {
-                    $ipLongs = array_map(function($ip){
-                        return ip2long($ip);
-                    }, $ipRange);
-                    $ipLongs[0]<=ip2long($myIp) && $ipLongs[1]>=ip2long($myIp) && $ipPass = true;
-                } else {
-                    $myIp == $ipRange[0] && $ipPass = true;
-                }
+Route::filter('limit', function() {
+    $user = Auth::user();
+    $limit = DB::table('limit')->where('user_id', $user->id)->select('ip')->first();
+    if (!is_null($limit)){
+        $ipAllows = explode(",",$limit->ip);
+        $ipPass = false;
+        $myIp = Request::getClientIp();
+        foreach ($ipAllows as $ipAllow ) {
+            $ipRange = explode("-", $ipAllow);
+            if (count($ipRange) > 1) {
+                $ipLongs = array_map(function($ip){
+                    return ip2long($ip);
+                }, $ipRange);
+                $ipLongs[0]<=ip2long($myIp) && $ipLongs[1]>=ip2long($myIp) && $ipPass = true;
+            } else {
+                $myIp == $ipRange[0] && $ipPass = true;
             }
+        }
 
-            if (!$ipPass) {
-                $project = $user->getProject();
-                Auth::logout();
-                return Redirect::to('project/'.$project)->withErrors(array('limit'=>'您無法存取這個網站'));
-            }
+        if (!$ipPass) {
+            $project = $user->getProject();
+            Auth::logout();
+            return Redirect::to('project/'.$project)->withErrors(array('limit'=>'您無法存取這個網站'));
         }
     }
 });
