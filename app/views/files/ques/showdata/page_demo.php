@@ -5,7 +5,7 @@
 	</div>
 
 	<div style="text-align:center;margin-top:20px;font-size:1em">
-		<?
+		<?php
 		$key = 0;
 		foreach($newpage->xmlfile_array as $p){	
 

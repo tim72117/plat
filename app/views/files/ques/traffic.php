@@ -59,7 +59,7 @@ $(function () {
 				type: 'datetime',	
 				labels: {
 					format: '{value:%Y-%m-%d}'
-				}, 
+				},
 				tickInterval: 3600 * 1000 * 24 * 2,
                 categories: <?=json_encode(array_keys($sum_array))?>				
 			},
@@ -73,7 +73,7 @@ $(function () {
 				xAxis:{
 					labels: {
 						format: '{value:%Y-%m-%d}'
-					}, 
+					},
 					tickInterval: 3600 * 1000 * 24
 				}
 			},
@@ -130,11 +130,11 @@ $(function () {
     });
 </script>
 
-<div style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
+<div class="ui basic segment">
 
 	<div id="container"></div>
 	<table class="ui collapsing table">
 		<?=$table?>
 	</table>
 
-</div>   
+</div>

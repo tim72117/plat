@@ -55,7 +55,7 @@ session_start();
     </div>	
     
     <p style="margin:0;margin-left:5px; clear:left;font-size:12px">選擇輸出資料小數點後位數<select name="dotmount">
-    <?
+    <?php
 	for($i=1;$i<10;$i++){
 		echo '<option value="'.$i.'" '.($i==3?'selected="selected"':'').'>'.$i.'</option>';
 	}
@@ -91,24 +91,24 @@ session_start();
 	<td>
 	<div class="tabs-target" style="margin:2px;overflow:hidden">
 		<ul>
-		<? if( $_SESSION['authority']=='1' ){ ?>
+		<?php if( $_SESSION['authority']=='1' ){ ?>
 			<li><a href="#tabs-target-1">本校</a></li>
 			<li><a href="#tabs-target-2">全國</a></li>
 			<li><a href="#tabs-target-3">校際比較</a></li>
 			<li><a href="#tabs-target-4">免試就學區</a></li>
-		<? } ?>
-		<? if( $_SESSION['authority']=='2' ){ ?>
+		<?php } ?>
+		<?php if( $_SESSION['authority']=='2' ){ ?>
 			<li><a href="#tabs-target-2">全國</a></li>
 			<li><a href="#tabs-target-3">校際比較</a></li>
 			<li><a href="#tabs-target-4">免試就學區</a></li>
 			<li><a href="#tabs-target-5">本縣市</a></li>
-		<? } ?>
-		<? if( $_SESSION['authority']=='3' ){ ?>
+		<?php } ?>
+		<?php if( $_SESSION['authority']=='3' ){ ?>
 			<li><a href="#tabs-target-2">全國</a></li>
 			<li><a href="#tabs-target-3">校際比較</a></li>
 			<li><a href="#tabs-target-4">免試就學區</a></li>
 			<li><a href="#tabs-target-6">各縣市</a></li>
-		<? } ?>
+		<?php } ?>
 			
 		</ul>
 		<div id="tabs-target-1" style="display:none">

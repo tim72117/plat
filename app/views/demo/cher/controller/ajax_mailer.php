@@ -1,4 +1,4 @@
-<?
+<?php
 return array(
     'send' => function() {
         $user = User::find(Input::get('id'));

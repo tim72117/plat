@@ -1,7 +1,7 @@
 
 <div ng-cloak ng-controller="newTableController">
         
-    <div class="ui segment" ng-class="{loading: loading}"> 
+    <div class="ui basic segment" ng-class="{loading: loading}"> 
 
         <div class="ui text menu">
             <div class="header item"><i class="file text icon"></i>{{ file.title }}</div>

@@ -335,20 +335,6 @@ foreach($census->pages as $page){
 //     $page++;
 // }
 
-
-?>
-<head>
-<style>
-.ruletip {
-	color:#ff80ff;
-}
-</style>
-</head>
-
-
-<div style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px">
-<table class="ui celled table">
-<?
 $q_count = 0;
 $tr_color_array = array('text_head'=>'#ccffcc','checkbox_head'=>'#ccffcc','list'=>'#ccffcc','scale_head'=>'#ccffcc','scale'=>'#f0f0f0','text'=>'#ddd');
 
@@ -401,7 +387,18 @@ foreach($table_array as $table){
 		$outtable .= '<tr><th>題號</th><th>標題</th><th>題目類型</th><th>欄位大小</th><th>資料庫欄位</th><th>選項名稱</th><th>填答說明</th></tr>'; 		
 	}
 }
-echo $outtable;
+
 ?>
+<head>
+<style>
+.ruletip {
+	color:#ff80ff;
+}
+</style>
+</head>
+
+<div class="ui basic segment">
+<table class="ui celled table">
+	<?=$outtable?>
 </table>
 </div>

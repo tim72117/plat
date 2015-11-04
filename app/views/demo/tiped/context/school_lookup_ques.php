@@ -1,7 +1,7 @@
 
-<div ng-controller="rateCtrl" style="position: absolute;left: 10px;right: 10px;top: 10px;bottom: 10px">
+<div ng-controller="rateCtrl">
     
-    <div class="ui segment active" ng-cloak ng-class="{loading: sheetLoading}">
+    <div class="ui basic segment" ng-cloak ng-class="{loading: sheetLoading}">
         
         <div class="ui mini statistic">
             <div class="value">{{ rate.finish }}</div>

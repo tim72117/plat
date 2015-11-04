@@ -61,8 +61,9 @@ foreach($commends_p3 as $i => $commend_p3){
 		</tr>';
 }
 ?>
-<div ng-cloak style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;overflow-y: auto;padding:1px;max-width:800px">
-	<div class="ui segment">
+<div class="ui basic segment">
+
+	<div class="ui segment" style="max-width:800px">
 		<h4 class="ui horizontal header divider">畢業後一年即時排行榜</h4>
 		<table class="ui very basic table">
 			<thead>
@@ -86,7 +87,7 @@ foreach($commends_p3 as $i => $commend_p3){
 			</tbody>
 		</table>
 	</div>
-	<div class="ui segment">
+	<div class="ui segment" style="max-width:800px">
 		<h4 class="ui horizontal header divider">畢業後三年即時排行榜</h4>
 		<table class="ui very basic table">
 			<thead>
@@ -110,4 +111,5 @@ foreach($commends_p3 as $i => $commend_p3){
 			</tbody>
 		</table>
 	</div>
+
 </div>

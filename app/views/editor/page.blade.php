@@ -126,7 +126,7 @@ $(document).ready(function(){
 			{{ Form::close() }}
 
             <div class="ui basic segment">
-            <?
+            <?php
                 $census->pages->each(function($page) {
                     $active = Input::get('page')==$page->page?' active':'';
                     echo '<a class="ui button ' . ($active ? ' active' : '') . '" href="demo?page='.$page->page.'">'.$page->page.'</a>';

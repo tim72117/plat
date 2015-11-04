@@ -103,25 +103,25 @@
 	<td>
 	<div class="tabs-target" style="margin:2px;overflow:hidden">
 		<ul>
-		<? if( $_SESSION['authority']=='1' ){ ?>
+		<?php if( $_SESSION['authority']=='1' ){ ?>
 			<li><a href="#tabs-target-1">本校</a></li>
 			<li><a href="#tabs-target-2">全國</a></li>
 			<li><a href="#tabs-target-3">校際比較</a></li>
 			<li><a href="#tabs-target-4">免試就學區</a></li>
-		<? } ?>
-		<? if( $_SESSION['authority']=='2' ){ ?>
+		<?php } ?>
+		<?php if( $_SESSION['authority']=='2' ){ ?>
 			<li><a href="#tabs-target-5">本縣市</a></li>
 			<li><a href="#tabs-target-2">全國</a></li>
 			<li><a href="#tabs-target-3">校際比較</a></li>
 			<li><a href="#tabs-target-4">免試就學區</a></li>
 			<li><a href="#tabs-target-7">縣市內各校</a></li>
-		<? } ?>
-		<? if( $_SESSION['authority']=='3' ){ ?>
+		<?php } ?>
+		<?php if( $_SESSION['authority']=='3' ){ ?>
 			<li><a href="#tabs-target-2">全國</a></li>
 			<li><a href="#tabs-target-3">校際比較</a></li>
 			<li><a href="#tabs-target-4">免試就學區</a></li>
 			<li><a href="#tabs-target-6">各縣市</a></li>
-		<? } ?>
+		<?php } ?>
 			
 		</ul>
 		<div id="tabs-target-1" style="display:none">
@@ -319,7 +319,7 @@
 		<div id="tabs-target-7" class="tabs-target-box" style="display:none;max-height:150px">
 					<ul name="browser" class="filetree">
 					
-						<?
+						<?php
 						
 						
 						
