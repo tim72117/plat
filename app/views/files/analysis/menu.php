@@ -21,6 +21,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         $scope.loading = true;
         $http({method: 'POST', url: 'get_analysis_questions', data:{} })
         .success(function(data, status, headers, config) {
+            
             $scope.columns = data.questions;
             $scope.title = data.title;
             $scope.loading = false;
@@ -75,7 +76,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         </div>
 
         <div class="ui top attached segment">
-            <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋欄位..."><i class="search icon"></i></div>
+            <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋關鍵字..."><i class="search icon"></i></div>
             <a class="ui button" href="open">上一步</a>
             <a class="ui olive button" href="javascript:void(0)" ng-click="nextStep()">下一步</a>
         </div>

@@ -2,16 +2,16 @@
     <div class="ui two column grid">
         <div class="fifteen wide column">
             <div class="ui fluid dropdown selection multiple" ng-class="{active: false, visible: false, disabled: loading}">
-                <a ng-repeat="column in selected.columns" class="ui label visible" style="max-width:100%;overflow:hidden;white-space: nowrap;text-overflow: ellipsis"
+                <a ng-repeat="column in selected.columns" class="ui label visible" style="max-width:100%;word-wrap:break-all"
                    ng-click="selected.columns.length = 0;clear(column)">
-                    <i class="columns icon"></i>
-                    {{ column.title }}
+                    <i class="columns icon"></i> 
+                    {{ column.title }} 
                 </a>
-                <div class="default text"><i class="columns icon"></i>Columns 行變數</div>
+                <div class="default text"><i class="columns icon"></i>Columns 欄變數</div>
             </div>
             <div class="ui hidden fitted divider"></div>
             <div class="ui fluid dropdown selection multiple" ng-class="{active: false, visible: false, disabled: loading}">
-                <a ng-repeat="column in selected.rows" class="ui label visible" style="max-width:100%;overflow:hidden;white-space: nowrap;text-overflow: ellipsis"
+                <a ng-repeat="column in selected.rows" class="ui label visible" style="max-width:100%; word-wrap:break-all"
                    ng-click="selected.rows.length = 0;clear(column)">
                     <i class="columns icon"></i>
                     {{ column.title }}
@@ -27,66 +27,116 @@
 
 <div class="ui basic segment" ng-class="{loading: loading}">
 
-    <div ng-if="result == 'bar' || result == 'pie'">
-        <h4 class="ui header" ng-repeat="column in selected.columns">{{ column.title }}</h4>
-        <div id="bar-container"></div>
+    <div>    
+        <div ng-if="result == 'bar' || result == 'pie'">
+            <div ng-if="selected.rows.length == 0 && selected.columns.length > 0">
+                <h4 class="ui header" ng-repeat="column in selected.columns">{{ column.title }}</h4>
+            </div>
+            <div ng-if="selected.rows.length > 0 && selected.columns.length == 0">
+                <h4 class="ui header" ng-repeat="row in selected.rows">{{ selected.rows[0].title }}</h4>
+            </div>
+            
+        </div>
+        <div ng-if="result == 'bar'" id="bar-container"></div>
+        <div ng-if="result == 'pie'" id="pie-container"></div>
     </div>
 
     <div style="overflow:auto" ng-if="result == 'table' && selected.rows.length == 0">
-        <div style="width:{{ selected.columns[0].answers.length*120 }}px;min-width:500px">
-            <table class="ui fixed single line table">
+        <div style="width:{{ selected.columns[0].answers.length*120+120 }}px;min-width:500px">
+            <table class="ui  table">
                 <thead>
                     <tr>
                         <th style="min-width:150px"></th>
-                        <th class="left aligned" colspan="{{ selected.columns[0].answers.length }}" ng-repeat="column in selected.columns">{{ column.title }}</th>
+                        <th class="left aligned" colspan="{{ selected.columns[0].answers.length+1 }}" ng-repeat="column in selected.columns" >{{ column.title }}</th>
                     </tr>
                     <tr>
                         <th></th>
                         <th class="top aligned left aligned" style="min-width:250px" ng-repeat="answer in selected.columns[0].answers">{{ answer.value }}({{ answer.title }})</th>
+                        <th class="top aligned left aligned" style="min-width:250px" ng-show="selected.columns.length > 0">總和</th>
                     </tr>
+                    
                 </thead>
                 <tbody ng-repeat="(id, target) in targetsSelected()">
                     <tr>
                         <td>{{ target.name }}</td>
                         <td class="left aligned collapsing" ng-class="{disabled: target.loading}" ng-repeat="answer in selected.columns[0].answers">
-                            {{ frequence[id][answer.value] ? frequence[id][answer.value] : 0 }}
+                            {{ frequence[id][answer.value] ? frequence[id][answer.value] : 0 }}  ({{getTotalPercent(frequence[id][answer.value],id)| number : 2 }}%)
+                            
                         </td>
+                        <td ng-show="selected.columns.length > 0">{{getTotal(id)}}(100%)</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <div style="overflow:auto" ng-if="result == 'table' && selected.rows.length > 0">
+    <div style="overflow:auto" ng-if="result == 'table' && selected.columns.length == 0 && selected.rows.length > 0">
+        <div style="min-width:600px">
+            <table class="ui  table">
+                <thead >
+                    <tr>
+                        <th class="top aligned center aligned" colspan="3" ng-repeat="row in selected.rows" >{{ selected.rows[0].title }}</th>
+                        
+                    </tr>
+                </thead>
+                <tbody ng-repeat="(id, target) in targetsSelected()">
+                    <tr>
+                        <td rowspan="{{ selected.rows[0].answers.length+2 }}" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700;width:50px">{{ target.name }}</td>
+                    </tr>
+                    <tr  ng-repeat="answer in selected.rows[0].answers">
+                        
+                        <td class="right aligned collapsing" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">{{ answer.title }}</td>
+                        <td class="left aligned collapsing" ng-class="{disabled: target.loading}">
+                            {{ frequence[id][answer.value] ? frequence[id][answer.value] : 0 }}  ({{getTotalPercent(frequence[id][answer.value],id)| number : 2 }}%)
+                             
+                        </td>
+                        
+                    </tr>
+                    <tr  ng-show="selected.rows.length > 0">
+                        
+                        <td class="right aligned collapsing" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">總和</td>
+                        <td class="left aligned collapsing" >{{getTotal(id)}}(100%)</td>
+                        
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div style="overflow:auto" ng-if="result == 'table' && selected.rows.length > 0 && selected.columns.length > 0">
         <div style="width:{{ selected.columns[0].answers.length*120+120 }}px;min-width:600px">
 
-            <table class="ui structured fixed single line table">
+            <table class="ui table">
                 <thead>
                     <tr>
                         <th style="min-width:150px"></th>
                         <th ng-if="selected.rows.length > 0"></th>
-                        <th colspan="{{ column.answers.length }}" ng-repeat="column in selected.columns">{{ column.title }}</th>
+                        <th colspan="{{ column.answers.length+1 }}" ng-repeat="column in selected.columns" >{{ column.title }}</th>
                     </tr>
                     <tr>
                         <th></th>
                         <th ng-if="selected.rows.length > 0"></th>
                         <th class="right aligned" ng-repeat="answer in selected.columns[0].answers">{{ answer.title }}({{ answer.value }})</th>
+                        
                     </tr>
                 </thead>
                 <tbody ng-repeat="(id, target) in targetsSelected()">
                     <tr>
-                        <td rowspan="{{ selected.rows[0].answers.length }}" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">{{ target.name }}</td>
+                        <td rowspan="{{ selected.rows[0].answers.length+1 }}" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">{{ target.name }}</td>
                         <td class="right aligned collapsing" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">{{ selected.rows[0].answers[0].title }}</td>
                         <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat="answer in selected.columns[0].answers">
-                            {{ crosstable[id][answer.value][selected.rows[0].answers[0].value] ? crosstable[id][answer.value][selected.rows[0].answers[0].value] : 0 }}
+                            {{ crosstable[id][answer.value][selected.rows[0].answers[0].value] ? crosstable[id][answer.value][selected.rows[0].answers[0].value] : 0 }} 
                         </td>
+                        
                     </tr>
                     <tr ng-repeat="(key, row_answer) in selected.rows[0].answers" ng-if="key != 0">
                         <td class="right aligned collapsing" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">{{ row_answer.title }}</td>
                         <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat="column_answer in selected.columns[0].answers">
                             {{ crosstable[id][column_answer.value][row_answer.value] ? crosstable[id][column_answer.value][row_answer.value] : 0 }}
                         </td>
+                        
                     </tr>
+                    
                 </tbody>
             </table>
 

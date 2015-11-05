@@ -17,13 +17,13 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
     $scope.clouds = 'C10';
     $scope.information = {};
     $scope.methods = {census: '普查', sampling: '抽樣調查'};
-    $scope.types = [{key: 'C10', title: '高一專一'}, {key: 'C11', title: '高二專二'}];
+    $scope.types = [{key: 'C10', title: '高一專一學生'}, {key: 'C11', title: '高二專二學生'}, {key: 'C10P', title: '高二專二家長調查'}];
 
     $scope.allCensus = function() {
         $scope.loading = true;
         $http({method: 'POST', url: 'all_census', data:{}})
         .success(function(data, status, headers, config) {
-            console.log(data);
+            
             $scope.docs = data.docs;
             var docs = $filter('filter')($scope.docs, {selected: true});
             if (docs.length > 0) {
@@ -78,7 +78,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
                     <div class="item" ng-repeat="type in types">
                         <div class="header">{{ type.title }}</div>
                         <div class="menu">
-                            <a class="item" ng-repeat="doc in docs | filter: {analysis: {target_people: type.key}}" ng-class="{active: doc.selected}" ng-click="selectDoc(doc)">
+                            <a class="item" ng-repeat="doc in docs | filter: {analysis: {target_people: type.key}}| orderBy:'analysis.code_year'" ng-class="{active: doc.selected}" ng-click="selectDoc(doc)">
                                 {{ doc.is_file.title }}
                             </a>
                         </div>
@@ -92,7 +92,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
                     <tbody>
                         <tr>
                             <td colspan="2">
-                                <h3 class="ui header">{{ information.title }} </h3>
+                                <h3 class="ui header">{{  doc.is_file.title }}</h3>
                                 <button class="ui olive button" ng-class="{disabled: (docs | filter: {selected: true}).length < 1}" ng-click="enterDoc()">
                                     <i class="puzzle icon"></i> 進入資料庫
                                 </button>
@@ -128,7 +128,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
                         </tr>
                         <tr>
                             <td class="collapsing">回收率 :</td>
-                            <td id="quantity_percent">{{ information.quantity_gets/information.quantity_total*100 || 0 }}%</td>
+                            <td id="quantity_percent">{{ information.quantity_gets/information.quantity_total*100 || 0 | number : 2 }}%</td>
                         </tr>
                         <tr>
                             <td class="collapsing">問卷內容 :</td>
