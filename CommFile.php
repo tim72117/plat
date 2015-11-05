@@ -79,7 +79,7 @@ class CommFile {
             throw new ValidateException($validator);
 
         $hash_name = hash_file('md5', $file_upload->getRealPath()) . '-' . uniqid(rand(0, 99));
-        
+
         $parts = array_slice(str_split($hash = md5($this->user->id), 2), 0, 2);
 
         $this->file->file = join('/', $parts) . '/' . $hash_name;
