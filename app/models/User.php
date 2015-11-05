@@ -130,39 +130,39 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 		return parent::save($options);
 	}
 
-    
+
  	public function getProject(){
         return Session::get('user.project');
-	}   
+	}
 	
 	public function setProject($project){
         Session::put('user.project', $project);
 	}
 
-    
+
     /*
 	| Relations
     */
 	public function contact() {
 		return $this->hasOne('Contact', 'user_id', 'id')->where('contact.project', $this->getProject());
 	}
-    
-	public function contacts() {        
+
+	public function contacts() {
 		return $this->hasMany('Contact', 'user_id', 'id');
 	}
-    
+
 	public function works() {
 		return $this->hasMany('Work', 'user_id');
 	}
-    
+
 	public function schools() {
 		return $this->belongsToMany('School', 'Work', 'user_id', 'sch_id');
 	}
 	
 	public function groups() {
         return $this->belongsToMany('Group', 'user_own_group', 'user_id', 'group_id');
-	}    
-    
+	}
+
 	public function inGroups() {
 		return $this->belongsToMany('Group', 'user_in_group', 'user_id', 'group_id');
 	}

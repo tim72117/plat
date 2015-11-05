@@ -18,7 +18,7 @@ class SystemFile extends CommFile {
         return false;
     }
 
-    public function get_views() 
+    public function get_views()
     {
         return [
             'open' => ['view' => 'files.system.development', 'full' => false],

@@ -6,7 +6,7 @@ use Files;
 use DB, View, Response, Config, Schema, Session, Input, ShareFile, Auth, Request, Carbon\Carbon;
 
 class AccountFile extends CommFile {
-        
+
     function __construct(Files $file, User $user)
     {
         parent::__construct($file, $user);
@@ -17,14 +17,14 @@ class AccountFile extends CommFile {
         return false;
     }
 
-    public function get_views() 
+    public function get_views()
     {
         return ['open'];
     }
 
     public function open()
-    {        
-        return 'files.account.profile'; 
+    {
+        return 'files.account.profile';
     }
 
     public function get_account()

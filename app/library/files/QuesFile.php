@@ -10,8 +10,8 @@ use Carbon\Carbon;
 use app\library\v10\buildQuestionAnalysis;
 
 class QuesFile extends CommFile {
-        
-    function __construct(Files $file, User $user) 
+
+    function __construct(Files $file, User $user)
     {
         parent::__construct($file, $user);
     }
@@ -20,12 +20,12 @@ class QuesFile extends CommFile {
     {
         return false;
     }
-    
-    public function get_views() 
+
+    public function get_views()
     {
         return ['open', 'open_ng', 'codebook', 'receives', 'spss', 'report', 'analysis'];
     }
-    
+
     public function create()
     {
         parent::create();
@@ -56,7 +56,7 @@ class QuesFile extends CommFile {
 
         return 'editor.editor-temp';
     }
-    
+
     public function open_ng()
     {
         View::share('census', $this->file->census);
@@ -385,7 +385,7 @@ class QuesFile extends CommFile {
                 $domnode->nodeValue = '';
                 $domnode->appendChild( new DOMCdataSection($question_title) );
                 echo 'degree'."\n";
-                
+
                 //$questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*");
                 //$node = $questionInSub[0];
                 //$domnode = dom_import_simplexml($node);
@@ -544,7 +544,7 @@ class QuesFile extends CommFile {
         $ques_page->update(array('xml' => $xml));
 
         return '';
-        
+
     }
 
     private function write($question_array, $name, $layer, $type){
@@ -602,10 +602,10 @@ class QuesFile extends CommFile {
     {
         if (!$this->file->cencus->edit)
             return '';
-        
+
         $tablename = $this->file->cencus->table;
         $pages = $this->file->cencus->pages;
-        
+
         Config::set('database.default', 'sqlsrv');
         Config::set('database.connections.sqlsrv.database', $this->file->cencus->database);
         DB::reconnect('sqlsrv');
@@ -613,14 +613,14 @@ class QuesFile extends CommFile {
         foreach($pages as $ques_page) {
             $page = $ques_page->page;
 
-            $question_array = simplexml_load_string($ques_page->xml);            
+            $question_array = simplexml_load_string($ques_page->xml);
 
             //Schema::hasTable($tablename.'_page'.$page) && Schema::drop($tablename.'_page'.$page);
-            
+
             Schema::create($tablename.'_page'.$page, function($table) use($question_array, $page){
-                
+
                 $table->string('newcid', 50)->primary();
-                
+
                 foreach($question_array as $question){
                     if ($question->getName()=='question' || $question->getName()=='question_sub'){
                         switch($question->type){
@@ -750,9 +750,9 @@ class QuesFile extends CommFile {
     public function to_old_analysis()
     {
         //DB::connection('sqlsrv_analysis')->table('question')->get();exit;
-        
+
         $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid', 'edit', 'table')->first();
-        
+
         $pages = DB::table('ques_page')->where('qid', $ques_doc->qid)->orderBy('page')->select('page', DB::raw('CAST(page AS varchar) AS label'), 'xml')->get();
 
         $GLOBALS['tablename'] = $ques_doc->table;
@@ -818,20 +818,20 @@ class QuesFile extends CommFile {
     {
         $subs = [];
         foreach($questions as $question){
-            
+
             $sub = (object)[
                 'id' => null,
                 //'answers' => [],
                 //'subs' => [],
             ];
-            
+
             $question->parent_id = $parent_id;
             $question->parent_value = $parent_value;
-            
-            if( isset($question->answers) ) {               
+
+            if( isset($question->answers) ) {
 
                 $sub->id = isset($question->id) ? $question->id : (is_callable($call) ? $call($question) : null);
-                
+
                 foreach($question->answers as $index => $anwser){
                     if( isset($anwser->subs) ){
 
@@ -846,18 +846,36 @@ class QuesFile extends CommFile {
 
                         //$sub->answers[$index] = ['subs' => []];
 
-                    } 
+                    }
                 }
-                
+
                 array_push($subs, $sub->id);
             }
-            
+
             if( isset($question->subs) ) {
-                //$sub->subs = 
-                $this->get_struct_from_view($question->subs, $call, $question->id);                
+                //$sub->subs =
+                $this->get_struct_from_view($question->subs, $call, $question->id);
             }
-            
+
         }
         return $subs;
+    }
+
+    public function get_reports()
+    {
+        $reports = DB::table('report')->where('census_id', $this->file->census->id)->select('id', 'contact', 'text', 'explorer', 'solve', 'time')->orderBy('time', 'desc')->get();
+        foreach ($reports as $report) {
+            $report->solve = (bool)$report->solve;
+        }
+        return ['reports' => $reports];
+    }
+
+    public function save_report()
+    {
+        $report_id = Input::get('report_id');
+        DB::table('report')->where('id', $report_id)->update(['solve' => Input::get('solve')]);
+        $report = DB::table('report')->where('id', $report_id)->select('id', 'contact', 'text', 'explorer', 'solve', 'time')->orderBy('time', 'desc')->first();
+        $report->solve = (bool)$report->solve;
+        return ['report' => $report];
     }
 }

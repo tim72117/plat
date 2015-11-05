@@ -18,7 +18,7 @@ class AnalysisFile extends CommFile {
         return true;
     }
 
-    public function get_views() 
+    public function get_views()
     {
         return ['open', 'menu', 'analysis'];
     }
@@ -32,7 +32,7 @@ class AnalysisFile extends CommFile {
     {
         return 'files.analysis.menu';
     }
-    
+
     public function analysis()
     {
         Input::has('columns_choosed') && Session::put('analysis-columns-choosed', Input::get('columns_choosed', []));
@@ -46,7 +46,7 @@ class AnalysisFile extends CommFile {
     }
 
     public function get_analysis_questions()
-    {        
+    {
         $quesFile = new QuesFile($this->file->analysis->ques, $this->user);
 
         $questions = [];
@@ -56,7 +56,7 @@ class AnalysisFile extends CommFile {
 
         $columns = DB::table('analysis_data.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $this->file->analysis->tablename)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
 
-        $questions = array_values(array_filter($questions, function(&$question) use($columns) {       
+        $questions = array_values(array_filter($questions, function(&$question) use($columns) {
             $question->choosed = in_array($question->name, Session::get('analysis-columns-choosed', []), true);
             return in_array($question->name, $columns);
         }));
@@ -80,7 +80,7 @@ class AnalysisFile extends CommFile {
             $query->where('files.type', 7);
         })
         ->has('isFile.analysis')
-        ->where(function($query) {           
+        ->where(function($query) {
             $query->where('target', 'user')->where('target_id', $this->user->id);
             $query->orWhere(function($query) {
                 $inGroups = $this->user->inGroups->lists('id');
@@ -94,7 +94,7 @@ class AnalysisFile extends CommFile {
 
         return ['docs' => $docs];
     }
-    
+
     public function get_targets()
     {
         return ['targets' => require(app_path() . '/views/files/analysis/filter_' . $this->file->analysis->site . '.php')];
@@ -104,9 +104,9 @@ class AnalysisFile extends CommFile {
     {
         $name = Input::get('name');
 
-        $data_query = $this->get_data_query([$name]);    
+        $data_query = $this->get_data_query([$name]);
         //var_dump($data_query->groupBy($name)->select(DB::raw('count(*) AS total'), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->get());exit;
-        $frequence = $data_query->groupBy($name)->select(DB::raw('count(*) AS total'), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->remember(3)->lists('total', 'name'); 
+        $frequence = $data_query->groupBy($name)->select(DB::raw('count(*) AS total'), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->remember(3)->lists('total', 'name');
 
         return ['frequence' => $frequence];
     }
@@ -132,7 +132,7 @@ class AnalysisFile extends CommFile {
             $crosstable[$frequence->name1][$frequence->name2] = $frequence->total;
         }
 
-        return ['crosstable' => $crosstable]; 
+        return ['crosstable' => $crosstable];
     }
 
     public function get_data_query($names)
@@ -140,17 +140,17 @@ class AnalysisFile extends CommFile {
         $filter = $this->get_targets()['targets'];
 
         $name = Input::get('name');
-        
-        $get_data_query = DB::table('analysis_data.dbo.' . $this->file->analysis->tablename);  
+
+        $get_data_query = DB::table('analysis_data.dbo.' . $this->file->analysis->tablename);
 
         foreach ($names as $name) {
             $get_data_query->where($name, '<>', '')->where($name, '<>', '-8')->where($name, '<>', '-9');
         }
-        
+
         //$get_data_query->where($question->spss_name, '<>', $question->skip_value);
-        
+
         $group = $filter['groups'][Input::get('group_key')];
-        $target = $group['targets'][Input::get('target_key')];        
+        $target = $group['targets'][Input::get('target_key')];
 
         isset($target['shid']) && $get_data_query->whereIn('shid', $target['shid']);
         isset($target['type2']) && $get_data_query->where('type2', $target['type2']);
@@ -161,7 +161,7 @@ class AnalysisFile extends CommFile {
         isset($target['type_establish']) && $get_data_query->whereIn('type_establish', $target['type_establish']);
         isset($target['type_comprehensive']) && $get_data_query->where('type_comprehensive', $target['type_comprehensive']);
         isset($target['type_pubpri']) && $get_data_query->where('type_pubpri', $target['type_pubpri']);
-        
+
         isset($target['class_k']) && $get_data_query->where('class_k', $target['class_k']);
         isset($target['class_e']) && $get_data_query->where('class_e', $target['class_e']);
         isset($target['class_m']) && $get_data_query->where('class_m', $target['class_m']);
@@ -181,19 +181,19 @@ class AnalysisFile extends CommFile {
         $this->file->analysis->update($input);
         return $this->get_analysis();
     }
-    
+
     public function get_count_frequence()
     {
         $ouput_data = Cache::remember('frequence-question-result-' . Input::get('QID') . Input::get('target_key'), 1, function() {
             return $this->getDataAndAnalysis();
-        });        
-        
+        });
+
         $case_v = 2;
         $dotmount = 1;
 
         $frequences = is_array($ouput_data->FrequenceTable) ? $ouput_data->FrequenceTable : [$ouput_data->FrequenceTable];
         $frequences_label = is_array($ouput_data->labels) ? $ouput_data->labels : [$ouput_data->labels];
-        
+
         $frequencesTable = [];
         foreach ($frequences as $key => $frequence) {
             $label = $frequences_label[$key];
@@ -207,7 +207,7 @@ class AnalysisFile extends CommFile {
                 in_array($key, $fitdot_names) && $otherinf[$key] = round($value, $dotmount)==0 ? str_pad('0.', $dotmount+2, '0', STR_PAD_RIGHT) : round($value, $dotmount);
             }
         }
-       
+
         return ['frequencesTable' => $frequencesTable, 'otherinf' => $otherinf];
     }
 
@@ -270,7 +270,7 @@ class AnalysisFile extends CommFile {
         } catch (Exception $e) {
             var_dump($e);exit;
         }
-        
+
         return $ouput_data;
     }
 }

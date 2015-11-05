@@ -9,8 +9,8 @@ use Question, Answer;
 use Carbon\Carbon;
 
 class DataFile extends CommFile {
-        
-    function __construct(Files $file, User $user) 
+
+    function __construct(Files $file, User $user)
     {
         parent::__construct($file, $user);
     }
@@ -24,14 +24,14 @@ class DataFile extends CommFile {
     {
         return [];
     }
-    
+
     public function create()
     {
         parent::create();
     }
-    
+
     public function open()
-    {        
+    {
         \Excel::create($this->file->title, function($excel) {
 
             $this->file->sheets->each(function($sheet) use($excel) {
@@ -72,8 +72,8 @@ class DataFile extends CommFile {
     }
 
     //uncomplete
-    private function get_rows_query($tables) 
-    {        
+    private function get_rows_query($tables)
+    {
         foreach($tables as $index => $table) {
             if( $index==0 ){
                 $query = DB::table($table->database . '.dbo.' . $table->name.' AS t0');
@@ -124,12 +124,12 @@ class DataFile extends CommFile {
             if( array_key_exists('variables', $column) )
             foreach($column->variables as $variable) {
                 isset($variable->selected) && $variable->selected && array_push($filters, $variable->name);
-            }  
+            }
 
             count($filters) > 0 && $frequences_query->whereIn($column->COLUMN_NAME, $filters);
 
             //var_dump($filters);
-        }   
+        }
 
         $frequences = $frequences_query->get();
 

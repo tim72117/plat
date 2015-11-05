@@ -87,7 +87,7 @@ Route::filter('csrf', function()
 Route::filter('post_delay', function()
 {
     $ip = Request::server('REMOTE_ADDR');
-    
+
     $ip_requested = sha1($ip.Request::url());
 
     $ip_requested_cache = Cache::get('post_delay' . $ip_requested, 0);

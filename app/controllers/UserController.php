@@ -18,7 +18,7 @@ class UserController extends BaseController {
         'password.regex'                 => '密碼格式錯誤',
         'password.between'               => '密碼格式必須介於 6 - 20 個字元',
         'password_confirmation.required' => '確認密碼必填',
-        'password_confirmation.regex'    => '確認密碼格式錯誤',  
+        'password_confirmation.regex'    => '確認密碼格式錯誤',
         'password_confirmation.between'  => '確認密碼格式必須介於 6 - 20 個字元',
         'password.confirmed'             => '確認密碼必須相同',
     );
@@ -38,11 +38,8 @@ class UserController extends BaseController {
         return Redirect::to('project/'.$project);
     }
 
-    public function loginPage($project = 'cher') {
-        if( $project=='das' ){exit;
-            return Redirect::to('project/use');
-        }
-        
+    public function loginPage($project = 'cher')
+    {
         View::share('project', $project);
 
         return View::make('demo.' . $project . '.home')
@@ -65,20 +62,20 @@ class UserController extends BaseController {
         }
 
         if( Auth::once(array('email'=>$input['email'], 'password'=>$input['password'])) ){
-            
-            $user = Auth::user();            
-            
+
+            $user = Auth::user();
+
             $contact_query = DB::table('contact')->where('user_id', $user->id)->where('active', true)->where('project', $project);
-            
+
             if( !$user->active || !$contact_query->exists() ){
                 $validator->getMessageBag()->add('login_error', '帳號尚未開通');
                 throw new app\library\files\v0\ValidateException($validator);
             }
-            
+
             $user->setProject($project);
-                
+
             Auth::login($user, true);
-            
+
             return Redirect::intended('page/project');
 
         }else{
@@ -152,7 +149,7 @@ class UserController extends BaseController {
     {
         $project = DB::table('projects')->where('code', Auth::user()->getProject())->first();
         $contents = View::make('demo.use.main', ['project' => $project])->nest('context','demo.page.passwordChange');
-        
+
         $this->layout->content = $contents;
     }
 
@@ -197,22 +194,22 @@ class UserController extends BaseController {
 
     public function registerSave($project) {
         $user = require app_path() . '\\views\\demo\\' . $project . '\\auth\\register_validator.php';
-        
+
         if ($user) {
             $email = $user->getReminderEmail();
-            
+
             $token = str_shuffle(sha1($email.spl_object_hash($this).microtime(true)));
-            
+
             DB::table('register_print')->insert(['token' => $token, 'user_id' => $user->id, 'created_at' => new Carbon\Carbon]);
-            
+
             Config::set('auth.reminder.email', 'emails.auth.register_' . $project);
-            
+
             $credentials = array('email' => $email);
-            
+
             Password::remind($credentials, function($message) {
                 $message->subject('教育資料庫整合平臺-註冊通知');
             });
-            
+
             return Redirect::to('project/' . $project . '/register/finish/' . $token);
         } else {
             return Redirect::back();
@@ -227,11 +224,11 @@ class UserController extends BaseController {
 
     public function registerPrint($project, $token) {
         $register_print_query = DB::table('register_print')->where('token', $token);
-        
+
         if( $register_print_query->exists() ) {
-            
+
             return View::make('demo.' . $project . '.auth.register_print', array('user_id' => $register_print_query->first()->user_id));
-        }       
+        }
     }
 
     public function terms($project) {

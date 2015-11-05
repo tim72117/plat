@@ -65,6 +65,6 @@ Route::get('project/{project}/register/print/{token}', 'UserController@registerP
 Route::get('api/projects', 'ApiController@projects');
 Route::get('api/news/{project_id}/{to}/{from?}', 'ApiController@news');
 Route::post('data/post/{table}', 'DataExchangeController@post');
-//平台--------------------------------------------------------------------------------------------------------------------------------- 
+//平台---------------------------------------------------------------------------------------------------------------------------------
 
 Route::get('/', function() { return Redirect::to('project'); });
