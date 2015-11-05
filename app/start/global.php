@@ -13,10 +13,10 @@
 
 ClassLoader::addDirectories(array(
 
-	app_path().'/commands',
-	app_path().'/controllers',
-	app_path().'/models',
-	app_path().'/database/seeds',
+    app_path().'/commands',
+    app_path().'/controllers',
+    app_path().'/models',
+    app_path().'/database/seeds',
 
 ));
 
@@ -48,23 +48,23 @@ Log::useFiles(storage_path().'/logs/laravel.log');
 
 App::error(function(Exception $exception, $code)
 {
-	Log::error($exception);
+    Log::error($exception);
 });
 
 App::error(function(app\library\files\v0\UploadFailedException $exception) {
-	return Response::json($exception->uploadFailedMessage);
+    return Response::json($exception->uploadFailedMessage);
 });
 
 App::error(function(app\library\files\v0\FileFailedException $exception) {
-	//return Response::view('noFile', array(), 404)->header('Refresh','5;url='.URL::to('page/project'));
+    //return Response::view('noFile', array(), 404)->header('Refresh','5;url='.URL::to('page/project'));
 });
 
 App::error(function(app\library\files\v0\ValidateException $exception) {
-	return Redirect::back()->withErrors($exception->validator)->withInput();
+    return Redirect::back()->withErrors($exception->validator)->withInput();
 });
 
 App::error(function(app\library\files\v0\TokenMismatchException $exception) {
-	return Redirect::back()->withErrors($exception->validator)->withInput(Input::except('_token','_token2'));
+    return Redirect::back()->withErrors($exception->validator)->withInput(Input::except('_token','_token2'));
 });
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -74,16 +74,16 @@ App::error(function(ModelNotFoundException $e)
 });
 
 App::error(function(PDOException $exception) {
-	//return Response::view('nopage', array(), 404);
+    //return Response::view('nopage', array(), 404);
 });
 
 App::error(function(Exception $exception)
 {
-	//return Response::view('nopage', array(), 404);
+    //return Response::view('nopage', array(), 404);
 });
 
 App::missing(function($exception) {
-	//return Response::view('nopage', array(), 404);
+    //return Response::view('nopage', array(), 404);
 });
 
 /*
@@ -99,7 +99,7 @@ App::missing(function($exception) {
 
 App::down(function()
 {
-	return Response::make(View::make('demo.maintenance'), 503);//View::make("demo.maintenance", 503);
+    return Response::make(View::make('demo.maintenance'), 503);//View::make("demo.maintenance", 503);
 });
 
 /*
