@@ -13,11 +13,11 @@ class Files extends Eloquent {
     }
 
     public function census() {
-        return $this->hasOne('Row\Census', 'file_id', 'id');
+        return $this->hasOne('QuestionXML\Census', 'file_id', 'id');
     }
 
     public function analysis() {
-        return $this->hasOne('Row\Analysis', 'file_id', 'id');
+        return $this->hasOne('QuestionXML\Analysis', 'file_id', 'id');
     }
 
     public function isType() {
@@ -26,35 +26,35 @@ class Files extends Eloquent {
 }
 
 class RequestFile extends Eloquent {
-    
+
     protected $table = 'docs_requested';
-    
+
     public $timestamps = true;
-    
+
     protected $fillable = array('doc_id', 'target', 'target_id', 'created_by', 'description');
-    
+
     public function isDoc() {
         return $this->hasOne('ShareFile', 'id', 'doc_id');
     }
 }
 
 class FileType extends Eloquent {
-    
+
     protected $table = 'files_type';
-    
+
     public $timestamps = false;
-    
+
     protected $fillable = array();
 }
 
 class ShareFile extends Eloquent {
-    
+
     protected $table = 'docs';
-    
+
     public $timestamps = true;
-    
+
     protected $fillable = array('target', 'target_id', 'file_id', 'created_by');
-    
+
     public function isFile() {
         return $this->hasOne('Files', 'id', 'file_id');
     }
@@ -72,7 +72,7 @@ class ShareFile extends Eloquent {
 
 class Struct_file {
 
-    static function open($doc) 
+    static function open($doc)
     {
         switch($doc->isFile->type) {
             case 1:

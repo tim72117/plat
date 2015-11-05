@@ -1101,7 +1101,7 @@ function getPassword(length) {
             <div class="ui horizontal divider addquestion" anchor="ques" addlayer="0"><i class="add icon"></i>加入題目</div>
         </div>
     </div>
-    <? 
+    <?php
 
     global $q_allsub;
     $q_allsub = array();
