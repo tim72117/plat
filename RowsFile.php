@@ -9,6 +9,7 @@ use Row\Sheet;
 use Row\Table;
 use Row\Column;
 use Carbon\Carbon;
+use Illuminate\Support\MessageBag;
 
 class RowsFile extends CommFile {
 
@@ -554,8 +555,8 @@ class RowsFile extends CommFile {
 
         return [
             'paginate' => $this->isCreater()
-            ? $query->addSelect('created_by')->paginate(10)->toArray()
-            : ['data' => $query->where('created_by', $this->user->id)->get()]
+            ? $query->addSelect('created_by')->paginate(15)->toArray()
+            : $query->where('created_by', $this->user->id)->paginate(15)->toArray()
         ];
     }
 
@@ -835,5 +836,47 @@ class RowsFile extends CommFile {
         DB::commit();
 
         return $exists;
+    }
+
+    public function saveRow()
+    {
+        $status = ['updated' => false, 'errors' => []];
+
+        $status['errors'] = $this->check_row(Input::get('row'));
+
+        if (empty($status['errors'])) {
+            $table = $this->file->sheets[0]->tables[0];
+
+            $table_columns = $table->columns->map(function($column) { return 'row.C' . $column->id; })->toArray();
+
+            $query = DB::table($table->database . '.dbo.' . $table->name);
+
+            if (!$this->isCreater()) {
+                $query->where('created_by', $this->user->id);
+            }
+
+            $status['updated'] = $query->where('id', Input::get('row.id'))->update(Input::only($table_columns)['row']);
+        }
+
+        return ['status' => $status];
+    }
+
+    private function check_row($row)
+    {
+        $errors = [];
+
+        foreach ($this->file->sheets[0]->tables[0]->columns as $column)
+        {
+            $value = isset($row['C' . $column->id]) ? remove_space($row['C' . $column->id]) : '';
+
+            if (!$column->isnull || !empty($value))
+            {
+                $column_errors = $this->check_column($column, $value);
+
+                !empty($column_errors) && $errors[$column->id] = $column_errors;
+            }
+        }
+
+        return $errors;
     }
 }
