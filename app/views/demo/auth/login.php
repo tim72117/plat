@@ -15,7 +15,7 @@
     <input type="submit" value="登入" hidden="hidden" />
     <div class="ui submit green button" onclick="loginForm.submit()">登入</div>
 
-    <a href="/project/<?=Request::segment(2)?>/register">
+    <a href="/project/<?=$project?>/register">
         <div class="ui button">申請帳號</div>
     </a>
 <?=Form::close()?>
