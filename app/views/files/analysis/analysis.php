@@ -353,6 +353,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         for(var i in column_answers) {
             var column_key = column_answers[i].value;
             var one = {name: column_answers[i].title, data: []};
+            if(crosstable[column_key]==null){crosstable[column_key]=[]};
             for(var j in $scope.selected.rows[0].answers) {
                 var value = $scope.selected.rows[0].answers[j].value;
                 var amount = crosstable[column_key][value] | 0;
@@ -427,6 +428,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         for(var i in column_answers) {
             var column_key = column_answers[i].value;
             var temp_total = 0;
+            if(crosstable[column_key]==null){crosstable[column_key]=[]};
             for(var j in $scope.selected.rows[0].answers) {
                 var value = $scope.selected.rows[0].answers[j].value;
                 var amount = crosstable[column_key][value] | 0;
@@ -446,6 +448,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 
         for(var i in column_answers) {
             var column_key = column_answers[i].value;
+            if(crosstable[column_key]==null){crosstable[column_key]=[]};
             for(var j in $scope.selected.rows[0].answers) {
                 var value = $scope.selected.rows[0].answers[j].value;
                 var amount = crosstable[column_key][value] | 0;
@@ -490,6 +493,8 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
     $scope.reset = function() {
         if ($('#bar-container').highcharts())
             $('#bar-container').highcharts().destroy();
+        if ($('#pie-container').highcharts())
+            $('#pie-container').highcharts().destroy();
     };
 
     $scope.drawChart = function() {

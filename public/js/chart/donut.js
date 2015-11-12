@@ -16,5 +16,8 @@ var donut = {
     tooltip: {
         valueSuffix: '%'
     },
+    credits: {
+        enabled: false
+    },
     series: []
 };
