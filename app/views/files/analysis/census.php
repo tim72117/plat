@@ -17,7 +17,8 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
     $scope.clouds = 'C10';
     $scope.information = {};
     $scope.methods = {census: '普查', sampling: '抽樣調查'};
-    $scope.types = [{key: 'C10', title: '高一專一學生'}, {key: 'C11', title: '高二專二學生'}, {key: 'C10P', title: '高二專二家長調查'}];
+    //$scope.types = [{key: 'C10', title: '高一專一學生'}, {key: 'C11', title: '高二專二學生'}, {key: 'C10P', title: '高二專二家長調查'}];
+    $scope.types = [{key: 'GT0', title: '新進師資生調查'}, {key: 'FT', title: '實習師資生調查'}, {key: 'YB', title: '統計年報'}];
 
     $scope.allCensus = function() {
         $scope.loading = true;
@@ -45,7 +46,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 
     $scope.enterDoc = function() {
         if ($scope.doc.id) {
-            location.replace('menu');
+            location.replace('/doc/' + $scope.doc.id + '/menu');
         };
     };
 
