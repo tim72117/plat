@@ -63,7 +63,7 @@
                             {{ frequence[id][answer.value] ? frequence[id][answer.value] : 0 }}  ({{ getTotalPercent(frequence[id][answer.value],id) | number : 2 }}%)
 
                         </td>
-                        <td ng-show="selected.columns.length > 0">{{ getRowTotal(id) }}(100%)</td>
+                        <td ng-show="selected.columns.length > 0">{{ getColumnTotal(id) }}(100%)</td>
                     </tr>
                 </tbody>
             </table>
@@ -95,7 +95,7 @@
                     <tr ng-show="selected.rows.length > 0">
 
                         <td class="right aligned collapsing" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">總和</td>
-                        <td class="left aligned collapsing" >{{ getColumnTotal(id) }}(100%)</td>
+                        <td class="left aligned collapsing" >{{ getRowTotal(id) }}(100%)</td>
 
                     </tr>
                 </tbody>

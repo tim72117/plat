@@ -586,7 +586,6 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
         var total = 0;
 
         if ($scope.selected.rows.length > 0 ){
-            console.log($scope.selected);
             for(var j in $scope.selected.rows[0].answers) {
                 var value = $scope.selected.rows[0].answers[j].value;
                 var amount = $scope.frequence[id][value] | 0;
