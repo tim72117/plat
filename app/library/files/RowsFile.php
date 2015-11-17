@@ -63,7 +63,7 @@ class RowsFile extends CommFile {
 
     public function get_views()
     {
-        return ['open', 'import', 'rows'];
+        return ['open', 'import', 'rows', 'analysis'];
     }
 
     public function create()
@@ -95,6 +95,11 @@ class RowsFile extends CommFile {
     public function rows()
     {
         return 'files.rows.rows_editor';
+    }
+
+    public function analysis()
+    {
+        return 'files.analysis.analysis';
     }
 
     public function generate_table()
