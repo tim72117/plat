@@ -1,4 +1,4 @@
-<div class="ui basic segment"><h1 class="ui center aligned grey header">申請教育部中小學師資培育整合平台帳號</h1></div>
+<div class="ui basic segment"><h1 class="ui center aligned grey header">申請教育部師資培育統計定期填報系統帳號</h1></div>
 
 <div ng-cloak class="flex" ng-app="app" ng-controller="register">
 
@@ -14,7 +14,7 @@
             <div class="step" ng-class="{active: confirming}">
                 <i class="edit icon"></i>
                 <div class="content">
-                    <div class="title">選擇申請帳號類型</div>
+                    <div class="title">是否申請過中小學師資培育整合平台</div>
                     <div class="description"></div>
                 </div>
             </div>
@@ -52,16 +52,27 @@
     <div ng-if="confirming">
         <div class="ui top attached very padded segment" style="width:500px;height:470px">
             <br/><br/><br/><br/>
-            <h3 class="ui header"><i class="icon user"></i><div class="content"><a href="javascript: void(0)" ng-click="confirmed()">申請中小學師資培育整合平台帳號</a></div></h3>
-            <h3 class="ui header"><i class="icon user"></i><div class="content"><a href="/project/yearbook/register">申請師資培育統計定期填報系統</a></div></h3>
+            <h3 class="ui header">
+                <i class="icon warning"></i>
+                <div class="content">我已經申請過中小學師資培育整合平台帳號
+                    <div class="sub header">請點選 <?=link_to('/page/project/profile/3', '申請師資培育統計定期填報系統')?></div>
+                    <div class="sub header">登入後，在師資培育統計年報項目後點選申請按鈕</div>
+                </div>
+            </h3>
+
+            <div class="ui horizontal divider">Or </div>
+
+            <h3 class="ui header">
+                <i class="icon warning"></i>
+                <div class="content">我還未申請過中小學師資培育整合平台帳號
+                    <div class="sub header">請點選 <a href="javascript: void(0)" ng-click="confirmed()">填寫申請表</a></div>
+                </div>
+            </h3>
         </div>
 
+
         <div class="ui bottom attached warning message">
-            <i class="icon help"></i>
-            我已經註冊過了，我要<?=link_to('project/' . Request::segment(2), '登入')?>
-            <br />
-            <i class="icon help"></i>
-            <?=link_to('project/'. Request::segment(2) . '/register/help', '需要幫助嗎')?>
+            @include('demo.auth.login-bottom')
         </div>
     </div>
 
@@ -94,39 +105,16 @@
             </div>
 
             <div class="field">
-                <label>身分別</label><!-- 師培大學：0 教育部：1 縣市政府：2  其他：3-->
-                <div class="ui radio checkbox">
-                    <!--<input type="radio" disabled><font color="#999">教育部</font>-->
-                    <!--<input type="radio" disabled><font color="#999">縣市政府承辦人</font></br>-->
-                    <?=Form::radio('type_class', 0, '', array('id'=>'type_class[0]', 'class' => 'hidden')).Form::label('type_class[0]', '師培大學承辦人')?>
-                    <!--<input type="radio" disabled><font color="#999">其他</font><br>-->
-                </div>
-            </div>
-
-            <div class="field">
-                <label>機構所在縣市</label>
+                <label>學校所在縣市</label>
                 <select ng-model="mySchool.cityname" ng-options="city.cityname as city.cityname for city in citys" class="ui search dropdown">
                     <option value="">選擇您服務的機構所在縣市</option>
                 </select>
             </div>
              <div class="field">
-                <label>機構名稱</label>
+                <label>學校名稱</label>
                 <select ng-model="sch_id" ng-options="school.id+' - '+school.name for school in schools | filter:mySchool | orderBy:'id' track by school.id" name="sch_id" class="ui search dropdown">
                     <option value="">選擇您機構的單位</option>
                 </select>
-            </div>
-
-            <div class="field">
-                <label>單位名稱</label>
-                <?=Form::text('department', '', array('size'=>20, 'class'=>'register-block'))?></td>
-            </div>
-
-           <div class="field">
-                <label>申請權限</label>
-                <div class="ui checkbox">
-                    <?=Form::checkbox('scope[plat]', 1, false, array('id' => 'scope[plat]', 'size' => 20, 'class' => 'hidden'))?>
-                    <?=Form::label('scope[plat]', '師資培育長期追蹤資料庫調查（含問卷查詢平台、線上分析系統等）')?>
-                </div>
             </div>
 
             <div class="ui error message">
@@ -142,11 +130,7 @@
         <?=Form::close()?>
 
         <div class="ui bottom attached warning message">
-            <i class="icon help"></i>
-            我已經註冊過了，我要<?=link_to('project/' . Request::segment(2), '登入')?>
-            <br />
-            <i class="icon help"></i>
-            <?=link_to('project/'. Request::segment(2) . '/register/help', '需要幫助嗎')?>
+            @include('demo.auth.login-bottom')
         </div>
     </div>
 
