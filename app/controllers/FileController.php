@@ -103,13 +103,13 @@ class FileController extends BaseController {
                 $view = View::make($file->$method());
             } else {
                 $project = DB::table('projects')->where('code', Auth::user()->getProject())->first();
-                $context = View::make('demo.use.main', ['project' => $project])->nest('context', $file->$method());
+                $context = View::make('demo.main', ['project' => $project])->nest('context', $file->$method());
                 $view = $this->createView($context);
             }
         } else {
             $view = $file->$method();
         }
-        
+
         return $view;
     }
 
@@ -295,4 +295,5 @@ class FileController extends BaseController {
             var_dump($query);echo '<br /><br />';
         }
     }
+
 }

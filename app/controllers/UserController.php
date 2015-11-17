@@ -23,18 +23,17 @@ class UserController extends BaseController {
         'password.confirmed'             => '確認密碼必須相同',
     );
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->beforeFilter(function($route) {
-            $project = $route->parameter('project') ? $route->parameter('project') : 'cher';
+            $project = $route->parameter('project') ? $route->parameter('project') : Config::get('project.default');
             $route->setParameter('project', $project);
+            View::share('project', $project);
         });
     }
 
-    public function project() {
-        return View::make('demo.project');
-    }
-
-    public function logout() {
+    public function logout()
+    {
         $project = Auth::user()->getProject();
         Auth::logout();
         return Redirect::to('project/'.$project);
@@ -42,14 +41,13 @@ class UserController extends BaseController {
 
     public function loginPage($project)
     {
-        View::share('project', $project);
-
         return View::make('demo.' . $project . '.home')
             ->nest('context', 'demo.' . $project . '.auth.login')
             ->nest('child_footer', 'demo.' . $project . '.footer');
     }
 
-    public function login($project) {
+    public function login($project)
+    {
         $input = Input::only('email', 'password');
 
         $rulls = array(
@@ -86,13 +84,15 @@ class UserController extends BaseController {
         }
     }
 
-    public function remindPage($project) {
+    public function remindPage($project)
+    {
         return View::make('demo.' . $project . '.home')
             ->nest('context','demo.' . $project . '.auth.remind')
             ->nest('child_footer','demo.' . $project . '.footer');
     }
 
-    public function remind($project) {
+    public function remind($project)
+    {
         $credentials = array('email' => Input::get('email'));
         Config::set('auth.reminder.email', 'emails.auth.reminder_'.$project);
         $response = Password::remind($credentials, function($message) {
@@ -109,13 +109,15 @@ class UserController extends BaseController {
         }
     }
 
-    public function resetPage($project, $token) {
+    public function resetPage($project, $token)
+    {
         return View::make('demo.' . $project . '.home')
             ->nest('context', 'demo.' . $project . '.auth.reset', array('token' => $token))
             ->nest('child_footer','demo.' . $project . '.footer');
     }
 
-    public function reset($project, $token) {
+    public function reset($project, $token)
+    {
         $input = Input::only('email', 'password', 'password_confirmation');
 
         $rulls = array(
@@ -150,7 +152,7 @@ class UserController extends BaseController {
     public function passwordChangePage()
     {
         $project = DB::table('projects')->where('code', Auth::user()->getProject())->first();
-        $contents = View::make('demo.use.main', ['project' => $project])->nest('context','demo.page.passwordChange');
+        $contents = View::make('demo.main', ['project' => $project])->nest('context','demo.page.passwordChange');
 
         $this->layout->content = $contents;
     }
@@ -182,7 +184,8 @@ class UserController extends BaseController {
         }
     }
 
-    public function registerPage($project) {
+    public function registerPage($project)
+    {
         $project_info = DB::table('projects')->where('code', $project)->first();
         if ($project_info->register) {
             $context = 'demo.' . $project . '.auth.register';
@@ -194,7 +197,8 @@ class UserController extends BaseController {
             ->nest('child_footer','demo.' . $project . '.footer');
     }
 
-    public function registerSave($project) {
+    public function registerSave($project)
+    {
         $user = require app_path() . '\\views\\demo\\' . $project . '\\auth\\register_validator.php';
 
         if ($user) {
@@ -218,13 +222,15 @@ class UserController extends BaseController {
         }
     }
 
-    public function registerFinish($project, $token) {
+    public function registerFinish($project, $token)
+    {
         return View::make('demo.' . $project . '.home')
             ->nest('context', 'demo.' . $project . '.auth.register_finish', ['register_print_url' => URL::to('project/' . $project . '/register/print/' . $token)])
             ->nest('child_footer', 'demo.' . $project . '.footer');
     }
 
-    public function registerPrint($project, $token) {
+    public function registerPrint($project, $token)
+    {
         $register_print_query = DB::table('register_print')->where('token', $token);
 
         if( $register_print_query->exists() ) {
@@ -233,15 +239,19 @@ class UserController extends BaseController {
         }
     }
 
-    public function terms($project) {
+    public function terms($project)
+    {
         return View::make('demo.' . $project . '.home')->nest('context', 'demo.' . $project . '.auth.register_terms')->nest('child_footer', 'demo.' . $project . '.footer');
     }
 
-    public function help($project) {
+    public function help($project)
+    {
         return View::make('demo.' . $project . '.home')->nest('context', 'demo.' . $project . '.auth.register_help')->nest('child_footer', 'demo.' . $project . '.footer');
     }
 
-    public function check($project) {
+    public function check($project)
+    {
         return $project;
     }
+
 }
