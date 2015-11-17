@@ -23,8 +23,10 @@ class UserController extends BaseController {
         'password.confirmed'             => '確認密碼必須相同',
     );
 
-    public function __construct(){
-        $this->beforeFilter(function($route){
+    public function __construct() {
+        $this->beforeFilter(function($route) {
+            $project = $route->parameter('project') ? $route->parameter('project') : 'cher';
+            $route->setParameter('project', $project);
         });
     }
 
@@ -38,7 +40,7 @@ class UserController extends BaseController {
         return Redirect::to('project/'.$project);
     }
 
-    public function loginPage($project = 'cher')
+    public function loginPage($project)
     {
         View::share('project', $project);
 
@@ -47,7 +49,7 @@ class UserController extends BaseController {
             ->nest('child_footer', 'demo.' . $project . '.footer');
     }
 
-    public function login($project = 'cher') {
+    public function login($project) {
         $input = Input::only('email', 'password');
 
         $rulls = array(
