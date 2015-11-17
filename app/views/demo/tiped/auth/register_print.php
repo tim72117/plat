@@ -26,7 +26,7 @@ if ($user->departments->isEmpty()) {
   <tr>
     <td colspan="4" height="30">紀錄編號：_________________________【由國立臺灣師範大學教育研究與評鑑中心（以下簡稱本中心）填寫】</td>
   </tr>
-<?
+<?php
 } 
 ?>
 </table>
@@ -159,7 +159,7 @@ if ($user->departments->isEmpty()) {
             <td align="center">本文件為國立臺灣師範大學教育研究與評鑑中心專有之財產，限承辦人申請、維護帳號使用。</td>
         </tr>
     </table> 
-<?
+<?php
 } 
 ?>
 

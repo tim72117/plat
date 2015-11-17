@@ -3,24 +3,19 @@
 <head>
 <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-<title>中小學師資資料庫整合平台</title>
+<title>教育部中小學師資培育整合平台</title>
 
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
 <script src="/js/angular-1.3.14/angular.min.js"></script>
 
 <link rel="stylesheet" href="/css/Semantic-UI/2.1.4/semantic.min.css" />
-
+<link rel="stylesheet" href="/css/flex-item.css" />
 </head>
 
-<body>
-    <div class="ui container">
+<body class="flex vertical" style="min-height: 1050px">
 
-        <?=$context?>
+    <?=$context?>
+    <?=$child_footer?>
 
-        <div class="ui divider"></div>
-
-        <?=$child_footer?>
-
-    </div>
 </body>
 </html>
