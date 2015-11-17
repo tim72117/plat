@@ -131,11 +131,7 @@
             <?=Form::close()?>
 
             <div class="ui bottom attached warning message">
-                <i class="icon help"></i>
-                我已經註冊過了，我要<?=link_to('project/' . Request::segment(2), '登入')?>
-                <br />
-                <i class="icon help"></i>
-                <?=link_to('project/'. Request::segment(2) . '/register/help', '需要幫助嗎')?>
+                @include('demo.auth.login-bottom')
             </div>
         </div>
 

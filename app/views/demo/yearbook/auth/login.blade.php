@@ -9,11 +9,7 @@
         </div>
 
         <div class="ui bottom attached warning message">
-            <i class="icon help"></i>
-            <?=link_to('project/' . Request::segment(2) . '/password/remind', '忘記密碼')?>
-            <br />
-            <i class="icon help"></i>
-            <?=link_to('project/'. Request::segment(2) . '/register/help', '需要幫助嗎', ['target' => '_blank'])?>
+            @include('demo.auth.login-bottom')
         </div>
 
     </div>
