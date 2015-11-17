@@ -3,30 +3,40 @@ $project_id = DB::table('projects')->where('code', $project)->first()->id;
 
 $news = DB::table('news')->where('project', $project_id)->whereNull('deleted_at')->orderBy('publish_at', 'desc')->limit(3)->get();
 
-echo '<div class="ui list">';
+$event = '';
 
-foreach($news as $new) { 
-    
+foreach($news as $new) {
+
     $publish_at = new Carbon\Carbon($new->publish_at);
-    
+
     $now = Carbon\Carbon::now();
-    
+
     $difference = ($publish_at->diff($now)->days);
 
     if( json_decode($new->display_at)->intro ) {
-        echo '<div class="item">';
 
-        echo '<div class="content">';
-        echo    '<div class="header">';
-        echo        $new->title;
-        echo    '</div>';
-        echo    $new->context;
-        echo    '<div class="description">' . '  ' . $difference . '天前</div>';    
-        echo '</div>';
+        $event .= '<div class="event">';
 
-        echo '</div>';
+        $event .= '    <div class="label">';
+        $event .= '        <i class="pencil icon"></i>';
+        $event .= '    </div>';
+
+        $event .= '<div class="content">';
+        $event .=    '<div class="summary">';
+        $event .=       $new->title;
+        $event .=       '<div class="date">' . '  ' . $difference . '天前</div>';
+        $event .=    '</div>';
+        $event .=    '<div class="extra text">' . $new->context . '</div>';
+        $event .=    '<div class="meta">';
+        // $event .=       '<a class="like"><i class="like icon"></i> 4 Likes </a>';
+        $event .=    '</div>';
+        $event .= '</div>';
+
+        $event .= '</div>';
     }
-    
-}
 
-echo '</div>'; 
+}
+?>
+<div class="ui feed">
+    <?=$event?>
+</div>

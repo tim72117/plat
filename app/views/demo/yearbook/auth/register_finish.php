@@ -1,7 +1,7 @@
 <div class="ui basic segment" style="width: 400px;margin: 0 auto">
     <div class="ui attached message">
         <div class="header">
-            教育資料庫資料查詢平台
+            中小學師資資料庫整合平台
         </div>
         <p>註冊成功!</p>
     </div>
