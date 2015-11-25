@@ -155,6 +155,7 @@ class AnalysisFile extends CommFile {
         $target = $group['targets'][Input::get('target_key')];
 
         isset($target['shid']) && $get_data_query->whereIn('shid', $target['shid']);
+        isset($target['type1']) && $get_data_query->whereIn('type1', $target['type1']);
         isset($target['type2']) && $get_data_query->where('type2', $target['type2']);
         isset($target['type_school']) && $get_data_query->where('type_school', $target['type_school']);
         isset($target['type4']) && $get_data_query->where('type4', $target['type4']);
