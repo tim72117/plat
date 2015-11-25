@@ -83,7 +83,7 @@
                         <div class="ui left labeled button">
                             <div class="ui right pointing label">
                                 <i class="wizard icon"></i>
-                                輸出結果
+                                輸出樣式
                             </div>
                             <div class="ui dropdown orange button chart">
                                 <input type="hidden" value="table">

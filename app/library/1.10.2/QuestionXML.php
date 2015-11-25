@@ -9,6 +9,7 @@ class QuestionXML {
         foreach($subs as $sub) {
 
             $sub->title = strip_tags(str_replace(PHP_EOL, '', $sub->title));
+            $sub->title = preg_replace('/&nbsp;/', '', $sub->title);
 
             if ($sub->type=='radio' || $sub->type=='select') {
                 if (isset($parent_title))
