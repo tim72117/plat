@@ -70,15 +70,11 @@
 
     <div style="overflow:auto" ng-if="result == 'table' && selected.columns.length == 0 && selected.rows.length > 0">
         <div style="min-width:300px">
-            <table class="ui celled structured collapsing table">
-                <thead >
-                    <tr>
-                        <th class="top aligned center aligned" colspan="4" ng-repeat="row in selected.rows" >{{ selected.rows[0].title }}</th>
-                    </tr>
-                </thead>
+            <table class="ui table">
+
                 <tbody>
                     <tr ng-repeat-start="(id, target) in targetsSelected()">
-                        <td rowspan="{{ selected.rows[0].answers.length+1 }}" style="font-weight: 700">{{ target.name }}</td>
+                        <td rowspan="{{ selected.rows[0].answers.length+1 }}" style="font-weight: 700; background-color:#f9fafb">{{ target.name }}</td>
                         <td class="left aligned" style="font-weight: 700">{{ selected.rows[0].answers[0].title }}</td>
                         <td class="right aligned" ng-class="{disabled: target.loading}">
                             {{ frequence[id][selected.rows[0].answers[0].value] ? frequence[id][selected.rows[0].answers[0].value] : 0 }}
@@ -109,28 +105,39 @@
                 <thead>
                     <tr>
                         <th style="min-width:150px" colspan="3"></th>
-                        <th colspan="{{ column.answers.length }}" ng-repeat="column in selected.columns" >{{ column.title }}</th>
+                        <th colspan="{{ column.answers.length +1}}" ng-repeat="column in selected.columns" >{{ column.title }}</th>
                     </tr>
                     <tr>
                         <th colspan="3"></th>
                         <th class="top aligned left aligned" ng-repeat="answer in selected.columns[0].answers">{{ answer.title }}</th>
+                        <th >總和</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat-start="(id, target) in targetsSelected()">
-                        <td rowspan="{{ selected.rows[0].answers.length }}" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">{{ selected.rows[0].title }}</td>
-                        <td class="single line" rowspan="{{ selected.rows[0].answers.length }}" style="font-weight: 700">{{ target.name }}</td>
+                        <td rowspan="{{ selected.rows[0].answers.length+1 }}" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">{{ selected.rows[0].title }}</td>
+                        <td class="single line" rowspan="{{ selected.rows[0].answers.length+1 }}" style="font-weight: 700">{{ target.name }}</td>
                         <td class="single line" style="font-weight: 700">{{ selected.rows[0].answers[0].title }}</td>
                         <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat="answer in selected.columns[0].answers">
                             {{ crosstable[id][answer.value][selected.rows[0].answers[0].value] ? crosstable[id][answer.value][selected.rows[0].answers[0].value] : 0 }}
                         </td>
+                        <td class="right aligned" ng-class="{disabled: target.loading}">{{getFirstCrossRowTotal(id,selected.rows[0].answers[0].value)}}</td>
+
+                        <!--<td >{{selected.rows[0].answers[0].value}}</td>-->
+
 
                     </tr>
-                    <tr ng-repeat-end ng-repeat="(key, row_answer) in selected.rows[0].answers" ng-if="key!=0">
+                    <tr ng-repeat="(key, row_answer) in selected.rows[0].answers" ng-if="key!=0">
                         <td class="single line" style="font-weight: 700">{{ row_answer.title }}</td>
                         <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat="column_answer in selected.columns[0].answers">
                             {{ crosstable[id][column_answer.value][row_answer.value] ? crosstable[id][column_answer.value][row_answer.value] : 0 }}
                         </td>
+                        <td class="right aligned" ng-class="{disabled: target.loading}">{{getCrossRowTotal(id,row_answer.value)}}</td>
+                    </tr>
+                    <tr ng-repeat-end="(id, target) in targetsSelected()">
+                        <td class="single line" style="font-weight: 700">總和</td>
+                        <td class="right aligned" ng-repeat="answer in selected.columns[0].answers">{{ getCrossColumnTotal(id,answer.value) }}</td>
+                        <td class="right aligned" >{{getCrossTotal (id)}}</td>
                     </tr>
                 </tbody>
             </table>
