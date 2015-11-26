@@ -9,7 +9,7 @@
 <script src="/js/angular-1.3.14/angular.min.js"></script>
 <script src="/js/twcaseal_v3.js"></script>
 
-<link rel="stylesheet" href="/css/Semantic-UI/Semantic-UI-2.0.7/semantic.min.css" />
+<link rel="stylesheet" href="/css/Semantic-UI/2.1.4/semantic.min.css" />
 <link rel="stylesheet" href="/css/flex-item.css" />
 </head>
 
@@ -17,7 +17,7 @@
 
     <?=$context?>
     <?=$child_footer?>
-    <div id="twcaseal" style="float:right;margin:10px;display: none" class="SMALL"><img src="/images/twca.gif" /></div>
+    <div style="float:right;margin:10px;display: none" class="SMALL"><img src="/images/twca.gif" /></div>
 
 </body>
 </html>
