@@ -14,6 +14,7 @@ angular.module('ngQuestion.services', [])
         setPage: function(v) { page = v; },
         setUser: function(v) { user_id = v; },
         setVisit: function(v) { visit = v;},
+        setFile_id: function(v) { file_id = v;},
         setAnswers: function(values) { 
             for (var i in answers) delete answers[i];
             angular.forEach(values, function(v, k) {
@@ -57,8 +58,8 @@ angular.module('ngQuestion.services', [])
         save: function(question) {
             
             if( navigator.onLine ) { 
-                //console.log(baby.id);
-                $http({method: 'POST', url: 'ajax/save_answers', data:{visit_id:visit.id, baby_id: visit.baby_id, page_id: page.id, doc_id: page.doc_id, ques_id: question.id, answer: answers[question.id]} })
+                console.log(file_id);
+                $http({method: 'POST', url: 'ajax/save_answers', data:{visit_id:visit.id, baby_id: visit.baby_id, page_id: page.id, file_id: file_id, ques_id: question.id, answer: answers[question.id]} })
                 .success(function(data, status, headers, config) {
                     console.log(data);
                 }).error(function(e){
