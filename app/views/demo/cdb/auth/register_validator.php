@@ -6,8 +6,8 @@ $rulls = array(
     'role'                => 'required|in:1,2,3,4,5',
     'email'               => 'required|email|unique:users',
     'name'                => 'required',
-    'tel'                 => 'required|alpha_num|between:7,10',
-    'phone'               => 'required|alpha_num|between:7,10',
+    'tel'                 => 'required|alpha_num|between:8,10',
+    'phone'               => 'required|alpha_num|between:8,10',
 
     'address.country'     => 'required',
     'address.district'    => 'required',
@@ -75,9 +75,9 @@ $contact = new Cdb\Contact(array(
     'country'         => $input['address']['country'],
     'district'        => $input['address']['district'],
     'address'         => $input['address']['detail'],
-    'emergency_name'  => $input['emergency']['name'],
-    'relation'        => $input['emergency']['relation'],
-    'emergency_phone' => $input['emergency']['phone'],
+    'emergency_name'     => $input['emergency']['name'],
+    'emergency_relation' => $input['emergency']['relation'],
+    'emergency_phone'    => $input['emergency']['phone'],
 ));
 
 

@@ -1,7 +1,7 @@
 <page pageset="old" backtop="7mm" backbottom="7mm" backleft="10mm" backright="10mm"> 
 	
 <?            
-$user = User_cdb::with('menber')->find($user_id);
+$user = Cdb\User::with('member')->find($user_id);
 ?>
 
 <table width="800" align="center" cellpadding="0" cellspacing="0" border="0" style="font-size:11pt; font-family:'標楷體'">
@@ -63,7 +63,7 @@ $user = User_cdb::with('menber')->find($user_id);
             <p align="center">職稱</p>
         </td>　
         <td width="300" height="30">
-            <p align="center">面訪人員</p>
+            <p align="center">個測人員</p>
         </td>	
     </tr>
     <tr>

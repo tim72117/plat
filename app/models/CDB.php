@@ -21,7 +21,7 @@ class User extends \User {
         return $this->hasMany('Cdb\Service', 'user_id', 'id');
     }
 
-    public function menber()
+    public function member()
     {
         return $this->hasOne('Cdb\Member', 'user_id', 'id')->cdb();
     }
@@ -110,7 +110,7 @@ class Contact extends Eloquent {
 
     public $timestamps = true;
 
-    protected $fillable = array('user_id', 'country', 'district', 'address', 'emergency_name', 'relation', 'emergency_phone');
+    protected $fillable = array('user_id', 'country', 'district', 'address', 'emergency_name', 'emergency_relation', 'emergency_phone');
 
     protected $guarded = array('id');
 
