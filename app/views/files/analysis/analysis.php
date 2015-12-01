@@ -39,7 +39,7 @@
                             <div class="item" ng-repeat="column in columns | filter: {choosed: true} | filter: searchText">
                                 <div class="content">
                                     <div class="ui checkbox" style="display: block">
-                                        <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.selected" ng-change="setColumns(column);getCount()" />
+                                        <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.selected" ng-change="setColumns(column)" />
                                         <label for="column-{{ $index }}" style="overflow:hidden;white-space: nowrap;text-overflow: ellipsis" title="{{ column.title }}">{{ column.title }}</label>
                                     </div>
                                 </div>
@@ -83,7 +83,7 @@
                         <div class="ui left labeled button">
                             <div class="ui right pointing label">
                                 <i class="wizard icon"></i>
-                                輸出結果
+                                輸出樣式
                             </div>
                             <div class="ui dropdown orange button chart">
                                 <input type="hidden" value="table">
@@ -129,7 +129,7 @@
 
 <script>
 var full = full | false;
-app.controller('analysisController', function($scope, $filter, $interval, $http) {
+app.controller('analysisController', function($scope, $filter, $interval, $http, countService) {
     $scope.tool = 1;
     $scope.frequence = {};
     $scope.crosstable = {};
@@ -140,19 +140,55 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
     $scope.selected = {columns: [], rows: []};
     $scope.result = 'table';
     $scope.loading = false;
+    $scope.loadingQuestions = false;
+    $scope.loadingTargets = false;
+    $scope.counting = false;
     $scope.full = full;
     $scope.auto_length = 500;
+
     $scope.getColumns = function() {
+        $scope.loadingQuestions = true;
         $scope.loading = true;
         $http({method: 'POST', url: 'get_analysis_questions', data:{} })
         .success(function(data, status, headers, config) {
             $scope.columns = data.questions;
             $scope.title = data.title;
-            $scope.loading = false;
+            $scope.loadingQuestions = false;
+            $scope.loading = $scope.loadingQuestions || $scope.loadingTargets;
         }).error(function(e){
             console.log(e);
         });
     };
+
+    $scope.getTargets = function() {
+        $scope.loadingTargets = true;
+        $scope.loading = true;
+        $http({method: 'POST', url: 'get_targets', data:{} })
+        .success(function(data, status, headers, config) {
+            console.log(data);
+            $scope.targets = data.targets;
+            $scope.targets.size = Object.keys($scope.targets.groups).length;
+            //$scope.targets['my'].selected = true;
+            angular.forEach($scope.targets.groups, function(group, group_key) {
+                angular.forEach(group.targets, function(target, target_key) {
+                    $scope.$watch('targets.groups["'+group_key+'"].targets["'+target_key+'"].selected', function(selected) {
+                        if( selected )
+                        {
+                            //var name = $filter('filter')($scope.columns, {selected: true})[0].name;
+                            //$scope.getResult(name, group_key, target_key);
+                        }
+                    });
+                });
+            });
+            $scope.loadingTargets = false;
+            $scope.loading = $scope.loadingQuestions || $scope.loadingTargets;
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+
+    $scope.getColumns();
+    $scope.getTargets();
 
     $scope.getGroups = function (items) {
         var groupArray = [];
@@ -207,6 +243,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         if ($filter("filter")($scope.columns, {selected: true}).length > $scope.limit) {
             column.selected = false;
         };
+        $scope.getCount();
     }
 
     $scope.setGroup = function(group) {
@@ -215,29 +252,6 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         }else{
             group.selected = false;
         }
-
-    };
-
-    $scope.getTargets = function() {
-        $http({method: 'POST', url: 'get_targets', data:{} })
-        .success(function(data, status, headers, config) {
-            $scope.targets = data.targets;
-            $scope.targets.size = Object.keys($scope.targets.groups).length;
-            //$scope.targets['my'].selected = true;
-            angular.forEach($scope.targets.groups, function(group, group_key) {
-                angular.forEach(group.targets, function(target, target_key) {
-                    $scope.$watch('targets.groups["'+group_key+'"].targets["'+target_key+'"].selected', function(selected) {
-                        if( selected )
-                        {
-                            //var name = $filter('filter')($scope.columns, {selected: true})[0].name;
-                            //$scope.getResult(name, group_key, target_key);
-                        }
-                    });
-                });
-            });
-        }).error(function(e){
-            console.log(e);
-        });
     };
 
     $scope.getCount = function() {
@@ -260,8 +274,21 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         };
     }
 
+    $scope.generateAnswers = function(variables) {
+        var answers = [];
+        for (var variable in variables) {
+            if (answers.indexOf(variable) < 0) {
+                answers.push(variable);
+            }
+        };
+        return answers.map(function(answer) { return {value: answer, title: answer}; });
+    };
+
+    var requestForCount = null;
+
     $scope.getResults = function(method, names) {
-        $scope.loading = true;
+        requestForCount && requestForCount.abort();
+
         $scope.results = {};
         var groups = $scope.targets.groups;
         for (group_key in groups) {
@@ -270,45 +297,66 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
                     method(names, group_key, target_key);
             }
         }
-        $scope.loading = false;
     };
 
     $scope.getFrequence = function(names, group_key, target_key) {
         $scope.targets.groups[group_key].targets[target_key].loading = true;
-        $http({method: 'POST', url: 'get_frequence', data:{name: names[0], group_key: group_key, target_key: target_key} })
-        .success(function(data, status, headers, config) {
-            $scope.frequence[target_key] = data.frequence;
-            $scope.total = 0 ;
-            angular.forEach($scope.frequences, function(value) {
-                $scope.total += (value.total || 0)*1;
-            });
-            $scope.targets.groups[group_key].targets[target_key].loading = false;
+        $scope.counting = true;
 
-            $scope.drawChart();
-        }).error(function(e){
-            console.log(e);
-        });
+        ( requestForCount = countService.getCount('get_frequence', {name: names[0], group_key: group_key, target_key: target_key}) ).then(
+            function( newResoult ) {
+                $scope.frequence[target_key] = newResoult.frequence;
+
+                if ($scope.selected.columns.length > 0 && !$scope.selected.columns[0].answers) {
+                    $scope.selected.columns[0].answers = $scope.generateAnswers($scope.frequence[target_key]);
+                };
+
+                if ($scope.selected.rows.length > 0 && !$scope.selected.rows[0].answers) {
+                    $scope.selected.rows[0].answers = $scope.generateAnswers($scope.frequence[target_key]);
+                };
+
+                $scope.targets.groups[group_key].targets[target_key].loading = false;
+                $scope.counting = false;
+                $scope.drawChart();
+            },
+            function( errorMessage ) {
+                // Flag the data as loaded (or rather, done trying to load). loading).
+                $scope.targets.groups[group_key].targets[target_key].loading = false;
+                //$scope.counting = false;
+                console.warn( "Request for frequence was rejected." );
+                console.info( "Error:", errorMessage );
+            }
+        );
     };
 
     $scope.getCrossTable = function(names, group_key, target_key) {
         $scope.targets.groups[group_key].targets[target_key].loading = true;
-        $http({method: 'POST', url: 'get_crosstable', data:{name1: names[0], name2: names[1], group_key: group_key, target_key: target_key} })
-        .success(function(data, status, headers, config) {
-            $scope.crosstable[target_key] = data.crosstable;
-            $scope.total = 0 ;
-            angular.forEach($scope.frequences, function(value) {
-                $scope.total += (value.total || 0)*1;
-            });
-            $scope.targets.groups[group_key].targets[target_key].loading = false;
+        $scope.counting = true;
 
-            $scope.drawChart();
-        }).error(function(e){
-            console.log(e);
-        });
+        ( requestForCount = countService.getCount('get_crosstable', {name1: names[0], name2: names[1], group_key: group_key, target_key: target_key}) ).then(
+            function( newResoult ) {
+                $scope.crosstable[target_key] = newResoult.crosstable;
+                if (!$scope.selected.columns[0].answers || !$scope.selected.rows[0].answers) {
+                    $scope.selected.columns[0].answers = $scope.generateAnswers($scope.crosstable[target_key]);
+                    var answers = {};
+                    for (var column_key in $scope.crosstable[target_key]) {
+                        answers = Object.assign(answers, $scope.crosstable[target_key][column_key]);
+                    };
+                    $scope.selected.rows[0].answers = $scope.generateAnswers(answers);
+                };
+
+                $scope.targets.groups[group_key].targets[target_key].loading = false;
+                $scope.counting = false;
+                $scope.drawChart();
+            },
+            function( errorMessage ) {
+                // Flag the data as loaded (or rather, done trying to load). loading).
+                $scope.targets.groups[group_key].targets[target_key].loading = false;
+                console.warn( "Request for crosstable was rejected." );
+                console.info( "Error:", errorMessage );
+            }
+        );
     };
-
-    $scope.getColumns();
-    $scope.getTargets();
 
     $scope.drawBar = function() {
         var targets = $scope.targetsSelected();
@@ -347,6 +395,9 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         var crosstable = $scope.crosstable[Object.keys(targets)[0]];
 
         bar.series = [];
+        bar.subtitle.text = $scope.selected.columns[0].title;
+        bar.xAxis.title.text = $scope.selected.rows[0].title.substring(0,22) ;
+        //console.log($scope.selected.rows[0])
 
         var column_answers = $scope.selected.columns[0].answers;
 
@@ -534,27 +585,35 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         return percent;
     }
 
-    $scope.getTotal = function(id) {
-        var col_or_row_total = 0;
+    $scope.getRowTotal = function(id) {
+        var total = 0;
+
+        if ($scope.selected.rows.length > 0 ){
+            for(var j in $scope.selected.rows[0].answers) {
+                var value = $scope.selected.rows[0].answers[j].value;
+                var amount = $scope.frequence[id][value] | 0;
+                total += amount;
+            }
+        }
+
+        return total;
+    }
+
+    $scope.getColumnTotal = function(id) {
+        var total = 0;
 
         if ($scope.selected.columns.length > 0 ){
             for(var j in $scope.selected.columns[0].answers) {
                 var value = $scope.selected.columns[0].answers[j].value;
                 var amount = $scope.frequence[id][value] | 0;
-                col_or_row_total = col_or_row_total+amount;
-            }
-        }else{
-            for(var j in $scope.selected.rows[0].answers) {
-                var value = $scope.selected.rows[0].answers[j].value;
-                var amount = $scope.frequence[id][value] | 0;
-                col_or_row_total = col_or_row_total+amount;
+                total += amount;
             }
         }
 
-        return col_or_row_total;
+        return total;
     }
 
-    $scope.getTotal2 = function(key) {
+    $scope.getCrossTotal = function(key) {
         var targets = $scope.targetsSelected();
         var crosstable = $scope.crosstable[key];
         var column_answers = $scope.selected.columns[0].answers;
@@ -580,6 +639,48 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         return sum_col_row;
     }
 
+    $scope.getCrossColumnTotal = function(id,key){
+        var targets = $scope.targetsSelected();
+        var crosstable = $scope.crosstable[id];
+        var sum = 0;
+        if(crosstable[key]==null){crosstable[key]=[]};
+        for(var i in $scope.selected.rows[0].answers) {
+            var value = $scope.selected.rows[0].answers[i].value;
+            var amount = crosstable[key][value] | 0;
+            sum = sum+amount;
+        }
+        return sum;
+    }
+
+    $scope.getCrossRowTotal = function(id,key){
+        var targets = $scope.targetsSelected();
+        var crosstable = $scope.crosstable[id];
+        var sum = 0;
+        
+        for(var i in $scope.selected.columns[0].answers) {
+            var value = $scope.selected.columns[0].answers[i].value;
+            if(crosstable[value]==null){crosstable[value]=[]};
+            var amount = crosstable[value][key] | 0;
+            sum = sum+amount;
+        }
+        return sum;
+    }
+
+    $scope.getFirstCrossRowTotal = function(id,key){
+        var targets = $scope.targetsSelected();
+        var crosstable = $scope.crosstable[id];
+        var sum = 0;
+        
+        for(var i in $scope.selected.columns[0].answers) {
+            var value = $scope.selected.columns[0].answers[i].value;
+            if(crosstable[value]==null){crosstable[value]=[]};
+            var amount = crosstable[value][key] | 0;
+            sum = sum+amount;
+            //console.log(sum)
+        }
+        return sum;
+    }
+
     $('.chart.dropdown').dropdown({onChange: function(value) {
         $scope.$apply(function() {
             $scope.result = value;
@@ -595,4 +696,57 @@ app.filter('groupby', function(){
         });
     };
 });
+app.service(
+    "countService",
+    function( $http, $q ) {
+
+        function getCount(url, data) {
+
+            var deferredAbort = $q.defer();
+            // Initiate the AJAX request.
+            var request = $http({
+                method: "POST",
+                url: url,
+                data: data,
+                timeout: deferredAbort.promise
+            });
+            // Rather than returning the http-promise object, we want to pipe it
+            // through another promise so that we can "unwrap" the response
+            // without letting the http-transport mechansim leak out of the
+            // service layer.
+            var promise = request.then(
+                function( response ) {
+                    return( response.data );
+                },
+                function( response ) {
+                    return( $q.reject( "Something went wrong" ) );
+                }
+            );
+            // Now that we have the promise that we're going to return to the
+            // calling context, let's augment it with the abort method. Since
+            // the $http service uses a deferred value for the timeout, then
+            // all we have to do here is resolve the value and AngularJS will
+            // abort the underlying AJAX request.
+            promise.abort = function() {
+                deferredAbort.resolve();
+            };
+            // Since we're creating functions and passing them out of scope,
+            // we're creating object references that may be hard to garbage
+            // collect. As such, we can perform some clean-up once we know
+            // that the requests has finished.
+            promise.finally(
+                function() {
+                    console.info( "Cleaning up object references." );
+                    promise.abort = angular.noop;
+                    deferredAbort = request = promise = null;
+                }
+            );
+            return( promise );
+        }
+        // Return the public API.
+        return({
+            getCount: getCount
+        });
+    }
+);
 </script>

@@ -21,7 +21,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         $scope.loading = true;
         $http({method: 'POST', url: 'get_analysis_questions', data:{} })
         .success(function(data, status, headers, config) {
-            
+            console.log(data);
             $scope.columns = data.questions;
             $scope.title = data.title;
             $scope.loading = false;

@@ -47,28 +47,30 @@ class AnalysisFile extends CommFile {
 
     public function get_analysis_questions()
     {
-        $quesFile = new QuesFile($this->file->analysis->ques, $this->user);
-
         $questions = [];
-        foreach($quesFile->xml_to_array()['pages'] as $index => $page) {
-            \app\library\v10\QuestionXML::get_subs($page->questions, $index, $questions);
-        }
 
         $columns = DB::table('analysis_data.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $this->file->analysis->tablename)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
+
+        if (!is_null($this->file->analysis->ques)) {
+            $quesFile = new QuesFile($this->file->analysis->ques, $this->user);
+            foreach($quesFile->xml_to_array()['pages'] as $index => $page) {
+                \app\library\v10\QuestionXML::get_subs($page->questions, $index, $questions);
+            }
+        } else {
+            foreach($columns as $column) {
+                if ($column != '身分識別碼') {
+                    array_push($questions, (object)[
+                        'name'  => $column,
+                        'title' => $column,
+                    ]);
+                }
+            }
+        }
 
         $questions = array_values(array_filter($questions, function(&$question) use($columns) {
             $question->choosed = in_array($question->name, Session::get('analysis-columns-choosed', []), true);
             return in_array($question->name, $columns);
         }));
-
-        foreach($columns as $column) {
-            if (substr($column, 0, 2) == 'YB' && (empty($columns_selected) || (!empty($columns_selected) && in_array($column, $columns_selected)))) {
-                array_push($questions, [
-                    'name'  => $column,
-                    'title' => $column,
-                ]);
-            }
-        }
 
         return ['questions' => $questions, 'title' => $this->file->analysis->title];
     }
@@ -105,7 +107,7 @@ class AnalysisFile extends CommFile {
         $name = Input::get('name');
 
         $data_query = $this->get_data_query([$name]);
-        //var_dump($data_query->groupBy($name)->select(DB::raw('count(*) AS total'), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->get());exit;
+
         $frequence = $data_query->groupBy($name)->select(DB::raw('count(*) AS total'), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->remember(3)->lists('total', 'name');
 
         return ['frequence' => $frequence];
@@ -153,6 +155,7 @@ class AnalysisFile extends CommFile {
         $target = $group['targets'][Input::get('target_key')];
 
         isset($target['shid']) && $get_data_query->whereIn('shid', $target['shid']);
+        isset($target['type1']) && $get_data_query->whereIn('type1', $target['type1']);
         isset($target['type2']) && $get_data_query->where('type2', $target['type2']);
         isset($target['type_school']) && $get_data_query->where('type_school', $target['type_school']);
         isset($target['type4']) && $get_data_query->where('type4', $target['type4']);
