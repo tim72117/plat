@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="/css/flex-item.css" />
 </head>
 
-<body class="flex vertical" style="min-height: 850px">
+<body class="flex vertical" style="min-height: 900px">
 
     <?=$context?>
     <?=$child_footer?>

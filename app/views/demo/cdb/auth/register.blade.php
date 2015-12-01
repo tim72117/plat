@@ -191,8 +191,6 @@ angular.module('app', ['angularify.semantic.dropdown'])
     $scope.default.service = {};
     $scope.default.service.area = '<?=Input::old('service.area')?>';
     $scope.default.service.country = '<?=Input::old('service.country')?>';
-    $scope.visible = {};
-    console.log($scope.default.address);
 
     $scope.closeDropDowm = function(){
         $scope.service_districts_visible = false;

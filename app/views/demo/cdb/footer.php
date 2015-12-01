@@ -2,6 +2,8 @@
 
     <div class="ui center aligned container">
         <div class="ui horizontal bulleted link list">
+            <div class="active item">Tel:（02）7734-1464 (教保觀察承辦人)</div>
+            <div class="active item">（02）7734-1463 (調查追蹤承辦人)</div>
             <div class="active item">Tel:（02）7734-1464 (個測承辦人)</div>
             <div class="active item">（02）7734-3654(系統資訊人員)</div>
             <div class="active item">Fax:（02）3343-3910</div>

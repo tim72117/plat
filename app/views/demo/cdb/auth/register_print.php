@@ -71,7 +71,7 @@ $user = Cdb\User::with('member')->find($user_id);
             <p align="center">電話</p>
         </td>
         <td width="300" height="30">
-            <p align="center"><?=$user->menber->tel?></p>
+            <p align="center"><?=$user->member->tel?></p>
         </td>	
         <td width="100" height="30">
             <p align="center">傳真</p>
