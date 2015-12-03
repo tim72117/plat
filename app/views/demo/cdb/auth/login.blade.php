@@ -10,7 +10,11 @@
 
         <div class="ui bottom attached warning message">
             @include('demo.auth.login-bottom')
+            <br />
+        	<i class="icon file"></i>
+        	<a class="item" target="_blank" href="https://plat.cher.ntnu.edu.tw/localhost/files/CERE-ISMS-D-031_countdeleted.doc" />帳號修改、註銷表</a>
         </div>
+       
 
     </div>
 
