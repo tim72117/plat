@@ -159,7 +159,7 @@ class AnalysisFile extends CommFile {
         isset($target['type2']) && $get_data_query->where('type2', $target['type2']);
         isset($target['type_school']) && $get_data_query->where('type_school', $target['type_school']);
         isset($target['type4']) && $get_data_query->where('type4', $target['type4']);
-        isset($target['city']) && $get_data_query->where('city', $target['city']);
+        isset($target['city']) && $get_data_query->whereIn('city', $target['city']);
         isset($target['city_notest']) && $get_data_query->where('city_notest', $target['city_notest']);
         isset($target['type_establish']) && $get_data_query->whereIn('type_establish', $target['type_establish']);
         isset($target['type_comprehensive']) && $get_data_query->where('type_comprehensive', $target['type_comprehensive']);
