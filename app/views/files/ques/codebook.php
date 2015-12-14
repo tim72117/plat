@@ -301,7 +301,7 @@ function buildQuestion($question,$question_array,&$table_array){
 
 
 $table_array = array();
-foreach($census->pages as $page){
+foreach($census->pages->sortBy('page') as $page){
     $tdobj = new tdobj();
     $tdobj->objtype = "title";
     $tdobj->page = $page->page;

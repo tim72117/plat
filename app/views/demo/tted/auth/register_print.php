@@ -89,7 +89,7 @@ $user = User_tted::find($user_id);
     <tr>
         <td height="40"><input type="checkbox" disabled><font color="#999">師資培育統計定期填報系統</font></td>
         <td rowspan="2"><font color="#999">802高雄市苓雅區和平一路116號 高師大通識教育中心收</font></td>
-        <td rowspan="2"><font color="#999">07-7258600</font></td>
+        <td rowspan="2"><font color="#999">07-7172930#3686</font></td>
     </tr>
     <tr>
         <td><input type="checkbox" disabled><font color="#999">縣市教師甄試調查系統</font></td>

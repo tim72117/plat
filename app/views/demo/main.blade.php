@@ -8,12 +8,12 @@
 <script src="/js/angular/1.4.7/angular.min.js"></script>
 <script src="/js/angular/1.4.7/angular-sanitize.min.js"></script>
 <script src="/js/angular/1.4.7/angular-cookies.min.js"></script>
-<script src="/css/Semantic-UI/2.1.4/components/transition.min.js"></script>
-<script src="/css/Semantic-UI/2.1.4/components/popup.min.js"></script>
+<script src="/css/Semantic-UI/2.1.6/components/transition.min.js"></script>
+<script src="/css/Semantic-UI/2.1.6/components/popup.min.js"></script>
 <script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
 <script src="/js/angular-semantic-ui/dropdown.js"></script>
 
-<link rel="stylesheet" href="/css/Semantic-UI/2.1.4/semantic.min.css" />
+<link rel="stylesheet" href="/css/Semantic-UI/2.1.6/semantic.min.css" />
 
 <style>
 ::-webkit-scrollbar {

@@ -54,7 +54,7 @@ if ($project_status['registered'] && !$project_status['actived'])
 }
 
 ?>
-<div ng-cloak  ng-controller="profileController" class="ui basic segment">
+<div ng-cloak ng-controller="profileController" class="ui basic segment">
 
     <div class="ui styled accordion">
 

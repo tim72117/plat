@@ -72,9 +72,9 @@ $user = User_yb::find($user_id);
         <td  width="100"><p align="center">聯絡電話</p></td>
     </tr>
     <tr>
-        <td height="40"><input type="checkbox" disabled><font color="#999">師資培育統計定期填報系統</font></td>
-        <td rowspan="2"><font color="#999">802高雄市苓雅區和平一路116號 高師大通識教育中心收</font></td>
-        <td rowspan="2"><font color="#999">07-7258600</font></td>
+        <td height="40"><input type="checkbox" checked="checked" disabled="disabled">師資培育統計定期填報系統</td>
+        <td rowspan="2">802高雄市苓雅區和平一路116號 高師大通識教育中心收</td>
+        <td rowspan="2">07-7172930#3686</td>
     </tr>
 </table>
 
