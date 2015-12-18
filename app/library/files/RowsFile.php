@@ -261,7 +261,7 @@ class RowsFile extends CommFile {
                     return empty($column_checked);
                 });
 
-                $exists = $this->getUniqueExists($uniques, $table, $column);
+                $exists = DB::table($table->database . '.dbo.' . $table->name)->whereIn('C' . $column->id, $uniques)->lists('created_by', 'C' . $column->id);
             }
 
             return (object)[
