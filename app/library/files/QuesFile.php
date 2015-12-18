@@ -600,14 +600,14 @@ class QuesFile extends CommFile {
 
     public function creatTable()
     {
-        if (!$this->file->cencus->edit)
+        if (!$this->file->census->edit)
             return '';
 
-        $tablename = $this->file->cencus->table;
-        $pages = $this->file->cencus->pages;
+        $tablename = $this->file->census->table;
+        $pages = $this->file->census->pages;
 
         Config::set('database.default', 'sqlsrv');
-        Config::set('database.connections.sqlsrv.database', $this->file->cencus->database);
+        Config::set('database.connections.sqlsrv.database', $this->file->census->database);
         DB::reconnect('sqlsrv');
 
         foreach($pages as $ques_page) {
@@ -617,7 +617,7 @@ class QuesFile extends CommFile {
 
             //Schema::hasTable($tablename.'_page'.$page) && Schema::drop($tablename.'_page'.$page);
 
-            Schema::create($tablename.'_page'.$page, function($table) use($question_array, $page){
+            Schema::create($this->file->census->database . '.dbo.' . $tablename.'_page' . $page, function($table) use($question_array, $page){
 
                 $table->string('newcid', 50)->primary();
 

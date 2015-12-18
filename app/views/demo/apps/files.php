@@ -203,7 +203,17 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     $scope.max = $scope.docs.length;
     $scope.pages = Math.ceil($scope.max/$scope.limit);
     $scope.timenow = new Date();
-    $scope.types = {1: 'file text outline', 2: 'code', 3: 'file outline blue', 5: 'file text', 6: 'file outline blue', 9: 'file text outline red', 7: 'bar chart', 10: 'file excel outline'};
+    $scope.types = {
+        1: 'file text outline',
+        2: 'code',
+        3: 'file outline blue',
+        5: 'file text',
+        6: 'file outline blue',
+        7: 'bar chart',
+        9: 'file text outline red',
+        10: 'file excel outline',
+        14: 'database'
+    };
     $scope.uploading = false;
     $scope.loading = false;
     $scope.information = {};
