@@ -2,12 +2,12 @@
 <html xml:lang="zh-TW" lang="zh-TW" ng-app="app">
 <head>
 <meta charset="utf-8" />
-<title><?//=$title?></title>
+<title><?=$title?></title>
 
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
-<script src="/js/angular-1.3.14/angular.min.js"></script>
+<script src="/js/angular/1.4.7/angular.min.js"></script>
 
-<link rel="stylesheet" href="/css/Semantic-UI/2.1.4/semantic.min.css" />
+<link rel="stylesheet" href="/css/Semantic-UI/2.1.6/semantic.min.css" />
 
 <script>
 var app = angular.module('app', []);
@@ -24,7 +24,6 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         $scope.loading = true;
         $http({method: 'POST', url: 'all_census', data:{}})
         .success(function(data, status, headers, config) {
-            
             $scope.docs = data.docs;
             var docs = $filter('filter')($scope.docs, {selected: true});
             if (docs.length > 0) {
@@ -37,7 +36,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         });
     };
 
-    $scope.selectDoc = function(doc) { 
+    $scope.selectDoc = function(doc) {
         $scope.information = doc.analysis;
         $scope.doc.selected = false;
         $scope.doc = doc;

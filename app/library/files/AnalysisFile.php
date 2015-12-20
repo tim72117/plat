@@ -25,11 +25,15 @@ class AnalysisFile extends CommFile {
 
     public function open()
     {
+        View::share('title', '線上分系系統');
+
         return 'files.analysis.census';
     }
 
     public function menu()
     {
+        View::share('title', '線上分系系統');
+
         return 'files.analysis.menu';
     }
 
@@ -154,6 +158,7 @@ class AnalysisFile extends CommFile {
         $group = $filter['groups'][Input::get('group_key')];
         $target = $group['targets'][Input::get('target_key')];
 
+        //todo run query if column exist
         isset($target['shid']) && $get_data_query->whereIn('shid', $target['shid']);
         isset($target['type1']) && $get_data_query->whereIn('type1', $target['type1']);
         isset($target['type2']) && $get_data_query->where('type2', $target['type2']);
