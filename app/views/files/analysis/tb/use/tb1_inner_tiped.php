@@ -43,7 +43,7 @@
 
     <div style="overflow:auto" ng-if="result == 'table' && selected.rows.length == 0 && selected.columns.length > 0">
         <div style="min-width:500px">
-            <table class="ui table">
+            <table class="ui celled structured table">
                 <thead>
                     <tr>
                         <th></th>
@@ -56,12 +56,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="(id, target) in targetsSelected()">
-                        <td class="single line">{{ target.name }}</td>
+                    <tr ng-repeat-start="(id, target) in targetsSelected()">
+                        <td rowspan="2" class="single line">{{ target.name }}</td>
                         <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat="answer in selected.columns[0].answers">
-                            {{ frequence[id][answer.value] ? frequence[id][answer.value] : 0 }} <br/> {{ getTotalPercent(frequence[id][answer.value],id) | number : 2 }}%
+                            {{ frequence[id][answer.value] || 0 }} <br/>
                         </td>
-                        <td class="right aligned">{{ getColumnTotal(id) }} <br/> 100%</td>
+                        <td class="right aligned">{{ getFrequenceTotal(selected.columns[0].answers, id) }}</td>
+                    </tr>
+                    <tr ng-repeat-end>
+                        <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat="answer in selected.columns[0].answers">
+                            {{ getTotalPercent(getFrequenceTotal(selected.columns[0].answers, id), frequence[id][answer.value] || 0) | number : 2 }}%
+                        </td>
+                        <td class="right aligned">100%</td>
                     </tr>
                 </tbody>
             </table>
@@ -70,27 +76,31 @@
 
     <div style="overflow:auto" ng-if="result == 'table' && selected.columns.length == 0 && selected.rows.length > 0">
         <div style="min-width:300px">
-            <table class="ui table">
-
+            <table class="ui celled structured table">
                 <tbody>
                     <tr ng-repeat-start="(id, target) in targetsSelected()">
+                        <td rowspan="{{ selected.rows[0].answers.length+1 }}" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">{{ selected.rows[0].title }}</td>
                         <td rowspan="{{ selected.rows[0].answers.length+1 }}" style="font-weight: 700; background-color:#f9fafb">{{ target.name }}</td>
                         <td class="left aligned" style="font-weight: 700">{{ selected.rows[0].answers[0].title }}</td>
                         <td class="right aligned" ng-class="{disabled: target.loading}">
-                            {{ frequence[id][selected.rows[0].answers[0].value] ? frequence[id][selected.rows[0].answers[0].value] : 0 }}
+                            {{ frequence[id][selected.rows[0].answers[0].value] || 0 }}
                         </td>
-                        <td class="right aligned">{{ getTotalPercent(frequence[id][selected.rows[0].answers[0].value], id) | number : 2 }}%</td>
+                        <td class="right aligned">
+                            {{ getTotalPercent(getFrequenceTotal(selected.rows[0].answers, id), frequence[id][selected.rows[0].answers[0].value] || 0) | number : 2 }}%
+                        </td>
                     </tr>
                     <tr ng-repeat="(key, answer) in selected.rows[0].answers" ng-if="key!=0">
                         <td class="left aligned" style="font-weight: 700">{{ answer.title }}</td>
                         <td class="right aligned" ng-class="{disabled: target.loading}">
-                            {{ frequence[id][answer.value] ? frequence[id][answer.value] : 0 }}
+                            {{ frequence[id][answer.value] || 0 }}
                         </td>
-                        <td class="right aligned">{{ getTotalPercent(frequence[id][answer.value],id) | number : 2 }}%</td>
+                        <td class="right aligned">
+                            {{ getTotalPercent(getFrequenceTotal(selected.rows[0].answers, id), frequence[id][answer.value] || 0) | number : 2 }}%
+                        </td>
                     </tr>
                     <tr ng-repeat-end>
                         <td class="left aligned" style="font-weight: 700">總和</td>
-                        <td class="right aligned" >{{ getRowTotal(id) }}</td>
+                        <td class="right aligned" >{{ getFrequenceTotal(selected.rows[0].answers, id) }}</td>
                         <td class="right aligned" >100%</td>
                     </tr>
                 </tbody>
@@ -137,7 +147,7 @@
                     <tr ng-repeat-end="(id, target) in targetsSelected()">
                         <td class="single line" style="font-weight: 700">總和</td>
                         <td class="right aligned" ng-repeat="answer in selected.columns[0].answers">{{ getCrossColumnTotal(id,answer.value) }}</td>
-                        <td class="right aligned" >{{getCrossTotal (id)}}</td>
+                        <td class="right aligned" >{{ getCrossTotal(id) }}</td>
                     </tr>
                 </tbody>
             </table>

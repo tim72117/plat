@@ -165,7 +165,6 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
         $scope.loading = true;
         $http({method: 'POST', url: 'get_targets', data:{} })
         .success(function(data, status, headers, config) {
-            console.log(data);
             $scope.targets = data.targets;
             $scope.targets.size = Object.keys($scope.targets.groups).length;
             //$scope.targets['my'].selected = true;
@@ -362,16 +361,19 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
         var targets = $scope.targetsSelected();
 
         bar.series = [];
+        bar.xAxis.title.text = '' ;
 
         for (var i in targets) {
             var one = {name: targets[i].name, data: []};
             if ($scope.selected.columns.length > 0 ){
+                bar.subtitle.text = $scope.selected.columns[0].title;
                 for(var j in $scope.selected.columns[0].answers) {
                     var value = $scope.selected.columns[0].answers[j].value;
                     var amount = $scope.frequence[i][value] | 0;
                     one.data.push(amount);
                 }
             }else{
+                bar.subtitle.text = $scope.selected.rows[0].title;
                 for(var j in $scope.selected.rows[0].answers) {
                 var value = $scope.selected.rows[0].answers[j].value;
                 var amount = $scope.frequence[i][value] | 0;
@@ -564,122 +566,97 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
 
     };
 
-
-    $scope.getTotalPercent = function(part_value,id) {
-        var col_or_row_total = 0;
-
-        if ($scope.selected.columns.length > 0 ){
-            for(var j in $scope.selected.columns[0].answers) {
-                var value = $scope.selected.columns[0].answers[j].value;
-                var amount = $scope.frequence[id][value] | 0;
-                col_or_row_total = col_or_row_total+amount;
-            }
-        }else{
-            for(var j in $scope.selected.rows[0].answers) {
-                var value = $scope.selected.rows[0].answers[j].value;
-                var amount = $scope.frequence[id][value] | 0;
-                col_or_row_total = col_or_row_total+amount;
-            }
-        }
-        var percent = (part_value/col_or_row_total)*100;
-        return percent;
+    $scope.getTotalPercent = function(total, value) {
+        return total == 0 ? 0 : value*100/total;
     }
 
-    $scope.getRowTotal = function(id) {
-        var total = 0;
-
-        if ($scope.selected.rows.length > 0 ){
-            for(var j in $scope.selected.rows[0].answers) {
-                var value = $scope.selected.rows[0].answers[j].value;
-                var amount = $scope.frequence[id][value] | 0;
-                total += amount;
-            }
+    $scope.getFrequenceTotal = function(answers, id) {
+        if (!$scope.frequence[id]) {
+            return 0;
         }
 
-        return total;
-    }
-
-    $scope.getColumnTotal = function(id) {
         var total = 0;
-
-        if ($scope.selected.columns.length > 0 ){
-            for(var j in $scope.selected.columns[0].answers) {
-                var value = $scope.selected.columns[0].answers[j].value;
-                var amount = $scope.frequence[id][value] | 0;
-                total += amount;
-            }
+        for(var i in answers) {
+            total += $scope.frequence[id][answers[i].value] | 0;
         }
-
         return total;
     }
 
     $scope.getCrossTotal = function(key) {
-        var targets = $scope.targetsSelected();
-        var crosstable = $scope.crosstable[key];
-        var column_answers = $scope.selected.columns[0].answers;
-        colum_total = [];
         var sum_col_row = 0;
+        if ($scope.crosstable[key] != null ){
+            var crosstable = $scope.crosstable[key];
+            var column_answers = $scope.selected.columns[0].answers;
+            colum_total = [];
 
 
-        for(var i in column_answers) {
-            var column_key = column_answers[i].value;
-            var temp_total = 0;
-            for(var j in $scope.selected.rows[0].answers) {
-                var value = $scope.selected.rows[0].answers[j].value;
-                var amount = crosstable[column_key][value] | 0;
-                temp_total = temp_total+amount;
+
+            for(var i in column_answers) {
+                var column_key = column_answers[i].value;
+                var temp_total = 0;
+                for(var j in $scope.selected.rows[0].answers) {
+                    var value = $scope.selected.rows[0].answers[j].value;
+                    var amount = crosstable[column_key][value] | 0;
+                    temp_total = temp_total+amount;
+                }
+                colum_total[i] = temp_total;
             }
-            colum_total[i] = temp_total;
-        }
 
-        for(var i in column_answers) {
-            sum_col_row = sum_col_row+colum_total[i];
+            for(var i in column_answers) {
+                sum_col_row = sum_col_row+colum_total[i];
+            }
         }
-
         return sum_col_row;
     }
 
     $scope.getCrossColumnTotal = function(id,key){
-        var targets = $scope.targetsSelected();
-        var crosstable = $scope.crosstable[id];
         var sum = 0;
-        if(crosstable[key]==null){crosstable[key]=[]};
-        for(var i in $scope.selected.rows[0].answers) {
-            var value = $scope.selected.rows[0].answers[i].value;
-            var amount = crosstable[key][value] | 0;
-            sum = sum+amount;
+        if ($scope.crosstable[id] != null ) {
+            var crosstable = $scope.crosstable[id];
+
+            if(crosstable[key]==null){crosstable[key]=[]};
+            for(var i in $scope.selected.rows[0].answers) {
+                var value = $scope.selected.rows[0].answers[i].value;
+                var amount = crosstable[key][value] | 0;
+                sum = sum+amount;
+            }
         }
         return sum;
     }
 
     $scope.getCrossRowTotal = function(id,key){
-        var targets = $scope.targetsSelected();
-        var crosstable = $scope.crosstable[id];
         var sum = 0;
-        
-        for(var i in $scope.selected.columns[0].answers) {
-            var value = $scope.selected.columns[0].answers[i].value;
-            if(crosstable[value]==null){crosstable[value]=[]};
-            var amount = crosstable[value][key] | 0;
-            sum = sum+amount;
+        if ($scope.crosstable[id] != null ){
+            var crosstable = $scope.crosstable[id];
+
+
+            for(var i in $scope.selected.columns[0].answers) {
+                var value = $scope.selected.columns[0].answers[i].value;
+                if(crosstable[value]==null){crosstable[value]=[]};
+                var amount = crosstable[value][key] | 0;
+                sum = sum+amount;
+            }
         }
         return sum;
     }
 
     $scope.getFirstCrossRowTotal = function(id,key){
-        var targets = $scope.targetsSelected();
-        var crosstable = $scope.crosstable[id];
         var sum = 0;
-        
-        for(var i in $scope.selected.columns[0].answers) {
-            var value = $scope.selected.columns[0].answers[i].value;
-            if(crosstable[value]==null){crosstable[value]=[]};
-            var amount = crosstable[value][key] | 0;
-            sum = sum+amount;
-            //console.log(sum)
+        if ($scope.crosstable[id] != null ){
+            var crosstable = $scope.crosstable[id];
+
+
+            for(var i in $scope.selected.columns[0].answers) {
+                var value = $scope.selected.columns[0].answers[i].value;
+                if(crosstable[value]==null){crosstable[value]=[]};
+                var amount = crosstable[value][key] | 0;
+                sum = sum+amount;
+            }
         }
         return sum;
     }
+
+
 
     $('.chart.dropdown').dropdown({onChange: function(value) {
         $scope.$apply(function() {

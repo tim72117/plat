@@ -2,12 +2,12 @@
 <html xml:lang="zh-TW" lang="zh-TW" ng-app="app">
 <head>
 <meta charset="utf-8" />
-<title><?//=$title?></title>
+<title><?=$title?></title>
 
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
-<script src="/js/angular-1.3.14/angular.min.js"></script>
+<script src="/js/angular/1.4.7/angular.min.js"></script>
 
-<link rel="stylesheet" href="/css/Semantic-UI/2.1.4/semantic.min.css" />
+<link rel="stylesheet" href="/css/Semantic-UI/2.1.6/semantic.min.css" />
 
 <script>
 var app = angular.module('app', []);
@@ -99,6 +99,11 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
                             <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.choosed" ng-change="resetAll()" />
                             <label for="column-{{ $index }}">{{ column.title }}</label>
                         </div>
+                        <select class="ui right floated mini button">
+                            <option value="">變項類型</option>
+                            <option value="1">連續變項</option>
+                            <option value="0">非連續變項</option>
+                        </select>
                         <div class="ui right floated mini button" ng-click="$event.stopPropagation();getAnswers(column)">選項定義</div>
                     </div>
 
