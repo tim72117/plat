@@ -361,6 +361,8 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
         var targets = $scope.targetsSelected();
 
         bar.series = [];
+        bar.xAxis.title = bar.xAxis.title || {};
+        bar.subtitle = bar.subtitle || {};
         bar.xAxis.title.text = '' ;
 
         for (var i in targets) {
@@ -375,9 +377,9 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
             }else{
                 bar.subtitle.text = $scope.selected.rows[0].title;
                 for(var j in $scope.selected.rows[0].answers) {
-                var value = $scope.selected.rows[0].answers[j].value;
-                var amount = $scope.frequence[i][value] | 0;
-                one.data.push(amount);
+                    var value = $scope.selected.rows[0].answers[j].value;
+                    var amount = $scope.frequence[i][value] | 0;
+                    one.data.push(amount);
                 }
             }
 
@@ -397,9 +399,10 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
         var crosstable = $scope.crosstable[Object.keys(targets)[0]];
 
         bar.series = [];
+        bar.subtitle = bar.subtitle || {};
+        bar.xAxis.title = bar.xAxis.title || {};
         bar.subtitle.text = $scope.selected.columns[0].title;
         bar.xAxis.title.text = $scope.selected.rows[0].title.substring(0,22) ;
-        //console.log($scope.selected.rows[0])
 
         var column_answers = $scope.selected.columns[0].answers;
 
@@ -557,13 +560,13 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
             $scope.drawBar();
         if ($scope.result == 'bar' && $scope.selected.columns.length > 0 && $scope.selected.rows.length > 0)
             $scope.drawCrossBar();
+
         if ($scope.result == 'pie' && $scope.selected.columns.length == 0)
             $scope.drawPie();
         if ($scope.result == 'pie' && $scope.selected.rows.length == 0)
             $scope.drawPie();
         if ($scope.result == 'pie' && $scope.selected.columns.length > 0 && $scope.selected.rows.length > 0)
             $scope.drawCrossPie();
-
     };
 
     $scope.getTotalPercent = function(total, value) {

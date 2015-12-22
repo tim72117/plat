@@ -17,6 +17,7 @@ class QuestionXML {
 
                 foreach($sub->answers as $answer) {
                     $answer->title = strip_tags(str_replace(PHP_EOL, '', $answer->title));
+                    $answer->title = preg_replace('/&nbsp;/', '', $answer->title);
                 }
 
                 array_push($questions, $sub);
@@ -30,7 +31,13 @@ class QuestionXML {
                 foreach ($sub->questions as $question) {
                     $question->title = strip_tags(str_replace(PHP_EOL, '', $question->title));
                     $question->title = $sub->title . '-' . $question->title;
+
+                    foreach($sub->answers as $answer) {
+                        $answer->title = strip_tags(str_replace(PHP_EOL, '', $answer->title));
+                        $answer->title = preg_replace('/&nbsp;/', '', $answer->title);
+                    }
                     $question->answers = $sub->answers;
+
                     array_push($questions, $question);
                 }
             }
