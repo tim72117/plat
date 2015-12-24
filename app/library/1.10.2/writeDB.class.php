@@ -1,6 +1,9 @@
 <?php
-namespace app\library\v10;
+
+namespace Plat\Files;
+
 use DB, Input, App, Exception ,Session;
+
 class writeAnswer{
 		
 	static function writeDB($option,$skip){

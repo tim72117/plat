@@ -1,5 +1,6 @@
 <?php
-namespace app\library\v10;
+
+namespace Plat\Files;
 
 class QuestionXML {
     static $questions;

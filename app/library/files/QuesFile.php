@@ -1,5 +1,6 @@
 <?php
-namespace app\library\files\v0;
+
+namespace Plat\Files;
 
 use User;
 use Files;
@@ -7,8 +8,11 @@ use DB, View, Response, Config, Schema, Session, Input, Auth;
 use DOMElement, DOMCdataSection, ShareFile;
 use Question, Answer;
 use Carbon\Carbon;
-use app\library\v10\buildQuestionAnalysis;
 
+/**
+ * Census editor and manager.
+ *
+ */
 class QuesFile extends CommFile {
 
     function __construct(Files $file, User $user)
@@ -90,13 +94,13 @@ class QuesFile extends CommFile {
         $questionHTML = '';
         foreach ($questions as $key => $question) {
             if ($question->getName()=='question') {
-                $questionHTML .= \app\library\v10\buildQuestion::build($question, $questions, 0, 'no');
+                $questionHTML .= buildQuestion::build($question, $questions, 0, 'no');
             }
         }
 
         return View::make('editor.page', [
             'question'            => $questionHTML,
-            'questionEvent'       => \app\library\v10\buildQuestionEvent::buildEvent($questions),
+            'questionEvent'       => buildQuestionEvent::buildEvent($questions),
             'questionEvent_check' => '',
             'init_value'          => '',
             'isPhone'             => false,
@@ -147,10 +151,10 @@ class QuesFile extends CommFile {
         $pages = $this->file->census->pages->map(function($page) {
             $question_box = (object)['index' => $page->page, 'questions' => []];
             $questions = simplexml_load_string($page->xml);
-            \app\library\v10\QuestionXML::$questions = $questions;
+            QuestionXML::$questions = $questions;
             foreach($questions as $question){
                 if ($question->getName()=='question') {
-                    array_push($question_box->questions, \app\library\v10\QuestionXML::to_array($question, 0, 'no'));
+                    array_push($question_box->questions, QuestionXML::to_array($question, 0, 'no'));
                 }
             }
             return $question_box;
@@ -176,7 +180,7 @@ class QuesFile extends CommFile {
     {
         $questions = [];
         foreach($this->xml_to_array()['pages'] as $index => $page) {
-            \app\library\v10\QuestionXML::get_subs($page->questions, $index, $questions);
+            QuestionXML::get_subs($page->questions, $index, $questions);
         }
         $questions = array_values(array_filter($questions, function(&$question) {
             $question->choosed = true;
@@ -711,7 +715,7 @@ class QuesFile extends CommFile {
 
         foreach($this->xml_to_array()['pages'] as $index => $page) {
             $questions = [];
-            \app\library\v10\QuestionXML::get_subs($page->questions, $index, $questions);
+            QuestionXML::get_subs($page->questions, $index, $questions);
 
             if (count($questions) > 0) {
                 $table = $sheet->tables()->create(['database' => $database, 'name' => $tablename . '_page' . ($page->index), 'lock' => true, 'construct_at' => Carbon::now()->toDateTimeString()]);

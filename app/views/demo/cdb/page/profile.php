@@ -45,7 +45,7 @@ if( Request::isMethod('post') ){
     $validator = Validator::make($input, $rulls, $rulls_message);
 
     if( $validator->fails() ){	
-        throw new app\library\files\v0\ValidateException($validator);
+        throw new Plat\Files\ValidateException($validator);
     }
 
 	$user->contact->title = Input::get('title');

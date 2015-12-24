@@ -111,7 +111,7 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
         $validator = Validator::make($dirty, $this->rules, $this->rulls_message);
 
         if( $validator->fails() ){
-            throw new app\library\files\v0\ValidateException($validator);
+            throw new Plat\Files\ValidateException($validator);
         }
 
         return $this->isValid = true;

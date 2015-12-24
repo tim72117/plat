@@ -1,11 +1,16 @@
 <?php
-namespace app\library\files\v0;
+
+namespace Plat\Files;
 
 use User;
 use Files;
 use DB, Input, Cache, View, Session;
 use ShareFile;
 
+/**
+ * Analysis census data.
+ *
+ */
 class AnalysisFile extends CommFile {
 
     function __construct(Files $file, User $user)
@@ -58,7 +63,7 @@ class AnalysisFile extends CommFile {
         if (!is_null($this->file->analysis->ques)) {
             $quesFile = new QuesFile($this->file->analysis->ques, $this->user);
             foreach($quesFile->xml_to_array()['pages'] as $index => $page) {
-                \app\library\v10\QuestionXML::get_subs($page->questions, $index, $questions);
+                QuestionXML::get_subs($page->questions, $index, $questions);
             }
         } else {
             foreach($columns as $column) {
