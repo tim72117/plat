@@ -1,5 +1,6 @@
 <?php
-namespace app\library\files\v0;
+
+namespace Plat\Files;
 
 use User;
 use Files;
@@ -11,6 +12,10 @@ use Row\Column;
 use Carbon\Carbon;
 use Illuminate\Support\MessageBag;
 
+/**
+ * Rows data Repository.
+ *
+ */
 class RowsFile extends CommFile {
 
     protected $database = 'rows';
@@ -49,6 +54,13 @@ class RowsFile extends CommFile {
         'stdyear'          => ['sort' => 18, 'type' => 'string',   'size' => 1,   'title' => 'TTED年級',                  'validator' => 'in:1,2,3,4,5,6,7'],
     ];
 
+    /**
+     * Create a new RowsFile.
+     *
+     * @param  Files  $file
+     * @param  User  $user
+     * @return void
+     */
     function __construct(Files $file, User $user)
     {
         parent::__construct($file, $user);
@@ -56,16 +68,31 @@ class RowsFile extends CommFile {
         $this->temp = (object)[];
     }
 
+    /**
+     * Determine if the view full page.
+     *
+     * @return bool
+     */
     public function is_full()
     {
         return false;
     }
 
+    /**
+     * Get all views.
+     *
+     * @return array
+     */
     public function get_views()
     {
         return ['open', 'import', 'rows', 'analysis'];
     }
 
+    /**
+     * Add a file then initialize sheets and tables.
+     *
+     * @return void
+     */
     public function create()
     {
         parent::create();
@@ -75,6 +102,11 @@ class RowsFile extends CommFile {
         $this->add_table($sheet, $this->database, $this->generate_table());
     }
 
+    /**
+     * Get default view when open file path.
+     *
+     * @return string
+     */
     public function open()
     {
         $view = $this->isCreater() ? 'files.rows.table_editor' : 'files.rows.table_open';
@@ -82,21 +114,41 @@ class RowsFile extends CommFile {
         return $view;
     }
 
+    /**
+     * Get sub tool view path.
+     *
+     * @return string
+     */
     public function subs()
     {
         return View::make('files.rows.subs.' . Input::get('tool', ''))->render();
     }
 
+    /**
+     * Get import rows data view path.
+     *
+     * @return string
+     */
     public function import()
     {
         return 'files.rows.table_import';
     }
 
+    /**
+     * Get edit rows data view path.
+     *
+     * @return string
+     */
     public function rows()
     {
         return 'files.rows.rows_editor';
     }
 
+    /**
+     * Get analysis rows data view path.
+     *
+     * @return string
+     */
     public function analysis()
     {
         return 'files.analysis.analysis';
@@ -220,7 +272,7 @@ class RowsFile extends CommFile {
 
         $file = new Files(['type' => 3, 'title' => Input::file('file_upload')->getClientOriginalName()]);
 
-        $file_upload = new \app\library\files\v0\CommFile($file, $this->user);
+        $file_upload = new CommFile($file, $this->user);
 
         $file_upload->upload(Input::file('file_upload'));
 

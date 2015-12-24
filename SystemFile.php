@@ -1,5 +1,6 @@
 <?php
-namespace app\library\files\v0;
+
+namespace Plat\Files;
 
 use User;
 use Files;
