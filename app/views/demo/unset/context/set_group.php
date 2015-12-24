@@ -81,7 +81,7 @@ $users = $group->users->take(30)->map(function($user){
 
 //var_dump($users);
 
-$fileProvider = app\library\files\v0\FileProvider::make();
+$fileProvider = Plat\Files\FileProvider::make();
 ?>
 
     

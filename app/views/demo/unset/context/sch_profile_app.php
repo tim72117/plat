@@ -91,7 +91,7 @@ $profiles = $contacts->map(function($contact){
 
 
 
-$fileProvider = app\library\files\v0\FileProvider::make();
+$fileProvider = Plat\Files\FileProvider::make();
 ?>
 
     
