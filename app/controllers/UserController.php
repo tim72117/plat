@@ -36,7 +36,7 @@ class UserController extends BaseController {
     {
         $project = Auth::user()->getProject();
         Auth::logout();
-        return Redirect::to('project/'.$project);
+        return Redirect::to('project/' . $project);
     }
 
     public function loginPage($project)
@@ -61,13 +61,13 @@ class UserController extends BaseController {
             throw new app\library\files\v0\ValidateException($validator);
         }
 
-        if( Auth::once(array('email'=>$input['email'], 'password'=>$input['password'])) ){
+        if (Auth::once(array('email'=>$input['email'], 'password'=>$input['password']))) {
 
             $user = Auth::user();
 
             $contact_query = DB::table('contact')->where('user_id', $user->id)->where('active', true)->where('project', $project);
 
-            if( !$user->active || !$contact_query->exists() ){
+            if (!$user->active || !$contact_query->exists()) {
                 $validator->getMessageBag()->add('login_error', '帳號尚未開通');
                 throw new app\library\files\v0\ValidateException($validator);
             }
