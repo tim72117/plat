@@ -12,12 +12,12 @@
 <script>
 angular.module('app', ['ngSanitize', 'ngQuestion'])
 .controller('quesController', function quesController($scope, $http, $filter, $window, dbService){
-    
+
     $scope.pages = [];
-    $scope.page = {}; 
-    
+    $scope.page = {};
+
     $scope.online = navigator.onLine;
-    
+
     $window.addEventListener("offline", function () {
         $scope.$apply(function() {
             $scope.online = false;
@@ -35,55 +35,55 @@ angular.module('app', ['ngSanitize', 'ngQuestion'])
         if( index < $scope.pages.length-1 )
             $scope.page = $scope.pages[++index];
     };
-    
+
     $scope.prev_page = function() {
         var index = $scope.pages.indexOf($scope.page);
         if( index > 0 )
             $scope.page = $scope.pages[--index];
-    }; 
+    };
 
     $scope.$watch('page', function() {
         dbService.setPage($scope.page);
     });
-    
+
     if( !navigator.onLine ){
-        
+
         $scope.questions = angular.fromJson(window.localStorage.getItem('questions'));
         $scope.answers = angular.fromJson(window.localStorage.getItem('ques_data'));
-        
+
     }else{
-        
+
         $http({method: 'POST', url: 'get_ques_from_db', data:{} })
         .success(function(data, status, headers, config) {
             console.log(data);
             $scope.pages = data;
             $scope.page = $scope.pages[0];
-            window.localStorage.setItem('pages', angular.toJson(data));   
-            $scope.getAnswers();  
+            window.localStorage.setItem('pages', angular.toJson(data));
+            $scope.getAnswers();
         }).error(function(e){
             console.log(e);
         });
-        
+
     }
 
     $scope.getAnswers = function() {
 
         $http({method: 'POST', url: 'get_answers', data:{} })
         .success(function(data, status, headers, config) {
-            console.log(data);   
+            console.log(data);
             dbService.setAnswers(data.answers);
         }).error(function(e){
             console.log(e);
         });
-              
-    };    
+
+    };
 
 })
 .filter('valueToObject', function() {
     return function(answers) {
         angular.forEach(answers, function(answer) {
             answer.value = angular.fromJson(answer.value);
-        });        
+        });
         return answers;
     };
 });
@@ -104,7 +104,7 @@ angular.module('app', ['ngSanitize', 'ngQuestion'])
         <div class="item">
             <div class="ui basic button" ng-click="prev_page()">上一頁</div>
             <div class="ui basic button" ng-click="next_page()">下一頁</div>
-        </div>       
+        </div>
 
         <div class="item">
             <span ng-show="online" style="color:green">online</span>
@@ -116,9 +116,9 @@ angular.module('app', ['ngSanitize', 'ngQuestion'])
     <div class="ui segment" ng-repeat="question in page.questions">
         <div class="field">
             <!-- <h4 class="ui header" ng-bind-html="question.title" style="max-width: 700px"></h4> -->
-            
+
             <div question="question" layer="0"></div>
-        </div>        
+        </div>
     </div>
 
 </div>

@@ -1,6 +1,6 @@
 <div>
-    
-    <div class="ui small secondary menu" >        
+
+    <div class="ui small secondary menu" >
 <!--         <a class="item" href="javascript:void(0)">{{ question.label }}</a> -->
         <div class="fitted item">
             <select class="ui dropdown" ng-model="question.type" ng-change="typeChange(question)">
@@ -23,15 +23,15 @@
 <!--             <textarea ng-model="question.title" ng-model-options="{ updateOn: 'blur' }" ng-change="update(question)" placeholder="輸入題目標題..." style="resize: none"></textarea> -->
         </div>
     </div>
-    
+
     <div class="ui accordion field" ng-if="question.type==='checkbox'">
-        
+
         <div class="title" ng-class="{active: question.open.checkboxs}" ng-click="question.open.checkboxs=!question.open.checkboxs">
             <i class="dropdown icon"></i>題目({{ question.subs.length }})
             <a href="javascript:void(0)" ng-click="$event.stopPropagation();addQues(question, 0);question.open.checkboxs=true" title="新增題目"><i class="add icon"></i></a>
         </div>
-    
-        <div class="content" ng-if="question.subs.length > 0" ng-class="{active: question.open.checkboxs}">            
+
+        <div class="content" ng-if="question.subs.length > 0" ng-class="{active: question.open.checkboxs}">
             <div class="ui selection list">
                 <div class="item" ng-repeat="checkbox in question.subs">
                     <i class=" icon" ng-class="{'red warning': !checkbox.title, move: !!checkbox.title}"></i>
@@ -46,38 +46,38 @@
                                 <!-- <div class="ui button" ng-click="checkbox.reset=!checkbox.reset" ng-if="question.open.button[$index] || checkbox.reset" title="清除勾選項目">
                                     <i class="refresh red icon"></i>
                                 </div>
-                                <div class="ui button" ng-click="removeQuestion(question.questions, $index)" title="刪除題目"><i class="close icon"></i></div>  -->                               
+                                <div class="ui button" ng-click="removeQuestion(question.questions, $index)" title="刪除題目"><i class="close icon"></i></div>  -->
                             </div>
                         </div>
 <!--                         <a href="javascript:void(0)" ng-click="addQues(checkbox, 0);question.open.subs=true" title="新增子題"><i class="add icon"></i></a>  -->
-                    </div>    
+                    </div>
                 </div>
-            </div>                    
+            </div>
         </div>
 
         <div class="title" ng-class="{active: question.open.subs}" ng-click="question.open.subs=!question.open.subs" ng-if="layer < 2">
             <i class="dropdown icon"></i>子題
         </div>
         <div class="content" ng-class="{active: question.open.subs}">
-            <div class="ui tertiary segment" ng-repeat="checkbox in question.subs" ng-if="checkbox.subs.length > 0">  
-                <!--<a class="ui green top left attached label" ng-repeat="answer in checkbox.subs" ng-if="answer.parent == checkbox.id ">{{checkbox.title}}</a>-->              
+            <div class="ui tertiary segment" ng-repeat="checkbox in question.subs" ng-if="checkbox.subs.length > 0">
+                <!--<a class="ui green top left attached label" ng-repeat="answer in checkbox.subs" ng-if="answer.parent == checkbox.id ">{{checkbox.title}}</a>-->
                 <h4 class="ui header">{{ checkbox.title }}</h4>
                 <div class="ui vertical segment" ng-repeat-start="sub in checkbox.subs" question="sub" layer="layer+2" update="update"></div>
                 <div class="ui horizontal divider" ng-repeat-end ng-click="subQues(checkbox.subs, $index+1, checkbox)"><a class="ui mini label"><i class="add icon"></i>加入題目</a></div>
             </div>
 
         </div>
-        
+
     </div>
 
 
-            
+
     <div class="ui accordion field" ng-if="question.type==='radio' || question.type==='select'">
         <div class="title" ng-class="{active: question.open.answers}" ng-click="question.open.answers = !question.open.answers">
             <i class="dropdown icon"></i>選項 ({{ question.answers.length }})
             <a href="javascript:void(0)" ng-click="$event.stopPropagation();addAns(question.answers, 0);question.open.answers=true" title="新增選項">
                 <i class="add icon"></i>
-            </a>  
+            </a>
         </div>
         <div class="content" ng-if="question.answers.length > 0" ng-class="{active: question.open.answers}">
             <div class="ui selection list">
@@ -86,23 +86,23 @@
                     <div class="header">
                         <div class="ui transparent fluid action left icon input">
                             <i class="icon" ng-class="{'red warning': !answer.title, move: !!answer.title}"></i>
-                            <input type="text" ng-model="answer.title" placeholder="輸入選項..." ng-focus="question.open.button[$index]=true" ng-blur="hideOptions(question, $index)" /> 
-                            <div class="ui icon basic buttons">                                
+                            <input type="text" ng-model="answer.title" placeholder="輸入選項..." ng-focus="question.open.button[$index]=true" ng-blur="hideOptions(question, $index)" />
+                            <div class="ui icon basic buttons">
                                 <div class="ui button" ng-click="addQues(question.subs, 0, answer);question.open.subs=true" title="新增子題" ng-if="question.open.button[$index]"><i class="vertically flipped fork icon"></i></div>
                                 <div class="ui button" ng-click="addAns(question.answers, $index+1)" title="設定跳題" ng-if="question.open.button[$index]"><i class="refresh icon"></i></div>
-                                <div class="ui button" ng-click="removeAns(question.answers, $index)" title="刪除選項"><i class="close icon"></i></div>                                
+                                <div class="ui button" ng-click="removeAns(question.answers, $index)" title="刪除選項"><i class="close icon"></i></div>
                             </div>
                         </div>
 <!--                         {{ answer.value }} -  {{ answer.title }}
-                        <a href="javascript:void(0)" ng-click="removeAns(question.answers, $index)" title="刪除選項"><i class="close icon"></i></a>  
-                        <a href="javascript:void(0)" ng-click="addAns(question.answers, $index+1)" title="設定跳題"><i class="linkify icon"></i></a> 
+                        <a href="javascript:void(0)" ng-click="removeAns(question.answers, $index)" title="刪除選項"><i class="close icon"></i></a>
+                        <a href="javascript:void(0)" ng-click="addAns(question.answers, $index+1)" title="設定跳題"><i class="linkify icon"></i></a>
                         <span ng-repeat="skip in answer.skips" title="跳題({{ skip }})" target="{{ skip }}" ng-click="removeAns(answer.skips, $index)"></span>
                         <a href="javascript:void(0)" ng-click="addQues(question, 0, answer);question.open.subs=true" title="新增子題"><i class="add icon"></i></a> -->
                     </div>
                 </div>
-            </div>                
+            </div>
         </div>
-        
+
         <div class="title" ng-class="{active: question.open.subs}" ng-click="question.open.subs = !question.open.subs" ng-if="question.subs.length > 0 || layer < 2">
             <i class="dropdown icon"></i>子題
         </div>
@@ -132,24 +132,24 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="title" ng-class="{active: question.open.answers}" ng-click="question.open.answers=!question.open.answers">
             <i class="dropdown icon"></i>選項 <a href="javascript:void(0)" ng-click="$event.stopPropagation();addAns(question.answers, 0);question.open.answers=true" title="加入選項"><i class="add icon"></i></a>
         </div>
-        
+
         <div class="content" ng-if="question.answers.length > 0" ng-class="{active: question.open.answers}">
             <div class="ui selection list">
-                <div class="item" ng-repeat="answer in question.answers">    
+                <div class="item" ng-repeat="answer in question.answers">
                     <div class="header">
                         <div class="ui transparent fluid action left icon mini input">
                             <i class="icon" ng-class="{'red warning': !answer.title, move: !!answer.title}"></i>
-                            <input type="text" ng-model="answer.title" placeholder="輸入選項..." /> 
+                            <input type="text" ng-model="answer.title" placeholder="輸入選項..." />
                             <div class="ui icon basic buttons">
                                 <div class="ui button" ng-click="removeAns(question.answers, $index)" title="刪除選項"><i class="close icon"></i></div>
                             </div>
-                        </div>         
-                    </div>  
-                </div>    
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -157,17 +157,17 @@
 
     <div class="ui basic segment" ng-if="question.type==='text'">
         <div class="ui selection list">
-            <div class="item" ng-repeat="answer in question.answers">    
-                <div class="header">                            
+            <div class="item" ng-repeat="answer in question.answers">
+                <div class="header">
                     <div class="ui transparent fluid action left icon input">
                         <i class="icon" ng-class="{'red warning': !answer.title, move: !!answer.title}"></i>
-                        <input type="text" ng-model="answer.title" ng-model-options="{ updateOn: 'blur' }" ng-change="update(question)" placeholder="輸入欄位描述..." /> 
-                        <div class="ui icon basic buttons">                                
-                            <div class="ui button" ng-click="removeAns(question.answers, $index)" title="刪除欄位"><i class="close icon"></i></div>                                
+                        <input type="text" ng-model="answer.title" ng-model-options="{ updateOn: 'blur' }" ng-change="update(question)" placeholder="輸入欄位描述..." />
+                        <div class="ui icon basic buttons">
+                            <div class="ui button" ng-click="removeAns(question.answers, $index)" title="刪除欄位"><i class="close icon"></i></div>
                         </div>
-                    </div>         
-                </div>  
-            </div>    
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -180,7 +180,7 @@
 
 
     <div class="ui basic segment" ng-if="question.type==='table'">
-        
+
         <table ng-if="question.type==='table' && !question.complete" class="nb-tab">
             <span style="font-size:10px;background-color:#b3e373;width:170px;position:absolute;margin-left:-{{ 180+layer*82 }}px">{{ answer.name }}</span>
             <tr>
@@ -193,7 +193,7 @@
                 <td width="1px"></td>
             </tr>
         </table>
-            
+
         <div ng-if="question.type==='table' && !question.complete" class="var_scale_box_init" style="margin-right:0px;border:0px dashed #A0A0A4">
             <table class="nb-tab max"><tr>
             <td><div class="title" style=";border-top:1px dashed #aaa;background-color:#D7E6FC"></div></td>
@@ -203,7 +203,7 @@
             <td width="1px"></td>
             </tr></table>
         </div>
-                        
+
         <div ng-repeat="degree in question.degrees" ng-if="question.type==='table' && !question.complete">
             <table class="nb-tab">
                 <tr>
@@ -217,22 +217,22 @@
                 </tr>
             </table>
         </div>
-        
+
         <table class="nb-tab" ng-if="question.type==='table' && question.complete" ng-click="question.complete=false">
             <tr>
                 <th style="width:50px"></th>
-                <th ng-repeat="answer in question.answers" style="width:50px">{{ answer.title }}</th> 
+                <th ng-repeat="answer in question.answers" style="width:50px">{{ answer.title }}</th>
             </tr>
             <tr ng-repeat="degree in question.degrees">
                 <th>{{ degree.title }}</th>
                 <th ng-repeat="answer in question.answers"><input type="text" style="width:45px" /></th>
             </tr>
         </table>
-        
-    </div>    
-    
-       
-    
+
+    </div>
+
+
+
     <div class="addvarlist_box" ng-if="question.is_import" style="margin-right:0px;border:0px dashed #A0A0A4">
         <table style="width:100%">
             <tr><td>
@@ -251,6 +251,6 @@
         </table>
     </div>
 
-    
+
 
 </div>

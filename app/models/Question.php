@@ -44,14 +44,14 @@ class Ques_middle extends Eloquent
 }
 
 class Ques_page extends Eloquent
-{   
+{
 
     protected $table = 'ques_page_new';
-    
+
     public $timestamps = true;
-    
+
     protected $fillable = array('file_id', 'value', 'rewrite');
-    
+
     protected $guarded = array('id');
 
     public function questions() {
