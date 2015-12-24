@@ -30,7 +30,7 @@ class FileController extends BaseController {
                 $query->where('target', 'group')->whereIn('target_id', $inGroups);
             });
 
-        })->where('visible', true)->get()->map(function($app) {
+        })->where('visible', true)->get()->sortBy('isFile.title')->map(function($app) {
 
             return [
                 'title' => $app->isFile->title,
