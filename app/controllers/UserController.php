@@ -169,7 +169,7 @@ class UserController extends BaseController {
 
         $validator = Validator::make($input, $rulls, $this->rulls_message);
 
-        if( $validator->fails() ){
+        if ($validator->fails()) {
             throw new app\library\files\v0\ValidateException($validator);
         }
 
