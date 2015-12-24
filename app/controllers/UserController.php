@@ -57,7 +57,7 @@ class UserController extends BaseController {
 
         $validator = Validator::make($input, $rulls, $this->rulls_message);
 
-        if( $validator->fails() ){
+        if ($validator->fails()) {
             throw new app\library\files\v0\ValidateException($validator);
         }
 
@@ -78,7 +78,7 @@ class UserController extends BaseController {
 
             return Redirect::intended('page/project');
 
-        }else{
+        } else {
             $validator->getMessageBag()->add('login_error', '帳號密碼錯誤');
             throw new app\library\files\v0\ValidateException($validator);
         }
@@ -172,13 +172,14 @@ class UserController extends BaseController {
         if( $validator->fails() ){
             throw new app\library\files\v0\ValidateException($validator);
         }
+
         $user = Auth::User();
 
-        if( Hash::check($input['passwordold'], $user->password) ){
+        if (Hash::check($input['passwordold'], $user->password)) {
             $user->password = Hash::make($input['password']);
             $user->save();
             return Redirect::route('project');
-        }else{
+        } else {
             $validator->getMessageBag()->add('passwordold', '舊密碼錯誤');
             return Redirect::back()->withErrors($validator);
         }

@@ -96,8 +96,8 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
             'email.unique'      => '電子郵件已被註冊',
     );
 
-    public function valid() {
-
+    public function valid()
+    {
         $this->rules = array_filter($this->rules);
 
         $dirty = $this->getDirty();
@@ -117,8 +117,8 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
         return $this->isValid = true;
     }
 
-    public function save(array $options = array()) {
-
+    public function save(array $options = array())
+    {
         $this->isValid || $this->valid();
 
         foreach($this->getRelations() as $relation){
@@ -131,11 +131,13 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
     }
 
 
-    public function getProject(){
+    public function getProject()
+    {
         return Session::get('user.project');
     }
 
-    public function setProject($project){
+    public function setProject($project)
+    {
         Session::put('user.project', $project);
     }
 
