@@ -103,7 +103,7 @@ Route::filter('post_delay', function()
 Route::filter('limit', function() {
     $user = Auth::user();
     $limit = DB::table('user_limit')->where('user_id', $user->id)->select('ip')->first();
-    if (!is_null($limit)){
+    if (!is_null($limit)) {
         $ipAllows = explode(",",$limit->ip);
         $ipPass = false;
         $myIp = Request::getClientIp();

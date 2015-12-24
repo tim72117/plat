@@ -34,7 +34,7 @@ class UserController extends BaseController {
 
     public function logout()
     {
-        $project = Auth::user()->getProject();
+        $project = Auth::user()->contact->project->code;
         Auth::logout();
         return Redirect::to('project/' . $project);
     }
@@ -61,18 +61,20 @@ class UserController extends BaseController {
             throw new Plat\Files\ValidateException($validator);
         }
 
-        if (Auth::once(array('email'=>$input['email'], 'password'=>$input['password']))) {
+        if (Auth::once($input)) {
 
             $user = Auth::user();
 
-            $contact_query = DB::table('contact')->where('user_id', $user->id)->where('active', true)->where('project', $project);
+            $contact = $user->contacts->load('project')->filter(function($contact) use($project) {
+                $contact->project->code == $project && !$contact->main && $contact->update(['main' => true]);
+                $contact->project->code != $project && $contact->main && $contact->update(['main' => false]);
+                return $contact->project->code == $project;
+            });
 
-            if (!$user->active || !$contact_query->exists()) {
+            if (!$user->active || $contact->isEmpty()) {
                 $validator->getMessageBag()->add('login_error', '帳號尚未開通');
                 throw new Plat\Files\ValidateException($validator);
             }
-
-            $user->setProject($project);
 
             Auth::login($user, true);
 
@@ -151,7 +153,8 @@ class UserController extends BaseController {
 
     public function passwordChangePage()
     {
-        $project = DB::table('projects')->where('code', Auth::user()->getProject())->first();
+        $project = Auth::user()->contact->project;
+
         $contents = View::make('demo.main', ['project' => $project])->nest('context','demo.page.passwordChange');
 
         $this->layout->content = $contents;
@@ -178,7 +181,8 @@ class UserController extends BaseController {
         if (Hash::check($input['passwordold'], $user->password)) {
             $user->password = Hash::make($input['password']);
             $user->save();
-            return Redirect::route('project');
+            $validator->getMessageBag()->add('passwordold', '密碼設定成功');
+            return Redirect::back()->withErrors($validator);
         } else {
             $validator->getMessageBag()->add('passwordold', '舊密碼錯誤');
             return Redirect::back()->withErrors($validator);

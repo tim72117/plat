@@ -54,9 +54,6 @@ class Contact extends Eloquent {
     public function Contact($attributes = array())
     {
         parent::__construct($attributes);
-        if( Auth::check() ){
-            //$this->setTable('contact_'.Auth::user()->getProject());
-        }
     }
 
     public function valid()
@@ -87,9 +84,24 @@ class Contact extends Eloquent {
         return parent::save($options);
     }
 
-    public function user()
+    public function user_()
     {
         return $this->hasOne('User', 'id', 'user_id');
+    }
+
+    public function user()
+    {
+        return $this->morphTo();
+    }
+
+    public function project()
+    {
+        return $this->hasOne('Doc\Project', 'id', 'project_id');
+    }
+
+    public function getProjectModelAttribute($project)
+    {
+        return 'User_' . $project;
     }
 
     public function validator(array $options = array())

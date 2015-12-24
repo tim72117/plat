@@ -8,6 +8,7 @@ class FileController extends BaseController {
     {
         $this->beforeFilter(function($route) {
             $this->user = Auth::user();
+            //$this->project = SessionConfig::get('project.default');
 
             Event::fire('ques.open', array());
         });
@@ -106,7 +107,7 @@ class FileController extends BaseController {
             if ($file->is_full()) {
                 $view = View::make($file->$method());
             } else {
-                $project = DB::table('projects')->where('code', Auth::user()->getProject())->first();
+                $project = $this->user->contact->project;
                 $context = View::make('demo.main', ['project' => $project])->nest('context', $file->$method());
                 $view = $this->createView($context);
             }

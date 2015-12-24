@@ -9,14 +9,14 @@ class PageController extends BaseController {
     public function __construct()
     {
         $this->beforeFilter(function($route){
-            $this->project = Auth::user()->getProject();
+            $this->user = Auth::user();
         });
     }
 
     public function project($context = 'intro', $parameter = null)
     {
-        $project = DB::table('projects')->where('code', $this->project)->first();
-        $contents = View::make('demo.main', ['project' => $project])->nest('context','demo.' . $this->project . '.page.' . $context);
+        $project = $this->user->contact->project;
+        $contents = View::make('demo.main', ['project' => $project])->nest('context','demo.' . $project->code . '.page.' . $context);
 
         $this->layout->content = $contents;
 
@@ -32,7 +32,7 @@ class PageController extends BaseController {
 
     public function page($context)
     {
-        $project = DB::table('projects')->where('code', $this->project)->first();
+        $project = $this->user->contact->project;
         $contents = View::make('demo.main', ['project' => $project])->nest('context','demo.page.' . $context);
 
         $this->layout->content = $contents;

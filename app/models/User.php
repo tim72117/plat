@@ -65,15 +65,6 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
         return 'remember_token';
     }
 
-    public function scopeContactj($query, $project)
-    {
-        //$contact = 'contact_'.$project;
-        //return $query->leftJoin($contact,$this->table.'.id','=',$contact.'.id')->where('active','1')->where($this->table.'.id',$this->getAuthIdentifier())->first();
-    }
-
-
-
-
     /**
      * Get the e-mail address where password reminders are sent.
      *
@@ -146,11 +137,11 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
     | Relations
     */
     public function contact() {
-        return $this->hasOne('Contact', 'user_id', 'id')->where('contact.project', $this->getProject());
+        return $this->hasOne('Contact', 'user_id', 'id')->where('main', true);
     }
 
     public function contacts() {
-        return $this->hasMany('Contact', 'user_id', 'id');
+        return $this->hasMany('Contact', 'user_id', 'id')->where('active', true);
     }
 
     public function works() {
