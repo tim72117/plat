@@ -30,7 +30,7 @@
 .menu-left {
     -webkit-flex: initial;
             flex: initial;
-    width: 350px;
+    width: 300px;
     min-width: 100px;
     padding: 5px;
 }

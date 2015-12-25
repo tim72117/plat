@@ -30,11 +30,17 @@ class FileController extends BaseController {
                 $query->where('target', 'group')->whereIn('target_id', $inGroups);
             });
 
-        })->where('visible', true)->get()->sortBy('isFile.title')->map(function($app) {
+        })->where('visible', true)->get()->sort(function($app) {
+
+            $rank_first = $app->file_id == 3 ? 0 : 1;
+            $rank_last = $app->target == 'user' ? 0 : 1;
+            return $rank_first . $app->isFile->title . $rank_last;
+
+        })->groupBy('file_id')->map(function($app) {
 
             return [
-                'title' => $app->isFile->title,
-                'link'  => 'doc/' . $app->id . '/open',
+                'title' => $app[0]->isFile->title,
+                'link'  => 'doc/' . $app[0]->id . '/open',
             ];
 
         })->toArray();
