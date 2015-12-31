@@ -89,8 +89,8 @@ table {
         <td style="font-size:10pt;">
             申請計畫選擇 :<br />
             <?=Form::radio('', '', true)?>後期中等教育整合資料庫<br />
-            <?=Form::radio('', '', true)?>新北市國中小校務評鑑資料庫<br />
-            <?=Form::radio('', '', true)?>幼兒發展調查資料庫
+            <?=Form::radio('', '', 0)?>新北市國中小校務評鑑資料庫<br />
+            <?=Form::radio('', '', 0)?>幼兒發展調查資料庫
         </td>
     </tr>
     <tr>
