@@ -1,6 +1,8 @@
 <?php
-namespace app\library\v10;
+
+namespace Plat\Files;
 use DB;
+
 class buildQuestionAnalysis {
     
     static function buildVariable($name, $value, $label, $qid){

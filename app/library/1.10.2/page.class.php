@@ -1,5 +1,7 @@
 <?php
-namespace app\library;
+
+namespace Plat\Files;
+
 class page {
 	
 	public $inifile = '';

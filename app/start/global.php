@@ -51,19 +51,19 @@ App::error(function(Exception $exception, $code)
     Log::error($exception);
 });
 
-App::error(function(app\library\files\v0\UploadFailedException $exception) {
+App::error(function(Plat\Files\UploadFailedException $exception) {
     return Response::json($exception->uploadFailedMessage);
 });
 
-App::error(function(app\library\files\v0\FileFailedException $exception) {
+App::error(function(Plat\Files\FileFailedException $exception) {
     //return Response::view('noFile', array(), 404)->header('Refresh','5;url='.URL::to('page/project'));
 });
 
-App::error(function(app\library\files\v0\ValidateException $exception) {
+App::error(function(Plat\Files\ValidateException $exception) {
     return Redirect::back()->withErrors($exception->validator)->withInput();
 });
 
-App::error(function(app\library\files\v0\TokenMismatchException $exception) {
+App::error(function(Plat\Files\TokenMismatchException $exception) {
     return Redirect::back()->withErrors($exception->validator)->withInput(Input::except('_token','_token2'));
 });
 

@@ -1,5 +1,7 @@
 <?php
-namespace app\library\files\v0;
+
+namespace Plat\Files;
+
 use Exception;
 
 class TokenMismatchException extends Exception {

@@ -1,7 +1,5 @@
 <?php
 
-use app\library\files\v0\CommFile;
-
 class FileController extends BaseController {
 
     protected $layout = 'demo.layout-main';
@@ -98,7 +96,7 @@ class FileController extends BaseController {
 
     private function active($doc, $method)
     {
-        $class = 'app\\library\\files\\v0\\' . $doc->isFile->isType->class;
+        $class = 'Plat\\Files\\' . $doc->isFile->isType->class;
 
         $file = new $class($doc->isFile, $this->user);
 
@@ -257,7 +255,7 @@ class FileController extends BaseController {
 
         $type = DB::table('files_type')->where('id', $type_id)->first();
 
-        $class = 'app\\library\\files\\v0\\' . $type->class;
+        $class = 'Plat\\Files\\' . $type->class;
 
         return new $class($file, $this->user);
     }

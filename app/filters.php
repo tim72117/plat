@@ -79,7 +79,7 @@ Route::filter('csrf', function()
         //throw new Illuminate\Session\TokenMismatchException;
         $messageBag = new Illuminate\Support\MessageBag();
         $messageBag->add('csrf', '畫面過期，請重新登入');
-        throw new app\library\files\v0\TokenMismatchException($messageBag);
+        throw new Plat\Files\TokenMismatchException($messageBag);
     }
 });
 

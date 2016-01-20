@@ -58,7 +58,7 @@ class UserController extends BaseController {
         $validator = Validator::make($input, $rulls, $this->rulls_message);
 
         if ($validator->fails()) {
-            throw new app\library\files\v0\ValidateException($validator);
+            throw new Plat\Files\ValidateException($validator);
         }
 
         if (Auth::once(array('email'=>$input['email'], 'password'=>$input['password']))) {
@@ -69,7 +69,7 @@ class UserController extends BaseController {
 
             if (!$user->active || !$contact_query->exists()) {
                 $validator->getMessageBag()->add('login_error', '帳號尚未開通');
-                throw new app\library\files\v0\ValidateException($validator);
+                throw new Plat\Files\ValidateException($validator);
             }
 
             $user->setProject($project);
@@ -80,7 +80,7 @@ class UserController extends BaseController {
 
         } else {
             $validator->getMessageBag()->add('login_error', '帳號密碼錯誤');
-            throw new app\library\files\v0\ValidateException($validator);
+            throw new Plat\Files\ValidateException($validator);
         }
     }
 
@@ -128,8 +128,8 @@ class UserController extends BaseController {
 
         $validator = Validator::make($input, $rulls, $this->rulls_message);
 
-        if( $validator->fails() ){
-            throw new app\library\files\v0\ValidateException($validator);
+        if ($validator->fails()) {
+            throw new Plat\Files\ValidateException($validator);
         }
 
         $response = Password::reset(array_merge($input, ['token' => $token]), function($user, $password) {
@@ -170,7 +170,7 @@ class UserController extends BaseController {
         $validator = Validator::make($input, $rulls, $this->rulls_message);
 
         if ($validator->fails()) {
-            throw new app\library\files\v0\ValidateException($validator);
+            throw new Plat\Files\ValidateException($validator);
         }
 
         $user = Auth::User();
