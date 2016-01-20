@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Database\Eloquent\SoftDeletingTrait;
+
 class School extends Eloquent {
 
     protected $table = 'pub_school';
@@ -17,6 +19,8 @@ class Work extends Eloquent {
 }
 
 class Contact extends Eloquent {
+
+    use SoftDeletingTrait;
 
     protected $table = 'contact';
 

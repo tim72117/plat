@@ -18,11 +18,11 @@ $rulls_message = array(
 
 $validator = Validator::make($input, $rulls, $rulls_message);
 
-if( $validator->fails() ){
+if ($validator->fails()) {
     throw new app\library\files\v0\ValidateException($validator);
 }
 
-$user = new User_yb;
+$user = new Yearbook\User;
 $user->username = $input['name'];
 $user->email    = $input['email'];
 $user->valid();
@@ -33,7 +33,6 @@ $contact = new Contact(array(
     'title'            => $input['title'],
     'tel'              => $input['tel'],
     'fax'              => $input['fax'],
-    'created_ip'       => Request::getClientIp(),
 ));
 
 $contact->valid();
@@ -43,7 +42,7 @@ try {
 
     $user->save();
     $user->contact()->save($contact);
-    $user->works()->save(new Work_yb(['ushid' => $input['sch_id']]));
+    $user->works()->save(new Yearbook\Work(['ushid' => $input['sch_id']]));
 
     DB::commit();
 } catch (\PDOException $e) {

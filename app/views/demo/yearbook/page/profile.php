@@ -7,7 +7,7 @@ $parameter = $parameter ? $parameter : 0;
 if (Request::isMethod('post')) {
 
     if ($parameter == 3) {
-        $member = Contact_yb::firstOrNew([
+        $member = Yearbook\Contact::firstOrNew([
             'user_id' => $user->id,
             'project' => 'yearbook',
         ]);
@@ -15,10 +15,10 @@ if (Request::isMethod('post')) {
         $member->created_ip = Request::getClientIp();
 
         $works = $user->works->unique()->map(function($work) {
-            return new Work_yb(['ushid' => $work->ushid]);
+            return new Yearbook\Work(['ushid' => $work->ushid]);
         })->all();
 
-        User_yb::find($user->id)->works()->saveMany($works);
+        Yearbook\User::find($user->id)->works()->saveMany($works);
 
         $user->member()->save($member);
     }

@@ -1,9 +1,9 @@
 <?php
-$user = User_yb::find($user_id);
+$user = Yearbook\User::find($user_id);
 ?>
 <page pageset="old" backtop="7mm" backbottom="7mm" backleft="10mm" backright="10mm">
 
-<table width="800" align="center" cellpadding="0" cellspacing="0" border="0" style="font-size:11pt; font-family:'標楷體'">
+<table width="800" align="center" cellspacing="0" border="0" style="font-size:11pt; font-family:'標楷體'">
     <tr>
         <td width="54%" height="5">
             <p>文件名稱：中小學師資資料庫整合平台帳號申請表</p>
@@ -19,23 +19,19 @@ $user = User_yb::find($user_id);
     </tr>
 </table>
 
-<table width="800" align="center" cellpadding="0" cellspacing="0" border="1" style="font-size:12pt; font-family:'標楷體'">
+<table width="800" align="center" cellspacing="0" border="1" style="font-size:12pt; font-family:'標楷體'">
     <tr>
-        <td width="30" height="70">
-            <p align="center">申請項目</p>
-        </td>
+        <td width="30" height="70" align="center">申請項目</td>
         <td width="150" height="50">
             <p>
                 <?=Form::radio('', '', true);?>申請新帳號使用權，新帳號為：<?=$user->email?><br />
-                <?=Form::radio('', '', false);?>註銷帳號，帳號為：_________________，原使用者為：____________<br />
-                <?=Form::radio('', '', false);?>新增權限，帳號為：_________________<br />
-                <?=Form::radio('', '', false);?>刪除權限，帳號為：_________________
+                <?=Form::radio('', '', false, ['disabled' => 'disabled']);?>更換使用者，帳號為：_________________，原使用者為：____________
             </p>
         </td>
     </tr>
 </table>
 
-<table width="800" align="center" cellpadding="0" cellspacing="0" border="1" style="font-size:12pt; font-family:'標楷體'">
+<table width="800" align="center" cellspacing="0" border="1" style="font-size:12pt; font-family:'標楷體'">
     <tr>
         <td width="98" height="50"><p align="center">申請日期</p></td>
         <td width="296" height="50"><p align="center"><?=$user->created_at?></p></td>
@@ -64,7 +60,7 @@ $user = User_yb::find($user_id);
     </tr>
 </table>
 
-<table width="800" align="center" cellpadding="0" cellspacing="0" border="1" style="font-family:'標楷體'">
+<table width="800" align="center" cellspacing="0" border="1" style="font-family:'標楷體'">
     <tr>
         <td rowspan="4" width="100"><p align="center">帳號權限</p></td>
         <td width="220"><p align="center">欲申請、刪除或註銷之權限</p></td>
@@ -72,13 +68,13 @@ $user = User_yb::find($user_id);
         <td  width="100"><p align="center">聯絡電話</p></td>
     </tr>
     <tr>
-        <td height="40"><input type="checkbox" checked="checked" disabled="disabled">師資培育統計定期填報系統</td>
+        <td height="40">師資培育統計定期填報系統</td>
         <td rowspan="2">802高雄市苓雅區和平一路116號 高師大通識教育中心收</td>
         <td rowspan="2">07-7172930#3686</td>
     </tr>
 </table>
 
-<table width="800" align="center"  cellpadding="0" cellspacing="0" border="1" style="font-size:12pt;font-family:'標楷體'">
+<table width="800" align="center" cellspacing="0" border="1" style="font-size:12pt;font-family:'標楷體'">
     <tr>
         <td align="left" colspan="4">
             <p>注意事項：</p>
@@ -96,7 +92,7 @@ $user = User_yb::find($user_id);
     </tr>
 </table>
 
-<table width="800" align="center" cellpadding="0" cellspacing="0" border="1" style="font-size:10pt; font-family:'標楷體'">
+<table width="800" align="center" cellspacing="0" border="1" style="font-size:10pt; font-family:'標楷體'">
     <tr>
         <td width="30" height="30">
             <p align="center">處理紀錄</p>
@@ -107,7 +103,7 @@ $user = User_yb::find($user_id);
     </tr>
 </table>
 
-<table width="800" align="center"  cellpadding="0" cellspacing="0" border="1"  style="font-size:12pt; font-family:'標楷體'">
+<table width="800" align="center" cellspacing="0" border="1"  style="font-size:12pt; font-family:'標楷體'">
     <tr>
         <td width="400" colspan="2" height="5">
             <p align="center">申請單位 </p>
@@ -160,7 +156,7 @@ $user = User_yb::find($user_id);
     </tr>
 </table>
 
-<table width="800" align="center" cellpadding="0" cellspacing="0" border="1" style="font-size:12pt; font-family:'標楷體'">
+<table width="800" align="center" cellspacing="0" border="1" style="font-size:12pt; font-family:'標楷體'">
     <tr>
         <td><p align="center" style="font-size:10pt; font-family:'標楷體'">本文件為教育部中小學師資資料庫專有之財產，限承辦人申請、維護帳號使用。</p></td>
     </tr>
@@ -179,12 +175,3 @@ table {
     font-size: 16px
 }
 </style>
-
-<script>
-var oElements = document.getElementsByTagName("input");
-for(i=0; i<oElements.length;i++) {
-    if (oElements[i].type=='checkbox') {var x=oElements[i];x.onclick=function x() {return false;}}
-    if (oElements[i].type=='radio' && oElements[i].checked==false) {oElements[i].disabled=true;}
-    if (oElements[i].type=='text') {oElements[i].readOnly=true;}
-}
-</script>

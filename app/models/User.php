@@ -176,7 +176,7 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 
 
     public function applying() {
-        return $this->hasOne('UserApply', 'user_id', 'id')->where('applied', false);
+        return $this->hasOne('UserApply', 'user_id', 'id');
     }
 
     /*
@@ -200,5 +200,13 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 }
 
 class UserApply extends Eloquent {
-    protected $table = 'users_apply';
+
+    use SoftDeletingTrait;
+
+    protected $table = 'user_apply';
+
+    public $timestamps = true;
+
+    protected $fillable = ['user_id'];
+
 }
