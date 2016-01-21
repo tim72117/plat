@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
-<script src="/js/angular1.3.14/angular.min.js"></script>
 <script src="/js/jquery-1.11.2.min.js"></script>
+<script src="/js/angular/1.4.7/angular.min.js"></script>
 </head>
 <body>
     <?=$context?>

@@ -1,32 +1,16 @@
 <?php
+namespace Plat;
 
+use Eloquent;
 use Illuminate\Database\Eloquent\SoftDeletingTrait;
-
-class School extends Eloquent {
-
-    protected $table = 'pub_school';
-
-    public $timestamps = false;
-
-}
-
-class Work extends Eloquent {
-
-    protected $table = 'work';
-
-    public $timestamps = false;
-
-}
 
 class Contact extends Eloquent {
 
-    use SoftDeletingTrait;
-
-    protected $table = 'contact';
+    protected $table = 'member_contact';
 
     public $timestamps = true;
 
-    protected $fillable = array('project', 'main', 'active', 'sname', 'department', 'area_num', 'title', 'tel', 'phone', 'fax', 'email2', 'country', 'district', 'address', 'created_by', 'created_ip');
+    protected $fillable = array('department', 'title', 'tel', 'phone', 'fax', 'email2', 'country', 'district', 'address');
 
     protected $guarded = array('id');
 
@@ -68,10 +52,10 @@ class Contact extends Eloquent {
             }
         }
 
-        $validator = Validator::make($dirty, $this->rules, $this->rulls_message);
+        $validator = \Validator::make($dirty, $this->rules, $this->rulls_message);
 
         if ($validator->fails()) {
-            throw new Plat\Files\ValidateException($validator);
+            throw new \Plat\Files\ValidateException($validator);
         }
 
         return $this->isValid = true;
@@ -84,29 +68,9 @@ class Contact extends Eloquent {
         return parent::save($options);
     }
 
-    public function user_()
-    {
-        return $this->hasOne('User', 'id', 'user_id');
-    }
-
-    public function user()
-    {
-        return $this->morphTo();
-    }
-
-    public function project()
-    {
-        return $this->hasOne('Doc\Project', 'id', 'project_id');
-    }
-
-    public function getProjectModelAttribute($project)
-    {
-        return 'User_' . $project;
-    }
-
     public function validator(array $options = array())
     {
-        return Validator::make($options, $this->rules, $this->rulls_message);
+        return \Validator::make($options, $this->rules, $this->rulls_message);
     }
 
 }

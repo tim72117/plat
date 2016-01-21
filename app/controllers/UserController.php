@@ -23,27 +23,26 @@ class UserController extends BaseController {
         'password.confirmed'             => '確認密碼必須相同',
     );
 
-    public function __construct()
-    {
-        $this->beforeFilter(function($route) {
-            $project = $route->parameter('project') ? $route->parameter('project') : Config::get('project.default');
-            $route->setParameter('project', $project);
-            View::share('project', $project);
-        });
-    }
+    public function __construct() {}
 
     public function logout()
     {
-        $project = Auth::user()->contact->project->code;
+        $member = Auth::user()->members()->logined()->orderBy('logined_at', 'desc')->first();
+
         Auth::logout();
-        return Redirect::to('project/' . $project);
+
+        if ($member) {
+            return Redirect::to('project/' . $member->project->code);
+        }
     }
 
-    public function loginPage($project)
+    public function loginPage($project = null)
     {
-        return View::make('demo.' . $project . '.home')
-            ->nest('context', 'demo.' . $project . '.auth.login')
-            ->nest('child_footer', 'demo.' . $project . '.footer');
+        if (!$project) {
+            return Redirect::to('project/' . Config::get('project.default'));
+        }
+
+        return $this->createHomeView($project, 'demo.' . $project . '.auth.login');
     }
 
     public function login($project)
@@ -65,16 +64,20 @@ class UserController extends BaseController {
 
             $user = Auth::user();
 
-            $contact = $user->contacts->load('project')->filter(function($contact) use($project) {
-                $contact->project->code == $project && !$contact->main && $contact->update(['main' => true]);
-                $contact->project->code != $project && $contact->main && $contact->update(['main' => false]);
-                return $contact->project->code == $project;
+            $members = $user->members->load('project')->filter(function($member) use($project) {
+                return $member->project->code == $project && $member->actived;
             });
 
-            if (!$user->active || $contact->isEmpty()) {
+            if (!$user->actived || $members->isEmpty()) {
                 $validator->getMessageBag()->add('login_error', '帳號尚未開通');
                 throw new Plat\Files\ValidateException($validator);
             }
+
+            $member = $members->first();
+
+            $member->logined_at = Carbon\Carbon::now()->toDateTimeString();
+
+            $member->save();
 
             Auth::login($user, true);
 
@@ -88,9 +91,7 @@ class UserController extends BaseController {
 
     public function remindPage($project)
     {
-        return View::make('demo.' . $project . '.home')
-            ->nest('context','demo.' . $project . '.auth.remind')
-            ->nest('child_footer','demo.' . $project . '.footer');
+        return $this->createHomeView($project, 'demo.' . $project . '.auth.remind');
     }
 
     public function remind($project)
@@ -113,9 +114,7 @@ class UserController extends BaseController {
 
     public function resetPage($project, $token)
     {
-        return View::make('demo.' . $project . '.home')
-            ->nest('context', 'demo.' . $project . '.auth.reset', array('token' => $token))
-            ->nest('child_footer','demo.' . $project . '.footer');
+        return $this->createHomeView($project, 'demo.' . $project . '.auth.reset', ['token' => $token]);
     }
 
     public function reset($project, $token)
@@ -147,15 +146,15 @@ class UserController extends BaseController {
                 return Redirect::back()->withErrors(['error' => Lang::get($response)]);
 
             case Password::PASSWORD_RESET:
-                return Redirect::to('user/auth/' . $project);
+                return Redirect::to('project' . $project);
         }
     }
 
     public function passwordChangePage()
     {
-        $project = Auth::user()->contact->project;
+        $member = Auth::user()->members()->logined()->orderBy('logined_at', 'desc')->first();
 
-        $contents = View::make('demo.main', ['project' => $project])->nest('context','demo.page.passwordChange');
+        $contents = View::make('demo.main', ['project' => $member->project])->nest('context','demo.passwordChange');
 
         $this->layout->content = $contents;
     }
@@ -191,37 +190,41 @@ class UserController extends BaseController {
 
     public function registerPage($project)
     {
-        $project_info = DB::table('projects')->where('code', $project)->first();
-        if ($project_info->register) {
-            $context = 'demo.' . $project . '.auth.register';
-        } else {
-            $context = 'demo.' . $project . '.auth.register_stop';
-        }
-        return View::make('demo.' . $project . '.home')
-            ->nest('context', $context)
-            ->nest('child_footer','demo.' . $project . '.footer');
+        $register = Plat\Project::where('code', $project)->first()->register;
+
+        $context = $register ? 'demo.' . $project . '.auth.register' : 'demo.' . $project . '.auth.register_stop';
+
+        return $this->createHomeView($project, $context);
     }
 
     public function registerSave($project)
     {
-        $user = require app_path() . '\\views\\demo\\' . $project . '\\auth\\register_validator.php';
+        $validator = require app_path() . '\\views\\demo\\' . $project . '\\auth\\register_validator.php';
 
-        if ($user) {
-            $email = $user->getReminderEmail();
+        if ($validator->fails()) {
+            throw new Plat\Files\ValidateException($validator);
+        }
 
-            $token = str_shuffle(sha1($email.spl_object_hash($this).microtime(true)));
+        $input = $validator->getData();
 
-            DB::table('register_print')->insert(['token' => $token, 'user_id' => $user->id, 'created_at' => new Carbon\Carbon]);
+        $member = require app_path() . '\\views\\demo\\' . $project . '\\auth\\register_member.php';
 
-            Config::set('auth.reminder.email', 'emails.auth.register_' . $project);
+        if ($member) {
 
-            $credentials = array('email' => $email);
+            $applying = new Plat\Applying(['id' => sha1(spl_object_hash($user) . microtime(true))]);
 
-            Password::remind($credentials, function($message) {
-                $message->subject('教育資料庫整合平臺-註冊通知');
-            });
+            $member->applying()->save($applying);
 
-            return Redirect::to('project/' . $project . '/register/finish/' . $token);
+            try {
+                Config::set('auth.reminder.email', 'emails.auth.register_' . $project);
+                Password::remind(['email' => $member->user->getReminderEmail()], function($message) {
+                    $message->subject('教育資料庫整合平臺-註冊通知');
+                });
+            } catch (Exception $e) {
+
+            }
+
+            return Redirect::to('project/' . $project . '/register/finish/' . $member->applying->id);
         } else {
             return Redirect::back();
         }
@@ -229,18 +232,15 @@ class UserController extends BaseController {
 
     public function registerFinish($project, $token)
     {
-        return View::make('demo.' . $project . '.home')
-            ->nest('context', 'demo.' . $project . '.auth.register_finish', ['register_print_url' => URL::to('project/' . $project . '/register/print/' . $token)])
-            ->nest('child_footer', 'demo.' . $project . '.footer');
+        return $this->createHomeView($project, 'demo.auth.register_finish', ['register_print_url' => URL::to('project/' . $project . '/register/print/' . $token)]);
     }
 
     public function registerPrint($project, $token)
     {
-        $register_print_query = DB::table('register_print')->where('token', $token);
+        $applying = Plat\Applying::find($token);
 
-        if( $register_print_query->exists() ) {
-
-            return View::make('demo.' . $project . '.auth.register_print', array('user_id' => $register_print_query->first()->user_id));
+        if ($applying->exists()) {
+            return View::make('demo.' . $project . '.auth.register_print', ['member' => $applying->member]);
         }
     }
 
@@ -254,9 +254,77 @@ class UserController extends BaseController {
         return View::make('demo.' . $project . '.home')->nest('context', 'demo.' . $project . '.auth.register_help')->nest('child_footer', 'demo.' . $project . '.footer');
     }
 
-    public function check($project)
+    public function createHomeView($project, $context, $args = [])
     {
-        return $project;
+        View::share('project', $project);
+
+        return View::make('demo.' . $project . '.home')->nest('context', $context, $args)->nest('child_footer', 'demo.' . $project . '.footer');
+    }
+
+    public function profile($project_code, $parameter = null)
+    {
+        $project = Plat\Project::where('code', $project_code)->first();
+
+        $member = Auth::user()->members()->where('project_id', $project->id)->first();
+
+        View::share('parameter', $parameter);
+
+        return View::make('demo.main', ['project' => $project])->nest('context', 'demo.' . $project->code . '.auth.profile', ['member' => $member]);
+    }
+
+    public function profileSave($project_code, $parameter = null)
+    {
+        switch ($parameter) {
+            case 'power':
+                $attributes = ['user_id' => Auth::user()->id, 'project_id' => Input::get('project_id')];
+                $member = Plat\Member::where($attributes)->withTrashed()->first() ?: new Plat\Member($attributes);
+
+                $member->actived = false;
+
+                require app_path() . '\\views\\demo\\' . $project_code . '\\auth\\register_works.php';
+
+                if ($member->trashed()) {
+                    $member->restore();
+                } else {
+                    Auth::user()->members()->save($member);
+                }
+
+                $member->contact()->save(Plat\Contact::firstOrNew(['member_id' => $member->id]));
+
+                $applying = new Plat\Applying(['member_id' => $member->id]);
+
+                $applying->id = sha1(spl_object_hash(Auth::user()) . microtime(true));
+
+                $member->applying()->save($applying);
+                break;
+
+            case 'contact':
+                $project = Plat\Project::where('code', $project_code)->first();
+                $member = Auth::user()->members()->where('project_id', $project->id)->first();
+                $member->contact->title = Input::get('title');
+                $member->contact->tel = Input::get('tel');
+                $member->contact->fax = Input::get('fax');
+                $member->contact->email2 = Input::get('email2');
+
+                $member->push();
+                break;
+
+            case 'changeUser':
+                $user = Auth::user();
+                $user->username = Input::get('username');
+                $user->email = Input::get('email');
+                $user->valid();
+                $user->members->each(function($member) {
+                    $member->actived = false;
+                });
+                $user->push();
+                break;
+
+            default:
+                # code...
+                break;
+        }
+        return Redirect::to(Request::path());
     }
 
 }

@@ -33,10 +33,13 @@ App::after(function($request, $response)
 |
 */
 
-Route::filter('auth', function()
+Route::filter('auth', function($route)
 {
-    if (Auth::guest())
-        return Redirect::guest('project');
+    if (Auth::guest()) {
+        $project = $route->getParameter('project');
+        $url = isset($project) ? 'project/' . $project : 'project';
+        return Redirect::guest($url);
+    }
 });
 
 
