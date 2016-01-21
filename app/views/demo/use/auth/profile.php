@@ -2,26 +2,30 @@
 
 $user = User_use::find(Auth::user()->id);
 
-$parameter = $parameter ? $parameter : 0;
+$parameter = isset($parameter) ? $parameter : 0;var_dump($parameter);
 
 if (Request::isMethod('post')) {
 
     if ($parameter == 3) {
 
-        $user->set_project('das')->member;
-
-        $contact_das = Contact::firstOrNew([
+        $member = Plat\Member::firstOrNew([
             'user_id' => $user->id,
-            'project' => 'das',
+            'project_id' => 4,
         ]);
 
-        $contact_das->created_ip = Request::getClientIp();
+        $member->actived = false;        
 
-        $user->set_project('das')->member()->save($contact_das);  
+        $user->members()->save($member); 
 
-        //DB::table('register_print')->where('user_id', $user->id)->delete();
+        $applying = new Plat\Applying(['member_id' => $member->id]);
 
-    } else {
+        $applying->id = sha1(spl_object_hash($user) . microtime(true));
+
+        $member->applying()->save($applying);
+
+    }
+
+    if ($parameter == 1) {
 
         $user->contact->title = Input::get('title');
         $user->contact->tel = Input::get('tel');
@@ -38,22 +42,7 @@ if (Request::isMethod('post')) {
 
 }
 
-$project_das_status = $user->project_actived('das');
-
-$register_print_query = DB::table('register_print')->where('user_id', $user ->id);
-
-if ($project_das_status['registered'] && !$project_das_status['actived'])
-{      
-    if (!$register_print_query->exists())
-    {
-        $token = str_shuffle(sha1($user->email . spl_object_hash($user) . microtime(true)));
-
-        DB::table('register_print')->insert(['token' => $token, 'user_id' => $user->id, 'created_at' => new Carbon\Carbon]);  
-    } else {
-        $token = DB::table('register_print')->where('user_id', $user ->id)->orderBy('created_at', 'desc')->first()->token;
-    }  
-}
-
+$members = $user->members()->get()->load('project', 'applying')->keyBy('project_id');
 ?>
 
 <div ng-cloak ng-controller="profileController" class="ui basic segment">
@@ -79,7 +68,7 @@ if ($project_das_status['registered'] && !$project_das_status['actived'])
         <div class="title" ng-class="{active: block==1}" ng-click="switchBlock(1)"><i class="user icon"></i>個人資料</div>
         <div class="content" ng-class="{active: block==1}">
 
-            <?=Form::open(array('url' => '/page/project/profile/1', 'method' => 'post', 'name'=>'profile', 'class'=>'ui form' . ($errors->isEmpty() ? '' : ' error')))?>
+            <?=Form::open(array('url' => '/auth/profile/1', 'method' => 'post', 'name'=>'profile', 'class'=>'ui form' . ($errors->isEmpty() ? '' : ' error')))?>
 
                 <div class="five wide field">
                     <label>職稱</label>
@@ -133,7 +122,7 @@ if ($project_das_status['registered'] && !$project_das_status['actived'])
         <div class="title" ng-class="{active: block==3}" ng-click="switchBlock(3)"><i class="setting icon"></i>其他系統權限</div>  
         <div class="content" ng-class="{active: block==3}">
 
-            <?=Form::open(array('url' => '/page/project/profile/3', 'method' => 'post', 'name'=>'profilePower', 'class'=>'ui form'))?>
+            <?=Form::open(array('url' => '/auth/profile/3', 'method' => 'post', 'name'=>'profilePower', 'class'=>'ui form'))?>
 
                 <table class="ui very basic table">
                     <thead>
@@ -145,20 +134,11 @@ if ($project_das_status['registered'] && !$project_das_status['actived'])
                     <tr>
                         <td>線上分析系統</td>                    
                         <td>
-                            <?php if ($project_das_status['registered'] && !$project_das_status['actived']) { ?>
-                            <div class="ui read-only checkbox">
-                                <input type="checkbox">
-                                <label>申請中 <a target="_blank" href="<?=URL::to('project/use/register/print/' . $token)?>">(列印申請表)</a></label>
+                            <div class="ui label" ng-if="members[4] && !members[4].actived && members[4].applying"> 申請中 
+                                <a target="_blank" href="/project/use/register/print/{{ members[4].applying.id }}">(列印申請表)</a>
                             </div>
-                            <?php } ?>
-                            <div class="ui read-only checkbox" ng-if="<?=$project_das_status['actived']?>">
-                                <input type="checkbox" checked="checked">
-                                <label>已開通</label>
-                            </div>
-                            <button class="ui submit button" ng-if="<?=!$project_das_status['registered']?>" onclick="profilePower.submit()">申請</button>
-                        </td>
-                        <td>
-                            
+                            <div class="ui label" ng-if="members[4] && members[4].actived"><i class="checkmark box icon"></i> 已開通 </div>
+                            <button class="ui submit button" ng-if="!members[4] || (members[4] && !members[4].applying)" onclick="profilePower.submit()">申請</button>
                         </td>
                     </tr>
                 </table >
@@ -174,13 +154,10 @@ if ($project_das_status['registered'] && !$project_das_status['actived'])
 <script>
 app.controller('profileController', function($scope, $filter, $http) {
     $scope.block = <?=$parameter?>;
+    $scope.members = angular.fromJson('<?=json_encode($members)?>');
 
     $scope.switchBlock = function(block) {
         $scope.block = block;
     }
 });
 </script>
-
-<style>
-
-</style>

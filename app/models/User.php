@@ -65,15 +65,6 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
         return 'remember_token';
     }
 
-    public function scopeContactj($query, $project)
-    {
-        //$contact = 'contact_'.$project;
-        //return $query->leftJoin($contact,$this->table.'.id','=',$contact.'.id')->where('active','1')->where($this->table.'.id',$this->getAuthIdentifier())->first();
-    }
-
-
-
-
     /**
      * Get the e-mail address where password reminders are sent.
      *
@@ -83,17 +74,17 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
     protected $isValid = false;
 
     protected $rules =  array(
-            'username'              => 'required|max:50',
+        'username'          => 'required|max:50',
     );
 
     protected $rulls_message = array(
-            'email.required'    => '電子郵件必填',
-            'username.required' => '姓名必填',
+        'email.required'    => '電子郵件必填',
+        'username.required' => '姓名必填',
 
-            'email.email'       => '電子郵件格式錯誤',
-            'username.max'      => '姓名不能超過50個字',
+        'email.email'       => '電子郵件格式錯誤',
+        'username.max'      => '姓名不能超過50個字',
 
-            'email.unique'      => '電子郵件已被註冊',
+        'email.unique'      => '電子郵件已被註冊',
     );
 
     public function valid()
@@ -110,7 +101,7 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 
         $validator = Validator::make($dirty, $this->rules, $this->rulls_message);
 
-        if( $validator->fails() ){
+        if ($validator->fails()) {
             throw new Plat\Files\ValidateException($validator);
         }
 
@@ -130,29 +121,9 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
         return parent::save($options);
     }
 
-
-    public function getProject()
-    {
-        return Session::get('user.project');
-    }
-
-    public function setProject($project)
-    {
-        Session::put('user.project', $project);
-    }
-
-
-    /*
-    | Relations
-    */
-    public function contact() {
-        return $this->hasOne('Contact', 'user_id', 'id')->where('contact.project', $this->getProject());
-    }
-
-    public function contacts() {
-        return $this->hasMany('Contact', 'user_id', 'id');
-    }
-
+    /**
+     * Relations
+     */
     public function works() {
         return $this->hasMany('Work', 'user_id');
     }
@@ -169,44 +140,13 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
         return $this->belongsToMany('Group', 'user_in_group', 'user_id', 'group_id');
     }
 
-    public function member() {
-        return $this->hasOne('Contact', 'user_id', 'id')->where('contact.project', $this->project);
+    public function members() {
+        return $this->hasMany('Plat\Member', 'user_id', 'id');
     }
 
-
-
-    public function applying() {
-        return $this->hasOne('UserApply', 'user_id', 'id');
-    }
-
-    /*
-    | Project
-    */
-
-    public function set_project($project)
+    public function getActivedAttribute($value)
     {
-        $this->project = $project;
-
-        return $this;
+        return (bool)$value;
     }
-
-    public function project_actived($project)
-    {
-        $member = $this->set_project($project)->member();
-
-        return ['registered' => $member->exists(), 'actived' => $member->exists() ? (bool)$member->first()->active : false];
-    }
-
-}
-
-class UserApply extends Eloquent {
-
-    use SoftDeletingTrait;
-
-    protected $table = 'user_apply';
-
-    public $timestamps = true;
-
-    protected $fillable = ['user_id'];
 
 }

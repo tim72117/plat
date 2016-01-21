@@ -33,10 +33,13 @@ App::after(function($request, $response)
 |
 */
 
-Route::filter('auth', function()
+Route::filter('auth', function($route)
 {
-    if (Auth::guest())
-        return Redirect::guest('project');
+    if (Auth::guest()) {
+        $project = $route->getParameter('project');
+        $url = isset($project) ? 'project/' . $project : 'project';
+        return Redirect::guest($url);
+    }
 });
 
 
@@ -103,7 +106,7 @@ Route::filter('post_delay', function()
 Route::filter('limit', function() {
     $user = Auth::user();
     $limit = DB::table('user_limit')->where('user_id', $user->id)->select('ip')->first();
-    if (!is_null($limit)){
+    if (!is_null($limit)) {
         $ipAllows = explode(",",$limit->ip);
         $ipPass = false;
         $myIp = Request::getClientIp();

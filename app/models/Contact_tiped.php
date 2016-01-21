@@ -24,7 +24,7 @@ class Contact_tiped extends Contact
 
 class School_tiped extends Eloquent {
 	
-	protected $table = 'pub_school_u';
+	protected $table = 'plat_resource.dbo.university_school';
 
 	public $timestamps = false;
 		
@@ -32,7 +32,7 @@ class School_tiped extends Eloquent {
 
 class Department_tiped extends Eloquent {
 	
-	protected $table = 'pub_depcode_u';
+	protected $table = 'plat_resource.dbo.university_depcode';
 
 	public $timestamps = false;
 	

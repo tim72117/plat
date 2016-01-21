@@ -1,5 +1,5 @@
 <?php
-$user = Yearbook\User::find($user_id);
+$user = Project\Yearbook\User::find($member->user_id);
 ?>
 <page pageset="old" backtop="7mm" backbottom="7mm" backleft="10mm" backright="10mm">
 
@@ -24,7 +24,7 @@ $user = Yearbook\User::find($user_id);
         <td width="30" height="70" align="center">申請項目</td>
         <td width="150" height="50">
             <p>
-                <?=Form::radio('', '', true);?>申請新帳號使用權，新帳號為：<?=$user->email?><br />
+                <?=Form::radio('', '', true);?>申請新帳號使用權，新帳號為：<?=$member->user->email?><br />
                 <?=Form::radio('', '', false, ['disabled' => 'disabled']);?>更換使用者，帳號為：_________________，原使用者為：____________
             </p>
         </td>
@@ -34,7 +34,7 @@ $user = Yearbook\User::find($user_id);
 <table width="800" align="center" cellspacing="0" border="1" style="font-size:12pt; font-family:'標楷體'">
     <tr>
         <td width="98" height="50"><p align="center">申請日期</p></td>
-        <td width="296" height="50"><p align="center"><?=$user->created_at?></p></td>
+        <td width="296" height="50"><p align="center"><?=$member->user->created_at?></p></td>
         <td width="100" height="50"><p align="center">機關(構)名稱</p></td>
         <td width="296" height="50">
             <ol>
@@ -48,15 +48,15 @@ $user = Yearbook\User::find($user_id);
     </tr>
     <tr>
         <td width="98" height="30"><p align="center">姓名</p></td>
-        <td width="296" height="30"><p align="center"><?=$user->username?></p></td>
+        <td width="296" height="30"><p align="center"><?=$member->user->username?></p></td>
         <td width="100" height="30"><p align="center">單位</p></td>　
-        <td width="296" height="30"><p align="center"><?=$user->contact->department?></p></td>
+        <td width="296" height="30"><p align="center"><?=$member->contact->department?></p></td>
     </tr>
     <tr>
         <td width="98" height="30"><p align="center">職稱</p></td>
-        <td width="296" height="30"><p align="center"><?=$user->contact->title?></p></td>
+        <td width="296" height="30"><p align="center"><?=$member->contact->title?></p></td>
         <td width="100" height="30"><p align="center">電話</p></td>
-        <td width="296" height="30"><p align="center"><?=$user->contact->tel?></p></td>
+        <td width="296" height="30"><p align="center"><?=$member->contact->tel?></p></td>
     </tr>
 </table>
 

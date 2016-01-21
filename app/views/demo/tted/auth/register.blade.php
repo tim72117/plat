@@ -145,8 +145,8 @@
 </div>
 
 <?php
-$citys = DB::table('pub_school_u')->where('year', 103)->whereNotNull('cityname')->groupBy('cityname')->select('cityname')->get();
-$schools = DB::table('pub_school_u')->where('year', 103)->orderBy('cityname', 'ASC', 'id')->groupBy('cityname', 'name', 'id', 'type')->select('id', 'name', 'type', 'cityname')->get();
+$citys = DB::table('public.dbo.university_school')->where('year', 103)->whereNotNull('cityname')->groupBy('cityname')->select('cityname')->get();
+$schools = DB::table('public.dbo.university_school')->where('year', 103)->orderBy('cityname', 'ASC', 'id')->groupBy('cityname', 'name', 'id', 'type')->select('id', 'name', 'type', 'cityname')->get();
 ?>
 <script>
 angular.module('app', [])

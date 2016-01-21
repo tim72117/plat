@@ -1,34 +1,21 @@
 <?php
+namespace Project\Teacher;
 
-class User_tted extends User {
+use Eloquent;
+
+class User extends \User {
 
     public function schools() {
-        return $this->belongsToMany('School_tted', 'work_tted', 'user_id', 'ushid');
-    }
-
-    public function contact() {
-        return $this->hasOne('Contact_tted', 'user_id', 'id')->tted();
+        return $this->belongsToMany('Project\Teacher\School', 'work_tted', 'user_id', 'ushid');
     }
 
     public function works() {
-        return $this->hasMany('Work_tted', 'user_id', 'id');
+        return $this->hasMany('Project\Teacher\Work', 'user_id', 'id');
     }
 
-    public function contact_()
-    {
-        return $this->morphMany('Contact', 'user');
-    }
 }
 
-class Contact_tted extends Contact {
-
-    public function scopeTted($query)
-    {
-        return $query->where('project', 'tted');
-    }
-}
-
-class School_tted extends Eloquent {
+class School extends Eloquent {
 
     protected $table = 'public.dbo.university_school';
 
@@ -36,36 +23,40 @@ class School_tted extends Eloquent {
 
 }
 
-class Work_tted extends Eloquent
-{
-    protected $table = 'work_tted';
+class Work extends Eloquent {
+
+    protected $table = 'plat.dbo.work_tted';
+
+    public $timestamps = true;
 
     protected $fillable = array('ushid', 'type');
 
     public function schools() {
-        return $this->hasMany('School_tted', 'id', 'ushid');
+        return $this->hasMany('Project\Teacher\School', 'id', 'ushid');
     }
+
 }
 
-class Struct_tted
-{
-    static function auth($user, $groups)
+class Struct {
+
+    static function auth($member, $groups)
     {
         return array(
-            'id'         => (int)$user->id,
-            'active'     => (bool)$user->active,
-            'disabled'   => (bool)$user->disabled,
-            'password'   => $user->password=='',
-            'email'      => $user->email,
-            'name'       => $user->username,
-            'schools'    => $user->schools->map(function($school){
+            'id'         => (int)$member->user_id,
+            'actived'    => $member->user->actived && $member->actived,
+            'password'   => $member->user->password=='',
+            'email'      => $member->user->email,
+            'name'       => $member->user->username,
+            'schools'    => Project\Teacher\User::find($member->user_id)->schools->sortBy('id')->filter(function($school) {
+                                return $school->year == '103';
+                            })->map(function($school){
                                 return array_only($school->toArray(), array('id', 'name', 'year'));
-                            }),
-            'title'  => $user->contact->title,
-            'tel'    => $user->contact->tel,
-            'fax'    => $user->contact->fax,
-            'email2' => $user->contact->email2,
-            'groups' => $user->groups->lists('id'),
+                            })->toArray(),
+            'title'  => $member->contact->title,
+            'tel'    => $member->contact->tel,
+            'fax'    => $member->contact->fax,
+            'email2' => $member->contact->email2,
+            'groups' => $member->user->groups->lists('id'),
         );
     }
 }

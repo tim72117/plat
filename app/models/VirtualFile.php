@@ -23,6 +23,10 @@ class Files extends Eloquent {
     public function isType() {
         return $this->hasOne('FileType', 'id', 'type');
     }
+
+    public function configs() {
+        return $this->hasMany('Doc\Config', 'file_id', 'id');
+    }
 }
 
 class RequestFile extends Eloquent {

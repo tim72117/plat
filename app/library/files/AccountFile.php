@@ -4,13 +4,18 @@ namespace Plat\Files;
 
 use User;
 use Files;
-use DB, View, Response, Config, Schema, Session, Input, ShareFile, Auth, Request, Carbon\Carbon;
+use Doc\Project;
+use DB, View, Response, Config, Schema, Session, Input, Auth, Request;
+use ShareFile;
+use Carbon\Carbon;
 
 class AccountFile extends CommFile {
 
     function __construct(Files $file, User $user)
     {
         parent::__construct($file, $user);
+
+        $this->configs = $this->file->configs->lists('value', 'name');
     }
 
     public function is_full()
@@ -25,7 +30,31 @@ class AccountFile extends CommFile {
 
     public function open()
     {
+        //$this->file->configs()->save(new \Doc\Config(['name' => 'project', 'value' => 2]));
+
+        // $project = Project::find($this->configs['project']);
+
+        // $users = $project->members->map(function($member) {
+        //     var_dump($member->user);exit;
+        // });
+
+        return 'files.account.setAuth';
+
         return 'files.account.profile';
+    }
+
+    public function get_accounts()
+    {
+        $project = Project::find($this->configs['project']);
+
+        $users = $project->members->load('user', 'user.schools')->map(function($member) {
+            //var_dump($member->user);
+            var_dump(DB::getQueryLog());exit;
+            return $this->account_to_view($member->user, $member, []);
+        });
+
+        //var_dump(DB::getQueryLog());exit;
+        return ['members' => $users->toArray()];
     }
 
     public function get_account()
@@ -33,6 +62,26 @@ class AccountFile extends CommFile {
         $user = \User_use::with('contact', 'works')->find($this->user->id);
 
         return ['user' => $user];
+    }
+
+    public function account_to_view($user, $contact, $groups)
+    {
+        return array(
+            'id'         => (int)$user->id,
+            'active'     => (bool)$user->active,
+            'disabled'   => (bool)$user->disabled,
+            'password'   => $user->password=='',
+            'email'      => $user->email,
+            'name'       => $user->username,
+            // 'schools'    => $user->schools->map(function($school){
+            //                     return array_only($school->toArray(), array('id', 'name', 'year'));
+            //                 }),
+            'title'  => $contact->title,
+            'tel'    => $contact->tel,
+            'fax'    => $contact->fax,
+            'email2' => $contact->email2,
+            //'groups' => $user->groups->lists('id'),
+        );
     }
 
     public function apply_change_user()

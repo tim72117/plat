@@ -6,11 +6,9 @@ class FileController extends BaseController {
 
     public function __construct()
     {
-        $this->beforeFilter(function($route) {
-            $this->user = Auth::user();
+        $this->user = Auth::user();
 
-            Event::fire('ques.open', array());
-        });
+        Event::fire('ques.open', array());
     }
 
     public function lists()
@@ -106,8 +104,8 @@ class FileController extends BaseController {
             if ($file->is_full()) {
                 $view = View::make($file->$method());
             } else {
-                $project = DB::table('projects')->where('code', Auth::user()->getProject())->first();
-                $context = View::make('demo.main', ['project' => $project])->nest('context', $file->$method());
+                $member = $this->user->members()->logined()->orderBy('logined_at', 'desc')->first();
+                $context = View::make('demo.main', ['project' => $member->project])->nest('context', $file->$method());
                 $view = $this->createView($context);
             }
         } else {
@@ -300,4 +298,22 @@ class FileController extends BaseController {
         }
     }
 
+    public function page($context = 'intro', $parameter = null)
+    {
+        $member = $this->user->members()->logined()->orderBy('logined_at', 'desc')->first();
+
+        $contents = View::make('demo.main', ['project' => $member->project])->nest('context','demo.' . $member->project->code . '.' . $context);
+
+        $this->layout->content = $contents;
+
+        View::share('parameter', $parameter);
+        View::share('project', $member->project);
+
+        $response = Response::make($this->layout, 200);
+        $response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
+        $response->header('Pragma', 'no-cache');
+        $response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
+
+        return $response;
+    }
 }

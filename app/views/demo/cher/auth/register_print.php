@@ -1,9 +1,10 @@
 
 <page pageset="old" backtop="7mm" backbottom="7mm" backleft="10mm" backright="10mm"> 
 	
-<?            
-$user = User_tiped::find($user_id);
-$contact = $user->contacts()->where('project', 'tiped')->first();
+<?php    
+var_dump($member);exit;   
+//$user = User_tiped::find($user_id);
+//$contact = $user->contacts()->where('project', 'tiped')->first();
 ?>
 
 <table width="800" align="center" cellpadding="0" cellspacing="0" border="0" style="font-size:11pt; font-family:'標楷體'">
@@ -35,7 +36,7 @@ $contact = $user->contacts()->where('project', 'tiped')->first();
 		<p align="center">申請項目</p>
 	</td>
 	<td width="150" height="50">
-        <p><input type="radio" disabled="disabled" checked="checked" />申請新帳號使用權，新帳號為：<?=$user->email?></p>
+        <p><input type="radio" disabled="disabled" checked="checked" />申請新帳號使用權，新帳號為：<?=$member->user->email?></p>
         <p><input type="radio" disabled="disabled" />註銷帳號使用，帳號為：＿＿＿＿＿＿＿＿，原使用者姓名：＿＿＿＿＿＿	</p>
     </td>	
   </tr>
@@ -46,14 +47,14 @@ $contact = $user->contacts()->where('project', 'tiped')->first();
             <p align="center">申請日期</p>
         </td>
         <td width="300" height="50">
-            <p align="center"><?=$user->created_at?></p>
+            <p align="center"><?=$member->user->created_at?></p>
         </td>	
         <td width="100" height="50">
             <p align="center">機構名稱</p>
         </td>
         <td width="300" height="50">
             <p align="left">
-            <? 
+            <?php 
                 foreach($user->schools()->where('year', 103)->get() as $school){
                     echo $school->id.' - '.$school->uname;
                     echo '<br />';
@@ -67,13 +68,13 @@ $contact = $user->contacts()->where('project', 'tiped')->first();
             <p align="center">姓名</p>
         </td>
         <td width="300" height="30">
-            <p align="center"><?=$user->username?></p>
+            <p align="center"><?=$member->user->username?></p>
         </td>	
         <td width="100" height="30">
             <p align="center">職稱</p>
         </td>　
         <td width="300" height="30">
-            <p align="center"><?=$contact->title?></p>
+            <p align="center"><?=$member->contact->title?></p>
         </td>	
     </tr>
     <tr>
