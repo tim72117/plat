@@ -84,7 +84,7 @@ app.filter('startFrom', function() {
         </div>
         <div class="right menu">
             <a class="item" href="/page/project"><i class="home icon"></i>首頁</a>
-            <a class="item" href="/page/project/profile">個人資料</a>
+            <a class="item" href="/auth/profile">個人資料</a>
             <a class="item" href="/auth/password/change">更改密碼</a>
             <a class="item" href="/auth/logout">登出</a>
         </div>

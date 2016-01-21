@@ -31,29 +31,33 @@ if( $validator->fails() ){
     throw new Plat\Files\ValidateException($validator);
 }
 		
-$user = new User_tiped;
+$user = new User;
 $user->username    = $input['name'];
 $user->email       = $input['email'];
 $user->valid();
 
-$contact_tiped = new Contact(array(
-    'project'    => 'tiped',
-    'active'     => 0,
-    'title'      => $input['title'],
-    'tel'        => $input['tel'],
-    'created_ip' => Request::getClientIp(),
-));
+$member = Plat\Member::firstOrNew([
+    'user_id' => $user->id,
+    'project_id' => 6,
+]);
 
-$contact_tiped->valid();
+$member->actived = false;
+
+$contact = new Contact([
+    'title' => $input['title'],
+    'tel'   => $input['tel'],
+]);
+
+// $contact_tiped->valid();
 
 DB::beginTransaction();
 
 $user->save();
 
-$user->contacts()->save($contact_tiped);
+$user->members()->save($member);
 
-$user->schools()->attach($input['sch_id'], array());
+//$user->schools()->attach($input['sch_id'], array());
 
 DB::commit();
 
-return $user;
+return $member;

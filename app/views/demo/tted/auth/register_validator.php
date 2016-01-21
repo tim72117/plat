@@ -34,19 +34,16 @@ if( $validator->fails() ){
     throw new Plat\Files\ValidateException($validator);
 }
 
-$user = new User_tted;
+$user = new Teacher\User;
 $user->username    = $input['name'];
 $user->email       = $input['email'];
 $user->valid();
 
-$contact = new Contact(array(
-    'project'          => 'tted',
-    'main'             => 1,
-    'title'            => $input['title'],
-    'tel'              => $input['tel'],
-    'fax'              => $input['fax'],
-    'created_ip'       => Request::getClientIp(),
-    'department'       => $input['department'],
+$contact = new Plat\Contact(array(
+    'title'      => $input['title'],
+    'tel'        => $input['tel'],
+    'fax'        => $input['fax'],
+    'department' => $input['department'],
 ));
 
 $contact->valid();
@@ -54,9 +51,14 @@ $contact->valid();
 try {
     DB::beginTransaction();
 
-    $user->save();
-    $user->contact()->save($contact);
-    $user->works()->save(new Work_tted(['ushid' => $input['sch_id'], 'type' => $input['type_class']]));
+    $user->save(); 
+
+    $member = Plat\Member::firstOrNew(['user_id' => $user->id, 'project_id' => 2]);
+    $member->actived = false;
+       
+    $user->members()->save($member);
+    $member->contact()->save($contact);
+    $user->works()->save(new Teacher\Work(['ushid' => $input['sch_id'], 'type' => $input['type_class']]));
 
     DB::commit();
 } catch (\PDOException $e) {
