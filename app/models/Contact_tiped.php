@@ -6,7 +6,7 @@ use Eloquent;
 class User extends \User {
 
     public function departments() {
-        return $this->belongsToMany('Project\Cher\Department', 'work_tiped', 'user_id', 'sch_id');
+        return $this->belongsToMany('Project\Cher\Department', 'plat.dbo.work_tiped', 'user_id', 'sch_id');
     }
 
     public function works() {

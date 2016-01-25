@@ -6,7 +6,7 @@ use Eloquent;
 class User extends \User {
 
     public function schools() {
-        return $this->belongsToMany('Project\Used\School', 'work', 'user_id', 'sch_id');
+        return $this->belongsToMany('Project\Used\School', 'plat.dbo.work_used', 'user_id', 'sch_id');
     }
 
     public function works() {
@@ -17,7 +17,7 @@ class User extends \User {
 
 class School extends Eloquent {
 
-    protected $table = 'pub_school';
+    protected $table = 'public.dbo.secondary_school';
 
     public $timestamps = false;
 
@@ -25,7 +25,7 @@ class School extends Eloquent {
 
 class Work extends Eloquent {
 
-    protected $table = 'plat.dbo.work_use';
+    protected $table = 'plat.dbo.work_used';
 
     public $timestamps = true;
 

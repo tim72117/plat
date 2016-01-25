@@ -64,12 +64,14 @@ class UserController extends BaseController {
 
             $user = Auth::user();
 
-            $members = $user->members->load('project')->filter(function($member) use($project) {
-                if ($project == Config::get('project.default')) {
-                    return $member->actived;
-                } else {
-                    return $member->project->code == $project && $member->actived;
-                }
+            $members = $user->members->load('project')->filter(function($member) use ($project) {
+
+                return ($member->project->code == $project || $project == Config::get('project.default')) && $member->actived;
+
+            })->sortBy(function($member) use ($project) {
+
+                return $member->project->code == $project ? 0 : 1;
+
             });
 
             if (!$user->actived || $members->isEmpty()) {
@@ -312,7 +314,7 @@ class UserController extends BaseController {
 
                 $member->actived = false;
 
-                require app_path() . '\\views\\project\\' . $project_code . '\\auth\\register_works.php';
+                require app_path() . '\\views\\project\\' . $project_code . '\\auth\\register_power.php';
 
                 if ($member->trashed()) {
                     $member->restore();

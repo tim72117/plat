@@ -109,17 +109,12 @@ $rejectd = isset($members[8]) ? $members[8]->trashed() : false;
                     <tr>
                         <td>師資培育統計年報</td>
                         <td>
-                            <?php
-                                $works = Project\Yearbook\User::find(Auth::user()->id)->works->unique()->map(function($work) {
-                                    return new Project\Teacher\Work(['ushid' => $work->ushid, 'type' => 0]);
-                                })->all();
-                            ?>
                             <input type="hidden" name="project_id" value="8" />
-                            <div class="ui label" ng-if="members[8] && !rejectd && !members[8].actived && members[8].applying"> 申請中
+                            <div class="ui label" ng-if="members[8] && !members[8].actived && members[8].applying && !rejectd"> 申請中
                                 <a class="detail" target="_blank" href="/project/yearbook/register/print/{{ members[8].applying.id }}">(列印申請表)</a>
                             </div>
-                            <div class="ui label" ng-if="members[8] && !rejectd && members[8].actived"><i class="checkmark box icon"></i> 已開通 </div>
-                            <button class="ui submit mini button" ng-if="!members[8]" onclick="profilePower.submit()">申請</button>
+                            <div class="ui label" ng-if="members[8] && members[8].actived && !rejectd"><i class="checkmark box icon"></i> 已開通 </div>
+                            <button class="ui submit mini button" ng-if="!members[8] || (members[8] && !members[8].actived && !members[8].applying)" onclick="profilePower.submit()">申請</button>
                             <button class="ui submit mini button" ng-if="members[8] && rejectd" onclick="profilePower.submit()">重新申請(未通過)</button>
                         </td>
                     </tr>

@@ -11,7 +11,7 @@ class FileController extends BaseController {
         Event::fire('ques.open', array());
     }
 
-    public function lists()
+    public function docs()
     {
         $apps = ShareFile::with(['isFile', 'isFile.isType'])->whereHas('isFile', function($query) {
 
@@ -316,4 +316,27 @@ class FileController extends BaseController {
 
         return $response;
     }
+
+    public function apps()
+    {
+
+        $docs = ShareFile::with(['isFile', 'isFile.isType', 'shareds', 'requesteds'])->where(function($query) {
+
+            $query->where('target', 'user')->where('target_id', $this->user->id);
+
+        })->orWhere(function($query) {
+
+            $inGroups = $this->user->inGroups->lists('id');
+
+            count($inGroups)>0 && $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $this->user->id);
+
+        })->get()->map(function($doc) {
+
+            return Struct_file::open($doc);
+
+        })->toArray();
+
+        return ['docs' => $docs];
+    }
+
 }

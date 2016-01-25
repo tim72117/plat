@@ -297,7 +297,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
 
     $scope.getDocs = function() {
         $scope.loading = true;
-        $http({method: 'POST', url: 'ajax/getDocs', data:{} })
+        $http({method: 'POST', url: '/apps/lists', data:{} })
         .success(function(data, status, headers, config) {
             $scope.docs = data.docs;
             $scope.setPaginate();

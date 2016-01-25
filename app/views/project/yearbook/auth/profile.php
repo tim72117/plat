@@ -114,7 +114,7 @@ $rejectd = isset($members[2]) ? $members[2]->trashed() : false;
                                 <a class="detail" target="_blank" href="/project/yearbook/register/print/{{ members[2].applying.id }}">(列印申請表)</a>
                             </div>
                             <div class="ui label" ng-if="members[2] && !rejectd && members[2].actived"><i class="checkmark box icon"></i> 已開通 </div>
-                            <button class="ui submit mini button" ng-if="!members[2]" onclick="profilePower.submit()">申請</button>
+                            <button class="ui submit mini button" ng-if="!members[2] || (members[2] && !members[2].actived && !members[2].applying)" onclick="profilePower.submit()">申請</button>
                             <button class="ui submit mini button" ng-if="members[2] && rejectd" onclick="profilePower.submit()">重新申請(未通過)</button>
                         </td>
                     </tr>

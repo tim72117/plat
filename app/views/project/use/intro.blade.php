@@ -22,7 +22,7 @@
     </div>
     
     <div class="ui bottom attached warning message">
-        <i class="warning icon"></i>後期中等教育資料查詢平台進行系統轉移，登入後請盡速確認承辦人個人資料。
+        <i class="warning icon"></i>登入後請盡速確認承辦人個人資料。
     </div>
     
 </div>
