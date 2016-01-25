@@ -105,7 +105,7 @@ class QuesFile extends CommFile {
             'init_value'          => '',
             'isPhone'             => false,
             'census'              => $this->file->census,
-        ])->nest('child_footer', 'demo.use.footer');
+        ])->nest('child_footer', 'project.use.footer');
     }
 
     public function codebook()

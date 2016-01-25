@@ -2,7 +2,7 @@
 
 class FileController extends BaseController {
 
-    protected $layout = 'demo.layout-main';
+    protected $layout = 'project.layout-main';
 
     public function __construct()
     {
@@ -105,7 +105,7 @@ class FileController extends BaseController {
                 $view = View::make($file->$method());
             } else {
                 $member = $this->user->members()->logined()->orderBy('logined_at', 'desc')->first();
-                $context = View::make('demo.main', ['project' => $member->project])->nest('context', $file->$method());
+                $context = View::make('project.main', ['project' => $member->project])->nest('context', $file->$method());
                 $view = $this->createView($context);
             }
         } else {
@@ -302,7 +302,7 @@ class FileController extends BaseController {
     {
         $member = $this->user->members()->logined()->orderBy('logined_at', 'desc')->first();
 
-        $contents = View::make('demo.main', ['project' => $member->project])->nest('context','demo.' . $member->project->code . '.' . $context);
+        $contents = View::make('project.main', ['project' => $member->project])->nest('context','project.' . $member->project->code . '.' . $context);
 
         $this->layout->content = $contents;
 

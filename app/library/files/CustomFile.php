@@ -34,7 +34,7 @@ class CustomFile extends CommFile {
 
     public function __call($method, $args)
     {
-        $fileLoader = new FileLoader(new Filesystem, app_path() . '/views/demo');
+        $fileLoader = new FileLoader(new Filesystem, app_path() . '/views/project');
 
         $ajax = new Repository($fileLoader, '');
 

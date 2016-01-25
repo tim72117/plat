@@ -2,7 +2,7 @@
 
 class OfflineController extends BaseController {
 
-    protected $layout = 'demo.layout-main';
+    protected $layout = 'project.layout-main';
 
     protected $project;
 
@@ -15,7 +15,7 @@ class OfflineController extends BaseController {
 
     public function project($context = 'intro')
     {
-        $contents = View::make('demo.main')->nest('context','demo.' . $this->project . '.page.' . $context);
+        $contents = View::make('project.main')->nest('context','project.' . $this->project . '.page.' . $context);
 
         $this->layout->content = $contents;
 
@@ -29,7 +29,7 @@ class OfflineController extends BaseController {
 
     public function page($context)
     {
-        $contents = View::make('demo.main')->nest('context','demo.page.' . $context);
+        $contents = View::make('project.main')->nest('context','project.page.' . $context);
 
         $this->layout->content = $contents;
 
@@ -47,12 +47,12 @@ class OfflineController extends BaseController {
             return View::make('editor.question_demo');
 
         if( $context == 'interviewer' )
-            return View::make('demo.cdb.page.offline_interviewer');
+            return View::make('project.cdb.page.offline_interviewer');
 
         if( $context == 'cache_manifest' )
             return Response::view('nopage', array(), 404);
 
-        return View::make('demo.cdb.page.cache_manifest');
+        return View::make('project.cdb.page.cache_manifest');
     }
 
 }

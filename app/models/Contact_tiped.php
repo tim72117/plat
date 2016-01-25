@@ -1,60 +1,58 @@
 <?php
-class User_tiped extends User
-{
-    public function contact() { 
-		return $this->hasOne('Contact_tiped', 'user_id', 'id')->use();
-	}
+namespace Project\Cher;
 
-    public function schools() { 
-		return $this->belongsToMany('School_tiped', 'work_tiped', 'user_id', 'sch_id');
-	}
+use Eloquent;
 
-	public function departments() { 
-		return $this->belongsToMany('Department_tiped', 'work_tiped', 'user_id', 'dep_id');
-	}
-	
-}
+class User extends \User {
 
-class Contact_tiped extends Contact
-{
-    public function scopeUse($query) {
-        return $query->where('contact.project', 'tiped');
+    public function departments() {
+        return $this->belongsToMany('Project\Cher\Department', 'work_tiped', 'user_id', 'sch_id');
     }
+
+    public function works() {
+        return $this->hasMany('Project\Cher\Work', 'user_id', 'id');
+    }
+
 }
 
-class School_tiped extends Eloquent {
-	
-	protected $table = 'plat_resource.dbo.university_school';
+class Department extends Eloquent {
 
-	public $timestamps = false;
-		
+    protected $table = 'public.dbo.university_school';
+
+    public $timestamps = false;
+
 }
 
-class Department_tiped extends Eloquent {
-	
-	protected $table = 'plat_resource.dbo.university_depcode';
+class Work extends Eloquent {
 
-	public $timestamps = false;
-	
+    protected $table = 'plat.dbo.work_tiped';
+
+    public $timestamps = true;
+
+    protected $fillable = array('sch_id', 'dep_id', 'sch_name', 'type');
+
+    public function departments() {
+        return $this->hasMany('Project\Cher\Department', 'id', 'sch_id');
+    }
+
 }
 
-class Struct_tiped
-{  
-    static function auth($user) 
+class Struct {
+
+    static function auth($member)
     {
         return array(
-            'id'          => (int)$user->id,
-            'active'      => (bool)$user->active,
-            'disabled'    => (bool)$user->disabled,
-            'password'    => $user->password=='',
-            'email'       => $user->email,
-            'name'        => $user->username,
-            'schools'     => $user->schools->toArray(),
-            'departments' => $user->departments->toArray(),
-            'title'  => $user->contact->title,
-            'tel'    => $user->contact->tel,
-            'fax'    => $user->contact->fax,
-            'email2' => $user->contact->email2,
-        );   
+            'id'          => (int)$member->user_id,
+            'actived'     => $member->user->actived && $member->actived,
+            'password'    => $member->user->password=='',
+            'email'       => $member->user->email,
+            'name'        => $member->user->username,
+            'departments' => Project\Cher\User::find($member->user_id)->departments->toArray(),
+            'title'  => $member->contact->title,
+            'tel'    => $member->contact->tel,
+            'fax'    => $member->contact->fax,
+            'email2' => $member->contact->email2,
+        );
     }
+
 }

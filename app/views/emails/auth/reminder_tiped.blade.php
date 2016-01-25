@@ -7,10 +7,7 @@
         <h2>重設密碼</h2>
 
         <div>
-            @foreach ($user->schools as $school)
-                <p>{{ $school->sname }}承辦人</p>
-            @endforeach
-            您好
+            親愛的業務承辦人您好：
             <br />
             <br />
             要重設密碼，只需點擊下方連結。此連結會帶你前往一個可以讓你建立新密碼的網頁

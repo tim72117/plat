@@ -30,25 +30,7 @@ class User extends \User {
     {
         return $this->hasOne('Cdb\Contact', 'user_id', 'id');
     }
-}
 
-class Member extends \Contact {
-
-    use SoftDeletingTrait;
-
-    public $timestamps = true;
-
-    //protected $fillable = array('user_id', 'name', 'title', 'emergency_name', 'relation', 'earea_number', 'emergency_phone');
-
-    protected $guarded = array('id');
-
-    public function scopeCdb($query) {
-        return $query->where('project', 'cdb');
-    }
-
-    public function menber_auth() {
-        return $this->hasMany('Cdb\Menber_auth', 'user_id', 'user_id');
-    }
 }
 
 class Service extends Eloquent {
@@ -101,7 +83,6 @@ class Management extends Eloquent {
         return $this->hasMany('Cdb\Management', 'user_id', 'boss_id');
     }
 
-
 }
 
 class Contact extends Eloquent {
@@ -117,6 +98,7 @@ class Contact extends Eloquent {
     public function user() {
         return $this->hasOne('Cdb\User', 'id', 'user_id');
     }
+
 }
 
 class District extends Eloquent {
@@ -128,6 +110,7 @@ class District extends Eloquent {
     protected $fillable = array('country_name', 'code', 'name');
 
     protected $guarded = array('id');
+
 }
 
 class Baby extends Eloquent {
@@ -157,6 +140,7 @@ class Baby extends Eloquent {
     public function visit_parent () {
         return $this->hasMany('Cdb\Visit_parent', 'baby_id', 'id');
     }
+
 }
 
 class Turn_record extends Eloquent {
@@ -168,6 +152,7 @@ class Turn_record extends Eloquent {
     protected $fillable = array('baby_id', 'sender_title', 'sender', 'recipient_title', 'recipient', 'reason', 'finish', 'notification');
 
     protected $guarded = array('id');
+
 }
 
 class Menber_auth extends Eloquent {
@@ -181,6 +166,7 @@ class Menber_auth extends Eloquent {
     protected $fillable = array('user_id', 'app_id', 'write', 'reads');
 
     protected $guarded = array('id');
+
 }
 
 class Wave extends Eloquent {
@@ -192,6 +178,7 @@ class Wave extends Eloquent {
     protected $fillable = array('month', 'start', 'ending', 'wait_start', 'method');
 
     protected $guarded = array('id');
+
 }
 
 class Visit_parent extends Eloquent {
@@ -215,6 +202,7 @@ class Visit_parent extends Eloquent {
     public function sorting() {
         return $this->hasMany('Cdb\Ques_repository', 'visit_id', 'id');
     }
+
 }
 
 class Ques_repository extends Eloquent {
@@ -226,6 +214,7 @@ class Ques_repository extends Eloquent {
     protected $fillable = array('page_id', 'ques_id', 'visit_id', 'value', 'string', 'created_at', 'baby_id', 'created_by');
 
     protected $guarded = array('id');
+
 }
 
 class Ques_rule extends Eloquent {
@@ -237,14 +226,13 @@ class Ques_rule extends Eloquent {
     protected $fillable = array('day', 'night', 'week', 'ques2', 'doc_id', 'doc_name');
 
     protected $guarded = array('id');
+
 }
 
 class Struct_cdb {
 
     static function management($user)
     {
-        //var_dump($user->toArray());
-
         return array(
             'id'                => (int)$user->id,
             'actived'           => (bool)$user->active && (bool)$user->menber->active,
@@ -267,7 +255,6 @@ class Struct_cdb {
 
     static function divert_status($record,$user)
     {
-        //var_dump($user->id);exit;
         if($record->sender_title ==1 && $record->recipient_title == 3){
             if($record->sender == $user->id){
                 return  $status = array('id'=>'2', 'code'=>'轉出中');
@@ -393,8 +380,10 @@ class Struct_cdb {
                     else { return $baby->quit;}
                 }
             }
+        } else {
+            return 0;
         }
-        else{ return 0; }
 
     }
+
 }

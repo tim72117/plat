@@ -99,7 +99,7 @@ App::missing(function($exception) {
 
 App::down(function()
 {
-    return Response::make(View::make('demo.maintenance'), 503);//View::make("demo.maintenance", 503);
+    return Response::make(View::make('project.maintenance'), 503);//View::make("project.maintenance", 503);
 });
 
 /*
