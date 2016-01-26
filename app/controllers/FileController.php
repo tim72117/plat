@@ -146,7 +146,7 @@ class FileController extends BaseController {
     public function shared()
     {
         $groups = $this->user->groups()->with(['users' => function ($query) {
-            $query->where('disabled', false)->where('active', true);
+            $query->where('disabled', false)->where('actived', true);
         }])->get();
 
         if (count(Input::get('docs'))==1) {
@@ -197,7 +197,7 @@ class FileController extends BaseController {
     public function requested()
     {
         $groups = $this->user->groups()->with(['users' => function ($query) {
-            $query->where('disabled', false)->where('active', true);
+            $query->where('disabled', false)->where('actived', true);
         }])->get();
 
         if (count(Input::get('docs'))==1) {
@@ -319,7 +319,6 @@ class FileController extends BaseController {
 
     public function apps()
     {
-
         $docs = ShareFile::with(['isFile', 'isFile.isType', 'shareds', 'requesteds'])->where(function($query) {
 
             $query->where('target', 'user')->where('target_id', $this->user->id);

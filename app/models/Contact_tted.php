@@ -42,21 +42,22 @@ class Struct {
     static function auth($member, $groups)
     {
         return array(
-            'id'         => (int)$member->user_id,
-            'actived'    => $member->user->actived && $member->actived,
-            'password'   => $member->user->password=='',
-            'email'      => $member->user->email,
-            'name'       => $member->user->username,
-            'schools'    => Project\Teacher\User::find($member->user_id)->schools->sortBy('id')->filter(function($school) {
+            'user_id'   => (int)$member->user_id,
+            'member_id' => (int)$member->id,
+            'actived'   => $member->user->actived && $member->actived,
+            'password'  => $member->user->password=='',
+            'email'     => $member->user->email,
+            'name'      => $member->user->username,
+            'title'     => $member->contact->title,
+            'tel'       => $member->contact->tel,
+            'fax'       => $member->contact->fax,
+            'email2'    => $member->contact->email2,
+            'inGroups'  => $member->user->inGroups,
+            'schools'   => User::find($member->user_id)->schools->sortBy('id')->filter(function($school) {
                                 return $school->year == '103';
                             })->map(function($school){
                                 return array_only($school->toArray(), array('id', 'name', 'year'));
                             })->toArray(),
-            'title'  => $member->contact->title,
-            'tel'    => $member->contact->tel,
-            'fax'    => $member->contact->fax,
-            'email2' => $member->contact->email2,
-            'groups' => $member->user->groups->lists('id'),
         );
     }
 }

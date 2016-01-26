@@ -1,8 +1,11 @@
 <?php
+namespace Plat;
+
+use Eloquent;
 
 class Group extends Eloquent {
 
-    protected $table = 'group';
+    protected $table = 'groups';
 
     public $timestamps = false;
 
