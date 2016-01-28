@@ -669,15 +669,17 @@ class RowsFile extends CommFile {
                 !in_array($column_value, $this->temp->dep_codes, true) && array_push($column_errors, '不是本校科別代碼');
             },
             'tted_sch' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->schools) && $this->temp->schools = \User_tted::find($this->user->id)->works->lists('ushid');
+                !isset($this->temp->schools) && $this->temp->schools = \Project\Teacher\User::find($this->user->id)->works->lists('sch_id');
                 !in_array($column_value, $this->temp->schools, true) && array_push($column_errors, '不是本校代碼');
             },
             'tted_depcode_103' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->dep_codes_103) && $this->temp->dep_codes_103 = DB::table('pub_depcode_tted')->whereIn('sch_id', \User_tted::find($this->user->id)->works->lists('ushid'))->where('year','=','103')->lists('id');
+                !isset($this->temp->dep_codes_103) && $this->temp->dep_codes_103 = DB::table('pub_depcode_tted')
+                    ->whereIn('sch_id', \Project\Teacher\User::find($this->user->id)->works->lists('sch_id'))->where('year','=','103')->lists('id');
                 !in_array($column_value, $this->temp->dep_codes_103, true) && array_push($column_errors, '不是本校系所代碼');
             },
             'tted_depcode_104' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->dep_codes_104) && $this->temp->dep_codes_104 = DB::table('pub_depcode_tted')->whereIn('sch_id', \User_tted::find($this->user->id)->works->lists('ushid'))->where('year','=','103')->lists('id');
+                !isset($this->temp->dep_codes_104) && $this->temp->dep_codes_104 = DB::table('pub_depcode_tted')
+                    ->whereIn('sch_id', \Project\Teacher\User::find($this->user->id)->works->lists('sch_id'))->where('year','=','103')->lists('id');
                 !in_array($column_value, $this->temp->dep_codes_104, true) && array_push($column_errors, '不是本校系所代碼');
             },
         ];

@@ -230,8 +230,9 @@ class UserController extends BaseController {
             $user->members()->save($member);
 
             $contact = Plat\Contact::firstOrNew(['member_id' => $member->id]);
-            $contact->title = $input['title'];
-            $contact->tel   = $input['tel'];
+            $contact->title      = $input['title'];
+            $contact->tel        = $input['tel'];
+            $contact->department = isset($input['department']) ? $input['department'] : '';
             $member->contact()->save($contact);
 
             require app_path() . '\\views\\project\\' . $project_code . '\\auth\\register_works.php';

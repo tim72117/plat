@@ -2,7 +2,7 @@
 
     <div style="width: 350px">
 
-        <h3 class="ui top attached center aligned header">教育部中小學師資培育整合平台</h3>
+        <h3 class="ui top attached center aligned header">資料釋出平台</h3>
 
         <div class="ui attached segment">
             @include('project.auth.login')
