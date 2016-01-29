@@ -137,4 +137,15 @@ class CommFile {
     {
         return isset($this->doc) && $this->doc->created_by == $this->user->id;
     }
+
+    public function setVisible()
+    {
+        if ($this->doc->target == 'user') {
+            $this->doc->visible = Input::get('visible');
+            $this->doc->save();
+        }
+
+        return ['doc' => $this->doc];
+    }
+
 }
