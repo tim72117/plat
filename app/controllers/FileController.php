@@ -331,7 +331,13 @@ class FileController extends BaseController {
 
         })->toArray();
 
-        return ['docs' => $docs];
+        $tooltip = [
+            'start'  => ['startup' => true,  'position' => 'bottom center', 'html' => '<h2 class="ui header">有新的功能</h2>更新時間2016-01-29'],
+            'rename' => ['startup' => false, 'position' => 'right center', 'html' => '<h2 class="ui header">點擊檔案名稱右邊的空白處，即可修改檔案名稱，修改完後再點擊一次空白處儲存變更。</h2><i class="info icon"></i>只有檔案的擁有人可以變更名稱'],
+            'menu'   => ['startup' => false, 'position' => 'left center', 'html' => '<h2 class="ui header">勾選將這個檔案加到左邊快捷選單中。</h2><i class="info icon"></i>只有檔案的擁有人可以變更名稱'],
+        ];
+
+        return ['docs' => $docs, 'tooltip' => $tooltip];
     }
 
 }

@@ -60,10 +60,12 @@
                         </div>
                     </div>
                     <label for="file_upload" class="ui basic mini button" ng-class="{loading: uploading}"><i class="icon upload"></i>上傳</label>
-                    <div class="ui basic mini button" ng-if="todo.delete" ng-click="deleteDoc()"><i class="icon trash outline"></i>刪除</div>
+                    <div class="ui basic mini button red" ng-class="{loading: deleting}" ng-if="todo.delete" ng-click="deleteDoc()"><i class="icon trash outline"></i>刪除</div>
                     <div class="ui basic mini button" ng-if="todo.share" ng-click="getShareds()"><i class="icon external share"></i>共用</div>
                     <div class="ui basic mini button" ng-if="todo.request" ng-click="getRequesteds()"><i class="icon exchange"></i>請求</div>
-                    <div class="ui yellow mini button" id="whatNews" ng-click="whatNews($event)" ng-mouseleave="whatNews($event)"><i class="icon help outline"></i>有什麼新功能</div>
+                    <div class="ui basic mini button yellow" ng-click="$event.stopPropagation();whatNews(false)" ng-popup="{show: true, tooltip: tooltip['start']}">
+                        <i class="icon help outline"></i>有什麼新功能
+                    </div>
                 </div>
                 <div class="right floated right aligned six wide column">
                     <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
@@ -113,6 +115,7 @@
                         <th></th>
                         <th></th>
                         <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -129,13 +132,13 @@
                     <tr ng-repeat="doc in docs | orderBy:'created_at':true | filter:searchText | filter:searchType:true | startFrom:(page-1)*limit | limitTo:limit">
                         <td width="50">
                             <div class="ui checkbox">
-                                <input type="checkbox" id="doc-{{ $index }}" ng-model="doc.selected">
+                                <input type="checkbox" id="doc-{{ $index }}" ng-model="doc.selected" ng-disabled="!doc.selected && (docs | filter:{selected: true}).length > 0">
                                 <label for="doc-{{ $index }}"></label>
                             </div>
                         </td>
                         <td style="min-width:400px" ng-click="rename(doc)">
                             <i class="icon" ng-class="types[doc.type]"></i>
-                            <a href="{{ doc.link }}" ng-if="!doc.renaming" ng-click="$event.stopPropagation()" name="whatNew">{{ doc.title }}</a>
+                            <a href="{{ doc.link }}" ng-if="!doc.renaming" ng-click="$event.stopPropagation()" ng-popup="{show: $first, tooltip: tooltip['rename']}">{{ doc.title }}</a>
                             <div class="ui mini icon input" ng-class="{loading: doc.saving}" ng-if="doc.renaming" ng-click="$event.stopPropagation()">
                                 <input type="text" ng-model="doc.title" size="50" placeholder="檔案名稱">
                                 <i class="search icon" ng-if="doc.saving"></i>
@@ -151,15 +154,11 @@
                                     </a>
                                 </div>
                             </div>
-
-    <!--         <div class="ignored ui popup basic top left transition" ng-class="{visible: doc.information.open}" style="top: {{ information.y }}px; bottom: auto; left: {{ information.x }}px; right: auto">
-                <div class="content">預設佈景的標準提示訊息並不包含指示的箭頭</div>
-            </div> -->
                         </td>
                         <td width="70">
                             <div class="ui basic icon button" ng-if="doc.type==='1'"><i class="icon settings"></i></div>
                         </td>
-                        <td class="collapsing" ng-class="{disabled: doc.saving}">
+                        <td class="collapsing" ng-class="{disabled: doc.saving}" ng-popup="{show: $first, tooltip: tooltip['menu']}">
                             <div class="ui fitted checkbox" ng-click="setVisible(doc)">
                                 <input type="checkbox" id="{{ ::$id }}" ng-model="doc.visible">
                                 <label for="{{ ::$id }}"></label>
@@ -200,7 +199,7 @@
 <script>
 app.requires.push('angularify.semantic.dropdown');
 app.requires.push('angularFileUpload');
-app.controller('fileController', function($scope, $filter, $interval, $http, $cookies, FileUploader) {
+app.controller('fileController', function($scope, $filter, $interval, $http, $cookies, $timeout, FileUploader) {
     $scope.docs = [];
     $scope.predicate = 'created_at';
     $scope.searchText = $cookies.getObject('file_text_filter') || {};
@@ -263,7 +262,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
 
     $scope.$watchCollection('docs | filter:{selected: true}', function (docs) {
         $scope.todo.share = docs.length > 0;
-        $scope.todo.delete = docs.length > 0 && false;
+        $scope.todo.delete = docs.length > 0;
         $scope.todo.request = docs.length > 0;
         for(var i in docs) {
             if (docs[i].type != '5') { $scope.todo.request = false; };
@@ -309,6 +308,10 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
             $scope.docs = data.docs;
             $scope.setPaginate();
             $scope.loading = false;
+            $scope.tooltip = data.tooltip;
+            $timeout(function() {
+                $scope.whatNews(true);
+            });
         }).error(function(e){
             console.log(e);
         });
@@ -317,12 +320,15 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     $scope.getDocs();
 
     $scope.deleteDoc = function() {
+        $scope.deleting = true;
         $filter("filter")($scope.docs, {selected: true}).map(function(doc) {
             $http({method: 'POST', url: '/doc/' + doc.id + '/delete', data:{} })
             .success(function(data, status, headers, config) {
+                console.log(data);
                 if (data.deleted) {
                     $scope.docs.splice($scope.docs.indexOf(doc), 1);
                 };
+                $scope.deleting = false;
             }).error(function(e){
                 console.log(e);
             });
@@ -433,22 +439,35 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         });
     };
 
-    $scope.whatNews = function(event) {
-        if (event.type=='click') {
-            $('#whatNews').popup({
-                target:   $('[name=whatNew]'),
-                position: 'right center',
-                on:       'manual',
-                title: '更改檔名',
-                html:  '<h2 class="ui  header">點擊檔案名稱右邊的空白處，即可修改檔案名稱，修改完後再點擊一次空白處儲存變更。</h2>' +
-                       '<i class="info icon"></i>只有檔案的擁有人可以變更名稱'
-            });
-            $('#whatNews').popup('show');
-        } else {
-            $('#whatNews').popup('destroy');
-        }
+    $scope.whatNews = function(startup) {
+        $scope.$broadcast('popup', {startup: startup});
     };
 
+})
+.directive('ngPopup', function() {
+    return {
+        restrict: "A",
+        scope: {
+            ngPopup: '='
+        },
+        controller: function ($scope, $element, $rootElement) {
+            $scope.$on('popup', function (event, args) {
+                if ($scope.ngPopup.show && $scope.ngPopup.tooltip && $scope.ngPopup.tooltip.startup == args.startup) {
+                    var popup = $element.popup({
+                        position: $scope.ngPopup.tooltip.position,
+                        html:     $scope.ngPopup.tooltip.html,
+                        on:       'manual'
+                    });
+                    $element.popup('show');
+                    $rootElement.on('click', function() {
+                        if (popup) {
+                            $element.popup('destroy');
+                        };
+                    });
+                };
+            });
+        }
+    };
 });
 
 app.controller('shareController', function($scope, $filter, $http) {
