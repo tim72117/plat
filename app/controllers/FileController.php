@@ -13,11 +13,7 @@ class FileController extends BaseController {
 
     public function docs()
     {
-        $apps = ShareFile::with(['isFile', 'isFile.isType'])->whereHas('isFile', function($query) {
-
-            $query->where('files.type', 2);
-
-        })->where(function($query) {
+        $apps = ShareFile::with(['isFile', 'isFile.isType'])->where(function($query) {
 
             $query->where(function($query) {
                 $query->where('target', 'user')->where('target_id', $this->user->id);

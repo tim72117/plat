@@ -72,6 +72,12 @@ class ShareFile extends Eloquent {
     public function requesteds() {
         return $this->hasMany('RequestFile', 'doc_id', 'id');
     }
+
+    public function getVisibleAttribute($value)
+    {
+        return (bool)$value;
+    }
+
 }
 
 class Struct_file {
@@ -109,6 +115,7 @@ class Struct_file {
             'link'       => '/doc/' . $doc->id . '/open',
             'type'       => $doc->isFile->type,
             'tools'      => isset($tools) ? $tools : [],
+            'visible'    => $doc->visible,
             'shared'     => array_count_values($doc->shareds->map(function($shared){
                             return $shared->target;
                         })->all()),

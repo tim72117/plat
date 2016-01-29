@@ -84,6 +84,7 @@
                         <th>檔名</th>
                         <th></th>
                         <th>設定</th>
+                        <th>選單</th>
                         <th>已共用</th>
                         <th>更新時間</th>
                         <th>擁有人</th>
@@ -157,6 +158,12 @@
                         </td>
                         <td width="70">
                             <div class="ui basic icon button" ng-if="doc.type==='1'"><i class="icon settings"></i></div>
+                        </td>
+                        <td class="collapsing" ng-class="{disabled: doc.saving}">
+                            <div class="ui fitted checkbox" ng-click="setVisible(doc)">
+                                <input type="checkbox" id="{{ ::$id }}" ng-model="doc.visible">
+                                <label for="{{ ::$id }}"></label>
+                            </div>
                         </td>
                         <td width="180">
 
@@ -414,6 +421,18 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         });
     };
 
+    $scope.setVisible = function(doc) {
+        doc.saving = true;
+        $http({method: 'POST', url: '/doc/' + doc.id + '/setVisible', data:{visible: doc.visible}})
+        .success(function(data, status, headers, config) {
+            doc.visible = data.doc.visible;
+            doc.saving = false;
+        }).error(function(e){
+            doc.visible = !doc.visible;
+            console.log(e);
+        });
+    };
+
     $scope.whatNews = function(event) {
         if (event.type=='click') {
             $('#whatNews').popup({
@@ -429,8 +448,6 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
             $('#whatNews').popup('destroy');
         }
     };
-
-
 
 });
 
