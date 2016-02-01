@@ -324,7 +324,6 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         $filter("filter")($scope.docs, {selected: true}).map(function(doc) {
             $http({method: 'POST', url: '/doc/' + doc.id + '/delete', data:{} })
             .success(function(data, status, headers, config) {
-                console.log(data);
                 if (data.deleted) {
                     $scope.docs.splice($scope.docs.indexOf(doc), 1);
                 };
@@ -554,14 +553,13 @@ app.controller('shareController', function($scope, $filter, $http) {
 
     $scope.shareTo = function() {
         $scope.wait = true;
-        $http({method: 'POST', url: '/docs/share/put', data:{groups: $scope.getSelectedGroups(), docs: $scope.docs}})
+        var doc = $filter('filter')(angular.element('#fileController').scope().docs, {selected: true})[0];
+        $http({method: 'POST', url: '/doc/' + doc.id + '/shareTo', data:{groups: $scope.getSelectedGroups()}})
         .success(function(data, status, headers, config) {
-            for(var i in data.docs) {
-                var doc = $filter('filter')(angular.element('#fileController').scope().docs, {id: data.docs[i].id}, true)[0];
-                angular.extend(doc, data.docs[i]);
-            }
+            angular.extend(doc, data.doc);
             $scope.wait = false;
             $scope.boxClose();
+            doc.selected = false;
         })
         .error(function(e){
             console.log(e);
@@ -570,15 +568,14 @@ app.controller('shareController', function($scope, $filter, $http) {
 
     $scope.requestTo = function(description) {
         $scope.wait = true;
-        $http({method: 'POST', url: '/docs/request/put', data:{groups: $scope.getSelectedGroups(), docs: $scope.docs, description: description}})
+        var doc = $filter('filter')(angular.element('#fileController').scope().docs, {selected: true})[0];
+        $http({method: 'POST', url: '/doc/' + doc.id + '/requestTo', data:{groups: $scope.getSelectedGroups(), description: description}})
         .success(function(data, status, headers, config) {
-            for(var i in data.docs) {
-                var doc = $filter('filter')(angular.element('#fileController').scope().docs, {id: data.docs[i].id}, true)[0];
-                angular.extend(doc, data.docs[i]);
-            }
+            angular.extend(doc, data.doc);
             $scope.wait = false;
             $scope.description = '';
             $scope.boxClose();
+            doc.selected = false;
         })
         .error(function(e){
             console.log(e);

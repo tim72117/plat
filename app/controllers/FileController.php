@@ -37,7 +37,7 @@ class FileController extends BaseController {
 
         })->toArray();
 
-        $requests = RequestFile::where(function($query) {
+        $requests = RequestFile::has('isDoc')->where(function($query) {
 
             $query->where(function($query) {
                 $query->where('target', 'user')->where('target_id', $this->user->id);
@@ -162,34 +162,6 @@ class FileController extends BaseController {
         return ['groups' => $groups->toArray()];
     }
 
-    public function shareTo()
-    {
-        $docs = ShareFile::where('created_by', $this->user->id)->get();
-        $shareds = [];
-
-        foreach (Input::get('docs') as $doc) {
-            if (!$docs->contains($doc['id'])) {
-                continue;
-            }
-
-            $doc = $docs->find($doc['id']);
-
-            foreach (Input::get('groups') as $group) {
-                if (count($group['users']) == 0 && $this->user->groups->contains($group['id'])) {
-                    ShareFile::updateOrCreate(['file_id' => $doc->file_id, 'target' => 'group', 'target_id' => $group['id'], 'created_by' => $this->user->id]);
-                }
-                if (count($group['users']) != 0){
-                    foreach ($group['users'] as $user) {
-                        ShareFile::updateOrCreate(['file_id' => $doc->file_id, 'target' => 'user', 'target_id' => $user['id'], 'created_by' => $this->user->id]);
-                    }
-                }
-            }
-            array_push($shareds, Struct_file::open($doc));
-        }
-
-        return ['docs' => $shareds];
-    }
-
     public function requested()
     {
         $groups = $this->user->groups()->with(['users' => function ($query) {
@@ -211,36 +183,6 @@ class FileController extends BaseController {
         }
 
         return ['groups' => $groups->toArray()];
-    }
-
-    public function requestTo()
-    {
-        $docs = ShareFile::where('created_by', $this->user->id)->get();
-        $requesteds = [];
-
-        foreach (Input::get('docs') as $doc) {
-            if (!$docs->contains($doc['id'])) {
-                continue;
-            }
-
-            $doc = $docs->find($doc['id']);
-
-            foreach (Input::get('groups') as $group) {
-                if (count($group['users']) == 0 && $this->user->groups->contains($group['id'])) {
-                    RequestFile::updateOrCreate(['doc_id' => $doc->id, 'target' => 'group', 'target_id' => $group['id'], 'created_by' => $this->user->id])
-                    ->update(['description' => Input::get('description')]);
-                }
-                if (count($group['users']) != 0){
-                    foreach ($group['users'] as $user) {
-                        RequestFile::updateOrCreate(['doc_id' => $doc->id, 'target' => 'user', 'target_id' => $user['id'], 'created_by' => $this->user->id])
-                        ->update(['description' => Input::get('description')]);
-                    }
-                }
-            }
-            array_push($requesteds, Struct_file::open($doc));
-        }
-
-        return ['docs' => $requesteds];
     }
 
     private function createFile($type_id, $title)
@@ -334,7 +276,7 @@ class FileController extends BaseController {
         $tooltip = [
             'start'  => ['startup' => true,  'position' => 'bottom center', 'html' => '<h2 class="ui header">有新的功能</h2>更新時間2016-01-29'],
             'rename' => ['startup' => false, 'position' => 'right center', 'html' => '<h2 class="ui header">點擊檔案名稱右邊的空白處，即可修改檔案名稱，修改完後再點擊一次空白處儲存變更。</h2><i class="info icon"></i>只有檔案的擁有人可以變更名稱'],
-            'menu'   => ['startup' => false, 'position' => 'left center', 'html' => '<h2 class="ui header">勾選將這個檔案加到左邊快捷選單中。</h2><i class="info icon"></i>只有檔案的擁有人可以變更名稱'],
+            'menu'   => ['startup' => false, 'position' => 'left center', 'html' => '<h2 class="ui header">勾選將這個檔案加到左邊快捷選單中。</h2>'],
         ];
 
         return ['docs' => $docs, 'tooltip' => $tooltip];
