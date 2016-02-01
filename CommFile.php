@@ -1,5 +1,4 @@
 <?php
-
 namespace Plat\Files;
 
 use User;
@@ -42,10 +41,11 @@ class CommFile {
         return $this->download();
     }
 
-    //uncomplete
     public function delete()
     {
-        return $this->doc->id;
+        $deleted = $this->doc->target == 'user' ? $this->doc->delete() : false;
+
+        return ['deleted' => $deleted];
     }
 
     public function rename()
@@ -116,8 +116,6 @@ class CommFile {
 
     public function save_as() { }
 
-    public function share_to() { }
-
     private function decodeInput($input)
     {
         return json_decode(urldecode(base64_decode($input)));
@@ -146,6 +144,64 @@ class CommFile {
         }
 
         return ['doc' => $this->doc];
+    }
+
+    public function shareTo()
+    {
+        foreach (Input::get('groups') as $group) {
+            if (count($group['users']) == 0 && $this->user->groups->contains($group['id'])) {
+                \ShareFile::updateOrCreate([
+                    'file_id' => $this->doc->file_id,
+                    'target' => 'group',
+                    'target_id' => $group['id'],
+                    'created_by' => $this->user->id
+                ]);
+            }
+            if (count($group['users']) != 0){
+                foreach ($group['users'] as $user) {
+                    \ShareFile::updateOrCreate([
+                        'file_id' => $this->doc->file_id,
+                        'target' => 'user',
+                        'target_id' => $user['id'],
+                        'created_by' => $this->user->id
+                    ]);
+                }
+            }
+        }
+
+        return ['doc' => \Struct_file::open($this->doc)];
+    }
+
+    public function requestTo()
+    {
+        foreach (Input::get('groups') as $group) {
+            if (count($group['users']) == 0 && $this->user->groups->contains($group['id'])) {
+                \RequestFile::updateOrCreate([
+                    'doc_id' => $this->doc->id,
+                    'target' => 'group',
+                    'target_id' => $group['id'],
+                    'created_by' => $this->user->id,
+                ], [
+                    'disabled' => false,
+                    'description' => Input::get('description'),
+                ]);
+            }
+            if (count($group['users']) != 0){
+                foreach ($group['users'] as $user) {
+                    \RequestFile::updateOrCreate([
+                        'doc_id' => $this->doc->id,
+                        'target' => 'user',
+                        'target_id' => $user['id'],
+                        'created_by' => $this->user->id,
+                    ], [
+                        'disabled' => false,
+                        'description' => Input::get('description'),
+                    ]);
+                }
+            }
+        }
+
+        return ['doc' => \Struct_file::open($this->doc)];
     }
 
 }
