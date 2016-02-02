@@ -26,8 +26,8 @@ $user = Project\Teacher\User::find($member->user_id);
     </td>
     <td width="150" height="50">
         <p>
-            <?=Form::radio('', '', true);?>申請新帳號使用權，新帳號為：<?=$member->user->email?><br />
-            <?=Form::radio('', '', false);?>註銷帳號，帳號為：_________________，原使用者為：____________
+            <?=Form::radio('', '', true, ['disabled' => 'disabled']);?>申請新帳號使用權，新帳號為：<?=$member->user->email?><br />
+            <?=Form::radio('', '', false, ['disabled' => 'disabled']);?>註銷帳號，帳號為：_________________，原使用者為：____________
         </p>
     </td>
   </tr>
@@ -35,32 +35,41 @@ $user = Project\Teacher\User::find($member->user_id);
 
 <table width="800" align="center" cellpadding="0" cellspacing="0" border="1" style="font-size:12pt; font-family:'標楷體'">
     <tr>
-        <td width="98" height="50"><p align="center">申請日期</p></td>
+        <td width="100" height="50"><p align="center">申請日期</p></td>
         <td width="296" height="50"><p align="center"><?=$member->user->created_at?></p></td>
         <td width="100" height="50"><p align="center">機關(構)名稱</p></td>
         <td width="296" height="50"><p align="center">
             <?php
-            $user->schools->each(function($school){
-                echo $school->id.' - '.$school->name;
-            });
+            foreach ($user->works as $work) {
+                if ($work->position == 0) {
+                    $work->schools->each(function($school) {
+                        echo $school->id.' - '.$school->name;
+                    });
+                }
+                if ($work->position == 4) {
+                    $work->departments->each(function($department) {
+                        echo $department->C413.' - '.$department->C414;
+                    });
+                }
+            }
             ?>
             </p>
         </td>
     </tr>
     <tr>
-        <td width="98" height="30"><p align="center">姓名</p></td>
+        <td width="100" height="30"><p align="center">姓名</p></td>
         <td width="296" height="30"><p align="center"><?=$member->user->username?></p></td>
         <td width="100" height="30"><p align="center">單位</p></td>　
         <td width="296" height="30"><p align="center"><?=$member->contact->department?></p></td>
     </tr>
     <tr>
-        <td width="98" height="30"><p align="center">職稱</p></td>
+        <td width="100" height="30"><p align="center">職稱</p></td>
         <td width="296" height="30"><p align="center"><?=$member->contact->title?></p></td>
         <td width="100" height="30"><p align="center">電話</p></td>
         <td width="296" height="30"><p align="center"><?=$member->contact->tel?></p></td>
     </tr>
     <tr>
-        <td width="98" height="30" style="font-size:12pt"><p align="center">E-mail</p></td>
+        <td width="100" height="30" style="font-size:12pt"><p align="center">E-mail</p></td>
         <td colspan="3" height="30"><p align="center"><?=$member->user->email?></p></td>
     </tr>
 </table>
@@ -68,20 +77,24 @@ $user = Project\Teacher\User::find($member->user_id);
 <table width="800" align="center" cellpadding="0" cellspacing="0" border="1" style="font-family:'標楷體'">
     <tr>
         <td rowspan="4" width="100"><p align="center">帳號權限</p></td>
-        <td width="150"><p align="center">身份別</p></td>
-        <td width="220"><p align="center">欲申請、刪除或註銷之權限</p></td>
-        <td><p align="center">書面審核單位地址</p></td>
-        <td  width="100"><p align="center">聯絡電話</p></td>
+        <td width="130"><p>身份別</p></td>
+        <td>
+            <label><?=Form::radio('', '', $user->works[0]->position == '1', ['disabled' => 'disabled'])?>教育部 </label>
+            <label><?=Form::radio('', '', $user->works[0]->position == '2', ['disabled' => 'disabled'])?>縣市政府承辦人 </label>
+            <label><?=Form::radio('', '', $user->works[0]->position == '0', ['disabled' => 'disabled'])?>師培大學承辦人 </label>
+            <label><?=Form::radio('', '', $user->works[0]->position == '4', ['disabled' => 'disabled'])?>各級學校人事承辦人 </label>
+        </td>
     </tr>
     <tr>
-        <td style="center">
-            <p><?=Form::radio('', '', $user->works[0]->type == '1')?>教育部 </p>
-            <p><?=Form::radio('', '', $user->works[0]->type == '2')?>縣市政府承辦人 </p>
-            <p><?=Form::radio('', '', $user->works[0]->type == '0')?>師培大學承辦人 </p>
-            <p><?=Form::radio('', '', $user->works[0]->type == '3')?>其他 </p>
-        </td>
-        <td><?=Form::checkbox('', '', $member->contact->exists())?>師資培育長期追蹤資料庫調查（含問卷查詢平台、線上分析系統等）</td>
+        <td><p>欲申請權限</p></td>
+        <td>師資培育長期追蹤資料庫調查（含問卷查詢平台、線上分析系統等）</td>
+    </tr>
+    <tr>
+        <td><p>書面審核單位地址</p></td>
         <td>106台北市大安區和平東路一段129號 臺師大教育研究與評鑑中心教育資料組收</td>
+    </tr>
+    <tr>
+        <td><p>聯絡電話</p></td>
         <td>02-77343669</td>
     </tr>
 </table>

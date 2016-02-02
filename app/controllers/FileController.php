@@ -236,11 +236,13 @@ class FileController extends BaseController {
         }
     }
 
-    public function page($context = 'intro', $parameter = null)
+    public function page($context = null, $parameter = null)
     {
         $member = $this->user->members()->logined()->orderBy('logined_at', 'desc')->first();
 
-        $contents = View::make('project.main', ['project' => $member->project])->nest('context','project.' . $member->project->code . '.' . $context);
+        $context = $context ? 'project.' . $member->project->code . '.' . $context : 'project.intro';
+
+        $contents = View::make('project.main', ['project' => $member->project])->nest('context',$context);
 
         $this->layout->content = $contents;
 

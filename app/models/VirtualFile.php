@@ -35,7 +35,7 @@ class RequestFile extends Eloquent {
 
     public $timestamps = true;
 
-    protected $fillable = array('doc_id', 'target', 'target_id', 'created_by', 'description');
+    protected $fillable = array('doc_id', 'target', 'target_id', 'description', 'disabled', 'created_by');
 
     public function isDoc() {
         return $this->hasOne('ShareFile', 'id', 'doc_id');
@@ -52,6 +52,8 @@ class FileType extends Eloquent {
 }
 
 class ShareFile extends Eloquent {
+
+    use SoftDeletingTrait;
 
     protected $table = 'docs';
 

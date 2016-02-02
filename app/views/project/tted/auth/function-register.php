@@ -2,23 +2,35 @@
 
 return [
 
-    'departments' => function() {
+    'citys' => function() {
 
-        $citys = DB::table('public.dbo.university_school')
-            ->where('year', 103)
-            ->whereNotNull('cityname')
-            ->groupBy('cityname')
-            ->select('cityname')
+        $citys = DB::table('plat_public.dbo.lists')
+            ->where('type', 'city')
+            ->select('name', 'code')
             ->get();
 
-        $schools = DB::table('public.dbo.university_school')
-            ->where('year', 103)
-            ->orderBy('cityname', 'ASC', 'id')
-            ->groupBy('cityname', 'name', 'id', 'type')
-            ->select('id', 'name', 'type', 'cityname')
-            ->get();
+        return ['citys' => $citys];
+    },
 
-        return ['citys' => $citys, 'schools' => $schools];
+    'schools' => function() {
+
+        if (Input::get('position') == 0) {
+            $schools = DB::table('plat_public.dbo.university_school')
+                ->where('year', 103)
+                ->where('citycode', Input::get('city_code'))
+                ->select('id', 'name')
+                ->get();
+        }
+
+        if (Input::get('position') == 4) {
+            $schools = DB::table('plat_public.dbo.row_20151023_200635_34isc')
+                ->where('C409', Input::get('city_code'))
+                ->select('C413 AS id', 'C414 AS name')
+                ->get();
+        }
+
+        return ['schools' => $schools];
+
     },
 
 ];

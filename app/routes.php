@@ -27,9 +27,7 @@ Route::group(array('before' => 'auth|limit'), function() {
     Route::post('docs/lists', 'FileController@docs');
     Route::post('apps/lists', 'FileController@apps');
     Route::post('docs/share/get', 'FileController@shared');
-    Route::post('docs/share/put', 'FileController@shareTo');
     Route::post('docs/request/get', 'FileController@requested');
-    Route::post('docs/request/put', 'FileController@requestTo');
     Route::any('page/project/{context?}/{parameter?}', 'FileController@page');
 
     Route::get('project/{project?}/profile/{parameter?}', 'UserController@profile');
@@ -38,6 +36,11 @@ Route::group(array('before' => 'auth|limit'), function() {
     Route::get('auth/password/change', array('before' => '', 'uses' => 'UserController@passwordChangePage'));
     Route::post('auth/password/change', array('before' => 'csrf|post_delay', 'uses' => 'UserController@passwordChange'));
 
+});
+
+Route::bind('project', function($value, $route)
+{
+    return Plat\Project::where('code', $value)->firstOrFail();
 });
 
 Route::get('project/{project}/password/remind', 'UserController@remindPage');
@@ -54,6 +57,7 @@ Route::get('project/{project}/register/help', 'UserController@help');
 Route::post('project/{project}/register/save', array('before' => 'csrf|post_delay', 'uses' => 'UserController@registerSave'));
 Route::get('project/{project}/register/finish/{token}', 'UserController@registerFinish');
 Route::get('project/{project}/register/print/{token}', 'UserController@registerPrint');
+Route::get('project/{project}/register/ajax/{method}', 'UserController@registerAjax');
 
 Route::get('api/projects', 'ApiController@projects');
 Route::get('api/news/{project_id}/{to}/{from?}', 'ApiController@news');

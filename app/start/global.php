@@ -60,7 +60,11 @@ App::error(function(Plat\Files\FileFailedException $exception) {
 });
 
 App::error(function(Plat\Files\ValidateException $exception) {
-    return Redirect::back()->withErrors($exception->validator)->withInput();
+    if (Request::ajax()) {
+        return Response::json(['errors' => $exception->validator->errors()->all()]);
+    } else {
+        return Redirect::back()->withErrors($exception->validator)->withInput();
+    }
 });
 
 App::error(function(Plat\Files\TokenMismatchException $exception) {
@@ -99,7 +103,7 @@ App::missing(function($exception) {
 
 App::down(function()
 {
-    return Response::make(View::make('project.maintenance'), 503);//View::make("project.maintenance", 503);
+    return Response::make(View::make('maintenance'), 503);//View::make("maintenance", 503);
 });
 
 /*

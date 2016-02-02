@@ -20,6 +20,6 @@
         <div class="ui submit green fluid button" onclick="loginForm.submit()">登入</div>
     </div>
     <div class="field">
-        <a class="ui submit fluid button" href="/project/<?=$project?>/register">註冊帳號</a>
+        <a class="ui submit fluid button" href="/project/<?=$project->code?>/register">註冊帳號</a>
     </div>
 <?=Form::close()?>

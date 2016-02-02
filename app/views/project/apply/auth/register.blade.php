@@ -9,34 +9,34 @@
         
             <div class="field">
                 <label>登入帳號 (e-mail)</label>
-                <?=Form::text('email', '', array())?>
+                <?=Form::text('user[email]', '', array())?>
             </div>
 
             <div class="two fields">
                 <div class="field">
                     <label>姓名</label>
-                    <?=Form::text('name', '', array())?>
+                    <?=Form::text('user[username]', '', array())?>
                 </div>
                 <div class="field">                            
                     <label>職稱</label>
-                    <?=Form::text('title', '', array())?>
+                    <?=Form::text('user[contact][title]', '', array())?>
                 </div>
             </div>
 
             <div class="field">
                 <label>聯絡電話(服務單位)</label>
-                <?=Form::text('tel', '', array())?>
+                <?=Form::text('user[contact][tel]', '', array())?>
             </div>
 
             <div class="field">
                 <label>服務單位</label>
-                <?=Form::select('sch_id', [
+                <?=Form::select('user[work][sch_id]', [
                     '' => '選擇您服務的單位',
-                    '9999' => '其他'], Input::old('sch_id'), ['ng-model' => 'sch_id', 'ng-init' => 'sch_id=\'' . Input::old('sch_id') . '\''])?>
+                    '9999' => '其他'], Input::old('user[work][sch_id]'), ['ng-model' => 'sch_id', 'ng-init' => 'sch_id=\'' . Input::old('user[work][sch_id]') . '\''])?>
             </div>
             <div class="field" ng-if="sch_id=='9999'">
                 <label>單位名稱</label>
-                <?=Form::text('sch_name', '', array())?>
+                <?=Form::text('user[work][sch_name]', '', array())?>
             </div>       
         
             <div class="ui error message">

@@ -1,6 +1,6 @@
 <?php
 
-$news = DB::table('news')->where('project', $project->id)->whereNull('deleted_at')->orderBy('publish_at', 'desc')->get();
+$news = $project->news()->orderBy('publish_at', 'desc')->get();
 
 foreach($news as $new) { 
     $publish_at = new Carbon\Carbon($new->publish_at);

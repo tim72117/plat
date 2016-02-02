@@ -93,7 +93,7 @@
         <?=Form::close()?>
 
         <div class="ui bottom attached warning message">
-            @include('project.auth.login-bottom')
+            @include('project.auth-login-bottom')
         </div>
     </div>
 

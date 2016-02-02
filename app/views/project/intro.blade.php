@@ -1,5 +1,5 @@
 
-<div class="ui basic segment" style="max-width:800px">
+<div class="ui basic segment" style="max-width:1000px">
 
     <div class="ui top attached segment">
         <p>本系統不支援IE7以下版本，請更新您的瀏覽器版本</p>
@@ -14,15 +14,15 @@
             <img src="/images/browser_firefox.png" height="20" border="0" style="margin-bottom:-4px" /></a>
         </p>
     </div>
-
+    
     <div class="ui attached segment">
         <div class="ui list large">
-            @include('project.intro_files')
-        </div>
+            @include('project.intro-news')
+        </div>    
     </div>
-
+    
     <div class="ui bottom attached warning message">
         <i class="warning icon"></i>登入後請盡速確認承辦人個人資料。
     </div>
-
+    
 </div>

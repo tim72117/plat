@@ -14,7 +14,12 @@ class Project extends Eloquent {
 
     public function members()
     {
-        return $this->hasMany('Member', 'project_id', 'id');
+        return $this->hasMany('Plat\Member', 'project_id', 'id');
+    }
+
+    public function news()
+    {
+        return $this->hasMany('Plat\News', 'project_id', 'id');
     }
 
     public function getRegisterAttribute($value)
@@ -78,5 +83,13 @@ class Applying extends Eloquent {
     {
         return $this->hasOne('Plat\Member', 'id', 'member_id');
     }
+
+}
+
+class News extends Eloquent {
+
+    use SoftDeletingTrait;
+
+    protected $table = 'news';
 
 }

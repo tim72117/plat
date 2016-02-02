@@ -17,7 +17,15 @@ class User extends \User {
 
 class School extends Eloquent {
 
-    protected $table = 'public.dbo.university_school';
+    protected $table = 'plat_public.dbo.university_school';
+
+    public $timestamps = false;
+
+}
+
+class Department extends Eloquent {
+
+    protected $table = 'plat_public.dbo.row_20151023_200635_34isc';
 
     public $timestamps = false;
 
@@ -29,10 +37,14 @@ class Work extends Eloquent {
 
     public $timestamps = true;
 
-    protected $fillable = array('sch_id', 'type');
+    protected $fillable = array('sch_id', 'position');
 
     public function schools() {
         return $this->hasMany('Project\Teacher\School', 'id', 'sch_id');
+    }
+
+    public function departments() {
+        return $this->hasMany('Project\Teacher\Department', 'C413', 'sch_id');
     }
 
 }

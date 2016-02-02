@@ -37,7 +37,7 @@ Route::filter('auth', function($route)
 {
     if (Auth::guest()) {
         $project = $route->getParameter('project');
-        $url = isset($project) ? 'project/' . $project : 'project';
+        $url = isset($project) ? 'project/' . $project->code : 'project';
         return Redirect::guest($url);
     }
 });

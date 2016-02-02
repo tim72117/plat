@@ -67,19 +67,17 @@
                         <i class="icon help outline"></i>有什麼新功能
                     </div>
                 </div>
-                <div class="right floated right aligned six wide column">
+                <div class="right floated right aligned nine wide column">
                     <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
                     <div class="ui basic mini buttons">
                         <div class="ui button" ng-click="prev()"><i class="icon angle left arrow"></i></div>
                         <div class="ui button" ng-click="next()"><i class="icon angle right arrow"></i></div>
                     </div>
-                    <div class="ui basic mini buttons">
-                        <div class="ui button" ng-click="all()"><i class="icon unhide"></i>顯示全部</div>
-                    </div>
+                    <div class="ui basic mini button" ng-click="all()"><i class="icon unhide"></i>顯示全部</div>
                 </div>
             </div>
 
-            <table class="ui compact table">
+            <table class="ui very compact table">
                 <thead>
                     <tr>
                         <th></th>
@@ -146,7 +144,7 @@
                         </td>
                         <td width="140">
                             <div class="ui inline labeled icon dropdown mini basic button" ng-dropdown-menu ng-if="doc.tools.length>0" ng-click="getPosition(doc, $event)">
-                                <span class="text">更多資訊</span><i class="dropdown icon"></i>
+                                <span class="text">更多</span><i class="dropdown icon"></i>
                                 <div class="menu transition" tabindex="-1">
                                     <a href="/doc/{{ doc.id }}/{{ tool.method }}" class="item" ng-repeat="tool in doc.tools" ng-click="getInformation()">
                                         <i class="icon" ng-class="tool.icon"></i>
