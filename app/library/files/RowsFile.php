@@ -52,7 +52,7 @@ class RowsFile extends CommFile {
         'other'            => ['sort' => 16, 'type' => 'tinyInteger',             'title' => 'TTED外加名額',              'validator' => 'in:0,1,2,3,4,5,6,7,8,9,10'],
         'stdyear'          => ['sort' => 18, 'type' => 'string',   'size' => 1,   'title' => 'TTED年級',                  'validator' => 'in:1,2,3,4,5,6,7'],
         'string_dot'       => ['sort' => 19, 'type' => 'string',   'size' => 100, 'title' => '文字(逗號分隔)',            'regex'     => '/^[\x{0080}-\x{00FF},]+$/'],
-        'float_hundred'    => ['sort' => 20, 'type' => 'string',   'size' => 8,   'title' => '小數(1-100)',               'validator' => ['regex:/^(([0-9]|[1-9][0-9])(\\.[0-9]{1,5})?|100)$/']],
+        'float_hundred'    => ['sort' => 20, 'type' => 'string',   'size' => 8,   'title' => '小數(1-100,-7)',            'validator' => ['regex:/^(([0-9]|[1-9][0-9])(\\.[0-9]{1,5})?|100|-7)$/']],
     ];
 
     /**
