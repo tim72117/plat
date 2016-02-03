@@ -1,18 +1,17 @@
 <?php
 
-$news = $project->news()->orderBy('publish_at', 'desc')->limit(3)->get();
+$posts = $project->posts()->limit(3)->get();
+$now = Carbon\Carbon::now();
 
 $event = '';
 
-foreach($news as $new) {
+foreach($posts as $post) {
 
-    $publish_at = new Carbon\Carbon($new->publish_at);
+    $publish_at = new Carbon\Carbon($post->publish_at);
 
-    $now = Carbon\Carbon::now();
+    $difference = $publish_at->diffInDays($now, false);
 
-    $difference = ($publish_at->diff($now)->days);
-
-    if( json_decode($new->display_at)->intro ) {
+    if (json_decode($post->display_at)->intro && $publish_at->diffInSeconds($now, false) > 0) {
 
         $event .= '<div class="event">';
 
@@ -22,10 +21,10 @@ foreach($news as $new) {
 
         $event .= '<div class="content">';
         $event .=    '<div class="summary">';
-        $event .=       $new->title;
+        $event .=       $post->title;
         $event .=       '<div class="date">' . '  ' . $difference . '天前</div>';
         $event .=    '</div>';
-        $event .=    '<div class="extra text">' . $new->context . '</div>';
+        $event .=    '<div class="extra text">' . $post->context . '</div>';
         $event .=    '<div class="meta">';
         // $event .=       '<a class="like"><i class="like icon"></i> 4 Likes </a>';
         $event .=    '</div>';

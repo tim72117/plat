@@ -8,7 +8,7 @@
         <p>設定密碼</p>
     </div>
 
-    <?=Form::open(array('url' => 'project/' . Request::segment(2) . '/password/reset/' . $token, 'method' => 'post', 'class' => 'ui warning form attached fluid segment'.($errors->isEmpty() ? '' : ' error'), 'name' => 'resetForm'))?>
+    <?=Form::open(array('url' => 'project/' . $project->code . '/password/reset/' . $token, 'method' => 'post', 'class' => 'ui warning form attached fluid segment'.($errors->isEmpty() ? '' : ' error'), 'name' => 'resetForm'))?>
         <div class="ui error message">
             <div class="header">資料錯誤</div>
             <p><?=implode('、', array_filter($errors->all()))?></p>

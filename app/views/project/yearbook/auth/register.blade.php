@@ -72,7 +72,7 @@
                     <h3 class="ui header">
                         <i class="icon write"></i>
                         <div class="content">我已經申請過中小學師資培育整合平台帳號
-                            <div class="sub header">請點選 <?=link_to('/project/yearbook/profile/power', '申請師資培育統計定期填報系統')?></div>
+                            <div class="sub header">請點選 <?=link_to('/project/tted/profile/power', '申請師資培育統計定期填報系統')?></div>
                             <div class="sub header">登入後，在師資培育統計年報項目後點選申請按鈕</div>
                         </div>
                     </h3>

@@ -155,7 +155,7 @@ class UserController extends BaseController {
                 return Redirect::back()->withErrors(['error' => Lang::get($response)]);
 
             case Password::PASSWORD_RESET:
-                return Redirect::to('project/' . $project);
+                return Redirect::to('project/' . $project->code);
         }
     }
 

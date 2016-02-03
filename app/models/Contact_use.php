@@ -17,7 +17,7 @@ class User extends \User {
 
 class School extends Eloquent {
 
-    protected $table = 'public.dbo.secondary_school';
+    protected $table = 'plat_public.dbo.secondary_school';
 
     public $timestamps = false;
 

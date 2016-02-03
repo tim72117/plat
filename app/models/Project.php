@@ -17,9 +17,9 @@ class Project extends Eloquent {
         return $this->hasMany('Plat\Member', 'project_id', 'id');
     }
 
-    public function news()
+    public function posts()
     {
-        return $this->hasMany('Plat\News', 'project_id', 'id');
+        return $this->hasMany('Plat\Post', 'project_id', 'id')->orderBy('publish_at', 'desc');
     }
 
     public function getRegisterAttribute($value)
@@ -86,10 +86,14 @@ class Applying extends Eloquent {
 
 }
 
-class News extends Eloquent {
+class Post extends Eloquent {
 
     use SoftDeletingTrait;
 
     protected $table = 'news';
+
+    public $timestamps = true;
+
+    protected $fillable = array('title', 'context', 'publish_at', 'display_at', 'created_by');
 
 }
