@@ -114,8 +114,6 @@ class CommFile {
         return Response::download($file_path, $this->file->title);
     }
 
-    public function save_as() { }
-
     private function decodeInput($input)
     {
         return json_decode(urldecode(base64_decode($input)));

@@ -9,7 +9,7 @@ class Sheet extends Eloquent {
 
     public $timestamps = true;
 
-    protected $fillable = array('title', 'editable');
+    protected $fillable = array('title', 'editable', 'fillable');
 
     public function getEditableAttribute($value) {
         return (boolean)$value;
@@ -18,6 +18,7 @@ class Sheet extends Eloquent {
     public function tables() {
         return $this->hasMany('Row\Table', 'sheet_id', 'id');
     }
+
 }
 
 class Table extends Eloquent {
@@ -35,6 +36,7 @@ class Table extends Eloquent {
     public function columns() {
         return $this->hasMany('Row\Column', 'table_id', 'id');
     }
+
 }
 
 class Column extends Eloquent {
@@ -62,4 +64,5 @@ class Column extends Eloquent {
     public function inTable() {
         return $this->belongsTo('Row\Table', 'table_id');
     }
+
 }

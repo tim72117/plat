@@ -2,31 +2,31 @@
 
 <table ng-repeat="table in sheet.tables" class="ui attached very compact collapsing table">
     <thead>
-        <tr>                            
+        <tr>
             <th colspan="9">
                 <div class="ui search selection dropdown active visible" ng-click="visible['sheets']=!visible['sheets'];$event.stopPropagation()">
                     <i class="dropdown icon"></i>
                     <div class="default text" ng-class="{filtered: (file.sheets | filter: {selected: true})[0].name!=''}">輸入資料表名稱</div>
-                    <input type="text" class="search" 
-                        ng-repeat="sheet in file.sheets | filter: {selected: true}" 
+                    <input type="text" class="search"
+                        ng-repeat="sheet in file.sheets | filter: {selected: true}"
                         ng-model="sheet.title" ng-model-options="{ debounce: 500 }"
-                        ng-change="updateSheet(sheet)" ng-click="$event.stopPropagation()" />    
+                        ng-change="updateSheet(sheet)" ng-click="$event.stopPropagation()" />
                     <div class="menu transition" ng-class="{visible: visible['sheets']}" ng-click="$event.stopPropagation()">
                         <div class="item" ng-repeat="sheet in file.sheets" ng-click="action.toSelect(sheet)">{{ sheet.title }}</div>
                     </div>
-                </div>                   
+                </div>
                 <div class="ui right attached basic icon button disabled" ng-click="addSheet()" title="新增資料表"><i class="plus icon"></i></div>
                 <div class="ui red button" ng-click="sheet.editable=true;updateSheet(sheet)" ng-class="{loading: saving, disabled: sheet.editable || table.lock}">
                     <i class="save icon"></i>修改(會移除已上傳資料)
-                </div> 
+                </div>
                 <div class="ui green button" ng-click="sheet.editable=false;updateSheet(sheet)" ng-class="{loading: saving, disabled: !sheet.editable || table.lock}">
                     <i class="save icon"></i>完成(會移除已上傳資料)
-                </div> 
+                </div>
                 <div class="ui red label" ng-if="table.lock"><i class="lock icon"></i>資料已鎖定<div class="detail">{{ table.count }}筆</div></div>
                 <div class="ui checkbox">
                     <input type="checkbox" id="readOnly" ng-true-value="'1'" ng-model="sheet.fillable">
                     <label for="readOnly">可匯入</label>
-                </div>      
+                </div>
             </th>
         </tr>
         <tr>

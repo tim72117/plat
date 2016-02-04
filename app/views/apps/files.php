@@ -430,7 +430,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         .success(function(data, status, headers, config) {
             doc.visible = data.doc.visible;
             doc.saving = false;
-        }).error(function(e){
+        }).error(function(e) {
             doc.visible = !doc.visible;
             console.log(e);
         });
