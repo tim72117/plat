@@ -162,12 +162,12 @@ class RowsFile extends CommFile {
 
     private function add_sheet()
     {
-        return $this->file->sheets()->create(['title' => '']);
+        return $this->file->sheets()->create(['title' => '', 'editable' => true, 'fillable' => true]);
     }
 
     private function add_table($sheet, $database, $name)
     {
-        $sheet->tables()->create(['database' => $database, 'name' => $name, 'construct_at' => Carbon::now()->toDateTimeString()]);
+        $sheet->tables()->create(['database' => $database, 'name' => $name, 'lock' => false, 'construct_at' => Carbon::now()->toDateTimeString()]);
     }
 
     private function init_sheets()
@@ -229,7 +229,11 @@ class RowsFile extends CommFile {
 
     public function update_column()
     {
-        $input = array_only(Input::get('column'), array('name', 'title', 'rules', 'unique', 'encrypt', 'isnull'));
+        $input = Input::only(['column.name', 'column.title', 'column.rules'])['column'];
+
+        $input['unique'] = Input::get('column.unique', false);
+        $input['encrypt'] = Input::get('column.encrypt', false);
+        $input['isnull'] = Input::get('column.isnull', false);
 
         $table = $this->file->sheets->find(Input::get('sheet_id'))->tables->find(Input::get('table_id'));
 
@@ -937,4 +941,5 @@ class RowsFile extends CommFile {
 
         return $errors;
     }
+
 }
