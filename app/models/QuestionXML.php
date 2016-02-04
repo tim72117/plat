@@ -9,11 +9,12 @@ class Census extends Eloquent {
 
     public $timestamps = false;
 
-    protected $fillable = array('title', 'dir', 'edit');
+    protected $fillable = array('title', 'dir', 'edit', 'closed');
 
     public function pages() {
         return $this->hasMany('QuestionXML\Pages', 'file_id', 'file_id');
     }
+
 }
 
 class Pages extends Eloquent {
@@ -23,6 +24,7 @@ class Pages extends Eloquent {
     public $timestamps = true;
 
     protected $fillable = array('page', 'xml');
+
 }
 
 class Analysis extends Eloquent {
@@ -40,4 +42,5 @@ class Analysis extends Eloquent {
     public function ques() {
         return $this->hasOne('Files', 'id', 'file_id_ques');
     }
+
 }

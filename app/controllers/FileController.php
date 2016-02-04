@@ -101,7 +101,7 @@ class FileController extends BaseController {
                 $view = View::make($file->$method());
             } else {
                 $member = $this->user->members()->logined()->orderBy('logined_at', 'desc')->first();
-                $context = View::make('project.main', ['project' => $member->project])->nest('context', $file->$method());
+                $context = View::make('project.main', ['project' => $member->project, 'doc' => $doc])->nest('context', $file->$method());
                 $view = $this->createView($context);
             }
         } else {
@@ -203,6 +203,8 @@ class FileController extends BaseController {
             'target'     => 'user',
             'target_id'  => $this->user->id,
             'created_by' => $this->user->id,
+        ], [
+            'visible' => false,
         ]);
     }
 

@@ -38,6 +38,7 @@ class QuesFile extends CommFile {
             'title' => $this->file->title,
             'dir'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))'),
             'edit'  => true,
+            'closed' => false,
         ]);
     }
 

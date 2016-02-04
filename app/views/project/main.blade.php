@@ -80,7 +80,13 @@ app.filter('startFrom', function() {
     <div class="ui attached inverted secondary menu green" ng-controller="topMenuController">
         <div class="menu">
             <a class="item" ng-click="closeLeftMenu()"><i class="sidebar icon"></i></a>
-            <div class="item">{{ $project->name }}</div>
+            <div class="item">
+                <div class="ui breadcrumb">
+                    <div class="section">{{ $project->name }}</div>
+                    <div class="divider"> / </div>
+                    <div class="active section">{{ @$doc->isFile->title }}</div>
+                </div>
+            </div>
         </div>
         <div class="right menu">
             <a class="item" href="/page/project"><i class="home icon"></i>首頁</a>
