@@ -1,8 +1,9 @@
+
 <div ng-cloak ng-controller="rowsEditorController">
 
     <div class="ui basic segment" ng-repeat="sheet in file.sheets" ng-class="{loading: loading}" style="overflow:auto">
 
-        <a class="ui button" href="import">
+        <a class="ui basic button" href="import">
             <i class="reply icon"></i>返回
         </a>
 
@@ -24,11 +25,11 @@
 
             <a class="icon item" ng-class="{disabled: paginate.current_page==paginate.last_page}" ng-click="nextPage()"><i class="right chevron icon"></i></a>
         </div>
-        第{{ paginate.from }}-{{ paginate.to }}列(共有{{ paginate.total }}列)
+
 
 
         <div class="ui left action icon input" ng-class="{loading: loading}">
-            <button class="ui labeled icon button" ng-click="searchText='';getRows(1, '')"><i class="unhide icon"></i> 顯示全部 </button>
+            <button class="ui labeled icon basic button" ng-click="searchText='';getRows(1, '')"><i class="unhide icon"></i> 顯示全部 </button>
             <input type="text" ng-model="searchText" placeholder="搜尋..." />
             <i class="search link icon" ng-click="getRows(1, searchText)"></i>
         </div>
@@ -46,6 +47,9 @@
 
         <table class="ui very compact collapsing table" ng-repeat="table in sheet.tables">
             <thead>
+                <tr>
+                    <th colspan="{{ table.columns.length+3 }}" class="right aligned">第{{ paginate.from }}-{{ paginate.to }}列(共有{{ paginate.total }}列) </th>
+                </tr>
                 <tr>
                     <th class="collapsing">
                         <div class="ui checkbox" ng-click="selectAll()">

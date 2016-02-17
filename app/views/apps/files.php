@@ -1,3 +1,4 @@
+
 <div class="pushable" style="min-height:800px">
 
     <div class="ui sidebar segment" ng-controller="shareController" ng-class="{visible: box.open}" style="max-height:800px;overflow: auto">
@@ -84,7 +85,7 @@
                         <th>檔名</th>
                         <th></th>
                         <th>設定</th>
-                        <th>選單</th>
+                        <th class="collapsing">選單</th>
                         <th>已共用</th>
                         <th>更新時間</th>
                         <th>擁有人</th>
@@ -156,7 +157,7 @@
                         <td width="70">
                             <div class="ui basic icon button" ng-if="doc.type==='1'"><i class="icon settings"></i></div>
                         </td>
-                        <td class="collapsing" ng-class="{disabled: doc.saving}" ng-popup="{show: $first, tooltip: tooltip['menu']}">
+                        <td class="center aligned" ng-class="{disabled: doc.saving}" ng-popup="{show: $first, tooltip: tooltip['menu']}">
                             <div class="ui fitted checkbox" ng-click="setVisible(doc)">
                                 <input type="checkbox" id="{{ ::$id }}" ng-model="doc.visible">
                                 <label for="{{ ::$id }}"></label>

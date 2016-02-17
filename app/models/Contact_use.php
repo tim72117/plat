@@ -47,7 +47,7 @@ class Struct {
             'password'   => $member->user->password=='',
             'email'      => $member->user->email,
             'name'       => $member->user->username,
-            'schools'    => Project\Used\User::find($member->user_id)->schools->map(function($school) {
+            'schools'    => \Project\Used\User::find($member->user_id)->schools->map(function($school) {
                                 return array_only($school->toArray(), array('id', 'sname', 'year'));
                             })->all(),
             'title'  => $member->contact->title,

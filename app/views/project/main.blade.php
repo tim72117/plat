@@ -78,10 +78,14 @@ var app = angular.module('app', ['ngSanitize', 'ngCookies'])
 
     <div class="ui attached inverted secondary menu green">
         <div class="menu">
+            <a class="item" ng-class="{active: openLeftMenu}" ng-click="toggleLeftMenu()"><i class="history icon"></i> 近期存取</a>
             <a class="item" href="/project/intro" ng-class="{active: pathname == '/project/intro'}"><i class="home icon"></i>{{ $project->name }}</a>
-            <a class="item" ng-class="{active: openLeftMenu}" ng-click="toggleLeftMenu()"><i class="search icon"></i></a>
-            <a class="item" href="/docs/management" ng-class="{active: pathname == '/docs/management'}">我的檔案</a>
+
+            <a class="item" href="/docs/management" ng-class="{active: pathname == '/docs/management'}">
+                <i class="folder outline icon" ng-class="{open: pathname == '/docs/management'}"></i> 我的檔案
+            </a>
             <div class="item active" ng-cloak ng-if="pathname.indexOf('doc/') != -1"> / {{ @$doc->isFile->title }}</div>
+            <div class="item active" ng-cloak ng-if="pathname.indexOf('request/') != -1"> / {{ @$request->description }}</div>
         </div>
 
         <div class="right menu">
@@ -95,23 +99,13 @@ var app = angular.module('app', ['ngSanitize', 'ngCookies'])
         <div ng-cloak ng-controller="leftMenuController" class="ui basic segment menu-left" ng-class="{loading: loading}" ng-if="openLeftMenu">
             <div class="ui relaxed divided list">
 
-                <div class="item" ng-repeat="doc in root.docs | orderBy: 'opened_at':true | limitTo:5">
+                <div class="item" ng-repeat="doc in root.docs | orderBy: 'opened_at':true | limitTo:10">
                     <i class="history icon"></i>
                     <div class="content">
                         <a href="@{{ doc.link }}">@{{ doc.title }}</a>
                     </div>
                 </div>
 
-            </div>
-            <div class="ui vertical fluid large menu">
-                <div class="item">
-                    <div class="ui icon transparent input"><input type="text" ng-model="searchText.title" placeholder="搜尋檔案..."><i class="search icon"></i></div>
-                </div>
-                <div class="item" ng-if="searchText.title">
-                    <div class="menu">
-                      <a class="item" ng-repeat="doc in root.docs | filter:searchText | orderBy: 'opened_at':true">@{{ doc.title }}</a>
-                    </div>
-                </div>
             </div>
         </div>
         <div class="context">

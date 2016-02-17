@@ -71,12 +71,14 @@ class FileController extends BaseController {
 
     public function request($request_id, $method = null)
     {
-        $doc_id = RequestFile::find($request_id)->doc_id;
+        $request = RequestFile::find($request_id);
 
-        $doc = ShareFile::find($doc_id);
+        $doc = ShareFile::find($request->doc_id);
         if (!isset($doc)) {
             return $this->no();
         }
+
+        View::share('request', $request);
 
         return $this->active($doc, $method);
     }
