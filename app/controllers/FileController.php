@@ -11,9 +11,19 @@ class FileController extends BaseController {
         Event::fire('ques.open', array());
     }
 
-    public function docs()
+    public function management()
     {
-        $apps = ShareFile::with(['isFile', 'isFile.isType'])->where(function($query) {
+        return $this->createView(View::make('project.main')->nest('context', 'apps.files'));
+    }
+
+    public function project()
+    {
+        return $this->createView(View::make('project.main')->nest('context', 'project.intro'));
+    }
+
+    public function apps()
+    {
+        $apps = ShareFile::with(['isFile', 'isFile.isType', 'isFile.tags'])->where(function($query) {
 
             $query->where(function($query) {
                 $query->where('target', 'user')->where('target_id', $this->user->id);
@@ -33,6 +43,7 @@ class FileController extends BaseController {
             return [
                 'title' => $app[0]->isFile->title,
                 'link'  => 'doc/' . $app[0]->id . '/open',
+                'tags'  => $app[0]->isFile->tags,
             ];
 
         })->toArray();
@@ -85,6 +96,9 @@ class FileController extends BaseController {
             return $this->deny();
         }
 
+        $doc->opened_at = Carbon\Carbon::now()->toDateTimeString();
+        $doc->save();
+
         return $this->active($doc, $method);
     }
 
@@ -100,8 +114,7 @@ class FileController extends BaseController {
             if ($file->is_full()) {
                 $view = View::make($file->$method());
             } else {
-                $member = $this->user->members()->logined()->orderBy('logined_at', 'desc')->first();
-                $context = View::make('project.main', ['project' => $member->project, 'doc' => $doc])->nest('context', $file->$method());
+                $context = View::make('project.main', ['doc' => $doc])->nest('context', $file->$method());
                 $view = $this->createView($context);
             }
         } else {
@@ -212,6 +225,10 @@ class FileController extends BaseController {
     {
         $this->layout->content = $view;
 
+        $member = $this->user->members()->logined()->orderBy('logined_at', 'desc')->first();
+
+        View::share('project', $member->project);
+
         $response = Response::make($this->layout, 200);
         $response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
         $response->header('Pragma', 'no-cache');
@@ -238,28 +255,7 @@ class FileController extends BaseController {
         }
     }
 
-    public function page($context = null, $parameter = null)
-    {
-        $member = $this->user->members()->logined()->orderBy('logined_at', 'desc')->first();
-
-        $context = $context ? 'project.' . $member->project->code . '.' . $context : 'project.intro';
-
-        $contents = View::make('project.main', ['project' => $member->project])->nest('context',$context);
-
-        $this->layout->content = $contents;
-
-        View::share('parameter', $parameter);
-        View::share('project', $member->project);
-
-        $response = Response::make($this->layout, 200);
-        $response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
-        $response->header('Pragma', 'no-cache');
-        $response->header('Last-Modified', gmdate( 'D, d M Y H:i:s' ).' GMT');
-
-        return $response;
-    }
-
-    public function apps()
+    public function docs()
     {
         $docs = ShareFile::with(['isFile', 'isFile.isType', 'shareds', 'requesteds'])->where(function($query) {
 

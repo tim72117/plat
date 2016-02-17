@@ -7,7 +7,7 @@
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
 <script src="/js/angular/1.4.7/angular.min.js"></script>
 
-<link rel="stylesheet" href="/css/Semantic-UI/2.1.6/semantic.min.css" />
+<link rel="stylesheet" href="/css/Semantic-UI/2.1.8/semantic.min.css" />
 
 <script>
 var app = angular.module('app', []);
@@ -65,7 +65,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 
         <div class="ui basic segment">
             <div class="ui small breadcrumb">
-                <a class="section" href="/page/project">查詢平台</a>
+                <a class="section" href="/project/intro">查詢平台</a>
                 <i class="right chevron icon divider"></i>
                 <div class="active section">選擇資料庫</div>
             </div>
