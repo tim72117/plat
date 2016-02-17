@@ -37,7 +37,7 @@ Route::filter('auth', function($route)
 {
     if (Auth::guest()) {
         $project = $route->getParameter('project');
-        $url = isset($project) ? 'project/' . $project->code : 'project';
+        $url = isset($project) ? 'project/' . $project->code : 'project/' . Config::get('project.default');
         return Redirect::guest($url);
     }
 });
@@ -61,7 +61,7 @@ Route::filter('auth.basic', function()
 
 Route::filter('guest', function()
 {
-    if (Auth::check()) return Redirect::to('page/project');
+    if (Auth::check()) return Redirect::to('project/intro');
 });
 
 /*

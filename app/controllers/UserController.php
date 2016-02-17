@@ -29,23 +29,8 @@ class UserController extends BaseController {
 
     public function __construct() {}
 
-    public function logout()
+    public function loginPage($project)
     {
-        $member = Auth::user()->members()->logined()->orderBy('logined_at', 'desc')->first();
-
-        Auth::logout();
-
-        if ($member) {
-            return Redirect::to('project/' . $member->project->code);
-        }
-    }
-
-    public function loginPage($project = null)
-    {
-        if (is_null($project)) {
-            return Redirect::to('project/' . Config::get('project.default'));
-        }
-
         $context = View::exists('project.' . $project->code . '.auth.login') ? 'project.' . $project->code . '.auth.login' : 'project.auth-login';
 
         return $this->createHomeView($project, 'home', $context);
@@ -92,7 +77,7 @@ class UserController extends BaseController {
 
             Auth::login($user, true);
 
-            return Redirect::intended('page/project');
+            return Redirect::intended('project/intro');
 
         } else {
             throw new Plat\Files\ValidateException($validator->getMessageBag()->add('error', '帳號密碼錯誤'));
@@ -156,44 +141,6 @@ class UserController extends BaseController {
 
             case Password::PASSWORD_RESET:
                 return Redirect::to('project/' . $project->code);
-        }
-    }
-
-    public function passwordChangePage()
-    {
-        $member = Auth::user()->members()->logined()->orderBy('logined_at', 'desc')->first();
-
-        $contents = View::make('project.main', ['project' => $member->project])->nest('context','project.passwordChange');
-
-        $this->layout->content = $contents;
-    }
-
-    public function passwordChange()
-    {
-        $input = Input::only('passwordold', 'password', 'password_confirmation');
-
-        $rulls = array(
-            'passwordold'            => $this->auth_rull['password'],
-            'password'               => $this->auth_rull['password_confirmation'],
-            'password_confirmation'  => $this->auth_rull['password'],
-        );
-
-        $validator = Validator::make($input, $rulls, $this->rulls_message);
-
-        if ($validator->fails()) {
-            throw new Plat\Files\ValidateException($validator);
-        }
-
-        $user = Auth::User();
-
-        if (Hash::check($input['passwordold'], $user->password)) {
-            $user->password = Hash::make($input['password']);
-            $user->save();
-            $validator->getMessageBag()->add('passwordold', '密碼設定成功');
-            return Redirect::back()->withErrors($validator);
-        } else {
-            $validator->getMessageBag()->add('passwordold', '舊密碼錯誤');
-            return Redirect::back()->withErrors($validator);
         }
     }
 
@@ -297,70 +244,6 @@ class UserController extends BaseController {
         View::share('project', $project);
 
         return View::make('project.layout-' . $layout)->nest('context', $context, $args)->nest('child_footer', 'project.' . $project->code . '.footer');
-    }
-
-    public function profile($project, $parameter = null)
-    {
-        $member = Auth::user()->members()->where('project_id', $project->id)->first();
-
-        View::share('parameter', $parameter);
-
-        return View::make('project.main', ['project' => $project])->nest('context', 'project.' . $project->code . '.profile', ['member' => $member]);
-    }
-
-    public function profileSave($project, $parameter = null)
-    {
-        switch ($parameter) {
-            case 'power':
-                $attributes = ['user_id' => Auth::user()->id, 'project_id' => Input::get('project_id')];
-                $member = Plat\Member::where($attributes)->withTrashed()->first() ?: new Plat\Member($attributes);
-
-                $member->actived = false;
-
-                require app_path() . '\\views\\project\\' . $project->code . '\\auth\\register_power.php';
-
-                if ($member->trashed()) {
-                    $member->restore();
-                } else {
-                    Auth::user()->members()->save($member);
-                }
-
-                $member->contact()->save(Plat\Contact::firstOrNew(['member_id' => $member->id]));
-
-                $applying = new Plat\Applying(['member_id' => $member->id]);
-
-                $applying->id = sha1(spl_object_hash(Auth::user()) . microtime(true));
-
-                $member->applying()->save($applying);
-                break;
-
-            case 'contact':
-                $member = Auth::user()->members()->where('project_id', $project->id)->first();
-                $member->contact->title = Input::get('title');
-                $member->contact->tel = Input::get('tel');
-                $member->contact->fax = Input::get('fax');
-                $member->contact->email2 = Input::get('email2');
-
-                $member->push();
-                break;
-
-            case 'changeUser':
-                $user = Auth::user();
-                $user->username = Input::get('username');
-                $user->email = Input::get('email');
-                $user->valid();
-                $user->members->each(function($member) {
-                    $member->actived = false;
-                });
-                $user->push();
-                break;
-
-            default:
-                # code...
-                break;
-        }
-
-        return Redirect::to(Request::path());
     }
 
     public function registerAjax($project, $method)

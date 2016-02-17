@@ -26,15 +26,16 @@ Route::group(array('before' => 'auth|limit'), function() {
     Route::post('file/upload', 'FileController@upload');
     Route::post('docs/lists', 'FileController@docs');
     Route::post('apps/lists', 'FileController@apps');
+    Route::get('docs/management', 'FileController@management');
     Route::post('docs/share/get', 'FileController@shared');
     Route::post('docs/request/get', 'FileController@requested');
-    Route::any('page/project/{context?}/{parameter?}', 'FileController@page');
+    Route::get('project/intro', 'FileController@project');
 
-    Route::get('project/{project?}/profile/{parameter?}', 'UserController@profile');
-    Route::post('project/{project?}/profile/{parameter?}', 'UserController@profileSave');
-    Route::get('auth/logout', array('as' => 'logout', 'uses' => 'UserController@logout'));
-    Route::get('auth/password/change', array('before' => '', 'uses' => 'UserController@passwordChangePage'));
-    Route::post('auth/password/change', array('before' => 'csrf|post_delay', 'uses' => 'UserController@passwordChange'));
+    Route::get('project/{project?}/profile/{parameter?}', 'UserAuthedController@profile');
+    Route::post('project/{project?}/profile/{parameter?}', 'UserAuthedController@profileSave');
+    Route::get('auth/logout', array('as' => 'logout', 'uses' => 'UserAuthedController@logout'));
+    Route::get('auth/password/change', array('before' => '', 'uses' => 'UserAuthedController@passwordChangePage'));
+    Route::post('auth/password/change', array('before' => 'csrf|post_delay', 'uses' => 'UserAuthedController@passwordChange'));
 
 });
 

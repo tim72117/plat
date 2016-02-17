@@ -1,6 +1,6 @@
 
 <script src="/js/Highcharts-4.1.8/js/highcharts.js"></script>
-<script src="/css/Semantic-UI/2.1.4/semantic.min.js"></script>
+<script src="/css/Semantic-UI/2.1.8/semantic.min.js"></script>
 <script src="/js/chart/bar.js"></script>
 <script src="/js/chart/pie.js"></script>
 <script src="/js/chart/donut.js"></script>
@@ -9,7 +9,7 @@
 
     <div class="ui basic segment" ng-if="full">
         <div class="ui small breadcrumb">
-            <a class="section" href="/page/project">查詢平台</a>
+            <a class="section" href="/project/intro">查詢平台</a>
             <i class="right chevron icon divider"></i>
             <a class="section" href="open">選擇資料庫</a>
             <i class="right chevron icon divider"></i>

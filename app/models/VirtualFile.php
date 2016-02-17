@@ -27,6 +27,12 @@ class Files extends Eloquent {
     public function configs() {
         return $this->hasMany('Doc\Config', 'file_id', 'id');
     }
+
+    public function tags()
+    {
+        return $this->hasMany('Tag', 'file_id', 'id');
+    }
+
 }
 
 class RequestFile extends Eloquent {
@@ -80,6 +86,19 @@ class ShareFile extends Eloquent {
         return (bool)$value;
     }
 
+    public function getOpenedAtAttribute($value)
+    {
+        return is_null($value) ? Carbon\Carbon::minValue() : Carbon\Carbon::parse($value);
+    }
+
+}
+
+class Tag extends Eloquent {
+
+    protected $table = 'file_tags';
+
+    public $timestamps = false;
+
 }
 
 class Struct_file {
@@ -114,6 +133,7 @@ class Struct_file {
             'title'      => $doc->isFile->title,
             'created_by' => $doc->created_by == Auth::user()->id ? '我' : $doc->created_by,
             'created_at' => $doc->created_at->toIso8601String(),
+            'opened_at'  => $doc->opened_at->toIso8601String(),
             'link'       => '/doc/' . $doc->id . '/open',
             'type'       => $doc->isFile->type,
             'tools'      => isset($tools) ? $tools : [],

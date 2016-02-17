@@ -24,105 +24,100 @@
     background: #aaa;
 }
 .flex {
-    display:-webkit-flex;
-    display:flex;
+    display: -webkit-flex;
+    display: flex;
 }
 .menu-left {
     -webkit-flex: initial;
             flex: initial;
-    width: 300px;
-    min-width: 100px;
-    padding: 5px;
+    min-width: 300px;
+    max-width: 350px;
 }
-.main {
+.context {
     -webkit-flex: 1;
             flex: 1;
-    padding: 5px;
 }
 </style>
 
 <script>
-var app = angular.module('app', ['ngSanitize', 'ngCookies']);
-app.filter('startFrom', function() {
-    return function(input, start) {
-        return input.slice(start);
-    };
-})
-.controller('topMenuController', function($scope, $filter, $http) {
+var app = angular.module('app', ['ngSanitize', 'ngCookies'])
 
-})
-.controller('leftMenuController', function($scope, $filter, $http, $cookies) {
-    $scope.menuMin = $cookies.get('menuMin') || false;
+.controller('mainController', function($scope, $filter, $http, $cookies) {
     $scope.pathname = window.location.pathname;
-    $scope.closeLeftMenu = function() {
-        $scope.menuMin = !$scope.menuMin;
-        $cookies.put('menuMin', $scope.menuMin);
+    $scope.openLeftMenu = false;
+    $scope.toggleLeftMenu = function() {
+        $scope.openLeftMenu = !$scope.openLeftMenu;
     };
+})
+
+.controller('leftMenuController', function($scope, $filter, $http) {
+    $scope.root = {};
     $scope.getDocs = function() {
         $scope.loading = true;
         $http({method: 'POST', url: '/docs/lists', data:{} })
         .success(function(data, status, headers, config) {
-            $scope.apps = data.apps;
-            $scope.requests = data.requests;
+            $scope.root.docs = data.docs;
             $scope.loading = false;
-        }).error(function(e){
+        }).error(function(e) {
             console.log(e);
         });
     };
     $scope.getDocs();
+})
+
+.filter('startFrom', function() {
+    return function(input, start) {
+        return input.slice(start);
+    };
 });
 </script>
 @stop
 
 @section('body')
-<div style="position:absolute;top:0;right:0;bottom:0;left:0">
+<div ng-controller="mainController">
 
-    <div class="ui attached inverted secondary menu green" ng-controller="topMenuController">
+    <div class="ui attached inverted secondary menu green">
         <div class="menu">
-            <a class="item" ng-click="closeLeftMenu()"><i class="sidebar icon"></i></a>
-            <div class="item">
-                <div class="ui breadcrumb">
-                    <div class="section">{{ $project->name }}</div>
-                    <div class="divider"> / </div>
-                    <div class="active section">{{ @$doc->isFile->title }}</div>
-                </div>
-            </div>
+            <a class="item" href="/project/intro" ng-class="{active: pathname == '/project/intro'}"><i class="home icon"></i>{{ $project->name }}</a>
+            <a class="item" ng-class="{active: openLeftMenu}" ng-click="toggleLeftMenu()"><i class="search icon"></i></a>
+            <a class="item" href="/docs/management" ng-class="{active: pathname == '/docs/management'}">我的檔案</a>
+            <div class="item active" ng-cloak ng-if="pathname.indexOf('doc/') != -1"> / {{ @$doc->isFile->title }}</div>
         </div>
+
         <div class="right menu">
-            <a class="item" href="/page/project"><i class="home icon"></i>首頁</a>
-            <a class="item" href="/project/{{ $project->code }}/profile">個人資料</a>
-            <a class="item" href="/auth/password/change">更改密碼</a>
+            <a class="item" href="/project/{{ $project->code }}/profile" ng-class="{active: pathname == '/project/{{ $project->code }}/profile'}">個人資料</a>
+            <a class="item" href="/auth/password/change" ng-class="{active: pathname == '/auth/password/change'}">更改密碼</a>
             <a class="item" href="/auth/logout">登出</a>
         </div>
     </div>
 
     <div class="flex">
-        <div class="menu-left dimmable dimmed" ng-controller="leftMenuController">
-            <div class="ui inverted dimmer" ng-class="{active: loading}">
-                <div class="ui text loader">Loading</div>
-            </div>
-            <div class="ui large fluid vertical menu">
-                <div class="item">
-                    <div class="ui icon small input"><input type="text" ng-model="searchText.title" placeholder="搜尋..."><i class="search icon"></i></div>
-                </div>
-                <div class="item">
-                    <div ng-cloak class="menu" style="overflow-y: auto;max-height:400px">
-                        <a class="header green item" ng-class="{active: pathname == '/'+app.link}" ng-repeat="app in apps | filter: searchText" href="/@{{ app.link }}">@{{ app.title }}</a>
+        <div ng-cloak ng-controller="leftMenuController" class="ui basic segment menu-left" ng-class="{loading: loading}" ng-if="openLeftMenu">
+            <div class="ui relaxed divided list">
+
+                <div class="item" ng-repeat="doc in root.docs | orderBy: 'opened_at':true | limitTo:5">
+                    <i class="history icon"></i>
+                    <div class="content">
+                        <a href="@{{ doc.link }}">@{{ doc.title }}</a>
                     </div>
                 </div>
+
+            </div>
+            <div class="ui vertical fluid large menu">
                 <div class="item">
-                    <div class="header"><i class="cloud upload large icon"></i>待上傳資料</div>
-                    <div ng-cloak class="menu" style="overflow-y: auto;max-height:200px">
-                        <a class="header green item" ng-class="{active: pathname == '/'+request.link}" ng-repeat="request in requests" href="/@{{ request.link }}">@{{ request.title }}</a>
+                    <div class="ui icon transparent input"><input type="text" ng-model="searchText.title" placeholder="搜尋檔案..."><i class="search icon"></i></div>
+                </div>
+                <div class="item" ng-if="searchText.title">
+                    <div class="menu">
+                      <a class="item" ng-repeat="doc in root.docs | filter:searchText | orderBy: 'opened_at':true">@{{ doc.title }}</a>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="main">
+        <div class="context">
             <?=$context?>
         </div>
     </div>
 
 </div>
-
 @stop
