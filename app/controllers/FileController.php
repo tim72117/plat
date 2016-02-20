@@ -62,6 +62,7 @@ class FileController extends BaseController {
             return [
                 'title' => $request->description,
                 'link'  => 'request/' . $request->id . '/import',
+                'created_at' => $request->created_at->toIso8601String(),
             ];
 
         })->toArray();
