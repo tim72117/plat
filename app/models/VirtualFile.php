@@ -50,7 +50,7 @@ class RequestFile extends Eloquent {
 
 class FileType extends Eloquent {
 
-    protected $table = 'files_type';
+    protected $table = 'file_type';
 
     public $timestamps = false;
 

@@ -6,7 +6,7 @@
 
             <h5 class="ui header"><i class="upload icon"></i> 待上傳資料 </h5>
             <div class="ui relaxed divided selection list">
-                <a class="item" ng-repeat="request in requests" href="/@{{ request.link }}">
+                <a class="item" ng-repeat="request in requests | orderBy:'created_at':true" href="/@{{ request.link }}">
                     <div class="left floated content">
                         <div class="header">@{{ request.title }}</div>
                     </div>

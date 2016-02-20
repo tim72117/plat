@@ -90,7 +90,7 @@ class Post extends Eloquent {
 
     use SoftDeletingTrait;
 
-    protected $table = 'news';
+    protected $table = 'project_post';
 
     public $timestamps = true;
 

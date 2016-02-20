@@ -5,7 +5,7 @@ use Eloquent;
 
 class Census extends Eloquent {
 
-    protected $table = 'ques_doc';
+    protected $table = 'file_ques_census';
 
     public $timestamps = false;
 
@@ -19,7 +19,7 @@ class Census extends Eloquent {
 
 class Pages extends Eloquent {
 
-    protected $table = 'ques_page';
+    protected $table = 'file_ques_page';
 
     public $timestamps = true;
 
