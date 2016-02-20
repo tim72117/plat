@@ -1,5 +1,4 @@
 <?php
-
 namespace Plat\Files;
 
 use User;
@@ -36,7 +35,7 @@ class QuesFile extends CommFile {
 
         $census = $this->file->census()->create([
             'title' => $this->file->title,
-            'dir'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM ques_doc) AS VARCHAR(9))'),
+            'dir'   => DB::raw('\'A\'+CAST((SELECT ISNULL(MAX(id)+1,0) FROM file_ques_census) AS VARCHAR(9))'),
             'edit'  => true,
             'closed' => false,
         ]);

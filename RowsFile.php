@@ -786,16 +786,15 @@ class RowsFile extends CommFile {
      */
     public function delete()
     {
-        parent::delete();
-        // $this->doc->shareds->each(function($requested) {
-        //     $requested->delete();
-        // });
+        $this->doc->shareds->each(function($requested) {
+            $requested->delete();
+        });
 
-        // $this->doc->requesteds->each(function($requested) {
-        //     $requested->delete();
-        // });
+        $this->doc->requesteds->each(function($requested) {
+            $requested->delete();
+        });
 
-        return ['deleted' => true];
+        return ['deleted' => parent::delete()];
     }
 
     /**
