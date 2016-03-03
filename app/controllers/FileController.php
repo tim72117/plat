@@ -107,7 +107,7 @@ class FileController extends BaseController {
 
     private function active($doc, $method)
     {
-        $class = 'Plat\\Files\\' . $doc->isFile->isType->class;
+        $class = $doc->isFile->isType->class;
 
         $file = new $class($doc->isFile, $this->user);
 
