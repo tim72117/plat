@@ -134,7 +134,11 @@ class FileController extends BaseController {
 
         $file = $this->createFile(3, Input::file('file_upload')->getClientOriginalName());
 
-        $file->upload(Input::file('file_upload'));
+        $class = $file->isType->class;
+
+        $app = new $class($file, $this->user);
+
+        $app->upload(Input::file('file_upload'));
 
         $doc = $this->createDoc($file);
 
@@ -148,7 +152,11 @@ class FileController extends BaseController {
 
         $file = $this->createFile(Input::get('fileInfo')['type'], Input::get('fileInfo')['title']);
 
-        $file->create();
+        $class = $file->isType->class;
+
+        $app = new $class($file, $this->user);
+
+        $app->create();
 
         $doc = $this->createDoc($file);
 
@@ -203,19 +211,13 @@ class FileController extends BaseController {
 
     private function createFile($type_id, $title)
     {
-        $file = new Files(['type' => $type_id, 'title' => $title]);
-
-        $type = DB::table('files_type')->where('id', $type_id)->first();
-
-        $class = 'Plat\\Files\\' . $type->class;
-
-        return new $class($file, $this->user);
+        return new Files(['type' => $type_id, 'title' => $title]);
     }
 
     private function createDoc($file)
     {
         return ShareFile::updateOrCreate([
-            'file_id'    => $file->id(),
+            'file_id'    => $file->id,
             'target'     => 'user',
             'target_id'  => $this->user->id,
             'created_by' => $this->user->id,

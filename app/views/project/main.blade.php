@@ -5,9 +5,9 @@
 
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
 <script src="/js/jquery-1.11.2.min.js"></script>
-<script src="/js/angular/1.4.9/angular.min.js"></script>
-<script src="/js/angular/1.4.9/angular-sanitize.min.js"></script>
-<script src="/js/angular/1.4.9/angular-cookies.min.js"></script>
+<script src="/js/angular/1.5.0/angular.min.js"></script>
+<script src="/js/angular/1.5.0/angular-sanitize.min.js"></script>
+<script src="/js/angular/1.5.0/angular-cookies.min.js"></script>
 <script src="/css/Semantic-UI/2.1.8/components/transition.min.js"></script>
 <script src="/css/Semantic-UI/2.1.8/components/popup.min.js"></script>
 <script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
