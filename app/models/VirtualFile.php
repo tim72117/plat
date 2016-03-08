@@ -20,6 +20,10 @@ class Files extends Eloquent {
         return $this->hasOne('QuestionXML\Analysis', 'file_id', 'id');
     }
 
+    public function book() {
+        return $this->hasOne('Ques\Book', 'file_id', 'id');
+    }
+
     public function isType() {
         return $this->hasOne('FileType', 'id', 'type');
     }
