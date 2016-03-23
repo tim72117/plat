@@ -26,7 +26,6 @@ class RowsFile extends CommFile {
         'gender_id'   => ['sort' => 2,  'type' => 'tinyInteger',             'title' => '性別: 1.男 2.女(身分證第2碼)',  'validator' => 'in:1,2'],
         'bool'        => ['sort' => 3,  'type' => 'boolean',                 'title' => '是(1)與否(0)',                  'validator' => 'boolean'],
         'stdidnumber' => ['sort' => 4,  'type' => 'string',   'size' => 10,  'title' => '身分證',                        'function' => 'stdidnumber'],
-        'email'       => ['sort' => 5,  'type' => 'string',   'size' => 80,  'title' => '信箱',                          'validator' => 'email'],
         'date_six'    => ['sort' => 6,  'type' => 'string',   'size' => 6,   'title' => '日期(yymmdd)',                  'validator' => ['regex:/^([0-9][0-9])(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$/']],
         'order'       => ['sort' => 7,  'type' => 'string',   'size' => 3,   'title' => '順序(1-99,-7)',                 'validator' => ['regex:/^([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|-7)$/']],
         'score'       => ['sort' => 8,  'type' => 'string',   'size' => 3,   'title' => '成績(A++,A+,A,B++,B+,B,C,-7)',  'validator' => 'in:A++,A+,A,B++,B+,B,C,-7'],
@@ -982,4 +981,79 @@ class RowsFile extends CommFile {
         return $errors;
     }
 
+    public function saveAs()
+    {
+        $dependTable = $this->file->sheets[0]->tables->first();
+        $doc = parent::saveAs();
+        $this->file->sheets->each(function($sheet)use($doc,$dependTable) {
+            $cloneSheet = $sheet->replicate();
+            $cloneSheet->file_id = $doc->file_id;
+            $cloneSheet->save();
+            $sheet->tables->each(function($table)use($cloneSheet,$dependTable) {
+                $cloneTable = $table->replicate();
+                $cloneTable->name = $this->generate_table();
+                $cloneTable->sheet_id = $cloneSheet->id;
+                $cloneTable->lock = true;
+                $cloneTable->save();
+                $cloneTable->depend_tables()->attach($cloneTable->id, array('depend_table_id' => $dependTable->id));
+                $table->columns->each(function($column)use($cloneTable) {
+                    $cloneColumn = $column->replicate();
+                    $cloneColumn->table_id = $cloneTable->id;
+                    $cloneColumn->save();
+                });
+            });
+        });
+    }
+
+    public function getParentTable()
+    {
+        $data = [];
+        $table = $this->file->sheets()->with(['tables.depend_tables.sheet.file'])->first();
+        if (!empty($table->tables[0]->depend_tables[0])) {
+           if ($this->has_table($table->tables[0]->depend_tables[0])) {
+               $data = $table->tables[0]->depend_tables;
+           }
+        }
+        return $data;
+    }
+
+    public function cloneTableData()
+    {
+        $parent_id          = input::get('table_id');
+
+        $child['table']     = $this->file->sheets[0]->tables->first();
+        $child['columns']   = $child['table']->columns->lists('id','name');
+        $child['has_table'] = $this->has_table($child['table']);
+        $child['rows']      = [];
+
+        $parent['table']    = Table::find($parent_id);
+        $parent['sheet']    = $parent['table']->sheet;
+        $parent['columns']  = $parent['table']->columns->lists('name','id');
+        $parent['rows']     = DB::table($parent['table']->database . '.dbo.' . $parent['table']->name)->where('created_by',$this->user->id)->get();
+
+        if (!$child['has_table']) {
+            $this->table_build($child['table']);
+            $child['has_table'] = $this->has_table($child['table']);
+        }
+
+        if ($parent['rows']) {
+            $count = 0;
+            foreach ($parent['rows'] as $row) {
+                foreach ($parent['table']['columns'] as $column) {
+                    $columnTitle    = $parent['columns'][$column->id];
+                    $childColumnId  = $child['columns'][$columnTitle];
+                    $child['rows'][$count]['C'.$childColumnId] = $row->{'C'.$column->id};
+                    $child['rows'][$count]['file_id'] = $parent['sheet']->file_id;
+                    $child['rows'][$count]['created_by'] = $this->user->id;
+                    $child['rows'][$count]['updated_by'] = $this->user->id;
+                    $child['rows'][$count]['created_at'] = Carbon::now()->toDateTimeString();
+                    $child['rows'][$count]['updated_at'] = Carbon::now()->toDateTimeString();
+                }
+                $count++;
+            }
+
+            $rowInsert = DB::table($child['table']->database . '.dbo.' . $child['table']->name)->insert($child['rows']);
+        }
+        return ['child'=>$child,'parent'=>$parent];
+    }
 }

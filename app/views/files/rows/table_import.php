@@ -20,7 +20,17 @@
                 <a class="ui green button" href="rows">
                     <i class="edit icon"></i>編輯名單
                 </a>
+                <div ng-dropdown-menu class="ui green dropdown button pointing top left floating" ng-class="{disabled: parentTables.length == 0}">
+                    <i class="file outline icon"></i>
+                    <span class="text">匯入歷史表單</span>
+                    <div class="menu transition">
+                        <div class="item" ng-repeat="parentTable in parentTables" ng-click="cloneTableData(parentTable.id)">
+                            <i class="file text icon"></i>{{parentTable.sheet.file.title}}
+                        </div>
+                    </div>
+                </div>
             </div>
+
             <md-progress-linear md-mode="determinate" value="{{progress}}" ng-if="sheetLoading"></md-progress-linear>
             <md-divider></md-divider>
             <p style="padding:10px" ng-bind-html="file.comment"></p>
@@ -101,6 +111,7 @@
 <script src="/js/angular-file-upload.min.js"></script>
 
 <script>
+app.requires.push('angularify.semantic.dropdown');
 app.requires.push('angularFileUpload');
 app.controller('uploadController', function($scope, $http, $timeout, FileUploader) {
     $scope.messages = [];
@@ -185,6 +196,31 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
 
     $scope.insert = function(value, index, array) {
         return value.pass && !value.empty && value.exists.length < 1;
+    };
+
+    $scope.getParentTable = function() {
+        $scope.parentTables = [];
+        $http({method: 'POST', url: 'getParentTable', data:{}})
+        .success(function(data, status, headers, config) {
+            console.log(data);
+           $scope.parentTables = data;
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+
+    $scope.getParentTable();
+
+    $scope.cloneTableData = function(table_id) {
+        $scope.sheetLoading = true;
+        var data = {table_id:table_id};
+        $http({method: 'POST', url: 'cloneTableData', data:data})
+        .success(function(data, status, headers, config) {
+        $scope.getStatus();
+        $scope.sheetLoading = false;
+        }).error(function(e){
+            console.log(e);
+        });
     };
 
 });
