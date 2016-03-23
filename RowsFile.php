@@ -197,6 +197,8 @@ class RowsFile extends CommFile {
                         $query->where('created_by', $this->user->id);
                     }
                     $table->count = $query->count();
+                } else {
+                    $this->table_build($table);
                 }
             });
         });
@@ -1029,7 +1031,7 @@ class RowsFile extends CommFile {
         $parent['table']    = Table::find($parent_id);
         $parent['sheet']    = $parent['table']->sheet;
         $parent['columns']  = $parent['table']->columns->lists('name','id');
-        $parent['rows']     = DB::table($parent['table']->database . '.dbo.' . $parent['table']->name)->where('created_by',$this->user->id)->get();
+        $parent['rows']     = DB::table($parent['table']->database . '.dbo.' . $parent['table']->name)->where('created_by',$this->user->id)->whereNull('deleted_at')->get();
 
         if (!$child['has_table']) {
             $this->table_build($child['table']);
@@ -1051,9 +1053,10 @@ class RowsFile extends CommFile {
                 }
                 $count++;
             }
-
-            $rowInsert = DB::table($child['table']->database . '.dbo.' . $child['table']->name)->insert($child['rows']);
+            foreach (array_chunk($child['rows'], 50) as $child_row) {
+                $rowInsert = DB::table($child['table']->database . '.dbo.' . $child['table']->name)->insert($child_row);
+            }
         }
-        return ['child'=>$child,'parent'=>$parent];
+        // return ['child'=>$child,'parent'=>$parent];
     }
 }
