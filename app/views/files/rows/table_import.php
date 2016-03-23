@@ -202,8 +202,7 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
         $scope.parentTables = [];
         $http({method: 'POST', url: 'getParentTable', data:{}})
         .success(function(data, status, headers, config) {
-            console.log(data);
-           $scope.parentTables = data;
+            $scope.parentTables = data;
         }).error(function(e){
             console.log(e);
         });
@@ -216,8 +215,8 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
         var data = {table_id:table_id};
         $http({method: 'POST', url: 'cloneTableData', data:data})
         .success(function(data, status, headers, config) {
-        $scope.getStatus();
-        $scope.sheetLoading = false;
+            $scope.getStatus();
+            $scope.sheetLoading = false;
         }).error(function(e){
             console.log(e);
         });
