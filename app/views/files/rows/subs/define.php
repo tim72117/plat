@@ -1,15 +1,15 @@
 <table ng-repeat="($tindex, sheet) in file.schema.sheets" ng-if="sheet.selected" class="ui compact collapsing table">
     <thead>
-        <tr>                            
-            <th colspan="3">    
+        <tr>
+            <th colspan="3">
                 <div class="ui search selection dropdown active visible" ng-click="visible['sheets']=!visible['sheets'];$event.stopPropagation()">
                     <i class="dropdown icon"></i>
                     <div class="default text" ng-class="{filtered: (file.schema.sheets | filter: {selected: true})[0].name!=''}">輸入資料表名稱</div>
-                    <input type="text" class="search" ng-repeat="sheet in file.schema.sheets | filter: {selected: true}" ng-model="sheet.name" ng-click="$event.stopPropagation()" />    
+                    <input type="text" class="search" ng-repeat="sheet in file.schema.sheets | filter: {selected: true}" ng-model="sheet.name" ng-click="$event.stopPropagation()" />
                     <div class="menu transition" ng-class="{visible: visible['sheets']}" ng-click="$event.stopPropagation()">
                         <div class="item" ng-repeat="sheet in file.schema.sheets" ng-click="action.toSelect(sheet)">{{ sheet.name }}</div>
                     </div>
-                </div>                   
+                </div>
                 <!-- <div class="ui input"><input type="text" placeholder="表格名稱" ng-model="sheet.name" /></div> -->
                 <div class="ui right attached basic icon button" ng-click="addSheet()" title="新增資料表"><i class="plus icon"></i></div>
                 <div class="ui checkbox">

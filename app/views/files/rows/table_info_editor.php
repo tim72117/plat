@@ -1,11 +1,11 @@
 <div ng-cloak ng-controller="newTableController" style="position: absolute;top: 10px;bottom: 10px;left: 10px; right: 10px">
-        
-    <div class="ui segment" ng-class="{loading: loading}">      
-        
+
+    <div class="ui segment" ng-class="{loading: loading}">
+
 <!--         <div class="ui flowing popup" style="width:500px">
             <div class="ui form">
                 <h4 class="ui dividing header">輸入檔案名稱</h4>
-                <div class="field">                        
+                <div class="field">
 
                     <div class="ui input">
                         <input type="text" placeholder="輸入檔案名稱" ng-model="file.title" />
@@ -29,13 +29,13 @@
             <a class="item" href="javascript:void(0)" ng-class="{active: tool==4}" ng-click="changeTool(4)">說明文件</a>
             <div class="item"><p><a href="import">預覽</a></p></div>
             <a class="item" href="javascript:void(0)">
-                <div class="ui basic button" ng-click="saveFile()" ng-class="{loading: saving}"><i class="save icon"></i>儲存</div> 
+                <div class="ui basic button" ng-click="saveFile()" ng-class="{loading: saving}"><i class="save icon"></i>儲存</div>
             </a>
         </div>
 
         <div class="slide-animate" ng-include="'subs?tool=column_limit'" ng-if="tool==2"></div>
         <div class="slide-animate" ng-include="'subs?tool=define'" ng-if="tool==3"></div>
-        <div class="slide-animate" ng-include="'subs?tool=comment'" ng-if="tool==4"></div>      
+        <div class="slide-animate" ng-include="'subs?tool=comment'" ng-if="tool==4"></div>
 
     </div>
 
@@ -56,7 +56,7 @@ app.controller('newTableController', function($scope, $http, $filter, $timeout, 
     $scope.tool = 2;
     $scope.limit = 100;
     $scope.newColumn = {};
-    $scope.action = {}; 
+    $scope.action = {};
     $scope.sheetsPage = 1;
     $scope.loading = true;
 
@@ -70,12 +70,12 @@ app.controller('newTableController', function($scope, $http, $filter, $timeout, 
         {name: '日期(yymmdd)', key: 'date_six', validator: /^[0-9]+-[0-9]+-[0-9]+$/},
         {name: '是與否', key: 'bool', validator: /^[0-1]+$/},
         {name: '整數', key: 'int', validator: /^\d+$/},
-        {name: '小數', key: 'float', validator: /^[0-9]+.[0-9]+$/},        
+        {name: '小數', key: 'float', validator: /^[0-9]+.[0-9]+$/},
         {name: '文字(50字以內)', key: 'nvarchar'},
         {name: '文字(50字以上)', key: 'text'},
         {name: '其他', key: 'other'}
-    ];   
-    
+    ];
+
     $scope.addSheet = function() {
         var sheet = {name:'', tables: [{columns:[], rows:[]}]};
         $scope.file.schema.sheets.push(sheet);
@@ -86,7 +86,7 @@ app.controller('newTableController', function($scope, $http, $filter, $timeout, 
         if( !sheets ) return;
 
         var columns = sheets[0].tables[0].columns;
-        
+
         if( columns.length < 1 || Object.keys(columns[columns.length-1]).length > 1 ) {
             //columns.push(angular.copy($scope.newColumn));
         }
@@ -106,14 +106,14 @@ app.controller('newTableController', function($scope, $http, $filter, $timeout, 
         table.columns.push(newColumn);console.log($scope.newColumn);
         $scope.newColumn = {};
         console.log($scope.newColumn);
-        
+
         if( property.indexOf($scope.newColumn.name) < 0 ) {
 
         }
     };
 
     $scope.removeColumn = function(index, tindex) {
-        $scope.file.schema.sheets[tindex].tables[0].columns.splice(index, 1); 
+        $scope.file.schema.sheets[tindex].tables[0].columns.splice(index, 1);
     };
 
     // $scope.updateColumns = function(sheet) {
@@ -135,59 +135,59 @@ app.controller('newTableController', function($scope, $http, $filter, $timeout, 
     //         console.log(e);
     //     });
     // };
-    
-    $scope.action.toSelect = function(sheet) {          
+
+    $scope.action.toSelect = function(sheet) {
         angular.forEach($filter('filter')($scope.file.schema.sheets, {selected: true}), function(sheet){
             sheet.selected = false;
         });
-        sheet.selected = true;        
-    }; 
-    
+        sheet.selected = true;
+    };
+
     $scope.getFile = function() {
         $scope.loading = true;
         $http({method: 'POST', url: 'get_file', data:{} })
         .success(function(data, status, headers, config) {
             console.log(data);
             $scope.file = data.file;
-            
+
             if( $scope.file.schema.sheets.length > 0 ) {
-                $scope.file.schema.sheets[0].selected = true; 
+                $scope.file.schema.sheets[0].selected = true;
             }else{
                 $scope.addSheet();
-            }  
+            }
 
             $scope.loading = false;
         }).error(function(e){
             console.log(e);
         });
     };
-    
-    $scope.getFile();       
-    
-    $scope.saveFile = function() {     
-        
+
+    $scope.getFile();
+
+    $scope.saveFile = function() {
+
         if( $scope.isEmpty($scope.file.schema.sheets) )
             return false;
         //console.log($scope.file.schema.sheets);return;
-        
+
         $scope.saving = true;
 
         $http({method: 'POST', url: 'save_file', data:{file: $scope.file} })
-        .success(function(data, status, headers, config) { 
-            console.log(data);    
-            $scope.file = data.file;  
-            
+        .success(function(data, status, headers, config) {
+            console.log(data);
+            $scope.file = data.file;
+
             if( $scope.file.schema.sheets.length > 0 ) {
-                $scope.file.schema.sheets[0].selected = true; 
+                $scope.file.schema.sheets[0].selected = true;
             }else{
                 $scope.addSheet();
-            }  
+            }
 
-            $scope.saving = false;              
+            $scope.saving = false;
         }).error(function(e){
             console.log(e);
         });
-    }; 
+    };
 
     $scope.updateFile = function() {
 
@@ -198,7 +198,7 @@ app.controller('newTableController', function($scope, $http, $filter, $timeout, 
         console.log(colHeader.link);
         colHeader.type = 'dropdown';
         colHeader.source = [];
-    };    
+    };
 
     $scope.isEmpty = function(sheets) {
         var emptyColumns = 0;
@@ -213,33 +213,33 @@ app.controller('newTableController', function($scope, $http, $filter, $timeout, 
                     if( !$scope.notNew(column) )
                         return false;
 
-                    if( /^\w+$/.test(column.name ) 
+                    if( /^\w+$/.test(column.name )
                         && column.title.Blength()>0 && column.title.Blength()<50
                         && column.rules
                         && /^[a-z_]+$/.test(column.rules.key)
                     ) {
                         return false;
-                    } else { 
-                        console.log(column);  
+                    } else {
+                        console.log(column);
                         return true;
                     }
 
-                }).length;     
-            }       
-        });    
+                }).length;
+            }
+        });
         return emptyColumns > 0;
-    };  
-    
+    };
+
     $scope.changeTool = function(tool) {
-        $scope.tool = tool;  
-    };    
-    
+        $scope.tool = tool;
+    };
+
     $('#save').popup({
         popup : $('.popup'),
         on    : 'click',
         position: 'bottom left'
     });
-        
+
     $scope.closePopup = function(event) {
         $('#save').popup('hide');
     };
@@ -247,7 +247,7 @@ app.controller('newTableController', function($scope, $http, $filter, $timeout, 
     $scope.notNew = function(column) {
         return Object.keys(column).length > 1;
     };
-    
+
 })
 .factory('XLSXReaderService', ['$q', '$rootScope',
     function($q, $rootScope) {
@@ -275,11 +275,11 @@ app.controller('newTableController', function($scope, $http, $filter, $timeout, 
     return {
         restrict: 'A',
         require: '?ngModel',
-        link: function(scope, element, attrs, ngModel) {            
+        link: function(scope, element, attrs, ngModel) {
             if (!ngModel) return;
 
             // Specify how UI should be updated
-            ngModel.$render = function() {                
+            ngModel.$render = function() {
                 element.html($sce.getTrustedHtml(ngModel.$viewValue || ''));
             };
 
@@ -287,11 +287,11 @@ app.controller('newTableController', function($scope, $http, $filter, $timeout, 
             element.on('blur keyup change', function() {
                 scope.$evalAsync(read);
             });
-            
+
             // Write data to the model
             function read() {
                 var html = element.html();
-                
+
                 ngModel.$setViewValue(html);
             }
         }
@@ -303,6 +303,6 @@ String.prototype.Blength = function() {
 };
 </script>
 
-<style>  
+<style>
 
 </style>

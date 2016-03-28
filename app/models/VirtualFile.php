@@ -121,12 +121,12 @@ class Struct_file {
             break;
             case 5:
                 $tools = [
-                    ['name' => 'edit_information', 'title' => '編輯檔案資訊', 'method' => 'edit_information', 'icon' => 'edit'],
+                    //['name' => 'edit_information', 'title' => '編輯檔案資訊', 'method' => 'edit_information', 'icon' => 'edit'],
                     ['name' => 'analysis',         'title' => '分析結果',     'method' => 'analysis',         'icon' => 'bar chart'],
                 ];
             break;
             case 7:
-                $tools = [['name' => 'information', 'title' => '調查資訊', 'method' => 'information', 'icon' => 'edit']];
+                $tools = [];//[['name' => 'information', 'title' => '調查資訊', 'method' => 'information', 'icon' => 'edit']];
             break;
             default:
             break;
