@@ -3,7 +3,7 @@
 <div class="flex">
 
     <div class="ui basic segment" style="width: 500px">
-        @include('project.news')
+        @include('project.intro-news')
     </div>
 
     <div style="width: 350px;margin-left:20px">
