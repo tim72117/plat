@@ -101,31 +101,3 @@ Route::filter('post_delay', function()
 
     Cache::put('post_delay' . $ip_requested, $ip_requested_cache, 10);
 });
-
-
-Route::filter('limit', function() {
-    $user = Auth::user();
-    $limit = DB::table('user_limit')->where('user_id', $user->id)->select('ip')->first();
-    if (!is_null($limit)) {
-        $ipAllows = explode(",",$limit->ip);
-        $ipPass = false;
-        $myIp = Request::getClientIp();
-        foreach ($ipAllows as $ipAllow ) {
-            $ipRange = explode("-", $ipAllow);
-            if (count($ipRange) > 1) {
-                $ipLongs = array_map(function($ip){
-                    return ip2long($ip);
-                }, $ipRange);
-                $ipLongs[0]<=ip2long($myIp) && $ipLongs[1]>=ip2long($myIp) && $ipPass = true;
-            } else {
-                $myIp == $ipRange[0] && $ipPass = true;
-            }
-        }
-
-        if (!$ipPass) {
-            $project = $user->getProject();
-            Auth::logout();
-            return Redirect::to('project/'.$project)->withErrors(array('limit'=>'您無法存取這個網站'));
-        }
-    }
-});

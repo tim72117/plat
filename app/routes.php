@@ -17,7 +17,7 @@ Route::get('test', function() {
 
 Route::patterns(['doc_id' => '[0-9]+', 'project' => '[a-z]+', 'token' => '[a-z0-9]+', 'project_id' => '[0-9]+']);
 //平台-------------------------------------------------------------------------------------------------------------------------------
-Route::group(array('before' => 'auth|limit'), function() {
+Route::group(array('before' => 'auth'), function() {
 
     Route::any('doc/{doc_id}/{method}', 'FileController@open');
     Route::any('doc/{doc_id}/ajax/{method}', 'FileController@open');
