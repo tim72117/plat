@@ -1,6 +1,6 @@
 <?php
 $schools = [];
-User_use::find(Auth::user()->id)->schools->each(function($school) use(&$schools) {
+Project\Used\User::find(Auth::user()->id)->schools->each(function($school) use(&$schools) {
     $schools['my-schools-' . $school->id] = ['name' => $school->sname, 'shid' => [$school->id]];
 })->toArray();
 
