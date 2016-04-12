@@ -79,29 +79,14 @@
                 <div class="item" ng-class="{active: tool===4}" ng-click="tool=5">迴歸分析</div> -->
                 <div class="right menu">
                     <div class="item">
-
-                        <div class="ui left labeled button">
-                            <div class="ui right pointing label">
-                                <i class="wizard icon"></i>
-                                輸出樣式
-                            </div>
-                            <div class="ui dropdown orange button chart">
-                                <input type="hidden" value="table">
-                                <div class="text"></div>
-                                <div class="menu">
-                                    <div class="item" data-value="table">
-                                        <i class="table icon"></i>表格
-                                    </div>
-                                    <div class="item" data-value="bar">
-                                        <i class="bar chart icon"></i>長條圖
-                                    </div>
-                                    <div class="item" data-value="pie">
-                                        <i class="pie chart icon"></i>圓餅圖
-                                    </div>
+                        <div ng-semantic-dropdown-menu ng-model="result" ng-change="changeChart()" class="ui top pointing dropdown">
+                            <span class="default text"><i class="wizard icon"></i>{{outputType}}</span>
+                            <div class="menu">
+                                <div class="item" ng-repeat="chart in charts" ng-class="{disabled: disabledCharts[chart.name]}" data-value="{{ chart.name }}" >
+                                    <i class="{{ chart.icon }} icon"></i> {{ chart.title }}
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -128,7 +113,7 @@
 </div>
 
 <script>
-var full = full | false;
+var full = full || false;
 app.controller('analysisController', function($scope, $filter, $interval, $http, countService) {
     $scope.tool = 1;
     $scope.frequence = {};
@@ -145,6 +130,15 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
     $scope.counting = false;
     $scope.full = full;
     $scope.auto_length = 500;
+    $scope.outputType = '輸出樣式:表格(預設)';
+    $scope.colPercent = false;
+    $scope.rowPercent = false;
+    $scope.totalPercent = false;
+    $scope.meanSet = 0;
+    $scope.tableOption = '';
+    $scope.tableOptions = ('行% 列% 總和% 平均數 不加').split(' ').map(function (eachOption) { return { abbrev: eachOption }; });
+    //$scope.crossPercent = '';
+    $scope.charts = [{title: '表格', name: 'table', icon: 'table'}, {title: '長條圖', name: 'bar', icon: 'bar chart'}, {title: '圓餅圖', name: 'pie', icon: 'pie chart'}];
 
     $scope.getColumns = function() {
         $scope.loadingQuestions = true;
@@ -167,18 +161,6 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
         .success(function(data, status, headers, config) {
             $scope.targets = data.targets;
             $scope.targets.size = Object.keys($scope.targets.groups).length;
-            //$scope.targets['my'].selected = true;
-            angular.forEach($scope.targets.groups, function(group, group_key) {
-                angular.forEach(group.targets, function(target, target_key) {
-                    $scope.$watch('targets.groups["'+group_key+'"].targets["'+target_key+'"].selected', function(selected) {
-                        if( selected )
-                        {
-                            //var name = $filter('filter')($scope.columns, {selected: true})[0].name;
-                            //$scope.getResult(name, group_key, target_key);
-                        }
-                    });
-                });
-            });
             $scope.loadingTargets = false;
             $scope.loading = $scope.loadingQuestions || $scope.loadingTargets;
         }).error(function(e){
@@ -246,11 +228,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
     }
 
     $scope.setGroup = function(group) {
-        if (!group.selected){
-            group.selected = true;
-        }else{
-            group.selected = false;
-        }
+        group.selected = !group.selected;
     };
 
     $scope.getCount = function() {
@@ -359,27 +337,37 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
 
     $scope.drawBar = function() {
         var targets = $scope.targetsSelected();
-
         bar.series = [];
         bar.xAxis.title = bar.xAxis.title || {};
-        bar.subtitle = bar.subtitle || {};
-        bar.xAxis.title.text = '' ;
+        bar.legend.title.text = '篩選條件';
 
         for (var i in targets) {
             var one = {name: targets[i].name, data: []};
-            if ($scope.selected.columns.length > 0 ){
-                bar.subtitle.text = $scope.selected.columns[0].title;
+            if ($scope.selected.columns.length > 0) {
+                bar.xAxis.title.text = $scope.selected.columns[0].title;
+                bar.xAxis.title.offset = -$scope.selected.columns[0].title.length*12;
+                var total = 0;
+                for(var j in $scope.selected.columns[0].answers) {
+                    total += $scope.frequence[i][$scope.selected.columns[0].answers[j].value]*1 || 0;
+                }
                 for(var j in $scope.selected.columns[0].answers) {
                     var value = $scope.selected.columns[0].answers[j].value;
-                    var amount = $scope.frequence[i][value] | 0;
-                    one.data.push(amount);
+                    var amount = $scope.frequence[i][value]*1 || 0;
+                    var percent = amount*100/total;
+                    one.data.push({y: percent, val: amount});
                 }
-            }else{
-                bar.subtitle.text = $scope.selected.rows[0].title;
+            } else {
+                bar.xAxis.title.text = $scope.selected.rows[0].title;
+                bar.xAxis.title.offset = -$scope.selected.rows[0].title.length*12;
+                var total = 0;
+                for(var j in $scope.selected.rows[0].answers) {
+                    total += $scope.frequence[i][$scope.selected.rows[0].answers[j].value]*1 || 0;
+                }
                 for(var j in $scope.selected.rows[0].answers) {
                     var value = $scope.selected.rows[0].answers[j].value;
-                    var amount = $scope.frequence[i][value] | 0;
-                    one.data.push(amount);
+                    var amount = $scope.frequence[i][value]*1 || 0;
+                    var percent = total == 0 ? 0 : amount*100/total;
+                    one.data.push({y: percent, val: amount});
                 }
             }
 
@@ -399,21 +387,31 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
         var crosstable = $scope.crosstable[Object.keys(targets)[0]];
 
         bar.series = [];
-        bar.subtitle = bar.subtitle || {};
+        bar.legend.title.text = $scope.selected.columns[0].title;
         bar.xAxis.title = bar.xAxis.title || {};
-        bar.subtitle.text = $scope.selected.columns[0].title;
-        bar.xAxis.title.text = $scope.selected.rows[0].title.substring(0,22) ;
+        bar.xAxis.title.text = $scope.selected.rows[0].title;
+        bar.xAxis.title.offset = -$scope.selected.rows[0].title.length*12;
 
         var column_answers = $scope.selected.columns[0].answers;
 
+        var total = {};
+        for(var i in column_answers) {
+            total[i] = 0;
+            var column_key = column_answers[i].value;
+            if(crosstable[column_key]==null){crosstable[column_key]=[]};
+            for(var j in $scope.selected.rows[0].answers) {
+                total[i] += crosstable[column_key][$scope.selected.rows[0].answers[j].value]*1 || 0;
+            }
+        }
         for(var i in column_answers) {
             var column_key = column_answers[i].value;
             var one = {name: column_answers[i].title, data: []};
             if(crosstable[column_key]==null){crosstable[column_key]=[]};
             for(var j in $scope.selected.rows[0].answers) {
                 var value = $scope.selected.rows[0].answers[j].value;
-                var amount = crosstable[column_key][value] | 0;
-                one.data.push(amount);
+                var amount = crosstable[column_key][value] || 0;
+                var percent = total[i] == 0 ? 0 : amount*100/total[i];
+                one.data.push({y: percent, val: amount});
             }
             bar.series.push(one);
         }
@@ -446,14 +444,14 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
                 for(var j in $scope.selected.columns[0].answers) {
                     series.data.push({
                         name: $scope.selected.columns[0].answers[j].title,
-                        y: $scope.frequence[target][$scope.selected.columns[0].answers[j].value] | 0
+                        y: $scope.frequence[target][$scope.selected.columns[0].answers[j].value]*1 || 0
                     });
                 }
             }else{
                 for(var j in $scope.selected.rows[0].answers) {
                     series.data.push({
                         name: $scope.selected.rows[0].answers[j].title,
-                        y: $scope.frequence[target][$scope.selected.rows[0].answers[j].value] | 0
+                        y: $scope.frequence[target][$scope.selected.rows[0].answers[j].value]*1 || 0
                     });
                 }
             }
@@ -468,7 +466,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
     $scope.drawCrossPie = function() {
         var targets = $scope.targetsSelected();
         var crosstable = $scope.crosstable[Object.keys(targets)[0]];
-        var colors = ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#698b22",
+        var colors = ["#7cb5ec", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#698b22",
                       "#8b795e", "#8b8378", "#458b74", "#838b8b", "#00008b", "#cd3333", "#7ac5cd", "#66cd00", "#ee7621", "#ff7256",
                       "#cdc8b1", "#bcee68", "#9bcd9b"]
 
@@ -487,7 +485,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
             if(crosstable[column_key]==null){crosstable[column_key]=[]};
             for(var j in $scope.selected.rows[0].answers) {
                 var value = $scope.selected.rows[0].answers[j].value;
-                var amount = crosstable[column_key][value] | 0;
+                var amount = crosstable[column_key][value]*1 || 0;
                 temp_total = temp_total+amount;
             }
             colum_total[i] = temp_total;
@@ -507,7 +505,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
             if(crosstable[column_key]==null){crosstable[column_key]=[]};
             for(var j in $scope.selected.rows[0].answers) {
                 var value = $scope.selected.rows[0].answers[j].value;
-                var amount = crosstable[column_key][value] | 0;
+                var amount = crosstable[column_key][value]*1 || 0;
                 var percent = (amount/sum_col_row)*100;
                 var brightness = 0.2 - 0.1*(j / $scope.selected.rows[0].answers.length) ;
                 row_series.push({name: $scope.selected.rows[0].answers[j].title, y: Math.floor(percent*100)/100, color: Highcharts.Color(colors[i]).brighten(brightness).get()});
@@ -554,19 +552,25 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
     };
 
     $scope.drawChart = function() {
-        if ($scope.result == 'bar' && $scope.selected.columns.length == 0 )
-            $scope.drawBar();
-        if ($scope.result == 'bar' && $scope.selected.rows.length == 0)
-            $scope.drawBar();
-        if ($scope.result == 'bar' && $scope.selected.columns.length > 0 && $scope.selected.rows.length > 0)
-            $scope.drawCrossBar();
+        if ($scope.selected.columns.length > 0 && $scope.selected.rows.length && Object.keys($scope.targetsSelected()).length > 1) {
+            $scope.disabledCharts = {bar: true, pie:  true};
+            $scope.result = 'table';
+        }else{
+            $scope.disabledCharts = {bar: false, pie:  false};
+            if ($scope.result == 'bar' && $scope.selected.columns.length == 0 )
+                $scope.drawBar();
+            if ($scope.result == 'bar' && $scope.selected.rows.length == 0)
+                $scope.drawBar();
+            if ($scope.result == 'bar' && $scope.selected.columns.length > 0 && $scope.selected.rows.length > 0)
+                $scope.drawCrossBar();
 
-        if ($scope.result == 'pie' && $scope.selected.columns.length == 0)
-            $scope.drawPie();
-        if ($scope.result == 'pie' && $scope.selected.rows.length == 0)
-            $scope.drawPie();
-        if ($scope.result == 'pie' && $scope.selected.columns.length > 0 && $scope.selected.rows.length > 0)
-            $scope.drawCrossPie();
+            if ($scope.result == 'pie' && $scope.selected.columns.length == 0)
+                $scope.drawPie();
+            if ($scope.result == 'pie' && $scope.selected.rows.length == 0)
+                $scope.drawPie();
+            if ($scope.result == 'pie' && $scope.selected.columns.length > 0 && $scope.selected.rows.length > 0)
+                $scope.drawCrossPie();
+        }
     };
 
     $scope.getTotalPercent = function(total, value) {
@@ -580,94 +584,228 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
 
         var total = 0;
         for(var i in answers) {
-            total += $scope.frequence[id][answers[i].value] | 0;
+            total += $scope.frequence[id][answers[i].value]*1 || 0;
         }
         return total;
     }
 
     $scope.getCrossTotal = function(key) {
+        if ($scope.crosstable[key] == null ) {
+            return 0;
+
+        }
         var sum_col_row = 0;
-        if ($scope.crosstable[key] != null ){
-            var crosstable = $scope.crosstable[key];
-            var column_answers = $scope.selected.columns[0].answers;
-            colum_total = [];
+        var crosstable = $scope.crosstable[key];
+        var column_answers = $scope.selected.columns[0].answers;
+        colum_total = [];
 
-
-
-            for(var i in column_answers) {
-                var column_key = column_answers[i].value;
-                var temp_total = 0;
-                for(var j in $scope.selected.rows[0].answers) {
-                    var value = $scope.selected.rows[0].answers[j].value;
-                    var amount = crosstable[column_key][value] | 0;
-                    temp_total = temp_total+amount;
-                }
-                colum_total[i] = temp_total;
+        for(var i in column_answers) {
+            var column_key = column_answers[i].value;
+            var temp_total = 0;
+            for(var j in $scope.selected.rows[0].answers) {
+                var value = $scope.selected.rows[0].answers[j].value;
+                var amount = crosstable[column_key][value]*1 || 0;
+                temp_total = temp_total+amount;
             }
+            colum_total[i] = temp_total;
+        }
 
-            for(var i in column_answers) {
-                sum_col_row = sum_col_row+colum_total[i];
-            }
+        for(var i in column_answers) {
+            sum_col_row = sum_col_row+colum_total[i];
         }
         return sum_col_row;
     }
 
-    $scope.getCrossColumnTotal = function(id,key){
+    $scope.getCrossColumnTotal = function(id, key){
+        if (!$scope.crosstable[id]) {
+            return 0;
+        }
         var sum = 0;
-        if ($scope.crosstable[id] != null ) {
-            var crosstable = $scope.crosstable[id];
+        var crosstable = $scope.crosstable[id];
 
-            if(crosstable[key]==null){crosstable[key]=[]};
-            for(var i in $scope.selected.rows[0].answers) {
-                var value = $scope.selected.rows[0].answers[i].value;
-                var amount = crosstable[key][value] | 0;
-                sum = sum+amount;
-            }
+        if(crosstable[key]==null){crosstable[key]=[]};
+        for(var i in $scope.selected.rows[0].answers) {
+            var value = $scope.selected.rows[0].answers[i].value;
+            var amount = crosstable[key][value]*1 || 0;
+            sum += amount;
         }
         return sum;
     }
 
-    $scope.getCrossRowTotal = function(id,key){
+    $scope.getCrossRowTotal = function(id, key){
+        if (!$scope.crosstable[id]) {
+            return 0;
+        }
         var sum = 0;
-        if ($scope.crosstable[id] != null ){
-            var crosstable = $scope.crosstable[id];
+        var crosstable = $scope.crosstable[id];
 
-
-            for(var i in $scope.selected.columns[0].answers) {
-                var value = $scope.selected.columns[0].answers[i].value;
-                if(crosstable[value]==null){crosstable[value]=[]};
-                var amount = crosstable[value][key] | 0;
-                sum = sum+amount;
-            }
+        for(var i in $scope.selected.columns[0].answers) {
+            var value = $scope.selected.columns[0].answers[i].value;
+            if(crosstable[value]==null){crosstable[value]=[]};
+            var amount = crosstable[value][key]*1 || 0;
+            sum += amount;
         }
         return sum;
     }
 
-    $scope.getFirstCrossRowTotal = function(id,key){
-        var sum = 0;
-        if ($scope.crosstable[id] != null ){
-            var crosstable = $scope.crosstable[id];
+    $scope.$watch('cross_percent', function(val) {
+        $scope.colPercent = val == 'col';
+    });
 
-
-            for(var i in $scope.selected.columns[0].answers) {
-                var value = $scope.selected.columns[0].answers[i].value;
-                if(crosstable[value]==null){crosstable[value]=[]};
-                var amount = crosstable[value][key] | 0;
-                sum = sum+amount;
-            }
-        }
-        return sum;
-    }
-
-
-
-    $('.chart.dropdown').dropdown({onChange: function(value) {
-        $scope.$apply(function() {
-            $scope.result = value;
-        });
+    $scope.changeChart = function() {
         $scope.drawChart();
-    }});
+    };
 
+    $scope.setRowPercent = function() {
+        $scope.colPercent = false;
+        $scope.rowPercent = true;
+        $scope.totalPercent = false;
+        $scope.meanSet = 0;
+    };
+
+    $scope.setColPercent = function() {
+        $scope.colPercent = true;
+        $scope.rowPercent = false;
+        $scope.totalPercent = false;
+        $scope.meanSet = 0;
+    };
+
+    $scope.setTotalPercent = function(){
+        $scope.colPercent = false;
+        $scope.rowPercent = false;
+        $scope.totalPercent = true;
+        $scope.meanSet = 0;
+    }
+
+    $scope.setMean = function() {
+        if(!$scope.meanSet){
+            $scope.colPercent = false;
+            $scope.rowPercent = false;
+            $scope.totalPercent = false;
+            $scope.meanSet = 1;
+        }else{
+            $scope.colPercent = false;
+            $scope.rowPercent = false;
+            $scope.totalPercent = false;
+            $scope.meanSet = 0;
+        }        
+    };
+
+    $scope.setNoPercent = function() {
+        $scope.colPercent = false;
+        $scope.rowPercent = false;
+        $scope.meanSet = 0;
+    };
+
+    $scope.showPercent = function(mode){
+        if (mode == '行%')
+            $scope.setColPercent();
+        if (mode == '列%')
+            $scope.setRowPercent();
+        if (mode == '總和%')
+            $scope.setTotalPercent();
+        if (mode == '平均數')
+            $scope.setMean();
+        if (mode == '不加')
+            $scope.setNoPercent();
+    };
+
+    $scope.getChartHeight = function() {
+        if ($scope.selected.columns.length > 0 && $scope.selected.rows.length == 0) {
+            return $scope.selected.columns[0].answers.length*30+200;
+        }
+        if ($scope.selected.rows.length > 0 && $scope.selected.columns.length == 0) {
+            return $scope.selected.rows[0].answers.length*30+200;
+        }
+        if ($scope.selected.columns.length > 0 && $scope.selected.rows.length > 0) {
+            var height = $scope.selected.rows[0].answers.length*$scope.selected.columns[0].answers.length*10+$scope.selected.rows[0].answers.length*10;
+            return height > 500 ? height : 500;
+        }
+    };
+
+    $scope.getMean = function(answers,id){
+        if (!$scope.frequence[id]) {
+            return 0;
+        }
+        var totalValue = 0;
+        var totalAmount = 0;
+        for(var i in answers) {
+            totalValue += $scope.frequence[id][answers[i].value]*answers[i].value*1 || 0;
+            totalAmount += $scope.frequence[id][answers[i].value]*1 || 0;
+        }
+
+        var mean = totalValue/totalAmount;
+        return mean;
+    };
+
+    $scope.getCrossColumnMean = function(id, key){
+        if (!$scope.crosstable[id]) {
+            return 0;
+        }
+        var totalValue = 0;
+        var totalAmount = 0;
+        var crosstable = $scope.crosstable[id];
+
+        if(crosstable[key]==null){crosstable[key]=[]};
+        for(var i in $scope.selected.rows[0].answers) {
+            var value = $scope.selected.rows[0].answers[i].value;
+            var amount = crosstable[key][value]*1 || 0;
+            totalValue += amount*value;
+            totalAmount += amount;
+        }
+        return totalValue/totalAmount;
+    }
+
+    $scope.getCrossRowMean = function(id, key){
+        if (!$scope.crosstable[id]) {
+            return 0;
+        }
+        var totalValue = 0;
+        var totalAmount = 0;
+        var crosstable = $scope.crosstable[id];
+
+        for(var i in $scope.selected.columns[0].answers) {
+            var value = $scope.selected.columns[0].answers[i].value;
+            if(crosstable[value]==null){crosstable[value]=[]};
+            var amount = crosstable[value][key]*1 || 0;
+            totalValue += amount*value;
+            totalAmount += amount;
+        }
+        return totalValue/totalAmount;
+    }
+
+})
+.directive('ngSemanticDropdownMenu', function($timeout, $window) {
+    return {
+        restrict: 'A',
+        scope: {
+            ngChange: '&'
+        },
+        require: 'ngModel',
+        link: function(scope, element, attrs, ngModelCtrl) {
+            element.dropdown({
+                transition: 'drop',
+                onChange: function(value, text, $choice) {
+                    if (value != scope.ngModel) {
+                        scope.$apply(function() {
+                            ngModelCtrl.$setViewValue(value);
+                        });
+                        scope.ngChange();
+                    };
+                }
+            });
+
+            ngModelCtrl.$render = function() {
+                element.dropdown('set selected', ngModelCtrl.$viewValue);console.log(element.dropdown('get value'));
+            };
+
+            //element.dropdown('set selected', 'bar');
+        },
+        controller: function($scope, $element) {
+            $element.dropdown('set selected', 'bar');
+            console.log($element);
+        }
+    };
 });
 app.filter('groupby', function(){
     return function(items, group){

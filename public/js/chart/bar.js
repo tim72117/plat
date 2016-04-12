@@ -1,20 +1,23 @@
 var bar = {
     chart: {
-        type: 'bar'
+        type: 'bar',
+        marginTop: 20
     },
+    colors: ["#7cb5ec", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#698b22",
+                      "#8b795e", "#8b8378", "#458b74", "#838b8b", "#00008b", "#cd3333", "#7ac5cd", "#66cd00", "#ee7621", "#ff7256",
+                      "#cdc8b1", "#bcee68", "#9bcd9b"],
     title:{
         text: ''
     },
-    subtitle: {
-        text: [],
-        align: 'center',
-        style:{
-            //fontSize: '14px',
-            fontWeight: 'bold',
-            color: '#333333'
-        },
-        
-        y: 380
+    tooltip: {
+        formatter: function() {
+            return '次數: '+this.point.val;
+        }
+    },
+    legend : {
+        title: {
+            text: ''
+        }
     },
     xAxis: {
         categories: [],
@@ -23,21 +26,27 @@ var bar = {
             align: 'left'
         },
         title: {
-            text: [],
-            align: 'low',
+            align: 'high',
+            offset: 0,
+            rotation: 0,
             style:{
-                //fontSize: '14px',
-                fontWeight: 'bold',
-                color: '#333333'
+                fontWeight: 'bold'
             },
-            x: -10,
+            x: 0,
+            y: -10
         }
-                
+
     },
     yAxis: {
         min: 0,
+        max: 100,
         title: {
-            text: '次數',            
+            text: '百分比',
+        },
+        labels: {
+            formatter: function() {
+                return (this.isLast ? this.value + '%' : this.value);
+            }
         }
     },
     plotOptions: {
