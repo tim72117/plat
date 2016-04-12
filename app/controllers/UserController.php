@@ -164,6 +164,8 @@ class UserController extends BaseController {
         $user = new User;
         $user->username = $input['username'];
         $user->email    = $input['email'];
+        $user->actived = false;
+        $user->disabled = false;
         $user->valid();
 
         try {
