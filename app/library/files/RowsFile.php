@@ -41,17 +41,18 @@ class RowsFile extends CommFile {
         'int'         => ['sort' => 17, 'type' => 'integer',                 'title' => '整數',                         'validator' => 'integer'],
         'float'       => ['sort' => 18, 'type' => 'string',   'size' => 80,  'title' => '小數',                         'validator' => ['regex:/^([0-9]|[1-9][0-9]{1,40})(\\.[0-9]{1,39})?$/']],
         'year_four'   => ['sort' => 19, 'type' => 'string',   'size' => 4,   'title' => '西元年(yyyy)',                 'validator' => ['regex:/^(19[0-9]{2})$/']],
+        'j_in_city'   => ['sort' => 20, 'type' => 'string',   'size' => 6,   'title' => '縣市所屬國中',                 'function'  => 'junior_schools_in_city'],
         //師培
-        'tted_sch'         => ['sort' => 10, 'type' => 'string',   'size' => 4,   'title' => 'TTED大專院校學校代碼',      'function' => 'tted_sch'],
-        'tted_depcode_103' => ['sort' => 11, 'type' => 'string',   'size' => 6,   'title' => 'TTED大專院校系所代碼103年', 'function' => 'tted_depcode_103'],
-        'tted_depcode_104' => ['sort' => 11, 'type' => 'string',   'size' => 6,   'title' => 'TTED大專院校系所代碼104年', 'function' => 'tted_depcode_104'],
-        'stdschoolstage'   => ['sort' => 12, 'type' => 'tinyInteger',             'title' => 'TTED教育階段',              'validator' => 'in:1,2,3'],
-        'schoolsys'        => ['sort' => 13, 'type' => 'tinyInteger',             'title' => 'TTED學制別',                'validator' => 'in:1,2'],
-        'program'          => ['sort' => 14, 'type' => 'tinyInteger',             'title' => 'TTED修課資格',              'validator' => 'in:0,1,2,3'],
-        'govexp'           => ['sort' => 15, 'type' => 'tinyInteger',             'title' => 'TTED公費生',                'validator' => 'in:0,1,2,3,4'],
-        'other'            => ['sort' => 16, 'type' => 'tinyInteger',             'title' => 'TTED外加名額',              'validator' => 'in:0,1,2,3,4,5,6,7,8,9,10'],
-        'stdyear'          => ['sort' => 18, 'type' => 'string',   'size' => 1,   'title' => 'TTED年級',                  'validator' => 'in:1,2,3,4,5,6,7'],
-        'string_dot'       => ['sort' => 19, 'type' => 'string',   'size' => 100, 'title' => '文字(逗號分隔)',            'regex'     => '/^[\x{0080}-\x{00FF},]+$/'],
+        'tted_sch'         => ['sort' => 21, 'type' => 'string',   'size' => 4,   'title' => 'TTED大專院校學校代碼',      'function' => 'tted_sch'],
+        'tted_depcode_103' => ['sort' => 22, 'type' => 'string',   'size' => 6,   'title' => 'TTED大專院校系所代碼103年', 'function' => 'tted_depcode_103'],
+        'tted_depcode_104' => ['sort' => 23, 'type' => 'string',   'size' => 6,   'title' => 'TTED大專院校系所代碼104年', 'function' => 'tted_depcode_104'],
+        'stdschoolstage'   => ['sort' => 24, 'type' => 'tinyInteger',             'title' => 'TTED教育階段',              'validator' => 'in:1,2,3'],
+        'schoolsys'        => ['sort' => 25, 'type' => 'tinyInteger',             'title' => 'TTED學制別',                'validator' => 'in:1,2'],
+        'program'          => ['sort' => 26, 'type' => 'tinyInteger',             'title' => 'TTED修課資格',              'validator' => 'in:0,1,2,3'],
+        'govexp'           => ['sort' => 27, 'type' => 'tinyInteger',             'title' => 'TTED公費生',                'validator' => 'in:0,1,2,3,4'],
+        'other'            => ['sort' => 28, 'type' => 'tinyInteger',             'title' => 'TTED外加名額',              'validator' => 'in:0,1,2,3,4,5,6,7,8,9,10'],
+        'stdyear'          => ['sort' => 29, 'type' => 'string',   'size' => 1,   'title' => 'TTED年級',                  'validator' => 'in:1,2,3,4,5,6,7'],
+        'string_dot'       => ['sort' => 30, 'type' => 'string',   'size' => 100, 'title' => '文字(逗號分隔)',            'regex'     => '/^[\x{0080}-\x{00FF},]+$/'],
         'float_hundred'    => ['sort' => 20, 'type' => 'string',   'size' => 8,   'title' => '小數(1-100,-7)',            'validator' => ['regex:/^(([0-9]|[1-9][0-9])(\\.[0-9]{1,5})?|100|-7)$/']],
     ];
 
@@ -665,12 +666,12 @@ class RowsFile extends CommFile {
                 !check_id_number($column_value) && array_push($column_errors, $column->title . '無效');
             },
             'schid_104' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->works) && $this->temp->works = \User_use::find($this->user->id)->works->lists('sch_id');
+                !isset($this->temp->works) && $this->temp->works = \Project\Used\User::find($this->user->id)->works->lists('sch_id');
                 !in_array($column_value, $this->temp->works, true) && array_push($column_errors, '不是本校代碼');
             },
             'depcode_104' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->dep_codes) && $this->temp->dep_codes = DB::table('rows.dbo.row_20150910_175955_h23of')
-                    ->whereIn('C246', \User_use::find($this->user->id)->works->lists('sch_id'))->lists('C248');
+                    ->whereIn('C246', \Project\Used\User::find($this->user->id)->works->lists('sch_id'))->lists('C248');
                 !in_array($column_value, $this->temp->dep_codes, true) && array_push($column_errors, '不是本校科別代碼');
             },
             'tted_sch' => function($column_value, $column, &$column_errors) {
@@ -686,6 +687,11 @@ class RowsFile extends CommFile {
                 !isset($this->temp->dep_codes_104) && $this->temp->dep_codes_104 = DB::table('pub_depcode_tted')
                     ->whereIn('sch_id', \Project\Teacher\User::find($this->user->id)->works->lists('sch_id'))->where('year','=','103')->lists('id');
                 !in_array($column_value, $this->temp->dep_codes_104, true) && array_push($column_errors, '不是本校系所代碼');
+            },
+            'junior_schools_in_city' => function($column_value, $column, &$column_errors) {
+                !isset($this->temp->junior_schools_in_city) && $this->temp->junior_schools_in_city = DB::table('rows.dbo.row_20151022_135158_5xtfu')
+                    ->whereIn('C404', \Project\Used\User::find($this->user->id)->works->lists('sch_id'))->lists('C406');
+                !in_array($column_value, $this->temp->junior_schools_in_city, true) && array_push($column_errors, '不是本縣市所屬學校代碼');
             },
         ];
         return $checkers[$name];
