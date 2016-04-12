@@ -432,6 +432,7 @@ class QuesFile extends CommFile {
 
             if( $question_target=='item_array' ){
                 unset($itemArray);
+                unset($degreeArray);
 
                 $question_id = $question['id'];
                 $question_qtype = $question['qtype'];
@@ -442,6 +443,9 @@ class QuesFile extends CommFile {
 
                 if( isset($question['itemArray']) )
                 $itemArray = $question['itemArray'];
+
+                if( isset($question['degreeArray']) )
+                $degreeArray = $question['degreeArray'];
 
                 if( isset($question['textarea_inf']) )
                 $textarea_inf = $question['textarea_inf'];
@@ -508,31 +512,26 @@ class QuesFile extends CommFile {
                 }
 
                 echo 'item_array'."\n";
-            }
 
-            if( $question_target=='degrees' ){
-                $question_id = $question['id'];
+                if( $question_qtype=='scale' ){
 
-                $questionInSub = $question_array->xpath("//id[.='".$question_id."']/parent::*/answer");
-                $node = $questionInSub[0];
+                    $nodelist = $domnode->getElementsByTagName('degree');
 
-                $domnode = dom_import_simplexml($node);
+                    while($elem = $nodelist->item(0)) {
+                        $elem->parentNode->removeChild($elem);
+                    }
 
-                $nodelist = $domnode->getElementsByTagName('degree');
+                    $degreeArray = isset($question['degreeArray']) ? $question['degreeArray'] : [];
 
-                while($elem = $nodelist->item(0)) {
-                    $elem->parentNode->removeChild($elem);
+                    foreach($degreeArray as $degree){
+                        $degree_title = $degree['title'];
+                        $newitem = new DOMElement('degree');
+                        $innode = $domnode->appendChild( $newitem );
+                        $innode->setAttribute('value', $degree['value']);
+                        $innode->appendChild( new DOMCdataSection($degree_title) );
+                    }
                 }
 
-                $degreeArray = isset($question['degreeArray']) ? $question['degreeArray'] : [];
-
-                foreach($degreeArray as $degree){
-                    $degree_title = $degree['title'];
-                    $newitem = new DOMElement('degree');
-                    $innode = $domnode->appendChild( $newitem );
-                    $innode->setAttribute('value', $degree['value']);
-                    $innode->appendChild( new DOMCdataSection($degree_title) );
-                }
             }
 
         }
