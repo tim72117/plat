@@ -354,11 +354,11 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     };
 
     $scope.getShareds = function() {
-        angular.element('[ng-controller=shareController]').scope().getShareds();
+        $scope.$parent.$broadcast('getShareds', {docs: $filter('filter')($scope.docs, {selected: true})});
     };
 
     $scope.getRequesteds = function() {
-        angular.element('[ng-controller=shareController]').scope().getRequesteds();
+        $scope.$parent.$broadcast('getRequesteds', {docs: $filter('filter')($scope.docs, {selected: true})});
     };
 
     $scope.addDoc = function(type) {
@@ -513,9 +513,8 @@ app.controller('shareController', function($scope, $filter, $http) {
         }
     };
 
-    $scope.getShareds = function() {
-        $scope.docs = $filter('filter')(angular.element('#fileController').scope().docs, {selected: true});
-
+    $scope.$on('getShareds', function(event, message) {
+        $scope.docs = message.docs;
         $http({method: 'POST', url: '/docs/share/get', data:{docs: $scope.docs}})
         .success(function(data, status, headers, config) {
             $scope.groups = data.groups;
@@ -525,11 +524,10 @@ app.controller('shareController', function($scope, $filter, $http) {
         .error(function(e){
             console.log(e);
         });
-    };
+    });
 
-    $scope.getRequesteds = function() {
-        $scope.docs = $filter('filter')(angular.element('#fileController').scope().docs, {selected: true});
-
+    $scope.$on('getRequesteds', function(event, message) {
+        $scope.docs = message.docs;
         $http({method: 'POST', url: '/docs/request/get', data:{docs: $scope.docs}})
         .success(function(data, status, headers, config) {
             $scope.groups = data.groups;
@@ -539,7 +537,7 @@ app.controller('shareController', function($scope, $filter, $http) {
         .error(function(e){
             console.log(e);
         });
-    };
+    });
 
     $scope.getSelectedGroups = function() {
         var groups = [];
@@ -553,7 +551,7 @@ app.controller('shareController', function($scope, $filter, $http) {
 
     $scope.shareTo = function() {
         $scope.wait = true;
-        var doc = $filter('filter')(angular.element('#fileController').scope().docs, {selected: true})[0];
+        var doc = $filter('filter')($scope.docs, {selected: true})[0];
         $http({method: 'POST', url: '/doc/' + doc.id + '/shareTo', data:{groups: $scope.getSelectedGroups()}})
         .success(function(data, status, headers, config) {
             angular.extend(doc, data.doc);
@@ -568,7 +566,7 @@ app.controller('shareController', function($scope, $filter, $http) {
 
     $scope.requestTo = function(description) {
         $scope.wait = true;
-        var doc = $filter('filter')(angular.element('#fileController').scope().docs, {selected: true})[0];
+        var doc = $filter('filter')($scope.docs, {selected: true})[0];
         $http({method: 'POST', url: '/doc/' + doc.id + '/requestTo', data:{groups: $scope.getSelectedGroups(), description: description}})
         .success(function(data, status, headers, config) {
             angular.extend(doc, data.doc);
