@@ -42,6 +42,10 @@
     -webkit-flex: 1;
             flex: 1;
 }
+.no-animate {
+    -webkit-transition: none !important;
+    transition: none !important;
+}
 </style>
 
 <script>
