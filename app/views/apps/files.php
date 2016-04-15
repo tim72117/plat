@@ -144,18 +144,22 @@
                                 <i class="search icon" ng-if="doc.saving"></i>
                             </div>
                         </td>
-                        <td width="140">
-                            <div class="ui inline labeled icon dropdown mini basic button" ng-dropdown-menu ng-if="doc.tools.length>0" ng-click="getPosition(doc, $event)">
-                                <span class="text">更多</span><i class="dropdown icon"></i>
-                                <div class="menu transition" tabindex="-1">
-                                    <a href="/doc/{{ doc.id }}/{{ tool.method }}" class="item" ng-repeat="tool in doc.tools" ng-click="getInformation()">
-                                        <i class="icon" ng-class="tool.icon"></i>
-                                        {{ tool.title }}
-                                    </a>
-                                </div>
-                            </div>
+                        <td class="collapsing">
+                            <md-menu>
+                                <md-button aria-label="更多" class="md-icon-button" ng-click="openMenu($mdOpenMenu, $event)">
+                                    <md-icon><i class="sidebar icon"></i></md-icon>
+                                </md-button>
+                                <md-menu-content width="4">
+                                    <md-menu-item ng-repeat="tool in doc.tools">
+                                        <md-button href="/doc/{{ doc.id }}/{{ tool.method }}">
+                                            <md-icon><i class="icon" ng-class="tool.icon"></i></md-icon>
+                                            {{ tool.title }}
+                                        </md-button>
+                                    </md-menu-item>
+                                </md-menu-content>
+                            </md-menu>
                         </td>
-                        <td width="70">
+                        <td class="collapsing">
                             <div class="ui basic icon button" ng-if="doc.type==='1'"><i class="icon settings"></i></div>
                         </td>
                         <td class="center aligned" ng-class="{disabled: doc.saving}" ng-popup="{show: $first, tooltip: tooltip['menu']}">
@@ -222,7 +226,6 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     };
     $scope.uploading = false;
     $scope.loading = false;
-    $scope.information = {};
     $scope.todo = {share: false, request: false, delete: false};
 
     $interval(function() {
@@ -414,12 +417,6 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         $scope.uploading = false;
     };
 
-    $scope.getPosition = function(Doc, event) {
-        Doc.information = {open: true};
-        $scope.information.x = event.delegateTarget.offsetLeft;
-        $scope.information.y = event.delegateTarget.offsetTop + event.delegateTarget.offsetHeight + 5;
-    };
-
     $scope.reset = function() {
         angular.forEach($scope.docs, function(doc, key){
             doc.selected = false;
@@ -440,6 +437,10 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
 
     $scope.whatNews = function(startup) {
         $scope.$broadcast('popup', {startup: startup});
+    };
+
+    $scope.openMenu = function($mdOpenMenu, event) {
+        $mdOpenMenu(event);
     };
 
 })
