@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-<title>教育部中小學師資培育整合平台</title>
+<title><?=$project->name?></title>
 
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
 <script src="/js/angular/1.4.7/angular.min.js"></script>
