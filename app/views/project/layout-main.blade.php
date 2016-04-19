@@ -6,8 +6,6 @@
 @yield('head')    
 </head>
 
-<body>
-    @yield('body')
-</body>
+@yield('body')
 
 </html>

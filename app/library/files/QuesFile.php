@@ -866,19 +866,17 @@ class QuesFile extends CommFile {
 
     public function get_reports()
     {
-        $reports = DB::table('report')->where('census_id', $this->file->census->id)->select('id', 'contact', 'text', 'explorer', 'solve', 'time')->orderBy('time', 'desc')->get();
-        foreach ($reports as $report) {
-            $report->solve = (bool)$report->solve;
-        }
+        $reports = $this->file->census->reports()->orderBy('time', 'desc')->get();
+
         return ['reports' => $reports];
     }
 
     public function save_report()
     {
-        $report_id = Input::get('report_id');
-        DB::table('report')->where('id', $report_id)->update(['solve' => Input::get('solve')]);
-        $report = DB::table('report')->where('id', $report_id)->select('id', 'contact', 'text', 'explorer', 'solve', 'time')->orderBy('time', 'desc')->first();
-        $report->solve = (bool)$report->solve;
+        $report = \QuestionXML\Report::find(Input::get('report_id'));
+
+        $report->update(['solve' => Input::get('solve')]);
+
         return ['report' => $report];
     }
 }

@@ -17,7 +17,7 @@ class User extends \User {
 
 class Department extends Eloquent {
 
-    protected $table = 'public.dbo.university_school';
+    protected $table = 'plat_public.dbo.university_school';
 
     public $timestamps = false;
 
@@ -47,7 +47,7 @@ class Struct {
             'password'    => $member->user->password=='',
             'email'       => $member->user->email,
             'name'        => $member->user->username,
-            'departments' => Project\Cher\User::find($member->user_id)->departments->toArray(),
+            'departments' => \Project\Cher\User::find($member->user_id)->departments->toArray(),
             'title'  => $member->contact->title,
             'tel'    => $member->contact->tel,
             'fax'    => $member->contact->fax,

@@ -4,18 +4,20 @@
         <meta charset="utf-8">
     </head>
     <body>
-        <h2>重設密碼</h2>
+        <h2>後期中等教育長期追蹤資料庫查詢平臺-註冊通知</h2>
 
         <div>
             親愛的業務承辦人您好：
-            <br />
-            <br />
-            要重設密碼，只需點擊下方連結。此連結會帶你前往一個可以讓你建立新密碼的網頁
-            <br />
-            {{ link_to('project/use/password/reset/'.$token, '重設您的密碼>', array(), $secure = true) }}
-            <br />
-            <br />
-            {{ secure_url('project/use/password/reset/'.$token) }}
+            <p>
+                您已完成後期中等教育長期追蹤資料庫查詢平臺帳號申請，<br>
+                請您點擊下方連結，並立即設定您的密碼。
+            </p>
+            <p>
+                {{ link_to('project/use/password/reset/'.$token, '重設您的密碼', array(), $secure = true) }}
+                <br />
+                <br />
+                網址：{{ secure_url('project/use/password/reset/'.$token) }}
+            </p>
         </div>
 
         <br />

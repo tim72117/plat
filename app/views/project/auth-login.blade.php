@@ -1,20 +1,27 @@
 
-<div class="flex">
+<md-content layout="column" flex layout-padding>
 
-    <div style="width: 350px">
+    <div layout="column" layout-align="center center" style="min-height:120px">
+        <h1 class="md-headline"><?=$project->name?></h1>
 
-        <h3 class="ui top attached center aligned header">
-            <?=$project->name?>
-        </h3>
+    </div>
 
-        <div class="ui attached segment">
-            @include('project.auth-login-form')
+    <div layout="column" layout-align="start center">
+
+        <div style="width:350px">
+            <div class="ui top attached segment">
+                @include('project.auth-login-form')
+            </div>
+
+            <div class="ui bottom attached warning message">
+                @include('project.auth-login-bottom')
+             </div>
         </div>
 
-        <div class="ui bottom attached warning message">
-            @include('project.auth-login-bottom')
+        <div>
+            @include('project.'.$project->code.'.footer')
         </div>
 
     </div>
 
-</div>
+</md-content>

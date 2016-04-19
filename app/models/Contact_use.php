@@ -29,7 +29,7 @@ class Work extends Eloquent {
 
     public $timestamps = true;
 
-    protected $fillable = array('sch_id', 'department_class');
+    protected $fillable = array('sch_id', 'staff', 'parent', 'student', 'tutor', 'department_class');
 
     public function schools() {
         return $this->hasMany('Project\Used\School', 'id', 'sch_id');
@@ -42,23 +42,20 @@ class Struct {
     static function auth($member, $groups)
     {
         return array(
-            'id'         => (int)$member->user_id,
-            'active'     => $member->user->actived && $member->actived,
-            'password'   => $member->user->password=='',
-            'email'      => $member->user->email,
-            'name'       => $member->user->username,
-            'schools'    => \Project\Used\User::find($member->user_id)->schools->map(function($school) {
-                                return array_only($school->toArray(), array('id', 'sname', 'year'));
-                            })->all(),
+            'id'        => (int)$member->user_id,
+            'member_id' => (int)$member->id,
+            'actived'   => $member->user->actived && $member->actived,
+            'password'  => $member->user->password=='',
+            'email'     => $member->user->email,
+            'name'      => $member->user->username,
             'title'  => $member->contact->title,
             'tel'    => $member->contact->tel,
             'fax'    => $member->contact->fax,
             'email2' => $member->contact->email2,
-            'groups' => [
-                '1'  => ['selected' => in_array(1, $groups)],
-                '5'  => ['selected' => in_array(5, $groups)],
-                '23' => ['selected' => in_array(23, $groups)],
-            ],
+            'inGroups'  => $member->user->inGroups,
+            'schools'   => \Project\Used\User::find($member->user_id)->schools->map(function($school) {
+                                return array_only($school->toArray(), array('id', 'name', 'year'));
+                            })->all(),
         );
     }
 

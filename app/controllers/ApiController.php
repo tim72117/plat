@@ -11,7 +11,8 @@ class ApiController extends BaseController {
 
     public function projects()
     {
-        $projects = DB::table('projects')->get();
+        $projects = Plat\Project::all();
+
         return Response::json($projects);
     }
 
@@ -24,8 +25,9 @@ class ApiController extends BaseController {
             return Response::json(['error' => $e->getMessage()]);
         }
 
-        $news = DB::table('news')->where('project', $project_id)->whereBetween('created_at', [$toDate, $fromDate])->select(['title', 'context', 'updated_at', 'created_at', 'deleted_at'])->get();
-        return Response::json($news);
+        $posts = Plat\Project::find($project_id)->posts()->whereBetween('created_at', [$toDate, $fromDate])->select(['title', 'context', 'publish_at'])->get();
+
+        return Response::json($posts);
     }
 
 }

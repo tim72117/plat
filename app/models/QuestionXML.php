@@ -15,6 +15,10 @@ class Census extends Eloquent {
         return $this->hasMany('QuestionXML\Pages', 'file_id', 'file_id');
     }
 
+    public function reports() {
+        return $this->hasMany('QuestionXML\Report', 'census_id', 'id');
+    }
+
 }
 
 class Pages extends Eloquent {
