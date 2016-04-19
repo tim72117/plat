@@ -79,6 +79,14 @@
                 <div class="item" ng-class="{active: tool===4}" ng-click="tool=5">迴歸分析</div> -->
                 <div class="right menu">
                     <div class="item">
+<!--                             <md-input-container style="margin-bottom:0">
+                                <label>樣式</label>
+                                <md-select ng-model="result" ng-change="changeChart()" aria-label="樣式">
+                                    <md-option ng-repeat="chart in charts" ng-disabled="disabledCharts[chart.name]" value="{{chart.name}}">
+                                        <i class="{{chart.icon}} icon"></i>{{chart.title}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container> -->
                         <div ng-semantic-dropdown-menu ng-model="result" ng-change="changeChart()" class="ui top pointing dropdown">
                             <span class="default text"><i class="wizard icon"></i>{{outputType}}</span>
                             <div class="menu">
@@ -135,9 +143,8 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
     $scope.rowPercent = false;
     $scope.totalPercent = false;
     $scope.meanSet = 0;
-    $scope.tableOption = '';
-    $scope.tableOptions = ('行% 列% 總和% 平均數 不加').split(' ').map(function (eachOption) { return { abbrev: eachOption }; });
-    //$scope.crossPercent = '';
+    $scope.tableOption = '不加%';
+    $scope.tableOptions = ('行% 列% 總和% 平均數 不加%').split(' ').map(function (eachOption) { return { abbrev: eachOption }; });
     $scope.charts = [{title: '表格', name: 'table', icon: 'table'}, {title: '長條圖', name: 'bar', icon: 'bar chart'}, {title: '圓餅圖', name: 'pie', icon: 'pie chart'}];
 
     $scope.getColumns = function() {
@@ -353,7 +360,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
                 for(var j in $scope.selected.columns[0].answers) {
                     var value = $scope.selected.columns[0].answers[j].value;
                     var amount = $scope.frequence[i][value]*1 || 0;
-                    var percent = amount*100/total;
+                    var percent = total == 0 ? 0 : amount*100/total;
                     one.data.push({y: percent, val: amount});
                 }
             } else {
@@ -592,7 +599,6 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
     $scope.getCrossTotal = function(key) {
         if ($scope.crosstable[key] == null ) {
             return 0;
-
         }
         var sum_col_row = 0;
         var crosstable = $scope.crosstable[key];
@@ -706,7 +712,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
             $scope.setTotalPercent();
         if (mode == '平均數')
             $scope.setMean();
-        if (mode == '不加')
+        if (mode == '不加%')
             $scope.setNoPercent();
     };
 
@@ -772,7 +778,20 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
             totalAmount += amount;
         }
         return totalValue/totalAmount;
-    }
+    };
+
+    $scope.getChartHeight = function() {
+        if ($scope.selected.columns.length > 0 && $scope.selected.rows.length == 0) {
+            return $scope.selected.columns[0].answers.length*30+200;
+        }
+        if ($scope.selected.rows.length > 0 && $scope.selected.columns.length == 0) {
+            return $scope.selected.rows[0].answers.length*30+200;
+        }
+        if ($scope.selected.columns.length > 0 && $scope.selected.rows.length > 0) {
+            var height = $scope.selected.rows[0].answers.length*$scope.selected.columns[0].answers.length*10+$scope.selected.rows[0].answers.length*10;
+            return height > 500 ? height : 500;
+        }
+    };
 
 })
 .directive('ngSemanticDropdownMenu', function($timeout, $window) {

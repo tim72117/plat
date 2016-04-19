@@ -121,23 +121,9 @@
                 <thead>
                     <tr>
                         <th style="min-width:150px" colspan="3">
-                            <!--<div ng-semantic-dropdown-menu ng-model="crossPercent" class="ui top left pointing labeled floating dropdown icon mini button">
-                                <span class="text">加入</span>
-                                <input type="hidden">
-                                <i class="add icon"></i>
-                                <div class="menu">
-                                    <div class="item" data-value="col" ng-click="setColPercent()">行 %</div>
-                                    <div class="item" data-value="row" ng-click="setRowPercent()">列 %</div>
-                                    <div class="item" data-value="meanAll" ng-click="setMean()">平均數</div>
-                                    <div class="item" data-value="noPercent" ng-click="setNoPercent()">不加</div>
-                                </div>
-                            </div>-->
                             <md-input-container>
-                                <label>加入</label>
-                                <md-select ng-model="tableOption" ng-change="showPercent(tableOption)">
-                                  <md-option ng-repeat="option in tableOptions" value="{{option.abbrev}}" >
-                                    {{option.abbrev}}
-                                  </md-option>
+                                <md-select ng-model="tableOption" ng-change="showPercent(tableOption)" aria-label="加入">
+                                    <md-option ng-repeat="option in tableOptions" value="{{option.abbrev}}">{{option.abbrev}}</md-option>
                                 </md-select>
                             </md-input-container>
                         </th>
