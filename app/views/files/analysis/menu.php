@@ -40,8 +40,23 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         });
     };
 
-    $scope.resetAll = function() {
-        $scope.isSelectAll = false;
+    $scope.selectSome = function() {
+        var isSelected = 0;
+        angular.forEach($scope.columns, function(column) {
+            if (column.choosed){
+                isSelected = isSelected +1;
+            }
+        });
+        if (isSelected == $scope.columns.length){
+            document.getElementById("selectAll").indeterminate = false;
+            $scope.isSelectAll = true;
+        }else if(isSelected>0){
+        123
+            document.getElementById("selectAll").indeterminate = true;
+        }else{
+            document.getElementById("selectAll").indeterminate = false;
+            $scope.isSelectAll = false;
+        }
     };	
 
     $scope.nextStep = function() {
@@ -56,6 +71,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
     };
 
     $scope.getColumns();
+
 });
 
 </script>
@@ -81,7 +97,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         </div>
 
         <div class="ui attached segment" ng-class="{loading: loading}">
-
+            <div class="list">
             <div class="ui checkbox">
                 <input type="checkbox" id="selectAll" ng-model="isSelectAll" ng-change="selectAll()">
                 <label for="selectAll">全選(勾選題目時，建議您參考問卷，以完整瞭解題目原意！)</label>
@@ -95,7 +111,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 
                     <div class="middle aligned content">
                         <div class="ui checkbox" style="margin-right:120px">
-                            <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.choosed" ng-change="resetAll()" />
+                            <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.choosed" ng-change="selectSome()" />
                             <label for="column-{{ $index }}">{{ column.title }}</label>
                         </div>
                         <select class="ui right floated mini button">
@@ -109,7 +125,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
                 </div>
 
             </div>
-
+            </div>
         </div>
 
 	</div>

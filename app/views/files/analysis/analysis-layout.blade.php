@@ -5,13 +5,20 @@
 <title></title>
 
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
-<script src="/js/angular/1.4.7/angular.min.js"></script>
 <script src="/js/jquery-1.11.2.min.js"></script>
+<script src="/js/angular/1.5.3/angular.min.js"></script>
+<script src="/js/angular/1.5.3/angular-sanitize.min.js"></script>
+<script src="/js/angular/1.5.3/angular-cookies.min.js"></script>
+<script src="/js/angular/1.5.3/angular-animate.min.js"></script>
+<script src="/js/angular/1.5.3/angular-aria.min.js"></script>
+<script src="/js/angular/1.5.3/angular-messages.min.js"></script>
+<script src="/js/angular_material/1.1.0/angular-material.min.js"></script>
 
-<link rel="stylesheet" href="/css/Semantic-UI/2.1.6/semantic.min.css" />
+<link rel="stylesheet" href="/css/Semantic-UI/2.1.8/semantic.min.css" />
+<link rel="stylesheet" href="/js/angular_material/1.1.0/angular-material.min.css">
 
 <script>
-var app = angular.module('app', []);
+var app = angular.module('app', ['ngMaterial']);
 var full = true;
 </script>
 </head>
