@@ -1,7 +1,7 @@
 <?php
 $schools = [];
 Project\Used\User::find(Auth::user()->id)->schools->each(function($school) use(&$schools) {
-    $schools['my-schools-' . $school->id] = ['name' => $school->sname, 'shid' => [$school->id]];
+    $schools['my-schools-' . $school->id] = ['name' => $school->name, 'shid' => [$school->id]];
 })->toArray();
 
 return [
