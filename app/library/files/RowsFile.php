@@ -230,11 +230,7 @@ class RowsFile extends CommFile {
 
     public function update_column()
     {
-        $input = Input::only(['column.name', 'column.title', 'column.rules'])['column'];
-
-        $input['unique'] = Input::get('column.unique', false);
-        $input['encrypt'] = Input::get('column.encrypt', false);
-        $input['isnull'] = Input::get('column.isnull', false);
+        $input = Input::only(['column.name', 'column.title', 'column.rules', 'column.unique', 'column.encrypt', 'column.isnull', 'column.readonly'])['column'];
 
         $table = $this->file->sheets->find(Input::get('sheet_id'))->tables->find(Input::get('table_id'));
 
