@@ -609,9 +609,9 @@ class QuesFile extends CommFile {
         $tablename = $this->file->census->table;
         $pages = $this->file->census->pages;
 
-        Config::set('database.default', 'sqlsrv');
-        Config::set('database.connections.sqlsrv.database', $this->file->census->database);
-        DB::reconnect('sqlsrv');
+        Config::set('database.default', 'sqlsrv_plat');
+        Config::set('database.connections.sqlsrv_plat.database', $this->file->census->database);
+        DB::reconnect('sqlsrv_plat');
 
         foreach($pages as $ques_page) {
             $page = $ques_page->page;
