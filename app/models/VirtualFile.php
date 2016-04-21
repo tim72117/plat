@@ -123,6 +123,8 @@ class Struct_file {
                 $tools = [
                     //['name' => 'edit_information', 'title' => '編輯檔案資訊', 'method' => 'edit_information', 'icon' => 'edit'],
                     ['name' => 'analysis',         'title' => '分析結果',     'method' => 'analysis',         'icon' => 'bar chart'],
+                    ['name' => 'rows',             'title' => '資料列',       'method' => 'rows',             'icon' => 'table'],
+                    ['name' => 'import',           'title' => '匯入資料',     'method' => 'import',           'icon' => 'upload'],
                 ];
             break;
             case 7:

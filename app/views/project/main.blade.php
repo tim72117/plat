@@ -54,7 +54,7 @@ app.config(['$compileProvider', function ($compileProvider) {
     $scope.root = {};
     $scope.getDocs = function() {
         $scope.loading = true;
-        $http({method: 'POST', url: '/docs/lists', data:{} })
+        $http({method: 'POST', url: '/docs/lists', data:{}})
         .success(function(data, status, headers, config) {
             $scope.root.docs = data.docs;
             $scope.loading = false;
@@ -82,6 +82,7 @@ app.config(['$compileProvider', function ($compileProvider) {
             <md-button ng-class="{'md-raised': pathname == '/docs/management'}" href="/docs/management">
                 <i class="folder outline icon" ng-class="{open: pathname == '/docs/management'}"></i>我的檔案
             </md-button>
+            <h2> / {{ @$doc->isFile->title }}</h2>
             <span flex></span>
             <md-button ng-class="{'md-raised': pathname == '/project/{{ $project->code }}/profile'}" href="/project/{{ $project->code }}/profile">個人資料</md-button>
             <md-button ng-class="{'md-raised': pathname == '/auth/password/change'}" href="/auth/password/change">更改密碼</md-button>
