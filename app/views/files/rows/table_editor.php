@@ -1,24 +1,66 @@
 
-<div ng-cloak ng-controller="newTableController">
+<div ng-cloak ng-controller="newTableController" layout="column" flex>
 
-    <div class="ui basic segment" ng-class="{loading: loading}">
-
-        <div class="ui text menu">
-            <div class="header item"><i class="file text icon"></i>{{ file.title }}</div>
-            <a class="item" href="javascript:void(0)" ng-class="{active: tool=='columns'}" ng-click="changeTool('columns')">欄位定義</a>
-            <a class="item" href="javascript:void(0)" ng-class="{active: tool=='comment'}" ng-click="changeTool('comment')">說明文件</a>
-            <a class="item" href="rows">資料列</a>
-            <a class="item" href="import">預覽</a>
-            <a class="item" href="javascript:void(0)">
-                <div class="ui basic button" ng-click="saveComment()" ng-class="{loading: saving, disabled: tool=='columns'}"><i class="save icon"></i>儲存</div>
-                <span ng-if="saving">儲存中...</span>
-            </a>
+    <md-toolbar class="md-menu-toolbar">
+        <div layout="row">
+            <md-toolbar-filler layout layout-align="center center">
+                <md-icon><i class="file icon"></i></md-icon>
+            </md-toolbar-filler>
+            <md-menu-bar>
+                <md-menu>
+                    <button ng-click="$mdOpenMenu()">
+                        檔案
+                    </button>
+                    <md-menu-content>
+                        <md-menu-item ng-if="tool=='columns'">
+                            <md-button ng-disabled="tool=='columns' && !table.lock && file.sheets[0].editable" ng-click="updateSheet(true)">修改</md-button>
+                        </md-menu-item>
+                        <md-menu-item ng-if="tool=='columns'">
+                            <md-button ng-disabled="tool=='columns' && !table.lock && !file.sheets[0].editable" ng-click="updateSheet(false)">完成</md-button>
+                        </md-menu-item>
+                        <md-menu-item ng-if="tool=='comment'">
+                            <md-button ng-click="saveComment()">儲存</md-button>
+                        </md-menu-item>
+                    </md-menu-content>
+                </md-menu>
+                <md-menu>
+                    <button ng-click="$mdOpenMenu()">
+                        設計
+                    </button>
+                    <md-menu-content>
+                        <md-menu-item>
+                            <md-button ng-click="changeTool('columns')">欄位定義</md-button>
+                        </md-menu-item>
+                        <md-menu-item>
+                            <md-button ng-click="changeTool('comment')">說明文件</md-button>
+                        </md-menu-item>
+                    </md-menu-content>
+                </md-menu>
+                <md-menu>
+                    <button ng-click="$mdOpenMenu()">
+                        資料
+                    </button>
+                    <md-menu-content>
+                        <md-menu-item>
+                            <md-button href="rows">資料列</md-button>
+                        </md-menu-item>
+                        <md-menu-item>
+                            <md-button href="import">匯入</md-button>
+                        </md-menu-item>
+                    </md-menu-content>
+                </md-menu>
+            </md-menu-bar>
         </div>
+    </md-toolbar>
 
-        <div class="slide-animate" ng-include="'subs?tool=columns'" ng-if="tool=='columns'"></div>
-        <div class="slide-animate" ng-include="'subs?tool=comment'" ng-if="tool=='comment'"></div>
-
+    <div layout="row" flex layout-align="center center" ng-if="loading">
+        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
     </div>
+
+    <md-content class="page-container">
+        <div ng-include="'subs?tool=columns'" ng-if="tool=='columns'"></div>
+        <div ng-include="'subs?tool=comment'" ng-if="tool=='comment'"></div>
+    </md-content>
 
 </div>
 
@@ -38,6 +80,7 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
     $scope.action = {};
     $scope.sheetsPage = 1;
     $scope.loading = true;
+    $scope.column = {};
 
     $scope.getFile = function() {
         $scope.loading = true;
@@ -48,6 +91,9 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
             $scope.file.title = data.title;
             $scope.file.sheets = data.sheets;
             $scope.file.comment = data.comment;
+            if ($scope.file.sheets[0].editable && !$scope.file.sheets[0].tables[0].lock && $scope.file.sheets[0].tables[0].columns == 0) {
+                $scope.addColumn($scope.file.sheets[0].tables[0]);
+            };
             $scope.loading = false;
         }).error(function(e){
             console.log(e);
@@ -62,52 +108,52 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         $scope.action.toSelect(sheet);
     };
 
-    $scope.$watch('file.sheets | filter: {selected: true}', function(sheets) {
-        if (!sheets) return;
-        if (!sheets[0].editable) return;
-        for(var i in sheets[0].tables) {
-            if (sheets[0].tables[i].lock) { return; };
-        }
+    $scope.addColumn = function(table) {
+        table.columns.push(angular.copy($scope.column));
+    };
 
-        var columns = sheets[0].tables[0].columns;
-
-        if( columns.length < 1 || Object.keys(columns[columns.length-1]).length > 1 ) {
-            columns.push({});
-        }
-    }, true);
-
-    $scope.updateSheet = function(sheet) {
+    $scope.updateSheet = function(editable) {
+        $scope.file.sheets[0].editable = editable;
         $scope.saving = true;
-        $http({method: 'POST', url: 'update_sheet', data:{sheet: sheet} })
+        $http({method: 'POST', url: 'update_sheet', data:{sheet: $scope.file.sheets[0]} })
         .success(function(data, status, headers, config) {
             console.log(data);
-            angular.extend(sheet, data.sheet);
+            angular.extend($scope.file.sheets[0], data.sheet);
             $scope.saving = false;
         }).error(function(e){
             console.log(e);
         });
     }
 
-    $scope.updateColumn = function(sheet, table, column, rebuild) {
+    $scope.updateColumn = function(sheet, table, column, rebuild) {console.log($scope.checkColumn(column));
         if ($scope.checkColumn(column)) return;
 
-        $scope.saving = true;
+        if (column.encrypt) {
+            column.readonly = true;
+        };
+
+        column.updating = true;
         $http({method: 'POST', url: 'update_column', data:{sheet_id: sheet.id, table_id: table.id, column: column, rebuild: rebuild} })
         .success(function(data, status, headers, config) {
             console.log(data);
             angular.extend(column, data.column);
-            $scope.saving = false;
+            column.updating = false;
         }).error(function(e){
             console.log(e);
         });
     };
 
     $scope.removeColumn = function(sheet, table, column) {
+        if (!column.id) {
+            table.columns.splice(table.columns.indexOf(column), 1);
+            return true;
+        };
         $scope.saving = true;
         $http({method: 'POST', url: 'remove_column', data:{sheet_id: sheet.id, table_id: table.id, column: column} })
         .success(function(data, status, headers, config) {
-            console.log(data);
-            angular.extend(table, data.table);
+            if (data.deleted) {
+                table.columns.splice(table.columns.indexOf(column), 1);
+            };
             $scope.saving = false;
         }).error(function(e){
             console.log(e);
@@ -134,13 +180,6 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
             sheet.selected = false;
         });
         sheet.selected = true;
-    };
-
-    $scope.setAutocomplete = function(colHeader) {
-        colHeader.link.enable = !!colHeader.link.table;
-        console.log(colHeader.link);
-        colHeader.type = 'dropdown';
-        colHeader.source = [];
     };
 
     $scope.checkColumn = function(column) {
@@ -173,21 +212,8 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         $scope.tool = tool;
     };
 
-    $('#save').popup({
-        popup : $('.popup'),
-        on    : 'click',
-        position: 'bottom left'
-    });
-
-    $scope.closePopup = function(event) {
-        $('#save').popup('hide');
-    };
-
-    $scope.notNew = function(column) {
-        return Object.keys(column).length > 1;
-    };
-
 })
+
 .factory('XLSXReaderService', ['$q', '$rootScope',
     function($q, $rootScope) {
         var service = function(data) {
@@ -210,6 +236,7 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         return service;
     }
 ])
+
 .directive('contenteditable', ['$sce', function($sce) {
     return {
         restrict: 'A',
@@ -241,7 +268,3 @@ String.prototype.Blength = function() {
     return  arr === null ? this.length : this.length + arr.length;
 };
 </script>
-
-<style>
-
-</style>
