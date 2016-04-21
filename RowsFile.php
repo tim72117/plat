@@ -223,9 +223,9 @@ class RowsFile extends CommFile {
     {
         $table = $this->file->sheets->find(Input::get('sheet_id'))->tables->find(Input::get('table_id'));
 
-        $table->columns->find(Input::get('column')['id'])->delete();
+        $deleted = $table->columns->find(Input::get('column')['id'])->delete();
 
-        return ['table' => $table->load('columns')->toArray()];
+        return ['deleted' => $deleted];
     }
 
     public function update_column()
@@ -612,11 +612,18 @@ class RowsFile extends CommFile {
 
         $query->whereNull('deleted_at')->select($head)->addSelect('id');
 
-        return [
-            'paginate' => $this->isCreater()
-            ? $query->addSelect('created_by')->paginate(15)->toArray()
-            : $query->where('created_by', $this->user->id)->paginate(15)->toArray()
-        ];
+        $paginate = $this->isCreater()
+            ? $query->addSelect('created_by')->paginate(15)
+            : $query->where('created_by', $this->user->id)->paginate(15);
+
+        $encrypts = $tables[0]->columns->filter(function($column) { return $column->encrypt; });
+
+        if (!$encrypts->isEmpty()) {
+            $paginate->getCollection()->each(function($row) use($encrypts) {
+                $this->setEncrypts($row, $encrypts);
+            });
+        }
+        return ['paginate' => $paginate->toArray()];
     }
 
     //uncomplete only first sheet
@@ -637,6 +644,14 @@ class RowsFile extends CommFile {
         });
 
         return ['tables' => $tables];
+    }
+
+    public function setEncrypts($row, $encrypts)
+    {
+        $encrypts->each(function($encrypt) use($row) {
+            $column = 'C' . $encrypt->id;
+            $row->$column = substr_replace($row->$column, '***', strlen($row->$column)-3, 3);
+        });
     }
 
     //uncomplete
@@ -901,27 +916,34 @@ class RowsFile extends CommFile {
         return $exists;
     }
 
-    public function saveRow()
+    public function updateRows()
     {
-        $status = ['updated' => false, 'errors' => []];
+        $updated = array_map(function($row) {
 
-        $status['errors'] = $this->check_row(Input::get('row'));
+            $row['errors'] = $this->check_row($row);
 
-        if (empty($status['errors'])) {
-            $table = $this->file->sheets[0]->tables[0];
+            if (empty($row['errors']))
+            {
+                $columns = $this->file->sheets[0]->tables[0]->columns->filter(function($column) {
+                    return !$column->encrypt;
+                })->map(function($column) {
+                    return 'C' . $column->id;
+                })->toArray();
 
-            $table_columns = $table->columns->map(function($column) { return 'row.C' . $column->id; })->toArray();
+                $query = DB::table($this->file->sheets[0]->tables[0]->database . '.dbo.' . $this->file->sheets[0]->tables[0]->name);
 
-            $query = DB::table($table->database . '.dbo.' . $table->name);
+                if (!$this->isCreater()) {
+                    $query->where('created_by', $this->user->id);
+                }
 
-            if (!$this->isCreater()) {
-                $query->where('created_by', $this->user->id);
+                $row['updated'] = $query->where('id', $row['id'])->update(array_only($row, $columns));
             }
 
-            $status['updated'] = $query->where('id', Input::get('row.id'))->update(Input::only($table_columns)['row']);
-        }
+            return $row;
 
-        return ['status' => $status];
+        }, Input::get('rows'));
+
+        return ['updated' => $updated];
     }
 
     private function check_row($row)
@@ -932,7 +954,7 @@ class RowsFile extends CommFile {
         {
             $value = isset($row['C' . $column->id]) ? remove_space($row['C' . $column->id]) : '';
 
-            if (!$column->isnull || !empty($value))
+            if (!$column->encrypt && (!$column->isnull || !empty($value)))
             {
                 $column_errors = $this->check_column($column, $value);
 
