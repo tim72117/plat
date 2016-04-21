@@ -580,9 +580,12 @@ class RowsFile extends CommFile {
 
                 list($query, $power) = $this->get_rows_query($tables);
 
-                $head = $tables[0]->columns->map(function($column) { return 'C' . $column->id . ' AS ' . $column->name; })->toArray();
+                $head = $tables[0]->columns->map(function($column) { return 'C' . $column->id; })->toArray();
 
-                $rows = array_map(function($row) {
+                $encrypts = $tables[0]->columns->filter(function($column) { return $column->encrypt; });
+
+                $rows = array_map(function($row) use($encrypts) {
+                    $this->setEncrypts($row, $encrypts);
                     return array_values(get_object_vars($row));
                 }, $query->where('created_by', $this->user->id)->whereNull('deleted_at')->select($head)->get());
 
@@ -650,7 +653,10 @@ class RowsFile extends CommFile {
     {
         $encrypts->each(function($encrypt) use($row) {
             $column = 'C' . $encrypt->id;
-            $row->$column = substr_replace($row->$column, '***', strlen($row->$column)-3, 3);
+
+            $encrypted = mb_substr($row->$column, round(mb_strlen($row->$column)/2));
+
+            $row->$column = str_pad($encrypted, strlen($row->$column), "*", STR_PAD_LEFT);
         });
     }
 
