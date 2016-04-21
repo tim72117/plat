@@ -1,85 +1,80 @@
 
 <div ng-cloak ng-controller="rowsEditorController">
 
-    <div class="ui basic segment" ng-repeat="sheet in file.sheets" ng-class="{loading: loading}" style="overflow:auto">
+    <div class="ui basic segment" ng-repeat="sheet in file.sheets" ng-class="{loading: loading || saving}" style="overflow:auto">
 
         <a class="ui basic button" href="import">
             <i class="reply icon"></i>返回
         </a>
 
-
         <div class="ui pagination small menu" ng-if="paginate.last_page<=6 && paginate.last_page>1">
-            <a class="item" ng-repeat="i in array(paginate.last_page)" ng-class="{active: paginate.current_page==i}" ng-click="getRows(i)">{{ i }}</a>
+            <a class="item" ng-repeat="i in generateArray(paginate.last_page)" ng-class="{active: paginate.current_page==i}" ng-click="getRows(i)">{{ i }}</a>
         </div>
 
         <div class="ui pagination small menu" ng-if="paginate.last_page>6">
             <a class="icon item" ng-class="{disabled: paginate.current_page==1}" ng-click="prevPage()"><i class="left chevron icon"></i></a>
 
             <a class="item" ng-class="{active: paginate.current_page==1}" ng-click="getRows(1)">1</a>
-            <a class="item disabled" ng-if="paginate.current_page!=2">..</a>
-            <a class="item" ng-if="paginate.current_page==paginate.last_page || paginate.current_page==paginate.last_page-1" ng-click="getRows(paginate.last_page-2)">{{ paginate.last_page-2 }}</a>
-            <a class="item active" ng-if="paginate.current_page!=1 && paginate.current_page!=paginate.last_page" ng-click="getRows(paginate.current_page)">{{ paginate.current_page }}</a>
-            <a class="item" ng-if="paginate.current_page==1 || paginate.current_page==2" ng-click="getRows(3)">3</a>
-            <a class="item disabled" ng-if="paginate.current_page!=paginate.last_page-1">..</a>
+            <a class="item no-animate disabled" ng-if="paginate.current_page!=2">..</a>
+            <a class="item no-animate" ng-if="paginate.current_page==paginate.last_page || paginate.current_page==paginate.last_page-1" ng-click="getRows(paginate.last_page-2)">{{ paginate.last_page-2 }}</a>
+            <a class="item no-animate active" ng-if="paginate.current_page!=1 && paginate.current_page!=paginate.last_page" ng-click="getRows(paginate.current_page)">{{ paginate.current_page }}</a>
+            <a class="item no-animate" ng-if="paginate.current_page==1 || paginate.current_page==2" ng-click="getRows(3)">3</a>
+            <a class="item no-animate disabled" ng-if="paginate.current_page!=paginate.last_page-1">..</a>
             <a class="item" ng-class="{active: paginate.current_page==paginate.last_page}" ng-click="getRows(paginate.last_page)">{{ paginate.last_page }}</a>
 
             <a class="icon item" ng-class="{disabled: paginate.current_page==paginate.last_page}" ng-click="nextPage()"><i class="right chevron icon"></i></a>
         </div>
 
+        <md-button md-colors="{background: 'red'}" ng-if="(paginate.data | filter: {selected: true}).length > 0"
+            ng-class="{loading: status.deleting}"
+            ng-click="delete()">
+            <i class="trash icon"></i>刪除名單 ({{ (paginate.data | filter: {selected: true}).length }}筆資料)
+        </md-button>
 
-
-        <div class="ui left action icon input" ng-class="{loading: loading}">
-            <button class="ui labeled icon basic button" ng-click="searchText='';getRows(1, '')"><i class="unhide icon"></i> 顯示全部 </button>
-            <input type="text" ng-model="searchText" placeholder="搜尋..." />
-            <i class="search link icon" ng-click="getRows(1, searchText)"></i>
-        </div>
-
-        <div class="ui buttons">
-            <div class="ui red button" ng-if="(paginate.data | filter: {selected: true}).length > 0"
-                ng-class="{loading: status.deleting}"
-                ng-click="status.confrim=true">
-                <i class="trash icon"></i>刪除名單 ({{ (paginate.data | filter: {selected: true}).length }}筆資料)
-            </div>
-            <div class="ui button" ng-if="(paginate.data | filter: {selected: true}).length > 0 && status.confrim" ng-click="delete()">
-                <i class="checkmark icon"></i>確定
-            </div>
-        </div>
+        <md-button md-colors="{background: 'green'}" ng-if="(paginate.data | filter: {updating: true}).length > 0" ng-click="updateRows()">儲存</md-button>
 
         <table class="ui very compact collapsing table" ng-repeat="table in sheet.tables">
             <thead>
                 <tr>
-                    <th colspan="{{ table.columns.length+3 }}" class="right aligned">第{{ paginate.from }}-{{ paginate.to }}列(共有{{ paginate.total }}列) </th>
+                    <th colspan="{{ table.columns.length+3 }}" class="right aligned">
+<!--                         <div class="ui left action icon input" ng-class="{loading: loading}">
+                            <button class="ui labeled icon basic button" ng-click="searchText='';getRows(1, '')"><i class="unhide icon"></i> 顯示全部 </button>
+                            <input type="text" ng-model="searchText" placeholder="搜尋..." />
+                            <i class="search link icon" ng-click="getRows(1, searchText)"></i>
+                        </div> -->
+                        第{{ paginate.from }}-{{ paginate.to }}列(共有{{ paginate.total }}列) </th>
                 </tr>
                 <tr>
-                    <th class="collapsing">
-                        <div class="ui checkbox" ng-click="selectAll()">
-                            <input type="checkbox" ng-model="paginate.allSelected" />
-                            <label></label>
-                        </div>
-                    </th>
                     <th class="collapsing" ng-if="paginate.data[0].created_by">上傳者</th>
-                    <th class="collapsing">編輯</th>
+                    <th class="collapsing">
+                        <md-checkbox aria-label="全選" ng-checked="isChecked()" md-indeterminate="isIndeterminate()" ng-click="toggleAll()"></md-checkbox>
+                    </th>
                     <th ng-repeat="column in table.columns">{{ column.title }}</th>
                 </tr>
             </thead>
             <tbody>
                 <tr ng-repeat="row in paginate.data" ng-class="{warning: row.writing, disabled: row.saving}">
+                    <td ng-if="row.created_by"><md-button>{{ row.created_by }}</md-button></td>
                     <td>
-                        <div class="ui checkbox">
-                            <input type="checkbox" ng-model="row.selected" />
-                            <label></label>
-                        </div>
+                        <md-checkbox ng-model="row.selected" aria-label="刪除"></md-checkbox>
                     </td>
-                    <td ng-if="row.created_by">{{ row.created_by }}</td>
-                    <td>
-                        <div class="ui icon basic button" ng-if="!row.writing" ng-click="row.writing=true"><i class="icon edit"></i></div>
-                        <div class="ui icon positive button" ng-if="row.writing" ng-click="saveRow(row)" ng-class="{loading: row.saving}"><i class="icon save"></i></div>
-                    </td>
-                    <td ng-repeat="column in table.columns" ng-if="!row.writing">{{ row['C' + column.id] }}</td>
-                    <td ng-repeat="column in table.columns" ng-if="row.writing">
-                        <div class="ui input" ng-class="{error: row.errors[column.id]}">
-                            <input type="text" ng-model="row['C' + column.id]" placeholder="...">
-                        </div>
+                    <td ng-repeat="column in table.columns" ng-if="true||row.writing">
+                        <md-input-container md-no-float class="md-block" ng-if="column.rules!='bool'">
+                            <input ng-model="row['C' + column.id]" ng-disabled="column.readonly" placeholder="{{column.title}}" ng-change="setUpdating(row)">
+                            <div class="md-input-messages-animation" ng-repeat="(id, errors) in row.errors" ng-if="id == column.id">
+                                <div class="no-animate" ng-repeat="error in errors">
+                                    {{error}}
+                                </div>
+                            </div>
+                        </md-input-container>
+                        <md-checkbox
+                            ng-model="row['C' + column.id]"
+                            ng-disabled="column.readonly"
+                            ng-true-value="'1'"
+                            ng-false-value="'0'"
+                            ng-if="column.rules=='bool'"
+                            ng-change="setUpdating(row)"
+                            aria-label="column.name"></md-checkbox>
                     </td>
                 </tr>
             </tbody>
@@ -92,8 +87,10 @@
 <script>
 app.controller('rowsEditorController', function($scope, $http, $filter) {
     $scope.file = {sheets: [], comment: ''};
+    $scope.paginate = {data: []};
     $scope.status = {};
-    $scope.loading = true;
+    $scope.loading = false;
+    $scope.saving = false;
 
     $scope.getStatus = function() {
         $http({method: 'POST', url: 'get_file', data:{editor: false}})
@@ -144,7 +141,7 @@ app.controller('rowsEditorController', function($scope, $http, $filter) {
         }
     };
 
-    $scope.array = function(max) {
+    $scope.generateArray = function(max) {
         var array = [];
         for (var i = 0; i < max; i++) {
             array[i] = i+1;
@@ -152,28 +149,48 @@ app.controller('rowsEditorController', function($scope, $http, $filter) {
         return array;
     };
 
-    $scope.selectAll = function() {
-        for (var i in $scope.paginate.data) {
-            $scope.paginate.data[i].selected = $scope.paginate.allSelected;
-        };
+    $scope.isChecked = function() {
+        var selected = $filter('filter')($scope.paginate.data, {selected: true});
+        return $scope.paginate.data.length > 0 && selected.length === $scope.paginate.data.length;
     };
 
-    $scope.saveRow = function(row) {
-        row.saving = true;
-        $http({method: 'POST', url: 'saveRow', data:{row: row}})
+    $scope.isIndeterminate = function() {
+        var selected = $filter('filter')($scope.paginate.data, {selected: true});
+        return (selected.length !== 0 && selected.length !== $scope.paginate.data.length);
+    };
+
+    $scope.toggleAll = function() {
+        var selected = $filter('filter')($scope.paginate.data, {selected: true});
+        if (selected.length === $scope.paginate.data.length) {
+            for (var i in selected) {
+                selected[i].selected = false;
+            };
+        } else if (selected.length === 0 || selected.length > 0) {
+            for (var i in $scope.paginate.data) {
+                $scope.paginate.data[i].selected = true;
+            };
+        }
+    };
+
+    $scope.setUpdating = function(row) {
+        row.updating = true;
+    };
+
+    $scope.updateRows = function() {
+        $scope.saving = true;
+        var rows = $filter('filter')($scope.paginate.data, {updating: true});
+        $http({method: 'POST', url: 'updateRows', data:{rows: rows}})
         .success(function(data, status, headers, config) {
-            row.saving = false;
-            row.errors = data.status.errors;
-            if (row.errors.length==0 && data.status.updated) {
-                row.writing = false;
-            }
+            for (var i in rows) {
+                var row = $filter('filter')(data.updated, {id: rows[i].id})[0];
+                rows[i].updating = !row.updated;
+                rows[i].errors = row.errors;
+                $scope.saving = false;
+            };
         }).error(function(e){
             console.log(e);
         });
     };
 
-    $scope.$watch('paginate.data', function(p) {
-        $scope.status.confrim = false;
-    }, true);
 });
 </script>
