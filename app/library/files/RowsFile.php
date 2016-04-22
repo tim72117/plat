@@ -1,7 +1,7 @@
 <?php
 namespace Plat\Files;
 
-use User;
+use User; 
 use Files;
 use DB, View, Schema, Response, Input, Session;
 use ShareFile, RequestFile;
