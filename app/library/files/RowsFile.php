@@ -54,6 +54,8 @@ class RowsFile extends CommFile {
         'stdyear'          => ['sort' => 29, 'type' => 'string',   'size' => 1,   'title' => 'TTED年級',                  'validator' => 'in:1,2,3,4,5,6,7'],
         'string_dot'       => ['sort' => 30, 'type' => 'string',   'size' => 100, 'title' => '文字(逗號分隔)',            'regex'     => '/^[\x{0080}-\x{00FF},]+$/'],
         'float_hundred'    => ['sort' => 20, 'type' => 'string',   'size' => 8,   'title' => '小數(1-100,-7)',            'validator' => ['regex:/^(([0-9]|[1-9][0-9])(\\.[0-9]{1,5})?|100|-7)$/']],
+        'yyy'              => ['sort' => 31, 'type' => 'string',   'size' => 3,   'title' => '民國年',                    'validator' => ['regex:/^([1-9]|[1-9][0-9]|[1][0-1][0-9])$/']],
+        'menu'             => ['sort' => 32, 'type' => 'tinyInteger',             'title' => '選單',                      'menu' => ''],
     ];
 
     /**
@@ -187,7 +189,7 @@ class RowsFile extends CommFile {
     {
         $this->init_sheets();
 
-        $sheets = $this->file->sheets()->with(['tables', 'tables.columns'])->get()->each(function($sheet) {
+        $sheets = $this->file->sheets()->with(['tables.columns.answers'])->get()->each(function($sheet) {
             $sheet->tables->each(function($table) use($sheet) {
                 !$sheet->editable && $this->table_construct($table);
                 if ($this->has_table($table)) {
@@ -329,6 +331,7 @@ class RowsFile extends CommFile {
                 'uniques' => isset($uniques) ? $uniques : [],
                 'repeats' => isset($repeats) ? $repeats : [],
                 'exists'  => isset($exists) ? $exists : [],
+                'menu'    => $column->rules == 'menu' ? $column->answers->lists('value') : [],
             ];
         });
 
@@ -337,7 +340,7 @@ class RowsFile extends CommFile {
 
         foreach ($rows as $row_index => $row)
         {
-            $row_filted = array_filter(array_map('strval', $row));
+            $row_filted = array_filter(array_map('strval', $row), function($value) { return $value != ''; });
 
             $messages[$row_index] = (object)['pass' => false, 'limit' => false, 'empty' => empty($row_filted), 'updated' => false, 'exists' => [], 'errors' => [], 'row' => []];
 
@@ -428,6 +431,12 @@ class RowsFile extends CommFile {
             }
             if (isset($rules['function'])) {
                 call_user_func_array($this->checker($rules['function']), array($column_value, $column, &$column_errors));
+            }
+
+            if (!$column->unique && isset($rules['menu'])) {
+                if (!in_array($column_value, $column->menu, true)) {
+                    array_push($column_errors, $column->title . '未在選單中');
+                }
             }
         }
 
@@ -962,6 +971,8 @@ class RowsFile extends CommFile {
 
             if (!$column->encrypt && (!$column->isnull || !empty($value)))
             {
+                $column->menu = $column->answers->lists('value');
+
                 $column_errors = $this->check_column($column, $value);
 
                 !empty($column_errors) && $errors[$column->id] = $column_errors;

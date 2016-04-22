@@ -37,9 +37,10 @@
 <script>
 var app = angular.module('app', ['ngSanitize', 'ngCookies', 'ngMaterial'])
 
-app.config(['$compileProvider', function ($compileProvider) {
+app.config(function ($compileProvider, $mdIconProvider) {
     $compileProvider.debugInfoEnabled(false);
-}])
+    $mdIconProvider.defaultIconSet('/js/angular_material/1.1.0/core-icons.svg', 24);
+})
 
 .controller('mainController', function($scope, $filter, $http, $cookies, $mdSidenav) {
     $scope.pathname = window.location.pathname;

@@ -1,41 +1,35 @@
 
 <div ng-cloak ng-controller="uploadController">
 
-    <div class="ui basic segment" ng-class="{loading: sheetLoading}" ng-repeat="sheet in file.sheets" style="overflow:scroll">
-
-        <div class="ui top attached orange progress" ng-class="{disabled: progress<1}">
-            <div class="bar" style="width: {{ progress }}%"></div>
-        </div>
+    <div ng-repeat="sheet in file.sheets">
 
         <form style="display:none">
             <input type="file" id="file_upload" nv-file-select uploader="uploader" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
         </form>
-        <label for="file_upload" class="ui red button" ng-class="{loading: uploading, disabled: sheet.editable}"><i class="icon upload"></i>上傳</label>
 
-        <div class="ui green button" ng-click="exportSample(sheet)">
-            <i class="download icon"></i>下載上傳名單用的資料表格
-        </div>
-
-        <div class="ui green button" ng-click="exportRows(sheet)">
-            <i class="download icon"></i>下載已上傳名單
-        </div>
-
-        <a class="ui green button" href="rows">
-            <i class="edit icon"></i>編輯名單
-        </a>
-
-        <div class="ui attached red message" ng-if="sheet.editable">資料表修改中，暫時無法上傳資料。</div>
-        <div class="ui attached message" ng-bind-html="file.comment"></div>
-        <div class="ui attached segment">若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</div>
-        <div class="ui attached segment" ng-if="messages.head">
-            <h4 class="ui header">沒有欄位</h4>
-            <div  class="ui red label" ng-repeat="error in messages.head">{{ error.title }}</div>
-        </div>
-
-        <div ng-repeat-start="table in sheet.tables" class="ui top attached segment">
-            <div class="ui mini statistics">
+        <md-card>
+            <div class="ui attached red message" ng-if="sheet.editable">資料表修改中，暫時無法上傳資料。</div>
+            <div style="padding:10px">
+                <label for="file_upload" class="ui red button" ng-class="{loading: uploading, disabled: sheet.editable}"><i class="icon upload"></i>上傳</label>
+                <div class="ui green button" ng-click="exportSample(sheet)">
+                    <i class="download icon"></i>下載上傳名單用的資料表格
+                </div>
+                <div class="ui green button" ng-click="exportRows(sheet)">
+                    <i class="download icon"></i>下載已上傳名單
+                </div>
+                <a class="ui green button" href="rows">
+                    <i class="edit icon"></i>編輯名單
+                </a>
+            </div>
+            <md-progress-linear md-mode="determinate" value="{{progress}}" ng-if="sheetLoading"></md-progress-linear>
+            <md-divider></md-divider>
+            <p style="padding:10px" ng-bind-html="file.comment"></p>
+            <md-divider></md-divider>
+            <p style="padding:10px">若仍無法正常匯入，請洽教評中心承辦人員協助排除。(02-7734-3669)</p>
+            <md-divider></md-divider>
+            <div class="ui mini statistics" style="margin:0;padding:10px">
                 <div class="grey statistic">
-                    <div class="value">{{ table.count }}</div>
+                    <div class="value">{{ sheet.tables[0].count }}</div>
                     <div class="label">已上傳</div>
                 </div>
                 <div class="green statistic" ng-if="messages.length > 0">
@@ -56,44 +50,48 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <table ng-repeat-end class="ui very compact fixed single line bottom attached table">
-            <thead>
-                <tr>
-                    <th style="width:50px"></th>
-                    <th style="width:65px;white-space: normal">欄位代號</th>
-                    <th style="width:165px"></th>
-                    <th title="{{ column.name }}" ng-repeat="column in table.columns">{{ column.name }}</th>
-                </tr>
-                <tr>
-                    <th style="width:50px"></th>
-                    <th style="width:65px;white-space: normal">欄位名稱</th>
-                    <th style="width:165px">錯誤資訊</th>
-                    <th title="{{ column.title }}" ng-repeat="column in table.columns">{{ column.title }}</th>
-                </tr>
-            </thead>
-            <tbody ng-if="messages.length > 0">
-                <tr ng-repeat="(index, message) in messages | filter: messagefilter" ng-class="{positive: message.pass, warning: message.pass && message.exists.length > 0}">
-                    <td>{{ index+2 }}</td>
-                    <td>
-                        <div class="ui green label" ng-if="message.pass && message.exists.length < 1">新增</div>
-                        <div class="ui yellow label" ng-if="message.pass && message.exists.length > 0">更新</div>
-                        <div class="ui red label" ng-if="!message.pass">錯誤</div>
-                    </td>
+            <div class="ui attached segment" ng-if="messages.head">
+                <h4 class="ui header">沒有欄位</h4>
+                <div  class="ui red label" ng-repeat="error in messages.head">{{ error.title }}</div>
+            </div>
+            <table class="ui very compact fixed single line attached table" ng-repeat="table in sheet.tables">
+                <thead>
+                    <tr>
+                        <th style="width:50px"></th>
+                        <th style="width:65px;white-space: normal">欄位代號</th>
+                        <th style="width:165px"></th>
+                        <th title="{{ column.name }}" ng-repeat="column in table.columns">{{ column.name }}</th>
+                    </tr>
+                    <tr>
+                        <th style="width:50px"></th>
+                        <th style="width:65px;white-space: normal">欄位名稱</th>
+                        <th style="width:165px">錯誤資訊</th>
+                        <th title="{{ column.title }}" ng-repeat="column in table.columns">{{ column.title }}</th>
+                    </tr>
+                </thead>
+                <tbody ng-if="messages.length > 0">
+                    <tr ng-repeat="(index, message) in messages | filter: messagefilter" ng-class="{positive: message.pass, warning: message.pass && message.exists.length > 0}">
+                        <td>{{ index+2 }}</td>
+                        <td>
+                            <div class="ui green label" ng-if="message.pass && message.exists.length < 1">新增</div>
+                            <div class="ui yellow label" ng-if="message.pass && message.exists.length > 0">更新</div>
+                            <div class="ui red label" ng-if="!message.pass">錯誤</div>
+                        </td>
 
-                    <td style="white-space: normal" ng-class="{error: !message.pass}">
-                        <div class="ui list">
-                            <span class="item" ng-repeat="errors in message.errors"><span ng-repeat="error in errors" class="ui horizontal label"><i class="attention red icon"></i>{{ error }}</span></span>
-                        </div>
+                        <td style="white-space: normal" ng-class="{error: !message.pass}">
+                            <div class="ui list">
+                                <span class="item" ng-repeat="errors in message.errors"><span ng-repeat="error in errors" class="ui horizontal label"><i class="attention red icon"></i>{{ error }}</span></span>
+                            </div>
 
-                        <a class="ui label" ng-if="message.exists.length > 0 && !message.updated && !message.limit"><i class="attention red icon"></i>更新失敗</a>
-                        <a class="ui label" ng-if="message.limit"><i class="attention red icon"></i>此資料已由他人上傳，欲更新資料請與本中心聯繫。</a>
-                        <a class="ui label" ng-if="message.empty"><i class="attention red icon"></i>空白</a>
-                    </td>
-                    <td ng-repeat="column in table.columns" ng-class="{error: message.errors[column.id]}">{{ message.row['C' + column.id] }}</td>
-                </tr>
-            </tbody>
-        </table>
+                            <a class="ui label" ng-if="message.exists.length > 0 && !message.updated && !message.limit"><i class="attention red icon"></i>更新失敗</a>
+                            <a class="ui label" ng-if="message.limit"><i class="attention red icon"></i>此資料已由他人上傳，欲更新資料請與本中心聯繫。</a>
+                            <a class="ui label" ng-if="message.empty"><i class="attention red icon"></i>空白</a>
+                        </td>
+                        <td ng-repeat="column in table.columns" ng-class="{error: message.errors[column.id]}">{{ message.row['C' + column.id] }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </md-card>
 
     </div>
 
@@ -155,7 +153,7 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
         }, 500);
     };
 
-    $scope.uploader.onCompleteItem = function(fileItem, response, status, headers) {
+    $scope.uploader.onCompleteItem = function(fileItem, response, status, headers) {console.log(response);
         if (headers['content-type'] != 'application/json')
             return;
 

@@ -4,8 +4,10 @@
     <md-toolbar class="md-menu-toolbar">
         <div layout="row">
             <md-toolbar-filler layout layout-align="center center">
-                <md-icon><i class="file icon"></i></md-icon>
+                <md-icon md-svg-icon="insert-drive-file"></md-icon>
             </md-toolbar-filler>
+            <div>
+            <h2 class="md-toolbar-tools">{{file.sheets[0].title}}<div class="ui red label"><div class="detail">{{ file.sheets[0].tables[0].count }}筆</div></div></h2>
             <md-menu-bar>
                 <md-menu>
                     <button ng-click="$mdOpenMenu()">
@@ -47,9 +49,12 @@
                         <md-menu-item>
                             <md-button href="import">匯入</md-button>
                         </md-menu-item>
+                        <md-menu-divider></md-menu-divider>
+                        <md-menu-item type="checkbox" ng-model="file.sheets[0].fillable">可匯入</md-menu-item>
                     </md-menu-content>
                 </md-menu>
             </md-menu-bar>
+            </div>
         </div>
     </md-toolbar>
 
@@ -72,7 +77,6 @@
 <script src="/js/lodash.min.js"></script>
 <script src="/js/xlsx-reader.js"></script>
 <script>
-app.requires.push('angularify.semantic.dropdown');
 app.controller('newTableController', function($scope, $http, $filter, XLSXReaderService) {
     $scope.file = {title: ''};
     $scope.tool = 'columns';

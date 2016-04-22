@@ -65,6 +65,11 @@ class Column extends Eloquent {
         return $this->belongsTo('Row\Table', 'table_id');
     }
 
+    public function answers()
+    {
+        return $this->hasMany('Row\Answer', 'column_id', 'id');
+    }
+
     public function getUniqueAttribute($value)
     {
         return (boolean)$value;
@@ -109,5 +114,15 @@ class Column extends Eloquent {
     {
         $this->attributes['readonly'] = isset($value) ? $value : false;
     }
+
+}
+
+class Answer extends Eloquent {
+
+    protected $table = 'row_table_column_answers';
+
+    public $timestamps = false;
+
+    protected $fillable = array('value', 'title');
 
 }
