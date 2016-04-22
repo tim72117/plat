@@ -121,7 +121,9 @@ require app_path().'/filters.php';
 
 Event::listen('ques.open', function()
 {
-    QuestionXML\Log::updateOrCreate(['session' => Session::getId()], ['host' => gethostname()]);
+    $log = QuestionXML\Log::updateOrCreate(['session' => Session::getId()], ['host' => gethostname()]);
+
+    $log->touch();
 });
 
 //DB::connection()->disableQueryLog();
