@@ -1,29 +1,8 @@
 
 <md-content ng-repeat="sheet in file.sheets" ng-if="sheet.selected" ng-class="{loading1: sheet.saving}" layout-padding>
-
+<md-card>
 <table class="ui very basic very compact table" ng-repeat="table in sheet.tables">
     <thead>
-        <tr>
-            <th colspan="9">
-                <div class="ui search selection dropdown active visible" ng-click="visible['sheets']=!visible['sheets'];$event.stopPropagation()">
-                    <i class="dropdown icon"></i>
-                    <div class="default text" ng-class="{filtered: (file.sheets | filter: {selected: true})[0].name!=''}">輸入資料表名稱</div>
-                    <input type="text" class="search"
-                        ng-repeat="sheet in file.sheets | filter: {selected: true}"
-                        ng-model="sheet.title" ng-model-options="{ debounce: 500 }"
-                        ng-change="updateSheet(sheet)" ng-click="$event.stopPropagation()" />
-                    <div class="menu transition" ng-class="{visible: visible['sheets']}" ng-click="$event.stopPropagation()">
-                        <div class="item" ng-repeat="sheet in file.sheets" ng-click="action.toSelect(sheet)">{{ sheet.title }}</div>
-                    </div>
-                </div>
-                <div class="ui right attached basic icon button disabled" ng-click="addSheet()" title="新增資料表"><i class="plus icon"></i></div>
-                <div class="ui red label" ng-if="table.lock"><i class="lock icon"></i>資料已鎖定<div class="detail">{{ table.count }}筆</div></div>
-                <div class="ui checkbox">
-                    <input type="checkbox" id="readOnly" ng-true-value="'1'" ng-model="sheet.fillable">
-                    <label for="readOnly">可匯入</label>
-                </div>
-            </th>
-        </tr>
         <tr>
             <th class="collapsing"></th>
             <th width="150">欄位代號</th>
@@ -79,4 +58,5 @@
         </tr>
     </tbody>
 </table>
+</md-card>
 </md-content>

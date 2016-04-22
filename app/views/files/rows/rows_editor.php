@@ -59,7 +59,7 @@
                         <md-checkbox ng-model="row.selected" aria-label="刪除"></md-checkbox>
                     </td>
                     <td ng-repeat="column in table.columns" ng-if="true||row.writing">
-                        <md-input-container md-no-float class="md-block" ng-if="column.rules!='bool'">
+                        <md-input-container md-no-float class="md-block" ng-if="column.rules!='bool' && column.rules!='menu'">
                             <input ng-model="row['C' + column.id]" ng-disabled="column.readonly" placeholder="{{column.title}}" ng-change="setUpdating(row)">
                             <div class="md-input-messages-animation" ng-repeat="(id, errors) in row.errors" ng-if="id == column.id">
                                 <div class="no-animate" ng-repeat="error in errors">
@@ -75,6 +75,11 @@
                             ng-if="column.rules=='bool'"
                             ng-change="setUpdating(row)"
                             aria-label="column.name"></md-checkbox>
+                        <md-select ng-model="row['C' + column.id]" ng-change="setUpdating(row)" ng-if="column.rules=='menu'">
+                            <md-option ng-repeat="anaser in column.answers" ng-value="anaser.value">
+                                {{anaser.title}}
+                            </md-option>
+                        </md-select>
                     </td>
                 </tr>
             </tbody>
