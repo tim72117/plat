@@ -737,17 +737,17 @@ class QuesFile extends CommFile {
     {
         $pages = $this->xml_to_array()['pages'];
 
-        $file = Files::create(['title'=> $this->file->title, 'type' => 9, 'created_by' => $this->user->id]);
+        $file = Files::create(['type' => 9, 'title'=> $this->file->title, 'created_by' => $this->user->id]);
 
         ShareFile::create(['file_id' => $file->id, 'target' => 'user', 'target_id' => $this->user->id, 'visible' => true, 'created_by' => $this->user->id]);
 
         $interViewFile = new InterViewFile($file, $this->user);
 
+        $interViewFile->resetBooks();
+
         $interViewFile->create();
 
-        $interViewFile->save_ques_to_db($pages);
-
-        return ['pages' => $pages];
+        $interViewFile->saveXML($pages);
     }
 
     public function to_old_analysis()
