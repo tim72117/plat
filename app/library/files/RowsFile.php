@@ -273,7 +273,7 @@ class RowsFile extends CommFile {
     public function import_upload()
     {
         if (!Input::hasFile('file_upload'))
-            throw new ValidateException(new MessageBag(array('no_file_upload' => '檔案錯誤')));
+            throw new UploadFailedException(new MessageBag(['messages' => ['max' => '檔案格式或大小錯誤']]));
 
         $file = new Files(['type' => 3, 'title' => Input::file('file_upload')->getClientOriginalName()]);
 

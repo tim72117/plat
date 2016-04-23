@@ -26,10 +26,10 @@
                     <a class="icon item" ng-class="{disabled: paginate.current_page==paginate.last_page}" ng-click="nextPage()"><i class="right chevron icon"></i></a>
                 </div>
             </md-list-item>
-            <md-list-item>
+            <md-list-item ng-if="parentTables.length > 0">
                 <md-menu>
-                    <md-button aria-label="匯入歷史表單" ng-disabled="parentTables.length == 0" ng-click="$mdOpenMenu($event)">
-                        <md-icon md-menu-origin md-svg-icon="insert-drive-file"></md-icon>匯入歷史表單
+                    <md-button aria-label="匯入歷史表單" ng-click="$mdOpenMenu($event)">
+                        <md-icon md-menu-origin md-svg-icon="insert-drive-file"></md-icon>匯入過去資料
                     </md-button>
                     <md-menu-content width="4">
                         <md-menu-item>

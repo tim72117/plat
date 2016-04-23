@@ -20,15 +20,23 @@
                 <a class="ui green button" href="rows">
                     <i class="edit icon"></i>編輯名單
                 </a>
-                <div ng-dropdown-menu class="ui green dropdown button pointing top left floating" ng-class="{disabled: parentTables.length == 0}">
+                <div ng-dropdown-menu class="ui green dropdown button pointing top left floating" ng-if="parentTables.length > 0">
                     <i class="file outline icon"></i>
-                    <span class="text">匯入歷史表單</span>
+                    <span class="text">匯入過去資料</span>
                     <div class="menu transition">
                         <div class="item" ng-repeat="parentTable in parentTables" ng-click="cloneTableData(parentTable.id)">
                             <i class="file text icon"></i>{{parentTable.sheet.file.title}}
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="ui attached segment" ng-if="messages.max">
+                <div class="ui red label">{{messages.max}}</div>
+            </div>
+            <div class="ui attached segment" ng-if="messages.head">
+                <h4 class="ui header">沒有欄位</h4>
+                <div class="ui red label" ng-repeat="error in messages.head">{{ error.title }}</div>
             </div>
 
             <md-progress-linear md-mode="determinate" value="{{progress}}" ng-if="sheetLoading"></md-progress-linear>
@@ -59,10 +67,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="ui attached segment" ng-if="messages.head">
-                <h4 class="ui header">沒有欄位</h4>
-                <div  class="ui red label" ng-repeat="error in messages.head">{{ error.title }}</div>
             </div>
             <table class="ui very compact fixed single line attached table" ng-repeat="table in sheet.tables">
                 <thead>
@@ -164,9 +168,10 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
         }, 500);
     };
 
-    $scope.uploader.onCompleteItem = function(fileItem, response, status, headers) {console.log(response);
-        if (headers['content-type'] != 'application/json')
+    $scope.uploader.onCompleteItem = function(fileItem, response, status, headers) {
+        if (headers['content-type'] != 'application/json') {
             return;
+        }
 
         $scope.messages = response.messages;
         $scope.progress = 100;
