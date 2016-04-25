@@ -19,6 +19,11 @@ class Sheet extends Eloquent {
         return $this->hasMany('Row\Table', 'sheet_id', 'id');
     }
 
+    public function file()
+    {
+        return $this->belongsTo('Files', 'file_id', 'id');
+    }
+
 }
 
 class Table extends Eloquent {
@@ -35,6 +40,16 @@ class Table extends Eloquent {
 
     public function columns() {
         return $this->hasMany('Row\Column', 'table_id', 'id');
+    }
+
+    public function depend_tables()
+    {
+        return $this->belongsToMany('Row\Table', 'row_table_depend', 'table_id', 'depend_table_id');
+    }
+
+    public function sheet()
+    {
+        return $this->belongsTo('Row\Sheet', 'sheet_id', 'id');
     }
 
 }

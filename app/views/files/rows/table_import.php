@@ -20,7 +20,25 @@
                 <a class="ui green button" href="rows">
                     <i class="edit icon"></i>編輯名單
                 </a>
+                <div ng-dropdown-menu class="ui green dropdown button pointing top left floating" ng-if="parentTables.length > 0">
+                    <i class="file outline icon"></i>
+                    <span class="text">匯入過去資料</span>
+                    <div class="menu transition">
+                        <div class="item" ng-repeat="parentTable in parentTables" ng-click="cloneTableData(parentTable.id)">
+                            <i class="file text icon"></i>{{parentTable.sheet.file.title}}
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <div class="ui attached segment" ng-if="messages.max">
+                <div class="ui red label">{{messages.max}}</div>
+            </div>
+            <div class="ui attached segment" ng-if="messages.head">
+                <h4 class="ui header">沒有欄位</h4>
+                <div class="ui red label" ng-repeat="error in messages.head">{{ error.title }}</div>
+            </div>
+
             <md-progress-linear md-mode="determinate" value="{{progress}}" ng-if="sheetLoading"></md-progress-linear>
             <md-divider></md-divider>
             <p style="padding:10px" ng-bind-html="file.comment"></p>
@@ -49,10 +67,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="ui attached segment" ng-if="messages.head">
-                <h4 class="ui header">沒有欄位</h4>
-                <div  class="ui red label" ng-repeat="error in messages.head">{{ error.title }}</div>
             </div>
             <table class="ui very compact fixed single line attached table" ng-repeat="table in sheet.tables">
                 <thead>
@@ -101,6 +115,7 @@
 <script src="/js/angular-file-upload.min.js"></script>
 
 <script>
+app.requires.push('angularify.semantic.dropdown');
 app.requires.push('angularFileUpload');
 app.controller('uploadController', function($scope, $http, $timeout, FileUploader) {
     $scope.messages = [];
@@ -153,9 +168,10 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
         }, 500);
     };
 
-    $scope.uploader.onCompleteItem = function(fileItem, response, status, headers) {console.log(response);
-        if (headers['content-type'] != 'application/json')
+    $scope.uploader.onCompleteItem = function(fileItem, response, status, headers) {
+        if (headers['content-type'] != 'application/json') {
             return;
+        }
 
         $scope.messages = response.messages;
         $scope.progress = 100;
@@ -185,6 +201,30 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
 
     $scope.insert = function(value, index, array) {
         return value.pass && !value.empty && value.exists.length < 1;
+    };
+
+    $scope.getParentTable = function() {
+        $scope.parentTables = [];
+        $http({method: 'POST', url: 'getParentTable', data:{}})
+        .success(function(data, status, headers, config) {
+            $scope.parentTables = data;
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+
+    $scope.getParentTable();
+
+    $scope.cloneTableData = function(table_id) {
+        $scope.sheetLoading = true;
+        var data = {table_id:table_id};
+        $http({method: 'POST', url: 'cloneTableData', data:data})
+        .success(function(data, status, headers, config) {
+            $scope.getStatus();
+            $scope.sheetLoading = false;
+        }).error(function(e){
+            console.log(e);
+        });
     };
 
 });

@@ -90,7 +90,6 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         $scope.loading = true;
         $http({method: 'POST', url: 'get_file', data:{editor: true} })
         .success(function(data, status, headers, config) {
-            console.log(data);
             $scope.file.rules = data.rules;
             $scope.file.title = data.title;
             $scope.file.sheets = data.sheets;
@@ -121,7 +120,6 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         $scope.saving = true;
         $http({method: 'POST', url: 'update_sheet', data:{sheet: $scope.file.sheets[0]} })
         .success(function(data, status, headers, config) {
-            console.log(data);
             angular.extend($scope.file.sheets[0], data.sheet);
             $scope.saving = false;
         }).error(function(e){
@@ -139,7 +137,6 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
         column.updating = true;
         $http({method: 'POST', url: 'update_column', data:{sheet_id: sheet.id, table_id: table.id, column: column, rebuild: rebuild} })
         .success(function(data, status, headers, config) {
-            console.log(data);
             angular.extend(column, data.column);
             column.updating = false;
         }).error(function(e){

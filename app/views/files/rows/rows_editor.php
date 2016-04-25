@@ -3,37 +3,56 @@
 
     <div class="ui basic segment" ng-repeat="sheet in file.sheets" ng-class="{loading: loading || saving}" style="overflow:auto">
 
-        <a class="ui basic button" href="import">
-            <i class="reply icon"></i>返回
-        </a>
+        <md-list layout="row">
+            <md-list-item>
+                <md-button href="import" aria-label="返回">返回</md-button>
+            </md-list-item>
+            <md-list-item>
+                <div class="ui pagination small menu" ng-if="paginate.last_page<=6 && paginate.last_page>1">
+                    <a class="item" ng-repeat="i in generateArray(paginate.last_page)" ng-class="{active: paginate.current_page==i}" ng-click="getRows(i)">{{ i }}</a>
+                </div>
 
-        <div class="ui pagination small menu" ng-if="paginate.last_page<=6 && paginate.last_page>1">
-            <a class="item" ng-repeat="i in generateArray(paginate.last_page)" ng-class="{active: paginate.current_page==i}" ng-click="getRows(i)">{{ i }}</a>
-        </div>
+                <div class="ui pagination small menu" ng-if="paginate.last_page>6">
+                    <a class="icon item" ng-class="{disabled: paginate.current_page==1}" ng-click="prevPage()"><i class="left chevron icon"></i></a>
 
-        <div class="ui pagination small menu" ng-if="paginate.last_page>6">
-            <a class="icon item" ng-class="{disabled: paginate.current_page==1}" ng-click="prevPage()"><i class="left chevron icon"></i></a>
+                    <a class="item" ng-class="{active: paginate.current_page==1}" ng-click="getRows(1)">1</a>
+                    <a class="item no-animate disabled" ng-if="paginate.current_page!=2">..</a>
+                    <a class="item no-animate" ng-if="paginate.current_page==paginate.last_page || paginate.current_page==paginate.last_page-1" ng-click="getRows(paginate.last_page-2)">{{ paginate.last_page-2 }}</a>
+                    <a class="item no-animate active" ng-if="paginate.current_page!=1 && paginate.current_page!=paginate.last_page" ng-click="getRows(paginate.current_page)">{{ paginate.current_page }}</a>
+                    <a class="item no-animate" ng-if="paginate.current_page==1 || paginate.current_page==2" ng-click="getRows(3)">3</a>
+                    <a class="item no-animate disabled" ng-if="paginate.current_page!=paginate.last_page-1">..</a>
+                    <a class="item" ng-class="{active: paginate.current_page==paginate.last_page}" ng-click="getRows(paginate.last_page)">{{ paginate.last_page }}</a>
 
-            <a class="item" ng-class="{active: paginate.current_page==1}" ng-click="getRows(1)">1</a>
-            <a class="item no-animate disabled" ng-if="paginate.current_page!=2">..</a>
-            <a class="item no-animate" ng-if="paginate.current_page==paginate.last_page || paginate.current_page==paginate.last_page-1" ng-click="getRows(paginate.last_page-2)">{{ paginate.last_page-2 }}</a>
-            <a class="item no-animate active" ng-if="paginate.current_page!=1 && paginate.current_page!=paginate.last_page" ng-click="getRows(paginate.current_page)">{{ paginate.current_page }}</a>
-            <a class="item no-animate" ng-if="paginate.current_page==1 || paginate.current_page==2" ng-click="getRows(3)">3</a>
-            <a class="item no-animate disabled" ng-if="paginate.current_page!=paginate.last_page-1">..</a>
-            <a class="item" ng-class="{active: paginate.current_page==paginate.last_page}" ng-click="getRows(paginate.last_page)">{{ paginate.last_page }}</a>
+                    <a class="icon item" ng-class="{disabled: paginate.current_page==paginate.last_page}" ng-click="nextPage()"><i class="right chevron icon"></i></a>
+                </div>
+            </md-list-item>
+            <md-list-item ng-if="parentTables.length > 0">
+                <md-menu>
+                    <md-button aria-label="匯入歷史表單" ng-click="$mdOpenMenu($event)">
+                        <md-icon md-menu-origin md-svg-icon="insert-drive-file"></md-icon>匯入過去資料
+                    </md-button>
+                    <md-menu-content width="4">
+                        <md-menu-item>
+                        <md-button ng-repeat="parentTable in parentTables" ng-click="cloneTableData(parentTable.id)">
+                            <md-icon md-svg-icon="insert-drive-file" md-menu-align-target></md-icon>
+                            {{parentTable.sheet.file.title}}
+                        </md-button>
+                        </md-menu-item>
+                    </md-menu-content>
+                </md-menu>
+            </md-list-item>
+            <md-list-item>
+                <md-button md-colors="{background: 'red'}" ng-if="(paginate.data | filter: {selected: true}).length > 0"
+                    ng-class="{loading: status.deleting}"
+                    ng-click="delete()">
+                    <i class="trash icon"></i>刪除名單 ({{ (paginate.data | filter: {selected: true}).length }}筆資料)
+                </md-button>
 
-            <a class="icon item" ng-class="{disabled: paginate.current_page==paginate.last_page}" ng-click="nextPage()"><i class="right chevron icon"></i></a>
-        </div>
+                <md-button md-colors="{background: 'green'}" ng-if="(paginate.data | filter: {updating: true}).length > 0" ng-click="updateRows()">儲存</md-button>
+            </md-list-item>
+        </md-list>
 
-        <md-button md-colors="{background: 'red'}" ng-if="(paginate.data | filter: {selected: true}).length > 0"
-            ng-class="{loading: status.deleting}"
-            ng-click="delete()">
-            <i class="trash icon"></i>刪除名單 ({{ (paginate.data | filter: {selected: true}).length }}筆資料)
-        </md-button>
-
-        <md-button md-colors="{background: 'green'}" ng-if="(paginate.data | filter: {updating: true}).length > 0" ng-click="updateRows()">儲存</md-button>
-
-        <table class="ui very compact collapsing table" ng-repeat="table in sheet.tables">
+        <table class="ui very compact table" ng-repeat="table in sheet.tables">
             <thead>
                 <tr>
                     <th colspan="{{ table.columns.length+3 }}" class="right aligned">
@@ -75,7 +94,7 @@
                             ng-if="column.rules=='bool'"
                             ng-change="setUpdating(row)"
                             aria-label="column.name"></md-checkbox>
-                        <md-select ng-model="row['C' + column.id]" ng-change="setUpdating(row)" ng-if="column.rules=='menu'">
+                        <md-select ng-model="row['C' + column.id]" ng-change="setUpdating(row)" ng-if="column.rules=='menu'" aria-label="column.name">
                             <md-option ng-repeat="anaser in column.answers" ng-value="anaser.value">
                                 {{anaser.title}}
                             </md-option>
@@ -96,6 +115,7 @@ app.controller('rowsEditorController', function($scope, $http, $filter) {
     $scope.status = {};
     $scope.loading = false;
     $scope.saving = false;
+    $scope.parentTables = false;
 
     $scope.getStatus = function() {
         $http({method: 'POST', url: 'get_file', data:{editor: false}})
@@ -192,6 +212,30 @@ app.controller('rowsEditorController', function($scope, $http, $filter) {
                 rows[i].errors = row.errors;
                 $scope.saving = false;
             };
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+
+    $scope.getParentTable = function() {
+        $scope.parentTables = [];
+        $http({method: 'POST', url: 'getParentTable', data:{}})
+        .success(function(data, status, headers, config) {
+           $scope.parentTables = data;
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+
+    $scope.getParentTable();
+
+    $scope.cloneTableData = function(table_id) {
+        $scope.loading = true;
+        var data = {table_id:table_id};
+        $http({method: 'POST', url: 'cloneTableData', data:data})
+        .success(function(data, status, headers, config) {
+            $scope.getRows();
+            $scope.loading = false;
         }).error(function(e){
             console.log(e);
         });

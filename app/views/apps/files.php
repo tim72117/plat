@@ -60,6 +60,7 @@
                 </div>
                 <label for="file_upload" class="ui basic mini button" ng-class="{loading: uploading}"><i class="icon upload"></i>上傳</label>
                 <div class="ui basic mini button red" ng-class="{loading: deleting}" ng-if="todo.delete" ng-click="deleteDoc()"><i class="icon trash outline"></i>刪除</div>
+                <div class="ui basic mini button" ng-class="{loading: saving}" ng-if="todo.saveAs" ng-click="saveAs()"><i class="icons"><i class="file outline icon"></i><i class="write icon"></i></i>另存</div>
                 <div class="ui basic mini button" ng-if="todo.share" ng-click="getShareds()"><i class="icon external share"></i>共用</div>
                 <div class="ui basic mini button" ng-if="todo.request" ng-click="getRequesteds()"><i class="icon exchange"></i>請求</div>
                 <div class="ui basic mini button yellow" ng-click="$event.stopPropagation();whatNews(false)" ng-popup="{show: true, tooltip: tooltip['start']}">
@@ -216,7 +217,9 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     };
     $scope.uploading = false;
     $scope.loading = false;
-    $scope.todo = {share: false, request: false, delete: false};
+    $scope.information = {};
+    $scope.todo = {share: false, request: false, delete: false, clone: false};
+    $scope.parentTables = false;
 
     $interval(function() {
         $scope.timenow = new Date();
@@ -257,8 +260,10 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         $scope.todo.share = docs.length > 0;
         $scope.todo.delete = docs.length > 0;
         $scope.todo.request = docs.length > 0;
+        $scope.todo.saveAs = docs.length > 0;
+        $scope.todo.clone = docs.length > 0;
         for(var i in docs) {
-            if (docs[i].type != '5') { $scope.todo.request = false; };
+            if (docs[i].type != '5') { $scope.todo.request = false; $scope.todo.saveAs = false; $scope.todo.clone = false };
         }
     });
 
@@ -421,6 +426,19 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
             doc.saving = false;
         }).error(function(e) {
             doc.visible = !doc.visible;
+            console.log(e);
+        });
+    };
+
+    $scope.saveAs = function() {
+        $scope.saving = true;
+        var doc = $filter('filter')($scope.docs, {selected: true})[0];
+        $http({method: 'POST', url: '/doc/' + doc.id + '/saveAs', data:{doc_id: doc.id}})
+        .success(function(data, status, headers, config) {
+            console.log(data);
+            $scope.getDocs();
+            $scope.saving = false;
+        }).error(function(e) {
             console.log(e);
         });
     };
