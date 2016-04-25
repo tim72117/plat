@@ -204,4 +204,14 @@ class CommFile {
         return ['doc' => \Struct_file::open($this->doc)];
     }
 
+    public function saveAs() {
+        $file = $this->file->replicate();
+        $file->title = $file->title . '(副本)';
+        $file->save();
+        $doc = $this->doc->replicate();
+        $doc->file_id = $file->id;
+        $doc->save();
+        return $doc;
+    }
+
 }
