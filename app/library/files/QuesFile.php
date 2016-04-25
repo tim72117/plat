@@ -879,4 +879,32 @@ class QuesFile extends CommFile {
 
         return ['report' => $report];
     }
+
+    public function importXMLFile()
+    {
+        $path = storage_path() . '/ques';
+
+        $pageinfos = simplexml_load_file($path . '/' . Input::get('id') .'/data/pageinfo.xml');
+
+        $index = 1;
+        foreach($pageinfos->p as $pageinfo) {
+
+            if (file_exists($path . '/' . Input::get('id') . '/data/' . $pageinfo->xmlfile)) {
+
+                $questions = simplexml_load_file($path . '/' . Input::get('id') . '/data/' . $pageinfo->xmlfile);
+
+                $dom = dom_import_simplexml($questions);
+
+                $xml = $dom->ownerDocument->saveXML($dom->ownerDocument->documentElement);
+
+                $this->file->census->pages()->save(new \QuestionXML\Pages([
+                    'page' => $index,
+                    'xml'  => '<?xml version="1.0"?>' . $xml,
+                ]));
+
+                $index++;
+            }
+        }
+    }
+
 }
