@@ -31,8 +31,8 @@ Route::group(array('before' => 'auth'), function() {
     Route::post('docs/request/get', 'FileController@requested');
     Route::get('project/intro', 'FileController@project');
 
-    Route::get('project/{project}/profile/{parameter?}', 'UserAuthedController@profile');
-    Route::post('project/{project}/profile/{parameter?}', 'UserAuthedController@profileSave');
+    Route::get('project/{project}/profile/{parameter?}', 'UserAuthedController@profile')->where('parameter', 'power|contact|changeUser');
+    Route::post('project/{project}/profile/{parameter?}', 'UserAuthedController@profileSave')->where('parameter', 'power|contact|changeUser');
     Route::get('auth/logout', array('as' => 'logout', 'uses' => 'UserAuthedController@logout'));
     Route::get('auth/password/change', array('before' => '', 'uses' => 'UserAuthedController@passwordChangePage'));
     Route::post('auth/password/change', array('before' => 'csrf|post_delay', 'uses' => 'UserAuthedController@passwordChange'));
