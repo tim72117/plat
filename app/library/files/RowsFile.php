@@ -26,6 +26,7 @@ class RowsFile extends CommFile {
         'gender_id'   => ['sort' => 2,  'type' => 'tinyInteger',             'title' => '性別: 1.男 2.女(身分證第2碼)',  'validator' => 'in:1,2'],
         'bool'        => ['sort' => 3,  'type' => 'boolean',                 'title' => '是(1)與否(0)',                  'validator' => 'boolean'],
         'stdidnumber' => ['sort' => 4,  'type' => 'string',   'size' => 10,  'title' => '身分證',                        'function' => 'stdidnumber'],
+        'email'       => ['sort' => 5,  'type' => 'string',   'size' => 80,  'title' => '信箱',                          'validator' => 'email'],
         'date_six'    => ['sort' => 6,  'type' => 'string',   'size' => 6,   'title' => '日期(yymmdd)',                  'validator' => ['regex:/^([0-9][0-9])(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$/']],
         'order'       => ['sort' => 7,  'type' => 'string',   'size' => 3,   'title' => '順序(1-99,-7)',                 'validator' => ['regex:/^([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|-7)$/']],
         'score'       => ['sort' => 8,  'type' => 'string',   'size' => 3,   'title' => '成績(A++,A+,A,B++,B+,B,C,-7)',  'validator' => 'in:A++,A+,A,B++,B+,B,C,-7'],
