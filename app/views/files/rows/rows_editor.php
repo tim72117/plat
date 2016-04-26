@@ -86,15 +86,18 @@
                                 </div>
                             </div>
                         </md-input-container>
-                        <md-checkbox
+                        <md-checkbox ng-if="column.rules=='bool'"
                             ng-model="row['C' + column.id]"
                             ng-disabled="column.readonly"
                             ng-true-value="'1'"
                             ng-false-value="'0'"
-                            ng-if="column.rules=='bool'"
                             ng-change="setUpdating(row)"
                             aria-label="column.name"></md-checkbox>
-                        <md-select ng-model="row['C' + column.id]" ng-change="setUpdating(row)" ng-if="column.rules=='menu'" aria-label="column.name">
+                        <md-select ng-if="column.rules=='menu'"
+                            ng-model="row['C' + column.id]"
+                            ng-disabled="column.readonly"
+                            ng-change="setUpdating(row)"
+                            aria-label="column.name">
                             <md-option ng-repeat="anaser in column.answers" ng-value="anaser.value">
                                 {{anaser.title}}
                             </md-option>
