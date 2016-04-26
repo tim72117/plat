@@ -2,10 +2,10 @@
 <html xml:lang="zh-TW" lang="zh-TW" ng-app="app">
 <head>
 <meta charset="utf-8" />
-<title><?=$title?></title>
+<title><?=$doc->isFile->title?></title>
 
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
-<script src="/js/angular/1.4.7/angular.min.js"></script>
+<script src="/js/angular/1.5.3/angular.min.js"></script>
 
 <link rel="stylesheet" href="/css/Semantic-UI/2.1.8/semantic.min.css" />
 
@@ -105,23 +105,23 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 
             <div class="ui divider"></div>
 
-            <div class="ui divided list" style="min-height:600px;max-height:600px;overflow-y:scroll">
+            <div class="ui middle aligned divided list" style="min-height:600px;max-height:600px;overflow-y:scroll">
 
                 <div class="item" ng-repeat="column in columns | filter: searchText">
-
-                    <div class="middle aligned content">
-                        <div class="ui checkbox" style="margin-right:120px">
+                    <div class="right floated content">
+                        <div class="ui button" ng-click="$event.stopPropagation();getAnswers(column)">選項定義</div>
+                    </div>
+                    <div class="content">
+                        <div class="ui checkbox" style="max-width:920px">
                             <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.choosed" ng-change="selectSome()" />
                             <label for="column-{{ $index }}">{{ column.title }}</label>
                         </div>
-                        <select class="ui right floated mini button">
+<!--                         <select class="ui right floated mini button">
                             <option value="">變項類型</option>
                             <option value="1">連續變項</option>
                             <option value="0">非連續變項</option>
-                        </select>
-                        <div class="ui right floated mini button" ng-click="$event.stopPropagation();getAnswers(column)">選項定義</div>
+                        </select> -->
                     </div>
-
                 </div>
 
             </div>
