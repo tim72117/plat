@@ -620,9 +620,9 @@ class RowsFile extends CommFile {
 
         $head = $tables[0]->columns->map(function($column) { return 'C' . $column->id; })->toArray();
 
-        Input::has('searchText') && $tables[0]->columns->each(function($column) use($query) {
-            $column->unique && $query->where('C' . $column->id, Input::get('searchText'));
-        });
+        if (Input::has('search.text') && Input::has('search.column_id')) {
+            $query->where('C' . Input::get('search.column_id'), Input::get('search.text'));
+        }
 
         $query->whereNull('deleted_at')->select($head)->addSelect('id');
 
