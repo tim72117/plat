@@ -8,9 +8,7 @@ class QuestionXML {
     static function get_subs($subs, $index, &$questions, $parent_title = null)
     {
         foreach($subs as $sub) {
-            if (!preg_match('{{[ ]?\${1}[\w]+[ ]?}}',$sub->title)) {
-            }
-
+            $sub->title = preg_replace('/{{[ ]?\${1}[\w]+[ ]?}}/','',$sub->title);
             $sub->title = strip_tags(str_replace(PHP_EOL, '', $sub->title));
             $sub->title = preg_replace('/&nbsp;/', '', $sub->title);
 
