@@ -1,94 +1,62 @@
-<div ng-repeat="sheet in file.sheets" ng-if="sheet.selected">
 
-<table ng-repeat="table in sheet.tables" class="ui attached very compact collapsing table">
+<md-content ng-repeat="sheet in file.sheets" ng-if="sheet.selected" ng-class="{loading1: sheet.saving}" layout-padding>
+<md-card>
+<table class="ui very basic very compact table" ng-repeat="table in sheet.tables">
     <thead>
         <tr>
-            <th colspan="9">
-                <div class="ui search selection dropdown active visible" ng-click="visible['sheets']=!visible['sheets'];$event.stopPropagation()">
-                    <i class="dropdown icon"></i>
-                    <div class="default text" ng-class="{filtered: (file.sheets | filter: {selected: true})[0].name!=''}">輸入資料表名稱</div>
-                    <input type="text" class="search"
-                        ng-repeat="sheet in file.sheets | filter: {selected: true}"
-                        ng-model="sheet.title" ng-model-options="{ debounce: 500 }"
-                        ng-change="updateSheet(sheet)" ng-click="$event.stopPropagation()" />
-                    <div class="menu transition" ng-class="{visible: visible['sheets']}" ng-click="$event.stopPropagation()">
-                        <div class="item" ng-repeat="sheet in file.sheets" ng-click="action.toSelect(sheet)">{{ sheet.title }}</div>
-                    </div>
-                </div>
-                <div class="ui right attached basic icon button disabled" ng-click="addSheet()" title="新增資料表"><i class="plus icon"></i></div>
-                <div class="ui red button" ng-click="sheet.editable=true;updateSheet(sheet)" ng-class="{loading: saving, disabled: sheet.editable || table.lock}">
-                    <i class="save icon"></i>修改(會移除已上傳資料)
-                </div>
-                <div class="ui green button" ng-click="sheet.editable=false;updateSheet(sheet)" ng-class="{loading: saving, disabled: !sheet.editable || table.lock}">
-                    <i class="save icon"></i>完成(會移除已上傳資料)
-                </div>
-                <div class="ui red label" ng-if="table.lock"><i class="lock icon"></i>資料已鎖定<div class="detail">{{ table.count }}筆</div></div>
-                <div class="ui checkbox">
-                    <input type="checkbox" id="readOnly" ng-true-value="'1'" ng-model="sheet.fillable">
-                    <label for="readOnly">可匯入</label>
-                </div>
-            </th>
-        </tr>
-        <tr>
-            <th></th>
+            <th class="collapsing"></th>
             <th width="150">欄位代號</th>
             <th width="200">欄位名稱</th>
             <th>欄位類型</th>
-            <th width="50">唯一</th>
-            <th width="50">加密</th>
-            <th width="60">非必填</th>
-            <th>連結選單</th>
+            <th class="collapsing">唯一</th>
+            <th class="collapsing">遮蔽</th>
+            <th class="collapsing">空值</th>
+            <th class="collapsing">唯讀</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="column in table.columns" ng-class="{active: !notNew(column), disabled: column.updating, error: column.error}">
-            <td><i class="icon" ng-class="{columns: notNew(column), add: !notNew(column)}"></i>{{ $index+1 }}</td>
+        <tr ng-repeat="column in table.columns" ng-class="{active: !column.id, disabled: column.updating, error: column.error}">
+            <td>{{ $index+1 }}</td>
             <td>
-                <div class="ui large input">
-                    <input type="text" placeholder="欄位代號" ng-model="column.name" ng-model-options="{ debounce: 500 }" ng-change="updateColumn(sheet, table, column)" />
+                <div class="ui large transparent left icon input" ng-class="{loading: column.updating}">
+                    <input type="text" placeholder="欄位代號" ng-model="column.name" ng-model-options="{debounce: 500}" ng-change="updateColumn(sheet, table, column)" />
+                    <i class="write icon"></i>
                 </div>
             </td>
             <td>
-                <div class="ui large input">
-                    <input type="text" placeholder="欄位名稱" ng-model="column.title" ng-model-options="{ debounce: 500 }" ng-change="updateColumn(sheet, table, column)" />
+                <div class="ui large transparent left icon input" ng-class="{loading: column.updating}">
+                    <input type="text" placeholder="欄位名稱" ng-model="column.title" ng-model-options="{debounce: 500}" ng-change="updateColumn(sheet, table, column)" />
+                    <i class="write icon"></i>
                 </div>
             </td>
             <td ng-class="{disabled: !sheet.editable || table.lock}">
-                <select class="ui dropdown" ng-model="column.rules" ng-options="key as rule.title for (key , rule) in file.rules" ng-change="updateColumn(sheet, table, column, true)">
-                    <option value="">過濾規則</option>
-                </select>
+                <md-input-container>
+                    <md-select ng-model="column.rules" aria-label="過濾規則" ng-change="updateColumn(sheet, table, column)">
+                        <md-option ng-repeat="(key, rule) in file.rules" ng-value="key" ng-disabled="$index === 1">
+                            {{rule.title}}
+                        </md-option>
+                    </md-select>
+                </md-input-container>
             </td>
             <td>
-                <div class="ui checkbox">
-                    <input type="checkbox" id="unique-{{ $index }}" ng-true-value="'1'" ng-model="column.unique" ng-change="updateColumn(sheet, table, column)" />
-                    <label for="unique-{{ $index }}"></label>
-                </div>
+                <md-checkbox ng-model="column.unique" aria-label="unique" ng-change="updateColumn(sheet, table, column)"></md-checkbox>
             </td>
             <td>
-                <div class="ui checkbox">
-                    <input type="checkbox" id="encrypt-{{ $index }}" ng-true-value="'1'" ng-model="column.encrypt" ng-change="updateColumn(sheet, table, column)" />
-                    <label for="encrypt-{{ $index }}"></label>
-                </div>
+                <md-checkbox ng-model="column.encrypt" aria-label="encrypt" ng-change="updateColumn(sheet, table, column)"></md-checkbox>
             </td>
             <td>
-                <div class="ui checkbox">
-                    <input type="checkbox" id="isnull-{{ $index }}" ng-true-value="'1'" ng-model="column.isnull" ng-change="updateColumn(sheet, table, column)" />
-                    <label for="isnull-{{ $index }}"></label>
-                </div>
+                <md-checkbox ng-model="column.isnull" aria-label="isnull" ng-change="updateColumn(sheet, table, column)"></md-checkbox>
             </td>
             <td>
-                <select class="ui dropdown" ng-model="column.link.table" ng-options="index as index for (index,sheet) in file.sheets" ng-change="setAutocomplete(colHeader)">
-                    <option value="">資料表</option>
-                </select>
+                <md-checkbox ng-model="column.readonly" aria-label="readonly" ng-disabled="column.encrypt" ng-change="updateColumn(sheet, table, column)"></md-checkbox>
             </td>
-            <td ng-class="{disabled: !sheet.editable || table.lock}">
-                <div class="ui basic mini button" ng-if="notNew(column)" ng-click="removeColumn(sheet, table, column)">
-                    <i class="remove icon"></i>刪除
-                </div>
+            <td>
+                <md-button class="md-raised" ng-disabled="!sheet.editable || table.lock" ng-click="removeColumn(sheet, table, column)" ng-if="table.columns.length>1">刪除</md-button>
+                <md-button class="md-raised md-warn" ng-disabled="!sheet.editable || table.lock" ng-click="addColumn(table)" ng-if="$last">新增</md-button>
             </td>
         </tr>
     </tbody>
 </table>
-
-</div>
+</md-card>
+</md-content>

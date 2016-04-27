@@ -8,6 +8,8 @@ class QuestionXML {
     static function get_subs($subs, $index, &$questions, $parent_title = null)
     {
         foreach($subs as $sub) {
+            if (!preg_match('{{[ ]?\${1}[\w]+[ ]?}}',$sub->title)) {
+            }
 
             $sub->title = strip_tags(str_replace(PHP_EOL, '', $sub->title));
             $sub->title = preg_replace('/&nbsp;/', '', $sub->title);
@@ -31,6 +33,7 @@ class QuestionXML {
             if ($sub->type=='scale') {
                 foreach ($sub->questions as $question) {
                     $question->title = strip_tags(str_replace(PHP_EOL, '', $question->title));
+                    $question->title = preg_replace('/&nbsp;/', '', $question->title);
                     $question->title = $sub->title . '-' . $question->title;
 
                     foreach($sub->answers as $answer) {
@@ -46,6 +49,7 @@ class QuestionXML {
             if ($sub->type=='checkbox') {
                 foreach ($sub->questions as $question) {
                     $question->title = strip_tags(str_replace(PHP_EOL, '', $question->title));
+                    $question->title = preg_replace('/&nbsp;/', '', $question->title);
                     $question->title = $question->title . '-' . $sub->title;
                     $question->answers = [(object)['title' => '是', 'value' => '1'], (object)['title' => '否', 'value' => '0']];
                     array_push($questions, $question);
@@ -74,14 +78,20 @@ class QuestionXML {
             $question_new->name = (string)$question->answer->name;
         }
 
+        if ($question->type=='scale') {
+            foreach($question->answer->degree as $degree) {
+                array_push($question_new->answers, (object)['title' => (string)$degree, 'value' => (string)$degree->attributes()['value']]);
+            }
+        }
+
         foreach($question->answer->item as $item){
             $attr = $item->attributes();
             $skips = array_filter(explode(',', $attr['skip']));
 
             $subs = [];
 
-            foreach(array_filter(explode(',', $attr["sub"])) as $sub){
-                $sub = self::$questions->xpath("/page/question_sub/id[.='".$sub."']/parent::*");
+            foreach(array_filter(explode(',', $attr["sub"])) as $sub_id){
+                $sub = self::$questions->xpath("/page/question_sub/id[.='".$sub_id."']/parent::*");
                 isset($sub[0]) && array_push($subs, self::to_array($sub[0], $layer+1, (string)$question->type));
             }
 
@@ -91,13 +101,13 @@ class QuestionXML {
                     array_push($question_new->answers, (object)['title' => (string)$item, 'value' => (string)$attr['value'], 'skips' => $skips, 'subs' => $subs]);
                     break;
                 case "text":
-                    array_push($question_new->questions, (object)['title' => (string)$item, 'name' => (string)$attr['name'], 'size' => (string)$attr['size'], 'placeholder' => (string)$attr['sub_title']]);
+                    array_push($question_new->questions, (object)['type' => 'text', 'title' => (string)$item, 'name' => (string)$attr['name'], 'size' => (string)$attr['size'], 'placeholder' => (string)$attr['sub_title']]);
                     break;
                 case "checkbox":
-                    array_push($question_new->questions, (object)['title' => (string)$item, 'name' => (string)$attr['name'], 'subs' => $subs, 'reset' => (string)$attr['reset']]);
+                    array_push($question_new->questions, (object)['type' => 'checkbox', 'title' => (string)$item, 'name' => (string)$attr['name'], 'subs' => $subs, 'reset' => (string)$attr['reset']]);
                     break;
                 case "scale":
-                    array_push($question_new->questions, (object)['title' => (string)$item, 'name' => (string)$attr['name']]);
+                    array_push($question_new->questions, (object)['type' => 'scale', 'title' => (string)$item, 'name' => (string)$attr['name']]);
                     break;
                 case "list":
                     array_push($question_new->questions, (object)['title' => (string)$item, 'subs' => $subs]);
@@ -107,14 +117,6 @@ class QuestionXML {
                     break;
             }
         }
-
-        // xml to objects
-        if (in_array((string)$question->type, ['scale'])) {
-            foreach($question->answer->degree as $degree) {
-                array_push($question_new->answers, (object)['title' => (string)$degree, 'value' => (string)$degree->attributes()['value']]);//strip_tags
-            }
-        }
-        //-----------------------------
 
         return $question_new;
     }

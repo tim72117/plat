@@ -1,7 +1,7 @@
 <?php
 $schools = [];
 Project\Used\User::find(Auth::user()->id)->schools->each(function($school) use(&$schools) {
-    $schools['my-schools-' . $school->id] = ['name' => $school->sname, 'shid' => [$school->id]];
+    $schools['my-schools-' . $school->id] = ['name' => $school->name, 'shid' => [$school->id]];
 })->toArray();
 
 return [
@@ -99,15 +99,15 @@ return [
             'key'   => 'no-test',
             'name'  => '免試就學區',
             'targets' => [
-                'NTR01'          => ['name' => '基北區', 'city_notest' => '1'],
-                'NTR02'          => ['name' => '桃園區', 'city_notest' => '2'],
-                'NTR03'          => ['name' => '竹苗區', 'city_notest' => '3'],
-                'NTR04'          => ['name' => '中投區', 'city_notest' => '4'],
-                'NTR05'          => ['name' => '嘉義區', 'city_notest' => '5'],
-                'NTR06'          => ['name' => '彰化區', 'city_notest' => '6'],
-                'NTR07'          => ['name' => '雲林區', 'city_notest' => '7'],
-                'NTR08'          => ['name' => '台南區', 'city_notest' => '8'],
-                'NTR09'          => ['name' => '高雄區', 'city_notest' => '9'],
+                'NTR01'          => ['name' => '基北區', 'city_notest' => '01'],
+                'NTR02'          => ['name' => '桃園區', 'city_notest' => '02'],
+                'NTR03'          => ['name' => '竹苗區', 'city_notest' => '03'],
+                'NTR04'          => ['name' => '中投區', 'city_notest' => '04'],
+                'NTR05'          => ['name' => '嘉義區', 'city_notest' => '05'],
+                'NTR06'          => ['name' => '彰化區', 'city_notest' => '06'],
+                'NTR07'          => ['name' => '雲林區', 'city_notest' => '07'],
+                'NTR08'          => ['name' => '台南區', 'city_notest' => '08'],
+                'NTR09'          => ['name' => '高雄區', 'city_notest' => '09'],
                 'NTR10'          => ['name' => '屏東區', 'city_notest' => '10'],
                 'NTR11'          => ['name' => '台東區', 'city_notest' => '11'],
                 'NTR12'          => ['name' => '花蓮區', 'city_notest' => '12'],

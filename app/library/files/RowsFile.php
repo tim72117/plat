@@ -54,6 +54,8 @@ class RowsFile extends CommFile {
         'stdyear'          => ['sort' => 29, 'type' => 'string',   'size' => 1,   'title' => 'TTED年級',                  'validator' => 'in:1,2,3,4,5,6,7'],
         'string_dot'       => ['sort' => 30, 'type' => 'string',   'size' => 100, 'title' => '文字(逗號分隔)',            'regex'     => '/^[\x{0080}-\x{00FF},]+$/'],
         'float_hundred'    => ['sort' => 20, 'type' => 'string',   'size' => 8,   'title' => '小數(1-100,-7)',            'validator' => ['regex:/^(([0-9]|[1-9][0-9])(\\.[0-9]{1,5})?|100|-7)$/']],
+        'yyy'              => ['sort' => 31, 'type' => 'string',   'size' => 3,   'title' => '民國年',                    'validator' => ['regex:/^([1-9]|[1-9][0-9]|[1][0-1][0-9])$/']],
+        'menu'             => ['sort' => 32, 'type' => 'tinyInteger',             'title' => '選單',                      'menu' => ''],
     ];
 
     /**
@@ -187,7 +189,7 @@ class RowsFile extends CommFile {
     {
         $this->init_sheets();
 
-        $sheets = $this->file->sheets()->with(['tables', 'tables.columns'])->get()->each(function($sheet) {
+        $sheets = $this->file->sheets()->with(['tables.columns.answers'])->get()->each(function($sheet) {
             $sheet->tables->each(function($table) use($sheet) {
                 !$sheet->editable && $this->table_construct($table);
                 if ($this->has_table($table)) {
@@ -196,6 +198,8 @@ class RowsFile extends CommFile {
                         $query->where('created_by', $this->user->id);
                     }
                     $table->count = $query->count();
+                } else {
+                    $this->table_build($table);
                 }
             });
         });
@@ -223,18 +227,14 @@ class RowsFile extends CommFile {
     {
         $table = $this->file->sheets->find(Input::get('sheet_id'))->tables->find(Input::get('table_id'));
 
-        $table->columns->find(Input::get('column')['id'])->delete();
+        $deleted = $table->columns->find(Input::get('column')['id'])->delete();
 
-        return ['table' => $table->load('columns')->toArray()];
+        return ['deleted' => $deleted];
     }
 
     public function update_column()
     {
-        $input = Input::only(['column.name', 'column.title', 'column.rules'])['column'];
-
-        $input['unique'] = Input::get('column.unique', false);
-        $input['encrypt'] = Input::get('column.encrypt', false);
-        $input['isnull'] = Input::get('column.isnull', false);
+        $input = Input::only(['column.name', 'column.title', 'column.rules', 'column.unique', 'column.encrypt', 'column.isnull', 'column.readonly'])['column'];
 
         $table = $this->file->sheets->find(Input::get('sheet_id'))->tables->find(Input::get('table_id'));
 
@@ -274,7 +274,7 @@ class RowsFile extends CommFile {
     public function import_upload()
     {
         if (!Input::hasFile('file_upload'))
-            throw new ValidateException(new MessageBag(array('no_file_upload' => '檔案錯誤')));
+            throw new UploadFailedException(new MessageBag(['messages' => ['max' => '檔案格式或大小錯誤']]));
 
         $file = new Files(['type' => 3, 'title' => Input::file('file_upload')->getClientOriginalName()]);
 
@@ -333,6 +333,7 @@ class RowsFile extends CommFile {
                 'uniques' => isset($uniques) ? $uniques : [],
                 'repeats' => isset($repeats) ? $repeats : [],
                 'exists'  => isset($exists) ? $exists : [],
+                'menu'    => $column->rules == 'menu' ? $column->answers->lists('value') : [],
             ];
         });
 
@@ -341,7 +342,7 @@ class RowsFile extends CommFile {
 
         foreach ($rows as $row_index => $row)
         {
-            $row_filted = array_filter(array_map('strval', $row));
+            $row_filted = array_filter(array_map('strval', $row), function($value) { return $value != ''; });
 
             $messages[$row_index] = (object)['pass' => false, 'limit' => false, 'empty' => empty($row_filted), 'updated' => false, 'exists' => [], 'errors' => [], 'row' => []];
 
@@ -432,6 +433,12 @@ class RowsFile extends CommFile {
             }
             if (isset($rules['function'])) {
                 call_user_func_array($this->checker($rules['function']), array($column_value, $column, &$column_errors));
+            }
+
+            if (!$column->unique && isset($rules['menu'])) {
+                if (!in_array($column_value, $column->menu, true)) {
+                    array_push($column_errors, $column->title . '未在選單中');
+                }
             }
         }
 
@@ -584,9 +591,12 @@ class RowsFile extends CommFile {
 
                 list($query, $power) = $this->get_rows_query($tables);
 
-                $head = $tables[0]->columns->map(function($column) { return 'C' . $column->id . ' AS ' . $column->name; })->toArray();
+                $head = $tables[0]->columns->map(function($column) { return 'C' . $column->id; })->toArray();
 
-                $rows = array_map(function($row) {
+                $encrypts = $tables[0]->columns->filter(function($column) { return $column->encrypt; });
+
+                $rows = array_map(function($row) use($encrypts) {
+                    $this->setEncrypts($row, $encrypts);
                     return array_values(get_object_vars($row));
                 }, $query->where('created_by', $this->user->id)->whereNull('deleted_at')->select($head)->get());
 
@@ -610,17 +620,24 @@ class RowsFile extends CommFile {
 
         $head = $tables[0]->columns->map(function($column) { return 'C' . $column->id; })->toArray();
 
-        Input::has('searchText') && $tables[0]->columns->each(function($column) use($query) {
-            $column->unique && $query->where('C' . $column->id, Input::get('searchText'));
-        });
+        if (Input::has('search.text') && Input::has('search.column_id')) {
+            $query->where('C' . Input::get('search.column_id'), Input::get('search.text'));
+        }
 
         $query->whereNull('deleted_at')->select($head)->addSelect('id');
 
-        return [
-            'paginate' => $this->isCreater()
-            ? $query->addSelect('created_by')->paginate(15)->toArray()
-            : $query->where('created_by', $this->user->id)->paginate(15)->toArray()
-        ];
+        $paginate = $this->isCreater()
+            ? $query->addSelect('created_by')->paginate(15)
+            : $query->where('created_by', $this->user->id)->paginate(15);
+
+        $encrypts = $tables[0]->columns->filter(function($column) { return $column->encrypt; });
+
+        if (!$encrypts->isEmpty()) {
+            $paginate->getCollection()->each(function($row) use($encrypts) {
+                $this->setEncrypts($row, $encrypts);
+            });
+        }
+        return ['paginate' => $paginate->toArray()];
     }
 
     //uncomplete only first sheet
@@ -641,6 +658,17 @@ class RowsFile extends CommFile {
         });
 
         return ['tables' => $tables];
+    }
+
+    public function setEncrypts($row, $encrypts)
+    {
+        $encrypts->each(function($encrypt) use($row) {
+            $column = 'C' . $encrypt->id;
+
+            $encrypted = mb_substr($row->$column, round(mb_strlen($row->$column)/2));
+
+            $row->$column = str_pad($encrypted, strlen($row->$column), "*", STR_PAD_LEFT);
+        });
     }
 
     //uncomplete
@@ -905,27 +933,34 @@ class RowsFile extends CommFile {
         return $exists;
     }
 
-    public function saveRow()
+    public function updateRows()
     {
-        $status = ['updated' => false, 'errors' => []];
+        $updated = array_map(function($row) {
 
-        $status['errors'] = $this->check_row(Input::get('row'));
+            $row['errors'] = $this->check_row($row);
 
-        if (empty($status['errors'])) {
-            $table = $this->file->sheets[0]->tables[0];
+            if (empty($row['errors']))
+            {
+                $columns = $this->file->sheets[0]->tables[0]->columns->filter(function($column) {
+                    return !$column->encrypt;
+                })->map(function($column) {
+                    return 'C' . $column->id;
+                })->toArray();
 
-            $table_columns = $table->columns->map(function($column) { return 'row.C' . $column->id; })->toArray();
+                $query = DB::table($this->file->sheets[0]->tables[0]->database . '.dbo.' . $this->file->sheets[0]->tables[0]->name);
 
-            $query = DB::table($table->database . '.dbo.' . $table->name);
+                if (!$this->isCreater()) {
+                    $query->where('created_by', $this->user->id);
+                }
 
-            if (!$this->isCreater()) {
-                $query->where('created_by', $this->user->id);
+                $row['updated'] = $query->where('id', $row['id'])->update(array_only($row, $columns));
             }
 
-            $status['updated'] = $query->where('id', Input::get('row.id'))->update(Input::only($table_columns)['row']);
-        }
+            return $row;
 
-        return ['status' => $status];
+        }, Input::get('rows'));
+
+        return ['updated' => $updated];
     }
 
     private function check_row($row)
@@ -936,8 +971,10 @@ class RowsFile extends CommFile {
         {
             $value = isset($row['C' . $column->id]) ? remove_space($row['C' . $column->id]) : '';
 
-            if (!$column->isnull || !empty($value))
+            if (!$column->encrypt && (!$column->isnull || !empty($value)))
             {
+                $column->menu = $column->answers->lists('value');
+
                 $column_errors = $this->check_column($column, $value);
 
                 !empty($column_errors) && $errors[$column->id] = $column_errors;
@@ -947,4 +984,80 @@ class RowsFile extends CommFile {
         return $errors;
     }
 
+    public function saveAs()
+    {
+        $dependTable = $this->file->sheets[0]->tables->first();
+        $doc = parent::saveAs();
+        $this->file->sheets->each(function($sheet)use($doc,$dependTable) {
+            $cloneSheet = $sheet->replicate();
+            $cloneSheet->file_id = $doc->file_id;
+            $cloneSheet->save();
+            $sheet->tables->each(function($table)use($cloneSheet,$dependTable) {
+                $cloneTable = $table->replicate();
+                $cloneTable->name = $this->generate_table();
+                $cloneTable->sheet_id = $cloneSheet->id;
+                $cloneTable->lock = true;
+                $cloneTable->save();
+                $cloneTable->depend_tables()->attach($cloneTable->id, array('depend_table_id' => $dependTable->id));
+                $table->columns->each(function($column)use($cloneTable) {
+                    $cloneColumn = $column->replicate();
+                    $cloneColumn->table_id = $cloneTable->id;
+                    $cloneColumn->save();
+                });
+            });
+        });
+    }
+
+    public function getParentTable()
+    {
+        $data = [];
+        $table = $this->file->sheets()->with(['tables.depend_tables.sheet.file'])->first();
+        if (!empty($table->tables[0]->depend_tables[0])) {
+           if ($this->has_table($table->tables[0]->depend_tables[0])) {
+               $data = $table->tables[0]->depend_tables;
+           }
+        }
+        return $data;
+    }
+
+    public function cloneTableData()
+    {
+        $parent_id          = input::get('table_id');
+
+        $child['table']     = $this->file->sheets[0]->tables->first();
+        $child['columns']   = $child['table']->columns->lists('id','name');
+        $child['has_table'] = $this->has_table($child['table']);
+        $child['rows']      = [];
+
+        $parent['table']    = Table::find($parent_id);
+        $parent['sheet']    = $parent['table']->sheet;
+        $parent['columns']  = $parent['table']->columns->lists('name','id');
+        $parent['rows']     = DB::table($parent['table']->database . '.dbo.' . $parent['table']->name)->where('created_by',$this->user->id)->whereNull('deleted_at')->get();
+
+        if (!$child['has_table']) {
+            $this->table_build($child['table']);
+            $child['has_table'] = $this->has_table($child['table']);
+        }
+
+        if ($parent['rows']) {
+            $count = 0;
+            foreach ($parent['rows'] as $row) {
+                foreach ($parent['table']['columns'] as $column) {
+                    $columnTitle    = $parent['columns'][$column->id];
+                    $childColumnId  = $child['columns'][$columnTitle];
+                    $child['rows'][$count]['C'.$childColumnId] = $row->{'C'.$column->id};
+                    $child['rows'][$count]['file_id'] = $parent['sheet']->file_id;
+                    $child['rows'][$count]['created_by'] = $this->user->id;
+                    $child['rows'][$count]['updated_by'] = $this->user->id;
+                    $child['rows'][$count]['created_at'] = Carbon::now()->toDateTimeString();
+                    $child['rows'][$count]['updated_at'] = Carbon::now()->toDateTimeString();
+                }
+                $count++;
+            }
+            foreach (array_chunk($child['rows'], 50) as $child_row) {
+                $rowInsert = DB::table($child['table']->database . '.dbo.' . $child['table']->name)->insert($child_row);
+            }
+        }
+        // return ['child'=>$child,'parent'=>$parent];
+    }
 }

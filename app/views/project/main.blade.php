@@ -11,14 +11,14 @@
 <script src="/js/angular/1.5.3/angular-animate.min.js"></script>
 <script src="/js/angular/1.5.3/angular-aria.min.js"></script>
 <script src="/js/angular/1.5.3/angular-messages.min.js"></script>
-<script src="/js/angular_material/1.1.0-rc1/angular-material.min.js"></script>
+<script src="/js/angular_material/1.1.0/angular-material.min.js"></script>
 <script src="/css/Semantic-UI/2.1.8/components/transition.min.js"></script>
 <script src="/css/Semantic-UI/2.1.8/components/popup.min.js"></script>
 <script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
 <script src="/js/angular-semantic-ui/dropdown.js"></script>
 
 <link rel="stylesheet" href="/css/Semantic-UI/2.1.8/semantic.min.css" />
-<link rel="stylesheet" href="/css/angular_material/1.1.0-rc1/angular-material.min.css">
+<link rel="stylesheet" href="/js/angular_material/1.1.0/angular-material.min.css">
 
 <style>
 ::-webkit-scrollbar {
@@ -27,20 +27,6 @@
 }
 ::-webkit-scrollbar-thumb {
     background: #aaa;
-}
-.flex {
-    display: -webkit-flex;
-    display: flex;
-}
-.menu-left {
-    -webkit-flex: initial;
-            flex: initial;
-    min-width: 300px;
-    max-width: 350px;
-}
-.context {
-    -webkit-flex: 1;
-            flex: 1;
 }
 .no-animate {
     -webkit-transition: none !important;
@@ -51,14 +37,16 @@
 <script>
 var app = angular.module('app', ['ngSanitize', 'ngCookies', 'ngMaterial'])
 
-app.config(['$compileProvider', function ($compileProvider) {
+app.config(function ($compileProvider, $mdIconProvider) {
     $compileProvider.debugInfoEnabled(false);
-}])
+    $mdIconProvider.defaultIconSet('/js/angular_material/1.1.0/core-icons.svg', 24);
+})
 
-.controller('mainController', function($scope, $filter, $http, $cookies) {
+.controller('mainController', function($scope, $filter, $http, $cookies, $mdSidenav) {
     $scope.pathname = window.location.pathname;
     $scope.openLeftMenu = false;
     $scope.toggleLeftMenu = function() {
+        $mdSidenav('left').toggle();
         $scope.openLeftMenu = !$scope.openLeftMenu;
     };
 })
@@ -67,7 +55,7 @@ app.config(['$compileProvider', function ($compileProvider) {
     $scope.root = {};
     $scope.getDocs = function() {
         $scope.loading = true;
-        $http({method: 'POST', url: '/docs/lists', data:{} })
+        $http({method: 'POST', url: '/docs/lists', data:{}})
         .success(function(data, status, headers, config) {
             $scope.root.docs = data.docs;
             $scope.loading = false;
@@ -87,44 +75,40 @@ app.config(['$compileProvider', function ($compileProvider) {
 @stop
 
 @section('body')
-<div ng-controller="mainController">
-
-    <div class="ui attached inverted secondary menu green">
-        <div class="menu">
-            <a class="item" ng-class="{active: openLeftMenu}" ng-click="toggleLeftMenu()"><i class="history icon"></i> 近期存取</a>
-            <a class="item" href="/project/intro" ng-class="{active: pathname == '/project/intro'}"><i class="home icon"></i>{{ $project->name }}</a>
-
-            <a class="item" href="/docs/management" ng-class="{active: pathname == '/docs/management'}">
-                <i class="folder outline icon" ng-class="{open: pathname == '/docs/management'}"></i> 我的檔案
-            </a>
-            <div class="item active" ng-cloak ng-if="pathname.indexOf('doc/') != -1"> / {{ @$doc->isFile->title }}</div>
-            <div class="item active" ng-cloak ng-if="pathname.indexOf('request/') != -1"> / {{ @$request->description }}</div>
+<body ng-cloak ng-controller="mainController" layout="column">
+    <md-toolbar layout="row">
+        <div class="md-toolbar-tools">
+            <md-button ng-class="{'md-raised': openLeftMenu}" ng-click="toggleLeftMenu()"><i class="history icon"></i> 近期存取</md-button>
+            <md-button ng-class="{'md-raised': pathname == '/project/intro'}" href="/project/intro"><i class="home icon"></i>{{ $project->name }}</md-button>
+            <md-button ng-class="{'md-raised': pathname == '/docs/management'}" href="/docs/management">
+                <i class="folder outline icon" ng-class="{open: pathname == '/docs/management'}"></i>我的檔案
+            </md-button>
+            <h2> / {{ @$doc->isFile->title }}</h2>
+            <span flex></span>
+            <md-button ng-class="{'md-raised': pathname == '/project/{{ $project->code }}/profile'}" href="/project/{{ $project->code }}/profile">個人資料</md-button>
+            <md-button ng-class="{'md-raised': pathname == '/auth/password/change'}" href="/auth/password/change">更改密碼</md-button>
+            <md-button href="/auth/logout">登出</md-button>
         </div>
-
-        <div class="right menu">
-            <a class="item" href="/project/{{ $project->code }}/profile" ng-class="{active: pathname == '/project/{{ $project->code }}/profile'}">個人資料</a>
-            <a class="item" href="/auth/password/change" ng-class="{active: pathname == '/auth/password/change'}">更改密碼</a>
-            <a class="item" href="/auth/logout">登出</a>
-        </div>
-    </div>
-
-    <div class="flex">
-        <div ng-cloak ng-controller="leftMenuController" class="ui basic segment menu-left" ng-class="{loading: loading}" ng-if="openLeftMenu">
-            <div class="ui relaxed divided list">
-
-                <div class="item" ng-repeat="doc in root.docs | orderBy: 'opened_at':true | limitTo:10">
-                    <i class="history icon"></i>
-                    <div class="content">
-                        <a href="@{{ doc.link }}">@{{ doc.title }}</a>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-        <div class="context">
+    </md-toolbar>
+    <md-content layout="row" flex>
+        <md-sidenav class="md-sidenav-left" md-component-id="left" layout="column">
+            <md-content ng-controller="leftMenuController" layout="row" flex ng-if="openLeftMenu">
+                <md-content layout="column" flex layout-align="center center" ng-if="loading">
+                    <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+                </md-content>
+                <md-list>
+                    <md-list-item ng-repeat="doc in root.docs | orderBy: 'opened_at':true | limitTo:10">
+                        <md-icon><i class="history icon"></i></md-icon>
+                        <div class="md-list-item-text" layout="column">
+                            <a href="@{{ doc.link }}">@{{ doc.title }}</a>
+                        </div>
+                    </md-list-item>
+                </md-list>
+            </md-content>
+        </md-sidenav>
+        <md-content layout="column" flex>
             <?=$context?>
-        </div>
-    </div>
-
-</div>
+        </md-content>
+    </md-content>
+</body>
 @stop

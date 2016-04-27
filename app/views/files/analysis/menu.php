@@ -2,10 +2,10 @@
 <html xml:lang="zh-TW" lang="zh-TW" ng-app="app">
 <head>
 <meta charset="utf-8" />
-<title><?=$title?></title>
+<title><?=$doc->isFile->title?></title>
 
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
-<script src="/js/angular/1.4.7/angular.min.js"></script>
+<script src="/js/angular/1.5.3/angular.min.js"></script>
 
 <link rel="stylesheet" href="/css/Semantic-UI/2.1.8/semantic.min.css" />
 
@@ -40,8 +40,23 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         });
     };
 
-    $scope.resetAll = function() {
-        $scope.isSelectAll = false;
+    $scope.selectSome = function() {
+        var isSelected = 0;
+        angular.forEach($scope.columns, function(column) {
+            if (column.choosed){
+                isSelected = isSelected +1;
+            }
+        });
+        if (isSelected == $scope.columns.length){
+            document.getElementById("selectAll").indeterminate = false;
+            $scope.isSelectAll = true;
+        }else if(isSelected>0){
+        123
+            document.getElementById("selectAll").indeterminate = true;
+        }else{
+            document.getElementById("selectAll").indeterminate = false;
+            $scope.isSelectAll = false;
+        }
     };	
 
     $scope.nextStep = function() {
@@ -56,6 +71,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
     };
 
     $scope.getColumns();
+
 });
 
 </script>
@@ -81,7 +97,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         </div>
 
         <div class="ui attached segment" ng-class="{loading: loading}">
-
+            <div class="list">
             <div class="ui checkbox">
                 <input type="checkbox" id="selectAll" ng-model="isSelectAll" ng-change="selectAll()">
                 <label for="selectAll">全選(勾選題目時，建議您參考問卷，以完整瞭解題目原意！)</label>
@@ -89,27 +105,27 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 
             <div class="ui divider"></div>
 
-            <div class="ui divided list" style="min-height:600px;max-height:600px;overflow-y:scroll">
+            <div class="ui middle aligned divided list" style="min-height:600px;max-height:600px;overflow-y:scroll">
 
                 <div class="item" ng-repeat="column in columns | filter: searchText">
-
-                    <div class="middle aligned content">
-                        <div class="ui checkbox" style="margin-right:120px">
-                            <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.choosed" ng-change="resetAll()" />
+                    <div class="right floated content">
+                        <div class="ui button" ng-click="$event.stopPropagation();getAnswers(column)">選項定義</div>
+                    </div>
+                    <div class="content">
+                        <div class="ui checkbox" style="max-width:920px">
+                            <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.choosed" ng-change="selectSome()" />
                             <label for="column-{{ $index }}">{{ column.title }}</label>
                         </div>
-                        <select class="ui right floated mini button">
+<!--                         <select class="ui right floated mini button">
                             <option value="">變項類型</option>
                             <option value="1">連續變項</option>
                             <option value="0">非連續變項</option>
-                        </select>
-                        <div class="ui right floated mini button" ng-click="$event.stopPropagation();getAnswers(column)">選項定義</div>
+                        </select> -->
                     </div>
-
                 </div>
 
             </div>
-
+            </div>
         </div>
 
 	</div>

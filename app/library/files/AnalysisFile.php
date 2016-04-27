@@ -81,6 +81,12 @@ class AnalysisFile extends CommFile {
             return in_array($question->name, $columns);
         }));
 
+        /*$questions = array_map(function($question) {
+            if(!preg_match('{{[ ]?\${1}[\w]+[ ]?}}',$question->title)) {
+                return $question;
+            }
+        },$questions);*/
+
         return ['questions' => $questions, 'title' => $this->file->analysis->title];
     }
 
@@ -98,6 +104,12 @@ class AnalysisFile extends CommFile {
                 $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $this->user->id);
             });
         })->get()->map(function($doc) {
+            if (file_exists($_SERVER['DOCUMENT_ROOT'].'\files\ques\\'.$doc->isFile->analysis->id.'.pdf')) {
+                $doc->isFile->analysis->file = (object)[
+                    'name' => $doc->isFile->analysis->title,
+                    'path' => '/files/ques/'.$doc->isFile->analysis->id.'.pdf'
+                ];
+            }
             $doc->analysis = $doc->isFile->analysis;
             $doc->selected = $this->file->id == $doc->file_id;
             return $doc;

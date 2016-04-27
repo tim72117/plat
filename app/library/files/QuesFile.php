@@ -609,9 +609,9 @@ class QuesFile extends CommFile {
         $tablename = $this->file->census->table;
         $pages = $this->file->census->pages;
 
-        Config::set('database.default', 'sqlsrv');
-        Config::set('database.connections.sqlsrv.database', $this->file->census->database);
-        DB::reconnect('sqlsrv');
+        Config::set('database.default', 'sqlsrv_plat');
+        Config::set('database.connections.sqlsrv_plat.database', $this->file->census->database);
+        DB::reconnect('sqlsrv_plat');
 
         foreach($pages as $ques_page) {
             $page = $ques_page->page;
@@ -737,17 +737,17 @@ class QuesFile extends CommFile {
     {
         $pages = $this->xml_to_array()['pages'];
 
-        $file = Files::create(['title'=> $this->file->title, 'type' => 9, 'created_by' => $this->user->id]);
+        $file = Files::create(['type' => 9, 'title'=> $this->file->title, 'created_by' => $this->user->id]);
 
         ShareFile::create(['file_id' => $file->id, 'target' => 'user', 'target_id' => $this->user->id, 'visible' => true, 'created_by' => $this->user->id]);
 
         $interViewFile = new InterViewFile($file, $this->user);
 
+        $interViewFile->resetBooks();
+
         $interViewFile->create();
 
-        $interViewFile->save_ques_to_db($pages);
-
-        return ['pages' => $pages];
+        $interViewFile->saveXML($pages);
     }
 
     public function to_old_analysis()
@@ -866,19 +866,45 @@ class QuesFile extends CommFile {
 
     public function get_reports()
     {
-        $reports = DB::table('report')->where('census_id', $this->file->census->id)->select('id', 'contact', 'text', 'explorer', 'solve', 'time')->orderBy('time', 'desc')->get();
-        foreach ($reports as $report) {
-            $report->solve = (bool)$report->solve;
-        }
+        $reports = $this->file->census->reports()->orderBy('time', 'desc')->get();
+
         return ['reports' => $reports];
     }
 
     public function save_report()
     {
-        $report_id = Input::get('report_id');
-        DB::table('report')->where('id', $report_id)->update(['solve' => Input::get('solve')]);
-        $report = DB::table('report')->where('id', $report_id)->select('id', 'contact', 'text', 'explorer', 'solve', 'time')->orderBy('time', 'desc')->first();
-        $report->solve = (bool)$report->solve;
+        $report = \QuestionXML\Report::find(Input::get('report_id'));
+
+        $report->update(['solve' => Input::get('solve')]);
+
         return ['report' => $report];
     }
+
+    public function importXMLFile()
+    {
+        $path = storage_path() . '/ques';
+
+        $pageinfos = simplexml_load_file($path . '/' . Input::get('id') .'/data/pageinfo.xml');
+
+        $index = 1;
+        foreach($pageinfos->p as $pageinfo) {
+
+            if (file_exists($path . '/' . Input::get('id') . '/data/' . $pageinfo->xmlfile)) {
+
+                $questions = simplexml_load_file($path . '/' . Input::get('id') . '/data/' . $pageinfo->xmlfile);
+
+                $dom = dom_import_simplexml($questions);
+
+                $xml = $dom->ownerDocument->saveXML($dom->ownerDocument->documentElement);
+
+                $this->file->census->pages()->save(new \QuestionXML\Pages([
+                    'page' => $index,
+                    'xml'  => '<?xml version="1.0"?>' . $xml,
+                ]));
+
+                $index++;
+            }
+        }
+    }
+
 }

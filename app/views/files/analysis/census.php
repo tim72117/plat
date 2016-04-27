@@ -2,10 +2,10 @@
 <html xml:lang="zh-TW" lang="zh-TW" ng-app="app">
 <head>
 <meta charset="utf-8" />
-<title><?=$title?></title>
+<title><?=$doc->isFile->title?></title>
 
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
-<script src="/js/angular/1.4.7/angular.min.js"></script>
+<script src="/js/angular/1.5.3/angular.min.js"></script>
 
 <link rel="stylesheet" href="/css/Semantic-UI/2.1.8/semantic.min.css" />
 
@@ -37,6 +37,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
     };
 
     $scope.selectDoc = function(doc) {
+        $scope.file = doc.analysis.file;
         $scope.information = doc.analysis;
         $scope.doc.selected = false;
         $scope.doc = doc;
@@ -132,7 +133,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
                         </tr>
                         <tr>
                             <td class="collapsing">問卷內容 :</td>
-                            <td></td>
+                            <td><a href="{{file.path}}">{{file.name}}</a></td>
                         </tr>
                     </tbody>
                 </table>

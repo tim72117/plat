@@ -1,1 +1,5 @@
-<div class="ui compact message" contenteditable ng-model="file.comment" style="min-height:500px;min-width: 800px;overflow-wrap: break-word"></div>
+<md-content layout-padding>
+<md-card>
+<div contenteditable ng-model="file.comment" style="overflow-wrap: break-word"></div>
+</md-card>
+</md-content>

@@ -28,31 +28,31 @@
 <div class="ui basic segment" ng-class="{loading: loading || counting}">
 
     <div>
-        <div ng-if="result == 'bar' || result == 'pie'">
+        <div ng-if="result == 'pie'">
             <div ng-if="selected.rows.length == 0 && selected.columns.length > 0">
                 <h4 class="ui header" ng-repeat="column in selected.columns">{{ column.title }}</h4>
             </div>
             <div ng-if="selected.rows.length > 0 && selected.columns.length == 0">
                 <h4 class="ui header" ng-repeat="row in selected.rows">{{ selected.rows[0].title }}</h4>
             </div>
-
         </div>
-        <div ng-if="result == 'bar'" id="bar-container"></div>
+        <div ng-if="result == 'bar'" id="bar-container" style="{{ 'min-height:'+getChartHeight()+'px' }}"></div>
         <div ng-if="result == 'pie'" id="pie-container"></div>
     </div>
 
-    <div style="overflow:auto" ng-if="result == 'table' && selected.rows.length == 0 && selected.columns.length > 0">
+    <div class="ui bottom attached" style="overflow:auto" ng-if="result == 'table' && selected.rows.length == 0 && selected.columns.length > 0">
         <div style="min-width:500px">
             <table class="ui celled structured table">
                 <thead>
                     <tr>
-                        <th></th>
-                        <th class="left aligned" colspan="{{ selected.columns[0].answers.length+1 }}" ng-repeat="column in selected.columns" >{{ column.title }}</th>
+                        <th><button class="ui mini button" ng-click="setMean()"><i class="plus icon"></i>平均數</button></th>
+                        <th class="left aligned" colspan="{{ selected.columns[0].answers.length+meanSet+1 }}" ng-repeat="column in selected.columns" >{{ column.title }}</th>
                     </tr>
                     <tr>
                         <th></th>
                         <th class="top aligned right aligned" style="min-width: 80px" ng-repeat="answer in selected.columns[0].answers">{{ answer.title }}</th>
                         <th class="top aligned right aligned" style="min-width: 80px">總和</th>
+                        <th class="top aligned right aligned" style="min-width: 80px" ng-if="meanSet">平均</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -62,6 +62,7 @@
                             {{ frequence[id][answer.value] || 0 }} <br/>
                         </td>
                         <td class="right aligned">{{ getFrequenceTotal(selected.columns[0].answers, id) }}</td>
+                        <td ng-if="meanSet" class="right aligned" rowspan="2">{{ getMean(selected.columns[0].answers, id) | number : 2 }}</td>
                     </tr>
                     <tr ng-repeat-end>
                         <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat="answer in selected.columns[0].answers">
@@ -79,8 +80,9 @@
             <table class="ui celled structured table">
                 <tbody>
                     <tr ng-repeat-start="(id, target) in targetsSelected()">
-                        <td rowspan="{{ selected.rows[0].answers.length+1 }}" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">{{ selected.rows[0].title }}</td>
-                        <td rowspan="{{ selected.rows[0].answers.length+1 }}" style="font-weight: 700; background-color:#f9fafb">{{ target.name }}</td>
+                        <td rowspan="{{ selected.rows[0].answers.length+meanSet+1 }}" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700"><button class="ui mini button" ng-click="setMean()"><i class="plus icon"></i>平均數</button></td>
+                        <td rowspan="{{ selected.rows[0].answers.length+meanSet+1 }}" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">{{ selected.rows[0].title }}</td>
+                        <td rowspan="{{ selected.rows[0].answers.length+meanSet+1 }}" style="font-weight: 700; background-color:#f9fafb">{{ target.name }}</td>
                         <td class="left aligned" style="font-weight: 700">{{ selected.rows[0].answers[0].title }}</td>
                         <td class="right aligned" ng-class="{disabled: target.loading}">
                             {{ frequence[id][selected.rows[0].answers[0].value] || 0 }}
@@ -98,10 +100,14 @@
                             {{ getTotalPercent(getFrequenceTotal(selected.rows[0].answers, id), frequence[id][answer.value] || 0) | number : 2 }}%
                         </td>
                     </tr>
-                    <tr ng-repeat-end>
+                    <tr>
                         <td class="left aligned" style="font-weight: 700">總和</td>
                         <td class="right aligned" >{{ getFrequenceTotal(selected.rows[0].answers, id) }}</td>
                         <td class="right aligned" >100%</td>
+                    </tr>
+                    <tr ng-if="meanSet" ng-repeat-end>
+                        <td class="left aligned" style="font-weight: 700">平均</td>
+                        <td class="right aligned" colspan="2">{{ getMean(selected.rows[0].answers, id) | number : 2 }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -114,42 +120,177 @@
             <table class="ui celled structured table">
                 <thead>
                     <tr>
-                        <th style="min-width:150px" colspan="3"></th>
-                        <th colspan="{{ column.answers.length +1}}" ng-repeat="column in selected.columns" >{{ column.title }}</th>
+                        <th style="min-width:150px" colspan="3">
+                            <md-input-container>
+                                <md-select ng-model="tableOption" ng-change="showPercent(tableOption)" aria-label="加入">
+                                    <md-option ng-repeat="option in tableOptions" value="{{option.abbrev}}">{{option.abbrev}}</md-option>
+                                </md-select>
+                            </md-input-container>
+                        </th>
+                        <th ng-if="!totalPercent" colspan="{{ colPercent ? column.answers.length*2+2 : column.answers.length*1+1+meanSet }}" ng-repeat="column in selected.columns" >{{ column.title }}</th>
+                        <th ng-if="totalPercent" colspan="{{ column.answers.length*2+2}}" ng-repeat="column in selected.columns" >{{ column.title }}</th>
                     </tr>
-                    <tr>
+                    <tr ng-if="!totalPercent">
                         <th colspan="3"></th>
-                        <th class="top aligned left aligned" ng-repeat="answer in selected.columns[0].answers">{{ answer.title }}</th>
-                        <th >總和</th>
+                        <th colspan="{{ colPercent ? 2 : 1 }}" class="top aligned left aligned" ng-repeat="answer in selected.columns[0].answers">{{ answer.title }}</th>
+                        <th colspan="{{ colPercent ? 2 : 1 }}">總和</th>
+                        <th ng-if="meanSet">平均</th>
+                    </tr>
+                    <tr ng-if="totalPercent">
+                        <th colspan="3"></th>
+                        <th colspan="{{ totalPercent ? 2 : 1 }}" class="top aligned left aligned" ng-repeat="answer in selected.columns[0].answers">{{ answer.title }}</th>
+                        <th colspan="{{ totalPercent ? 2 : 1 }}">總和</th>
+                        <th ng-if="meanSet">平均</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody ng-if="!totalPercent">
                     <tr ng-repeat-start="(id, target) in targetsSelected()">
-                        <td rowspan="{{ selected.rows[0].answers.length+1 }}" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">{{ selected.rows[0].title }}</td>
-                        <td class="single line" rowspan="{{ selected.rows[0].answers.length+1 }}" style="font-weight: 700">{{ target.name }}</td>
-                        <td class="single line" style="font-weight: 700">{{ selected.rows[0].answers[0].title }}</td>
-                        <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat="answer in selected.columns[0].answers">
-                            {{ crosstable[id][answer.value][selected.rows[0].answers[0].value] ? crosstable[id][answer.value][selected.rows[0].answers[0].value] : 0 }}
+                        <td rowspan="{{ selected.rows[0].answers.length*(rowPercent ? 2 : 1)+1+meanSet }}" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">
+                            {{ selected.rows[0].title }}
                         </td>
-                        <td class="right aligned" ng-class="{disabled: target.loading}">{{getFirstCrossRowTotal(id,selected.rows[0].answers[0].value)}}</td>
-
-                        <!--<td >{{selected.rows[0].answers[0].value}}</td>-->
-
-
+                        <td class="single line" rowspan="{{ selected.rows[0].answers.length*(rowPercent ? 2 : 1)+1+meanSet }}" style="font-weight: 700">{{ target.name }}</td>
+                        <td class="single line" rowspan="{{ rowPercent ? 2 : 1 }}" style="font-weight: 700">{{ selected.rows[0].answers[0].title }}</td>
+                        <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat-start="answer in selected.columns[0].answers">
+                            {{ crosstable[id][answer.value][selected.rows[0].answers[0].value] || 0 }}
+                        </td>
+                        <td class="right aligned" ng-repeat-end ng-if="colPercent">
+                            {{ getTotalPercent(getCrossColumnTotal(id,answer.value),crosstable[id][answer.value][selected.rows[0].answers[0].value]  || 0) | number : 2 }}%
+                        </td>
+                        <td class="right aligned" ng-class="{disabled: target.loading}">
+                            {{ getCrossRowTotal(id,selected.rows[0].answers[0].value) }}
+                        </td>
+                        <td class="right aligned" ng-if="colPercent">
+                            {{ getTotalPercent(getCrossTotal(id),getCrossRowTotal(id,selected.rows[0].answers[0].value)  || 0) | number : 2 }}%
+                        </td>
+                        <td class="right aligned" ng-if="meanSet">
+                            {{getCrossRowMean(id,selected.rows[0].answers[0].value) | number : 2 }}
+                        </td>
                     </tr>
-                    <tr ng-repeat="(key, row_answer) in selected.rows[0].answers" ng-if="key!=0">
-                        <td class="single line" style="font-weight: 700">{{ row_answer.title }}</td>
+
+                    <!-- row first all percent -->
+                    <tr ng-if="rowPercent">
                         <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat="column_answer in selected.columns[0].answers">
-                            {{ crosstable[id][column_answer.value][row_answer.value] ? crosstable[id][column_answer.value][row_answer.value] : 0 }}
+                            {{ getTotalPercent(getCrossRowTotal(id,selected.rows[0].answers[0].value), crosstable[id][column_answer.value][selected.rows[0].answers[0].value] || 0) | number : 2 }}%
                         </td>
-                        <td class="right aligned" ng-class="{disabled: target.loading}">{{getCrossRowTotal(id,row_answer.value)}}</td>
+                        <td class="right aligned">100%</td>
                     </tr>
-                    <tr ng-repeat-end="(id, target) in targetsSelected()">
+
+                    <tr ng-repeat-start="(key, row_answer) in selected.rows[0].answers" ng-if="key!=0">
+                        <td class="single line" rowspan="{{ rowPercent ? 2 : 1 }}" style="font-weight: 700">{{ row_answer.title }}</td>
+                        <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat-start="column_answer in selected.columns[0].answers">
+                            {{ crosstable[id][column_answer.value][row_answer.value] || 0 }}
+                        </td>
+                        <!-- columns percent -->
+                        <td class="right aligned" ng-repeat-end ng-if="colPercent">
+                            {{ getTotalPercent(getCrossColumnTotal(id,column_answer.value),crosstable[id][column_answer.value][row_answer.value] || 0) | number : 2 }}%
+                        </td>
+
+                        <td class="right aligned" ng-class="{disabled: target.loading}">{{getCrossRowTotal(id,row_answer.value)}}</td>
+
+                        <!-- columns total percent -->
+                        <td class="right aligned" ng-if="colPercent">
+                            {{ getTotalPercent(getCrossTotal(id),getCrossRowTotal(id,row_answer.value) || 0) | number : 2 }}%
+                        </td>
+                        <td class="right aligned" ng-if="meanSet">
+                            {{getCrossRowMean(id,row_answer.value) | number : 2 }}
+                        </td>
+                    </tr>
+
+                    <!-- row all percent -->
+                    <tr ng-repeat-end ng-if="!$first && rowPercent">
+                        <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat="column_answer in selected.columns[0].answers">
+                            {{ getTotalPercent(getCrossRowTotal(id,row_answer.value), crosstable[id][column_answer.value][row_answer.value] || 0) | number : 2 }}%
+                        </td>
+                        <td class="right aligned">100%</td>
+                    </tr>
+
+                    <tr >
                         <td class="single line" style="font-weight: 700">總和</td>
-                        <td class="right aligned" ng-repeat="answer in selected.columns[0].answers">{{ getCrossColumnTotal(id,answer.value) }}</td>
-                        <td class="right aligned" >{{ getCrossTotal(id) }}</td>
+                        <td class="right aligned" ng-repeat-start="answer in selected.columns[0].answers">{{ getCrossColumnTotal(id,answer.value) }}</td>
+                        <td class="right aligned" ng-repeat-end ng-if="colPercent">100%</td>
+                        <td class="right aligned" colspan="{{1+meanSet}}" rowspan="{{1+meanSet}}">{{ getCrossTotal(id) }} </td>
+                        <td class="right aligned" ng-if="colPercent">100%</td>
+                    </tr>
+                    <tr ng-repeat-end ng-if="meanSet">
+                        <td class="single line" style="font-weight: 700">平均</td>
+                        <td class="right aligned" ng-repeat="answer in selected.columns[0].answers">{{ getCrossColumnMean(id,answer.value) | number : 2 }}</td>
                     </tr>
                 </tbody>
+                <!--if total percent been choose-->
+                <tbody ng-if="totalPercent">
+                    <tr ng-repeat-start="(id, target) in targetsSelected()">
+                        <td rowspan="{{ selected.rows[0].answers.length*(rowPercent ? 2 : 1)+1+meanSet }}" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">
+                            {{ selected.rows[0].title }}
+                        </td>
+                        <td class="single line" rowspan="{{ selected.rows[0].answers.length*(rowPercent ? 2 : 1)+1+meanSet }}" style="font-weight: 700">{{ target.name }}</td>
+                        <td class="single line" rowspan="{{ rowPercent ? 2 : 1 }}" style="font-weight: 700">{{ selected.rows[0].answers[0].title }}</td>
+                        <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat-start="answer in selected.columns[0].answers">
+                            {{ crosstable[id][answer.value][selected.rows[0].answers[0].value] || 0 }}
+                        </td>
+                        <td class="right aligned" ng-repeat-end ng-if="totalPercent">
+                            {{ getTotalPercent(getCrossTotal(id),crosstable[id][answer.value][selected.rows[0].answers[0].value]  || 0) | number : 2 }}%
+                        </td>
+                        <td class="right aligned" ng-class="{disabled: target.loading}">
+                            {{ getCrossRowTotal(id,selected.rows[0].answers[0].value) }}
+                        </td>
+                        <td class="right aligned" ng-if="totalPercent">
+                            {{ getTotalPercent(getCrossTotal(id),getCrossRowTotal(id,selected.rows[0].answers[0].value)  || 0) | number : 2 }}%
+                        </td>
+                        <td class="right aligned" ng-if="meanSet">
+                            {{getCrossRowMean(id,selected.rows[0].answers[0].value) | number : 2 }}
+                        </td>
+                    </tr>
+
+                    <!-- row first all percent -->
+                    <tr ng-if="rowPercent">
+                        <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat="column_answer in selected.columns[0].answers">
+                            {{ getTotalPercent(getCrossRowTotal(id,selected.rows[0].answers[0].value), crosstable[id][column_answer.value][selected.rows[0].answers[0].value] || 0) | number : 2 }}%
+                        </td>
+                        <td class="right aligned">100%</td>
+                    </tr>
+
+                    <tr ng-repeat-start="(key, row_answer) in selected.rows[0].answers" ng-if="key!=0">
+                        <td class="single line" rowspan="{{ rowPercent ? 2 : 1 }}" style="font-weight: 700">{{ row_answer.title }}</td>
+                        <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat-start="column_answer in selected.columns[0].answers">
+                            {{ crosstable[id][column_answer.value][row_answer.value] || 0 }}
+                        </td>
+                        <!-- columns percent -->
+                        <td class="right aligned" ng-repeat-end ng-if="totalPercent">
+                            {{ getTotalPercent(getCrossTotal(id),crosstable[id][column_answer.value][row_answer.value] || 0) | number : 2 }}%
+                        </td>
+
+                        <td class="right aligned" ng-class="{disabled: target.loading}">{{getCrossRowTotal(id,row_answer.value)}}</td>
+
+                        <!-- columns total percent -->
+                        <td class="right aligned" ng-if="totalPercent">
+                            {{ getTotalPercent(getCrossTotal(id),getCrossRowTotal(id,row_answer.value) || 0) | number : 2 }}%
+                        </td>
+                        <td class="right aligned" ng-if="meanSet">
+                            {{getCrossRowMean(id,row_answer.value) | number : 2 }}
+                        </td>
+                    </tr>
+
+                    <!-- row all percent -->
+                    <tr ng-repeat-end ng-if="!$first && rowPercent">
+                        <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat="column_answer in selected.columns[0].answers">
+                            {{ getTotalPercent(getCrossTotal(id), crosstable[id][column_answer.value][row_answer.value] || 0) | number : 2 }}%
+                        </td>
+                        <td class="right aligned">100%</td>
+                    </tr>
+
+                    <tr >
+                        <td class="single line" style="font-weight: 700">總和</td>
+                        <td class="right aligned" ng-repeat-start="answer in selected.columns[0].answers">{{ getCrossColumnTotal(id,answer.value) }}</td>
+                        <td class="right aligned" ng-repeat-end ng-if="totalPercent"> {{ getTotalPercent(getCrossTotal(id), getCrossColumnTotal(id,answer.value) || 0) | number : 2 }}%</td>
+                        <td class="right aligned" colspan="{{1+meanSet}}" rowspan="{{1+meanSet}}">{{ getCrossTotal(id) }} </td>
+                        <td class="right aligned" ng-if="totalPercent">100%</td>
+                    </tr>
+                    <tr ng-repeat-end ng-if="meanSet">
+                        <td class="single line" style="font-weight: 700">平均</td>
+                        <td class="right aligned" ng-repeat="answer in selected.columns[0].answers">{{ getCrossColumnMean(id,answer.value) | number : 2 }}</td>
+                    </tr>
+                </tbody>
+                
             </table>
 
         </div>
