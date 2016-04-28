@@ -91,6 +91,9 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         </div>
 
         <div class="ui top attached segment">
+            <div class="ui blue ribbon label">
+                {{title}}
+            </div>
             <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋關鍵字..."><i class="search icon"></i></div>
             <a class="ui button" href="open">上一步</a>
             <a class="ui olive button" href="javascript:void(0)" ng-click="nextStep()">下一步</a>
@@ -108,9 +111,6 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
             <div class="ui middle aligned divided list" style="min-height:600px;max-height:600px;overflow-y:scroll">
 
                 <div class="item" ng-repeat="column in columns | filter: searchText">
-                    <div class="right floated content">
-                        <div class="ui button" ng-click="$event.stopPropagation();getAnswers(column)">選項定義</div>
-                    </div>
                     <div class="content">
                         <div class="ui checkbox" style="max-width:920px">
                             <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.choosed" ng-change="selectSome()" />
@@ -121,6 +121,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
                             <option value="1">連續變項</option>
                             <option value="0">非連續變項</option>
                         </select> -->
+                        <div class="ui right floated mini button" ng-click="$event.stopPropagation();getAnswers(column)">選項定義</div>
                     </div>
                 </div>
 
