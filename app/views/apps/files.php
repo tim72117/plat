@@ -212,6 +212,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         7: 'bar chart',
         9: 'file text outline red',
         10: 'file excel outline',
+        11: 'users',
         14: 'database'
     };
     $scope.uploading = false;

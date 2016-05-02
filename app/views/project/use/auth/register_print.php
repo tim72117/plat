@@ -65,7 +65,7 @@
     <tr>
         <th width="100" height="30" style="font-size:12pt">E-mail</th>
         <td colspan="3" height="30">
-            <p style="padding-left:10px"><?=$member->email?></p>
+            <p style="padding-left:10px"><?=$member->user->email?></p>
         </td>
     </tr>
 </table>
@@ -75,15 +75,18 @@
         <th rowspan="2" width="100">帳號權限</th>
         <td style="font-size:10pt;">
             申請計畫選擇 :<br />
-            <?=Form::radio('', '', true)?>後期中等教育整合資料庫<br />
-            <?=Form::radio('', '', 0)?>新北市國中小校務評鑑資料庫<br />
-            <?=Form::radio('', '', 0)?>幼兒發展調查資料庫
+            <?=Form::radio('', '', true, ['disabled' => 'disabled'])?>後期中等教育整合資料庫<br />
         </td>
     </tr>
     <tr>
         <td style="font-size:10pt;">
-            <?=Form::checkbox('', '', $member->project->code == 'use', ['disabled' => 'disabled'])?>學校查詢平台
-            <?=Form::checkbox('', '', $member->project->code == 'das', ['disabled' => 'disabled'])?>線上分析系統
+            申請承辦業務 :<br />
+            <?php
+                $positions = Plat\Position::where('project_id', 1)->get();
+                foreach ($positions as $position) {
+                    echo Form::checkbox('', '', $member->user->positions->contains($position->id), ['disabled' => 'disabled']) . $position->title;
+                }
+            ?>
         </td>
     </tr>
 </table>
