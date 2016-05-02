@@ -22,6 +22,11 @@ class Project extends Eloquent {
         return $this->hasMany('Plat\Post', 'project_id', 'id')->orderBy('publish_at', 'desc');
     }
 
+    public function positions()
+    {
+        return $this->hasMany('Plat\Position', 'project_id', 'id');
+    }
+
     public function getRegisterAttribute($value)
     {
         return (bool)$value;
@@ -95,5 +100,15 @@ class Post extends Eloquent {
     public $timestamps = true;
 
     protected $fillable = array('title', 'context', 'publish_at', 'display_at', 'created_by');
+
+}
+
+class Position extends Eloquent {
+
+    protected $table = 'project_positions';
+
+    public $timestamps = false;
+
+    protected $fillable = array('title');
 
 }

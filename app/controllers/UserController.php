@@ -257,7 +257,7 @@ class UserController extends BaseController {
         $func = $repository->get('function-register.' . $method);
 
         if (is_callable($func)) {
-            return call_user_func($func);
+            return call_user_func($func, $project);
         }
     }
 

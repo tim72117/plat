@@ -136,6 +136,11 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
         return $this->hasMany('Plat\Member', 'user_id', 'id');
     }
 
+    public function positions()
+    {
+        return $this->belongsToMany('Plat\Position', 'user_positions', 'user_id', 'position_id');
+    }
+
     public function getActivedAttribute($value)
     {
         return (bool)$value;

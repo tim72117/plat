@@ -82,8 +82,7 @@
                 <tr>
                     <th></th>
                     <th>檔名</th>
-                    <th></th>
-                    <th class="collapsing">選單</th>
+                    <th>更多</th>
                     <th>已共用</th>
                     <th>更新時間</th>
                     <th>擁有人</th>
@@ -107,7 +106,6 @@
                         </div>
                         <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋..."><i class="search icon"></i></div>
                     </th>
-                    <th></th>
                     <th></th>
                     <th></th>
                     <th></th>
@@ -141,8 +139,8 @@
                         </div>
                     </td>
                     <td class="collapsing">
-                        <md-menu ng-if="doc.tools.length>0">
-                            <md-button aria-label="更多" class="md-icon-button" ng-click="openMenu($mdOpenMenu, $event)">
+                        <md-menu>
+                            <md-button aria-label="更多" class="md-icon-button" ng-click="$mdOpenMenu($event)">
                                 <md-icon><i class="sidebar icon"></i></md-icon>
                             </md-button>
                             <md-menu-content width="4">
@@ -152,14 +150,15 @@
                                         {{ tool.title }}
                                     </md-button>
                                 </md-menu-item>
+                                <md-menu-divider ng-if="doc.tools.length>0"></md-menu-divider>
+                                <md-menu-item ng-model="doc.visible">
+                                    <md-button ng-click="setVisible(doc)">
+                                        <md-icon md-svg-icon="speaker-notes{{doc.visible ? '-off' : ''}}"></md-icon>
+                                        {{doc.visible ? '不顯示在選單中' : '顯示在選單中' }}
+                                    </md-button>
+                                </md-menu-item>
                             </md-menu-content>
                         </md-menu>
-                    </td>
-                    <td class="center aligned" ng-class="{disabled: doc.saving}" ng-popup="{show: $first, tooltip: tooltip['menu']}">
-                        <div class="ui fitted checkbox" ng-click="setVisible(doc)">
-                            <input type="checkbox" id="{{ ::$id }}" ng-model="doc.visible">
-                            <label for="{{ ::$id }}"></label>
-                        </div>
                     </td>
                     <td width="180">
 
@@ -419,6 +418,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     };
 
     $scope.setVisible = function(doc) {
+        doc.visible = !doc.visible;
         doc.saving = true;
         $http({method: 'POST', url: '/doc/' + doc.id + '/setVisible', data:{visible: doc.visible}})
         .success(function(data, status, headers, config) {
@@ -445,10 +445,6 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
 
     $scope.whatNews = function(startup) {
         $scope.$broadcast('popup', {startup: startup});
-    };
-
-    $scope.openMenu = function($mdOpenMenu, event) {
-        $mdOpenMenu(event);
     };
 
 })
