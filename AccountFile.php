@@ -1,13 +1,14 @@
 <?php
-
 namespace Plat\Files;
 
 use User;
 use Files;
-use Doc\Project;
 use DB, View, Response, Config, Schema, Session, Input, Auth, Request;
 use ShareFile;
 use Carbon\Carbon;
+use Plat\Member;
+use Plat\Project;
+use Project\Used\Struct;
 
 class AccountFile extends CommFile {
 
@@ -15,7 +16,7 @@ class AccountFile extends CommFile {
     {
         parent::__construct($file, $user);
 
-        $this->configs = $this->file->configs->lists('value', 'name');
+        //$this->configs = $this->file->configs->lists('value', 'name');
     }
 
     public function is_full()
@@ -151,4 +152,69 @@ class AccountFile extends CommFile {
 
         return $this->get_register_das();
     }
+
+    public function getGroups()
+    {
+        return ['groups' => $this->user->groups, 'positions' => Project::find(1)->positions];
+    }
+
+    public function getUsers()
+    {
+        $members_query = Member::where('project_id', 1)->orderBy('user_id')->with(['user.positions', 'user.inGroups', 'contact']);
+
+        Input::has('search.position') && $members_query->whereHas('user.positions', function($query) {
+            $query->where('project_positions.id', Input::get('search.position'));
+        });
+
+        $members = $members_query->paginate(100);
+
+        $profiles = $members->getCollection()->map(function($member) {
+            return Struct::auth($member, array_pluck($member->user->inGroups->toArray(), 'id'));
+        });
+
+        return array('users' => $profiles, 'currentPage' => $members->getCurrentPage(), 'lastPage' => $members->getLastPage(), 'log' => DB::getQueryLog());
+    }
+
+    public function activeUser()
+    {
+        $member = Member::find(Input::get('member_id'));
+
+        $member->user->actived = Input::get('actived') ? true : $member->user->actived;
+
+        $member->actived = Input::get('actived');
+
+        $member->push();
+
+        return ['profiles' => Struct::auth($member, array_pluck($member->user->inGroups->toArray(), 'id'))];
+    }
+
+    public function disableUser()
+    {
+        $member = Member::find(Input::get('member_id'));
+
+        $disabled = isset($member) ? $member->delete() : false;
+
+        return ['disabled' => $disabled];
+    }
+
+    public function addGroup()
+    {
+        $member = Member::find(Input::get('member_id'));
+
+        if (!$member->user->inGroups->contains(Input::get('group_id'))) {
+            $member->user->inGroups()->attach(Input::get('group_id'));
+        }
+
+        return ['inGroups' => $member->user->inGroups()->getResults()];
+    }
+
+    public function deleteGroup()
+    {
+        $member = Member::find(Input::get('member_id'));
+
+        $member->user->inGroups()->detach(Input::get('group_id'));
+
+        return ['inGroups' => $member->user->inGroups];
+    }
+
 }
