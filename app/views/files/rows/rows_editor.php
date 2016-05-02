@@ -55,13 +55,25 @@
         <table class="ui very compact table" ng-repeat="table in sheet.tables">
             <thead>
                 <tr>
-                    <th colspan="{{ table.columns.length+3 }}" class="right aligned">
-<!--                         <div class="ui left action icon input" ng-class="{loading: loading}">
-                            <button class="ui labeled icon basic button" ng-click="searchText='';getRows(1, '')"><i class="unhide icon"></i> 顯示全部 </button>
-                            <input type="text" ng-model="searchText" placeholder="搜尋..." />
-                            <i class="search link icon" ng-click="getRows(1, searchText)"></i>
-                        </div> -->
-                        第{{ paginate.from }}-{{ paginate.to }}列(共有{{ paginate.total }}列) </th>
+                    <th colspan="{{ table.columns.length+3 }}">
+                        <div layout="row">
+                            <md-input-container md-no-float flex="none">
+                                <label>選擇搜尋欄位</label>
+                                <md-select ng-model="search.column_id">
+                                    <md-option ng-repeat="column in table.columns" value="{{column.id}}">
+                                    {{column.title}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            <md-input-container>
+                                <label>輸入搜尋字串</label>
+                                <input type="text" ng-model="search.text">
+                            </md-input-container>
+                            <md-button class="md-fab md-mini" ng-click="getRows(1)"><md-icon md-svg-icon="find-in-page" aria-label="搜尋"></md-icon></md-button>
+                            <div flex></div>
+                            <span layout="row" layout-align="start center">第{{ paginate.from }}-{{ paginate.to }}列(共有{{ paginate.total }}列)</span>
+                        </div>
+                    </th>
                 </tr>
                 <tr>
                     <th class="collapsing" ng-if="paginate.data[0].created_by">上傳者</th>
@@ -86,15 +98,18 @@
                                 </div>
                             </div>
                         </md-input-container>
-                        <md-checkbox
+                        <md-checkbox ng-if="column.rules=='bool'"
                             ng-model="row['C' + column.id]"
                             ng-disabled="column.readonly"
                             ng-true-value="'1'"
                             ng-false-value="'0'"
-                            ng-if="column.rules=='bool'"
                             ng-change="setUpdating(row)"
                             aria-label="column.name"></md-checkbox>
-                        <md-select ng-model="row['C' + column.id]" ng-change="setUpdating(row)" ng-if="column.rules=='menu'" aria-label="column.name">
+                        <md-select ng-if="column.rules=='menu'"
+                            ng-model="row['C' + column.id]"
+                            ng-disabled="column.readonly"
+                            ng-change="setUpdating(row)"
+                            aria-label="column.name">
                             <md-option ng-repeat="anaser in column.answers" ng-value="anaser.value">
                                 {{anaser.title}}
                             </md-option>
@@ -116,6 +131,7 @@ app.controller('rowsEditorController', function($scope, $http, $filter) {
     $scope.loading = false;
     $scope.saving = false;
     $scope.parentTables = false;
+    $scope.search = {};
 
     $scope.getStatus = function() {
         $http({method: 'POST', url: 'get_file', data:{editor: false}})
@@ -130,9 +146,9 @@ app.controller('rowsEditorController', function($scope, $http, $filter) {
 
     $scope.getStatus();
 
-    $scope.getRows = function(page, searchText) {
+    $scope.getRows = function(page) {
         $scope.loading = true;
-        $http({method: 'POST', url: 'get_rows', data:{page: page, searchText: searchText}})
+        $http({method: 'POST', url: 'get_rows', data:{page: page, search: $scope.search}})
         .success(function(data, status, headers, config) {
             $scope.paginate = data.paginate;
             $scope.loading = false;

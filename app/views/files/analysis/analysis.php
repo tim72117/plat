@@ -20,7 +20,9 @@
     </div>
 
     <div class="ui basic segment">
-
+        <div class="ui blue ribbon label">
+            {{title}}
+        </div>
     <div class="ui grid">
 
         <div class="five wide column dimmable dimmed">
@@ -143,8 +145,8 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
     $scope.rowPercent = false;
     $scope.totalPercent = false;
     $scope.meanSet = 0;
-    $scope.tableOption = '不加%';
-    $scope.tableOptions = ('行% 列% 總和% 平均數 不加%').split(' ').map(function (eachOption) { return { abbrev: eachOption }; });
+    $scope.tableOption = '個數';
+    $scope.tableOptions = ('行% 列% 總和% 平均數 個數').split(' ').map(function (eachOption) { return { abbrev: eachOption }; });
     $scope.charts = [{title: '表格', name: 'table', icon: 'table'}, {title: '長條圖', name: 'bar', icon: 'bar chart'}, {title: '圓餅圖', name: 'pie', icon: 'pie chart'}];
 
     $scope.getColumns = function() {
@@ -712,7 +714,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
             $scope.setTotalPercent();
         if (mode == '平均數')
             $scope.setMean();
-        if (mode == '不加%')
+        if (mode == '個數')
             $scope.setNoPercent();
     };
 
@@ -815,14 +817,13 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
             });
 
             ngModelCtrl.$render = function() {
-                element.dropdown('set selected', ngModelCtrl.$viewValue);console.log(element.dropdown('get value'));
+                element.dropdown('set selected', ngModelCtrl.$viewValue);
             };
 
             //element.dropdown('set selected', 'bar');
         },
         controller: function($scope, $element) {
             $element.dropdown('set selected', 'bar');
-            console.log($element);
         }
     };
 });
