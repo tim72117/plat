@@ -73,14 +73,10 @@
 
                     <div class="field">
                         <label>單位類別</label>
-                        <div class="ui radio checkbox">
-                            <input type="radio" name="work_type" id="work_type[1]" ng-model="user.work.type" value="1" class="hidden" />
-                            <label for="work_type[1]">中央政府/縣市政府</label>
-                        </div>
-                        <div class="ui radio checkbox">
-                            <input type="radio" name="work_type" id="work_type[2]" ng-model="user.work.type" value="0" class="hidden" />
-                            <label for="work_type[2]">各級學校</label>
-                        </div>
+                        <md-radio-group ng-model="user.work.type">
+                            <md-radio-button value="1" class="md-primary">中央政府/縣市政府</md-radio-button>
+                            <md-radio-button value="0">各級學校</md-radio-button>
+                        </md-radio-group>
                     </div>
 
                     <div class="field">
@@ -100,17 +96,7 @@
 
                     <div class="field">
                         <label>承辦業務</label>
-                        <md-checkbox ng-model="user.work.staff">學校人員調查(教師、校長調查)</md-checkbox>
-                        <md-checkbox ng-model="user.work.parent">家長調查</md-checkbox>
-                        <md-checkbox ng-model="user.work.student">學生調查</md-checkbox>
-                        <md-checkbox ng-model="user.work.tutor">導師調查</md-checkbox>
-                    </div>
-
-                    <div class="field">
-                        <label>額外服務申請<span style="color:red">(需校長核准)</span></label>
-                        <md-checkbox  ng-model="user.member.apply">
-                            線上分析系統
-                        </md-checkbox>
+                        <md-checkbox ng-repeat="position in positions" ng-model="user.positions[position.id]">@{{position.title}}</md-checkbox>
                     </div>
 
                     <div class="ui error message">
@@ -155,13 +141,14 @@ app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
 
 .controller('register', function($scope, $http, CSRF_TOKEN) {
     $scope.step = 'write';
-    $scope.user = {work: {}, contact: {}, member: {project_id: 4, apply: false}};
+    $scope.user = {work: {}, contact: {}, member: {project_id: 4, apply: false}, positions: []};
     $scope.citys = [];
     $scope.schools = [];
 
-    $http({method: 'GET', url: 'register/ajax/citys', params:{}})
+    $http({method: 'GET', url: 'register/ajax/init', params:{}})
     .success(function(data, status, headers, config) {
         $scope.citys = data.citys;
+        $scope.positions = data.positions;
     })
     .error(function(e) {
         console.log(e);
@@ -171,7 +158,6 @@ app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
         $scope.saving = true;
         $http({method: 'POST', url: 'register/save', data:{'_token': CSRF_TOKEN, user: $scope.user}})
         .success(function(data, status, headers, config) {
-            console.log(data);
             $scope.errors = data.errors;
             if (data.applying_id) {
                 $scope.step = 'print';
