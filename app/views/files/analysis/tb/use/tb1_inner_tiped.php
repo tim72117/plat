@@ -290,7 +290,7 @@
                         <td class="right aligned" ng-repeat="answer in selected.columns[0].answers">{{ getCrossColumnMean(id,answer.value) | number : 2 }}</td>
                     </tr>
                 </tbody>
-                
+
             </table>
 
         </div>
@@ -345,7 +345,7 @@
 
     <h5 class="ui header">選擇輸出資料小數點後位數</h5>
     <select name="ext_digit">
-		<option value="1">1</option>
+        <option value="1">1</option>
         <option value="2">2</option>
         <option value="3" selected="selected">3</option>
     </select>
