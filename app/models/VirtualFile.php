@@ -112,19 +112,19 @@ class Struct_file {
         switch($doc->isFile->type) {
             case 1:
                 $tools = [
-                    ['name' => 'codebook', 'title' => 'codebook', 'method' => 'codebook', 'icon' => 'book'],
-                    ['name' => 'receives', 'title' => '回收狀況', 'method' => 'receives', 'icon' => 'line chart'],
-                    ['name' => 'analysis', 'title' => '分析結果', 'method' => 'analysis', 'icon' => 'bar chart'],
+                    ['name' => 'codebook', 'title' => 'codebook', 'method' => 'codebook', 'icon' => 'list'],
+                    ['name' => 'receives', 'title' => '回收狀況', 'method' => 'receives', 'icon' => 'show-chart'],
+                    ['name' => 'analysis', 'title' => '分析結果', 'method' => 'analysis', 'icon' => 'pie-chart'],
                     ['name' => 'spss',     'title' => 'spss',     'method' => 'spss',     'icon' => 'code'],
-                    ['name' => 'report',   'title' => '問題回報', 'method' => 'report',   'icon' => 'comment outline']
+                    ['name' => 'report',   'title' => '問題回報', 'method' => 'report',   'icon' => 'question-answer']
                 ];
             break;
             case 5:
                 $tools = [
                     //['name' => 'edit_information', 'title' => '編輯檔案資訊', 'method' => 'edit_information', 'icon' => 'edit'],
-                    ['name' => 'analysis',         'title' => '分析結果',     'method' => 'analysis',         'icon' => 'bar chart'],
-                    ['name' => 'rows',             'title' => '資料列',       'method' => 'rows',             'icon' => 'table'],
-                    ['name' => 'import',           'title' => '匯入資料',     'method' => 'import',           'icon' => 'upload'],
+                    ['name' => 'analysis',         'title' => '分析結果',     'method' => 'analysis',         'icon' => 'pie-chart'],
+                    ['name' => 'rows',             'title' => '資料列',       'method' => 'rows',             'icon' => 'create'],
+                    ['name' => 'import',           'title' => '匯入資料',     'method' => 'import',           'icon' => 'file-upload'],
                 ];
             break;
             case 7:

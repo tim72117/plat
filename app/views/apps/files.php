@@ -146,7 +146,7 @@
                             <md-menu-content width="4">
                                 <md-menu-item ng-repeat="tool in doc.tools">
                                     <md-button href="/doc/{{ doc.id }}/{{ tool.method }}">
-                                        <md-icon><i class="icon" ng-class="tool.icon"></i></md-icon>
+                                        <md-icon md-svg-icon="{{tool.icon}}"></md-icon>
                                         {{ tool.title }}
                                     </md-button>
                                 </md-menu-item>
