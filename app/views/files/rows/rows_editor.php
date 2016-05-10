@@ -124,7 +124,7 @@
 </div>
 
 <script>
-app.controller('rowsEditorController', function($scope, $http, $filter) {
+app.controller('rowsEditorController', function($scope, $http, $filter, $mdToast) {
     $scope.file = {sheets: [], comment: ''};
     $scope.paginate = {data: []};
     $scope.status = {};
@@ -153,7 +153,8 @@ app.controller('rowsEditorController', function($scope, $http, $filter) {
             $scope.paginate = data.paginate;
             $scope.loading = false;
         }).error(function(e){
-            console.log(e);
+            $scope.loading = false;
+            $mdToast.show($mdToast.simple().content('錯誤，請聯絡系統人員 ' + angular.element(e).children().text()));
         });
     };
 
