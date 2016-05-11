@@ -42,28 +42,30 @@ app.config(function ($compileProvider, $mdIconProvider) {
     $mdIconProvider.defaultIconSet('/js/angular_material/1.1.0/core-icons.svg', 24);
 })
 
-.controller('mainController', function($scope, $filter, $http, $cookies, $mdSidenav) {
-    $scope.pathname = window.location.pathname;
-    $scope.openLeftMenu = false;
-    $scope.toggleLeftMenu = function() {
+.controller('mainController', function($scope, $mdSidenav) {
+    $scope.main = {};
+    $scope.main.pathname = window.location.pathname;
+    $scope.main.openLeftMenu = false;
+    $scope.main.loading = false;
+    $scope.main.toggleLeftMenu = function() {
         $mdSidenav('left').toggle();
-        $scope.openLeftMenu = !$scope.openLeftMenu;
+        $scope.main.openLeftMenu = !$scope.main.openLeftMenu;
     };
 })
 
-.controller('leftMenuController', function($scope, $filter, $http) {
-    $scope.root = {};
-    $scope.getDocs = function() {
-        $scope.loading = true;
+.controller('leftMenuController', function($scope, $http) {
+    $scope.leftMenu = {};
+    $scope.leftMenu.getDocs = function() {
+        $scope.leftMenu.loading = true;
         $http({method: 'POST', url: '/docs/lists', data:{}})
         .success(function(data, status, headers, config) {
-            $scope.root.docs = data.docs;
-            $scope.loading = false;
+            $scope.leftMenu.docs = data.docs;
+            $scope.leftMenu.loading = false;
         }).error(function(e) {
             console.log(e);
         });
     };
-    $scope.getDocs();
+    $scope.leftMenu.getDocs();
 })
 
 .filter('startFrom', function() {
@@ -76,29 +78,32 @@ app.config(function ($compileProvider, $mdIconProvider) {
 
 @section('body')
 <body ng-cloak ng-controller="mainController" layout="column">
-    <md-toolbar layout="row">
+    <md-toolbar>
         <div class="md-toolbar-tools">
-            <md-button ng-class="{'md-raised': openLeftMenu}" ng-click="toggleLeftMenu()"><i class="history icon"></i> 近期存取</md-button>
-            <md-button ng-class="{'md-raised': pathname == '/project/intro'}" href="/project/intro"><i class="home icon"></i>{{ $project->name }}</md-button>
-            <md-button ng-class="{'md-raised': pathname == '/docs/management'}" href="/docs/management">
-                <i class="folder outline icon" ng-class="{open: pathname == '/docs/management'}"></i>我的檔案
+            <md-button ng-class="{'md-raised': main.openLeftMenu}" ng-click="main.toggleLeftMenu()"><i class="history icon"></i> 近期存取</md-button>
+            <md-button ng-class="{'md-raised': main.pathname == '/project/intro'}" href="/project/intro"><i class="home icon"></i>{{ $project->name }}</md-button>
+            <md-button ng-class="{'md-raised': main.pathname == '/docs/management'}" href="/docs/management">
+                <i class="folder outline icon" ng-class="{open: main.pathname == '/docs/management'}"></i>我的檔案
             </md-button>
             <h2> / {{ @$doc->isFile->title }}</h2>
             <span flex></span>
-            <md-button ng-class="{'md-raised': pathname == '/project/{{ $project->code }}/profile'}" href="/project/{{ $project->code }}/profile">個人資料</md-button>
-            <md-button ng-class="{'md-raised': pathname == '/auth/password/change'}" href="/auth/password/change">更改密碼</md-button>
+            <md-button ng-class="{'md-raised': main.pathname == '/project/{{ $project->code }}/profile'}" href="/project/{{ $project->code }}/profile">個人資料</md-button>
+            <md-button ng-class="{'md-raised': main.pathname == '/auth/password/change'}" href="/auth/password/change">更改密碼</md-button>
             <md-button href="/auth/logout">登出</md-button>
         </div>
     </md-toolbar>
-    <md-content layout="row" flex>
+    <div layout="column" flex layout-align="center center" ng-if="main.loading">
+        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+    </div>
+    <md-content flex layout="row" ng-show="!main.loading">
         <md-sidenav class="md-sidenav-left" md-component-id="left" layout="column">
-            <md-content ng-controller="leftMenuController" layout="row" flex ng-if="openLeftMenu">
-                <md-content layout="column" flex layout-align="center center" ng-if="loading">
+            <md-content ng-controller="leftMenuController" layout="row" flex ng-if="main.openLeftMenu">
+                <md-content layout="column" flex layout-align="center center" ng-if="leftMenu.loading">
                     <md-progress-circular md-mode="indeterminate"></md-progress-circular>
                 </md-content>
                 <md-list>
-                    <md-list-item ng-repeat="doc in root.docs | orderBy: 'opened_at':true | limitTo:10">
-                        <md-icon><i class="history icon"></i></md-icon>
+                    <md-list-item ng-repeat="doc in leftMenu.docs | orderBy: 'opened_at':true | limitTo:10">
+                        <md-icon md-svg-icon="history"></md-icon>
                         <div class="md-list-item-text" layout="column">
                             <a href="@{{ doc.link }}">@{{ doc.title }}</a>
                         </div>
@@ -106,9 +111,9 @@ app.config(function ($compileProvider, $mdIconProvider) {
                 </md-list>
             </md-content>
         </md-sidenav>
-        <md-content layout="column" flex>
-            <?=$context?>
-        </md-content>
+        <div flex>
+            {{ $context }}
+        </div>
     </md-content>
 </body>
 @stop
