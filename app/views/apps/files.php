@@ -37,7 +37,7 @@
 
 <div ng-cloak ng-controller="fileController" id="fileController">
 
-    <div class="ui basic segment" ng-class="{loading: loading}">
+    <div class="ui basic segment">
 
         <div class="ui top attached orange progress">
             <div class="bar" style="width: {{ progress }}%"></div>
@@ -300,12 +300,12 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     };
 
     $scope.getDocs = function() {
-        $scope.loading = true;
+        $scope.$parent.main.loading = true;
         $http({method: 'POST', url: '/docs/lists', data:{} })
         .success(function(data, status, headers, config) {
             $scope.docs = data.docs;
             $scope.setPaginate();
-            $scope.loading = false;
+            $scope.$parent.main.loading = false;
             $scope.tooltip = data.tooltip;
             $timeout(function() {
                 $scope.whatNews(true);

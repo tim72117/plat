@@ -1,5 +1,5 @@
 
-<div ng-cloak ng-controller="newTableController" layout="column" flex>
+<div ng-cloak ng-controller="newTableController">
 
     <md-toolbar class="md-menu-toolbar">
         <div layout="row">
@@ -58,14 +58,10 @@
         </div>
     </md-toolbar>
 
-    <div layout="row" flex layout-align="center center" ng-if="loading">
-        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
-    </div>
-
-    <md-content class="page-container">
+    <div>
         <div ng-include="'subs?tool=columns'" ng-if="tool=='columns'"></div>
         <div ng-include="'subs?tool=comment'" ng-if="tool=='comment'"></div>
-    </md-content>
+    </div>
 
 </div>
 
@@ -87,7 +83,7 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
     $scope.column = {};
 
     $scope.getFile = function() {
-        $scope.loading = true;
+        $scope.$parent.main.loading = true;
         $http({method: 'POST', url: 'get_file', data:{editor: true} })
         .success(function(data, status, headers, config) {
             $scope.file.rules = data.rules;
@@ -97,7 +93,7 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
             if ($scope.file.sheets[0].editable && !$scope.file.sheets[0].tables[0].lock && $scope.file.sheets[0].tables[0].columns == 0) {
                 $scope.addColumn($scope.file.sheets[0].tables[0]);
             };
-            $scope.loading = false;
+            $scope.$parent.main.loading = false;
         }).error(function(e){
             console.log(e);
         });
