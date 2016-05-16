@@ -146,4 +146,21 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
         return (bool)$value;
     }
 
+    public static function boot()
+    {
+        parent::boot();
+
+        User::updated(function($user) {
+            if ($user->isDirty('username')) {
+                Plat\Log\Change::create([
+                    'table_name' => 'users',
+                    'column_name' => 'username',
+                    'row_id' => $user->id,
+                    'origin' => $user->getOriginal('username'),
+                    'created_by' => Auth::user()->id,
+                ]);
+            }
+        });
+    }
+
 }

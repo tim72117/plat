@@ -3,6 +3,7 @@ namespace Plat;
 
 use Eloquent;
 use Illuminate\Database\Eloquent\SoftDeletingTrait;
+use Auth;
 
 class Project extends Eloquent {
 
@@ -72,6 +73,33 @@ class Member extends Eloquent {
     public function getActivedAttribute($value)
     {
         return (bool)$value;
+    }
+
+    public static function boot()
+    {
+        parent::boot();
+
+        Member::updated(function($member) {
+            if ($member->isDirty('actived')) {
+                Log\Change::create([
+                    'table_name' => 'user_member',
+                    'column_name' => 'actived',
+                    'row_id' => $member->id,
+                    'origin' => $member->getOriginal('actived'),
+                    'created_by' => Auth::user()->id,
+                ]);
+            }
+        });
+
+        Member::deleted(function($member) {
+            Log\Change::create([
+                'table_name' => 'user_member',
+                'column_name' => 'deleted_at',
+                'row_id' => $member->id,
+                'origin' => '',
+                'created_by' => Auth::user()->id,
+            ]);
+        });
     }
 
 }
