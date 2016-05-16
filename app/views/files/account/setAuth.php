@@ -48,7 +48,7 @@
                     <th>email</th>
                     <th width="100">帳號開通</th>
                     <th width="100">密碼狀態</th>
-                    <th width="80">停權</th>                    
+                    <th width="100">資料變更</th>
                     <th>職稱</th>
                     <th width="180">電話、傳真</th>
                     <th>群組</th>
@@ -62,14 +62,14 @@
                     <th><div class="ui icon small fluid input" ><input ng-model="searchText.email" /><i class="search icon"></i></div></th>
                     <th></th>
                     <th></th>
-                    <th></th>                    
+                    <th></th>
                     <th></th>
                     <th></th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="user in users | inSchool:searchSchools | orderBy:predicate:reverse | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
+                <tr ng-class="{disabled: user.saving}" ng-repeat="user in users | inSchool:searchSchools | orderBy:predicate:reverse | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
                     <td>{{ user.id | number }}</td>
                     <td><div style="max-height:150px;overflow-y:scroll"><div ng-repeat="school in user.schools">{{ school.id }} - {{ school.year }} - {{ school.name }}</div></div></td>
                     <td>{{ user.name }}</td>
@@ -83,8 +83,21 @@
                         <i class="thumbs outline up green icon" ng-if="!user.password"></i>
                     </td>
                     <td>
-                        <md-button class="md-raised" ng-if="!user.disabling" ng-click="user.disabling=true">註銷</md-button>
-                        <md-button class="md-raised md-accent" ng-if="user.disabling" ng-click="disableUser(user)">確定</md-button>
+                        <md-menu>
+                            <md-button aria-label="資料變更" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+                                <md-icon md-menu-origin md-svg-icon="settings"></md-icon>
+                            </md-button>
+                            <md-menu-content width="4">
+                                <md-menu-item>
+                                    <md-button ng-click="changeUsername(user)"><md-icon md-svg-icon="face"></md-icon>變更資料</md-button>
+                                </md-menu-item>
+                                <md-menu-divider></md-menu-divider>
+                                <md-menu-item>
+                                    <md-button ng-click="user.disabling=true"><md-icon md-svg-icon="delete"></md-icon>註銷</md-button>
+                                </md-menu-item>
+                            </md-menu-content>
+                        </md-menu>
+                        <md-button aria-label="確定" class="md-raised md-accent" ng-if="user.disabling" ng-click="disableUser(user)">確定</md-button>
                     </td>
                     <td>{{ user.title }}</td>
                     <td>
@@ -114,7 +127,7 @@
 </div>
 
 <script>
-app.controller('usersCtrl', function($scope, $http, $filter) {
+app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog) {
     $scope.users = [];
     $scope.predicate = 'id';
     $scope.page = 1;
@@ -199,7 +212,7 @@ app.controller('usersCtrl', function($scope, $http, $filter) {
             $scope.users = [];
             $scope.sheetLoading = true;
         };
-        
+
         $http({method: 'POST', url: 'getUsers', data:{page: $scope.loadingPage, search: $scope.search}})
         .success(function(data, status, headers, config) {
             $scope.users = $scope.users.concat(data.users);
@@ -246,6 +259,40 @@ app.controller('usersCtrl', function($scope, $http, $filter) {
 
     $scope.getGroups();
     $scope.getUsers(true);
+
+    $scope.changeUsername = function(user) {
+        $mdDialog.show({
+            controller: function (scope, $mdDialog) {
+                scope.user = angular.copy(user);
+                scope.hide = function() {
+                    $mdDialog.hide();
+                };
+                scope.cancel = function() {
+                    $mdDialog.cancel();
+                };
+                scope.answer = function(answer) {
+                    user.saving = true;
+                    $mdDialog.hide(answer);
+                };
+            },
+            templateUrl: 'changeName',
+            parent: angular.element(document.body),
+            clickOutsideToClose: false
+        })
+        .then(function(userChanged) {
+            $http({method: 'POST', url: 'setUsername', data:{member_id: userChanged.member_id, username: userChanged.name}})
+            .success(function(data, status, headers, config) {
+                user.name = data.user.name;
+                user.saving = false;
+            })
+            .error(function(e){
+                console.log(e);
+                user.saving = false;
+            });
+        }, function() {
+
+        });
+    };
 
 })
 

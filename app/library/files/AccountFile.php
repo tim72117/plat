@@ -44,6 +44,11 @@ class AccountFile extends CommFile {
         return 'files.account.profile';
     }
 
+    public function changeName()
+    {
+        return View::make('files.account.changeName');
+    }
+
     public function get_accounts()
     {
         $project = Project::find($this->configs['project']);
@@ -215,6 +220,17 @@ class AccountFile extends CommFile {
         $member->user->inGroups()->detach(Input::get('group_id'));
 
         return ['inGroups' => $member->user->inGroups];
+    }
+
+    public function setUsername()
+    {
+        $member = Member::find(Input::get('member_id'));
+
+        $member->user->username = Input::get('username');
+
+        $member->user->save();
+
+        return ['user' => Struct::auth($member, array_pluck($member->user->inGroups->toArray(), 'id'))];
     }
 
 }
