@@ -125,6 +125,7 @@ class Struct_file {
                     ['name' => 'analysis',         'title' => '分析結果',     'method' => 'analysis',         'icon' => 'pie-chart'],
                     ['name' => 'rows',             'title' => '資料列',       'method' => 'rows',             'icon' => 'create'],
                     ['name' => 'import',           'title' => '匯入資料',     'method' => 'import',           'icon' => 'file-upload'],
+                    ['name' => 'export',           'title' => '匯出資料',     'method' => 'exportAllRows',    'icon' => 'file-download'],
                 ];
             break;
             case 7:
