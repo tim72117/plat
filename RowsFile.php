@@ -611,6 +611,38 @@ class RowsFile extends CommFile {
         })->download('xls');
     }
 
+    public function exportAllRows()
+    {
+        if (!$this->isCreater())
+            throw new FileFailedException(new MessageBag(array('noAuth' => '沒有權限')));
+
+        \Excel::create('sample', function($excel) {
+
+            $excel->sheet('sample', function($sheet) {
+
+                $tables = $this->file->sheets->first()->tables;
+
+                list($query, $power) = $this->get_rows_query($tables);
+
+                $head = $tables->first()->columns->map(function($column) { return 'C' . $column->id; })->toArray();
+
+                $rows = array_map(function($row) {
+
+                    return array_values(get_object_vars($row));
+
+                }, $query->whereNull('deleted_at')->select($head)->get());
+
+                array_unshift($rows, $tables[0]->columns->fetch('title')->toArray());
+
+                $sheet->freezeFirstRow();
+
+                $sheet->fromArray($rows, null, 'A1', false, false);
+
+            });
+
+        })->download('xlsx');
+    }
+
     //uncomplete only first sheet, only first table
     public function get_rows()
     {
