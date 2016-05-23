@@ -1,13 +1,14 @@
 <?php
-namespace Doc;
+namespace Plat\Files;
 
 use Eloquent;
 
-class Config extends Eloquent
-{
+class Config extends Eloquent {
+
     protected $table = 'file_config';
 
-    public $timestamps = true;
+    public $timestamps = false;
 
     protected $fillable = array('name', 'value');
+
 }
