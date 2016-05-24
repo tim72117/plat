@@ -79,10 +79,12 @@ $user = Project\Teacher\User::find($member->user_id);
         <td rowspan="4" width="100"><p align="center">帳號權限</p></td>
         <td width="130"><p>身份別</p></td>
         <td>
-            <label><?=Form::radio('', '', $user->works[0]->position == '1', ['disabled' => 'disabled'])?>教育部 </label>
-            <label><?=Form::radio('', '', $user->works[0]->position == '2', ['disabled' => 'disabled'])?>縣市政府承辦人 </label>
-            <label><?=Form::radio('', '', $user->works[0]->position == '0', ['disabled' => 'disabled'])?>師培大學承辦人 </label>
-            <label><?=Form::radio('', '', $user->works[0]->position == '4', ['disabled' => 'disabled'])?>各級學校人事承辦人 </label>
+            <?php
+                $positions = Plat\Position::where('project_id', 2)->get();
+                foreach ($positions as $position) {
+                    echo Form::checkbox('', '', $member->user->positions->contains($position->id), ['disabled' => 'disabled']) . $position->title;
+                }
+            ?>
         </td>
     </tr>
     <tr>

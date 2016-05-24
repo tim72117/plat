@@ -244,7 +244,6 @@ app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
         .success(function(data, status, headers, config) {
             $scope.schools = data.schools;
             $scope.loading.school = false;
-            console.log($scope.schools)
         })
         .error(function(e) {
             console.log(e);
