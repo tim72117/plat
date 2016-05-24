@@ -125,8 +125,8 @@
                         <label>身分別</label><!-- 師培大學：0 教育部：1 縣市政府：2  其他：3-->
                         <div class="field" ng-repeat="position in positions">
                             <div class="ui radio checkbox">
-                                <input type="radio" ng-model="user.work.position" id="@{{ ::$id }}" ng-value="position.value" class="hidden" />
-                                <label for="@{{ ::$id }}">@{{ position.name }}</label>
+                                <input type="radio" ng-model="user.work.position" id="@{{ ::$id }}" ng-value="position.id" class="hidden" />
+                                <label for="@{{ ::$id }}">@{{ position.title }}</label>
                             </div>
                         </div>
                     </div>
@@ -203,9 +203,17 @@ app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
 
 .controller('register', function($scope, $http, CSRF_TOKEN) {
     $scope.step = 1;
-    $scope.positions = [{value: 0, name: '師培大學承辦人'}, {value: 4, name: '各級學校承辦人'}];
+    $scope.positions = [];
     $scope.user = {work: {}, contact: {}};
     $scope.loading = {school: true};
+
+    $http({method: 'GET', url: 'register/ajax/positions', params:{}})
+    .success(function(data, status, headers, config) {
+        $scope.positions = data.positions;
+    })
+    .error(function(e) {
+        console.log(e);
+    });
 
     $scope.confirmed = function() {
         $scope.step = 2;
@@ -236,6 +244,7 @@ app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
         .success(function(data, status, headers, config) {
             $scope.schools = data.schools;
             $scope.loading.school = false;
+            console.log($scope.schools)
         })
         .error(function(e) {
             console.log(e);
