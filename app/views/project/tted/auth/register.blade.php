@@ -1,20 +1,15 @@
 
-<div class="ui basic segment">
-    <h1 class="ui center aligned grey header">申請教育部中小學師資培育整合平台帳號</h1>
-    <h4 class="ui center aligned grey icon header">
-        <i class="puzzle icon"></i>
-        <div class="content">
-            申請步驟
-            <div class="sub header">請依下列步驟完成帳號申請</div>
-        </div>
-    </h4>
-</div>
+<div ng-controller="register" layout="column" flex>
 
-<div ng-cloak ng-app="app" ng-controller="register">
+    <div layout="column" layout-align="center center" style="min-height:100px">
+        <h1 class="md-display-1">申請{{$project->name}}帳號</h1>
+    </div>
 
-    <div class="ui grid container">
+    <div layout="row" layout-align="center start">
 
-        <div class="seven wide column">
+        <div layout="row" layout-sm="column" layout-xs="column" flex="60" flex-md="80" flex-sm="80" flex-xs="80">
+
+        <div flex="40" flex-sm="100" flex-xs="100">
 
             <div class="ui fluid small vertical steps">
                 <div class="step" ng-class="{active: step == 1}">
@@ -56,12 +51,39 @@
 
         </div>
 
-        <div class="nine wide column">
+        <div flex="60" flex-sm="100" flex-xs="100">
 
             <div ng-if="step == 1">
                 <div class="ui top attached padded segment">
-                    <h4 class="ui header"><i class="icon user"></i><div class="content"><a href="javascript: void(0)" ng-click="confirmed()">申請中小學師資培育整合平台帳號</a></div></h4>
-                    <h4 class="ui header"><i class="icon user"></i><div class="content"><a href="/project/yearbook/register">申請師資培育統計定期填報系統</a></div></h4>
+
+                    <div class="ui basic segment">
+                        <div class="ui header"><i class="icon user"></i>
+                            <div class="content">
+                                <a href="javascript: void(0)" ng-click="confirmed()">申請中小學師資培育整合平台帳號</a>
+                                <div class="ui tiny list">
+                                    <div class="item">
+                                        <div class="content">
+                                            <div class="header">師培大學承辦人</div>
+                                            <div class="description">填報師資生調查學生名單</div>
+                                        </div>
+                                    </div>
+                                    <div class="item">
+                                        <div class="content">
+                                            <div class="header">各級學校承辦人</div>
+                                            <div class="description">填報教師調查名單</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ui horizontal divider">Or </div>
+
+                    <div class="ui basic segment">
+                        <div class="ui header"><i class="icon user"></i><div class="content"><a href="/project/yearbook/register">申請師資培育統計定期填報系統</a></div></div>
+                    </div>
+
                 </div>
 
                 <div class="ui bottom attached warning message">
@@ -111,31 +133,24 @@
 
                     <div class="field">
                         <label>機構所在縣市</label>
-                        <select class="ui search dropdown" ng-model="user.work.city" ng-options="city as city.name for city in citys" ng-change="changeCity()">
-                            <option value="">選擇您服務的機構所在縣市</option>
-                        </select>
-                    </div>
-
-                    <div class="field" ng-if="user.work.position == 0 && user.work.city">
-                        <label>服務機構</label>
-                        <div ng-dropdown="schools" ng-model="user.work.sch_id" class="ui search selection dropdown" ng-class="{loading: loading.school, disabled: loading.school}">
-                            <i class="dropdown icon"></i>
-                            <div class="default text">選擇您服務機構名稱</div>
-                            <div class="menu">
-                                <div class="item" data-value="@{{ school.id }}" ng-repeat="school in schools">@{{ school.id+' - '+school.name }}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="field" ng-if="user.work.position == 4 && user.work.city">
-                        <label>服務機構</label>
-                        <div ng-dropdown ng-model="user.work.sch_id" class="ui search selection dropdown" ng-class="{loading: loading.school, disabled: loading.school}">
-                            <i class="dropdown icon"></i>
-                            <div class="default text">選擇您服務機構名稱</div>
-                            <div class="menu">
-                                <div class="item" data-value="@{{ school.id }}" ng-repeat="school in schools">@{{ school.name }}</div>
-                            </div>
-                        </div>
+                        <md-input-container>
+                            <label>選擇您服務的機構所在縣市</label>
+                            <md-select ng-model="user.work.city" ng-change="changeCity()">
+                                <md-option ng-repeat="city in citys" ng-value="city">@{{city.name}}</md-option>
+                            </md-select>
+                        </md-input-container>
+                        <md-input-container ng-if="user.work.position == 4 && user.work.city">
+                            <label>選擇您服務機構</label>
+                            <md-select ng-model="user.work.sch_id" ng-disabled="loading.school">
+                                <md-option ng-repeat="school in schools" value="@{{school.id}}">@{{school.name}}</md-option>
+                            </md-select>
+                        </md-input-container>
+                        <md-input-container ng-if="user.work.position == 0 && user.work.city">
+                            <label>選擇您服務機構</label>
+                            <md-select ng-model="user.work.sch_id" ng-disabled="loading.school">
+                                <md-option ng-repeat="school in schools" value="@{{school.id}}">@{{school.name}}</md-option>
+                            </md-select>
+                        </md-input-container>
                     </div>
 
                     <div class="ui error message">
@@ -173,19 +188,22 @@
 
         </div>
 
+        </div>
+
     </div>
 
 </div>
 
 <script>
-angular.module('app', [])
-.constant("CSRF_TOKEN", '{{ csrf_token() }}')
+app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
+
 .config(['$httpProvider', function($httpProvider) {
     $httpProvider.defaults.headers.common["X-Requested-With"] = 'XMLHttpRequest';
 }])
+
 .controller('register', function($scope, $http, CSRF_TOKEN) {
     $scope.step = 1;
-    $scope.positions = [{value: 0, name: '師培大學承辦人'}, {value: 4, name: '各級學校人事承辦人'}];
+    $scope.positions = [{value: 0, name: '師培大學承辦人'}, {value: 4, name: '各級學校承辦人'}];
     $scope.user = {work: {}, contact: {}};
     $scope.loading = {school: true};
 
@@ -197,7 +215,6 @@ angular.module('app', [])
         $scope.saving = true;
         $http({method: 'POST', url: 'register/save', data:{'_token': CSRF_TOKEN, user: $scope.user}})
         .success(function(data, status, headers, config) {
-            console.log(data);
             $scope.errors = data.errors;
             if (data.applying_id) {
                 $scope.step = 3;
@@ -237,23 +254,5 @@ angular.module('app', [])
         console.log(e);
     });
 
-})
-.directive('ngDropdown', function() {
-    return {
-        restrict: "A",
-        scope: {ngDropdown: '='},
-        require: 'ngModel',
-        link: function (scope, element, iAttrs, ngModelCtrl) {
-            scope.$watch('ngDropdown', function(value) {
-                element.dropdown('clear');
-            });
-            element.dropdown({
-                fullTextSearch: true,
-                onChange: function(value, text, $selectedItem) {
-                    ngModelCtrl.$setViewValue(value);
-                }
-            });
-        }
-    };
 });
 </script>
