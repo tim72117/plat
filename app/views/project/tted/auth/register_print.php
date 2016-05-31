@@ -40,18 +40,23 @@ $user = Project\Teacher\User::find($member->user_id);
         <td width="100" height="50"><p align="center">機關(構)名稱</p></td>
         <td width="296" height="50"><p align="center">
             <?php
-            foreach ($user->works as $work) {
-                if ($work->position == 0) {
-                    $work->schools->each(function($school) {
-                        echo $school->id.' - '.$school->name;
-                    });
+                $positions = Plat\Position::where('project_id', 2)->get();
+                foreach ($positions as $position) {
+                    if($member->user->positions->contains($position->id)){
+                        foreach ($user->works as $work) {
+                            if ($position->id == 1) {
+                                $work->schools->each(function($school) {
+                                    echo $school->id.' - '.$school->name.'<br />';
+                                });
+                            }
+                            if ($position->id == 2) {
+                                $work->departments->each(function($department) {
+                                    echo $department->C413.' - '.$department->C414;
+                                });
+                            }
+                        }
+                    }
                 }
-                if ($work->position == 4) {
-                    $work->departments->each(function($department) {
-                        echo $department->C413.' - '.$department->C414;
-                    });
-                }
-            }
             ?>
             </p>
         </td>
@@ -82,7 +87,7 @@ $user = Project\Teacher\User::find($member->user_id);
             <?php
                 $positions = Plat\Position::where('project_id', 2)->get();
                 foreach ($positions as $position) {
-                    echo Form::checkbox('', '', $member->user->positions->contains($position->id), ['disabled' => 'disabled']) . $position->title;
+                    echo Form::radio('', '', $member->user->positions->contains($position->id), ['disabled' => 'disabled']) . $position->title;
                 }
             ?>
         </td>

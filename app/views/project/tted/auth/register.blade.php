@@ -139,13 +139,13 @@
                                 <md-option ng-repeat="city in citys" ng-value="city">@{{city.name}}</md-option>
                             </md-select>
                         </md-input-container>
-                        <md-input-container ng-if="user.work.position == 4 && user.work.city">
+                        <md-input-container ng-if="user.work.position == 2 && user.work.city">
                             <label>選擇您服務機構</label>
                             <md-select ng-model="user.work.sch_id" ng-disabled="loading.school">
                                 <md-option ng-repeat="school in schools" value="@{{school.id}}">@{{school.name}}</md-option>
                             </md-select>
                         </md-input-container>
-                        <md-input-container ng-if="user.work.position == 0 && user.work.city">
+                        <md-input-container ng-if="user.work.position == 1 && user.work.city">
                             <label>選擇您服務機構</label>
                             <md-select ng-model="user.work.sch_id" ng-disabled="loading.school">
                                 <md-option ng-repeat="school in schools" value="@{{school.id}}">@{{school.name}}</md-option>
