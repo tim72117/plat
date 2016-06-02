@@ -201,6 +201,7 @@ class StructFile extends CommFile {
         $rows = array();
 
         $count = 0;
+        $tableTitle = implode("\r\n", $tableTitle);
         $rows[$count++][] = $tableTitle;
 
         foreach ($columns as $column) {
@@ -266,7 +267,7 @@ class StructFile extends CommFile {
             }
         }
 
-        $rows[$count][] = '總合';
+        $rows[$count][] = '總和';
         for ($i=0; $i < count($columns)-1;$i++) {
             $rows[$count][] = '';
         }

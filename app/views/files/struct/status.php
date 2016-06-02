@@ -586,7 +586,9 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
             }
             titles.push(title);
         }
+        $scope.tableTitle.title_text = titles;
         $scope.tableTitle.title = '<div>' + titles.join('</div><div>') + '</div>';
+
     }
 
     $scope.edit = function() {
@@ -658,7 +660,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         };
 
         if ($scope.tableTitle !== undefined) {
-             tableTitle = $scope.tableTitle.title;
+             tableTitle = $scope.tableTitle.title_text;
         }
 
         jQuery.fileDownload('export_excel', {
