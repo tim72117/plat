@@ -176,6 +176,8 @@ class AnalysisFile extends CommFile {
         $target = $group['targets'][Input::get('target_key')];
 
         //todo run query if column exist
+
+        isset($target['uid']) && $get_data_query->whereIn('uid', $target['uid']);
         isset($target['shid']) && $get_data_query->whereIn('shid', $target['shid']);
         isset($target['type1']) && $get_data_query->whereIn('type1', $target['type1']);
         isset($target['type2']) && $get_data_query->where('type2', $target['type2']);
