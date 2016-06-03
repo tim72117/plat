@@ -42,7 +42,7 @@ app.config(function ($compileProvider, $mdIconProvider) {
     $mdIconProvider.defaultIconSet('/js/angular_material/1.1.0/core-icons.svg', 24);
 })
 
-.controller('mainController', function($scope, $mdSidenav) {
+.controller('mainController', function($scope, $mdSidenav, $mdToast) {
     $scope.main = {};
     $scope.main.pathname = window.location.pathname;
     $scope.main.openLeftMenu = false;
@@ -50,6 +50,16 @@ app.config(function ($compileProvider, $mdIconProvider) {
     $scope.main.toggleLeftMenu = function() {
         $mdSidenav('left').toggle();
         $scope.main.openLeftMenu = !$scope.main.openLeftMenu;
+    };
+    $scope.main.showHelp = function() {
+        $mdToast.show(
+            $mdToast.simple()
+            .textContent('聯絡電話：02-77343669　傳真：02-33433910')
+            .position('top right')
+            .hideDelay(20000)
+            .action('關閉')
+            .highlightAction(true)
+        );
     };
 })
 
@@ -89,6 +99,9 @@ app.config(function ($compileProvider, $mdIconProvider) {
             <span flex></span>
             <md-button ng-class="{'md-raised': main.pathname == '/project/{{ $project->code }}/profile'}" href="/project/{{ $project->code }}/profile">個人資料</md-button>
             <md-button ng-class="{'md-raised': main.pathname == '/auth/password/change'}" href="/auth/password/change">更改密碼</md-button>
+            <md-button class="md-icon-button" aria-label="需要幫助" ng-click="main.showHelp()">
+                <md-icon md-svg-icon="help-outline"></md-icon>
+            </md-button>
             <md-button href="/auth/logout">登出</md-button>
         </div>
     </md-toolbar>
