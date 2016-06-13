@@ -29,7 +29,7 @@ class Files extends Eloquent {
     }
 
     public function configs() {
-        return $this->hasMany('Doc\Config', 'file_id', 'id');
+        return $this->hasMany('Plat\Files\Config', 'file_id', 'id');
     }
 
     public function tags()

@@ -14,7 +14,7 @@ return [
 
     'schools' => function() {
 
-        if (Input::get('position') == 0) {
+        if (Input::get('position') == 1) {
             $schools = DB::table('plat_public.dbo.university_school')
                 ->where('year', 103)
                 ->where('citycode', Input::get('city_code'))
@@ -22,7 +22,7 @@ return [
                 ->get();
         }
 
-        if (Input::get('position') == 4) {
+        if (Input::get('position') == 2) {
             $schools = DB::table('plat_public.dbo.row_20151023_200635_34isc')
                 ->where('C409', Input::get('city_code'))
                 ->select('C413 AS id', 'C414 AS name')
@@ -31,6 +31,11 @@ return [
 
         return ['schools' => $schools];
 
+    },
+
+    'positions' => function($project) {
+
+        return ['positions' => $project->positions];
     },
 
 ];

@@ -37,7 +37,7 @@ class Work extends Eloquent {
 
     public $timestamps = true;
 
-    protected $fillable = array('sch_id', 'position');
+    protected $fillable = array('sch_id');
 
     public function schools() {
         return $this->hasMany('Project\Teacher\School', 'id', 'sch_id');

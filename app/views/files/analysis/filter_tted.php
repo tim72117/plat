@@ -1,4 +1,8 @@
 <?php
+$schools = [];
+Project\Teacher\User::find(Auth::user()->id)->schools->each(function($school) use(&$schools) {
+    $schools['my-schools-' . $school->id] = ['name' => $school->name, 'uid' => [$school->id]];
+})->toArray();
 return [
     'FW'  => 'FWT',
     // 'uid' =>    ['name' => '本校', 'uid' => User_tted::find(Auth::user()->id)->schools->map(function($school)
@@ -7,6 +11,11 @@ return [
     //                                         })->all()
     //             ],
     'groups' => [
+        'my' => [
+            'key' =>'my-schools',
+            'name' => '本校',
+            'targets' =>  $schools,
+        ],
         'all' => [
             'key'   => 'all',
             'name'  => '全國',

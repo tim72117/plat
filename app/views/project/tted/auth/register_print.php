@@ -40,18 +40,23 @@ $user = Project\Teacher\User::find($member->user_id);
         <td width="100" height="50"><p align="center">機關(構)名稱</p></td>
         <td width="296" height="50"><p align="center">
             <?php
-            foreach ($user->works as $work) {
-                if ($work->position == 0) {
-                    $work->schools->each(function($school) {
-                        echo $school->id.' - '.$school->name;
-                    });
+                $positions = Plat\Position::where('project_id', 2)->get();
+                foreach ($positions as $position) {
+                    if($member->user->positions->contains($position->id)){
+                        foreach ($user->works as $work) {
+                            if ($position->id == 1) {
+                                $work->schools->each(function($school) {
+                                    echo $school->id.' - '.$school->name.'<br />';
+                                });
+                            }
+                            if ($position->id == 2) {
+                                $work->departments->each(function($department) {
+                                    echo $department->C413.' - '.$department->C414;
+                                });
+                            }
+                        }
+                    }
                 }
-                if ($work->position == 4) {
-                    $work->departments->each(function($department) {
-                        echo $department->C413.' - '.$department->C414;
-                    });
-                }
-            }
             ?>
             </p>
         </td>
@@ -79,10 +84,12 @@ $user = Project\Teacher\User::find($member->user_id);
         <td rowspan="4" width="100"><p align="center">帳號權限</p></td>
         <td width="130"><p>身份別</p></td>
         <td>
-            <label><?=Form::radio('', '', $user->works[0]->position == '1', ['disabled' => 'disabled'])?>教育部 </label>
-            <label><?=Form::radio('', '', $user->works[0]->position == '2', ['disabled' => 'disabled'])?>縣市政府承辦人 </label>
-            <label><?=Form::radio('', '', $user->works[0]->position == '0', ['disabled' => 'disabled'])?>師培大學承辦人 </label>
-            <label><?=Form::radio('', '', $user->works[0]->position == '4', ['disabled' => 'disabled'])?>各級學校人事承辦人 </label>
+            <?php
+                $positions = Plat\Position::where('project_id', 2)->get();
+                foreach ($positions as $position) {
+                    echo Form::radio('', '', $member->user->positions->contains($position->id), ['disabled' => 'disabled']) . $position->title;
+                }
+            ?>
         </td>
     </tr>
     <tr>
