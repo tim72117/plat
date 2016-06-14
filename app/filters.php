@@ -59,9 +59,12 @@ Route::filter('auth.basic', function()
 |
 */
 
-Route::filter('guest', function()
+Route::filter('guest', function($route)
 {
-    if (Auth::check()) return Redirect::to('project/intro');
+    if (Auth::check()) {
+        $project = $route->getParameter('project');
+        return Redirect::to('project/' . $project->code . '/intro');
+    }
 });
 
 /*

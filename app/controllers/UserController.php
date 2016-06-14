@@ -77,7 +77,7 @@ class UserController extends BaseController {
 
             Auth::login($user, true);
 
-            return Redirect::intended('project/intro');
+            return Redirect::intended('project/' . $project->code . '/intro');
 
         } else {
             throw new Plat\Files\ValidateException($validator->getMessageBag()->add('error', '帳號密碼錯誤'));

@@ -29,8 +29,8 @@ Route::group(array('before' => 'auth'), function() {
     Route::get('docs/management', 'FileController@management');
     Route::post('docs/share/get', 'FileController@shared');
     Route::post('docs/request/get', 'FileController@requested');
-    Route::get('project/intro', 'FileController@project');
 
+    Route::get('project/{project}/intro', 'FileController@project');
     Route::get('project/{project}/profile/{parameter?}', 'UserAuthedController@profile')->where('parameter', 'power|contact|changeUser');
     Route::post('project/{project}/profile/{parameter?}', 'UserAuthedController@profileSave')->where('parameter', 'power|contact|changeUser');
     Route::get('auth/logout', array('as' => 'logout', 'uses' => 'UserAuthedController@logout'));

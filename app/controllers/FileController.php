@@ -18,7 +18,7 @@ class FileController extends BaseController {
 
     public function project()
     {
-        return $this->createView(View::make('project.main')->nest('context', 'project.intro'));
+        return $this->createView(View::make('project.main')->nest('context', 'project.intro1'));
     }
 
     public function apps()

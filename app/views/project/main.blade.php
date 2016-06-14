@@ -90,10 +90,17 @@ app.config(function ($compileProvider, $mdIconProvider) {
 <body ng-cloak ng-controller="mainController" layout="column">
     <md-toolbar>
         <div class="md-toolbar-tools">
-            <md-button ng-class="{'md-raised': main.openLeftMenu}" ng-click="main.toggleLeftMenu()"><i class="history icon"></i> 近期存取</md-button>
-            <md-button ng-class="{'md-raised': main.pathname == '/project/intro'}" href="/project/intro"><i class="home icon"></i>{{ $project->name }}</md-button>
+            <md-button ng-class="{'md-raised': main.openLeftMenu}" ng-click="main.toggleLeftMenu()">
+                <md-icon ng-style="{fill: main.openLeftMenu ? '#000' : '#fff'}" md-svg-icon="history"></md-icon>
+                近期存取
+            </md-button>
+            <md-button ng-class="{'md-raised': main.pathname == '/project/{{ $project->code }}/intro'}" href="/project/{{ $project->code }}/intro">
+                <md-icon ng-style="{fill: main.pathname == '/project/{{ $project->code }}/intro' ? '#000' : '#fff'}" md-svg-icon="home"></md-icon>
+                {{ $project->name }}
+            </md-button>
             <md-button ng-class="{'md-raised': main.pathname == '/docs/management'}" href="/docs/management">
-                <i class="folder outline icon" ng-class="{open: main.pathname == '/docs/management'}"></i>我的檔案
+                <md-icon md-svg-icon="@{{main.pathname == '/docs/management' ? 'folder-open' : 'folder'}}"></md-icon>
+                我的檔案
             </md-button>
             <h2> / {{ @$doc->isFile->title }}</h2>
             <span flex></span>
