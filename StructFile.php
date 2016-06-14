@@ -194,86 +194,130 @@ class StructFile extends CommFile {
 
     public function export_excel()
     {
-        $calculations = Input::get('calculations');
-        $tableTitle = Input::get('tableTitle');
-        $levels = Input::get('levels');
-        $columns = array_pluck(Input::get('columns'), 'title');
-        $rows = array();
+        $calculations       = Input::get('calculations');
+        $tableTitle         = Input::get('tableTitle');
+        $levels             = Input::get('levels');
 
-        $count = 0;
-        $tableTitle = implode("\r\n", $tableTitle);
-        $rows[$count++][] = $tableTitle;
+        $count              = 0;
+        $tableTitle         = implode("\r\n", $tableTitle);
+        $rows[$count++][]   = $tableTitle;
 
-        foreach ($columns as $column) {
-            $rows[$count][] = $column;
-        }
+        if (Input::get('columns')) {
+            $columns = array_pluck(Input::get('columns'), 'title');
 
-        $count++;
-        foreach ($levels as $level) {
-            if (isset($level['parents'])) {
-                foreach ($level['parents'] as $parent) {
-                    $rows[$count][] = $parent['title'];
-                }
+            foreach ($columns as $column) {
+                $rows[$count][] = $column;
             }
-            $rows[$count++][] = $level['title'];
-        }
 
-        $value = array();
-        $total = array();
-        for ($i=0; $i < count($calculations); $i++) {
-            $rows[1][] = '人數 (百分比)';
-            $total[$i] = 0;
-            $length = count($rows);
-            for ($j=2; $j < $length; $j++) {
-                if (isset($calculations[$i]['results']) && is_array($calculations[$i]['results'])) {
-                    $value = $calculations[$i]['results'];
-                    $amount = count($rows[$j]);
-                    for ($k=0; $k < $amount; $k++) {
-                        if (isset($value[$rows[$j][$k]])) {
-                            $value = $value[$rows[$j][$k]];
-                            if (!is_array($value)) {
+            $count++;
+            foreach ($levels as $level) {
+                if (isset($level['parents']) && is_array($level['parents'])) {
+                    foreach ($level['parents'] as $parent) {
+                        $rows[$count][] = $parent['title'];
+                    }
+                }
+                $rows[$count++][] = $level['title'];
+            }
+
+            $value = array();
+            $total = array();
+            for ($i=0; $i < count($calculations); $i++) {
+                $title = '';
+                if (isset($calculations[$i]['structs']) && is_array($calculations[$i]['structs'])) {
+                    foreach ($calculations[$i]['structs'] as $struct) {
+                        $title .= $struct['title'];
+                        if (isset($struct['rows']) && is_array($struct['rows'])) {
+                            foreach ($struct['rows'] as $row) {
+                                $title .= "(".$row['title']."-".$row['filter'].")";
+                            }
+                        }
+                        $title .= "\r\n";
+                    }
+                }
+                $rows[1][] = $title.'單位:人';
+
+                $total[$i] = 0;
+                $length = count($rows);
+
+                for ($j=2; $j < $length; $j++) {
+                    if (isset($calculations[$i]['results']) && is_array($calculations[$i]['results'])) {
+                        $value = $calculations[$i]['results'];
+                        $amount = count($rows[$j]);
+                        for ($k=0; $k < $amount; $k++) {
+                            if (isset($value[$rows[$j][$k]])) {
+                                $value = $value[$rows[$j][$k]];
+                                if (!is_array($value)) {
+                                    break;
+                                }
+                            } else {
+                                $value = '0';
                                 break;
                             }
-                        } else {
-                            $value = '0';
-                            break;
                         }
-                    }
-                } else {
-                    $value = '0';
-                }
-                $total[$i] = $total[$i] + intval($value);
-                $rows[$j][] = $value;
-            }
-        }
-
-        $percentage = 0;
-        for ($i=2; $i < count($rows); $i++) {
-            $colLength = count($columns);
-            $k = 0;
-            for ($j = $colLength; $j < $colLength+count($calculations); $j++) {
-                if (isset($rows[$i][$j]) && is_numeric($rows[$i][$j])) {
-                    if (intval($rows[$i][$j]) == 0) {
-                        $percentage = 0;
                     } else {
-                        $percentage = intval($rows[$i][$j])*100/$total[$k];
+                        $value = '0';
                     }
-                } else {
-                    $percentage = 0;
+                    $total[$i] = $total[$i] + intval($value);
+                    $rows[$j][] = $value;
                 }
-
-                $rows[$i][$j] = $rows[$i][$j].' ('.round($percentage,2).'%)';
-                $k++;
             }
-        }
 
-        $rows[$count][] = '總和';
-        for ($i=0; $i < count($columns)-1;$i++) {
+            //==增加百分比==//
+            /*$percentage = 0;
+
+            for ($i=2; $i < count($rows); $i++) {
+                $colLength = count($columns);
+                $k = 0;
+                for ($j = $colLength; $j < $colLength+count($calculations); $j++) {
+                    if (isset($rows[$i][$j]) && is_numeric($rows[$i][$j])) {
+                        if (intval($rows[$i][$j]) == 0) {
+                            $percentage = 0;
+                        } else {
+                            $percentage = intval($rows[$i][$j])*100/$total[$k];
+                        }
+                    } else {
+                        $percentage = 0;
+                    }
+
+                    $rows[$i][$j] = $rows[$i][$j].' ('.round($percentage,2).'%)';
+                    $k++;
+                }
+            }*/
+
+            $rows[$count][] = '總和';
+            for ($i=0; $i < count($columns)-1;$i++) {
+                $rows[$count][] = '';
+            }
+
+            for ($i=0; $i < count($calculations); $i++) {
+                $rows[$count][] = strval($total[$i]);
+            }
+
+        } else {
             $rows[$count][] = '';
-        }
+            for ($i=0; $i < count($calculations); $i++) {
+                $title = '';
+                if (isset($calculations[$i]['structs']) && is_array($calculations[$i]['structs'])) {
+                    foreach ($calculations[$i]['structs'] as $struct) {
+                        $title .= $struct['title'];
+                        if (isset($struct['rows']) && is_array($struct['rows'])) {
+                            foreach ($struct['rows'] as $row) {
+                                $title .= "(".$row['title']."-".$row['filter'].")";
+                            }
+                        }
+                        $title .= "\r\n";
+                    }
+                }
+                $rows[$count][] = $title.'單位:人';
+            }
 
-        for ($i=0; $i < count($calculations); $i++) {
-            $rows[$count][] = strval($total[$i]).' (100%)';
+            $count++;
+
+            $rows[$count][] = '總和';
+
+            for ($i=0; $i < count($calculations); $i++) {
+                $rows[$count][] = $calculations[$i]['results'][0];
+            }
         }
 
         \Excel::create($this->file->title, function($excel) use($rows){
@@ -281,12 +325,19 @@ class StructFile extends CommFile {
                 $sheet->fromArray($rows, null, 'A1', false, false);
                 $sheet->setFontSize(12);
                 $lastColumn = $sheet->getHighestColumn();
+                $lastRow = $sheet->getHighestRow();
+                $sheet->getDefaultStyle()->getAlignment()->setWrapText(true);
                 $sheet->mergeCells('A1:'.$lastColumn.'1');
                 $sheet->cells('A1:'.$lastColumn.'1', function($cells) {
-                    $cells->setAlignment('center');
+                    $cells->setAlignment('left');
+                    $cells->setValignment('center');
+                });
+                $sheet->cells('A2:'.$lastColumn.$lastRow, function($cells) {
+                    $cells->setAlignment('left');
+                    $cells->setValignment('top');
                 });
             });
-        })->download('xlsx');
+        })->download(Input::get('type'));
     }
 
     public function get_intern_count()
