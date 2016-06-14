@@ -4,7 +4,7 @@
     <div ng-repeat="sheet in file.sheets">
 
         <form style="display:none">
-            <input type="file" id="file_upload" nv-file-select uploader="uploader" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+            <input type="file" id="file_upload" nv-file-select uploader="uploader" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel,.csv" />
         </form>
 
         <md-card>
