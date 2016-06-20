@@ -45,11 +45,10 @@ app.config(function ($compileProvider, $mdIconProvider) {
 .controller('mainController', function($scope, $mdSidenav, $mdToast) {
     $scope.main = {};
     $scope.main.pathname = window.location.pathname;
-    $scope.main.openLeftMenu = false;
+    $scope.main.isOpenLeftMenu = false;
     $scope.main.loading = false;
     $scope.main.toggleLeftMenu = function() {
         $mdSidenav('left').toggle();
-        $scope.main.openLeftMenu = !$scope.main.openLeftMenu;
     };
     $scope.main.showHelp = function() {
         $mdToast.show(
@@ -90,8 +89,8 @@ app.config(function ($compileProvider, $mdIconProvider) {
 <body ng-cloak ng-controller="mainController" layout="column">
     <md-toolbar>
         <div class="md-toolbar-tools">
-            <md-button ng-class="{'md-raised': main.openLeftMenu}" ng-click="main.toggleLeftMenu()">
-                <md-icon ng-style="{fill: main.openLeftMenu ? '#000' : '#fff'}" md-svg-icon="history"></md-icon>
+            <md-button ng-class="{'md-raised': main.isOpenLeftMenu}" ng-click="main.toggleLeftMenu()">
+                <md-icon ng-style="{fill: main.isOpenLeftMenu ? '#000' : '#fff'}" md-svg-icon="history"></md-icon>
                 近期存取
             </md-button>
             <md-button ng-class="{'md-raised': main.pathname == '/project/{{ $project->code }}/intro'}" href="/project/{{ $project->code }}/intro">
@@ -115,25 +114,24 @@ app.config(function ($compileProvider, $mdIconProvider) {
     <div layout="column" flex layout-align="center center" ng-if="main.loading">
         <md-progress-circular md-mode="indeterminate"></md-progress-circular>
     </div>
-    <md-content flex layout="row" ng-show="!main.loading">
-        <md-sidenav class="md-sidenav-left" md-component-id="left" layout="column">
-            <md-content ng-controller="leftMenuController" layout="row" flex ng-if="main.openLeftMenu">
-                <md-content layout="column" flex layout-align="center center" ng-if="leftMenu.loading">
-                    <md-progress-circular md-mode="indeterminate"></md-progress-circular>
-                </md-content>
-                <md-list>
-                    <md-list-item ng-repeat="doc in leftMenu.docs | orderBy: 'opened_at':true | limitTo:10">
-                        <md-icon md-svg-icon="history"></md-icon>
-                        <div class="md-list-item-text" layout="column">
-                            <a href="@{{ doc.link }}">@{{ doc.title }}</a>
-                        </div>
-                    </md-list-item>
-                </md-list>
+    <md-sidenav class="md-sidenav-left" md-component-id="left" md-is-open="main.isOpenLeftMenu">
+        <md-toolbar>
+            <h1 class="md-toolbar-tools">近期存取</h1>
+        </md-toolbar>
+        <md-content ng-controller="leftMenuController" layout="row" flex ng-if="main.isOpenLeftMenu">
+            <md-content layout="column" flex layout-align="center center" ng-if="leftMenu.loading">
+                <md-progress-circular md-mode="indeterminate"></md-progress-circular>
             </md-content>
-        </md-sidenav>
-        <div flex>
-            {{ $context }}
-        </div>
+            <md-list>
+                <md-list-item ng-repeat="doc in leftMenu.docs | orderBy: 'opened_at':true | limitTo:10" href="@{{ doc.link }}">
+                    <md-icon md-svg-icon="history"></md-icon>
+                    <p>@{{ doc.title }}</p>
+                </md-list-item>
+            </md-list>
+        </md-content>
+    </md-sidenav>
+    <md-content flex ng-show="!main.loading">
+        {{ $context }}
     </md-content>
 </body>
 @stop

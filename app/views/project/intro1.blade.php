@@ -1,7 +1,7 @@
 
-<md-content ng-cloak ng-controller="introController" layout-padding layout-xs="column" layout-sm="column" layout-md="row" layout-gt-md="row" layout-wrap="md">
+<md-content ng-cloak ng-controller="introController" layout-padding flex="100" layout="row" layout-wrap="md">
 
-    <div flex-md="50" flex-gt-md="33" layout="column">
+    <div flex-sm="100" flex-md="50" flex-gt-md="33">
         <md-card ng-repeat="tag in tags">
             <md-card-title>@{{tag.name}}</md-card-title>
             <md-list>
@@ -13,7 +13,7 @@
         </md-card>
     </div>
 
-    <div flex-md="50" flex-gt-md="33" layout="column">
+    <div flex-sm="100" flex-md="50" flex-gt-md="33">
         <md-card>
             <md-card-title>待完成</md-card-title>
             <md-list>
@@ -50,7 +50,7 @@
         </md-card>
     </div>
 
-    <div flex-md="50" flex-gt-md="33" layout="column">
+    <div flex-sm="100" flex-md="50" flex-gt-md="33">
         <md-card>
             <md-card-title>注意事項</md-card-title> 
             <md-card-content>
