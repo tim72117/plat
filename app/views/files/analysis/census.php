@@ -66,7 +66,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
 
         <div class="ui basic segment">
             <div class="ui small breadcrumb">
-                <a class="section" href="/project/intro">查詢平台</a>
+                <a class="section" href="/project/<?=$project->code?>/intro">查詢平台</a>
                 <i class="right chevron icon divider"></i>
                 <div class="active section">選擇資料庫</div>
             </div>
