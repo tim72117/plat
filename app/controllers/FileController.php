@@ -115,6 +115,8 @@ class FileController extends BaseController {
 
         if (in_array($method, $file->get_views())) {
             if ($file->is_full()) {
+                $member = $this->user->members()->logined()->orderBy('logined_at', 'desc')->first();
+                View::share('project', $member->project);
                 $view = View::make($file->$method(), ['doc' => $doc]);
             } else {
                 $context = View::make('project.main', ['doc' => $doc])->nest('context', $file->$method());
