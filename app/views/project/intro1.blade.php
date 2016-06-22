@@ -3,56 +3,65 @@
 
     <div flex-sm="100" flex-md="50" flex-gt-md="33">
         <md-card ng-repeat="tag in tags">
-            <md-card-title>@{{tag.name}}</md-card-title>
+            <md-list-item>
+                <md-icon md-svg-icon="@{{tag.icon}}"></md-icon>
+                <p style="font-weight:bold">@{{tag.name}}</p>
+            </md-list-item>
             <md-list>
                 <md-list-item ng-repeat="app in apps" href="/@{{ app.link }}" ng-if="app.tags[0].title == tag.name">
-                    <md-icon md-svg-icon="@{{tag.icon}}"></md-icon>
+                    <md-icon></md-icon>
                     <p>@{{ app.title }}</p>
-                </md-list-item>        
+                </md-list-item>
             </md-list>
         </md-card>
     </div>
 
     <div flex-sm="100" flex-md="50" flex-gt-md="33">
         <md-card>
-            <md-card-title>待完成</md-card-title>
+            <md-list-item>
+                <md-icon md-svg-icon="assignment"></md-icon>
+                <p style="font-weight:bold">待完成</p>
+            </md-list-item>
             <md-list>
                 <md-subheader class="md-no-sticky" ng-if="requests.length==0">沒有任何待完成工作</md-subheader>
                 <md-list-item ng-repeat="request in requests | orderBy:'created_at':true" href="/@{{ request.link }}" class="md-2-line">
-                    <md-icon md-svg-icon="assignment"></md-icon>
+                    <md-icon></md-icon>
                     <div class="md-list-item-text" layout="column">
                         <h3>@{{ request.title }}</h3>
                         <p>新增於 @{{ diff(request.created_at) }}</p>
                     </div>
                     <md-divider ng-if="!$last"></md-divider>
-                </md-list-item>        
+                </md-list-item>
             </md-list>
         </md-card>
         <md-card>
-            <md-card-title>最新消息</md-card-title>
             <md-list>
+                <md-list-item>
+                    <md-icon md-svg-icon="alarm"></md-icon>
+                    <p style="font-weight:bold">最新消息</p>
+                </md-list-item>
                 <md-subheader class="md-no-sticky" ng-if="posts.length==0">過去 7 天內沒有任何新消息</md-subheader>
                 <md-list-item ng-repeat="post in posts | limitTo:postsLimit" class="md-3-line md-long-text">
-                    <md-icon md-svg-icon="alarm"></md-icon>
+                    <md-icon></md-icon>
                     <div class="md-list-item-text">
                         <h3>@{{ post.title }}</h3>
                         <p style="color:#000" ng-bind-html="post.context"></p>
                         <p>@{{ post.publish_at }}</p>
-                    </div>                
-                </md-list-item>     
-                <md-divider ng-if="posts.length > postsLimit"></md-divider> 
-                <md-list-item ng-if="posts.length > postsLimit">     
-                    <md-icon md-svg-icon="keyboard-arrow-right"></md-icon>            
+                    </div>
+                </md-list-item>
+                <md-divider ng-if="posts.length > postsLimit"></md-divider>
+                <md-list-item ng-if="posts.length > postsLimit">
+                    <md-icon md-svg-icon="keyboard-arrow-right"></md-icon>
                     <p></p>
                     <md-button class="md-secondary" ng-if="posts.length > postsLimit" ng-click="morePosts()">顯示更多消息</md-button>
-                </md-list-item> 
+                </md-list-item>
             </md-list>
         </md-card>
     </div>
 
     <div flex-sm="100" flex-md="50" flex-gt-md="33">
         <md-card>
-            <md-card-title>注意事項</md-card-title> 
+            <md-card-title>注意事項</md-card-title>
             <md-card-content>
                 <p>系統不支援IE7以下版本，請更新您的瀏覽器版本</p>
                 <p>
@@ -90,7 +99,6 @@ app.controller('introController', function($scope, $filter, $http, $cookies, tim
     $scope.getApps = function() {
         $http({method: 'POST', url: '/apps/lists', data:{}})
         .success(function(data, status, headers, config) {
-            console.log(data);
             $scope.apps = data.apps;
             $scope.requests = data.requests;
             $scope.$parent.main.loading = false;
@@ -102,13 +110,12 @@ app.controller('introController', function($scope, $filter, $http, $cookies, tim
     $scope.getPosts = function() {
         $http({method: 'GET', url: '/api/news/<?=$project->id?>/last week/now', data:{}})
         .success(function(data, status, headers, config) {
-            console.log(data);
-            $scope.posts = data;            
+            $scope.posts = data;
         }).error(function(e) {
             console.log(e);
         });
     };
-    
+
     $scope.getApps();
     $scope.getPosts();
 })
