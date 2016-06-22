@@ -129,6 +129,15 @@ class Post extends Eloquent {
 
     protected $fillable = array('title', 'context', 'publish_at', 'display_at', 'created_by');
 
+    public function files()
+    {
+        return $this->belongsToMany('Files', 'project_post_file', 'post_id', 'file_id')->withPivot('id');
+    }
+
+    public function getDisplayAtAttribute($value)
+    {
+        return json_decode($value);
+    }
 }
 
 class Position extends Eloquent {

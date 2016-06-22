@@ -62,6 +62,7 @@ Route::get('project/{project}/register/ajax/{method}', 'UserController@registerA
 
 Route::get('api/projects', 'ApiController@projects');
 Route::get('api/news/{project_id}/{to}/{from?}', 'ApiController@news');
+Route::get('api/news/download/{post_id}', 'ApiController@postFileDownload')->where('post_id', '[0-9]+');
 Route::post('data/post/{table}', 'DataExchangeController@post');
 //平台---------------------------------------------------------------------------------------------------------------------------------
 
