@@ -8,7 +8,6 @@ use ShareFile;
 use Carbon\Carbon;
 use Plat\Member;
 use Plat\Project;
-use Project\Used\Struct;
 
 class AccountFile extends CommFile {
 
@@ -178,8 +177,8 @@ class AccountFile extends CommFile {
         $members = $members_query->paginate(100);
 
         $profiles = $members->getCollection()->map(function($member) {
-            $Struct = $this->configs['Struct'];
-            return $Struct::auth($member, array_pluck($member->user->inGroups->toArray(), 'id'));
+            $struct = $this->configs['Struct'];
+            return $struct::auth($member, array_pluck($member->user->inGroups->toArray(), 'id'));
         });
 
         return array('users' => $profiles, 'currentPage' => $members->getCurrentPage(), 'lastPage' => $members->getLastPage(), 'log' => DB::getQueryLog());
@@ -195,7 +194,9 @@ class AccountFile extends CommFile {
 
         $member->push();
 
-        return ['profiles' => Struct::auth($member, array_pluck($member->user->inGroups->toArray(), 'id'))];
+        $struct = $this->configs['Struct'];
+
+        return ['profiles' => $struct::auth($member, array_pluck($member->user->inGroups->toArray(), 'id'))];
     }
 
     public function disableUser()
@@ -235,7 +236,9 @@ class AccountFile extends CommFile {
 
         $member->user->save();
 
-        return ['user' => Struct::auth($member, array_pluck($member->user->inGroups->toArray(), 'id'))];
+        $struct = $this->configs['Struct'];
+
+        return ['user' => $struct::auth($member, array_pluck($member->user->inGroups->toArray(), 'id'))];
     }
 
 }
