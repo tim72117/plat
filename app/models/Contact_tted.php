@@ -54,6 +54,7 @@ class Struct {
     static function auth($member, $groups)
     {
         return array(
+            'id'        => (int)$member->user_id,
             'user_id'   => (int)$member->user_id,
             'member_id' => (int)$member->id,
             'actived'   => $member->user->actived && $member->actived,
