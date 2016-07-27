@@ -591,6 +591,10 @@ class QuesFile extends CommFile {
         }
     }
 
+    public function createPstat() {
+        $this->create_pstat($this->file->census->database . '.dbo.' . $this->file->census->table);
+    }
+
     private function create_pstat($tablename) {
         !Schema::hasTable($tablename.'_pstat') && Schema::create($tablename.'_pstat', function($table){
             $table->integer('id', true);
