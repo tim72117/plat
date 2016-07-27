@@ -20,7 +20,7 @@
         <md-card>
             <md-list-item>
                 <md-icon md-svg-icon="assignment"></md-icon>
-                <p style="font-weight:bold">待完成</p>
+                <p style="font-weight:bold">進行中業務</p>
             </md-list-item>
             <md-list>
                 <md-subheader class="md-no-sticky" ng-if="requests.length==0">沒有任何待完成工作</md-subheader>
