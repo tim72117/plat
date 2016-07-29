@@ -92,7 +92,7 @@
             </div>
 
             <div ng-if="step == 2">
-                <form class="ui form segment attached" ng-submit="save()" ng-class="{error: errors.length > 0}">
+                <form class="ui form segment attached" action="register/save" method="post" ng-submit="save($event)" ng-class="{error: errors.length > 0}">
 
                     <div class="field">
                         <label>登入帳號 (e-mail)</label>
@@ -227,7 +227,8 @@ app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
         $scope.step = 2;
     };
 
-    $scope.save = function() {
+    $scope.save = function(event) {
+        event.preventDefault();
         $scope.saving = true;
         $scope.user.work.sch_id = $scope.user.work.selectedItem != undefined ? $scope.user.work.selectedItem.id : '';
         $http({method: 'POST', url: 'register/save', data:{'_token': CSRF_TOKEN, user: $scope.user}})
