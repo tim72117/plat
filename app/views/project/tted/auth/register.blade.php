@@ -133,24 +133,32 @@
 
                     <div class="field">
                         <label>機構所在縣市</label>
-                        <md-input-container>
-                            <label>選擇您服務的機構所在縣市</label>
-                            <md-select ng-model="user.work.city" ng-change="changeCity()">
-                                <md-option ng-repeat="city in citys" ng-value="city">@{{city.name}}</md-option>
-                            </md-select>
-                        </md-input-container>
-                        <md-input-container ng-if="user.work.position == 2 && user.work.city">
-                            <label>選擇您服務機構</label>
-                            <md-select ng-model="user.work.sch_id" ng-disabled="loading.school">
-                                <md-option ng-repeat="school in schools" value="@{{school.id}}">@{{school.name}}</md-option>
-                            </md-select>
-                        </md-input-container>
-                        <md-input-container ng-if="user.work.position == 1 && user.work.city">
-                            <label>選擇您服務機構</label>
-                            <md-select ng-model="user.work.sch_id" ng-disabled="loading.school">
-                                <md-option ng-repeat="school in schools" value="@{{school.id}}">@{{school.name}}</md-option>
-                            </md-select>
-                        </md-input-container>
+                        <div layout-gt-sm="row">
+                            <md-autocomplete md-search-text="searchCity" md-selected-item-change="changeCity()" md-items="city in getCitys(searchCity)" md-selected-item="user.work.city" md-item-text="city.name" md-min-length="0" placeholder="選擇您服務的機構所在縣市" md-no-cache="true">
+                                <md-item-template>
+                                    <span md-highlight-text="searchCity">@{{city.name}}</span>
+                                </md-item-template>
+                                <md-not-found>
+                                    查無"@{{searchCity}}"縣市名稱
+                                </md-not-found>
+                            </md-autocomplete>
+                            <md-autocomplete ng-if="user.work.position == 2 && user.work.city" md-search-text="searchSchool" md-items="school in getSchools(searchSchool)" md-item-text="school.name" md-selected-item="user.work.selectedItem" md-min-length="0" placeholder="選擇您服務機構" ng-disabled="loading.school" md-no-cache="true" style="margin-left:10px" >
+                                <md-item-template>
+                                    <span md-highlight-text="searchSchool" md-highlight-flags="^i">@{{school.name}}</span>
+                                </md-item-template>
+                                <md-not-found>
+                                    查無"@{{searchSchool}}"服務機構名稱
+                                </md-not-found>
+                            </md-autocomplete>
+                            <md-autocomplete ng-if="user.work.position == 1 && user.work.city" md-search-text="searchSchool" md-items="school in getSchools(searchSchool)" md-item-text="school.name" md-selected-item="user.work.selectedItem" md-min-length="0" placeholder="選擇您服務機構" ng-disabled="loading.school" md-no-cache="true" style="margin-left:10px" >
+                                <md-item-template>
+                                    <span md-highlight-text="searchSchool" md-highlight-flags="^i">@{{school.name}}</span>
+                                </md-item-template>
+                                <md-not-found>
+                                    查無"@{{searchSchool}}"服務機構名稱
+                                </md-not-found>
+                            </md-autocomplete>
+                        </div>
                     </div>
 
                     <div class="ui error message">
@@ -201,7 +209,7 @@ app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
     $httpProvider.defaults.headers.common["X-Requested-With"] = 'XMLHttpRequest';
 }])
 
-.controller('register', function($scope, $http, CSRF_TOKEN) {
+.controller('register', function($scope, $http, CSRF_TOKEN, $filter) {
     $scope.step = 1;
     $scope.positions = [];
     $scope.user = {work: {}, contact: {}};
@@ -221,6 +229,7 @@ app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
 
     $scope.save = function() {
         $scope.saving = true;
+        $scope.user.work.sch_id = $scope.user.work.selectedItem != undefined ? $scope.user.work.selectedItem.id : '';
         $http({method: 'POST', url: 'register/save', data:{'_token': CSRF_TOKEN, user: $scope.user}})
         .success(function(data, status, headers, config) {
             $scope.errors = data.errors;
@@ -236,11 +245,12 @@ app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
     };
 
     $scope.changeCity = function() {
-        if (!$scope.user.work.city)
+        if (!$scope.user.work.city || !$scope.user.work.position )
             return;
 
         $scope.loading.school = true;
-        $http({method: 'GET', url: 'register/ajax/schools', params:{city_code: $scope.user.work.city.code, position: $scope.user.work.position}})
+        $scope.user.work.selectedItem = null;
+        $http({method: 'GET', url: 'register/ajax/schools', params:{city_code: $scope.user.work.city.code,city_name: $scope.user.work.city.name,position: $scope.user.work.position}})
         .success(function(data, status, headers, config) {
             $scope.schools = data.schools;
             $scope.loading.school = false;
@@ -249,6 +259,16 @@ app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
             console.log(e);
         });
     };
+
+    $scope.getSchools = function(query) {
+        var results = query ? $filter('filter')($scope.schools,query) : $scope.schools;
+        return results;
+    }
+
+    $scope.getCitys = function(query) {
+        var results = query ? $filter('filter')($scope.citys,query) : $scope.citys;
+        return results;
+    }
 
     $scope.$watch('user.work.position', function() {
         $scope.changeCity();

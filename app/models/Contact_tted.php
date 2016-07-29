@@ -25,7 +25,7 @@ class School extends Eloquent {
 
 class Department extends Eloquent {
 
-    protected $table = 'plat_public.dbo.row_20151023_200635_34isc';
+    protected $table = 'rows.dbo.row_20160629_171704_qe7nn';
 
     public $timestamps = false;
 
@@ -44,7 +44,7 @@ class Work extends Eloquent {
     }
 
     public function departments() {
-        return $this->hasMany('Project\Teacher\Department', 'C413', 'sch_id');
+        return $this->hasMany('Project\Teacher\Department', 'C1187', 'sch_id');
     }
 
 }

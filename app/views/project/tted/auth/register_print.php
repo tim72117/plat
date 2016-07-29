@@ -6,7 +6,7 @@ $user = Project\Teacher\User::find($member->user_id);
 <table width="800" align="center" cellpadding="0" cellspacing="0" border="0" style="font-size:11pt; font-family:'標楷體'">
   <tr>
     <td width="54%" height="5">
-    <p>文件名稱：中小學師資資料庫整合平台帳號申請表</p>
+    <p>文件名稱：中小學師資資料庫整合平臺帳號申請表</p>
     </td>
     <td width="46%" height="5">
     <p align="right">機密等級：□一般 ■限閱 □敏感 □機密</p>
@@ -51,7 +51,7 @@ $user = Project\Teacher\User::find($member->user_id);
                             }
                             if ($position->id == 2) {
                                 $work->departments->each(function($department) {
-                                    echo $department->C413.' - '.$department->C414;
+                                    echo $department->C1187.' - '.$department->C1188;
                                 });
                             }
                         }
@@ -94,11 +94,11 @@ $user = Project\Teacher\User::find($member->user_id);
     </tr>
     <tr>
         <td><p>欲申請權限</p></td>
-        <td>師資培育長期追蹤資料庫調查（含問卷查詢平台、線上分析系統等）</td>
+        <td>師資培育長期追蹤資料庫調查（含問卷查詢平臺、線上分析系統等）</td>
     </tr>
     <tr>
         <td><p>書面審核單位地址</p></td>
-        <td>106台北市大安區和平東路一段129號 臺師大教育研究與評鑑中心教育資料組收</td>
+        <td>106台北市大安區和平東路一段129號 臺師大教育研究與評鑑中心調查資料組收</td>
     </tr>
     <tr>
         <td><p>聯絡電話</p></td>
