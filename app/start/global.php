@@ -51,6 +51,11 @@ App::error(function(Exception $exception, $code)
     Log::error($exception);
 });
 
+App::error(function(Exception $exception)
+{
+    return Response::view('badRequest', array(), 400);
+});
+
 App::error(function(Plat\Files\UploadFailedException $exception) {
     return Response::json($exception->uploadFailedMessage);
 });
@@ -81,9 +86,9 @@ App::error(function(PDOException $exception) {
     //return Response::view('nopage', array(), 404);
 });
 
-App::error(function(Exception $exception)
+App::error(function(Symfony\Component\HttpKernel\Exception\HttpException $exception)
 {
-    //return Response::view('nopage', array(), 404);
+    return Response::view('nopage', array(), 404);
 });
 
 App::missing(function($exception) {
