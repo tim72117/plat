@@ -42,16 +42,18 @@ class Struct {
     static function auth($member)
     {
         return array(
-            'id'          => (int)$member->user_id,
-            'actived'     => $member->user->actived && $member->actived,
-            'password'    => $member->user->password=='',
-            'email'       => $member->user->email,
-            'name'        => $member->user->username,
-            'departments' => \Project\Cher\User::find($member->user_id)->departments->toArray(),
+            'id'        => (int)$member->user_id,
+            'member_id' => (int)$member->id,
+            'actived'   => $member->user->actived && $member->actived,
+            'password'  => $member->user->password=='',
+            'email'     => $member->user->email,
+            'name'      => $member->user->username,
             'title'  => $member->contact->title,
             'tel'    => $member->contact->tel,
             'fax'    => $member->contact->fax,
             'email2' => $member->contact->email2,
+            'inGroups'  => $member->user->inGroups,
+            'departments' => \Project\Cher\User::find($member->user_id)->departments->toArray(),
         );
     }
 
