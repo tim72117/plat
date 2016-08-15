@@ -18,6 +18,15 @@
                 <br />
                 網址：{{ secure_url('project/tted/password/reset/'.$token) }}
             </p>
+            <p>
+                請開啟下列連結後，列印出申請單。
+            </p>
+            <p>
+                {{ link_to('project/tted/register/print/'.$applying_id, '列印申請單', array(), $secure = true) }}
+                <br />
+                <br />
+                網址：{{ secure_url('project/tted/register/print/'.$applying_id) }}
+            </p>
         </div>
 
         <br />

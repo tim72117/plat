@@ -199,6 +199,7 @@ class UserController extends BaseController {
 
             try {
                 Config::set('auth.reminder.email', 'emails.auth.register_' . $project->code);
+                View::share('applying_id', $member->applying->id);
                 Password::remind(['email' => $member->user->getReminderEmail()], function($message) {
                     $message->subject('教育資料庫整合平臺-註冊通知');
                 });
