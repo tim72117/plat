@@ -34,9 +34,9 @@
         <th width="100">機構名稱</th>
         <td>
             <?php
-                foreach(Project\Used\User::find($member->user_id)->schools as $school){
-                    echo '<div style="padding-left:10px;font-size:11pt">' . $school->id.' - '.$school->name . '</div>';
-                }
+                $member->organizations->each(function($organization) {
+                    echo $organization->now->id.' - '.$organization->now->name ;
+                });
             ?>
         </td>
     </tr>

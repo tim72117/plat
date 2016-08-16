@@ -104,8 +104,8 @@ class UserAuthedController extends BaseController {
     {
         switch ($parameter) {
             case 'power':
-                $attributes = ['user_id' => Auth::user()->id, 'project_id' => Input::get('project_id')];
-                $member = Plat\Member::where($attributes)->withTrashed()->first() ?: new Plat\Member($attributes);
+                $attributes = ['user_id' => Auth::user()->id, 'project_id' => Input::get('project_id'), 'actived' => false];
+                $member = Plat\Member::where($attributes)->withTrashed()->first() ?: Plat\Member::create($attributes);
 
                 $member->actived = false;
 
