@@ -21,17 +21,22 @@ class StructFile extends CommFile {
 
     public function get_views()
     {
-        return ['open', 'intern'];
+        return ['open', 'intern', 'integrate'];
     }
 
-    public function open()
+    /*public function open()
     {
         return 'files.struct.status';
-    }
+    }*/
 
     public function intern()
     {
         return 'files.struct.intern';
+    }
+
+    public function open()
+    {
+        return 'files.struct.integrate';
     }
 
     public function getIntern()
@@ -39,7 +44,7 @@ class StructFile extends CommFile {
         $tables = [];
 
         foreach ($this->tables as $name => $table) {
-            $columns = DB::connection('sqlsrv_tted')->table('TTED_MAIN.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
+            $columns = DB::connection('sqlsrv_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
 
             $columns = array_diff($columns, ['身分識別碼']);
 
@@ -64,32 +69,81 @@ class StructFile extends CommFile {
     public function getItems()
     {
         $tables = [];
-
+        $schoolName = Input::get('schoolName');
+        if ($this->file->configs[0]->value == 1) {
+            $mainTable = 'TEV103_TE_StudentInSchool_OK';
+        } else if ($this->file->configs[0]->value == 2) {
+            $mainTable = 'TE2_D_OK';
+        } else {
+            $mainTable = 'TE2_E_OK';
+        }
+        
         foreach ($this->tables as $name => $table) {
-
-            $query = DB::connection('sqlsrv_tted')->table('TTED_MAIN.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table)
+            $query = DB::connection('sqlsrv_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table)
                 ->where('COLUMN_NAME', '<>', '身分證字號')
-                ->where('COLUMN_NAME', '<>', '發證日期');
+                ->where('COLUMN_NAME', '<>', '學校代碼')
+                ->where('COLUMN_NAME', '<>', '學校名稱')
+                ->where('COLUMN_NAME', '<>', '就讀科系代碼');
 
-            $columns = $query->select('COLUMN_NAME')
+            $columnNames = $query->select('COLUMN_NAME')
                 //->remember(1)
                 ->lists('COLUMN_NAME');
 
-            $selects = array_map(function($key, $column) {
-                return $column . ' AS ' . $key;
-            }, array_keys($columns), $columns);
+            $mainSelects = array_map(function($key, $columnName) {
+                return $columnName . ' AS ' . $key;
+            }, array_keys($columnNames), $columnNames);
 
+            $selects = array_map(function($key, $columnName) use($table) {
+                return 'analysis_tted.dbo.'.$table.'.'.$columnName . ' AS ' . $key;
+            }, array_keys($columnNames), $columnNames);
+            
+            $columns = [];
+            foreach ($columnNames as $key => $columnName) {
+                array_push($columns, 'analysis_tted.dbo.'.$table.'.'.$columnName);
+            }
+            //Cache::flush();
             //Cache::forget(DB::connection('sqlsrv_tted')->table($table)->groupBy($columns)->select($selects)->getCacheKey());
-            $values = Cache::remember(DB::connection('sqlsrv_tted')->table($table)->groupBy($columns)->select($selects)->getCacheKey(), 300, function() use ($table, $columns, $selects) {
-                $rows = DB::connection('sqlsrv_tted')->table($table)->groupBy($columns)->select($selects)->get();
-                $values = [];
-                foreach ($columns as $key => $column) {
-                    $values[$column] = array_values(array_unique(array_pluck($rows, $key)));
-                    rsort($values[$column]);
-                }
-                return $values;
-            });
-
+            if ($table == $mainTable) {
+                $values = Cache::remember(DB::connection('sqlsrv_tted')
+                    ->table($table)
+                    ->whereIn('學校名稱',$schoolName)
+                    ->groupBy($columnNames)
+                    ->select($mainSelects)
+                    ->getCacheKey(), 300, function() use ($table, $mainSelects, $schoolName, $columnNames) {
+                    $rows = DB::connection('sqlsrv_tted')->table($table)->whereIn('學校名稱',$schoolName)
+                        ->groupBy($columnNames)
+                        ->select($mainSelects)
+                        ->get();
+                    $values = [];
+                    foreach ($columnNames as $key => $columnName) {
+                        $values[$columnName] = array_values(array_unique(array_pluck($rows, $key)));
+                        rsort($values[$columnName]);
+                    }
+                    return $values;
+                });
+            } else{
+                $remember_key = DB::connection('sqlsrv_tted')
+                        ->table('analysis_tted.dbo.'.$mainTable)
+                        ->join('analysis_tted.dbo.'.$table,'analysis_tted.dbo.'.$mainTable.'.身分證字號','=','analysis_tted.dbo.'.$table.'.身分證字號')
+                        ->whereIn('analysis_tted.dbo.'.$mainTable.'.學校名稱',$schoolName)
+                        ->groupBy($columns)
+                        ->select($selects)
+                        ->getCacheKey();
+                $values = Cache::remember($remember_key, 300, function() use ($table, $columns, $selects, $schoolName, $columnNames, $mainTable) {
+                    $rows = DB::connection('sqlsrv_tted')->table('analysis_tted.dbo.'.$mainTable)
+                        ->join('analysis_tted.dbo.'.$table,'analysis_tted.dbo.'.$mainTable.'.身分證字號','=','analysis_tted.dbo.'.$table.'.身分證字號')
+                        ->whereIn('analysis_tted.dbo.'.$mainTable.'.學校名稱',$schoolName)
+                        ->groupBy($columns)
+                        ->select($selects)
+                        ->get();
+                    $values = [];
+                    foreach ($columnNames as $key => $columnName) {
+                        $values[$columnName] = array_values(array_unique(array_pluck($rows, $key)));
+                        rsort($values[$columnName]);
+                    }
+                    return $values;
+                });
+            }
             $tables[$name] = $values;
         }
 
@@ -110,12 +164,79 @@ class StructFile extends CommFile {
         return ['rows' => $rows, 'columns' => array_add($columns, 'count', '人次')];
     }
 
-    public function setLevel($array)
+    public function setLevel()
     {
+        $tables = [];
 
+        foreach ($this->tables as $name => $table) {
+            $tableId = DB::connection('sqlsrv_tted')->table('analysis_tted.dbo.table_struct')->where('title','=', $name)->select('id')->get();
+            $query = DB::connection('sqlsrv_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table)
+                ->where('COLUMN_NAME', '<>', '身分證字號')
+                ->where('COLUMN_NAME', '<>', '學校代碼')
+                ->where('COLUMN_NAME', '<>', '學校名稱')
+                ->where('COLUMN_NAME', '<>', '就讀科系代碼');
+
+            $columns = $query->select('COLUMN_NAME')
+                ->lists('COLUMN_NAME');
+
+            $selects = array_map(function($key, $column) {
+                return $column . ' AS ' . $key;
+            }, array_keys($columns), $columns);
+
+            $values = Cache::remember(DB::connection('sqlsrv_tted')->table($table)->groupBy($columns)->select($selects)->getCacheKey(), 300, function() use ($table, $columns, $selects) {
+                $rows = DB::connection('sqlsrv_tted')->table($table)->groupBy($columns)->select($selects)->get();
+                $values = [];
+                foreach ($columns as $key => $column) {
+                    $values[$column] = array_values(array_unique(array_pluck($rows, $key)));
+                    rsort($values[$column]);
+                }
+             });
+            foreach ($columns as $key => $column) {
+                $rowId = DB::connection('sqlsrv_tted')->table('analysis_tted.dbo.row_struct')
+                        ->where('table_struct_id','=', $tableId[0]->id)
+                        ->where('title','=', $column)
+                        ->get();
+                foreach ($values[$column] as $key => $item) {
+                    DB::connection('sqlsrv_tted')->table('analysis_tted.dbo.item_struct2')->insert(
+                        array('row_struct_id' => $rowId[0]->id, 'item_title' => $item)
+                    );
+                }
+            }
+        }
     }
 
-    private $tables = [
+    public function getStructs(){
+        $table = \Plat\Analysis\TableStruct::all();
+        //$item = $table->load('rows.items');
+        $row = $table->load('rows');
+        return($row);
+    }
+
+    public function getExplans(){
+        $table = \Plat\Analysis\TableStruct::all();
+        $explan = $table->load('explanations');
+        return($explan);
+    }
+
+    public function getPopulation(){
+        $population = $this->file->configs[0]->value;
+        return($population);
+    }
+
+    public function getSchools(){
+        $schoolIDs = \Project\Teacher\Work::where('user_id','=',$this->user->id)->select('sch_id')->get();
+        $IDs = [];
+        foreach ($schoolIDs as $key => $schoolID) {
+            array_push($IDs,$schoolID->sch_id);
+        }
+        $schools = \Project\Teacher\School::whereIn('id',$IDs)
+                    ->where('year', '103')
+                    ->where('edu','True')
+                    ->select('id','name')->get();
+        return($schools);
+    }
+
+    /*private $tables = [
         '個人資料'      => 'A01',
         '實際修課'      => 'A02',
         '在校'          => 'A03',
@@ -139,20 +260,51 @@ class StructFile extends CommFile {
         // '教師在職進修資料'   => 'A25',
         '閩南語檢定'         => 'A26',
         '客語檢定'           => 'A27',
+    ];*/
+
+    private $tables = [
+        '個人資料'      => 'TE_基本資料',
+        '就學資訊'      => 'TEV103_TE_StudentInSchool_OK',
+        '完成教育專業課程'   => 'TEV103_TE2_C1_OK',
+        '完成及認定專門課程' => 'TEV103_TE2_C2_OK',
+        '卓越師資培育獎學金' => 'TE_StudentScs_new_OK',
+        '五育教材教法設計徵選活動獎' => 'TE_Student_五育教材教法_OK',
+        '實踐史懷哲精神教育服務計畫' => 'TE_Student_史懷哲精神_OK',
+        '獲選為交換學生至國際友校' => 'TE_Student_國際交換學生_OK',
+        '卓越儲備教師證明書' => 'TE_Student_卓越儲備教師_OK',
+        '實際參與實習'       => 'TE2_D_OK',
+        '修畢師資職前教育證明書' => 'TE2_E_OK',
+        '教師資格檢定'       => 'TE_教師資格檢定_OK',
+        '教師專長'           => 'TE_教師專長_OK',
+        '教甄資料'           => 'TE_教甄資料_OK',
+        '在職教師'           => 'TE_在職教師_OK',
+        '公立學校代理代課教師'       => 'TE_公校代理代課教師_OK',
+        '儲備教師'           => 'TE_新制儲備師資人員_OK',
+        '離退教師'           => 'TE_離退教師_OK',
+        '閩南語檢定'         => 'TE_閩南語檢定_OK',
+        '客語檢定'           => 'TE_客語檢定_OK',
     ];
 
     public function calculate()
     {
         $structs = Input::get('structs');
+        $schoolName = Input::get('schoolName');
+        
+        if ($this->file->configs[0]->value == 1) {
+            $first_table_title = '就學資訊';
+        } else if ($this->file->configs[0]->value == 2) {
+            $first_table_title = '實際參與實習';
+        } else {
+            $first_table_title = '修畢師資職前教育證明書';
+        }
 
-        //var_dump(array_keys($columns));exit;
-
+        $first_table = $this->tables[$first_table_title];
+        $query = DB::connection('sqlsrv_tted')->table($first_table)->whereIn('analysis_tted.dbo.'.$first_table.'.學校名稱',$schoolName);
+        
         foreach ($structs as $i => $struct) {
             $table = $this->tables[$struct['title']];
-            if ($i == 0) {
-                $first_table = $table;
-                $query = DB::connection('sqlsrv_tted')->table($first_table);
-            } else {
+            
+            if ($struct['title'] != $first_table_title) {
                 $query->join($table, $first_table . '.身分證字號', '=', $table . '.身分證字號');
             }
 
@@ -166,8 +318,6 @@ class StructFile extends CommFile {
         $selects = array_map(function($key, $column) {
             return $this->tables[$column['struct']] . '.' . $column['title'] . ' AS C' . $key;
         }, array_keys($columns), Input::get('columns'));
-
-        //var_dump($selects);exit;
 
         foreach (Input::get('columns') as $column) {
             $query->groupBy($this->tables[$column['struct']] . '.' . $column['title']);
@@ -690,7 +840,6 @@ class StructFile extends CommFile {
     }
 
 
-
     /*public function export_excel()
     {
         $structs = Input::get('structs');
@@ -795,5 +944,5 @@ class StructFile extends CommFile {
             });
         })->download('xlsx');
     }*/
-
+    
 }
