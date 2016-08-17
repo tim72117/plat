@@ -13,6 +13,10 @@ class CustomFile extends CommFile {
     function __construct(Files $file, User $user)
     {
         parent::__construct($file, $user);
+
+        $fileLoader = new FileLoader(new Filesystem, app_path() . '/views');
+
+        $this->module = new Repository($fileLoader, '');
     }
 
     public function get_views()
@@ -22,23 +26,19 @@ class CustomFile extends CommFile {
 
     public function open()
     {
-        return $this->file->file;
+        $func = $this->module->get($this->file->file . '.open');
+
+        return call_user_func($func);
     }
 
     public function is_full()
     {
-        $information = json_decode($this->file->information);
-
-        return isset($information->full) && $information->full;
+        return false;
     }
 
     public function __call($method, $args)
     {
-        $fileLoader = new FileLoader(new Filesystem, app_path() . '/views/project');
-
-        $ajax = new Repository($fileLoader, '');
-
-        $func = $ajax->get($this->file->controller . '.' . $method);
+        $func = $this->module->get($this->file->file . '.' . $method);
 
         if (is_callable($func)) {
             return call_user_func($func);
