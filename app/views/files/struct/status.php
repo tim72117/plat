@@ -153,7 +153,8 @@
             <thead>
                 <tr>
                     <th colspan="{{columns.length}}" ng-if="calculations.length>0">
-                        <div ng-semantic-dropdown-menu ng-model="crossPercent" class="ui top left pointing labeled floating dropdown icon mini button">
+                        <md-menu-bar>
+                            <div ng-semantic-dropdown-menu ng-model="crossPercent" class="ui top left pointing labeled floating dropdown icon mini button">
                                 <span class="text">加入 %</span>
                                 <input type="hidden">
                                 <i class="add icon"></i>
@@ -162,10 +163,22 @@
                                     <div class="item" data-value="row" ng-click="setRowPercent()">列 %</div>
                                     <div class="item" data-value="noPercent" ng-click="setNoPercent()">不加 %</div>
                                 </div>
-                        </div>
-                        <button class="basic ui icon button" ng-click="exportExcel(structs)">
-                            <i class="download icon"></i> 下載結果
-                        </button>
+                            </div>
+                            <md-menu>
+                                <button class="basic ui icon button" ng-click="$mdOpenMenu()"><i class="download icon"></i>下載結果</button>
+                                <md-menu-content>
+                                    <md-menu-item>
+                                        <md-button ng-click="exportExcel(structs,'csv')">csv</md-button>
+                                    </md-menu-item>
+                                    <md-menu-item>
+                                        <md-button ng-click="exportExcel(structs,'xls')">xls 2003</md-button>
+                                    </md-menu-item>
+                                    <md-menu-item>
+                                        <md-button ng-click="exportExcel(structs,'xlsx')">xlsx 2007</md-button>
+                                    </md-menu-item>
+                                </md-menu-content>
+                            </md-menu>
+                        </md-menu-bar>
                     </th>
                     <th colspan="{{calculations.length}}" ng-if="calculations.length>0">
                         <div ng-hide="tableTitle.editing">
@@ -652,12 +665,8 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         }
     };
 
-    $scope.exportExcel = function(structs) {
+    $scope.exportExcel = function(structs,type) {
         var tableTitle = '';
-        if ($scope.columns == '') {
-            alert('請勾選欲顯示欄位');
-            return false;
-        };
 
         if ($scope.tableTitle !== undefined) {
              tableTitle = $scope.tableTitle.title_text;
@@ -665,7 +674,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
 
         jQuery.fileDownload('export_excel', {
             httpMethod: "POST",
-            data:{tableTitle: tableTitle, columns: $scope.columns,levels:$scope.levels,calculations: $scope.calculations},
+            data:{tableTitle: tableTitle, columns: $scope.columns,levels:$scope.levels,calculations: $scope.calculations,type: type},
             failCallback: function (responseHtml, url) { console.log(responseHtml); }
         });
     };
