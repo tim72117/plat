@@ -288,7 +288,7 @@ class RowsFile extends CommFile {
 
         $table_columns = $table->columns->fetch('name')->toArray();
 
-        $rows = \Excel::load(storage_path() . '/file_upload/' . $file_upload->file->file, function($reader) {
+        $rows = \Excel::selectSheetsByIndex(0)->load(storage_path() . '/file_upload/' . $file_upload->file->file, function($reader) {
 
         })->get($table_columns)->toArray();
 
