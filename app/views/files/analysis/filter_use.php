@@ -1,16 +1,15 @@
 <?php
-$schools = [];
-Project\Used\User::find(Auth::user()->id)->schools->each(function($school) use(&$schools) {
-    $schools['my-schools-' . $school->id] = ['name' => $school->name, 'shid' => [$school->id]];
-})->toArray();
-
+$organizations = [];
+Plat\Member::where('project_id', 1)->where('user_id', Auth::user()->id)->first()->organizations->load('now')->each(function($organization) use(&$organizations) {
+    $organizations['my-schools-' . $organization->now->id] = ['name' => $organization->now->name, 'shid' => [$organization->now->id]];
+});
 return [
     'FW' => 'FW_new',
     'groups' => [
         'my' => [
             'key' =>'my-schools',
             'name' => '本校',
-            'targets' => $schools,
+            'targets' => $organizations,
         ],
         'all' => [
             'key'   => 'all',

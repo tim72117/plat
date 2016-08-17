@@ -48,63 +48,93 @@
                 </div>
             </div>
             <div flex="60" flex-sm="100" flex-xs="100">
-                <form class="ui form segment top attached" ng-submit="saveRegister()" ng-class="{error: errors.length > 0}" ng-if="step == 'write'">
+                <form class="ui segment top attached" name="register" ng-submit="register.$valid && saveRegister()" novalidate ng-if="step == 'write'">
 
-                    <div class="field">
-                        <label>登入帳號 (e-mail)</label>
-                        <input type="email" required ng-model="user.email" />
+                    <div>
+                        <md-input-container class="md-icon-float md-block">
+                            <label>登入帳號 (e-mail)</label>
+                            <md-icon md-svg-icon="email"></md-icon>
+                            <input type="email" required="true" ng-model="user.email" name="email" md-maxlength="100" />
+                            <div class="md-input-messages-animation" ng-repeat="(id, error) in errors" ng-if="id == 'email'"><div class="md-input-message-animation">@{{error.join()}}</div></div>
+                            <div ng-messages="register.email.$error">
+                                <div ng-message="required">必填</div>
+                                <div ng-message="email">電子郵件格式錯誤</div>
+                                <div ng-message="md-maxlength">輸入太多文字</div>
+                            </div>
+                        </md-input-container>
                     </div>
 
-                    <div class="two fields">
-                        <div class="field">
+                    <div>
+                        <md-input-container class="md-icon-float md-block">
                             <label>姓名</label>
-                            <input type="text" required ng-model="user.username" />
-                        </div>
-                        <div class="field">
+                            <md-icon md-svg-icon="person"></md-icon>
+                            <input type="text" required ng-model="user.username" name="username" md-maxlength="20" />
+                            <div class="md-input-messages-animation" ng-repeat="(id, error) in errors" ng-if="id == 'username'"><div class="md-input-message-animation">@{{error.join()}}</div></div>
+                            <div ng-messages="register.username.$error">
+                                <div ng-message="required">必填</div>
+                                <div ng-message="md-maxlength">輸入太多文字</div>
+                            </div>
+                        </md-input-container>
+                    </div>
+
+                    <div layout="row">
+                        <md-input-container class="md-icon-float md-block" flex>
+                            <label>聯絡電話(服務單位)</label>
+                            <md-icon md-svg-icon="phone"></md-icon>
+                            <input type="tel" required ng-model="user.contact.tel" name="tel" placeholder="例：02-7734-3645#1234" />
+                            <div class="md-input-messages-animation" ng-repeat="(id, error) in errors" ng-if="id == 'tel'"><div class="md-input-message-animation">@{{error.join()}}</div></div>
+                            <div ng-messages="register.tel.$error">
+                                <div ng-message="required">必填</div>
+                            </div>
+                        </md-input-container>
+                        <md-input-container class="md-icon-float md-block" flex>
                             <label>職稱</label>
-                            <input type="text" required ng-model="user.contact.title" />
-                        </div>
+                            <md-icon md-svg-icon="assignment-ind"></md-icon>
+                            <input type="text" required ng-model="user.contact.title" name="title" />
+                            <div class="md-input-messages-animation" ng-repeat="(id, error) in errors" ng-if="id == 'title'"><div class="md-input-message-animation">@{{error.join()}}</div></div>
+                            <div ng-messages="register.title.$error">
+                                <div ng-message="required">必填</div>
+                            </div>
+                        </md-input-container>
                     </div>
 
-                    <div class="field">
-                        <label>聯絡電話(服務單位)</label>
-                        <input type="tel" required ng-model="user.contact.tel" placeholder="例：02-7734-3645#1234" />
-                    </div>
-
-                    <div class="field">
-                        <label>單位類別</label>
-                        <md-radio-group ng-model="user.work.type">
+                    <h4>單位類別</h4>
+                    <md-input-container>
+                        <md-radio-group ng-model="user.work.type" ng-change="changeType()">
                             <md-radio-button value="1" class="md-primary">中央政府/縣市政府</md-radio-button>
                             <md-radio-button value="0">各級學校</md-radio-button>
                         </md-radio-group>
-                    </div>
+                        <div class="md-input-messages-animation" ng-repeat="(id, error) in errors" ng-if="id == 'user.work.type'"><div class="md-input-message-animation">@{{error.join()}}</div></div>
+                    </md-input-container>
 
-                    <div class="field">
-                        <md-input-container>
-                            <label>選擇您服務的單位所在縣市</label>
-                            <md-select ng-model="cityname" style="min-width: 200px" ng-change="getDepartments(cityname)">
-                                <md-option ng-repeat="city in citys" value="@{{city.cityname}}">@{{city.cityname}}</md-option>
-                            </md-select>
-                        </md-input-container>
-                        <md-input-container>
-                            <label>選擇您服務的單位</label>
-                            <md-select ng-model="user.work.sch_id" style="min-width: 200px">
-                                <md-option ng-repeat="department in departments | filter:{type:user.work.type}" ng-value="department.id">@{{department.name}}</md-option>
-                            </md-select>
-                        </md-input-container>
-                    </div>
+                    <md-autocomplete md-search-text="searchCity" md-selected-item-change="changeCity()" md-items="city in citys" md-selected-item="user.work.city" md-item-text="city.name" md-min-length="0" placeholder="選擇您服務的機構所在縣市" md-no-cache="true">
+                        <md-item-template>
+                            <span md-highlight-text="searchCity">@{{city.name}}</span>
+                        </md-item-template>
+                        <md-not-found>
+                            查無"@{{searchCity}}"縣市名稱
+                        </md-not-found>
+                    </md-autocomplete>
 
-                    <div class="field">
-                        <label>承辦業務</label>
+                    <md-autocomplete md-search-text="searchSchool" md-items="school in getSchools(searchSchool)" md-item-text="school.name" md-selected-item="user.work.selectedItem" md-min-length="0" placeholder="選擇您服務機構" ng-disabled="loading.school" md-no-cache="true">
+                        <md-item-template>
+                            <span md-highlight-text="searchSchool" md-highlight-flags="^i">@{{school.name}}</span>
+                        </md-item-template>
+                        <md-not-found>
+                            查無"@{{searchSchool}}"服務機構名稱
+                        </md-not-found>                            
+                    </md-autocomplete>
+                    <md-input-container>
+                        <div class="md-input-messages-animation" ng-repeat="(id, error) in errors" ng-if="id == 'user.work.organization_id'"><div class="md-input-message-animation">@{{error.join()}}</div></div>
+                    </md-input-container>
+
+                    <h4>承辦業務</h4>
+
+                    <div>                        
                         <md-checkbox ng-repeat="position in positions" ng-model="user.positions[position.id]">@{{position.title}}</md-checkbox>
                     </div>
 
-                    <div class="ui error message">
-                        <div class="header">資料錯誤</div>
-                        <p>@{{ errors.join('、') }}</p>
-                    </div>
-
-                    <div class="field">
+                    <div>
                         <label>一旦點擊註冊，即表示你同意 <a href="register/terms" target="_blank">使用條款</a>。</label>
                     </div>
 
@@ -135,15 +165,17 @@
 <script>
 app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
 
-.config(['$httpProvider', function($httpProvider) {
+.config(function($httpProvider, $mdIconProvider) {
     $httpProvider.defaults.headers.common["X-Requested-With"] = 'XMLHttpRequest';
-}])
+    $mdIconProvider.defaultIconSet('/js/angular_material/1.1.0/core-icons.svg', 24);
+})
 
-.controller('register', function($scope, $http, CSRF_TOKEN) {
+.controller('register', function($scope, $http, $filter, CSRF_TOKEN) {
     $scope.step = 'write';
     $scope.user = {work: {}, contact: {}, member: {project_id: 4, apply: false}, positions: []};
     $scope.citys = [];
     $scope.schools = [];
+    $scope.loading = {school: true};
 
     $http({method: 'GET', url: 'register/ajax/init', params:{}})
     .success(function(data, status, headers, config) {
@@ -155,9 +187,12 @@ app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
     });
 
     $scope.saveRegister = function() {
+        alert();
         $scope.saving = true;
+        $scope.user.work.organization_id = $scope.user.work.selectedItem != undefined ? $scope.user.work.selectedItem.id : '';
         $http({method: 'POST', url: 'register/save', data:{'_token': CSRF_TOKEN, user: $scope.user}})
         .success(function(data, status, headers, config) {
+            console.log(data);
             $scope.errors = data.errors;
             if (data.applying_id) {
                 $scope.step = 'print';
@@ -170,15 +205,37 @@ app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
         });
     };
 
-    $scope.getDepartments = function(cityname) {
-        $http({method: 'GET', url: 'register/ajax/departments', params:{cityname: cityname}})
+    $scope.changeCity = function() {
+        if (!$scope.user.work.city)
+            return;
+
+        $scope.loading.school = true;
+        $scope.user.work.selectedItem = null;
+        $http({method: 'GET', url: 'register/ajax/schools', params:{city_code: $scope.user.work.city.code, city_name: $scope.user.work.city.name, position: $scope.user.work.position}})
         .success(function(data, status, headers, config) {
-            $scope.departments = data.departments;
+            console.log(data);
+            $scope.schools = data.schools;
+            $scope.loading.school = false;
         })
         .error(function(e) {
             console.log(e);
         });
     };
+
+    $scope.changeType = function() {
+        $scope.user.work.selectedItem = null;
+    };
+
+    $scope.getSchools = function(query) {
+        var items = $filter('filter')($scope.schools, function(school) {
+            if ($scope.user.work.type == 1) {
+                return school.sysname == '教育處';
+            } else {
+                return school.sysname != '教育處';
+            };
+        });
+        return query ? $filter('filter')($scope.schools, query) : items;
+    }
 
 });
 </script>

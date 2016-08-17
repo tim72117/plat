@@ -2,9 +2,6 @@
 
 $positions = array_keys(array_filter(Input::get('user.positions')));
 
-$user->positions()->attach($positions);
+count($positions) > 0 && $user->positions()->attach($positions);
 
-Project\Used\User::find($user->id)->works()->save(new Project\Used\Work([
-    'sch_id' => Input::get('user.work.sch_id'),
-    'department_class' => Input::get('user.work.type'),
-]));
+$member->organizations()->attach(Input::get('user.work.organization_id'));

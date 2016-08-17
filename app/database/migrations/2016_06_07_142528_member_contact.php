@@ -26,6 +26,7 @@ class MemberContact extends Migration {
             $table->string('address', 50)->nullable();
             $table->timestamps();
             $table->softDeletes();
+            $table->unique('member_id');
         });
     }
 

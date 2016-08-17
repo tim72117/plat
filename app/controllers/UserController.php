@@ -159,7 +159,7 @@ class UserController extends BaseController {
             throw new Plat\Files\ValidateException($validator);
         }
 
-        $input = $validator->getData()['user'];
+        $input = $validator->getData();
 
         $user = new User;
         $user->username = $input['username'];
@@ -178,9 +178,10 @@ class UserController extends BaseController {
             $user->members()->save($member);
 
             $contact = Plat\Contact::firstOrNew(['member_id' => $member->id]);
-            $contact->title      = $input['contact']['title'];
-            $contact->tel        = $input['contact']['tel'];
-            $contact->department = isset($input['contact']['department']) ? $input['contact']['department'] : '';
+            $contact->title      = $input['title'];
+            $contact->tel        = $input['tel'];
+            $contact->department = isset($input['department']) ? $input['department'] : '';
+
             $member->contact()->save($contact);
 
             require app_path() . '\\views\\project\\' . $project->code . '\\auth\\register_works.php';

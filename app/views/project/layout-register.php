@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="/js/angular_material/1.1.0/angular-material.min.css">
 
 <script>
-var app = angular.module('app', ['ngMaterial']);
+var app = angular.module('app', ['ngMaterial', 'ngMessages']);
 </script>
 </head>
 

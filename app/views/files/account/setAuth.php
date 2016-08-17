@@ -1,13 +1,13 @@
 
 <div ng-controller="usersCtrl">
 
-    <div class="ui basic segment" ng-cloak ng-class="{loading: sheetLoading}" style="overflow: auto">
+    <div class="ui basic segment" ng-cloak style="overflow: auto">
 
-        <md-progress-linear md-mode="determinate" value="{{loadingPercent}}" ng-if="!sheetLoaded"></md-progress-linear>
+
 
         <md-input-container>
             <label>選擇承辦業務</label>
-            <md-select ng-model="search.position" ng-change="getUsers(true)">
+            <md-select ng-model="search.position" ng-change="getUsers(1)">
                 <md-option ng-repeat="position in positions" value="{{position.id}}">
                     {{position.title}}
                 </md-option>
@@ -17,22 +17,16 @@
 
         <md-input-container>
             <label>選擇頁數</label>
-            <md-select ng-model="page">
-                <md-option ng-repeat="allPage in allPages" value="{{allPage}}">
-                    {{allPage}}
-                </md-option>
+            <md-select ng-model="currentPage" ng-change="getUsers(currentPage)">
+                <md-option ng-repeat="page in pages" value="{{page}}">{{page}}</md-option>
             </md-select>
         </md-input-container>
 
-        <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
+        <div class="ui label">第 {{ currentPage }} 頁<div class="detail">共 {{ lastPage }} 頁</div></div>
 
         <div class="ui basic mini buttons">
             <div class="ui button" ng-click="prev()"><i class="icon angle left arrow"></i></div>
             <div class="ui button" ng-click="next()"><i class="icon angle right arrow"></i></div>
-        </div>
-
-        <div class="ui basic mini buttons">
-            <div class="ui button" ng-click="getUsers(true)"><i class="refresh icon"></i>重新整理</div>
         </div>
 
         <table class="ui very compact table">
@@ -45,7 +39,7 @@
                         學校
                     </th>
                     <th width="140">姓名</th>
-                    <th>email</th>
+                    <th width="250">email</th>
                     <th width="100">帳號開通</th>
                     <th width="100">密碼狀態</th>
                     <th width="100">資料變更</th>
@@ -57,9 +51,54 @@
             <thead>
                 <tr>
                     <th></th>
-                    <th><div class="ui icon small fluid input" ><input ng-model="searchSchools" /><i class="search icon"></i></div></th>
-                    <th><div class="ui icon small fluid input" ><input ng-model="searchText.name" /><i class="search icon"></i></div></th>
-                    <th><div class="ui icon small fluid input" ><input ng-model="searchText.email" /><i class="search icon"></i></div></th>
+                    <th>
+                        <md-autocomplete
+                            md-selected-item="search.organization"
+                            md-selected-item-change="getUsers(1)"
+                            md-search-text="searchText"
+                            md-items="item in queryOrganizations(searchText)"
+                            md-item-text="item.now.name"
+                            md-min-length="2"
+                            md-delay="500"
+                            placeholder="搜尋學校名稱">
+                            <md-item-template>
+                                <span md-highlight-text="searchText" md-highlight-flags="^i">{{item.now.name}}</span>
+                            </md-item-template>
+                            <md-not-found>沒有找到與 "{{searchText}}" 相關的機構</md-not-found>
+                        </md-autocomplete>
+                    </th>
+                    <th>
+                        <md-autocomplete
+                            md-selected-item="search.username"
+                            md-selected-item-change="getUsers(1)"
+                            md-search-text="searchTextUsername"
+                            md-items="item in queryUsernames(searchTextUsername)"
+                            md-item-text="item"
+                            md-min-length="1"
+                            md-delay="500"
+                            placeholder="搜尋姓名">
+                            <md-item-template>
+                                <span md-highlight-text="searchTextUsername" md-highlight-flags="^i">{{item}}</span>
+                            </md-item-template>
+                            <md-not-found>沒有找到與 "{{searchTextUsername}}" 相關的姓名</md-not-found>
+                        </md-autocomplete>
+                    </th>
+                    <th>
+                        <md-autocomplete
+                            md-selected-item="search.email"
+                            md-selected-item-change="getUsers(1)"
+                            md-search-text="searchTextEmail"
+                            md-items="item in queryEmails(searchTextEmail)"
+                            md-item-text="item"
+                            md-min-length="3"
+                            md-delay="500"
+                            placeholder="搜尋電子郵件信箱">
+                            <md-item-template>
+                                <span md-highlight-text="searchTextEmail" md-highlight-flags="^i">{{item}}</span>
+                            </md-item-template>
+                            <md-not-found>沒有找到與 "{{searchTextEmail}}" 相關的電子郵件信箱</md-not-found>
+                        </md-autocomplete>
+                    </th>
                     <th></th>
                     <th></th>
                     <th></th>
@@ -69,11 +108,16 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-class="{disabled: user.saving}" ng-repeat="user in users | inSchool:searchSchools | orderBy:predicate:reverse | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
+                <tr ng-class="{disabled: user.saving}" ng-repeat="user in users | orderBy:predicate:reverse">
                     <td>{{ user.id | number }}</td>
-                    <td><div style="max-height:150px;overflow-y:scroll"><div ng-repeat="school in user.schools">{{ school.id }} - {{ school.year }} - {{ school.name }}</div></div></td>
+                    <td>
+                        <div style="max-height:150px;overflow-y:scroll">
+                            <div ng-repeat="organization in user.organizations">{{ organization.now.name }}({{ organization.now.id }})</div>
+                        </div>
+                    </td>
                     <td>{{ user.name }}</td>
-                    <td>{{ user.email }}
+                    <td>
+                        {{ user.email }}
                         <div ng-if="user.email2">{{ user.email2 }}</div>
                     </td>
                     <td class="center aligned">
@@ -122,60 +166,52 @@
                 </tr>
             <tbody>
         </table>
+        <md-progress-linear md-mode="indeterminate" ng-disabled="sheetLoaded"></md-progress-linear>
     </div>
 
 </div>
 
 <script>
-app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog) {
+app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog, $timeout, $q) {
     $scope.users = [];
     $scope.predicate = 'id';
-    $scope.page = 1;
-    $scope.limit = 20;
-    $scope.max = 0;
-    $scope.pages = 0;
+    $scope.currentPage = 1;
+    $scope.lastPage = 0;
+    $scope.pages = [];
     $scope.groups = [];
-    $scope.loadingPage = 1;
-    $scope.loadingPercent = 0;
     $scope.sheetLoaded = false;
     $scope.search = {position: ''};
 
-    $scope.$watchCollection('searchText', function(query) {
-        $scope.max = $filter("filter")($scope.users, query).length;
-        $scope.pages = Math.ceil($scope.max/$scope.limit);
-        $scope.page = 1;
-    });
-
-    $scope.$watch('pages', function(pages) {
-        $scope.allPages = [];
-        for (var i = 1; i <= pages; i++) {
-            $scope.allPages.push(i);
+    $scope.$watch('lastPage', function(lastPage) {
+        $scope.pages = [];
+        for (var i = 1; i <= lastPage; i++) {
+            $scope.pages.push(i);
         };
     });
 
     $scope.next = function() {
-        if( $scope.page < $scope.pages )
-            $scope.page++;
+        if ($scope.currentPage < $scope.lastPage) {
+            $scope.currentPage++;
+            $scope.getUsers($scope.currentPage);
+        }
     };
 
     $scope.prev = function() {
-        if( $scope.page > 1 )
-            $scope.page--;
-    };
-
-    $scope.all = function() {
-        $scope.page = 1;
-        $scope.limit = $scope.max;
-        $scope.pages = 1;
+        if ($scope.currentPage > 1) {
+            $scope.currentPage--;
+            $scope.getUsers($scope.currentPage);
+        }
     };
 
     $scope.getGroups = function() {
+        $scope.$parent.main.loading = true;
         $http({method: 'POST', url: 'getGroups', data:{}})
         .success(function(data, status, headers, config) {
             $scope.groups = data.groups;
             $scope.positions = data.positions;
+            $scope.$parent.main.loading = false;
         })
-        .error(function(e){
+        .error(function(e) {
             console.log(e);
         });
     };
@@ -184,9 +220,10 @@ app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog) {
         profile.saving = true;
         $http({method: 'POST', url: 'activeUser', data:{member_id: profile.member_id, actived: profile.actived}})
         .success(function(data, status, headers, config) {
+            profile.actived = data.profile.actived;
             profile.saving = false;
         })
-        .error(function(e){
+        .error(function(e) {
             console.log(e);
         });
     };
@@ -198,36 +235,22 @@ app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog) {
             profile.saving = false;
             $scope.users.splice($scope.users.indexOf(profile), 1);
         })
-        .error(function(e){
+        .error(function(e) {
             console.log(e);
         });
     };
 
-    $scope.getUsers = function(init) {
-        if (init) {
-            $scope.page = 1;
-            $scope.loadingPage = 1;
-            $scope.loadingPercent = 0;
-            $scope.sheetLoaded = false;
-            $scope.users = [];
-            $scope.sheetLoading = true;
-        };
-
-        $http({method: 'POST', url: 'getUsers', data:{page: $scope.loadingPage, search: $scope.search}})
+    $scope.getUsers = function(currentPage) {
+        $scope.users = [];
+        $scope.sheetLoaded = false;
+        $http({method: 'POST', url: 'getUsers', data:{page: currentPage, search: $scope.search}})
         .success(function(data, status, headers, config) {
-            $scope.users = $scope.users.concat(data.users);
-            $scope.max = $scope.users.length;
-            $scope.pages = Math.ceil($scope.max/$scope.limit);
-            $scope.sheetLoading = false;
-            $scope.loadingPercent = data.currentPage*100 / data.lastPage;
-            if (data.currentPage != data.lastPage) {
-                $scope.loadingPage = data.currentPage+1;
-                $scope.getUsers(false);
-            } else {
-                $scope.sheetLoaded = true;
-            };
+            $scope.users = data.users;
+            $scope.currentPage = data.currentPage;
+            $scope.lastPage = data.lastPage;
+            $scope.sheetLoaded = true;
         })
-        .error(function(e){
+        .error(function(e) {
             console.log(e);
         });
     };
@@ -240,7 +263,7 @@ app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog) {
             profile.saving = false;
             profile.inGroups = data.inGroups;
         })
-        .error(function(e){
+        .error(function(e) {
             console.log(e);
         });
     };
@@ -252,18 +275,81 @@ app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog) {
             profile.saving = false;
             profile.inGroups = data.inGroups;
         })
-        .error(function(e){
+        .error(function(e) {
             console.log(e);
         });
     };
 
     $scope.getGroups();
-    $scope.getUsers(true);
+    $scope.getUsers(1);
+
+    $scope.queryOrganizations = function(query) {
+        if (!query) {
+            return [];
+        }
+
+        deferred = $q.defer();
+        $http({method: 'POST', url: 'queryOrganizations', data:{query: query}})
+        .success(function(data, status, headers, config) {
+            deferred.resolve(data.organizations);
+        })
+        .error(function(e) {
+            console.log(e);
+        });
+
+        return deferred.promise;
+    };
+
+    $scope.queryUsernames = function(query) {
+        if (!query) {
+            return [];
+        }
+
+        deferred = $q.defer();
+        $http({method: 'POST', url: 'queryUsernames', data:{query: query}})
+        .success(function(data, status, headers, config) {
+            deferred.resolve(data.usernames);
+        })
+        .error(function(e) {
+            console.log(e);
+        });
+
+        return deferred.promise;
+    };
+
+    $scope.queryEmails = function(query) {
+        if (!query) {
+            return [];
+        }
+
+        deferred = $q.defer();
+        $http({method: 'POST', url: 'queryEmails', data:{query: query}})
+        .success(function(data, status, headers, config) {
+            deferred.resolve(data.emails);
+        })
+        .error(function(e) {
+            console.log(e);
+        });
+
+        return deferred.promise;
+    };
 
     $scope.changeUsername = function(user) {
         $mdDialog.show({
             controller: function (scope, $mdDialog) {
+                user.selectedOrganizations = [];
+                for (var i in user.organizations) {
+                    user.selectedOrganizations.push({id: user.organizations[i].id, name: user.organizations[i].now.name});
+                };
                 scope.user = angular.copy(user);
+                scope.terms = {};
+
+                scope.transformChip = function(chip) {
+                    return {id: chip.id, name: chip.now.name};
+                }
+
+                scope.querySearch = $scope.queryOrganizations;
+
                 scope.hide = function() {
                     $mdDialog.hide();
                 };
@@ -280,12 +366,13 @@ app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog) {
             clickOutsideToClose: false
         })
         .then(function(userChanged) {
-            $http({method: 'POST', url: 'setUsername', data:{member_id: userChanged.member_id, username: userChanged.name}})
+            $http({method: 'POST', url: 'setUsername', data:{member_id: userChanged.member_id, username: userChanged.name, organizations: userChanged.selectedOrganizations}})
             .success(function(data, status, headers, config) {
                 user.name = data.user.name;
+                user.organizations = data.user.organizations;
                 user.saving = false;
             })
-            .error(function(e){
+            .error(function(e) {
                 console.log(e);
                 user.saving = false;
             });
@@ -294,21 +381,5 @@ app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog) {
         });
     };
 
-})
-
-.filter('inSchool', function($filter) {
-    return function(users, expected) {
-        expected = angular.lowercase('' + expected);
-        if( expected !== 'undefined' ) {
-            return $filter('filter')(users, function(user) {
-                return $filter('filter')(user.schools, function(school){
-                    var school_id = angular.lowercase('' + school.id);
-                    var school_name = angular.lowercase('' + school.name);
-                    return ( school_id.indexOf(expected) !== -1 || school_name.indexOf(expected) !== -1 );
-                }).length > 0;
-            });
-        }
-        return users;
-    };
 });
 </script>
