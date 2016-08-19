@@ -312,7 +312,7 @@ class RowsFile extends CommFile {
 
         $this->bulidCheckTable($table);
 
-        foreach (array_chunk(array_map(function($message) { return $message->row; }, $inserts), floor(2000/$table->columns->count())) as $part) {
+        foreach (array_chunk(array_map(function($message) { return $message->row; }, $inserts), floor(2000/($table->columns->count()+1))) as $part) {
             DB::table('rows_check.dbo.' . $table->name . '_' . $this->user->id)->insert($part);
         }
 
