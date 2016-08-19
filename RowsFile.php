@@ -321,9 +321,11 @@ class RowsFile extends CommFile {
             $messages[$duplicate_index]->limit = true;
         };
 
-        $this->moveRowsFromTemp($table);
+        $amounts = [];
 
-        $this->updateRowsFromTemp($table);
+        $amounts['updated'] = $this->updateRowsFromTemp($table);
+
+        $amounts['created'] = $this->moveRowsFromTemp($table);
 
         $this->dropCheckTable($table);
 
@@ -335,7 +337,7 @@ class RowsFile extends CommFile {
 
         $table->update(['lock' => true]);
 
-        return ['messages' => $messages_error];
+        return ['messages' => $messages_error, 'amounts' => $amounts];
     }
 
     /**
@@ -1087,11 +1089,13 @@ class RowsFile extends CommFile {
             });
         })->whereNotNull('checked.id');
 
-        DB::update(
+        $amount = DB::update(
             'UPDATE rows SET '
             . implode(',', $updates->toArray()) . ', updated_by=' . $this->user->id . ', updated_at=\'' . Carbon::now()->toDateTimeString() . '\' '
             . $query_update->toSql() . ' and rows.created_by = ' . $this->user->id
         );
+
+        return $amount;
     }
 
     private function moveRowsFromTemp($table)
@@ -1115,7 +1119,14 @@ class RowsFile extends CommFile {
             DB::raw('\'' . Carbon::now()->toDateTimeString() . '\''),
         ]));
 
-        DB::insert('INSERT INTO ' . $table->database . '.dbo.' . $table->name . ' (' . implode(',', $columns->toArray()) . ', file_id, updated_by, created_by, updated_at, created_at) ' . $query_insert->toSql());
+        $amount = $query_insert->count();
+
+        $success = DB::insert('INSERT INTO ' .
+            $table->database . '.dbo.' . $table->name . ' (' . implode(',', $columns->toArray()) . ', file_id, updated_by, created_by, updated_at, created_at) ' .
+            $query_insert->toSql()
+        );
+
+        return $success ? $amount : 0;
     }
 
     public function cleanRow($table)
