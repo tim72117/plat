@@ -56,12 +56,12 @@
                     <div class="value">{{ sheet.tables[0].count }}</div>
                     <div class="label">已上傳</div>
                 </div>
-                <div class="green statistic" ng-if="messages.length > 0">
-                    <div class="value">{{ (messages | filter: insert).length }}</div>
+                <div class="green statistic" ng-if="amounts.created">
+                    <div class="value">{{ amounts.created || 0 }}</div>
                     <div class="label">這次上傳 新增</div>
                 </div>
-                <div class="yellow statistic" ng-if="messages.length > 0">
-                    <div class="value">{{ (messages | filter: update).length }}</div>
+                <div class="yellow statistic" ng-if="amounts.updated">
+                    <div class="value">{{ amounts.updated || 0 }}</div>
                     <div class="label">這次上傳 更新</div>
                 </div>
                 <div class="red statistic" ng-if="messages.length > 0">
@@ -180,6 +180,7 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
         }
 
         $scope.messages = response.messages;
+        $scope.amounts = response.amounts;
         $scope.progress = 100;
         $scope.sheetLoading = false;
 
