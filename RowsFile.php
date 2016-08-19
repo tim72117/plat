@@ -308,7 +308,7 @@ class RowsFile extends CommFile {
             return $message->pass;
         });
 
-        //DB::beginTransaction();
+        DB::beginTransaction();
 
         $this->bulidCheckTable($table);
 
@@ -316,20 +316,16 @@ class RowsFile extends CommFile {
             DB::table('rows_check.dbo.' . $table->name . '_' . $this->user->id)->insert($part);
         }
 
-        foreach ($this->checkDuplicate($table) as $duplicate_index) {
-            $messages[$duplicate_index]->pass = false;
-            $messages[$duplicate_index]->limit = true;
-        };
-
         $amounts = [];
 
-        $amounts['updated'] = $this->updateRowsFromTemp($table);
+        if ($table->columns->groupBy('unique')->has(1))
+            $amounts['removed'] = $this->removeRowsInTemp($table);
 
         $amounts['created'] = $this->moveRowsFromTemp($table);
 
         $this->dropCheckTable($table);
 
-        //DB::commit();
+        DB::commit();
 
         $messages_error = array_values(array_filter($messages, function($message) {
             return !$message->pass;
@@ -1064,19 +1060,7 @@ class RowsFile extends CommFile {
         });
     }
 
-    private function checkDuplicate($table)
-    {
-        return DB::table($table->database . '.dbo.' . $table->name . ' AS rows')
-        ->leftJoin('rows_check.dbo.' . $table->name . '_' . $this->user->id . ' AS checked', function($join) use ($table) {
-            $table->columns->each(function($column) use ($join) {
-                if ($column->unique) {
-                    $join->on('checked.C' . $column->id, '=', 'rows.C' . $column->id);
-                }
-            });
-        })->whereNotNull('checked.id')->where('rows.created_by', '<>', $this->user->id)->select('checked.index')->lists('index');
-    }
-
-    private function updateRowsFromTemp($table)
+    private function removeRowsInTemp($table)
     {
         $updates = $table->columns->map(function($column) { return 'rows.C' . $column->id . '=checked.C' . $column->id; });
 
@@ -1089,11 +1073,7 @@ class RowsFile extends CommFile {
             });
         })->whereNotNull('checked.id');
 
-        $amount = DB::update(
-            'UPDATE rows SET '
-            . implode(',', $updates->toArray()) . ', updated_by=' . $this->user->id . ', updated_at=\'' . Carbon::now()->toDateTimeString() . '\' '
-            . $query_update->toSql() . ' and rows.created_by = ' . $this->user->id
-        );
+        $amount = DB::delete('DELETE rows ' . $query_update->toSql() . ' and rows.created_by = ' . $this->user->id);
 
         return $amount;
     }
@@ -1103,15 +1083,7 @@ class RowsFile extends CommFile {
         $checkeds = $table->columns->map(function($column) { return 'checked.C' . $column->id; });
         $columns = $table->columns->map(function($column) { return 'C' . $column->id; });
 
-        $query_insert = DB::table('rows_check.dbo.' . $table->name . '_' . $this->user->id . ' AS checked')
-        ->leftJoin($table->database . '.dbo.' . $table->name . ' AS rows', function($join) use ($table) {
-            $table->columns->each(function($column) use ($join) {
-                if ($column->unique) {
-                    $join->on('checked.C' . $column->id, '=', 'rows.C' . $column->id);
-                }
-            });
-        })->whereNull('rows.id')
-        ->select(array_merge($checkeds->toArray(), [
+        $query_insert = DB::table('rows_check.dbo.' . $table->name . '_' . $this->user->id . ' AS checked')->select(array_merge($checkeds->toArray(), [
             DB::raw('\'1\''),
             DB::raw('\'' . $this->user->id . '\''),
             DB::raw('\'' . $this->user->id . '\''),
