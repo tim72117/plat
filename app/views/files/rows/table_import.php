@@ -38,6 +38,12 @@
                 <h4 class="ui header">沒有欄位</h4>
                 <div class="ui red label" ng-repeat="error in messages.head">{{ error.title }}</div>
             </div>
+            <div class="ui attached segment" ng-if="messages.repeat">
+                <h4 class="ui header">資料重複</h4>
+                <div class="ui red label">{{ messages.repeat.title }} 有
+                    <div ng-repeat="(value, amount) in messages.repeat.values"> {{ amount }} 筆 "{{ value }}" 資料重複</div>
+                </div>
+            </div>
 
             <md-progress-linear md-mode="determinate" value="{{progress}}" ng-if="sheetLoading"></md-progress-linear>
             <md-divider></md-divider>
