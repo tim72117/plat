@@ -29,6 +29,10 @@
                     </md-card-title-text>
                 </md-card-title>
                 <md-card-content>
+                    <p ng-repeat="file in post.files">
+                        <i class="attach icon red"></i>
+                        <a href="/api/news/download/@{{file.pivot.id}}">@{{ file.title }}</a>
+                    </p>
                     <p>@{{post.context}}</p>
                 </md-card-content>
             </md-card>
