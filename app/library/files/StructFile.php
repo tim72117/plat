@@ -69,7 +69,7 @@ class StructFile extends CommFile {
     public function getItems()
     {
         $tables = [];
-        $schoolName = Input::get('schoolName');
+        $schoolID = Input::get('schoolID');
         if ($this->file->configs[0]->value == 1) {
             $mainTable = 'TEV103_TE_StudentInSchool_OK';
         } else if ($this->file->configs[0]->value == 2) {
@@ -77,7 +77,7 @@ class StructFile extends CommFile {
         } else {
             $mainTable = 'TE2_E_OK';
         }
-        
+
         foreach ($this->tables as $name => $table) {
             $query = DB::connection('sqlsrv_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table)
                 ->where('COLUMN_NAME', '<>', '身分證字號')
@@ -96,21 +96,21 @@ class StructFile extends CommFile {
             $selects = array_map(function($key, $columnName) use($table) {
                 return 'analysis_tted.dbo.'.$table.'.'.$columnName . ' AS ' . $key;
             }, array_keys($columnNames), $columnNames);
-            
+
             $columns = [];
             foreach ($columnNames as $key => $columnName) {
                 array_push($columns, 'analysis_tted.dbo.'.$table.'.'.$columnName);
             }
-            //Cache::flush();
+            Cache::flush();
             //Cache::forget(DB::connection('sqlsrv_tted')->table($table)->groupBy($columns)->select($selects)->getCacheKey());
             if ($table == $mainTable) {
                 $values = Cache::remember(DB::connection('sqlsrv_tted')
                     ->table($table)
-                    ->whereIn('學校名稱',$schoolName)
+                    ->whereIn(DB::raw('substring(學校代碼,3,4)'),$schoolID)
                     ->groupBy($columnNames)
                     ->select($mainSelects)
-                    ->getCacheKey(), 300, function() use ($table, $mainSelects, $schoolName, $columnNames) {
-                    $rows = DB::connection('sqlsrv_tted')->table($table)->whereIn('學校名稱',$schoolName)
+                    ->getCacheKey(), 300, function() use ($table, $mainSelects, $schoolID, $columnNames) {
+                    $rows = DB::connection('sqlsrv_tted')->table($table)->whereIn(DB::raw('substring(學校代碼,3,4)'),$schoolID)
                         ->groupBy($columnNames)
                         ->select($mainSelects)
                         ->get();
@@ -125,14 +125,14 @@ class StructFile extends CommFile {
                 $remember_key = DB::connection('sqlsrv_tted')
                         ->table('analysis_tted.dbo.'.$mainTable)
                         ->join('analysis_tted.dbo.'.$table,'analysis_tted.dbo.'.$mainTable.'.身分證字號','=','analysis_tted.dbo.'.$table.'.身分證字號')
-                        ->whereIn('analysis_tted.dbo.'.$mainTable.'.學校名稱',$schoolName)
+                        ->whereIn(DB::raw('substring(analysis_tted.dbo.'.$mainTable.'.學校代碼,3,4)'),$schoolID)
                         ->groupBy($columns)
                         ->select($selects)
                         ->getCacheKey();
-                $values = Cache::remember($remember_key, 300, function() use ($table, $columns, $selects, $schoolName, $columnNames, $mainTable) {
+                $values = Cache::remember($remember_key, 300, function() use ($table, $columns, $selects, $schoolID, $columnNames, $mainTable) {
                     $rows = DB::connection('sqlsrv_tted')->table('analysis_tted.dbo.'.$mainTable)
                         ->join('analysis_tted.dbo.'.$table,'analysis_tted.dbo.'.$mainTable.'.身分證字號','=','analysis_tted.dbo.'.$table.'.身分證字號')
-                        ->whereIn('analysis_tted.dbo.'.$mainTable.'.學校名稱',$schoolName)
+                        ->whereIn(DB::raw('substring(analysis_tted.dbo.'.$mainTable.'.學校代碼,3,4)'),$schoolID)
                         ->groupBy($columns)
                         ->select($selects)
                         ->get();
@@ -146,7 +146,6 @@ class StructFile extends CommFile {
             }
             $tables[$name] = $values;
         }
-
         return ['tables' => $tables];
     }
 
@@ -224,15 +223,29 @@ class StructFile extends CommFile {
     }
 
     public function getSchools(){
-        $schoolIDs = \Project\Teacher\Work::where('user_id','=',$this->user->id)->select('sch_id')->get();
-        $IDs = [];
+        $schoolIDs = \Plat\Member::where('user_id', $this->user->id)
+                     ->where('project_id', 2)
+                     ->first()
+                     ->organizations
+                     ->load('now')
+                     ->fetch('now.id');
+        //dd($schoolIDs[1]);exit;
+        $schoolNames = \Plat\Member::where('user_id', $this->user->id)
+                     ->where('project_id', 2)
+                     ->first()
+                     ->organizations
+                     ->load('now')
+                     ->fetch('now.name');
+        $schools = [];
         foreach ($schoolIDs as $key => $schoolID) {
-            array_push($IDs,$schoolID->sch_id);
+            $school = ['id' => $schoolID,'name'];
+            array_push($schools,$school);
         }
-        $schools = \Project\Teacher\School::whereIn('id',$IDs)
-                    ->where('year', '103')
-                    ->where('edu','True')
-                    ->select('id','name')->get();
+
+        foreach ($schoolNames as $key => $schoolName) {
+            $schools[$key]['name'] = $schoolName;
+        }
+
         return($schools);
     }
 
@@ -288,8 +301,8 @@ class StructFile extends CommFile {
     public function calculate()
     {
         $structs = Input::get('structs');
-        $schoolName = Input::get('schoolName');
-        
+        $schoolID = Input::get('schoolID');
+
         if ($this->file->configs[0]->value == 1) {
             $first_table_title = '就學資訊';
         } else if ($this->file->configs[0]->value == 2) {
@@ -299,11 +312,11 @@ class StructFile extends CommFile {
         }
 
         $first_table = $this->tables[$first_table_title];
-        $query = DB::connection('sqlsrv_tted')->table($first_table)->whereIn('analysis_tted.dbo.'.$first_table.'.學校名稱',$schoolName);
-        
+        $query = DB::connection('sqlsrv_tted')->table($first_table)->whereIn(DB::raw('substring(analysis_tted.dbo.'.$first_table.'.學校代碼,3,4)'),$schoolID);
+
         foreach ($structs as $i => $struct) {
             $table = $this->tables[$struct['title']];
-            
+
             if ($struct['title'] != $first_table_title) {
                 $query->join($table, $first_table . '.身分證字號', '=', $table . '.身分證字號');
             }
@@ -944,5 +957,5 @@ class StructFile extends CommFile {
             });
         })->download('xlsx');
     }*/
-    
+
 }

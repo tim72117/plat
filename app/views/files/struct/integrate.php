@@ -193,7 +193,7 @@
             </div>
 
             <div style="display: -webkit-flex;display: flex">
-            
+
             <div style="-webkit-flex: initial;flex: initial;min-width: 300px" ng-show="page == 'explan'">
             <table class="ui teal collapsing celled structured very compact table" ng-class="{small:tableSize=='small', large:tableSize=='large'}" style="background: #F5F5F5">
                 <thead>
@@ -269,7 +269,7 @@
                 <thead>
                     <tr>
                         <th class="center aligned"><!--<div class="ui mini button" ng-click="needHelp($event)" style="background: #ECBE13;color: white"><i class="icon help outline"></i>需要幫忙</div>--></th>
-                        <th>發展業歷程</th>
+                        <th>發展歷程</th>
                         <th>表單名稱</th>
                         <th colspan="2" ng-if="structClassShow">選擇欄位</th>
                         <th ng-if="structFilterShow">選擇分析目標或篩選條件</th>
@@ -311,7 +311,7 @@
                         </td>
                         <td ng-if="structFilterShow && !struct.classExpanded && structClass[struct.title]" class="no-animate">
                         </td>
-                        
+
                         <!-- expand button -->
                         <td rowspan="{{ struct.expanded ? struct.rows.length : 1 }}" ng-if="struct.expanded" class="no-animate">
                             <div class="compact ui icon mini basic vertical buttons" ng-if="!struct.disabled || struct.expanded">
@@ -568,8 +568,8 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         console.log(e);
     });
 
-    $scope.updateItem = function(selectSchoolName){
-        $http({method: 'POST', url: 'getItems', data:{schoolName: selectSchoolName}})
+    $scope.updateItem = function(selectSchoolID){
+        $http({method: 'POST', url: 'getItems', data:{schoolID: selectSchoolID}})
         .success(function(data, status, headers, config) {
             for (var i in $scope.structs) {
                 var struct = $scope.structs[i];
@@ -593,11 +593,11 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     .success(function(data, status, headers, config) {
         $scope.schools = data;
         $scope.selectSchool = $scope.schools;
-        $scope.selectSchoolName = [];
+        $scope.selectSchoolID = [];
         for (var i in $scope.selectSchool) {
-            $scope.selectSchoolName.push($scope.selectSchool[i].name);
+            $scope.selectSchoolID.push($scope.selectSchool[i].id);
         };
-        $scope.updateItem($scope.selectSchoolName);
+        $scope.updateItem($scope.selectSchoolID);
     }).error(function(e){
         console.log(e);
     });
@@ -638,11 +638,11 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
 
     $scope.$watchCollection('selectSchool', function(selectSchool) {
         $scope.loading = true;
-        $scope.selectSchoolName = [];
+        $scope.selectSchoolID = [];
         for (var i in selectSchool) {
-            $scope.selectSchoolName.push(selectSchool[i].name);
+            $scope.selectSchoolID.push(selectSchool[i].id);
         };
-        $scope.updateItem($scope.selectSchoolName);
+        $scope.updateItem($scope.selectSchoolID);
         $scope.columns = [];
         $scope.calculations = [];
         $scope.levels = [];
@@ -780,7 +780,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.addCalculation = function(calculateStructs,calculation) {
-        $http({method: 'POST', url: 'calculate', data:{structs: calculateStructs, columns: $scope.columns, schoolName: $scope.selectSchoolName}})
+        $http({method: 'POST', url: 'calculate', data:{structs: calculateStructs, columns: $scope.columns, schoolID: $scope.selectSchoolID}})
         .success(function(data, status, headers, config) {
             calculation.results = data.results;
         }).error(function(e){
@@ -1088,7 +1088,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         if (JSON.stringify($scope.selectSchool) === JSON.stringify($scope.schools) ){
             $scope.selectSchool = [];
         }else{
-            $scope.selectSchool = $scope.schools;  
+            $scope.selectSchool = $scope.schools;
         }
     };
 
