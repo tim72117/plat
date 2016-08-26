@@ -709,6 +709,7 @@ class QuesFile extends CommFile {
             'file_id'    => $file->id,
             'target'     => 'user',
             'target_id'  => $this->user->id,
+            'visible'    => false,
             'created_by' => $this->user->id,
         ]);
 
@@ -729,7 +730,8 @@ class QuesFile extends CommFile {
                         'rules' => 'nvarchar',
                         'unique' => false,
                         'encrypt' => false,
-                        'isnull' => false
+                        'isnull' => false,
+                        'readonly' => false,
                     ]);
                 }
             }
