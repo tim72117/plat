@@ -21,7 +21,7 @@
         </div>
 
         <div ng-controller="postController" style="width:800px">
-            <md-card ng-repeat="post in posts">
+            <md-card ng-repeat="post in posts | filter: {display_at:{intro:'true'}}">
                 <md-card-title>
                     <md-card-title-text>
                     <span class="md-headline">@{{post.title}}</span>
@@ -29,6 +29,10 @@
                     </md-card-title-text>
                 </md-card-title>
                 <md-card-content>
+                    <p ng-repeat="file in post.files">
+                        <i class="attach icon red"></i>
+                        <a href="/api/news/download/@{{file.pivot.id}}">@{{ file.title }}</a>
+                    </p>
                     <p>@{{post.context}}</p>
                 </md-card-content>
             </md-card>

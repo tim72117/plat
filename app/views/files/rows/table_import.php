@@ -4,7 +4,7 @@
     <div ng-repeat="sheet in file.sheets">
 
         <form style="display:none">
-            <input type="file" id="file_upload" nv-file-select uploader="uploader" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+            <input type="file" id="file_upload" nv-file-select uploader="uploader" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel,.csv" />
         </form>
 
         <md-card>
@@ -38,6 +38,12 @@
                 <h4 class="ui header">沒有欄位</h4>
                 <div class="ui red label" ng-repeat="error in messages.head">{{ error.title }}</div>
             </div>
+            <div class="ui attached segment" ng-if="messages.repeat">
+                <h4 class="ui header">資料重複</h4>
+                <div class="ui red label">{{ messages.repeat.title }} 有
+                    <div ng-repeat="(value, amount) in messages.repeat.values"> {{ amount }} 筆 "{{ value }}" 資料重複</div>
+                </div>
+            </div>
 
             <md-progress-linear md-mode="determinate" value="{{progress}}" ng-if="sheetLoading"></md-progress-linear>
             <md-divider></md-divider>
@@ -50,12 +56,12 @@
                     <div class="value">{{ sheet.tables[0].count }}</div>
                     <div class="label">已上傳</div>
                 </div>
-                <div class="green statistic" ng-if="messages.length > 0">
-                    <div class="value">{{ (messages | filter: insert).length }}</div>
+                <div class="green statistic" ng-if="amounts.created">
+                    <div class="value">{{ amounts.created-amounts.removed || 0 }}</div>
                     <div class="label">這次上傳 新增</div>
                 </div>
-                <div class="yellow statistic" ng-if="messages.length > 0">
-                    <div class="value">{{ (messages | filter: update).length }}</div>
+                <div class="yellow statistic" ng-if="amounts.removed">
+                    <div class="value">{{ amounts.removed || 0 }}</div>
                     <div class="label">這次上傳 更新</div>
                 </div>
                 <div class="red statistic" ng-if="messages.length > 0">
@@ -97,8 +103,7 @@
                                 <span class="item" ng-repeat="errors in message.errors"><span ng-repeat="error in errors" class="ui horizontal label"><i class="attention red icon"></i>{{ error }}</span></span>
                             </div>
 
-                            <a class="ui label" ng-if="message.exists.length > 0 && !message.updated && !message.limit"><i class="attention red icon"></i>更新失敗</a>
-                            <a class="ui label" ng-if="message.limit"><i class="attention red icon"></i>此資料已由他人上傳，欲更新資料請與本中心聯繫。</a>
+                            <a class="ui label" ng-if="message.exists.length > 0 && !message.updated"><i class="attention red icon"></i>更新失敗</a>
                             <a class="ui label" ng-if="message.empty"><i class="attention red icon"></i>空白</a>
                         </td>
                         <td ng-repeat="column in table.columns" ng-class="{error: message.errors[column.id]}">{{ message.row['C' + column.id] }}</td>
@@ -174,6 +179,7 @@ app.controller('uploadController', function($scope, $http, $timeout, FileUploade
         }
 
         $scope.messages = response.messages;
+        $scope.amounts = response.amounts;
         $scope.progress = 100;
         $scope.sheetLoading = false;
 

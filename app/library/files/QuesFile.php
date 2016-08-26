@@ -756,36 +756,6 @@ class QuesFile extends CommFile {
         $interViewFile->saveXML($pages);
     }
 
-    public function to_old_analysis()
-    {
-        //DB::connection('sqlsrv_analysis')->table('question')->get();exit;
-
-        $ques_doc = DB::table('ques_admin.dbo.ques_doc')->where('id', $this->file->file)->select('dir', 'qid', 'edit', 'table')->first();
-
-        $pages = DB::table('ques_page')->where('qid', $ques_doc->qid)->orderBy('page')->select('page', DB::raw('CAST(page AS varchar) AS label'), 'xml')->get();
-
-        $GLOBALS['tablename'] = $ques_doc->table;
-        $GLOBALS['qOption'] = '';
-        $GLOBALS['page'] = 1;
-        $GLOBALS['scale_head_count'] = 1;
-        $GLOBALS['checkbox_head_count'] = 1;
-        $GLOBALS['CID'] = $ques_doc->qid;
-        $GLOBALS['part'] = '1';
-        $GLOBALS['questionSQL'] = '';
-        $GLOBALS['variableSQL'] = '';
-
-        $qtree = '';
-
-        foreach($pages as $page) {
-            $xml = simplexml_load_string($page->xml);
-            foreach($xml->question as $question){
-                $qtree .= buildQuestionAnalysis::build($question, $xml->question, 0, '');
-            }
-        }
-
-        return $GLOBALS['variableSQL'];
-    }
-
     public function update_question()
     {
         if (!Input::has('question')) {

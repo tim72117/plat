@@ -273,6 +273,8 @@ class RowsFile extends CommFile {
         return isset($this->file->information) ? json_decode($this->file->information) : (object)['comment' => ''];
     }
 
+    protected $import = [];
+
     public function import_upload()
     {
         if (!Input::hasFile('file_upload'))
@@ -288,125 +290,50 @@ class RowsFile extends CommFile {
 
         $table_columns = $table->columns->fetch('name')->toArray();
 
-        $rows = \Excel::load(storage_path() . '/file_upload/' . $file_upload->file->file, function($reader) {
+        $rows = \Excel::selectSheetsByIndex(0)->load(storage_path() . '/file_upload/' . $file_upload->file->file, function($reader) {
 
         })->get($table_columns)->toArray();
 
+        $this->import['rows'] = $rows;
+
         $head = head($rows);
 
-        // check excel column head
-        $checked_head = $table->columns->filter(function($column) use($head) {
-            return !array_key_exists($column->name, $head ? $head : []);
+        $this->check_head($table, $head);
+
+        $this->check_repeat($table);
+
+        $messages = $this->cleanRow($table);
+
+        $inserts = array_filter($messages, function($message) {
+            return $message->pass;
         });
 
-        if (!$checked_head->isEmpty()) {
-            return ['messages' => ['head' => $checked_head]];
+        DB::beginTransaction();
+
+        $this->bulidCheckTable($table);
+
+        foreach (array_chunk(array_map(function($message) { return $message->row; }, $inserts), floor(2000/($table->columns->count()+1))) as $part) {
+            DB::table('rows_check.dbo.' . $table->name . '_' . $this->user->id)->insert($part);
         }
 
-        $columns = $table->columns->map(function($column) use($table, $rows, $head)
-        {
+        $amounts = [];
 
-            if( $column->unique )
-            {
-                $cells = array_pluck($rows, $column->name);
+        if ($table->columns->groupBy('unique')->has(1))
+            $amounts['removed'] = $this->removeRowsInTemp($table);
 
-                $repeats = array_count_values(array_map('strval', $cells));
+        $amounts['created'] = $this->moveRowsFromTemp($table);
 
-                $uniques = array_filter($cells, function($cell) use($column)
-                {
-                    $column_value = remove_space($cell);
+        $this->dropCheckTable($table);
 
-                    $column_checked = $this->check_column($column, $column_value);
+        DB::commit();
 
-                    return empty($column_checked);
-                });
+        $messages_error = array_values(array_filter($messages, function($message) {
+            return !$message->pass;
+        }));
 
-                $exists = DB::table($table->database . '.dbo.' . $table->name)->whereIn('C' . $column->id, $uniques)->lists('created_by', 'C' . $column->id);
-            }
+        $table->update(['lock' => true]);
 
-            return (object)[
-                'id'      => $column->id,
-                'name'    => $column->name,
-                'title'   => $column->title,
-                'rules'   => $column->rules,
-                'unique'  => $column->unique,
-                'encrypt' => $column->encrypt,
-                'isnull'  => $column->isnull,
-                'uniques' => isset($uniques) ? $uniques : [],
-                'repeats' => isset($repeats) ? $repeats : [],
-                'exists'  => isset($exists) ? $exists : [],
-                'menu'    => $column->rules == 'menu' ? $column->answers->lists('value') : [],
-            ];
-        });
-
-        $messages = [];
-        $rows_insert = [];
-
-        foreach ($rows as $row_index => $row)
-        {
-            $row_filted = array_filter(array_map('strval', $row), function($value) { return $value != ''; });
-
-            $messages[$row_index] = (object)['pass' => false, 'limit' => false, 'empty' => empty($row_filted), 'updated' => false, 'exists' => [], 'errors' => [], 'row' => []];
-
-            // skip if empty
-            if ($messages[$row_index]->empty) continue;
-
-            foreach ($columns as $column)
-            {
-                $value = $messages[$row_index]->row['C' . $column->id] = isset($row[$column->name]) ? remove_space($row[$column->name]) : '';
-
-                if ($column->unique && array_key_exists($value, $column->exists))
-                {
-                    $messages[$row_index]->limit = $messages[$row_index]->limit || $column->exists[$value] != $this->user->id;
-
-                    array_push($messages[$row_index]->exists, 'C' . $column->id);
-                }
-
-                if (!$column->isnull || !empty($value))
-                {
-                    $column_errors = $this->check_column($column, $value);
-
-                    !empty($column_errors) && $messages[$row_index]->errors[$column->id] = $column_errors;
-                }
-            }
-
-            $messages[$row_index]->pass = !$messages[$row_index]->limit && empty($messages[$row_index]->errors);
-
-            // skip if not pass
-            if (!$messages[$row_index]->pass) continue;
-
-            $messages[$row_index]->row['file_id'] = $file_upload->file->id;
-            $messages[$row_index]->row['updated_by'] = $this->user->id;
-            $messages[$row_index]->row['updated_at'] = Carbon::now()->toDateTimeString();
-
-            if (!empty($messages[$row_index]->exists))
-            {
-                $query = DB::table($table->database . '.dbo.' . $table->name);
-                foreach ($messages[$row_index]->exists as $exist_id)
-                {
-                    $query->where($exist_id, $messages[$row_index]->row[$exist_id]);
-                }
-                $messages[$row_index]->updated = $query->update($messages[$row_index]->row);
-            }
-            else
-            {
-                $messages[$row_index]->row['created_by'] = $this->user->id;
-                $messages[$row_index]->row['created_at'] = Carbon::now()->toDateTimeString();
-                array_push($rows_insert, $messages[$row_index]->row);
-            }
-        }
-
-        if (!$table->lock && count($rows_insert)>0) {
-            $table->lock = true;
-            $table->save();
-        }
-
-        foreach(array_chunk($rows_insert, 50) as $rows_part)
-        {
-            DB::table($table->database . '.dbo.' . $table->name)->insert($rows_part);
-        }
-
-        return ['messages' => $messages];
+        return ['messages' => $messages_error, 'amounts' => $amounts];
     }
 
     /**
@@ -728,40 +655,43 @@ class RowsFile extends CommFile {
                 !check_id_number($column_value) && array_push($column_errors, $column->title . '無效');
             },
             'schid_104' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->works) && $this->temp->works = \Project\Used\User::find($this->user->id)->works->lists('sch_id');
+                !isset($this->temp->works) && $this->temp->works = \Plat\Member::where('project_id', 1)->where('user_id', $this->user->id)->first()->organizations->load('now')->fetch('now.id')->toArray();
                 !in_array($column_value, $this->temp->works, true) && array_push($column_errors, '不是本校代碼');
             },
             'schid_105' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->works) && $this->temp->works = \Project\Used\User::find($this->user->id)->works->lists('sch_id');
+                !isset($this->temp->works) && $this->temp->works = \Plat\Member::where('project_id', 1)->where('user_id', $this->user->id)->first()->organizations->load('now')->fetch('now.id')->toArray();
                 !in_array($column_value, $this->temp->works, true) && array_push($column_errors, '不是本校代碼');
             },
             'depcode_104' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->dep_codes_104) && $this->temp->dep_codes_104 = DB::table('rows.dbo.row_20150910_175955_h23of')
-                    ->whereIn('C246', \Project\Used\User::find($this->user->id)->works->lists('sch_id'))->lists('C248');
+                    ->whereIn('C246', \Plat\Member::where('project_id', 1)->where('user_id', $this->user->id)->first()->organizations->load('now')->fetch('now.id')->toArray())->lists('C248');
                 !in_array($column_value, $this->temp->dep_codes_104, true) && array_push($column_errors, '不是本校科別代碼');
             },
             'depcode_105' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->dep_codes_105) && $this->temp->dep_codes_105 = DB::table('rows.dbo.row_20160622_111650_ykezh')
-                    ->whereIn('C1106', \Project\Used\User::find($this->user->id)->works->lists('sch_id'))->lists('C1108');
+                    ->whereIn('C1106', \Plat\Member::where('project_id', 1)->where('user_id', $this->user->id)->first()->organizations->load('now')->fetch('now.id')->toArray())->lists('C1108');
                 !in_array($column_value, $this->temp->dep_codes_105, true) && array_push($column_errors, '不是本校科別代碼');
             },
             'tted_sch' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->schools) && $this->temp->schools = \Project\Teacher\User::find($this->user->id)->works->lists('sch_id');
+                !isset($this->temp->schools) && $this->temp->schools = \Plat\Member::where('project_id', 2)->where('user_id', $this->user->id)->first()->organizations->load('now')->fetch('now.id')->toArray();
                 !in_array($column_value, $this->temp->schools, true) && array_push($column_errors, '不是本校代碼');
             },
             'tted_depcode_103' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->dep_codes_103) && $this->temp->dep_codes_103 = DB::table('pub_depcode_tted')
-                    ->whereIn('sch_id', \Project\Teacher\User::find($this->user->id)->works->lists('sch_id'))->where('year','=','103')->lists('id');
+                !isset($this->temp->dep_codes_103) && $this->temp->dep_codes_103 = DB::table('plat_public.dbo.pub_depcode_tted')
+                    ->whereIn('sch_id', \Plat\Member::where('project_id', 2)->where('user_id', $this->user->id)->first()->organizations->load('now')->fetch('now.id')->toArray())
+                    ->where('year','=','103')->lists('id');
                 !in_array($column_value, $this->temp->dep_codes_103, true) && array_push($column_errors, '不是本校系所代碼');
             },
             'tted_depcode_104' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->dep_codes_104) && $this->temp->dep_codes_104 = DB::table('pub_depcode_tted')
-                    ->whereIn('sch_id', \Project\Teacher\User::find($this->user->id)->works->lists('sch_id'))->where('year','=','103')->lists('id');
+                !isset($this->temp->dep_codes_104) && $this->temp->dep_codes_104 = DB::table('plat_public.dbo.pub_depcode_tted')
+                    ->whereIn('sch_id', \Plat\Member::where('project_id', 2)->where('user_id', $this->user->id)->first()->organizations->load('now')->fetch('now.id')->toArray())
+                    ->where('year','=','104')->lists('id');
                 !in_array($column_value, $this->temp->dep_codes_104, true) && array_push($column_errors, '不是本校系所代碼');
             },
             'junior_schools_in_city' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->junior_schools_in_city) && $this->temp->junior_schools_in_city = DB::table('rows.dbo.row_20151022_135158_5xtfu')
-                    ->whereIn('C404', \Project\Used\User::find($this->user->id)->works->lists('sch_id'))->lists('C406');
+                    ->whereIn('C404', \Plat\Member::where('project_id', 1)->where('user_id', $this->user->id)->first()->organizations->load('now')->fetch('now.id')->toArray())->lists('C406');
+                    var_dump($this->temp->junior_schools_in_city);exit;
                 !in_array($column_value, $this->temp->junior_schools_in_city, true) && array_push($column_errors, '不是本縣市所屬學校代碼');
             },
         ];
@@ -938,42 +868,34 @@ class RowsFile extends CommFile {
         return ['frequence' => $frequence];
     }
 
-    private function bulidCheckTable($prefix_table_name)
+    private function bulidCheckTable($table)
     {
-        Schema::create('rows_check.dbo.' . $prefix_table_name, function($query) {
-            $query->string('unique', 50);
+        $check_table = $table->name . '_' . $this->user->id;
+
+        $this->dropCheckTable($table);
+
+        Schema::create('rows_check.dbo.' . $check_table, function($query) use($table) {
+            $query->increments('id');
+            foreach ($table->columns as $column) {
+                $this->column_bulid($query, 'C' . $column->id, $column->rules);
+            }
+            $query->integer('index');
         });
     }
 
-    private function dropCheckTable($prefix_table_name)
+    private function dropCheckTable($table)
     {
-        Schema::drop('rows_check.dbo.' . $prefix_table_name);
+        $check_table = $table->name . '_' . $this->user->id;
+
+        $this->has_table((object)['database' => 'rows_check', 'name' => $check_table]) && Schema::drop('rows_check.dbo.' . $check_table);
     }
 
+    /**
+     * Get analysis filter columns
+     */
     private function getUniqueExists($uniques, $table, $column)
     {
-        $exists = [];
 
-        $prefix_table_name = $table->name . '_' . $this->user->id . '_' . strtolower(str_random(5));
-
-        DB::beginTransaction();
-
-        $this->bulidCheckTable($prefix_table_name);
-
-        foreach (array_chunk($uniques, 1000) as $unique) {
-            $rows = array_map(function($value) { return ['unique' => $value]; }, $unique);
-            DB::table('rows_check.dbo.' . $prefix_table_name)->insert($rows);
-        }
-
-        $exists = DB::table($table->database . '.dbo.' . $table->name . ' AS table')->whereExists(function($query) use($prefix_table_name) {
-            $query->select(DB::raw(1))->from('rows_check.dbo.' . $prefix_table_name);
-        })->lists('table.created_by', 'C' . $column->id);
-
-        $this->dropCheckTable($prefix_table_name);
-
-        DB::commit();
-
-        return $exists;
     }
 
     public function updateRows()
@@ -1103,4 +1025,114 @@ class RowsFile extends CommFile {
         }
         // return ['child'=>$child,'parent'=>$parent];
     }
+
+    private function check_head($table, $head)
+    {
+        // check excel column head
+        $checked_head = $table->columns->filter(function($column) use($head) {
+            return !array_key_exists($column->name, $head ? $head : []);
+        });
+
+        if (!$checked_head->isEmpty())
+            throw new RowsImportException(['head' => $checked_head]);
+
+    }
+
+    private function check_repeat($table)
+    {
+        $columns_repeat = $table->columns->filter(function($column) {
+
+            return $column->unique;
+
+        })->map(function($column) use($table) {
+
+            $cells = array_pluck($this->import['rows'], $column->name);
+
+            $repeats = array_count_values(array_map('strval', $cells));
+
+            foreach (array_keys($repeats, 1, true) as $key) {
+                unset($repeats[$key]);
+            }
+
+            if (!empty($repeats)) {
+                throw new RowsImportException(['repeat' => ['title' => $column->name, 'values' => $repeats]]);
+            }
+        });
+    }
+
+    private function removeRowsInTemp($table)
+    {
+        $updates = $table->columns->map(function($column) { return 'rows.C' . $column->id . '=checked.C' . $column->id; });
+
+        $query_update = DB::table($table->database . '.dbo.' . $table->name . ' AS rows')
+        ->leftJoin('rows_check.dbo.' . $table->name . '_' . $this->user->id . ' AS checked', function($join) use ($table) {
+            $table->columns->each(function($column) use ($join) {
+                if ($column->unique) {
+                    $join->on('checked.C' . $column->id, '=', 'rows.C' . $column->id);
+                }
+            });
+        })->whereNotNull('checked.id');
+
+        $amount = DB::delete('DELETE rows ' . $query_update->toSql() . ' and rows.created_by = ' . $this->user->id);
+
+        return $amount;
+    }
+
+    private function moveRowsFromTemp($table)
+    {
+        $checkeds = $table->columns->map(function($column) { return 'checked.C' . $column->id; });
+        $columns = $table->columns->map(function($column) { return 'C' . $column->id; });
+
+        $query_insert = DB::table('rows_check.dbo.' . $table->name . '_' . $this->user->id . ' AS checked')->select(array_merge($checkeds->toArray(), [
+            DB::raw('\'1\''),
+            DB::raw('\'' . $this->user->id . '\''),
+            DB::raw('\'' . $this->user->id . '\''),
+            DB::raw('\'' . Carbon::now()->toDateTimeString() . '\''),
+            DB::raw('\'' . Carbon::now()->toDateTimeString() . '\''),
+        ]));
+
+        $amount = $query_insert->count();
+
+        $success = DB::insert('INSERT INTO ' .
+            $table->database . '.dbo.' . $table->name . ' (' . implode(',', $columns->toArray()) . ', file_id, updated_by, created_by, updated_at, created_at) ' .
+            $query_insert->toSql()
+        );
+
+        return $success ? $amount : 0;
+    }
+
+    public function cleanRow($table)
+    {
+        $index = 0;
+        return array_map(function($row) use ($table, &$index) {
+
+            $row_filted = array_filter(array_map('strval', $row), function($value) { return $value != ''; });
+
+            $message = (object)['pass' => false, 'limit' => false, 'empty' => empty($row_filted), 'updated' => false, 'exists' => [], 'errors' => [], 'row' => []];
+
+            // skip if empty
+            if ($message->empty)
+                return $message;
+
+            foreach ($table->columns as $column)
+            {
+                $value = $message->row['C' . $column->id] = isset($row[$column->name]) ? remove_space($row[$column->name]) : '';
+
+                if (!$column->isnull || !empty($value)) {
+
+                    $column_errors = $this->check_column($column, $value);
+
+                    !empty($column_errors) && $message->errors[$column->id] = $column_errors;
+                }
+            }
+
+            $message->pass = !$message->limit && empty($message->errors);
+
+            $message->row['index'] = $index++;
+
+            return $message;
+
+        }, $this->import['rows']);
+    }
+
 }

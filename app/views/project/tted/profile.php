@@ -80,14 +80,11 @@ $rejectd = isset($members[8]) ? $members[8]->trashed() : false;
                 <table class="ui very basic table">
                     <tr><td>學校</td><td>啟用</td></tr>
                     <?php
-                    Project\Teacher\User::find(Auth::user()->id)->works->each(function($work) {
-                        $work->schools->each(function($school) use($work) {
-                            $label_id = $school->id . '-' . $school->year;
-                            echo '<tr>';
-                            echo '<td>' . $school->id . ' (' . $school->year . ') - ' . $school->name . '</td>';
-                            echo '<td><div class="ui checkbox"><input type="checkbox"' . ((bool)$work->active ? ' checked="checked" ' : '') . 'id="'. $label_id .'"><label for="'. $label_id .'"></label></div></td>';
-                            echo '</tr>';
-                        });
+                    $member->organizations->load('now')->each(function($organization) {
+                        echo '<tr>';
+                        echo '<td>' . $organization->now->id . ' (' . $organization->now->year . ') - ' . $organization->now->name . '</td>';
+                        //echo '<td><div class="ui checkbox"><input type="checkbox"' . ((bool)$work->active ? ' checked="checked" ' : '') . 'id="'. $label_id .'"><label for="'. $label_id .'"></label></div></td>';
+                        echo '</tr>';
                     });
                     ?>
                 </table >

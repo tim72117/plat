@@ -72,6 +72,10 @@ App::error(function(Plat\Files\ValidateException $exception) {
     }
 });
 
+App::error(function(Plat\Files\RowsImportException $exception) {
+    return Response::json(['messages' => $exception->messages]);
+});
+
 App::error(function(Plat\Files\TokenMismatchException $exception) {
     return Redirect::back()->withErrors($exception->validator)->withInput(Input::except('_token','_token2'));
 });

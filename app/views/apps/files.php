@@ -125,10 +125,7 @@
                 </tr>
                 <tr ng-repeat="doc in docs | orderBy:'created_at':true | filter:searchText | filter:searchType:true | startFrom:(page-1)*limit | limitTo:limit">
                     <td width="50">
-                        <div class="ui checkbox">
-                            <input type="checkbox" id="doc-{{ $index }}" ng-model="doc.selected" ng-disabled="!doc.selected && (docs | filter:{selected: true}).length > 0">
-                            <label for="doc-{{ $index }}"></label>
-                        </div>
+                        <md-checkbox ng-model="doc.selected" aria-label="選取檔案" style="margin-bottom:0" ng-disabled="!doc.selected && (docs | filter:{selected: true}).length > 0"></md-checkbox>
                     </td>
                     <td style="min-width:400px" ng-click="rename(doc)">
                         <i class="icon" ng-class="types[doc.type]"></i>

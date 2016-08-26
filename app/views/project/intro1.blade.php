@@ -46,6 +46,10 @@
                     <div class="md-list-item-text">
                         <h3>@{{ post.title }}</h3>
                         <p style="color:#000" ng-bind-html="post.context"></p>
+                        <p ng-repeat="file in post.files">
+                            <i class="attach icon red"></i>
+                            <a href="/api/news/download/@{{file.pivot.id}}">@{{ file.title }}</a>
+                        </p>
                         <p>@{{ post.publish_at }}</p>
                     </div>
                 </md-list-item>
