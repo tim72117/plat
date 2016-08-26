@@ -107,7 +107,15 @@
                         <div class="md-input-messages-animation" ng-repeat="(id, error) in errors" ng-if="id == 'user.work.type'"><div class="md-input-message-animation">@{{error.join()}}</div></div>
                     </md-input-container>
 
-                    <md-autocomplete md-search-text="searchCity" md-selected-item-change="changeCity()" md-items="city in citys" md-selected-item="user.work.city" md-item-text="city.name" md-min-length="0" placeholder="選擇您服務的機構所在縣市" md-no-cache="true">
+                    <md-autocomplete
+                        md-search-text="searchCity"
+                        md-selected-item-change="changeCity()"
+                        md-items="city in citys"
+                        md-selected-item="user.work.city"
+                        md-item-text="city.name"
+                        md-min-length="0"
+                        placeholder="選擇您服務的機構所在縣市"
+                        md-no-cache="true">
                         <md-item-template>
                             <span md-highlight-text="searchCity">@{{city.name}}</span>
                         </md-item-template>
@@ -116,13 +124,21 @@
                         </md-not-found>
                     </md-autocomplete>
 
-                    <md-autocomplete md-search-text="searchSchool" md-items="school in getSchools(searchSchool)" md-item-text="school.name" md-selected-item="user.work.selectedItem" md-min-length="0" placeholder="選擇您服務機構" ng-disabled="loading.school" md-no-cache="true">
+                    <md-autocomplete
+                        md-search-text="searchSchool"
+                        md-items="school in getSchools(searchSchool)"
+                        md-item-text="school.name"
+                        md-selected-item="user.work.selectedItem"
+                        md-min-length="0"
+                        placeholder="選擇您服務機構"
+                        ng-disabled="loading.school"
+                        md-no-cache="true">
                         <md-item-template>
                             <span md-highlight-text="searchSchool" md-highlight-flags="^i">@{{school.name}}</span>
                         </md-item-template>
                         <md-not-found>
                             查無"@{{searchSchool}}"服務機構名稱
-                        </md-not-found>                            
+                        </md-not-found>
                     </md-autocomplete>
                     <md-input-container>
                         <div class="md-input-messages-animation" ng-repeat="(id, error) in errors" ng-if="id == 'user.work.organization_id'"><div class="md-input-message-animation">@{{error.join()}}</div></div>
@@ -130,7 +146,7 @@
 
                     <h4>承辦業務</h4>
 
-                    <div>                        
+                    <div>
                         <md-checkbox ng-repeat="position in positions" ng-model="user.positions[position.id]">@{{position.title}}</md-checkbox>
                     </div>
 
@@ -213,7 +229,6 @@ app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
         $scope.user.work.selectedItem = null;
         $http({method: 'GET', url: 'register/ajax/schools', params:{city_code: $scope.user.work.city.code, city_name: $scope.user.work.city.name, position: $scope.user.work.position}})
         .success(function(data, status, headers, config) {
-            console.log(data);
             $scope.schools = data.schools;
             $scope.loading.school = false;
         })
