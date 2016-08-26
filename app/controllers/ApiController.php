@@ -2,11 +2,14 @@
 
 class ApiController extends BaseController {
 
+    public $storage_path;
+
     public function __construct()
     {
         $this->beforeFilter(function($route){
 
         });
+        $this->storage_path = storage_path() . '\file_upload';
     }
 
     public function projects()
@@ -25,9 +28,15 @@ class ApiController extends BaseController {
             return Response::json(['error' => $e->getMessage()]);
         }
 
-        $posts = Plat\Project::find($project_id)->posts()->whereBetween('created_at', [$toDate, $fromDate])->select(['title', 'context', 'publish_at'])->get();
+        $posts = Plat\Project::find($project_id)->posts()->whereBetween('created_at', [$toDate, $fromDate])->select(['id','title', 'context', 'publish_at','display_at'])->get()->load('files');
 
         return Response::json($posts);
+    }
+
+    public function postFileDownload($id)
+    {
+        $postFile = Plat\Project\PostFile::find($id)->file;
+        return Response::download($this->storage_path.'/'.$postFile->file,$postFile->title);
     }
 
 }

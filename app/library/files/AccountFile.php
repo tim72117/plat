@@ -168,17 +168,28 @@ class AccountFile extends CommFile {
     {
         $project_id = $this->configs['project_id'];
 
-        $members_query = Member::where('project_id', $project_id)->orderBy('user_id')->with(['user.positions', 'user.inGroups', 'contact']);
+        $members_query = Member::where('project_id', $project_id)->orderBy('user_id')->with(['user.positions', 'user.inGroups', 'contact', 'organizations.now']);
 
         Input::has('search.position') && $members_query->whereHas('user.positions', function($query) {
             $query->where('project_positions.id', Input::get('search.position'));
         });
 
-        $members = $members_query->paginate(100);
+        Input::has('search.organization') && $members_query->whereHas('organizations', function($query) {
+            $query->where('works.organization_id', Input::get('search.organization.id'));
+        });
+
+        Input::has('search.username') && $members_query->whereHas('user', function($query) {
+            $query->where('users.username', Input::get('search.username'));
+        });
+
+        Input::has('search.email') && $members_query->whereHas('user', function($query) {
+            $query->where('users.email', Input::get('search.email'));
+        });
+
+        $members = $members_query->paginate(10);
 
         $profiles = $members->getCollection()->map(function($member) {
-            $struct = $this->configs['Struct'];
-            return $struct::auth($member, array_pluck($member->user->inGroups->toArray(), 'id'));
+            return $this->setProfile($member);
         });
 
         return array('users' => $profiles, 'currentPage' => $members->getCurrentPage(), 'lastPage' => $members->getLastPage(), 'log' => DB::getQueryLog());
@@ -194,9 +205,7 @@ class AccountFile extends CommFile {
 
         $member->push();
 
-        $struct = $this->configs['Struct'];
-
-        return ['profiles' => $struct::auth($member, array_pluck($member->user->inGroups->toArray(), 'id'))];
+        return ['profile' => $this->setProfile($member)];
     }
 
     public function disableUser()
@@ -236,9 +245,62 @@ class AccountFile extends CommFile {
 
         $member->user->save();
 
-        $struct = $this->configs['Struct'];
+        $organizations = array_fetch(Input::get('organizations'), 'id');
 
-        return ['user' => $struct::auth($member, array_pluck($member->user->inGroups->toArray(), 'id'))];
+        $member->organizations()->sync($organizations);
+
+        $member->load('organizations.now');
+
+        return ['user' => $this->setProfile($member)];
+    }
+
+    public function queryOrganizations()
+    {
+        $organizationDetails = \Plat\Project\OrganizationDetail::where('name', 'like', '%' . Input::get('query') . '%')->limit(2000)->lists('organization_id');
+
+        $organizations = \Plat\Project\Organization::find($organizationDetails)->load('now');
+
+        return ['organizations' => $organizations];
+    }
+
+    public function queryUsernames()
+    {
+        $project_id = $this->configs['project_id'];
+
+        $usernames = Member::with('user')->where('project_id', $project_id)->whereHas('user', function($query) {
+            $query->where('users.username', 'like', '%' . Input::get('query') . '%')->groupBy('users.username');
+        })->limit(1000)->get()->fetch('user.username')->all();
+
+        return ['usernames' => array_unique($usernames)];
+    }
+
+    public function queryEmails()
+    {
+        $project_id = $this->configs['project_id'];
+
+        $emails = Member::with('user')->where('project_id', $project_id)->whereHas('user', function($query) {
+            $query->where('users.email', 'like', '%' . Input::get('query') . '%');
+        })->limit(1000)->get()->fetch('user.email');
+
+        return ['emails' => $emails];
+    }
+
+    public function setProfile($member)
+    {
+        return [
+            'id'        => (int)$member->user_id,
+            'member_id' => (int)$member->id,
+            'actived'   => $member->user->actived && $member->actived,
+            'password'  => $member->user->password=='',
+            'email'     => $member->user->email,
+            'name'      => $member->user->username,
+            'title'  => $member->contact->title,
+            'tel'    => $member->contact->tel,
+            'fax'    => $member->contact->fax,
+            'email2' => $member->contact->email2,
+            'inGroups'  => $member->user->inGroups,
+            'organizations' => $member->organizations,
+        ];
     }
 
 }

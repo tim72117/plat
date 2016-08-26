@@ -28,6 +28,11 @@ class Project extends Eloquent {
         return $this->hasMany('Plat\Position', 'project_id', 'id');
     }
 
+    public function organizations()
+    {
+        return $this->hasMany('Plat\Project\Organization', 'project_id', 'id');
+    }
+
     public function getRegisterAttribute($value)
     {
         return (bool)$value;
@@ -63,6 +68,11 @@ class Member extends Eloquent {
     public function applying()
     {
         return $this->hasOne('Plat\Applying', 'member_id', 'id');
+    }
+
+    public function organizations()
+    {
+        return $this->belongsToMany('Plat\Project\Organization', 'works', 'member_id','organization_id');
     }
 
     public function scopeLogined($query)
@@ -129,6 +139,15 @@ class Post extends Eloquent {
 
     protected $fillable = array('title', 'context', 'publish_at', 'display_at', 'created_by');
 
+    public function files()
+    {
+        return $this->belongsToMany('Files', 'project_post_file', 'post_id', 'file_id')->withPivot('id');
+    }
+
+    public function getDisplayAtAttribute($value)
+    {
+        return json_decode($value);
+    }
 }
 
 class Position extends Eloquent {
