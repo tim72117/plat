@@ -500,7 +500,7 @@ class StructFile extends CommFile {
                     $cells->setValignment('top');
                 });
             });
-        })->download(Input::get('type'));
+        })->download(Input::get('type', 'xlsx'));
     }
 
     public function get_intern_count()
