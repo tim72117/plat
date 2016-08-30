@@ -77,7 +77,8 @@ App::error(function(Plat\Files\RowsImportException $exception) {
 });
 
 App::error(function(Plat\Files\TokenMismatchException $exception) {
-    return Redirect::back()->withErrors($exception->validator)->withInput(Input::except('_token','_token2'));
+    return Response::view('badRequest', array(), 400);
+    // return Redirect::back()->withErrors($exception->validator)->withInput(Input::except('_token','_token2'));
 });
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
