@@ -45,7 +45,7 @@ class RowsFile extends CommFile {
         'year_four'   => ['sort' => 21, 'type' => 'string',   'size' => 4,   'title' => '西元年(yyyy)',                 'validator' => ['regex:/^(19[0-9]{2})$/']],
         'j_in_city'   => ['sort' => 22, 'type' => 'string',   'size' => 6,   'title' => '縣市所屬國中',                 'function'  => 'junior_schools_in_city'],
         //師培
-        'tted_sch'         => ['sort' => 23, 'type' => 'string',   'size' => 4,   'title' => 'TTED大專院校學校代碼',      'function' => 'tted_sch'],
+        'tted_sch'         => ['sort' => 23, 'type' => 'string',   'size' => 10,   'title' => 'TTED大專院校學校代碼',      'function' => 'tted_sch'],
         'tted_depcode_103' => ['sort' => 24, 'type' => 'string',   'size' => 6,   'title' => 'TTED大專院校系所代碼103年', 'function' => 'tted_depcode_103'],
         'tted_depcode_104' => ['sort' => 25, 'type' => 'string',   'size' => 6,   'title' => 'TTED大專院校系所代碼104年', 'function' => 'tted_depcode_104'],
         'stdschoolstage'   => ['sort' => 26, 'type' => 'tinyInteger',             'title' => 'TTED教育階段',              'validator' => 'in:1,2,3'],
