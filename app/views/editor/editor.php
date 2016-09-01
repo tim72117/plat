@@ -36,7 +36,7 @@ $(document).ready(function() {
     $('#btn_save').click(function(){
 
         var checkerror = false;
-        
+
         if ( editor )
             editor.destroy();
 
@@ -217,7 +217,7 @@ $(document).ready(function() {
 
             var textarea_inf = {};
             if( qtype=='textarea' ){
-                itemArray.push( { 
+                itemArray.push( {
                     value:1 ,
                     size:$(this).children('div.var_textarea_box').find('input[name=tablesize]').val(),
                     height:$(this).children('div.var_textarea_box').find('input[name=tableheight]').val(),
@@ -267,8 +267,8 @@ $(document).ready(function() {
             alert('儲存成功');
             valInObj.obj = [];
             location.reload();
-        
-        
+
+
         }).error(function(e){
             console.log(e);
         });
@@ -416,7 +416,7 @@ $(document).ready(function() {
         $(this).attr('title','完成').removeClass('skipq').addClass('skipq_block');
 
         $('#contents').on("mouseover", "div.question_box[layer=0] div.qtype_box", function(){
-        
+
             $(this).animate({ backgroundColor: "#ff0" }, 100);
 
         }).on("mouseout", "div.question_box[layer=0] div.qtype_box", function() {
@@ -656,7 +656,7 @@ $(document).ready(function() {
                     (( other!='' )?'<td width="1px" name="otherv">'+other+'</td>':'')+
                     (( qtype=='text' || qtype=='scale' )?'<td width="1px"><input name="v_value" type="hidden" size="1" disabled="disabled" value="" /></td>':'')+
                     '<td><div class="editor title" style=";border:1px dashed #A0A0A4;background-color:#D7E6FC;min-height:22px">'+text+'</div></td>'+
-                   
+
                     //'<td width="16px"><img class="edittext" anchor="var" src="images/edit.png" title="修改文字" alt="修改文字" /></td>'+
 
                     (( qtype=='radio' || qtype=='select' )?'<td width="16px"><span class="skipq" title="設定跳題" /></td>':'')+
@@ -687,7 +687,7 @@ $(document).ready(function() {
         $(this).attr('src','images/q_data_empty.png').attr('title','加入跳答欄位').attr('alt','加入跳答欄位').removeClass('data_edit').addClass('data_add');
         $('img.data_add').parent('td').next('td.rull_data_text').text('');
         $('img.data_add').parent('td').next('td.rull_data_text').next('td').find('select[name=value] option').remove();
-         
+
         $('#database').on("click", "img.addtable", function(){
             $('img.data_add').parent('td').next('td.rull_data_text').text($(this).attr('title'));
             var option = '';
@@ -766,7 +766,7 @@ $(document).ready(function() {
                     '<option value="manual">手動編碼</option>'+
                 '</select></td>'+
                 '<td><div class="editor title" style=";border:0px dashed #A0A0A4;background-color:#D7E6FC"></div></td>'+
-                
+
                 '<td width="16px"><span class="addvar" anchor="var" addlayer="'+addlayer+'" title="加入選項"><i class="add icon"></i></span></td>'+
                 '<td width="16px"><span class="addvar_list" anchor="var" addlayer="1" title="匯入選項" /></td>'+
                 '<td width="16px"><span class="deletevar_list" anchor="var" addlayer="1" title="刪除全部選項" /></td>'+
@@ -782,7 +782,7 @@ $(document).ready(function() {
                 '<div class="ui horizontal divider addquestion" anchor="' + qanchor + '" addlayer="' + addlayer + '"><i class="add icon"></i> 加入題目 </div>'+
             '</div>'
         ).insertAfter(newq);
-        
+
         newq.slideDown('fast');
 
 
@@ -897,7 +897,7 @@ function textChanged(currentTarget) {
         $(currentTarget).addClass('text_changed');
 
     }else if( $(currentTarget).is('[target=degree]') ){
-    
+
         $(currentTarget).addClass('text_changed');
 
     }else if( $(currentTarget).is('[target=explain]') ){
@@ -936,7 +936,7 @@ function createEditor(target) {
             { name: 'insert',      items : [ 'Image','SpecialChar' ] }
         ];
     //config.stylesSet = 'my_styles';
-        
+
     /*
     config.keystrokes =[
         [ CKEDITOR.CTRL + 86, 'pastefromword' ]
@@ -980,7 +980,7 @@ function createEditor(target) {
         editor.on( 'blur', function( e )
         {
         //alert( 'The editor named ' + e.editor.name + ' is now focused' );
-        }); 
+        });
     });
     */
     return;
@@ -995,21 +995,21 @@ function createEditor(target) {
         if( $(target).parent('td').parent('tr').parent('tbody').parent('table').parent('div').is('.var_box,.var_scale_box') )
         if( !$(target).parent('td').parent('tr').parent('tbody').parent('table').parent('div.var_box,div.var_scale_box').parent('div.fieldA').is('.changed') )
         if( $(target).is('[target=item]') ){
-            
+
             $(target).addClass('text_changed');
-        
+
         }else if( $(target).is('[target=degree]') ){
-        
+
             $(target).addClass('text_changed');
-        
+
         }else if( $(target).is('[target=explain]') ){
-        
+
             $(target).addClass('text_changed');
-        
+
         }else if( $(target).is('[target=item_sub]') ){
-        
+
             $(target).parent('td').parent('tr').find('div[target=item]').addClass('text_changed');
-        
+
         }
 
         $(target).parent('td').next('td').find('img.editfinish').attr('src','images/edit.png').attr('title','修改文字').attr('alt','修改文字').removeClass('editfinish').addClass('edittext');
@@ -1022,7 +1022,7 @@ function createEditor(target) {
 String.prototype.trim_hl = function() { return this.replace(/(^\s*)|(\s*$)/g, ""); } //去除頭尾空白
 
 function recodeValue(target,qtype,code){
-    var value = 1; 
+    var value = 1;
 
     target.each(function(){
         if (qtype!='checkbox' && code=='auto') {
@@ -1037,7 +1037,7 @@ function recodeValue(target,qtype,code){
 }
 
 function recodeIndex(target){
-    var value = 1; 
+    var value = 1;
 
     target.each(function(){
         $(this).children('table').find('tbody > tr > td > input[name=v_value]').attr('index',value);
@@ -1080,16 +1080,17 @@ function getPassword(length) {
 
 </head>
 
+<md-content layout="column" layout-align="start center">
 <form name="form1" action="" method="get">
     <?=Form::select('page', $pages->lists('page', 'page'), $page->page, array('id' => 'page', 'onChange'=>'this.form.submit()'))?>  /  <?=$pages->count()?>
     <!--<input id="btn_dpage" type="button" value="刪除整頁" disabled="disabled" />-->
     <div class="ui basic mini button <?=($census->edit ? '' : 'disabled')?>" id="btn_cpage">
         <i class="file outline icon"></i> 新增一頁
-    </div>  
+    </div>
     <div class="ui basic mini button <?=($census->edit ? '' : 'disabled')?>" id="btn_save">
         <i class="save icon"></i> 儲存
-    </div>   
-    <a href="demo?page=1" target="_blank">預覽</a> 
+    </div>
+    <a href="demo?page=1" target="_blank">預覽</a>
 </form>
 
 <div id="building" style="width:800px">
@@ -1132,7 +1133,9 @@ function getPassword(length) {
     echo '</div>';
 
     ?>
-        
+
     </div>
-    
+
 </div>
+
+</md-content>
