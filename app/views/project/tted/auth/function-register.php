@@ -25,7 +25,7 @@ return [
             $schools = DB::table('plat.dbo.organizations AS organizations')
                 ->leftJoin('plat.dbo.organization_details AS detial', 'organizations.id', '=', 'detial.organization_id')
                 ->where('detial.citycode', Input::get('city_code'))
-                ->whereIn('detial.grade', [3, 4, 5, 6, 7, 8, 'K', 'W', 'X', 'Y', 'Z', 'M', 'S'])
+                ->whereIn('detial.grade', [3, 4, 5, 6, 7, 8, 'F', 'K', 'W', 'X', 'Y', 'Z', 'M', 'S'])
                 ->select('organizations.id', 'detial.name')
                 ->orderBy('detial.year', 'desc')
                 ->orderBy('detial.grade', 'desc')
