@@ -5,20 +5,23 @@ namespace Plat\Files;
 class QuestionXML {
     static $questions;
 
+    static function str_filter(&$content) {
+        $content->title = preg_replace('/{{[ ]?\${1}[\w]+[ ]?}}/','',$content->title);
+        $content->title = strip_tags(str_replace(PHP_EOL, '', $content->title));
+        $content->title = preg_replace('/&nbsp;/', '', $content->title);
+    }
+
     static function get_subs($subs, $index, &$questions, $parent_title = null)
     {
         foreach($subs as $sub) {
-            $sub->title = preg_replace('/{{[ ]?\${1}[\w]+[ ]?}}/','',$sub->title);
-            $sub->title = strip_tags(str_replace(PHP_EOL, '', $sub->title));
-            $sub->title = preg_replace('/&nbsp;/', '', $sub->title);
+            self::str_filter($sub);
 
             if ($sub->type=='radio' || $sub->type=='select') {
                 if (isset($parent_title))
                     $sub->title = $parent_title . '-' . $sub->title;
 
                 foreach($sub->answers as $answer) {
-                    $answer->title = strip_tags(str_replace(PHP_EOL, '', $answer->title));
-                    $answer->title = preg_replace('/&nbsp;/', '', $answer->title);
+                    self::str_filter($answer);
                 }
 
                 array_push($questions, $sub);
@@ -30,13 +33,11 @@ class QuestionXML {
 
             if ($sub->type=='scale') {
                 foreach ($sub->questions as $question) {
-                    $question->title = strip_tags(str_replace(PHP_EOL, '', $question->title));
-                    $question->title = preg_replace('/&nbsp;/', '', $question->title);
+                    self::str_filter($question);
                     $question->title = $sub->title . '-' . $question->title;
 
                     foreach($sub->answers as $answer) {
-                        $answer->title = strip_tags(str_replace(PHP_EOL, '', $answer->title));
-                        $answer->title = preg_replace('/&nbsp;/', '', $answer->title);
+                        self::str_filter($answer);
                     }
                     $question->answers = $sub->answers;
 
@@ -46,8 +47,7 @@ class QuestionXML {
 
             if ($sub->type=='checkbox') {
                 foreach ($sub->questions as $question) {
-                    $question->title = strip_tags(str_replace(PHP_EOL, '', $question->title));
-                    $question->title = preg_replace('/&nbsp;/', '', $question->title);
+                    self::str_filter($question);
                     $question->title = $question->title . '-' . $sub->title;
                     $question->answers = [(object)['title' => '是', 'value' => '1'], (object)['title' => '否', 'value' => '0']];
                     array_push($questions, $question);
