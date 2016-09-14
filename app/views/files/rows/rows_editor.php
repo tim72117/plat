@@ -8,6 +8,9 @@
                 <md-button href="import" aria-label="返回">返回</md-button>
             </md-list-item>
             <md-list-item>
+                <md-button aria-label="下載已上傳名單" ng-click="exportRows(sheet)">下載已上傳名單</md-button>
+            </md-list-item>
+            <md-list-item>
                 <div class="ui pagination small menu" ng-if="paginate.last_page<=6 && paginate.last_page>1">
                     <a class="item" ng-repeat="i in generateArray(paginate.last_page)" ng-class="{active: paginate.current_page==i}" ng-click="getRows(i)">{{ i }}</a>
                 </div>
@@ -122,7 +125,7 @@
     </div>
 
 </div>
-
+<script src="/js/jquery.fileDownload.js"></script>
 <script>
 app.controller('rowsEditorController', function($scope, $http, $filter, $mdToast) {
     $scope.file = {sheets: [], comment: ''};
@@ -255,6 +258,14 @@ app.controller('rowsEditorController', function($scope, $http, $filter, $mdToast
             $scope.loading = false;
         }).error(function(e){
             console.log(e);
+        });
+    };
+
+    $scope.exportRows = function(sheet) {
+        jQuery.fileDownload('export_my_rows', {
+            httpMethod: "POST",
+            data: {sheet_id: sheet.id},
+            failCallback: function (responseHtml, url) { console.log(responseHtml); }
         });
     };
 
