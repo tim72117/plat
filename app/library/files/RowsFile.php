@@ -367,7 +367,7 @@ class RowsFile extends CommFile {
             }
 
             if (!$column->unique && isset($rules['menu'])) {
-                if (!in_array($column_value, $column->menu, true)) {
+                if (!in_array($column_value, $column->answers->lists('value'), true)) {
                     array_push($column_errors, $column->title . '未在選單中');
                 }
             }
