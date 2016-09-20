@@ -148,3 +148,17 @@ if ( ! function_exists('createnewcid'))
 	return 	$newcid;
 	}
 }
+
+if ( ! function_exists('ddd'))
+{
+	/**
+	 * Dump the passed variables and end the script.
+	 *
+	 * @param  mixed
+	 * @return void
+	 */
+	function ddd()
+	{
+		call_user_func_array('dump', func_get_args()); die;
+	}
+}
