@@ -9,8 +9,15 @@
 		"lucadegasperi/oauth2-server-laravel": "3.0.*",
 		"league/oauth2-client": "^1.2",
 		"phpunit/phpunit": "5.2.*",
-		"aws/aws-sdk-php-laravel": "1.*"
+		"larapack/dd": "1.*",
+		"tim72117/question": "1.*"
 	},
+	"repositories": [
+		{
+			"type": "path",
+			"url":  "../packages/tim72117/question"
+		}
+	],
 	"autoload": {
 		"classmap": [
 			"app/commands",
@@ -19,8 +26,7 @@
 			"app/database/migrations",
 			"app/database/seeds",
 			"app/tests/TestCase.php",
-			"app/library/1.10.2",
-			"app/library/files"
+			"app/library"
 		],
 		"files": [
 			"app/function/myfunction.php"
