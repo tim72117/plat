@@ -58,6 +58,7 @@ class RowsFile extends CommFile {
         'float_hundred'    => ['sort' => 22, 'type' => 'string',   'size' => 8,   'title' => '小數(1-100,-7)',            'validator' => ['regex:/^(([0-9]|[1-9][0-9])(\\.[0-9]{1,5})?|100|-7)$/']],
         'yyy'              => ['sort' => 33, 'type' => 'string',   'size' => 3,   'title' => '民國年',                    'validator' => ['regex:/^([1-9]|[1-9][0-9]|[1][0-1][0-9])$/']],
         'menu'             => ['sort' => 34, 'type' => 'tinyInteger',             'title' => '選單',                      'menu' => ''],
+        'counties'         => ['sort' => 35, 'type' => 'string',   'size' => 2,   'title' => '縣市(六都改制)',             'function'  => 'counties'],
     ];
 
     /**
@@ -693,8 +694,11 @@ class RowsFile extends CommFile {
             'junior_schools_in_city' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->junior_schools_in_city) && $this->temp->junior_schools_in_city = DB::table('rows.dbo.row_20151022_135158_5xtfu')
                     ->whereIn('C404', \Plat\Member::where('project_id', 1)->where('user_id', $this->user->id)->first()->organizations->load('now')->fetch('now.id')->toArray())->lists('C406');
-                    var_dump($this->temp->junior_schools_in_city);exit;
                 !in_array($column_value, $this->temp->junior_schools_in_city, true) && array_push($column_errors, '不是本縣市所屬學校代碼');
+            },
+            'counties' => function($column_value, $column, &$column_errors) {
+                !isset($this->temp->counties) && $this->temp->counties = DB::table('plat_public.dbo.lists')->lists('code');
+                !in_array($column_value, $this->temp->counties, true) && array_push($column_errors, '不是正確的縣市代碼');
             },
         ];
         return $checkers[$name];
