@@ -348,11 +348,6 @@ class RowsFile extends CommFile {
 
         check_empty($column_value, $column->title, $column_errors);
 
-        if( isset( $column->repeats[$column_value] ) && $column->repeats[$column_value] > 1 )
-        {
-            array_push($column_errors, $column->title . '資料重複');
-        }
-
         if( empty( $column_errors ) )
         {
             $rules = $this->rules[$column->rules];
@@ -1126,7 +1121,12 @@ class RowsFile extends CommFile {
             {
                 $value = $message->row['C' . $column->id] = isset($row[$column->name]) ? remove_space($row[$column->name]) : '';
 
-                if (!$column->isnull || !empty($value)) {
+                $skip = false;
+                if ($column->skip && isset($message->row['C' . $column->skip->rules->by_column_id])) {
+                    $skip = $message->row['C' . $column->skip->rules->by_column_id] == $column->skip->rules->value;
+                }
+
+                if (!$skip && (!$column->isnull || !empty($value))) {
 
                     $column_errors = $this->check_column($column, $value);
 

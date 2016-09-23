@@ -85,6 +85,11 @@ class Column extends Eloquent {
         return $this->hasMany('Row\Answer', 'column_id', 'id');
     }
 
+    public function skip()
+    {
+        return $this->hasOne('Plat\Files\Row\Skip', 'column_id', 'id');
+    }
+
     public function getUniqueAttribute($value)
     {
         return (boolean)$value;
