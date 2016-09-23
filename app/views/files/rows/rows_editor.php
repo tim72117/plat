@@ -1,7 +1,7 @@
 
-<div ng-cloak ng-controller="rowsEditorController">
+<md-content class="md-padding" ng-cloak ng-controller="rowsEditorController">
 
-    <div class="ui basic segment" ng-repeat="sheet in file.sheets" ng-class="{loading: loading || saving}" style="overflow:auto">
+    <div ng-repeat="sheet in file.sheets" style="overflow:auto">
 
         <md-list layout="row">
             <md-list-item>
@@ -55,7 +55,7 @@
             </md-list-item>
         </md-list>
 
-        <table class="ui very compact table" ng-repeat="table in sheet.tables">
+        <table class="ui very compact single line table" ng-repeat="table in sheet.tables">
             <thead>
                 <tr>
                     <th colspan="{{ table.columns.length+3 }}">
@@ -92,7 +92,7 @@
                     <td>
                         <md-checkbox ng-model="row.selected" aria-label="刪除"></md-checkbox>
                     </td>
-                    <td ng-repeat="column in table.columns" ng-if="true||row.writing">
+                    <td ng-repeat="column in table.columns" ng-if="true||row.writing" class="center aligned">
                         <md-input-container md-no-float class="md-block" ng-if="column.rules!='bool' && column.rules!='menu'">
                             <input ng-model="row['C' + column.id]" ng-disabled="column.readonly" placeholder="{{column.title}}" ng-change="setUpdating(row)">
                             <div class="md-input-messages-animation" ng-repeat="(id, errors) in row.errors" ng-if="id == column.id">
@@ -124,14 +124,13 @@
 
     </div>
 
-</div>
+</md-content>
 <script src="/js/jquery.fileDownload.js"></script>
 <script>
 app.controller('rowsEditorController', function($scope, $http, $filter, $mdToast) {
     $scope.file = {sheets: [], comment: ''};
     $scope.paginate = {data: []};
     $scope.status = {};
-    $scope.loading = false;
     $scope.saving = false;
     $scope.parentTables = false;
     $scope.search = {};
@@ -150,13 +149,13 @@ app.controller('rowsEditorController', function($scope, $http, $filter, $mdToast
     $scope.getStatus();
 
     $scope.getRows = function(page) {
-        $scope.loading = true;
+        $scope.$parent.main.loading = true;
         $http({method: 'POST', url: 'get_rows', data:{page: page, search: $scope.search}})
         .success(function(data, status, headers, config) {
             $scope.paginate = data.paginate;
-            $scope.loading = false;
+            $scope.$parent.main.loading = false;
         }).error(function(e){
-            $scope.loading = false;
+            $scope.$parent.main.loading = false;
             $mdToast.show($mdToast.simple().content('錯誤，請聯絡系統人員 ' + angular.element(e).children().text()));
         });
     };
@@ -250,12 +249,10 @@ app.controller('rowsEditorController', function($scope, $http, $filter, $mdToast
     $scope.getParentTable();
 
     $scope.cloneTableData = function(table_id) {
-        $scope.loading = true;
         var data = {table_id:table_id};
         $http({method: 'POST', url: 'cloneTableData', data:data})
         .success(function(data, status, headers, config) {
             $scope.getRows();
-            $scope.loading = false;
         }).error(function(e){
             console.log(e);
         });
