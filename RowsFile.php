@@ -22,7 +22,7 @@ class RowsFile extends CommFile {
     protected $temp;
 
     public $rules = [
-        'gender'      => ['sort' => 1,  'type' => 'tinyInteger',             'title' => '性別: 1.男 2.女',               'validator' => 'in:1,2'],
+        'gender'      => ['sort' => 1,  'type' => 'tinyInteger',             'title' => '性別: 1.男 2.女',               'validator' => 'in:1,2', 'editor' => 'menu', 'answers' => ['1' => '男', '2' => '女']],
         'gender_id'   => ['sort' => 2,  'type' => 'tinyInteger',             'title' => '性別: 1.男 2.女(身分證第2碼)',  'validator' => 'in:1,2'],
         'bool'        => ['sort' => 3,  'type' => 'boolean',                 'title' => '是(1)與否(0)',                  'validator' => 'boolean'],
         'stdidnumber' => ['sort' => 4,  'type' => 'string',   'size' => 10,  'title' => '身分證',                        'function' => 'stdidnumber'],
@@ -210,6 +210,14 @@ class RowsFile extends CommFile {
         });
 
         $sheets->first()->selected = true;
+
+        $sheets->first()->tables->first()->columns->each(function($column) {
+            if (isset($this->rules[$column->rules]['editor']) && $this->rules[$column->rules]['editor'] == 'menu') {
+                foreach ($this->rules[$column->rules]['answers'] as $value => $title) {
+                    $column->answers->push(['value' => $value, 'title' => $title]);
+                }
+            }
+        });
 
         return [
             'title'    => $this->file->title,
