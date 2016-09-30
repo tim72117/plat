@@ -5,20 +5,20 @@
 
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
 <script src="/js/jquery-1.11.2.min.js"></script>
-<script src="/js/angular/1.5.3/angular.min.js"></script>
-<script src="/js/angular/1.5.3/angular-sanitize.min.js"></script>
-<script src="/js/angular/1.5.3/angular-cookies.min.js"></script>
-<script src="/js/angular/1.5.3/angular-animate.min.js"></script>
-<script src="/js/angular/1.5.3/angular-aria.min.js"></script>
-<script src="/js/angular/1.5.3/angular-messages.min.js"></script>
+<script src="/js/angular/1.5.8/angular.min.js"></script>
+<script src="/js/angular/1.5.8/angular-sanitize.min.js"></script>
+<script src="/js/angular/1.5.8/angular-cookies.min.js"></script>
+<script src="/js/angular/1.5.8/angular-animate.min.js"></script>
+<script src="/js/angular/1.5.8/angular-aria.min.js"></script>
+<script src="/js/angular/1.5.8/angular-messages.min.js"></script>
 <script src="/js/angular_material/1.1.0/angular-material.min.js"></script>
-<script src="/css/Semantic-UI/2.1.8/components/transition.min.js"></script>
-<script src="/css/Semantic-UI/2.1.8/components/popup.min.js"></script>
+<script src="/css/Semantic-UI/2.2.4/components/transition.min.js"></script>
+<script src="/css/Semantic-UI/2.2.4/components/popup.min.js"></script>
 <script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
 <script src="/js/angular-semantic-ui/dropdown.js"></script>
 
-<link rel="stylesheet" href="/css/Semantic-UI/2.1.8/semantic.min.css" />
-<link rel="stylesheet" href="/js/angular_material/1.1.0/angular-material.min.css">
+<link rel="stylesheet" href="/css/Semantic-UI/2.2.4/semantic.min.css" />
+<link rel="stylesheet" href="/js/angular_material/1.1.1/angular-material.min.css">
 
 <style>
 ::-webkit-scrollbar {
@@ -39,7 +39,7 @@ var app = angular.module('app', ['ngSanitize', 'ngCookies', 'ngMaterial'])
 
 app.config(function ($compileProvider, $mdIconProvider) {
     $compileProvider.debugInfoEnabled(false);
-    $mdIconProvider.defaultIconSet('/js/angular_material/1.1.0/core-icons.svg', 24);
+    $mdIconProvider.defaultIconSet('/js/angular_material/core-icons.svg', 24);
 })
 
 .controller('mainController', function($scope, $mdSidenav, $mdToast) {
