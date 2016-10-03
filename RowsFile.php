@@ -72,6 +72,8 @@ class RowsFile extends CommFile {
         parent::__construct($file, $user);
 
         $this->temp = (object)[];
+
+        $this->configs = $this->file->configs->lists('value', 'name');
     }
 
     /**
@@ -137,7 +139,7 @@ class RowsFile extends CommFile {
      */
     public function import()
     {
-        return 'files.rows.table_import';
+        return !empty($this->configs['rows_edit']) && $this->configs['rows_edit'] == 1 ? self::rows() : 'files.rows.table_import';
     }
 
     /**
@@ -648,6 +650,8 @@ class RowsFile extends CommFile {
     //uncomplete only first sheet, only first table
     public function get_rows()
     {
+        $lock = !empty($this->configs['rows_edit']) && $this->configs['rows_edit'] == 1 ? true : false;
+
         $tables = $this->file->sheets->first()->tables;
 
         list($query, $power) = $this->get_rows_query($tables);
@@ -671,7 +675,7 @@ class RowsFile extends CommFile {
                 $this->setEncrypts($row, $encrypts);
             });
         }
-        return ['paginate' => $paginate->toArray()];
+        return ['paginate' => $paginate->toArray(),'lock' => $lock];
     }
 
     //uncomplete only first sheet
