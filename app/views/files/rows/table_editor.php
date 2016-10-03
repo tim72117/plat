@@ -65,15 +65,8 @@
 
 </div>
 
-<!--<script src="/js/angular-file-upload.min.js"></script>-->
-
-<script src="/js/jquery.fileDownload.js"></script>
-<script src="/js/jszip.min.js"></script>
-<script src="/js/xlsx.js"></script>
-<script src="/js/lodash.min.js"></script>
-<script src="/js/xlsx-reader.js"></script>
 <script>
-app.controller('newTableController', function($scope, $http, $filter, XLSXReaderService) {
+app.controller('newTableController', function($scope, $http, $filter) {
     $scope.file = {title: ''};
     $scope.tool = 'columns';
     $scope.limit = 100;
@@ -210,29 +203,6 @@ app.controller('newTableController', function($scope, $http, $filter, XLSXReader
     };
 
 })
-
-.factory('XLSXReaderService', ['$q', '$rootScope',
-    function($q, $rootScope) {
-        var service = function(data) {
-            angular.extend(this, data);
-        };
-
-        service.readFile = function(file, readCells, toJSON) {
-            var deferred = $q.defer();
-
-            XLSXReader(file, readCells, toJSON, function(data) {
-                $rootScope.$apply(function() {
-                    deferred.resolve(data);
-                });
-            });
-
-            return deferred.promise;
-        };
-
-
-        return service;
-    }
-])
 
 .directive('contenteditable', ['$sce', function($sce) {
     return {

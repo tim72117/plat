@@ -30,14 +30,17 @@
                     <i class="write icon"></i>
                 </div>
             </td>
-            <td ng-class="{disabled: !sheet.editable || table.lock}">
-                <md-input-container>
+            <td ng-class="{disabled: !sheet.editable || table.lock}" layout="row">
+                <md-input-container flex>
                     <md-select ng-model="column.rules" aria-label="過濾規則" ng-change="updateColumn(sheet, table, column)">
                         <md-option ng-repeat="(key, rule) in file.rules" ng-value="key" ng-disabled="$index === 1">
                             {{rule.title}}
                         </md-option>
                     </md-select>
                 </md-input-container>
+                <md-list flex ng-if="column.rules == 'menu'">
+                    <md-list-item ng-repeat="answer in column.answers">{{answer.value}}:{{answer.title}}</md-list-item>
+                 </md-list>
             </td>
             <td>
                 <md-checkbox ng-model="column.unique" aria-label="unique" ng-change="updateColumn(sheet, table, column)"></md-checkbox>
