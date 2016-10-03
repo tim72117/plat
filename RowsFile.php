@@ -59,6 +59,7 @@ class RowsFile extends CommFile {
         'yyy'              => ['sort' => 33, 'type' => 'string',   'size' => 3,   'title' => '民國年',                    'validator' => ['regex:/^([1-9]|[1-9][0-9]|[1][0-1][0-9])$/']],
         'menu'             => ['sort' => 34, 'type' => 'tinyInteger',             'title' => '選單',                      'menu' => ''],
         'counties'         => ['sort' => 35, 'type' => 'string',   'size' => 2,   'title' => '縣市(六都改制)',             'function'  => 'counties'],
+        'gateway'          => ['sort' => 36, 'type' => 'tinyInteger',             'title' => '師資生核定培育管道',          'validator' => 'in:0,1,2', 'editor' => 'menu', 'answers' => ['0' => '無', '1' => '師培系所之師資生', '2' => '師培中心之師資生']],
     ];
 
     /**
