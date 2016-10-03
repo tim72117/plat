@@ -4,20 +4,12 @@
     <div class="ui basic segment" ng-repeat="sheet in file.sheets" ng-class="{loading: loading || saving}" style="overflow:auto">
 
         <md-list layout="row">
-            <div style="padding:10px">
-                <div class="ui primary button" onclick="history.back()">
-                    返回
-                </div>
-                <div class="ui green button" ng-click="exportRows(sheet)">
-                    <i class="download icon"></i>下載已上傳名單
-                </div>
-            </div>
-            <!-- <md-list-item>
-                <md-button href="import" aria-label="返回">返回</md-button>
+            <md-list-item ng-hide="lock">
+                <md-button href="import" aria-label="返回" >返回</md-button>
             </md-list-item>
             <md-list-item>
-                <md-button class="md-warn md-raised md-hue-2" aria-label="下載已上傳名單" ng-click="exportRows(sheet)">下載已上傳名單</md-button>
-            </md-list-item> -->
+                <md-button class="md-warn md-raised md-hue-2" aria-label="下載已上傳名單" ng-click="exportRows(sheet)" md-colors="{background: 'Indigo-A200'}">下載已上傳名單</md-button>
+            </md-list-item>
             <md-list-item>
                 <div class="ui pagination small menu" ng-if="paginate.last_page<=6 && paginate.last_page>1">
                     <a class="item" ng-repeat="i in generateArray(paginate.last_page)" ng-class="{active: paginate.current_page==i}" ng-click="getRows(i)">{{ i }}</a>
