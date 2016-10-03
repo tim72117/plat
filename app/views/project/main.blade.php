@@ -11,7 +11,7 @@
 <script src="/js/angular/1.5.8/angular-animate.min.js"></script>
 <script src="/js/angular/1.5.8/angular-aria.min.js"></script>
 <script src="/js/angular/1.5.8/angular-messages.min.js"></script>
-<script src="/js/angular_material/1.1.0/angular-material.min.js"></script>
+<script src="/js/angular_material/1.1.1/angular-material.min.js"></script>
 <script src="/css/Semantic-UI/2.2.4/components/transition.min.js"></script>
 <script src="/css/Semantic-UI/2.2.4/components/popup.min.js"></script>
 <script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
@@ -37,7 +37,7 @@
 <script>
 var app = angular.module('app', ['ngSanitize', 'ngCookies', 'ngMaterial'])
 
-app.config(function ($compileProvider, $mdIconProvider) {
+app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
     $compileProvider.debugInfoEnabled(false);
     $mdIconProvider.defaultIconSet('/js/angular_material/core-icons.svg', 24);
 })
