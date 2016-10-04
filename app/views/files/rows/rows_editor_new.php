@@ -43,7 +43,7 @@
         <md-toolbar md-colors="{background: 'grey-100'}">
             <div class="md-toolbar-tools">
                 <span></span>
-                <md-button class="md-raised" md-colors="{background: 'pink-400'}" aria-label="刪除" ng-if="(paginate.data | filter: {selected: true}).length > 0" ng-click="delete()">
+                <md-button class="md-raised" md-colors="{background: 'pink-400'}" aria-label="刪除" ng-if="(paginate.data | filter: {selected: true}).length > 0" ng-click="delete()" ng-hide="lock">
                     <md-icon md-svg-icon="delete"></md-icon>
                     <md-tooltip><h4>刪除</h4></md-tooltip>
                     刪除{{(paginate.data | filter: {selected: true}).length}}筆資料
@@ -57,22 +57,22 @@
                     <md-icon md-svg-icon="add"></md-icon>
                     <md-tooltip md-visible="addTooltipVisible"><h4>點擊這邊新增一筆資料</h4></md-tooltip>
                 </md-button>-->
-            </div>    
+            </div>
         </md-toolbar>
         <md-divider></md-divider>
         <md-content style="height:100%">
             <div style="height:100%;overflow:scroll;;background-color:#fff">
                 <div ng-repeat="table in file.sheets[0].tables" style="display:table;width:100%;">
-                    <div style="display: table-row">                
+                    <div style="display: table-row">
                         <div style="display: table-cell;border-bottom: 1px solid rgba(0,0,0,0.12);padding:20px 0 0 15px">
-                            <md-checkbox aria-label="全選" ng-checked="isChecked()" md-indeterminate="isIndeterminate()" ng-click="toggleAll()"></md-checkbox>
+                            <md-checkbox aria-label="全選" ng-checked="isChecked()" md-indeterminate="isIndeterminate()" ng-click="toggleAll()" ng-disabled="lock"></md-checkbox>
                         </div>
                         <div style="display: table-cell;border-bottom: 1px solid rgba(0,0,0,0.12);padding:20px 0 0 0" ng-repeat="column in table.columns">{{ column.title }}</div>
-                        <div style="display: table-cell;border-bottom: 1px solid rgba(0,0,0,0.12);padding:20px 0 0 0;width:80px"></div>               
+                        <div style="display: table-cell;border-bottom: 1px solid rgba(0,0,0,0.12);padding:20px 0 0 0;width:80px"></div>
                     </div>
-                    <div style="display: table-row" ng-repeat="row in paginate.data" class="selectable" md-colors="{background: row.opening ? 'grey' : 'grey-A100'}" ng-click="row.selected=!row.selected">
+                    <div style="display: table-row" ng-repeat="row in paginate.data" class="selectable" md-colors="{background: row.opening ? 'grey' : 'grey-A100'}" ng-click="row.selected=!row.selected && !lock">
                         <div style="display: table-cell;border-bottom: 1px solid rgba(0,0,0,0.12);padding:15px 0 15px 15px">
-                            <md-checkbox aria-label="選擇" ng-model="row.selected" ng-click="$event.stopPropagation()"></md-checkbox>
+                            <md-checkbox aria-label="選擇" ng-disabled="true" ng-model="row.selected" ng-click="$event.stopPropagation()" ng-disabled="lock"></md-checkbox>
                         </div>
                         <div style="display: table-cell;border-bottom: 1px solid rgba(0,0,0,0.12);padding:15px 0" ng-repeat="column in table.columns">
                             <span ng-if="column.answers.length>0" ng-repeat="answer in column.answers | filter:{value: row['C' + column.id]}">{{answer.title}}</span>
@@ -80,7 +80,7 @@
                         </div>
                         <div style="display: table-cell;border-bottom: 1px solid rgba(0,0,0,0.12);padding:15px 0">
                             <md-button aria-label="編輯" ng-click="toggleDetail(row);$event.stopPropagation()">編輯</md-button>
-                        </div>                
+                        </div>
                     </div>
                 </div>
                 <div layout-padding layout="row" layout-align="center center">
@@ -145,6 +145,7 @@ app.controller('rowsEditorController', function($scope, $http, $filter, $mdToast
     $scope.search = {};
     $scope.mdSidenav = {};
     $scope.addTooltipVisible = false;
+    $scope.lock = false;
 
     $scope.getStatus = function() {
         $scope.$parent.main.loading = true;
@@ -164,6 +165,7 @@ app.controller('rowsEditorController', function($scope, $http, $filter, $mdToast
         $scope.$parent.main.loading = true;
         $http({method: 'POST', url: 'get_rows', data:{page: page, search: $scope.search}})
         .success(function(data, status, headers, config) {
+            $scope.lock = data.lock;
             $scope.paginate = data.paginate;
             $scope.$parent.main.loading = false;
         }).error(function(e){
