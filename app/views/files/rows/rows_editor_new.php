@@ -72,7 +72,7 @@
                     </div>
                     <div style="display: table-row" ng-repeat="row in paginate.data" class="selectable" md-colors="{background: row.opening ? 'grey' : 'grey-A100'}" ng-click="row.selected=!row.selected && !lock">
                         <div style="display: table-cell;border-bottom: 1px solid rgba(0,0,0,0.12);padding:15px 0 15px 15px">
-                            <md-checkbox aria-label="選擇" ng-disabled="true" ng-model="row.selected" ng-click="$event.stopPropagation()" ng-disabled="lock"></md-checkbox>
+                            <md-checkbox aria-label="選擇" ng-model="row.selected" ng-click="$event.stopPropagation()" ng-disabled="lock"></md-checkbox>
                         </div>
                         <div style="display: table-cell;border-bottom: 1px solid rgba(0,0,0,0.12);padding:15px 0 0 10px;max-width:50px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis" ng-repeat="column in table.columns">
                             <span ng-if="column.answers.length>0" ng-repeat="answer in column.answers | filter:{value: row['C' + column.id]}">{{answer.title}}</span>
