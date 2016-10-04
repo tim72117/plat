@@ -4,8 +4,11 @@
     <div ng-repeat="sheet in file.sheets" style="overflow:auto">
 
         <md-list layout="row">
+            <md-list-item ng-hide="lock">
+                <md-button href="import" aria-label="返回" >返回</md-button>
+            </md-list-item>
             <md-list-item>
-                <md-button href="import" aria-label="返回">返回</md-button>
+                <md-button class="md-warn md-raised md-hue-2" aria-label="下載已上傳名單" ng-click="exportRows(sheet)" md-colors="{background: 'Indigo-A200'}">下載已上傳名單</md-button>
             </md-list-item>
             <md-list-item>
                 <md-button aria-label="下載已上傳名單" ng-click="exportRows(sheet)">下載已上傳名單</md-button>
@@ -47,7 +50,8 @@
             <md-list-item>
                 <md-button md-colors="{background: 'red'}" ng-if="(paginate.data | filter: {selected: true}).length > 0"
                     ng-class="{loading: status.deleting}"
-                    ng-click="delete()">
+                    ng-click="delete()"
+                    ng-hide="lock">
                     <i class="trash icon"></i>刪除名單 ({{ (paginate.data | filter: {selected: true}).length }}筆資料)
                 </md-button>
 
@@ -81,7 +85,7 @@
                 <tr>
                     <th class="collapsing" ng-if="paginate.data[0].created_by">上傳者</th>
                     <th class="collapsing">
-                        <md-checkbox aria-label="全選" ng-checked="isChecked()" md-indeterminate="isIndeterminate()" ng-click="toggleAll()"></md-checkbox>
+                        <md-checkbox aria-label="全選" ng-checked="isChecked()" md-indeterminate="isIndeterminate()" ng-click="toggleAll()" ng-disabled="lock"></md-checkbox>
                     </th>
                     <th ng-repeat="column in table.columns">{{ column.title }}</th>
                 </tr>
@@ -90,7 +94,7 @@
                 <tr ng-repeat="row in paginate.data" ng-class="{warning: row.writing, disabled: row.saving}">
                     <td ng-if="row.created_by"><md-button>{{ row.created_by }}</md-button></td>
                     <td>
-                        <md-checkbox ng-model="row.selected" aria-label="刪除"></md-checkbox>
+                        <md-checkbox ng-model="row.selected" aria-label="刪除" ng-disabled="lock"></md-checkbox>
                     </td>
                     <td ng-repeat="column in table.columns" ng-if="true||row.writing" class="center aligned">
                         <md-input-container md-no-float class="md-block" ng-if="column.rules!='bool' && column.answers==0">
@@ -134,6 +138,7 @@ app.controller('rowsEditorController', function($scope, $http, $filter, $mdToast
     $scope.saving = false;
     $scope.parentTables = false;
     $scope.search = {};
+    $scope.lock = false;
 
     $scope.getStatus = function() {
         $http({method: 'POST', url: 'get_file', data:{editor: false}})
@@ -152,6 +157,7 @@ app.controller('rowsEditorController', function($scope, $http, $filter, $mdToast
         $scope.$parent.main.loading = true;
         $http({method: 'POST', url: 'get_rows', data:{page: page, search: $scope.search}})
         .success(function(data, status, headers, config) {
+            $scope.lock = data.lock
             $scope.paginate = data.paginate;
             $scope.$parent.main.loading = false;
         }).error(function(e){
