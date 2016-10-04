@@ -257,7 +257,10 @@
             <table class="ui teal collapsing celled structured very compact table" ng-class="{small:tableSize=='small', large:tableSize=='large'}" style="background: #F5F5F5">
                 <thead>
                     <tr>
-                        <th class="center aligned"><!--<div class="ui mini button" ng-click="needHelp($event)" style="background: #ECBE13;color: white"><i class="icon help outline"></i>需要幫忙</div>--></th>
+                        <th class="center aligned">
+                            <!--<div class="ui mini button" ng-click="needHelp($event)" style="background: #ECBE13;color: white"><i class="icon help outline"></i>需要幫忙</div>-->
+                            <div class="ui mini button" ng-click="showTabDialog($event)" style="background: #ECBE13;color: white"><i class="icon help outline"></i>需要幫忙</div>
+                        </th>
                         <th>發展歷程</th>
                         <th>表單名稱</th>
                         <th colspan="2" ng-if="structClassShow">選擇欄位</th>
@@ -411,7 +414,7 @@
                 <thead>
                     <tr>
                         <th colspan="{{columns.length}}" ng-if="calculations.length>0">
-                            <div ng-semantic-dropdown-menu ng-model="crossPercent" class="ui top left pointing labeled floating dropdown icon mini button">
+                            <!--<div ng-semantic-dropdown-menu ng-model="crossPercent" class="ui top left pointing labeled floating dropdown icon mini button">
                                     <span class="text">加入 %</span>
                                     <input type="hidden">
                                     <i class="add icon"></i>
@@ -420,7 +423,15 @@
                                         <div class="item" data-value="row" ng-click="setRowPercent()">列 %</div>
                                         <div class="item" data-value="noPercent" ng-click="setNoPercent()">不加 %</div>
                                     </div>
-                            </div>
+                            </div>-->
+                            <md-input-container>
+                                <label>加入 %</label>
+                                <md-select ng-model="crossPercent">
+                                    <md-option ng-repeat="tableOption in tableOptions" ng-value="tableOption" ng-click="setPercent(tableOption)">
+                                        {{tableOption}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
                             <button class="basic ui icon button" ng-click="exportExcel(structs)">
                                 <i class="download icon"></i> 下載結果
                             </button>
@@ -497,7 +508,7 @@
 <script src="/js/angular-file-upload.min.js"></script>
 
 <script>
-app.controller('statusController', function($scope, $http, $filter, $timeout, $location, $anchorScroll) {
+app.controller('statusController', function($scope, $http, $filter, $timeout, $location, $anchorScroll, $mdDialog) {
     $scope.page = 'editor';
     $scope.helpChoosen = false;
     $scope.colPercent = false;
@@ -524,6 +535,8 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         '在職教師': {title: '教師就業狀況', size: 4},
         '閩南語檢定': {title: '語言檢定', size: 2}
     };
+
+    $scope.tableOptions = ['行%', '列%', '不加%'];
 
     $scope.loading = true;
     $scope.structs = [];
@@ -961,6 +974,15 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         delete $scope.tableTitle.editing;
     };
 
+    $scope.setPercent = function(mode) {
+        if (mode == '行%')
+            $scope.setColPercent();
+        if (mode == '列%')
+            $scope.setRowPercent();
+        if (mode == '不加%')
+            $scope.setNoPercent();
+    };
+
     $scope.setRowPercent = function() {
         $scope.colPercent = false;
         $scope.rowPercent = true;
@@ -1150,8 +1172,31 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
        'userSelect': 'none'
     });
 
+    $scope.showTabDialog = function(ev) {
+        $mdDialog.show({
+          controller: DialogController,
+          templateUrl: 'templateHelp',
+          parent: angular.element(document.body),
+          targetEvent: ev,
+          clickOutsideToClose:true
+        })
+    };
+
+    function DialogController($scope, $mdDialog) {
+        $scope.hide = function() {
+          $mdDialog.hide();
+        };
+
+        $scope.cancel = function() {
+          $mdDialog.cancel();
+        };
+
+        $scope.answer = function(answer) {
+          $mdDialog.hide(answer);
+        };
+    }
 })
-.directive('ngMutiDropdownMenu', function($timeout, $window) {
+/*.directive('ngMutiDropdownMenu', function($timeout, $window) {
     return {
         restrict: 'A',
         scope: {},
@@ -1165,7 +1210,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
             });
         }
     };
-})
+})*/
 .directive('ngSlider', function($timeout, $window) {
     return {
         restrict: 'A',
@@ -1207,7 +1252,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         }
     };
 })
-.directive('ngSemanticDropdownMenu', function($timeout, $window) {
+/*.directive('ngSemanticDropdownMenu', function($timeout, $window) {
     return {
         restrict: 'A',
         scope: {
@@ -1230,5 +1275,5 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
 
     };
 
-});
+})*/;
 </script>
