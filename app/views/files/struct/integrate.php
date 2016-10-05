@@ -7,7 +7,7 @@
                 <h2>{{progress[academicYearType]}}</h2>
                 <span flex></span>
                 <md-button aria-label="預覽表格" ng-click="toggleSidenavRight()">
-                    <md-icon md-svg-icon="settings"></md-icon>
+                    <md-icon md-svg-icon="icon-eye"></md-icon>
                     預覽表格
                 </md-button>
             </div>
@@ -20,13 +20,13 @@
             </div>
             <div class="item" align="center">
             <md-input-container>
-                    <label>學校</label>
-                    <md-select ng-model="selectSchool" aria-label="schools" multiple >
-                        <md-button layout-fill value="all" ng-click="selectAllSchool()">全選</md-button>
-                        <md-optgroup >
-                            <md-option ng-value="school" ng-repeat="school in schools">{{school.name}}</md-option>
-                        </md-optgroup>
-                    </md-select>
+                <label>學校</label>
+                <md-select ng-model="selectSchool" aria-label="schools" multiple >
+                    <md-button layout-fill value="all" ng-click="selectAllSchool()">全選</md-button>
+                    <md-optgroup >
+                        <md-option ng-value="school" ng-repeat="school in schools">{{school.name}}</md-option>
+                    </md-optgroup>
+                </md-select>
             </md-input-container>
             </div>
         </div>
@@ -38,7 +38,11 @@
                 <p>占教育部核定名額學年度</p>
                 <p>自
                     <md-input-container>
-                        <md-select placeholder="學年度" ng-model="academicYearStart" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
+                        <md-select placeholder="學年度"
+                            ng-model="academicYearStart"
+                            md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)"
+                            style="max-width: 100px"
+                            ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
                             <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
                             <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
                         </md-select>
@@ -46,7 +50,11 @@
                 學年度起</p>
                 <p>至
                     <md-input-container>
-                        <md-select placeholder="學年度" ng-model="academicYearEnd" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
+                        <md-select placeholder="學年度"
+                            ng-model="academicYearEnd"
+                            md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)"
+                            style="max-width: 100px"
+                            ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
                             <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
                             <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
                         </md-select>
@@ -57,7 +65,11 @@
                 <p>發證年度</p>
                 <p>自
                     <md-input-container>
-                        <md-select placeholder="年" ng-model="academicYearStart" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
+                        <md-select placeholder="年"
+                            ng-model="academicYearStart"
+                            md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)"
+                            style="max-width: 100px"
+                            ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
                             <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
                             <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
                         </md-select>
@@ -65,7 +77,11 @@
                 年起</p>
                 <p>至
                     <md-input-container>
-                        <md-select placeholder="年" ng-model="academicYearEnd" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
+                        <md-select placeholder="年"
+                            ng-model="academicYearEnd"
+                            md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)"
+                            style="max-width: 100px"
+                            ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
                             <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
                             <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
                         </md-select>
@@ -76,7 +92,11 @@
                 <p>參與教育實習學年度</p>
                 <p>自
                     <md-input-container>
-                        <md-select placeholder="學年度" ng-model="academicYearStart" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
+                        <md-select placeholder="學年度"
+                            ng-model="academicYearStart"
+                            md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)"
+                            style="max-width: 100px"
+                            ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
                             <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
                             <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
                         </md-select>
@@ -84,7 +104,11 @@
                 學年度起</p>
                 <p>至
                     <md-input-container>
-                        <md-select placeholder="學年度" ng-model="academicYearEnd" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
+                        <md-select placeholder="學年度"
+                            ng-model="academicYearEnd"
+                            md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)"
+                            style="max-width: 100px"
+                            ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
                             <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
                             <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
                         </md-select>
@@ -109,7 +133,6 @@
                     </tr>
                 </thead>
                 <tbody>
-
                     <tr>
                         <td ng-class="{negative: structs[idType].rows[0].disabled, disabled: structs[idType].rows[0].disabled}">
                             <i class="icon close" ng-if="structs[idType].rows[0].disabled"></i>
@@ -143,7 +166,9 @@
 
                         <td ng-class="{negative: row.disabled, disabled: row.disabled}">
                             <i class="icon close" ng-if="row.disabled"></i>
-                            <md-checkbox ng-model="row.selected" aria-label="{{ structs[idType].rows[0].title }}" ng-change="toggleColumn(row, structs[idType])">{{ row.title }}</md-checkbox>
+                            <md-checkbox ng-model="row.selected"
+                                aria-label="{{ structs[idType].rows[0].title }}"
+                                ng-change="toggleColumn(row, structs[idType])">{{ row.title }}</md-checkbox>
                         </td>
 
                         <td ng-class="{disabled: row.disabled}">
@@ -152,7 +177,11 @@
                                 <div ng-slider ng-model="row.filter" items="row.items"></div>
                             </div>
                             <md-input-container ng-if="!row.disabled && row.type!='slider'">
-                                <md-select placeholder="{{ row.title }}" ng-model="row.filter" md-on-open="loadItem(structs[idType].title,row.title)" multiple ng-change="setFilter(structs[idType])">
+                                <md-select multiple
+                                    placeholder="{{ row.title }}"
+                                    ng-model="row.filter"
+                                    md-on-open="loadItem(structs[idType].title,row.title)"
+                                    ng-change="setFilter(structs[idType])">
                                     <md-progress-circular ng-if="!row.items" md-diameter="20px"></md-progress-circular>
                                     <md-optgroup >
                                         <md-option ng-value="item" ng-repeat="item in row.items">{{item}}</md-option>
@@ -170,7 +199,7 @@
 
     <div flex layout="column">
         <md-toolbar class="md-theme-indigo">
-            <h1 class="md-toolbar-tools" style="font-weight: bold;background: #046D8B;color: white" ng-if="academicYearType==1">
+            <div class="md-toolbar-tools" style="background: #046D8B;color: white" ng-if="academicYearType==1">
                 <md-button aria-label="快速設定" ng-click="toggleSidenav()">
                     <md-icon md-svg-icon="settings"></md-icon>
                     快速設定
@@ -184,10 +213,11 @@
                     資料欄位說明
                 </md-button>
                 <md-button aria-label="預覽表格" ng-click="toggleSidenavRight()">
-                    <md-icon md-svg-icon="settings"></md-icon>
+                    <md-icon md-svg-icon="icon-eye"></md-icon>
                     預覽表格
                 </md-button>
                 <span flex></span>
+                <md-button aria-label="需要幫忙" ng-click="showTabDialog($event)"><md-icon md-svg-icon="help"></md-icon>需要幫忙</md-button>
                 <md-menu>
                     <md-button aria-label="表單大小" ng-click="$mdOpenMenu($event)">
                         表單大小
@@ -197,7 +227,7 @@
                         <md-menu-item><md-button aria-label="大" ng-click="tableSize='large'"><i class="table large icon"></i>大</md-button></md-menu-item>
                     </md-menu-content>
                 </md-menu>
-            </h1>
+            </div>
         </md-toolbar>
         <div class="ui basic segment" ng-class="{loading: loading}">
 
@@ -208,9 +238,7 @@
                 <table class="ui teal collapsing celled structured very compact table" ng-class="{small:tableSize=='small', large:tableSize=='large'}" style="background: #F5F5F5">
                     <thead>
                         <tr>
-                            <th class="center aligned">
-                                <div class="ui mini button" ng-click="showTabDialog($event)" style="background: #ECBE13;color: white"><i class="icon help outline"></i>需要幫忙</div>
-                            </th>
+                            <th></th>
                             <th>發展歷程</th>
                             <th>表單名稱</th>
                             <th colspan="2" ng-if="structClassShow">選擇欄位</th>
@@ -225,7 +253,9 @@
                                     <i name="needHelp4" class="play icon"></i> 開始計算
                                 </button>
                             </td>
-                            <td rowspan="{{ structClass[struct.title].expanded ? getRowSpan(structs.slice(index, index+structClass[struct.title].size)) : 1 }}" ng-if="structClass[struct.title]" class="no-animate">
+                            <td rowspan="{{ structClass[struct.title].expanded ? getRowSpan(structs.slice(index, index+structClass[struct.title].size)) : 1 }}"
+                                ng-if="structClass[struct.title]"
+                                class="no-animate">
                                 <a href="javascript:void(0)" ng-click="showStruct(struct.title,structClass[struct.title].title)">
                                     {{ structClass[struct.title].title }}
                                 </a>
@@ -263,10 +293,14 @@
 
                             <td ng-if="struct.expanded && struct.classExpanded" ng-class="{negative: struct.rows[0].disabled, disabled: struct.rows[0].disabled}" class="no-animate">
                                 <i class="icon close" ng-if="struct.rows[0].disabled"></i>
-                                <div class="ui checkbox" >
-                                    <input id="{{ ::$id }}" type="checkbox" ng-model="struct.rows[0].selected" ng-change="toggleColumn(struct.rows[0], struct)" ng-click="needHelp2()" class="hidden"  name="needHelp5">
-                                    <label for="{{ ::$id }}" >{{ struct.rows[0].title }}</label>
-                                </div>
+                                <md-checkbox
+                                    ng-model="struct.rows[0].selected"
+                                    aria-label="{{ struct.rows[0].title }}"
+                                    ng-change="toggleColumn(struct.rows[0], struct)"
+                                    ng-click="needHelp2()"
+                                    name="needHelp5">
+                                    {{ struct.rows[0].title }}
+                                </md-checkbox>
                             </td>
 
                             <td ng-if="!struct.expanded && struct.classExpanded" colspan="{{struct.expanded ? 1 : 2}}" class="no-animate">
@@ -277,7 +311,11 @@
 
                             <td ng-class="{disabled: struct.rows[0].disabled}" ng-if="struct.classExpanded && structFilterShow" class="no-animate">
                                 <md-input-container ng-if="!struct.rows[0].disabled && struct.expanded">
-                                    <md-select placeholder="{{ struct.rows[0].title }}" ng-model="struct.rows[0].filter" md-on-open="loadItem(struct.title,struct.rows[0].title)" multiple ng-change="setFilter(struct)">
+                                    <md-select multiple
+                                        placeholder="{{ struct.rows[0].title }}"
+                                        ng-model="struct.rows[0].filter"
+                                        md-on-open="loadItem(struct.title,struct.rows[0].title)"
+                                        ng-change="setFilter(struct)">
                                         <md-progress-circular ng-if="!struct.rows[0].items" md-diameter="20px"></md-progress-circular>
                                         <md-optgroup >
                                             <md-option ng-value="item" ng-repeat="item in struct.rows[0].items" ng-click="needHelp4()">{{item}}</md-option>
@@ -291,10 +329,9 @@
 
                             <td ng-class="{negative: row.disabled, disabled: row.disabled}" class="no-animate">
                                 <i class="icon close" ng-if="row.disabled"></i>
-                                <div class="ui checkbox">
-                                    <input id="{{ ::$id }}" type="checkbox" ng-model="row.selected" ng-change="toggleColumn(row, struct)" class="hidden" ng-click="needHelp2()">
-                                    <label for="{{ ::$id }}">{{ row.title }}</label>
-                                </div>
+                                <md-checkbox ng-model="row.selected" aria-label="{{ struct.rows[0].title }}" ng-change="toggleColumn(row, struct)" ng-click="needHelp2()">
+                                    {{ row.title }}
+                                </md-checkbox>
                             </td>
 
                             <td ng-class="{disabled: row.disabled}" ng-if="structFilterShow" >
@@ -484,17 +521,17 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
 
     $http({method: 'POST', url: 'getPopulation', value:{}})
     .success(function(value, status, headers, config) {
-        if (value == 1){
+        if (value == 1) {
             $scope.idType = 1;//新進師資生
             $scope.academicYearType = 1;//新進師資生
-        } else if (value == 2){
+        } else if (value == 2) {
             $scope.idType = 9;//實習師資生
             $scope.academicYearType = 3;//實習師資生(參與教育實習學年度)
         } else{
             $scope.idType = 10;//完成職前教育師資生
             $scope.academicYearType = 2;//完成職前教育師資生(發證年度)
         }
-    }).error(function(e){
+    }).error(function(e) {
         console.log(e);
     });
 
@@ -505,7 +542,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         $scope.structs[$scope.idType].expanded = true;
         $scope.loading = false;
         $scope.$parent.main.loading = false;
-    }).error(function(e){
+    }).error(function(e) {
         console.log(e);
     });
 
@@ -521,17 +558,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         $scope.mdSidenav.left = true;
     }, 100);
 
-    $scope.explans = [];
-    $http({method: 'POST', url: 'getExplans', data:{}})
-    .success(function(data, status, headers, config) {
-        $scope.explans = data;
-    }).error(function(e){
-        console.log(e);
-    });
-
-
-
-    /*$scope.updateItem = function(selectSchoolID){
+    /*$scope.updateItem = function(selectSchoolID) {
         $http({method: 'POST', url: 'getItems', data:{schoolID: selectSchoolID}})
         .success(function(data, status, headers, config) {
             for (var i in $scope.structs) {
@@ -547,29 +574,29 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
             $scope.structs[0].rows[1].type = 'slider';
             $scope.structs[$scope.idType].expanded = true;
             $scope.loading = false;
-        }).error(function(e){
+        }).error(function(e) {
             console.log(e);
         });
     };*/
 
-    $scope.loadItem = function(structTitle,rowTitle, callback){
+    $scope.loadItem = function(structTitle,rowTitle, callback) {
         $http({method: 'POST', url: 'getEachItems', data:{schoolID: $scope.selectSchoolID,structTitle: structTitle,rowTitle: rowTitle}})
         .success(function(data, status, headers, config) {
             var struct = $scope.structs[data.key];
             var rows = data.tables[struct.title] || {};
             struct.disabled = Object.keys(rows).length == 0;
             for (var j in struct.rows) {
-                if (struct.rows[j].title == rowTitle){
+                if (struct.rows[j].title == rowTitle) {
                     struct.rows[j].items = rows[struct.rows[j].title] || [];
                     struct.rows[j].disabled = struct.rows[j].items == 0;
                     if (struct.rows[j].title == '年齡') struct.rows[j].disabled = true;
                 }
             };
             $scope.structs[0].rows[1].type = 'slider';
-            if (callback){
+            if (callback) {
                 callback();
             }
-        }).error(function(e){
+        }).error(function(e) {
             console.log(e);
         });
     };
@@ -582,7 +609,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         for (var i in $scope.selectSchool) {
             $scope.selectSchoolID.push($scope.selectSchool[i].id);
         };
-    }).error(function(e){
+    }).error(function(e) {
         console.log(e);
     });
 
@@ -690,20 +717,20 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
                 };
 
                 var inStructs = 0;
-                if ($scope.calculations.length>0){
-                    for (var i in $scope.calculations){
-                        for (var j in $scope.calculations[i].structs){
-                            if ($scope.calculations[i].structs[j].title == struct.title ){
+                if ($scope.calculations.length>0) {
+                    for (var i in $scope.calculations) {
+                        for (var j in $scope.calculations[i].structs) {
+                            if ($scope.calculations[i].structs[j].title == struct.title ) {
                                 inStructs = 1;
                             }
                         }
-                        if (inStructs==0 && isadd){
+                        if (inStructs==0 && isadd) {
                             $scope.calculations[i].structs.push({title: struct.title, rows: {}});
                         }
                     }
                 }
-                if ($scope.calculations.length>0){
-                    for (var i in $scope.calculations){
+                if ($scope.calculations.length>0) {
+                    for (var i in $scope.calculations) {
                         $scope.calculations[i].results = {};
                     }
                 }
@@ -722,20 +749,20 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
             };
 
             var inStructs = 0;
-            if ($scope.calculations.length>0){
-                for (var i in $scope.calculations){
-                    for (var j in $scope.calculations[i].structs){
-                        if ($scope.calculations[i].structs[j].title == struct.title ){
+            if ($scope.calculations.length>0) {
+                for (var i in $scope.calculations) {
+                    for (var j in $scope.calculations[i].structs) {
+                        if ($scope.calculations[i].structs[j].title == struct.title ) {
                             inStructs = 1;
                         }
                     }
-                    if (inStructs==0 && isadd){
+                    if (inStructs==0 && isadd) {
                         $scope.calculations[i].structs.push({title: struct.title, rows: {}});
                     }
                 }
             }
-            if ($scope.calculations.length>0){
-                for (var i in $scope.calculations){
+            if ($scope.calculations.length>0) {
+                for (var i in $scope.calculations) {
                     $scope.calculations[i].results = {};
                 }
             }
@@ -772,7 +799,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         $scope.preCalculations.push(calculation);
     }
 
-    $scope.addNewCalStruct = function(structs){
+    $scope.addNewCalStruct = function(structs) {
         var calculation = {structs: [], results: {}};
         for (var i in structs) {
             if (structs[i].selected && !structs[i].disabled) {
@@ -787,9 +814,9 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         $scope.callCalculation();
     };
 
-    $scope.callCalculation = function(){
-        for (var i in $scope.calculations){
-            if ($.isEmptyObject($scope.calculations[i].results)){
+    $scope.callCalculation = function() {
+        for (var i in $scope.calculations) {
+            if ($.isEmptyObject($scope.calculations[i].results)) {
                 $scope.addCalculation($scope.calculations[i].structs,$scope.calculations[i]);
             }
         }
@@ -801,7 +828,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         $http({method: 'POST', url: 'calculate', data:{structs: calculateStructs, columns: $scope.columns, schoolID: $scope.selectSchoolID}})
         .success(function(data, status, headers, config) {
             calculation.results = data.results;
-        }).error(function(e){
+        }).error(function(e) {
             console.log(e);
         });
     };
@@ -878,16 +905,16 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
 
     $scope.getCrossColumnTotal = function(calculation,levels) {
         var crossColumnTotal = 0;
-        for (var i in levels){
+        for (var i in levels) {
             crossColumnTotal = crossColumnTotal+ 1*$scope.getResults(calculation, levels[i]);
         }
         return crossColumnTotal;
     };
 
-    $scope.getNearestColumnTotal = function(calculation,level){
+    $scope.getNearestColumnTotal = function(calculation,level) {
         var nearestColumnTotal = 0;
         var  nearestColumn = $scope.getParentResult(calculation, level.parents);
-        for (var i in nearestColumn){
+        for (var i in nearestColumn) {
             nearestColumnTotal = nearestColumnTotal+ 1*nearestColumn[i];
         }
         return nearestColumnTotal;
@@ -903,14 +930,14 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         //$anchorScroll();
     };
 
-    $scope.getTitle = function(){
+    $scope.getTitle = function() {
         $scope.tableTitle = {};
         var titles = [];
-        for (i in $scope.calculations){
+        for (i in $scope.calculations) {
             var title = '';
-            for (j in $scope.calculations[i].structs){
+            for (j in $scope.calculations[i].structs) {
                 title = title+$scope.calculations[i].structs[j].title+' ';
-                for (k in $scope.calculations[i].structs[j].rows){
+                for (k in $scope.calculations[i].structs[j].rows) {
                     title = title+$scope.calculations[i].structs[j].rows[k].title+'-'+$scope.calculations[i].structs[j].rows[k].filter;
                 }
             }
@@ -953,11 +980,11 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         $scope.rowPercent = false;
     };
 
-    $scope.getStructsTitile = function(key){
+    $scope.getStructsTitile = function(key) {
         var title = [];
-        for (i in $scope.calculations[key].structs){
+        for (i in $scope.calculations[key].structs) {
             title.push($scope.calculations[key].structs[i].title);
-            for (j in $scope.calculations[key].structs[i].rows){
+            for (j in $scope.calculations[key].structs[i].rows) {
                     title.push($scope.calculations[key].structs[i].rows[j].title);
                     title.push($scope.calculations[key].structs[i].rows[j].title+'-'+$scope.calculations[key].structs[i].rows[j].filter);
             }
@@ -965,15 +992,15 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         return title;
     };
 
-    $scope.checkInArray = function(value){
-        if (this.indexOf(value)>-1){
+    $scope.checkInArray = function(value) {
+        if (this.indexOf(value)>-1) {
             return true;
         }else{
             return false;
         }
     };
 
-    $scope.restrictInvolve = function(key){
+    $scope.restrictInvolve = function(key) {
         if (key>0) {
             var denominator = $scope.getStructsTitile (key-1);
             var molecular = $scope.getStructsTitile (key);
@@ -983,7 +1010,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         }
     };
 
-    $scope.getRowPercent = function(key,level){
+    $scope.getRowPercent = function(key,level) {
         if (key>0) {
             var denominator = $scope.getResults($scope.calculations[key-1].results,level);
             var molecular = $scope.getResults($scope.calculations[key].results,level);
@@ -1024,11 +1051,11 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         moveCalculation.results = $scope.calculations[$scope.dragBefore]['results'];
         moveCalculation.structs = $scope.calculations[$scope.dragBefore]['structs'];
 
-        if ($scope.dragBefore > dragAfter){
+        if ($scope.dragBefore > dragAfter) {
             $scope.calculations.splice($scope.dragBefore,1);
             $scope.calculations.splice(dragAfter+1,0,moveCalculation);
         }
-        if ($scope.dragBefore < dragAfter){
+        if ($scope.dragBefore < dragAfter) {
             $scope.calculations.splice(dragAfter+1,0,moveCalculation);
             $scope.calculations.splice($scope.dragBefore,1);
         }
@@ -1045,18 +1072,18 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         moveColumn.struct = $scope.columns[$scope.changeColumnBefore]['struct'];
         moveColumn.items = $scope.columns[$scope.changeColumnBefore]['items'];
 
-        if ($scope.calculations.length>0){
-            for (var i in $scope.calculations){
+        if ($scope.calculations.length>0) {
+            for (var i in $scope.calculations) {
                 $scope.calculations[i].results = {};
             }
         }
 
-        if ($scope.changeColumnBefore > dragAfter){
+        if ($scope.changeColumnBefore > dragAfter) {
             $scope.columns.splice($scope.changeColumnBefore,1);
             $scope.columns.splice(dragAfter+1,0,moveColumn);
             $scope.callCalculation();
         }
-        if ($scope.changeColumnBefore < dragAfter){
+        if ($scope.changeColumnBefore < dragAfter) {
             $scope.columns.splice(dragAfter+1,0,moveColumn);
             $scope.columns.splice($scope.changeColumnBefore,1);
             $scope.callCalculation();
@@ -1064,12 +1091,12 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         $scope.changeColumnBefore = [];
     };
 
-    $scope.setAcademicYear = function(startYear,endYear,struct,column){
+    $scope.setAcademicYear = function(startYear,endYear,struct,column) {
         column.filter = [];
-        if (typeof(startYear)!='undefined'){
-            if (typeof(endYear)!='undefined'){
-                if (endYear*1 >= startYear*1){
-                    for (var i = startYear*1; i < endYear*1+1; i++){
+        if (typeof(startYear)!='undefined') {
+            if (typeof(endYear)!='undefined') {
+                if (endYear*1 >= startYear*1) {
+                    for (var i = startYear*1; i < endYear*1+1; i++) {
                         column.filter.push(i);
                     }
                     column.selected = true;
@@ -1084,27 +1111,27 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
 
     };
 
-    $scope.showStruct = function(firstStruct,classTitle){
+    $scope.showStruct = function(firstStruct,classTitle) {
         $scope.structClass[firstStruct].expanded = true;
         $scope.structClassShow = true;
-        for (var i in $scope.structInClass[classTitle].structs){
-            for (var j in $scope.structs){
-                if ($scope.structs[j].title == $scope.structInClass[classTitle].structs[i].title){
+        for (var i in $scope.structInClass[classTitle].structs) {
+            for (var j in $scope.structs) {
+                if ($scope.structs[j].title == $scope.structInClass[classTitle].structs[i].title) {
                      $scope.structs[j].classExpanded = true;
                 }
             }
         }
     };
 
-    $scope.showFilter = function(struct){
+    $scope.showFilter = function(struct) {
         $scope.structFilterShow = true;
         struct.expanded=true;
     };
 
 
 
-    $scope.selectAllSchool = function(){
-        if (JSON.stringify($scope.selectSchool) === JSON.stringify($scope.schools) ){
+    $scope.selectAllSchool = function() {
+        if (JSON.stringify($scope.selectSchool) === JSON.stringify($scope.schools) ) {
             $scope.selectSchool = [];
         }else{
             $scope.selectSchool = $scope.schools;
@@ -1138,7 +1165,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         .success(function(data, status, headers, config) {
             console.log(data);
             scope.explans = data;
-        }).error(function(e){
+        }).error(function(e) {
             console.log(e);
         });
 
@@ -1207,11 +1234,11 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
 
 })
 
-.directive('contenteditable', function(){
+.directive('contenteditable', function() {
     return {
         restrict: 'A',
         require: 'ngModel',
-        link: function(scope, element, attributes, ngModel){
+        link: function(scope, element, attributes, ngModel) {
             ngModel.$render = function() {
                 element.html(ngModel.$viewValue || '');
             };
