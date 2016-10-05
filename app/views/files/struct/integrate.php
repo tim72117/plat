@@ -1,9 +1,16 @@
 
 <md-content ng-cloak ng-controller="statusController" layout="row" style="height:100%">
 
-    <md-sidenav class="md-sidenav-left" md-is-open="mdSidenav" layout="column" style="min-width: 500px">
+    <md-sidenav class="md-sidenav-left" md-is-open="mdSidenav.left" layout="column" style="min-width: 500px">
         <md-toolbar class="md-theme-indigo">
-            <h1 class="md-toolbar-tools" style="font-weight: bold;background: #046D8B;color: white" ng-if="academicYearType==1">{{progress[academicYearType]}}</h1>
+            <div class="md-toolbar-tools" style="font-weight: bold;background: #046D8B;color: white" ng-if="academicYearType==1">
+                <h2>{{progress[academicYearType]}}</h2>
+                <span flex></span>
+                <md-button aria-label="預覽表格" ng-click="toggleSidenavRight()">
+                    <md-icon md-svg-icon="settings"></md-icon>
+                    預覽表格
+                </md-button>
+            </div>
             <h1 class="md-toolbar-tools" style="font-weight: bold;background: #CB0051;color: white" ng-if="academicYearType==2">{{progress[academicYearType]}}</h1>
             <h1 class="md-toolbar-tools" style="font-weight: bold;background: #4A970A;color: white" ng-if="academicYearType==3">{{progress[academicYearType]}}</h1>
         </md-toolbar>
@@ -106,10 +113,10 @@
                     <tr>
                         <td ng-class="{negative: structs[idType].rows[0].disabled, disabled: structs[idType].rows[0].disabled}">
                             <i class="icon close" ng-if="structs[idType].rows[0].disabled"></i>
-                            <div class="ui checkbox" >
-                                <input id="{{ ::$id }}" type="checkbox" ng-model="structs[idType].rows[0].selected" ng-change="toggleColumn(structs[idType].rows[0], structs[idType])">
-                                <label for="{{ ::$id }}" >{{ structs[idType].rows[0].title }}</label>
-                            </div>
+                            <md-checkbox
+                                ng-model="structs[idType].rows[0].selected"
+                                aria-label="{{ structs[idType].rows[0].title }}"
+                                ng-change="toggleColumn(structs[idType].rows[0], structs[idType])">{{ structs[idType].rows[0].title }}</md-checkbox>
                         </td>
 
                         <td ng-if="!structs[idType].expanded">
@@ -136,10 +143,7 @@
 
                         <td ng-class="{negative: row.disabled, disabled: row.disabled}">
                             <i class="icon close" ng-if="row.disabled"></i>
-                            <div class="ui checkbox">
-                                <input id="{{ ::$id }}" type="checkbox" ng-model="row.selected" ng-change="toggleColumn(row, structs[idType])" class="hidden">
-                                <label for="{{ ::$id }}">{{ row.title }}</label>
-                            </div>
+                            <md-checkbox ng-model="row.selected" aria-label="{{ structs[idType].rows[0].title }}" ng-change="toggleColumn(row, structs[idType])">{{ row.title }}</md-checkbox>
                         </td>
 
                         <td ng-class="{disabled: row.disabled}">
@@ -164,235 +168,168 @@
         </md-content>
     </md-sidenav>
 
-    <div layout="column" style="width: 100%">
+    <div flex layout="column">
+        <md-toolbar class="md-theme-indigo">
+            <h1 class="md-toolbar-tools" style="font-weight: bold;background: #046D8B;color: white" ng-if="academicYearType==1">
+                <md-button aria-label="快速設定" ng-click="toggleSidenav()">
+                    <md-icon md-svg-icon="settings"></md-icon>
+                    快速設定
+                </md-button>
+                <md-button aria-label="資料欄位說明" ng-click="showExplain()">
+                    <md-icon md-svg-icon="help-outline"></md-icon>
+                    資料欄位說明
+                </md-button>
+                <md-button aria-label="資料欄位說明" href="/files/explan.xlsx">
+                    <md-icon md-svg-icon="file-download"></md-icon>
+                    資料欄位說明
+                </md-button>
+                <md-button aria-label="預覽表格" ng-click="toggleSidenavRight()">
+                    <md-icon md-svg-icon="settings"></md-icon>
+                    預覽表格
+                </md-button>
+                <span flex></span>
+                <md-menu>
+                    <md-button aria-label="表單大小" ng-click="$mdOpenMenu($event)">
+                        表單大小
+                    </md-button>
+                    <md-menu-content width="4">
+                        <md-menu-item><md-button aria-label="中" ng-click="tableSize=''"><i class="table icon"></i>中</md-button></md-menu-item>
+                        <md-menu-item><md-button aria-label="大" ng-click="tableSize='large'"><i class="table large icon"></i>大</md-button></md-menu-item>
+                    </md-menu-content>
+                </md-menu>
+            </h1>
+        </md-toolbar>
         <div class="ui basic segment" ng-class="{loading: loading}">
-            <div class="ui tabular menu">
-                <a class="item" ng-class="{active: page == 'explan'}" ng-click="page='explan'">資料欄位說明 </a>
-                <a class="item" ng-class="{active: page == 'editor'}" ng-click="page='editor'">串聯其他表單 </a>
-                <a class="item" ng-class="{active: page == 'resoult'}" ng-click="page='resoult'">分析結果 </a>
-                <div class="right menu">
-                    <a class="item" ng-class="{active:tableSize==''}" ng-click="tableSize=''"><i class="table icon"></i>中</a>
-                    <a class="item" ng-class="{active:tableSize=='large'}" ng-click="tableSize='large'"><i class="table large icon"></i>大</a>
-                </div>
-            </div>
 
-            <div style="display: -webkit-flex;display: flex">
+        <md-tabs md-dynamic-height md-selected="page">
+            <md-tab label="串聯其他表單">
+                <md-content class="md-padding" layout="row" style="height:100%">
+                <div flex="50">
+                <table class="ui teal collapsing celled structured very compact table" ng-class="{small:tableSize=='small', large:tableSize=='large'}" style="background: #F5F5F5">
+                    <thead>
+                        <tr>
+                            <th class="center aligned">
+                                <div class="ui mini button" ng-click="showTabDialog($event)" style="background: #ECBE13;color: white"><i class="icon help outline"></i>需要幫忙</div>
+                            </th>
+                            <th>發展歷程</th>
+                            <th>表單名稱</th>
+                            <th colspan="2" ng-if="structClassShow">選擇欄位</th>
+                            <th ng-if="structFilterShow">選擇分析目標或篩選條件</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
-            <div style="-webkit-flex: initial;flex: initial;min-width: 300px" ng-show="page == 'explan'">
-            <table class="ui teal collapsing celled structured very compact table" ng-class="{small:tableSize=='small', large:tableSize=='large'}" style="background: #F5F5F5">
-                <thead>
-                    <tr>
-                        <th>師培及就業歷程</th>
-                        <th>表單名稱</th>
-                        <th colspan="2">欄位名稱</th>
-                        <th>欄位說明</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                <tr ng-repeat-start="(index, explan) in explans" class="no-animate">
-
-                    <td rowspan="{{ getExplanSpan(explans.slice(index, index+structClass[explan.title].size)) }}" ng-if="structClass[explan.title]">{{ structClass[explan.title].title }}</td>
-
-                    <td rowspan="{{ explan.expanded ? explan.explanations.length : 1 }}">{{ explan.title }}</td>
-
-                    <td class="no-animate" rowspan="{{ explan.expanded ? explan.explanations.length : 1 }}">
-                        <div class="compact ui icon mini basic vertical buttons" ng-if="!explan.disabled || explan.expanded">
-                            <button class="ui button" ng-if="!explan.expanded" ng-click="explan.expanded=true">
-                                <i class="expand icon"></i>
-                            </button>
-                            <button class="ui button" ng-if="explan.expanded" ng-click="explan.expanded=false">
-                                <i class="compress icon"></i>
-                            </button>
-                        </div>
-                    </td>
-
-                    <td class="no-animate" ng-if="explan.expanded">
-                        {{ explan.explanations[0].title }}
-                    </td>
-                    <td class="no-animate" ng-if="explan.expanded">
-                        {{ explanation.content }}
-                    </td>
-                    <td class="no-animate" ng-if="!explan.expanded">
-                        <div style="width:180px;text-overflow: ellipsis;overflow:hidden !important;white-space: nowrap">
-                            <span class="item" ng-repeat="explanation in explan.explanations">{{ explanation.title }}{{ $last ? '' : ',' }}</span>
-                        </div>
-                    </td>
-                    <td class="no-animate" ng-if="!explan.expanded">
-                    </td>
-                </tr>
-
-                <tr ng-repeat-end ng-repeat="explanation in explan.explanations" ng-if="!$first && explan.expanded" class="no-animate">
-
-                    <td>
-                        {{ explanation.title }}
-                    </td>
-                    <td>
-                        {{ explanation.content }}
-                    </td>
-                </tr>
-
-            </tbody>
-            </table>
-            </div>
-
-            <div ng-show="page == 'explan'" style="-webkit-flex: 1;flex: 1;margin-left:10px">
-                <button class="compact ui olive icon large button" style="background: #93A42A;color: white">
-                <a href="/files/explan.xlsx" style="color: white">
-                    <i class="download icon"></i> 下載
-                </a>
-                </button>
-            </div>
-
-            <div style="-webkit-flex: initial;flex: initial;min-width: 300px" ng-show="page == 'editor'">
-            <table class="ui teal collapsing celled structured very compact table" ng-class="{small:tableSize=='small', large:tableSize=='large'}" style="background: #F5F5F5">
-                <thead>
-                    <tr>
-                        <th class="center aligned">
-                            <div class="ui mini button" ng-click="showTabDialog($event)" style="background: #ECBE13;color: white"><i class="icon help outline"></i>需要幫忙</div>
-                        </th>
-                        <th>發展歷程</th>
-                        <th>表單名稱</th>
-                        <th colspan="2" ng-if="structClassShow">選擇欄位</th>
-                        <th ng-if="structFilterShow">選擇分析目標或篩選條件</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr ng-repeat-start="(index, struct) in structs" ng-hide="index==idType" class="no-animate">
-                        <td rowspan="{{ getRowSpan(structs) }}" ng-if="$first" class="no-animate">
-                            <button class="compact ui olive icon large button" ng-click="addNewCalStruct(structs);destroyPopup()" style="background: #93A42A;color: white">
-                                <i name="needHelp4" class="play icon"></i> 開始計算
-                            </button>
-                        </td>
-                        <td rowspan="{{ structClass[struct.title].expanded ? getRowSpan(structs.slice(index, index+structClass[struct.title].size)) : 1 }}" ng-if="structClass[struct.title]" class="no-animate">
-                            <a href="javascript:void(0)" ng-click="showStruct(struct.title,structClass[struct.title].title)">
-                                {{ structClass[struct.title].title }}
-                            </a>
-                        </td>
-
-                        <td ng-if="!struct.classExpanded && structClass[struct.title]" class="no-animate">
-                            <div style="width:180px;text-overflow: ellipsis;overflow:hidden !important;white-space: nowrap">
-                                <span class="item" ng-repeat="struct in structInClass[structClass[struct.title].title].structs">{{ struct.title }}{{ $last ? '' : ',' }}</span>
-                            </div>
-                        </td>
-
-                        <td ng-if="struct.classExpanded" rowspan="{{ struct.expanded ? struct.rows.length : 1 }}" class="no-animate">
-                            <a href="javascript:void(0)" ng-click="showFilter(struct)">
-                                {{ struct.title }}
-                            </a>
-                            <div class="compact ui icon mini basic vertical buttons">
-                                <button class="ui button" ng-if="!struct.disabled" ng-click="toggleStruct(struct)" >
-                                    <i name="needHelp2" class="checkmark icon" ng-class="{green: !struct.disabled && struct.selected}"></i>
+                        <tr ng-repeat-start="(index, struct) in structs" ng-hide="index==idType" class="no-animate">
+                            <td rowspan="{{ getRowSpan(structs) }}" ng-if="$first" class="no-animate">
+                                <button class="compact ui olive icon large button" ng-click="addNewCalStruct(structs);destroyPopup()" style="background: #93A42A;color: white">
+                                    <i name="needHelp4" class="play icon"></i> 開始計算
                                 </button>
-                            </div>
-                        </td>
+                            </td>
+                            <td rowspan="{{ structClass[struct.title].expanded ? getRowSpan(structs.slice(index, index+structClass[struct.title].size)) : 1 }}" ng-if="structClass[struct.title]" class="no-animate">
+                                <a href="javascript:void(0)" ng-click="showStruct(struct.title,structClass[struct.title].title)">
+                                    {{ structClass[struct.title].title }}
+                                </a>
+                            </td>
 
-                        <td colspan="2" ng-if="structClassShow && !struct.classExpanded && structClass[struct.title]" class="no-animate">
-                        </td>
-                        <td ng-if="structFilterShow && !struct.classExpanded && structClass[struct.title]" class="no-animate">
-                        </td>
-
-                        <td rowspan="{{ struct.expanded ? struct.rows.length : 1 }}" ng-if="struct.expanded" class="no-animate">
-                            <div class="compact ui icon mini basic vertical buttons" ng-if="!struct.disabled || struct.expanded">
-                                <button class="ui button" ng-click="struct.expanded=false">
-                                    <i class="compress icon"></i>
-                                </button>
-                            </div>
-                        </td>
-
-                        <td ng-if="struct.expanded && struct.classExpanded" ng-class="{negative: struct.rows[0].disabled, disabled: struct.rows[0].disabled}" class="no-animate">
-                            <i class="icon close" ng-if="struct.rows[0].disabled"></i>
-                            <div class="ui checkbox" >
-                                <input id="{{ ::$id }}" type="checkbox" ng-model="struct.rows[0].selected" ng-change="toggleColumn(struct.rows[0], struct)" ng-click="needHelp2()" class="hidden"  name="needHelp5">
-                                <label for="{{ ::$id }}" >{{ struct.rows[0].title }}</label>
-                            </div>
-                        </td>
-
-                        <td ng-if="!struct.expanded && struct.classExpanded" colspan="{{struct.expanded ? 1 : 2}}" class="no-animate">
-                            <div style="width:180px;text-overflow: ellipsis;overflow:hidden !important;white-space: nowrap">
-                                <span id="needHelp" class="item" ng-repeat="row in struct.rows">{{ row.title }}{{ $last ? '' : ',' }}</span>
-                            </div>
-                        </td>
-
-                        <td ng-class="{disabled: struct.rows[0].disabled}" ng-if="struct.classExpanded && structFilterShow" class="no-animate">
-                            <md-input-container ng-if="!struct.rows[0].disabled && struct.expanded">
-                                <md-select placeholder="{{ struct.rows[0].title }}" ng-model="struct.rows[0].filter" md-on-open="loadItem(struct.title,struct.rows[0].title)" multiple ng-change="setFilter(struct)">
-                                    <md-progress-circular ng-if="!struct.rows[0].items" md-diameter="20px"></md-progress-circular>
-                                    <md-optgroup >
-                                        <md-option ng-value="item" ng-repeat="item in struct.rows[0].items" ng-click="needHelp4()">{{item}}</md-option>
-                                    </md-optgroup>
-                                </md-select>
-                            </md-input-container>
-                        </td>
-                    </tr>
-
-                    <tr ng-repeat-end ng-repeat="row in struct.rows" ng-if="!$first && struct.expanded" ng-hide="index==idType">
-
-                        <td ng-class="{negative: row.disabled, disabled: row.disabled}" class="no-animate">
-                            <i class="icon close" ng-if="row.disabled"></i>
-                            <div class="ui checkbox">
-                                <input id="{{ ::$id }}" type="checkbox" ng-model="row.selected" ng-change="toggleColumn(row, struct)" class="hidden" ng-click="needHelp2()">
-                                <label for="{{ ::$id }}">{{ row.title }}</label>
-                            </div>
-                        </td>
-
-                        <td ng-class="{disabled: row.disabled}" ng-if="structFilterShow" >
-                            <div ng-if="row.type=='slider'">
-                                {{ row.filter[0] }}年至{{ row.filter[1] }}
-                                <div ng-slider ng-model="row.filter" items="row.items"></div>
-                            </div>
-                            <md-input-container ng-if="!row.disabled && row.type!='slider'">
-                                <md-select placeholder="{{ row.title }}" ng-model="row.filter" md-on-open="loadItem(struct.title,row.title)" multiple ng-change="setFilter(struct)">
-                                    <md-progress-circular ng-if="!row.items" md-diameter="20px"></md-progress-circular>
-                                    <md-optgroup >
-                                        <md-option ng-value="item" ng-repeat="item in row.items" >{{item}}</md-option>
-                                    </md-optgroup>
-                                </md-select>
-                            </md-input-container>
-                        </td>
-
-                    </tr>
-
-                </tbody>
-            </table>
-            </div>
-
-            <div style="-webkit-flex: 1;flex: 1;margin-left:10px" ng-show="page == 'editor'">
-            <table class="ui collapsing celled structured very compact bottom attached table" ng-class="{small:tableSize=='small', large:tableSize=='large'}">
-                <thead>
-                    <tr>
-                        <th colspan="{{ preCalculations.length+columns.length }}" style="background: #2FB8AC;color: white;text-align: center">預覽</th>
-                    </tr>
-                    <tr>
-                        <th ng-repeat="column in columns">{{ column.title }}</th>
-                        <th ng-repeat="calculation in preCalculations" class="top aligned" style="max-width:200px">
-                            <div ng-repeat="struct in calculation.structs">
-                                {{ struct.title }}
-                                <div class="ui label" ng-repeat="row in struct.rows">
-                                    {{ row.title }} - {{ row.filter }}
+                            <td ng-if="!struct.classExpanded && structClass[struct.title]" class="no-animate">
+                                <div style="width:180px;text-overflow: ellipsis;overflow:hidden !important;white-space: nowrap">
+                                    <span class="item" ng-repeat="struct in structInClass[structClass[struct.title].title].structs">{{ struct.title }}{{ $last ? '' : ',' }}</span>
                                 </div>
-                            </div>
-                            單位：人
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="level in levels">
-                        <td ng-repeat="parent in level.parents" rowspan="{{ parent.size }}" ng-if="parent.head">{{ parent.title }}</td>
-                        <td>{{ level.title }}</td>
-                        <td ng-repeat="calculation in preCalculations"></td>
-                    </tr>
-                    <tr ng-if="preCalculations.length>0">
-                        <td colspan="{{ columns.length }}">總和</td>
-                        <td ng-repeat="calculation in preCalculations"></td>
-                    </tr>
-                </tbody>
-            </table>
-            </div>
-            </div>
+                            </td>
 
-            <table class="ui teal collapsing celled structured very compact bottom attached table" ng-class="{small:tableSize=='small', large:tableSize=='large'}" ng-show="page == 'resoult'">
+                            <td ng-if="struct.classExpanded" rowspan="{{ struct.expanded ? struct.rows.length : 1 }}" class="no-animate">
+                                <a href="javascript:void(0)" ng-click="showFilter(struct)">
+                                    {{ struct.title }}
+                                </a>
+                                <div class="compact ui icon mini basic vertical buttons">
+                                    <button class="ui button" ng-if="!struct.disabled" ng-click="toggleStruct(struct)" >
+                                        <i name="needHelp2" class="checkmark icon" ng-class="{green: !struct.disabled && struct.selected}"></i>
+                                    </button>
+                                </div>
+                            </td>
+
+                            <td colspan="2" ng-if="structClassShow && !struct.classExpanded && structClass[struct.title]" class="no-animate">
+                            </td>
+                            <td ng-if="structFilterShow && !struct.classExpanded && structClass[struct.title]" class="no-animate">
+                            </td>
+
+                            <td rowspan="{{ struct.expanded ? struct.rows.length : 1 }}" ng-if="struct.expanded" class="no-animate">
+                                <div class="compact ui icon mini basic vertical buttons" ng-if="!struct.disabled || struct.expanded">
+                                    <button class="ui button" ng-click="struct.expanded=false">
+                                        <i class="compress icon"></i>
+                                    </button>
+                                </div>
+                            </td>
+
+                            <td ng-if="struct.expanded && struct.classExpanded" ng-class="{negative: struct.rows[0].disabled, disabled: struct.rows[0].disabled}" class="no-animate">
+                                <i class="icon close" ng-if="struct.rows[0].disabled"></i>
+                                <div class="ui checkbox" >
+                                    <input id="{{ ::$id }}" type="checkbox" ng-model="struct.rows[0].selected" ng-change="toggleColumn(struct.rows[0], struct)" ng-click="needHelp2()" class="hidden"  name="needHelp5">
+                                    <label for="{{ ::$id }}" >{{ struct.rows[0].title }}</label>
+                                </div>
+                            </td>
+
+                            <td ng-if="!struct.expanded && struct.classExpanded" colspan="{{struct.expanded ? 1 : 2}}" class="no-animate">
+                                <div style="width:180px;text-overflow: ellipsis;overflow:hidden !important;white-space: nowrap">
+                                    <span id="needHelp" class="item" ng-repeat="row in struct.rows">{{ row.title }}{{ $last ? '' : ',' }}</span>
+                                </div>
+                            </td>
+
+                            <td ng-class="{disabled: struct.rows[0].disabled}" ng-if="struct.classExpanded && structFilterShow" class="no-animate">
+                                <md-input-container ng-if="!struct.rows[0].disabled && struct.expanded">
+                                    <md-select placeholder="{{ struct.rows[0].title }}" ng-model="struct.rows[0].filter" md-on-open="loadItem(struct.title,struct.rows[0].title)" multiple ng-change="setFilter(struct)">
+                                        <md-progress-circular ng-if="!struct.rows[0].items" md-diameter="20px"></md-progress-circular>
+                                        <md-optgroup >
+                                            <md-option ng-value="item" ng-repeat="item in struct.rows[0].items" ng-click="needHelp4()">{{item}}</md-option>
+                                        </md-optgroup>
+                                    </md-select>
+                                </md-input-container>
+                            </td>
+                        </tr>
+
+                        <tr ng-repeat-end ng-repeat="row in struct.rows" ng-if="!$first && struct.expanded" ng-hide="index==idType">
+
+                            <td ng-class="{negative: row.disabled, disabled: row.disabled}" class="no-animate">
+                                <i class="icon close" ng-if="row.disabled"></i>
+                                <div class="ui checkbox">
+                                    <input id="{{ ::$id }}" type="checkbox" ng-model="row.selected" ng-change="toggleColumn(row, struct)" class="hidden" ng-click="needHelp2()">
+                                    <label for="{{ ::$id }}">{{ row.title }}</label>
+                                </div>
+                            </td>
+
+                            <td ng-class="{disabled: row.disabled}" ng-if="structFilterShow" >
+                                <div ng-if="row.type=='slider'">
+                                    {{ row.filter[0] }}年至{{ row.filter[1] }}
+                                    <div ng-slider ng-model="row.filter" items="row.items"></div>
+                                </div>
+                                <md-input-container ng-if="!row.disabled && row.type!='slider'">
+                                    <md-select placeholder="{{ row.title }}" ng-model="row.filter" md-on-open="loadItem(struct.title,row.title)" multiple ng-change="setFilter(struct)">
+                                        <md-progress-circular ng-if="!row.items" md-diameter="20px"></md-progress-circular>
+                                        <md-optgroup >
+                                            <md-option ng-value="item" ng-repeat="item in row.items" >{{item}}</md-option>
+                                        </md-optgroup>
+                                    </md-select>
+                                </md-input-container>
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+                </table>
+                </div>
+                <div flex="50" layout="column" style="height:100%">
+
+                </div>
+                </md-content>
+            </md-tab>
+            <md-tab label="分析結果">
+                <md-content class="md-padding">
+
+                </md-content>
+            </md-tab>
+        </md-tabs>
+
+            <table class="ui teal collapsing celled structured very compact bottom attached table" ng-class="{small:tableSize=='small', large:tableSize=='large'}" ng-show="page == 1">
                 <a id="resultTable"></a>
                 <thead>
                     <tr>
@@ -471,6 +408,39 @@
             </table>
         </div>
     </div>
+
+    <md-sidenav class="md-sidenav-right" md-is-open="mdSidenav.right" layout="column" style="min-width: 800px">
+        <md-toolbar class="md-theme-indigo">
+            <h1 class="md-toolbar-tools">預覽</h1>
+        </md-toolbar>
+        <table flex="50" class="ui collapsing celled structured very compact bottom attached table" ng-class="{small:tableSize=='small', large:tableSize=='large'}">
+            <thead>
+                <tr>
+                    <th ng-repeat="column in columns">{{ column.title }}</th>
+                    <th ng-repeat="calculation in preCalculations" class="top aligned" style="max-width:200px">
+                        <div ng-repeat="struct in calculation.structs">
+                            {{ struct.title }}
+                            <div class="ui label" ng-repeat="row in struct.rows">
+                                {{ row.title }} - {{ row.filter }}
+                            </div>
+                        </div>
+                        單位：人
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="level in levels">
+                    <td ng-repeat="parent in level.parents" rowspan="{{ parent.size }}" ng-if="parent.head">{{ parent.title }}</td>
+                    <td>{{ level.title }}</td>
+                    <td ng-repeat="calculation in preCalculations"></td>
+                </tr>
+                <tr ng-if="preCalculations.length>0">
+                    <td colspan="{{ columns.length }}">總和</td>
+                    <td ng-repeat="calculation in preCalculations"></td>
+                </tr>
+            </tbody>
+        </table>
+    </md-sidenav>
 </md-content>
 
 <script src="/js/jquery-ui/1.11.4/jquery-ui.min.js"></script>
@@ -480,7 +450,7 @@
 
 <script>
 app.controller('statusController', function($scope, $http, $filter, $timeout, $location, $anchorScroll, $mdDialog) {
-    $scope.page = 'editor';
+    $scope.page = 0;
     $scope.helpChoosen = false;
     $scope.colPercent = false;
     $scope.rowPercent = false;
@@ -539,9 +509,16 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         console.log(e);
     });
 
-    $scope.mdSidenav = false;
+    $scope.mdSidenav = {left:false, right: false};
+    $scope.toggleSidenav = function() {
+        $scope.mdSidenav.left = !$scope.mdSidenav.left;
+    };
+
+    $scope.toggleSidenavRight = function() {
+        $scope.mdSidenav.right = !$scope.mdSidenav.right;
+    };
     $timeout(function() {
-        $scope.mdSidenav = true;
+        $scope.mdSidenav.left = true;
     }, 100);
 
     $scope.explans = [];
@@ -921,7 +898,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.gotoResultTable = function() {
-        $scope.page = 'resoult';
+        $scope.page = 1;
         //$location.hash('resultTable');
         //$anchorScroll();
     };
@@ -1124,15 +1101,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         struct.expanded=true;
     };
 
-    $scope.getExplanSpan = function(explans) {
-        var explanSpan = explans.length - $filter('filter')(explans, {expanded: true}).length;
-        for (i in explans) {
-            if (explans[i].expanded) {
-                explanSpan += explans[i].explanations.length;
-            };
-        }
-        return explanSpan;
-    };
+
 
     $scope.selectAllSchool = function(){
         if (JSON.stringify($scope.selectSchool) === JSON.stringify($scope.schools) ){
@@ -1160,6 +1129,43 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         })
     };
 
+
+    function explainController(scope) {
+        scope.explans = [];
+        scope.structClass = $scope.structClass;
+
+        $http({method: 'POST', url: 'getExplans', data:{}})
+        .success(function(data, status, headers, config) {
+            console.log(data);
+            scope.explans = data;
+        }).error(function(e){
+            console.log(e);
+        });
+
+        scope.getExplanSpan = function(explans) {
+            var explanSpan = explans.length - $filter('filter')(explans, {expanded: true}).length;
+            for (i in explans) {
+                if (explans[i].expanded) {
+                    explanSpan += explans[i].explanations.length;
+                };
+            }
+            return explanSpan;
+        };
+    }
+
+    $scope.showExplain = function(ev) {
+        $mdDialog.show({
+            controller: explainController,
+            templateUrl: 'templateExplain',
+            clickOutsideToClose: true
+        })
+        .then(function(answer) {
+            $scope.status = 'You said the information was "' + answer + '".';
+        }, function() {
+            $scope.status = 'You cancelled the dialog.';
+        });
+    };
+
     function DialogController($scope, $mdDialog) {
         $scope.hide = function() {
           $mdDialog.hide();
@@ -1174,21 +1180,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         };
     }
 })
-/*.directive('ngMutiDropdownMenu', function($timeout, $window) {
-    return {
-        restrict: 'A',
-        scope: {},
-        require: 'ngModel',
-        link: function(scope, element, attrs, ngModelCtrl) {
-            element.dropdown({
-                allowAdditions: true,
-                onChange: function(value, text, $choice) {
-                    ngModelCtrl.$setViewValue(value);
-                }
-            });
-        }
-    };
-})*/
+
 .directive('ngSlider', function($timeout, $window) {
     return {
         restrict: 'A',
@@ -1214,6 +1206,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
 })
+
 .directive('contenteditable', function(){
     return {
         restrict: 'A',
@@ -1229,29 +1222,5 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
             });
         }
     };
-})
-/*.directive('ngSemanticDropdownMenu', function($timeout, $window) {
-    return {
-        restrict: 'A',
-        scope: {
-            ngChange: '&'
-        },
-        require: 'ngModel',
-        link: function(scope, element, attrs, ngModelCtrl) {
-            element.dropdown({
-                transition: 'drop',
-                onChange: function(value, text, $choice) {
-                    if (value != scope.ngModel) {
-                        scope.$apply(function() {
-                            ngModelCtrl.$setViewValue(value);
-                        });
-                        scope.ngChange();
-                    };
-                }
-            });
-        },
-
-    };
-
-})*/;
+});
 </script>
