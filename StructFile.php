@@ -46,6 +46,16 @@ class StructFile extends CommFile {
         return 'files.struct.templateHelp';
     }
 
+    public function templateExplain()
+    {
+        return View::make('files.struct.templateExplain');
+    }
+
+    public function templateQuickStart()
+    {
+        return View::make('files.struct.quickStart');
+    }
+
     public function organize()
     {
         return 'files.struct.organize';
