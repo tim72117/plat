@@ -27,17 +27,17 @@
                     ng-false-value="'0'"
                     ng-change="setUpdating(mdSidenav.editing)"
                     aria-label="column.title">{{column.title}}</md-checkbox>
-                <md-input-container ng-if="column.rules!='bool' && column.answers.length > 0">
-                <label>{{column.title}}</label>
-                <md-select
-                    ng-model="mdSidenav.editing['C' + column.id]"
-                    ng-disabled="column.readonly"
-                    ng-change="setUpdating(mdSidenav.editing)"
-                    aria-label="column.title">
-                    <md-option ng-repeat="answer in column.answers" ng-value="answer.value">
-                        {{answer.title}}
-                    </md-option>
-                </md-select>
+                <md-input-container class="md-block" ng-if="column.rules!='bool' && column.answers.length > 0">
+                    <label>{{column.title}}</label>
+                    <md-select
+                        ng-model="mdSidenav.editing['C' + column.id]"
+                        ng-disabled="column.readonly"
+                        ng-change="setUpdating(mdSidenav.editing)"
+                        aria-label="column.title">
+                        <md-option ng-repeat="answer in column.answers" ng-value="answer.value">
+                            {{answer.title}}
+                        </md-option>
+                    </md-select>
                 </md-input-container>
             </div>
         </md-content>
