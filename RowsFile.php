@@ -22,9 +22,9 @@ class RowsFile extends CommFile {
     protected $temp;
 
     public $rules = [
-        'gender'      => ['sort' => 1,  'type' => 'tinyInteger',             'title' => '性別: 1.男 2.女',               'validator' => 'in:1,2', 'editor' => 'menu', 'answers' => ['1' => '男', '2' => '女']],
+        'gender'      => ['sort' => 1,  'type' => 'tinyInteger',             'title' => '性別: 1.男 2.女',               'validator' => 'in:1,2', 'editor' => 'menu'],
         'gender_id'   => ['sort' => 2,  'type' => 'tinyInteger',             'title' => '性別: 1.男 2.女(身分證第2碼)',  'validator' => 'in:1,2'],
-        'bool'        => ['sort' => 3,  'type' => 'boolean',                 'title' => '是(1)與否(0)',                  'validator' => 'boolean'],
+        'bool'        => ['sort' => 3,  'type' => 'boolean',                 'title' => '是(1)與否(0)',                  'validator' => 'boolean', 'editor' => 'menu'],
         'stdidnumber' => ['sort' => 4,  'type' => 'string',   'size' => 10,  'title' => '身分證',                        'function' => 'stdidnumber'],
         'email'       => ['sort' => 5,  'type' => 'string',   'size' => 80,  'title' => '信箱',                          'validator' => 'email'],
         'date_six'    => ['sort' => 6,  'type' => 'string',   'size' => 6,   'title' => '日期(yymmdd)',                  'validator' => ['regex:/^([0-9][0-9])(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$/']],
@@ -57,9 +57,9 @@ class RowsFile extends CommFile {
         'string_dot'       => ['sort' => 32, 'type' => 'string',   'size' => 100, 'title' => '文字(逗號分隔)',            'regex'     => '/^[\x{0080}-\x{00FF},]+$/'],
         'float_hundred'    => ['sort' => 22, 'type' => 'string',   'size' => 8,   'title' => '小數(1-100,-7)',            'validator' => ['regex:/^(([0-9]|[1-9][0-9])(\\.[0-9]{1,5})?|100|-7)$/']],
         'yyy'              => ['sort' => 33, 'type' => 'string',   'size' => 3,   'title' => '民國年',                    'validator' => ['regex:/^([1-9]|[1-9][0-9]|[1][0-1][0-9])$/']],
-        'menu'             => ['sort' => 34, 'type' => 'tinyInteger',             'title' => '選單',                      'menu' => ''],
-        'counties'         => ['sort' => 35, 'type' => 'string',   'size' => 2,   'title' => '縣市(六都改制)',             'function'  => 'counties'],
-        'gateway'          => ['sort' => 36, 'type' => 'tinyInteger',             'title' => '師資生核定培育管道',          'validator' => 'in:0,1,2', 'editor' => 'menu', 'answers' => ['0' => '無', '1' => '師培系所之師資生', '2' => '師培中心之師資生']],
+        'menu'             => ['sort' => 34, 'type' => 'tinyInteger',             'title' => '選單',                      'menu' => '', 'editor' => 'menu'],
+        'counties'         => ['sort' => 35, 'type' => 'string',   'size' => 2,   'title' => '縣市(六都改制)',             'function'  => 'counties', 'editor' => 'menu'],
+        'gateway'          => ['sort' => 36, 'type' => 'tinyInteger',             'title' => '師資生核定培育管道',          'validator' => 'in:0,1,2', 'editor' => 'menu'],
     ];
 
     /**
@@ -195,7 +195,7 @@ class RowsFile extends CommFile {
     {
         $this->init_sheets();
 
-        $sheets = $this->file->sheets()->with(['tables.columns.answers'])->get()->each(function($sheet) {
+        $sheets = $this->file->sheets()->with(['tables.columns'])->get()->each(function($sheet) {
             $sheet->tables->each(function($table) use($sheet) {
                 !$sheet->editable && $this->table_construct($table);
                 if ($this->has_table($table)) {
@@ -214,9 +214,7 @@ class RowsFile extends CommFile {
 
         $sheets->first()->tables->first()->columns->each(function($column) {
             if (isset($this->rules[$column->rules]['editor']) && $this->rules[$column->rules]['editor'] == 'menu') {
-                foreach ($this->rules[$column->rules]['answers'] as $value => $title) {
-                    $column->answers->push(['value' => $value, 'title' => $title]);
-                }
+                $answers = $this->setAnswers($column);
             }
         });
 
@@ -708,6 +706,39 @@ class RowsFile extends CommFile {
             },
         ];
         return $checkers[$name];
+    }
+
+    public function setAnswers($column)
+    {
+        switch ($column->rules) {
+            case 'counties':
+                $items = DB::table('plat_public.dbo.lists')->lists('name', 'code');
+                break;
+
+            case 'gender':
+                $items =  ['1' => '男', '2' => '女'];
+                break;
+
+            case 'bool':
+                $items = ['0' => '否', '1' => '是'];
+                break;
+
+            case 'gateway':
+                $items = ['0' => '無', '1' => '師培系所之師資生', '2' => '師培中心之師資生'];
+                break;
+
+            case 'menu':
+                $column->answers->lists('title', 'value');
+                $items = [];
+                break;
+
+            default:
+                break;
+        }
+
+        foreach ($items as $value => $title) {
+            $column->answers->push(['value' => $value, 'title' => $title]);
+        }
     }
 
     /**
