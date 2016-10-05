@@ -12,7 +12,8 @@
         <md-content layout-padding>
             <div ng-repeat="column in file.sheets[0].tables[0].columns">
                 <md-input-container class="md-block" ng-if="column.rules!='bool' && !column.answers">
-                    <input ng-model="mdSidenav.editing['C' + column.id]" ng-disabled="column.readonly" placeholder="{{column.title}}" ng-change="setUpdating(mdSidenav.editing)">
+                    <label>{{column.title}}</label>
+                    <input ng-model="mdSidenav.editing['C' + column.id]" ng-disabled="column.readonly" ng-change="setUpdating(mdSidenav.editing)">
                     <div class="md-input-messages-animation" ng-repeat="(id, errors) in mdSidenav.editing.errors" ng-if="id == column.id">
                         <div class="no-animate" ng-repeat="error in errors">
                             {{error}}
@@ -25,16 +26,19 @@
                     ng-true-value="'1'"
                     ng-false-value="'0'"
                     ng-change="setUpdating(mdSidenav.editing)"
-                    aria-label="column.name">{{column.title}}</md-checkbox>
-                <md-select ng-if="column.answers.length > 0"
+                    aria-label="column.title">{{column.title}}</md-checkbox>
+                <md-input-container ng-if="column.rules!='bool' && column.answers.length > 0">
+                <label>{{column.title}}</label>
+                <md-select
                     ng-model="mdSidenav.editing['C' + column.id]"
                     ng-disabled="column.readonly"
                     ng-change="setUpdating(mdSidenav.editing)"
-                    aria-label="column.name">
-                    <md-option ng-repeat="anaser in column.answers" ng-value="anaser.value">
-                        {{anaser.title}}
+                    aria-label="column.title">
+                    <md-option ng-repeat="answer in column.answers" ng-value="answer.value">
+                        {{answer.title}}
                     </md-option>
                 </md-select>
+                </md-input-container>
             </div>
         </md-content>
     </md-sidenav>
