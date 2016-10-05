@@ -1,176 +1,171 @@
-<div ng-cloak ng-controller="statusController">
 
-    <div class="ui basic segment" style="width: 100%">
-        <section layout="row" flex style="width: 22%;float: left">
-            <md-sidenav class="md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" md-disable-backdrop md-whiteframe="4" style="width: 100%">
-                <md-toolbar class="md-theme-indigo">
-                    <h1 class="md-toolbar-tools" style="font-weight: bold;background: #046D8B;color: white" ng-if="academicYearType==1">{{progress[academicYearType]}}</h1>
-                    <h1 class="md-toolbar-tools" style="font-weight: bold;background: #CB0051;color: white" ng-if="academicYearType==2">{{progress[academicYearType]}}</h1>
-                    <h1 class="md-toolbar-tools" style="font-weight: bold;background: #4A970A;color: white" ng-if="academicYearType==3">{{progress[academicYearType]}}</h1>
-                </md-toolbar>
-                <md-content layout-padding style="overflow-y: auto;max-height:10%;max-height: 300px">
-                    <div class="ui ribbon label" style="background: #309292;color: white">
-                        <h4>選擇分析學校</h4>
-                    </div>
-                    <div class="item" align="center">
+<md-content ng-cloak ng-controller="statusController" layout="row" style="height:100%">
+
+    <md-sidenav class="md-sidenav-left" md-is-open="mdSidenav" layout="column" style="min-width: 500px">
+        <md-toolbar class="md-theme-indigo">
+            <h1 class="md-toolbar-tools" style="font-weight: bold;background: #046D8B;color: white" ng-if="academicYearType==1">{{progress[academicYearType]}}</h1>
+            <h1 class="md-toolbar-tools" style="font-weight: bold;background: #CB0051;color: white" ng-if="academicYearType==2">{{progress[academicYearType]}}</h1>
+            <h1 class="md-toolbar-tools" style="font-weight: bold;background: #4A970A;color: white" ng-if="academicYearType==3">{{progress[academicYearType]}}</h1>
+        </md-toolbar>
+        <div layout-padding>
+            <div class="ui ribbon label" style="background: #309292;color: white">
+                <h4>選擇分析學校</h4>
+            </div>
+            <div class="item" align="center">
+            <md-input-container>
+                    <label>學校</label>
+                    <md-select ng-model="selectSchool" aria-label="schools" multiple >
+                        <md-button layout-fill value="all" ng-click="selectAllSchool()">全選</md-button>
+                        <md-optgroup >
+                            <md-option ng-value="school" ng-repeat="school in schools">{{school.name}}</md-option>
+                        </md-optgroup>
+                    </md-select>
+            </md-input-container>
+            </div>
+        </div>
+        <div layout-padding>
+            <div class="ui ribbon label" style="background: #309292;color: white">
+                <h4>選擇學年度</h4>
+            </div>
+            <div class="item" align="center" ng-if="academicYearType==1">
+                <p>占教育部核定名額學年度</p>
+                <p>自
                     <md-input-container>
-                            <label>學校</label>
-                            <md-select ng-model="selectSchool" aria-label="schools" multiple >
-                                <md-button layout-fill value="all" ng-click="selectAllSchool()">全選</md-button>
-                                <md-optgroup >
-                                    <md-option ng-value="school" ng-repeat="school in schools">{{school.name}}</md-option>
-                                </md-optgroup>
-                            </md-select>
+                        <md-select placeholder="學年度" ng-model="academicYearStart" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
+                            <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
+                            <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
+                        </md-select>
                     </md-input-container>
-                    </div>
-                </md-content>
-                <md-content layout-padding>
-                    <div class="ui ribbon label" style="background: #309292;color: white">
-                        <h4>選擇學年度</h4>
-                    </div>
-                    <div class="item" align="center" ng-if="academicYearType==1">
-                        <p>占教育部核定名額學年度</p>
-                        <p>自
-                            <md-input-container>
-                                <md-select placeholder="學年度" ng-model="academicYearStart" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
-                                    <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
-                                    <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
+                學年度起</p>
+                <p>至
+                    <md-input-container>
+                        <md-select placeholder="學年度" ng-model="academicYearEnd" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
+                            <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
+                            <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
+                        </md-select>
+                    </md-input-container>
+                學年度止</p>
+            </div>
+            <div class="item" align="center" ng-if="academicYearType==2">
+                <p>發證年度</p>
+                <p>自
+                    <md-input-container>
+                        <md-select placeholder="年" ng-model="academicYearStart" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
+                            <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
+                            <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
+                        </md-select>
+                    </md-input-container>
+                年起</p>
+                <p>至
+                    <md-input-container>
+                        <md-select placeholder="年" ng-model="academicYearEnd" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
+                            <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
+                            <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
+                        </md-select>
+                    </md-input-container>
+                年止</p>
+            </div>
+            <div class="item" align="center" ng-if="academicYearType==3">
+                <p>參與教育實習學年度</p>
+                <p>自
+                    <md-input-container>
+                        <md-select placeholder="學年度" ng-model="academicYearStart" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
+                            <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
+                            <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
+                        </md-select>
+                    </md-input-container>
+                學年度起</p>
+                <p>至
+                    <md-input-container>
+                        <md-select placeholder="學年度" ng-model="academicYearEnd" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
+                            <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
+                            <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
+                        </md-select>
+                    </md-input-container>
+                學年度止</p>
+            </div>
+        </div>
+
+        <div class="ui ribbon label" align="center" style="background: #309292;color: white">
+                <h4> 加入分類變項與篩選條件</h4>
+        </div>
+
+        <md-content layout-padding>
+            <div layout="row" layout-sm="column" layout-align="space-around" ng-if="loading">
+                <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+            </div>
+            <table class="ui teal collapsing celled table" style="background: #F5F5F5" ng-if="!loading">
+                <thead>
+                    <tr>
+                        <th>選擇欄位</th>
+                        <th>選擇分析目標或篩選條件</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td ng-class="{negative: structs[idType].rows[0].disabled, disabled: structs[idType].rows[0].disabled}">
+                            <i class="icon close" ng-if="structs[idType].rows[0].disabled"></i>
+                            <div class="ui checkbox" >
+                                <input id="{{ ::$id }}" type="checkbox" ng-model="structs[idType].rows[0].selected" ng-change="toggleColumn(structs[idType].rows[0], structs[idType])">
+                                <label for="{{ ::$id }}" >{{ structs[idType].rows[0].title }}</label>
+                            </div>
+                        </td>
+
+                        <td ng-if="!structs[idType].expanded">
+                            <a href="javascript:void(0)" ng-click="structs[idType].expanded=true">
+                            <div style="width:180px;text-overflow: ellipsis;overflow:hidden !important;white-space: nowrap">
+                                <span id="needHelp" class="item" ng-repeat="row in structs[idType].rows">{{ row.title }}{{ $last ? '' : ',' }}</span>
+                            </div>
+                            </a>
+                        </td>
+
+                        <td ng-class="{disabled: structs[idType].rows[0].disabled}">
+                            <md-input-container ng-if="!row.disabled && row.type!='slider'">
+                                <md-select placeholder="{{ structs[idType].rows[0].title }}" ng-model="structs[idType].rows[0].filter" md-on-open="loadItem(structs[idType].title,structs[idType].rows[0].title)" multiple ng-change="setFilter(structs[idType])">
+                                    <md-progress-circular ng-if="!structs[idType].rows[0].items" md-diameter="20px"></md-progress-circular>
+                                    <md-optgroup >
+                                        <md-option ng-value="item" ng-repeat="item in structs[idType].rows[0].items">{{item}}</md-option>
+                                    </md-optgroup>
                                 </md-select>
                             </md-input-container>
-                        學年度起</p>
-                        <p>至
-                            <md-input-container>
-                                <md-select placeholder="學年度" ng-model="academicYearEnd" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
-                                    <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
-                                    <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
+                        </td>
+                    </tr>
+
+                    <tr ng-repeat-end ng-repeat="row in structs[idType].rows" ng-if="!$first && structs[idType].expanded">
+
+                        <td ng-class="{negative: row.disabled, disabled: row.disabled}">
+                            <i class="icon close" ng-if="row.disabled"></i>
+                            <div class="ui checkbox">
+                                <input id="{{ ::$id }}" type="checkbox" ng-model="row.selected" ng-change="toggleColumn(row, structs[idType])" class="hidden">
+                                <label for="{{ ::$id }}">{{ row.title }}</label>
+                            </div>
+                        </td>
+
+                        <td ng-class="{disabled: row.disabled}">
+                            <div ng-if="row.type=='slider'">
+                                {{ row.filter[0] }}年至{{ row.filter[1] }}
+                                <div ng-slider ng-model="row.filter" items="row.items"></div>
+                            </div>
+                            <md-input-container ng-if="!row.disabled && row.type!='slider'">
+                                <md-select placeholder="{{ row.title }}" ng-model="row.filter" md-on-open="loadItem(structs[idType].title,row.title)" multiple ng-change="setFilter(structs[idType])">
+                                    <md-progress-circular ng-if="!row.items" md-diameter="20px"></md-progress-circular>
+                                    <md-optgroup >
+                                        <md-option ng-value="item" ng-repeat="item in row.items">{{item}}</md-option>
+                                    </md-optgroup>
                                 </md-select>
                             </md-input-container>
-                        學年度止</p>
-                    </div>
-                    <div class="item" align="center" ng-if="academicYearType==2">
-                        <p>發證年度</p>
-                        <p>自
-                            <md-input-container>
-                                <md-select placeholder="年" ng-model="academicYearStart" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
-                                    <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
-                                    <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
-                                </md-select>
-                            </md-input-container>
-                        年起</p>
-                        <p>至
-                            <md-input-container>
-                                <md-select placeholder="年" ng-model="academicYearEnd" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
-                                    <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
-                                    <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
-                                </md-select>
-                            </md-input-container>
-                        年止</p>
-                    </div>
-                    <div class="item" align="center" ng-if="academicYearType==3">
-                        <p>參與教育實習學年度</p>
-                        <p>自
-                            <md-input-container>
-                                <md-select placeholder="學年度" ng-model="academicYearStart" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
-                                    <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
-                                    <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
-                                </md-select>
-                            </md-input-container>
-                        學年度起</p>
-                        <p>至
-                            <md-input-container>
-                                <md-select placeholder="學年度" ng-model="academicYearEnd" md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)" style="max-width: 100px" ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
-                                    <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
-                                    <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
-                                </md-select>
-                            </md-input-container>
-                        學年度止</p>
-                    </div>
-                </md-content>
-                <div class="ui ribbon label" align="center" style="background: #309292;color: white">
-                        <h4> 加入分類變項與篩選條件</h4>
-                </div>
+                        </td>
 
-                <md-content layout-padding>
-                    <div layout="row" layout-sm="column" layout-align="space-around" ng-if="loading">
-                      <md-progress-circular md-mode="indeterminate"></md-progress-circular>
-                    </div>
-                    <table class="ui teal collapsing celled table" style="background: #F5F5F5" ng-if="!loading">
-                        <thead>
-                            <tr>
-                                <th>選擇欄位</th>
-                                <th>選擇分析目標或篩選條件</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                    </tr>
 
-                            <tr>
-                                <!-- first row checkbox -->
-                                <td ng-class="{negative: structs[idType].rows[0].disabled, disabled: structs[idType].rows[0].disabled}">
-                                    <i class="icon close" ng-if="structs[idType].rows[0].disabled"></i>
-                                    <div class="ui checkbox" >
-                                        <input id="{{ ::$id }}" type="checkbox" ng-model="structs[idType].rows[0].selected" ng-change="toggleColumn(structs[idType].rows[0], structs[idType])">
-                                        <label for="{{ ::$id }}" >{{ structs[idType].rows[0].title }}</label>
-                                    </div>
-                                </td>
+                </tbody>
+            </table>
+        </md-content>
+    </md-sidenav>
 
-                                <!-- all rows title -->
-                                <td ng-if="!structs[idType].expanded">
-                                    <a href="javascript:void(0)" ng-click="structs[idType].expanded=true">
-                                    <div style="width:180px;text-overflow: ellipsis;overflow:hidden !important;white-space: nowrap">
-                                        <span id="needHelp" class="item" ng-repeat="row in structs[idType].rows">{{ row.title }}{{ $last ? '' : ',' }}</span>
-                                    </div>
-                                    </a>
-                                </td>
-
-                                <!-- first row filter -->
-                                <td ng-class="{disabled: structs[idType].rows[0].disabled}">
-                                    <md-input-container ng-if="!row.disabled && row.type!='slider'">
-                                        <md-select placeholder="{{ structs[idType].rows[0].title }}" ng-model="structs[idType].rows[0].filter" md-on-open="loadItem(structs[idType].title,structs[idType].rows[0].title)" multiple ng-change="setFilter(structs[idType])">
-                                            <md-progress-circular ng-if="!structs[idType].rows[0].items" md-diameter="20px"></md-progress-circular>
-                                            <md-optgroup >
-                                                <md-option ng-value="item" ng-repeat="item in structs[idType].rows[0].items">{{item}}</md-option>
-                                            </md-optgroup>
-                                        </md-select>
-                                    </md-input-container>
-                                </td>
-                            </tr>
-
-                            <tr ng-repeat-end ng-repeat="row in structs[idType].rows" ng-if="!$first && structs[idType].expanded">
-
-                                <!-- rows checkbox -->
-                                <td ng-class="{negative: row.disabled, disabled: row.disabled}">
-                                    <i class="icon close" ng-if="row.disabled"></i>
-                                    <div class="ui checkbox">
-                                        <input id="{{ ::$id }}" type="checkbox" ng-model="row.selected" ng-change="toggleColumn(row, structs[idType])" class="hidden">
-                                        <label for="{{ ::$id }}">{{ row.title }}</label>
-                                    </div>
-                                </td>
-
-                                <!-- rows filter -->
-                                <td ng-class="{disabled: row.disabled}">
-                                    <div ng-if="row.type=='slider'">
-                                        {{ row.filter[0] }}年至{{ row.filter[1] }}
-                                        <div ng-slider ng-model="row.filter" items="row.items"></div>
-                                    </div>
-                                    <md-input-container ng-if="!row.disabled && row.type!='slider'">
-                                        <md-select placeholder="{{ row.title }}" ng-model="row.filter" md-on-open="loadItem(structs[idType].title,row.title)" multiple ng-change="setFilter(structs[idType])">
-                                            <md-progress-circular ng-if="!row.items" md-diameter="20px"></md-progress-circular>
-                                            <md-optgroup >
-                                                <md-option ng-value="item" ng-repeat="item in row.items">{{item}}</md-option>
-                                            </md-optgroup>
-                                        </md-select>
-                                    </md-input-container>
-                                </td>
-
-                            </tr>
-
-                        </tbody>
-                    </table>
-                </md-content>
-            </md-sidenav>
-        </section>
-        <!--</div>-->
-        <div class="ui basic segment" ng-class="{loading: loading}" style="width: 75%;float: left">
+    <div layout="column" style="width: 100%">
+        <div class="ui basic segment" ng-class="{loading: loading}">
             <div class="ui tabular menu">
                 <a class="item" ng-class="{active: page == 'explan'}" ng-click="page='explan'">資料欄位說明 </a>
                 <a class="item" ng-class="{active: page == 'editor'}" ng-click="page='editor'">串聯其他表單 </a>
@@ -201,7 +196,6 @@
 
                     <td rowspan="{{ explan.expanded ? explan.explanations.length : 1 }}">{{ explan.title }}</td>
 
-                    <!-- expand button -->
                     <td class="no-animate" rowspan="{{ explan.expanded ? explan.explanations.length : 1 }}">
                         <div class="compact ui icon mini basic vertical buttons" ng-if="!explan.disabled || explan.expanded">
                             <button class="ui button" ng-if="!explan.expanded" ng-click="explan.expanded=true">
@@ -213,14 +207,12 @@
                         </div>
                     </td>
 
-                    <!-- first explanation checkbox -->
                     <td class="no-animate" ng-if="explan.expanded">
                         {{ explan.explanations[0].title }}
                     </td>
                     <td class="no-animate" ng-if="explan.expanded">
                         {{ explanation.content }}
                     </td>
-                    <!-- all explanations title -->
                     <td class="no-animate" ng-if="!explan.expanded">
                         <div style="width:180px;text-overflow: ellipsis;overflow:hidden !important;white-space: nowrap">
                             <span class="item" ng-repeat="explanation in explan.explanations">{{ explanation.title }}{{ $last ? '' : ',' }}</span>
@@ -232,7 +224,6 @@
 
                 <tr ng-repeat-end ng-repeat="explanation in explan.explanations" ng-if="!$first && explan.expanded" class="no-animate">
 
-                    <!-- explanations checkbox -->
                     <td>
                         {{ explanation.title }}
                     </td>
@@ -258,7 +249,6 @@
                 <thead>
                     <tr>
                         <th class="center aligned">
-                            <!--<div class="ui mini button" ng-click="needHelp($event)" style="background: #ECBE13;color: white"><i class="icon help outline"></i>需要幫忙</div>-->
                             <div class="ui mini button" ng-click="showTabDialog($event)" style="background: #ECBE13;color: white"><i class="icon help outline"></i>需要幫忙</div>
                         </th>
                         <th>發展歷程</th>
@@ -298,13 +288,11 @@
                             </div>
                         </td>
 
-                        <!-- cell if not expand -->
                         <td colspan="2" ng-if="structClassShow && !struct.classExpanded && structClass[struct.title]" class="no-animate">
                         </td>
                         <td ng-if="structFilterShow && !struct.classExpanded && structClass[struct.title]" class="no-animate">
                         </td>
 
-                        <!-- expand button -->
                         <td rowspan="{{ struct.expanded ? struct.rows.length : 1 }}" ng-if="struct.expanded" class="no-animate">
                             <div class="compact ui icon mini basic vertical buttons" ng-if="!struct.disabled || struct.expanded">
                                 <button class="ui button" ng-click="struct.expanded=false">
@@ -313,7 +301,6 @@
                             </div>
                         </td>
 
-                        <!-- first row checkbox -->
                         <td ng-if="struct.expanded && struct.classExpanded" ng-class="{negative: struct.rows[0].disabled, disabled: struct.rows[0].disabled}" class="no-animate">
                             <i class="icon close" ng-if="struct.rows[0].disabled"></i>
                             <div class="ui checkbox" >
@@ -322,14 +309,12 @@
                             </div>
                         </td>
 
-                        <!-- all rows title -->
                         <td ng-if="!struct.expanded && struct.classExpanded" colspan="{{struct.expanded ? 1 : 2}}" class="no-animate">
                             <div style="width:180px;text-overflow: ellipsis;overflow:hidden !important;white-space: nowrap">
                                 <span id="needHelp" class="item" ng-repeat="row in struct.rows">{{ row.title }}{{ $last ? '' : ',' }}</span>
                             </div>
                         </td>
 
-                        <!-- first row filter -->
                         <td ng-class="{disabled: struct.rows[0].disabled}" ng-if="struct.classExpanded && structFilterShow" class="no-animate">
                             <md-input-container ng-if="!struct.rows[0].disabled && struct.expanded">
                                 <md-select placeholder="{{ struct.rows[0].title }}" ng-model="struct.rows[0].filter" md-on-open="loadItem(struct.title,struct.rows[0].title)" multiple ng-change="setFilter(struct)">
@@ -344,7 +329,6 @@
 
                     <tr ng-repeat-end ng-repeat="row in struct.rows" ng-if="!$first && struct.expanded" ng-hide="index==idType">
 
-                        <!-- rows checkbox -->
                         <td ng-class="{negative: row.disabled, disabled: row.disabled}" class="no-animate">
                             <i class="icon close" ng-if="row.disabled"></i>
                             <div class="ui checkbox">
@@ -353,7 +337,6 @@
                             </div>
                         </td>
 
-                        <!-- rows filter -->
                         <td ng-class="{disabled: row.disabled}" ng-if="structFilterShow" >
                             <div ng-if="row.type=='slider'">
                                 {{ row.filter[0] }}年至{{ row.filter[1] }}
@@ -414,16 +397,6 @@
                 <thead>
                     <tr>
                         <th colspan="{{columns.length}}" ng-if="calculations.length>0">
-                            <!--<div ng-semantic-dropdown-menu ng-model="crossPercent" class="ui top left pointing labeled floating dropdown icon mini button">
-                                    <span class="text">加入 %</span>
-                                    <input type="hidden">
-                                    <i class="add icon"></i>
-                                    <div class="menu">
-                                        <div class="item" data-value="col" ng-click="setColPercent()">行 %</div>
-                                        <div class="item" data-value="row" ng-click="setRowPercent()">列 %</div>
-                                        <div class="item" data-value="noPercent" ng-click="setNoPercent()">不加 %</div>
-                                    </div>
-                            </div>-->
                             <md-input-container>
                                 <label>加入 %</label>
                                 <md-select ng-model="crossPercent">
@@ -498,14 +471,12 @@
             </table>
         </div>
     </div>
-</div>
+</md-content>
 
 <script src="/js/jquery-ui/1.11.4/jquery-ui.min.js"></script>
-<script src="/css/Semantic-UI/2.1.8/semantic.min.js"></script>
 <link rel="stylesheet" href="/js/jquery-ui/1.11.4/jquery-ui.min.css" />
 
 <script src="/js/jquery.fileDownload.js"></script>
-<script src="/js/angular-file-upload.min.js"></script>
 
 <script>
 app.controller('statusController', function($scope, $http, $filter, $timeout, $location, $anchorScroll, $mdDialog) {
@@ -557,14 +528,21 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         console.log(e);
     });
 
+    $scope.$parent.main.loading = true;
     $http({method: 'POST', url: 'getStructs', data:{}})
     .success(function(data, status, headers, config) {
         $scope.structs = data;
         $scope.structs[$scope.idType].expanded = true;
         $scope.loading = false;
+        $scope.$parent.main.loading = false;
     }).error(function(e){
         console.log(e);
     });
+
+    $scope.mdSidenav = false;
+    $timeout(function() {
+        $scope.mdSidenav = true;
+    }, 100);
 
     $scope.explans = [];
     $http({method: 'POST', url: 'getExplans', data:{}})
