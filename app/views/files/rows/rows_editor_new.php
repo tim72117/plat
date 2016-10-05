@@ -11,7 +11,7 @@
         </md-toolbar>
         <md-content layout-padding>
             <div ng-repeat="column in file.sheets[0].tables[0].columns">
-                <md-input-container class="md-block" ng-if="column.rules!='bool' && column.answers==0">
+                <md-input-container class="md-block" ng-if="column.rules!='bool' && !column.answers">
                     <input ng-model="mdSidenav.editing['C' + column.id]" ng-disabled="column.readonly" placeholder="{{column.title}}" ng-change="setUpdating(mdSidenav.editing)">
                     <div class="md-input-messages-animation" ng-repeat="(id, errors) in mdSidenav.editing.errors" ng-if="id == column.id">
                         <div class="no-animate" ng-repeat="error in errors">
@@ -75,8 +75,8 @@
                             <md-checkbox aria-label="選擇" ng-model="row.selected" ng-click="$event.stopPropagation()" ng-disabled="lock"></md-checkbox>
                         </div>
                         <div style="display: table-cell;border-bottom: 1px solid rgba(0,0,0,0.12);padding:15px 0 0 10px;max-width:50px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis" ng-repeat="column in table.columns">
-                            <span ng-if="column.answers.length>0" ng-repeat="answer in column.answers | filter:{value: row['C' + column.id]}">{{answer.title}}</span>
-                            <span ng-if="column.answers.length==0">{{row['C' + column.id]}}</span>
+                            <span ng-if="column.answers.length > 0" ng-repeat="answer in column.answers | filter:{value: row['C' + column.id]}">{{answer.title}}</span>
+                            <span ng-if="!column.answers">{{row['C' + column.id]}}</span>
                         </div>
                         <div style="display: table-cell;border-bottom: 1px solid rgba(0,0,0,0.12);padding:15px 0">
                             <md-button aria-label="編輯" ng-click="toggleDetail(row);$event.stopPropagation()">編輯</md-button>
