@@ -56,6 +56,11 @@ class StructFile extends CommFile {
         return View::make('files.struct.quickStart');
     }
 
+    public function templatePlanTable()
+    {
+        return View::make('files.struct.templatePlanTable');
+    }
+
     public function organize()
     {
         return 'files.struct.organize';
@@ -1073,20 +1078,20 @@ class StructFile extends CommFile {
         $tables = [];
         $schoolID = Input::get('schoolID');
         $allTables = \Plat\Analysis\OrgTable::all();
-        
+
         foreach ($allTables as $table) {
             //ddd($table->name);
             $query = DB::connection('sqlsrv_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table->name)
                 ->whereIn('COLUMN_NAME', ['國私立別','師培學校屬性','縣市','師資類科','學年度/期數','必修/選修','學年度','師培屬性','年度']);
-                           
+
             $columnNames = $query->select('COLUMN_NAME')
                 ->lists('COLUMN_NAME');
-            
+
             $selects = array_map(function($key, $columnName) {
                 return $columnName . ' AS ' . $key;
             }, array_keys($columnNames), $columnNames);
 
-            
+
             $columns = [];
             foreach ($columnNames as $key => $columnName) {
                 array_push($columns, 'analysis_tted.dbo.'.$table->name.'.'.$columnName);
@@ -1122,7 +1127,7 @@ class StructFile extends CommFile {
         $first_table_title = '師培大學基本資料';
         $first_table = 'TEV103_TM_學校基本資料_OK';
         $query = DB::connection('sqlsrv_tted')->table($first_table)->whereIn(DB::raw('substring(analysis_tted.dbo.'.$first_table.'.學校代碼,3,4)'),$schoolID);
-       
+
         foreach ($structs as $i => $struct) {
             $table = $struct['name'];
            if ($struct['title'] != $first_table_title) {
@@ -1133,17 +1138,17 @@ class StructFile extends CommFile {
                 $query->whereIn($table . '.' . $row['title'], explode(',', $row['filter']));
             }
         }
-        
+
         $columnNames = DB::connection('sqlsrv_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')
                 ->where('TABLE_NAME', $structs[1]['name'])
                 ->where('COLUMN_NAME', '<>', '學校代碼')
                 ->select('COLUMN_NAME')
                 ->lists('COLUMN_NAME');
-        
+
         $selects = array_map(function($key, $columnName) use($structs){
                 return $structs[1]['name'].'.'.$columnName . ' AS ' . $key;
             }, array_keys($columnNames), $columnNames);
-       
+
         return ['results' => $query->select($selects)->get(), 'columns' => $columnNames];
     }
 
