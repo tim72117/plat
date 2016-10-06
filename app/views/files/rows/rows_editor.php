@@ -11,9 +11,6 @@
                 <md-button class="md-warn md-raised md-hue-2" aria-label="下載已上傳名單" ng-click="exportRows(sheet)" md-colors="{background: 'Indigo-A200'}">下載已上傳名單</md-button>
             </md-list-item>
             <md-list-item>
-                <md-button aria-label="下載已上傳名單" ng-click="exportRows(sheet)">下載已上傳名單</md-button>
-            </md-list-item>
-            <md-list-item>
                 <div class="ui pagination small menu" ng-if="paginate.last_page<=6 && paginate.last_page>1">
                     <a class="item" ng-repeat="i in generateArray(paginate.last_page)" ng-class="{active: paginate.current_page==i}" ng-click="getRows(i)">{{ i }}</a>
                 </div>
