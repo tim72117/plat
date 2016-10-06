@@ -11,8 +11,17 @@
                     預覽表格
                 </md-button>
             </div>
-            <h1 class="md-toolbar-tools" style="font-weight: bold;background: #CB0051;color: white" ng-if="academicYearType==2">{{progress[academicYearType]}}</h1>
-            <h1 class="md-toolbar-tools" style="font-weight: bold;background: #4A970A;color: white" ng-if="academicYearType==3">{{progress[academicYearType]}}</h1>
+             
+             <div class="md-toolbar-tools" style="font-weight: bold;background: #4A970A;color: white" ng-if="academicYearType==3">
+                <h2>{{progress[academicYearType]}}</h2>
+                <span flex></span>
+                <md-button aria-label="預覽表格" ng-click="toggleSidenavRight()">
+                    <md-icon md-svg-icon="icon-eye"></md-icon>
+                    預覽表格
+                </md-button>
+            </div>
+            <!--<h1 class="md-toolbar-tools" style="font-weight: bold;background: #CB0051;color: white" ng-if="academicYearType==2">{{progress[academicYearType]}}</h1>
+            <h1 class="md-toolbar-tools" style="font-weight: bold;background: #4A970A;color: white" ng-if="academicYearType==3">{{progress[academicYearType]}}</h1>-->
         </md-toolbar>
         <div layout-padding>
             <div class="ui ribbon label" style="background: #309292;color: white">
@@ -21,7 +30,7 @@
             <div class="item" align="center">
             <md-input-container>
                 <label>學校</label>
-                <md-select ng-model="selectSchool" aria-label="schools" multiple >
+                <md-select ng-model="selectSchool" aria-label="schools" multiple md-selected-text="selectSchool.length+'所學校'">
                     <md-button layout-fill value="all" ng-click="selectAllSchool()">全選</md-button>
                     <md-optgroup >
                         <md-option ng-value="school" ng-repeat="school in schools">{{school.name}}</md-option>
@@ -61,34 +70,8 @@
                     </md-input-container>
                 學年度止</p>
             </div>
+           
             <div class="item" align="center" ng-if="academicYearType==2">
-                <p>發證年度</p>
-                <p>自
-                    <md-input-container>
-                        <md-select placeholder="年"
-                            ng-model="academicYearStart"
-                            md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)"
-                            style="max-width: 100px"
-                            ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
-                            <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
-                            <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
-                        </md-select>
-                    </md-input-container>
-                年起</p>
-                <p>至
-                    <md-input-container>
-                        <md-select placeholder="年"
-                            ng-model="academicYearEnd"
-                            md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)"
-                            style="max-width: 100px"
-                            ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
-                            <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
-                            <md-option ng-value="{{academicYear}}" ng-repeat="academicYear in structs[idType].rows[academicYearType].items">{{academicYear}}</md-option>
-                        </md-select>
-                    </md-input-container>
-                年止</p>
-            </div>
-            <div class="item" align="center" ng-if="academicYearType==3">
                 <p>參與教育實習學年度</p>
                 <p>自
                     <md-input-container>
@@ -199,7 +182,7 @@
 
     <div flex layout="column">
         <md-toolbar class="md-theme-indigo">
-            <div class="md-toolbar-tools" style="background: #046D8B;color: white" ng-if="academicYearType==1">
+            <div class="md-toolbar-tools" style="background: #046D8B;color: white">
                 <md-button aria-label="快速設定" ng-click="toggleSidenav()">
                     <md-icon md-svg-icon="settings"></md-icon>
                     快速設定
@@ -217,7 +200,7 @@
                     預覽表格
                 </md-button>
                 <span flex></span>
-                <md-button aria-label="需要幫忙" ng-click="showTabDialog($event)"><md-icon md-svg-icon="help"></md-icon>需要幫忙</md-button>
+                <!--<md-button aria-label="需要幫忙" ng-click="showTabDialog($event)"><md-icon md-svg-icon="help"></md-icon>需要幫忙</md-button>-->
                 <md-menu>
                     <md-button aria-label="表單大小" ng-click="$mdOpenMenu($event)">
                         表單大小
@@ -229,7 +212,7 @@
                 </md-menu>
             </div>
         </md-toolbar>
-        <div class="ui basic segment" ng-class="{loading: loading}">
+        <div class="ui basic segment" ng-class="{loading: loading}" style="overflow-y: auto">
 
         <md-tabs md-dynamic-height md-selected="page">
             <md-tab label="串聯其他表單">
@@ -389,9 +372,9 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     $scope.preCalculations = [];
     $scope.dragBefore = [];
     $scope.changeColumnBefore = [];
-    $scope.progress = {1:'新進師資生', 2:'完成職前教育師資生', 3:'實習師資生'};
-    $scope.idType = 9;//1:新進師資生;9:實習師資生;10:完成職前教育師資生
-    $scope.academicYearType = 3;//1:新進師資生(核定名額學年度);3:實習師資生(參與教育實習學年度);2:完成職前教育師資生(發證年度)
+    $scope.progress = {1:'新進師資生', 2:'實習師資生'};
+    $scope.idType = 9;//1:新進師資生;9:實習師資生(第幾個表單)
+    $scope.academicYearType = 2;//1:新進師資生(核定名額學年度);2:實習師資生(參與教育實習學年度)(表單中的第幾欄)
     $scope.structClassShow = false;
     $scope.structFilterShow = false;
     $scope.structClass = {
@@ -400,7 +383,6 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         '完成教育專業課程': {title: '修課狀況', size: 2},
         '卓越師資培育獎學金': {title: '相關活動', size: 5},
         '實際參與實習': {title: '教育實習', size: 1},
-        '修畢師資職前教育證明書': {title: '師資職前教育', size: 1},
         '教師資格檢定': {title: '教檢情形', size: 1},
         '教師專長': {title: '教師專長', size: 1},
         '教甄資料': {title: '教師甄試', size: 1},
@@ -418,12 +400,10 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         if (value == 1) {
             $scope.idType = 1;//新進師資生
             $scope.academicYearType = 1;//新進師資生
-        } else if (value == 2) {
+        } 
+        if (value == 2) {
             $scope.idType = 9;//實習師資生
-            $scope.academicYearType = 3;//實習師資生(參與教育實習學年度)
-        } else{
-            $scope.idType = 10;//完成職前教育師資生
-            $scope.academicYearType = 2;//完成職前教育師資生(發證年度)
+            $scope.academicYearType = 2;//實習師資生(參與教育實習學年度)
         }
     }).error(function(e) {
         console.log(e);
@@ -866,7 +846,6 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         if ($scope.tableTitle !== undefined) {
              tableTitle = $scope.tableTitle.title_text;
         }
-
         jQuery.fileDownload('export_excel', {
             httpMethod: "POST",
             data:{tableTitle: tableTitle, columns: $scope.columns,levels:$scope.levels,calculations: $scope.calculations},

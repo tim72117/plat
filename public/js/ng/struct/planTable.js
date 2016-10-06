@@ -28,7 +28,6 @@ angular.module('ngStruct', [])
                 '修課狀況':{structs: [{title: '完成教育專業課程'}, {title: '完成及認定專門課程'}]},
                 '相關活動':{structs: [{title: '卓越師資培育獎學金'}, {title: '五育教材教法設計徵選活動獎'}, {title: '實踐史懷哲精神教育服務計畫'}, {title: '獲選為交換學生至國際友校'}, {title: '卓越儲備教師證明書'}]},
                 '教育實習':{structs: [{title: '實際參與實習'}]},
-                '師資職前教育':{structs: [{title: '修畢師資職前教育證明書'}]},
                 '教檢情形':{structs: [{title: '教師資格檢定'}]},
                 '教師專長':{structs: [{title: '教師專長'}]},
                 '教師甄試':{structs: [{title: '教甄資料'}]},

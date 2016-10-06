@@ -37,7 +37,11 @@ class StructFile extends CommFile {
 
     public function open()
     {
-        return 'files.struct.integrate';
+        if ($this->file->configs[0]->value == 4) {
+            return 'files.struct.organize';
+        } else {
+            return 'files.struct.integrate';
+        }        
     }
 
     public function templateHelp()
@@ -378,7 +382,7 @@ class StructFile extends CommFile {
     ];*/
 
     private $tables = [
-        '個人資料'      => 'TE_基本資料',
+        '個人資料'      => 'TE_基本資料_new_OK',
         '就學資訊'      => 'TEV103_TE_StudentInSchool_OK',
         '完成教育專業課程'   => 'TEV103_TE2_C1_OK',
         '完成及認定專門課程' => 'TEV103_TE2_C2_OK',
@@ -388,7 +392,6 @@ class StructFile extends CommFile {
         '獲選為交換學生至國際友校' => 'TE_Student_國際交換學生_OK',
         '卓越儲備教師證明書' => 'TE_Student_卓越儲備教師_OK',
         '實際參與實習'       => 'TE2_D_OK',
-        '修畢師資職前教育證明書' => 'TE2_E_OK',
         '教師資格檢定'       => 'TE_教師資格檢定_OK',
         '教師專長'           => 'TE_教師專長_OK',
         '教甄資料'           => 'TE_教甄資料_OK',
@@ -466,10 +469,10 @@ class StructFile extends CommFile {
         $count              = 0;
         $tableTitle         = implode("\r\n", $tableTitle);
         $rows[$count++][]   = $tableTitle;
-
+        
         if (Input::get('columns')) {
             $columns = array_pluck(Input::get('columns'), 'title');
-
+            
             foreach ($columns as $column) {
                 $rows[$count][] = $column;
             }
@@ -584,7 +587,7 @@ class StructFile extends CommFile {
                 $rows[$count][] = $calculations[$i]['results'][0];
             }
         }
-
+        
         \Excel::create($this->file->title, function($excel) use($rows){
             $excel->sheet('Sheetname', function($sheet) use($rows) {
                 $sheet->fromArray($rows, null, 'A1', false, false);
@@ -1080,7 +1083,6 @@ class StructFile extends CommFile {
         $allTables = \Plat\Analysis\OrgTable::all();
 
         foreach ($allTables as $table) {
-            //ddd($table->name);
             $query = DB::connection('sqlsrv_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table->name)
                 ->whereIn('COLUMN_NAME', ['國私立別','師培學校屬性','縣市','師資類科','學年度/期數','必修/選修','學年度','師培屬性','年度']);
 
@@ -1152,5 +1154,50 @@ class StructFile extends CommFile {
         return ['results' => $query->select($selects)->get(), 'columns' => $columnNames];
     }
 
+    
+    public function export_org_excel()
+    {
+        $calculation       = Input::get('calculation');
+        $tableTitle         = Input::get('tableTitle');
+        
+
+        $count              = 0;
+        $tableTitle         = implode("\r\n", $tableTitle);
+        $rows[$count++][]   = $tableTitle;
+        if (count($calculation['columns']) != 0) {
+            $columns = $calculation['columns'];
+            $results = $calculation['results'];
+            foreach ($columns as $column) {
+                $rows[$count][] = $column;
+            }
+            $count++;
+            foreach ($results as $result) {
+                for ($i=0; $i < count($result)-1; $i++) {
+                    $value = $result[$i];
+                    $rows[$count][] = $value;
+                }
+                $count++;
+            }
+         } 
+        
+        \Excel::create($tableTitle, function($excel) use($rows){
+            $excel->sheet('Sheetname', function($sheet) use($rows) {
+                $sheet->fromArray($rows, null, 'A1', false, false);
+                $sheet->setFontSize(12);
+                $lastColumn = $sheet->getHighestColumn();
+                $lastRow = $sheet->getHighestRow();
+                $sheet->getDefaultStyle()->getAlignment()->setWrapText(true);
+                $sheet->mergeCells('A1:'.$lastColumn.'1');
+                $sheet->cells('A1:'.$lastColumn.'1', function($cells) {
+                    $cells->setAlignment('left');
+                    $cells->setValignment('center');
+                });
+                $sheet->cells('A2:'.$lastColumn.$lastRow, function($cells) {
+                    $cells->setAlignment('left');
+                    $cells->setValignment('top');
+                });
+            });
+        })->download(Input::get('type', 'xlsx'));
+    }
 
 }

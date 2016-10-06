@@ -20,14 +20,11 @@
                         </md-input-container>
                     </div>
 
-                    <div class="ui ribbon label" align="center" style="background: #309292;color: white">
+                    <div class="ui ribbon label" align="center" style="background: #309292;color: white" ng-show="schools.length > 1">
                         <h4>選擇分析對象</h4>
                     </div>
-                    <div layout="row" layout-sm="column" layout-align="space-around" ng-if="loading">
-                      <md-progress-circular md-mode="indeterminate"></md-progress-circular>
-                    </div>
-
-                    <div>
+                    
+                    <div ng-show="schools.length > 1">
                         <div class="ui teal styled fluid accordion">
                             <div class="title">
                                 <i class="dropdown icon"></i>
@@ -154,7 +151,7 @@
                 <div ng-show="page == 'explan'" style="-webkit-flex: 1;flex: 1;margin-left:10px">
                     <button class="compact ui olive icon large button" style="background: #93A42A;color: white">
                     <a href="/files/org_explan.xlsx" style="color: white">
-                        <i class="download icon"></i> 下載
+                        <i class="download icon"></i> 下載表單及欄位說明檔
                     </a>
                     </button>
                 </div>
@@ -166,13 +163,13 @@
                             <th ng-if="calculation.results.length>0">
                                 <md-input-container ng-if="sumButton">
                                     <label>加總</label>
-                                    <md-select ng-model="total">
+                                    <md-select ng-model="addUp">
                                         <md-option ng-repeat="tableOption in tableOptions" ng-value="tableOption" ng-click="setTotal(tableOption)">
                                             {{tableOption}}
                                         </md-option>
                                     </md-select>
                                 </md-input-container>
-                                <button class="basic ui mini icon button" ng-click="exportExcel(structs)">
+                                <button class="basic ui mini icon button" ng-click="exportExcel()">
                                     <i class="download icon"></i> 下載結果
                                 </button>
                             </th>
@@ -203,7 +200,7 @@
                         </tr>
                         <tr ng-if="sumButton == 2 && setSum">
                             <td style="white-space: nowrap;text-align:left" colspan="6">總和</td>
-                            <td style="white-space: nowrap;text-align:left">{{ 7 }}</td>
+                            <td style="white-space: nowrap;text-align:left">{{ getTotal(6) }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -228,7 +225,6 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     $scope.explans = [];
     $http({method: 'POST', url: 'getOrgExplans', data:{}})
     .success(function(data, status, headers, config) {
-       console.log(data)
        $scope.explans = data;
     }).error(function(e){
         console.log(e);
@@ -309,7 +305,6 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         }
         $http({method: 'POST', url: 'get_organize_detail', data:{structs: $scope.calculation.structs, schoolID: $scope.selectSchoolID}})
         .success(function(data, status, headers, config) {
-            //console.log(data)
             $scope.calculation.results = data.results;
             $scope.calculation.columns = data.columns;
             $scope.tableTitle = {};
@@ -317,7 +312,6 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
             titles.push($scope.calculation.structs[1]['title']);
             $scope.tableTitle.title_text = titles;
             $scope.tableTitle.title = '<div>' + titles.join('</div><div>') + '</div>';
-            console.log($scope.calculation)
         }).error(function(e){
             console.log(e);
         });
@@ -341,7 +335,31 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.getTotal = function(key) {
-        
+        var total = 0;
+        for (var i in $scope.calculation.results) {
+            if ($scope.calculation.results[i][key] !=  'NULL') {
+                total = total + $scope.calculation.results[i][key]*1;
+            };
+        }
+        return total;
+    };
+
+    $scope.exportExcel = function(structs) {
+        var tableTitle = '';
+        if ($scope.columns == '') {
+            alert('請勾選欲顯示欄位');
+            return false;
+        };
+
+        if ($scope.tableTitle !== undefined) {
+             tableTitle = $scope.tableTitle.title_text;
+        }
+
+        jQuery.fileDownload('export_org_excel', {
+            httpMethod: "POST",
+            data:{tableTitle: tableTitle,calculation: $scope.calculation},
+            failCallback: function (responseHtml, url) { console.log(responseHtml); }
+        });
     };
 
     $('.ui.accordion')
