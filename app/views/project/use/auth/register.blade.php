@@ -183,7 +183,7 @@ app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
 
 .config(function($httpProvider, $mdIconProvider) {
     $httpProvider.defaults.headers.common["X-Requested-With"] = 'XMLHttpRequest';
-    $mdIconProvider.defaultIconSet('/js/angular_material/1.1.0/core-icons.svg', 24);
+    $mdIconProvider.defaultIconSet('/js/angular_material/core-icons.svg', 24);
 })
 
 .controller('register', function($scope, $http, $filter, CSRF_TOKEN) {
@@ -203,12 +203,10 @@ app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
     });
 
     $scope.saveRegister = function() {
-        alert();
         $scope.saving = true;
         $scope.user.work.organization_id = $scope.user.work.selectedItem != undefined ? $scope.user.work.selectedItem.id : '';
         $http({method: 'POST', url: 'register/save', data:{'_token': CSRF_TOKEN, user: $scope.user}})
         .success(function(data, status, headers, config) {
-            console.log(data);
             $scope.errors = data.errors;
             if (data.applying_id) {
                 $scope.step = 'print';
