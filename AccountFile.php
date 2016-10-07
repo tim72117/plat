@@ -256,7 +256,9 @@ class AccountFile extends CommFile {
 
     public function queryOrganizations()
     {
-        $organizationDetails = \Plat\Project\OrganizationDetail::where('name', 'like', '%' . Input::get('query') . '%')->limit(2000)->lists('organization_id');
+        $organizationDetails = \Plat\Project\OrganizationDetail::where(function($query) {
+            $query->where('name', 'like', '%' . Input::get('query') . '%')->orWhere('id', Input::get('query'));
+        })->limit(2000)->lists('organization_id');
 
         $organizations = \Plat\Project\Organization::find($organizationDetails)->load('now');
 
