@@ -25,7 +25,7 @@ class AnalysisFile extends CommFile {
 
     public function get_views()
     {
-        return ['open', 'menu', 'analysis'];
+        return ['open', 'menu', 'analysis', 'analysis_report'];
     }
 
     public function open()
@@ -54,6 +54,11 @@ class AnalysisFile extends CommFile {
         return 'files.analysis.editor';
     }
 
+    public function analysis_report()
+    {
+        return 'files.analysis.analysis_report';
+    }
+
     public function get_analysis_questions()
     {
         $questions = [];
@@ -76,16 +81,10 @@ class AnalysisFile extends CommFile {
             }
         }
 
-        $questions = array_values(array_filter($questions, function(&$question) use($columns) {
+        $questions = \Illuminate\Database\Eloquent\Collection::make($questions)->reject(function($question) use ($columns) {
             $question->choosed = in_array($question->name, Session::get('analysis-columns-choosed', []), true);
-            return in_array($question->name, $columns);
-        }));
-
-        /*$questions = array_map(function($question) {
-            if(!preg_match('{{[ ]?\${1}[\w]+[ ]?}}',$question->title)) {
-                return $question;
-            }
-        },$questions);*/
+            return !in_array($question->name, $columns, true);
+        })->slice(Input::get('start', 0), Input::get('amount', count($questions)));
 
         return ['questions' => $questions, 'title' => $this->file->analysis->title];
     }
@@ -141,8 +140,10 @@ class AnalysisFile extends CommFile {
 
         $data_query = $this->get_data_query([$column_name1, $column_name2]);
 
+        $total_query = Input::get('weight', false) ? 'CONVERT(int, ROUND(sum(w_final), 0)) AS total' : 'count(*) AS total';
+
         $frequences = $data_query->groupBy($column_name1, $column_name2)
-        ->select(DB::raw('count(*) AS total, CAST(' . $column_name1 . ' AS varchar) AS name1, CAST(' . $column_name2 . ' AS varchar) AS name2'))->remember(3)->get();
+        ->select(DB::raw($total_query . ', CAST(' . $column_name1 . ' AS varchar) AS name1, CAST(' . $column_name2 . ' AS varchar) AS name2'))->remember(3)->get();
 
         //$columns_horizontal = [];
         //$columns_vertical = [];
