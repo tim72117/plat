@@ -21,7 +21,7 @@ class Files extends Eloquent {
     }
 
     public function book() {
-        return $this->hasOne('Ques\Book', 'file_id', 'id');
+        return $this->hasOne('Plat\Eloquent\Survey\Book', 'file_id', 'id');
     }
 
     public function isType() {
