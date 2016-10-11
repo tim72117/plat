@@ -289,4 +289,8 @@ class FileController extends BaseController {
         return ['docs' => $docs, 'tooltip' => $tooltip];
     }
 
+    public function templateSidenav() {
+        return View::make('apps.templateSidenav');
+    }
+
 }

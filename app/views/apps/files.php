@@ -1,115 +1,74 @@
 
-<div class="ui sidebar segment" ng-controller="shareController" ng-class="{visible: box.open}" style="max-height:800px;overflow: auto">
-    <div class="item">
-    <div class="ui vertically divided grid">
-        <div class="row" ng-class="{'two column': users.length>0}" style="max-height:700px;overflow: auto">
-            <div class="column">
-                <div class="ui fluid vertical inverted menu">
-                    <div class="header item"><i class="users icon"></i>群組</div>
-                    <a class="item" ng-class="{active: group.open}" ng-repeat="group in groups" ng-click="getUsers(group)">
-                        <div class="ui label" ng-click="getUsers(group);select(group);selectAll(group)" ng-class="{green: group.selected}">{{ group.users.length }}</div>
-                        {{ group.description }}
-                    </a>
-                </div>
+<div ng-cloak ng-controller="fileController" id="fileController" layout="row" style="height:100%">
+
+    <div sidenav layout="column"></div>
+
+    <div flex layout="column">
+        <md-toolbar class="md-toolbar-tools" md-colors="{background: 'grey-100'}">
+            <div class="md-toolbar-tools">
+                <h5>
+                    <md-input-container style="margin-bottom:0">
+                        <label>選擇資料格式</label>
+                        <md-select multiple ng-model="searchType">
+                            <md-option ng-repeat="type in types" ng-value="type.id">{{type.title}}</md-option>
+                        </md-select>
+                    </md-input-container>
+                    <md-input-container style="margin-bottom:0" class="no-errors-spacer">
+                        <label>搜尋...</label>
+                        <input type="text" ng-model="searchText.title">
+                    </md-input-container>
+                </h5>
+                <md-menu>
+                    <md-button class="md-raised md-primary" aria-label="新增" ng-click="$mdOpenMenu($event)">
+                        <md-icon md-svg-icon="insert-drive-file"></md-icon>新增
+                    </md-button>
+                    <md-menu-content width="3">
+                        <md-menu-item><md-button ng-click="addDoc(5)"><md-icon md-svg-icon="insert-drive-file" md-menu-align-target></md-icon>資料檔</md-button></md-menu-item>
+                        <md-menu-item><md-button ng-click="addDoc(1)"><md-icon md-svg-icon="insert-drive-file" md-menu-align-target></md-icon>問卷</md-button></md-menu-item>
+                        <md-menu-item><md-button ng-click="addDoc(9)"><md-icon md-svg-icon="insert-drive-file" md-menu-align-target></md-icon>面訪問卷</md-button></md-menu-item>
+                    </md-menu-content>
+                </md-menu>
+                <label class="md-button md-raised" ng-disabled="uploading" for="file_upload">
+                    <md-icon md-svg-icon="file-upload" ng-style="{color: 'grey', fill: 'grey'}"></md-icon>上傳
+                </label>
+                <md-button class="md-raised" aria-label="刪除" ng-disabled="deleting" ng-if="todo.delete" ng-click="deleteDoc()">
+                    <md-icon md-svg-icon="delete" ng-style="{color: 'grey', fill: 'grey'}"></md-icon>刪除
+                </md-button>
+                <md-button class="md-raised" aria-label="共用" ng-if="todo.share" ng-click="getShareds()">
+                    <md-icon md-svg-icon="delete" ng-style="{color: 'grey', fill: 'grey'}"></md-icon>共用
+                </md-button>
+                <md-button class="md-raised" aria-label="請求" ng-if="todo.request" ng-click="getRequesteds()">
+                    <md-icon md-svg-icon="delete" ng-style="{color: 'grey', fill: 'grey'}"></md-icon>請求
+                </md-button>
+                <md-button class="md-raised" aria-label="另存" ng-if="todo.saveAs" ng-disabled="saving" ng-click="saveAs()">
+                    <md-icon md-svg-icon="delete" ng-style="{color: 'grey', fill: 'grey'}"></md-icon>另存
+                </md-button>
+                <span flex></span>
+                <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
+                <md-button class="md-icon-button" aria-label="上一頁" ng-click="prev()">
+                    <md-icon md-svg-icon="keyboard-arrow-left" ng-style="{color: 'grey', fill: 'grey'}"></md-icon>
+                </md-button>
+                <md-button class="md-icon-button" aria-label="下一頁" ng-click="next()">
+                    <md-icon md-svg-icon="keyboard-arrow-right" ng-style="{color: 'grey', fill: 'grey'}"></md-icon>
+                </md-button>
+                <md-button class="md-raised" aria-label="顯示全部" ng-click="all()">顯示全部</md-button>
             </div>
-            <div class="column" ng-if="users.length>0">
-                <div class="ui vertical inverted menu">
-                    <div class="header item"><i class="user icon"></i>成員({{ group_description }})</div>
-                    <a class="item" ng-class="{active: user.selected}" ng-repeat="user in users" ng-click="select(user);unselectGroup()">
-                        {{ user.username }}<i class="tag green icon" ng-show="user.selected"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="column">
-                <div class="ui action input" ng-show="box.type=='request'">
-                    <input type="text" ng-model="description" placeholder="輸入這份請求的描述...">
-                    <div class="ui positive button" ng-class="{loading: wait}" ng-click="requestTo(description)"><i class="exchange icon"></i>請求</div>
-                </div>
-                <div class="ui positive button" ng-class="{loading: wait}" ng-click="shareTo()" ng-show="box.type=='share'"><i class="external share icon"></i>共用</div>
-                <div class="ui basic button" ng-click="boxClose()"><i class="ban icon"></i>取消</div>
-            </div>
-        </div>
-    </div>
-    </div>
-</div>
-
-<div ng-cloak ng-controller="fileController" id="fileController">
-
-    <div class="ui basic segment">
-
-        <div class="ui top attached orange progress">
-            <div class="bar" style="width: {{ progress }}%"></div>
-        </div>
-
+        </md-toolbar>
+        <md-divider></md-divider>
+        <md-progress-linear md-mode="determinate" ng-if="uploading" value="{{ progress }}"></md-progress-linear>
         <form style="display:none">
             <input type="file" id="file_upload" nv-file-select uploader="uploader" />
         </form>
-
-        <div class="ui grid">
-            <div class="left floated left aligned seven wide column">
-                <div ng-dropdown-menu class="ui floating top left pointing labeled icon dropdown basic mini button">
-                    <i class="file outline icon"></i>
-                    <span class="text">新增</span>
-                    <div class="menu transition" tabindex="-1">
-                        <a class="item" href="javascript:void(0)" ng-click="addDoc(5)"><i class="file text icon"></i>資料檔</a>
-                        <a class="item" href="javascript:void(0)" ng-click="addDoc(1)"><i class="file text outline icon"></i>問卷</a>
-                        <a class="item" href="javascript:void(0)" ng-click="addDoc(9)"><i class="file text outline icon red"></i>面訪問卷</a>
-                    </div>
-                </div>
-                <label for="file_upload" class="ui basic mini button" ng-class="{loading: uploading}"><i class="icon upload"></i>上傳</label>
-                <div class="ui basic mini button red" ng-class="{loading: deleting}" ng-if="todo.delete" ng-click="deleteDoc()"><i class="icon trash outline"></i>刪除</div>
-                <div class="ui basic mini button" ng-class="{loading: saving}" ng-if="todo.saveAs" ng-click="saveAs()"><i class="icons"><i class="file outline icon"></i><i class="write icon"></i></i>另存</div>
-                <div class="ui basic mini button" ng-if="todo.share" ng-click="getShareds()"><i class="icon external share"></i>共用</div>
-                <div class="ui basic mini button" ng-if="todo.request" ng-click="getRequesteds()"><i class="icon exchange"></i>請求</div>
-                <div class="ui basic mini button yellow" ng-click="$event.stopPropagation();whatNews(false)" ng-popup="{show: true, tooltip: tooltip['start']}">
-                    <i class="icon help outline"></i>有什麼新功能
-                </div>
-            </div>
-            <div class="right floated right aligned nine wide column">
-                <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
-                <div class="ui basic mini buttons">
-                    <div class="ui button" ng-click="prev()"><i class="icon angle left arrow"></i></div>
-                    <div class="ui button" ng-click="next()"><i class="icon angle right arrow"></i></div>
-                </div>
-                <div class="ui basic mini button" ng-click="all()"><i class="icon unhide"></i>顯示全部</div>
-            </div>
-        </div>
-
-        <table class="ui very compact table">
+        <md-content layout-padding style="height:100%">
+        <table class="ui very basic table">
             <thead>
                 <tr>
                     <th></th>
-                    <th>檔名</th>
+                    <th>檔案名稱</th>
                     <th>更多</th>
                     <th>已共用</th>
                     <th>更新時間</th>
                     <th>擁有人</th>
-                </tr>
-                <tr>
-                    <th></th>
-                    <th>
-                        <div ng-dropdown-menu class="ui floating top left pointing labeled icon dropdown basic button">
-                            <i class="filter icon"></i>
-                            <span class="text file-filter-button"><i class="icon" ng-class="!searchType.type ? 'file outline' : types[searchType.type]"></i></span>
-                            <div class="menu transition hidden file-filter">
-                                <div class="item" ng-click="searchType = {type: '5'}"><i class="file text icon"></i>資料檔</div>
-                                <div class="item" ng-click="searchType = {type: '1'}"><i class="file text outline icon"></i>問卷</div>
-                                <div class="item" ng-click="searchType = {type: '9'}"><i class="file text outline icon red"></i>面訪問卷</div>
-                                <div class="item" ng-click="searchType = {type: '3'}"><i class="file outline blue icon"></i>一般檔案</div>
-                                <div class="item" ng-click="searchType = {type: '2'}"><i class="code icon"></i>程式</div>
-                                <div class="item" ng-click="searchType = {type: '7'}"><i class="bar chart icon"></i>線上分析</div>
-                                <div class="item" ng-click="searchType = {type: '10'}"><i class="file excel outline icon"></i>資料檔</div>
-                                <div class="item" ng-click="searchType = {}"><i class="file outline icon"></i>所有檔案</div>
-                            </div>
-                        </div>
-                        <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋..."><i class="search icon"></i></div>
-                    </th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -123,13 +82,13 @@
                     <td></td><td></td>
                     <td></td><td></td>
                 </tr>
-                <tr ng-repeat="doc in docs | orderBy:'created_at':true | filter:searchText | filter:searchType:true | startFrom:(page-1)*limit | limitTo:limit">
+                <tr ng-repeat="doc in docs | orderBy:'created_at':true | filter:searchText | typeFilter:searchType | startFrom:(page-1)*limit | limitTo:limit">
                     <td width="50">
                         <md-checkbox ng-model="doc.selected" aria-label="選取檔案" style="margin-bottom:0" ng-disabled="!doc.selected && (docs | filter:{selected: true}).length > 0"></md-checkbox>
                     </td>
-                    <td style="min-width:400px" ng-click="rename(doc)">
-                        <i class="icon" ng-class="types[doc.type]"></i>
-                        <a href="{{ doc.link }}" ng-if="!doc.renaming" ng-click="$event.stopPropagation()" ng-popup="{show: $first, tooltip: tooltip['rename']}">{{ doc.title }}</a>
+                    <td class="no-outline" style="min-width:400px" ng-click="rename(doc)">
+                        <i class="icon" ng-class="(types | filter:{id: doc.type*1}:true)[0].icon"></i>
+                        <a href="{{ doc.link }}" ng-if="!doc.renaming" ng-click="$event.stopPropagation()">{{ doc.title }}</a>
                         <div class="ui mini icon input" ng-class="{loading: doc.saving}" ng-if="doc.renaming" ng-click="$event.stopPropagation()">
                             <input type="text" ng-model="doc.title" size="50" placeholder="檔案名稱">
                             <i class="search icon" ng-if="doc.saving"></i>
@@ -180,43 +139,54 @@
                 </tr>
             </tbody>
         </table>
+        </md-content>
 
     </div>
 
 </div>
 
 <script src="/js/angular-file-upload.min.js"></script>
+<script src="/js/ng/ngShare.js"></script>
+
+<style>
+.no-outline:focus {
+    outline: none;
+}
+.no-errors-spacer .md-errors-spacer {
+    display: none;
+}
+</style>
 
 <script>
-app.requires.push('angularify.semantic.dropdown');
 app.requires.push('angularFileUpload');
+app.requires.push('ngShare');
 app.controller('fileController', function($scope, $filter, $interval, $http, $cookies, $timeout, FileUploader) {
     $scope.docs = [];
     $scope.predicate = 'created_at';
     $scope.searchText = $cookies.getObject('file_text_filter') || {};
-    $scope.searchType = $cookies.getObject('file_type_filter') || {};
+    $scope.searchType = $cookies.getObject('file_type_filter') || [];
     $scope.page = $cookies.getObject('file_page') || 1;
     $scope.limit = 10;
     $scope.max = $scope.docs.length;
     $scope.pages = Math.ceil($scope.max/$scope.limit);
     $scope.timenow = new Date();
-    $scope.types = {
-        1: 'file text outline',
-        2: 'code',
-        3: 'file outline blue',
-        5: 'file text',
-        6: 'file outline blue',
-        7: 'bar chart',
-        9: 'file text outline red',
-        10: 'file excel outline',
-        11: 'users',
-        14: 'database'
-    };
+    $scope.types = [
+        {id: 1,  icon: 'file text outline',     title: '問卷'},
+        {id: 2,  icon: 'code',                  title: '程式'},
+        {id: 3,  icon: 'file outline blue',     title: '一般檔案'},
+        {id: 5,  icon: 'file text',             title: '資料檔'},
+        {id: 7,  icon: 'bar chart',             title: '線上分析'},
+        {id: 9,  icon: 'file text outline red', title: '面訪問卷'},
+        {id: 10, icon: 'file excel outline',    title: 'EXCEL'},
+        {id: 11, icon: 'users',                 title: '帳號管理'},
+        {id: 14, icon: 'database',              title: '分類統計'}
+    ];
     $scope.uploading = false;
     $scope.loading = false;
     $scope.information = {};
     $scope.todo = {share: false, request: false, delete: false, clone: false};
     $scope.parentTables = false;
+    $scope.sidenav = {};
 
     $interval(function() {
         $scope.timenow = new Date();
@@ -303,10 +273,6 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
             $scope.docs = data.docs;
             $scope.setPaginate();
             $scope.$parent.main.loading = false;
-            $scope.tooltip = data.tooltip;
-            $timeout(function() {
-                $scope.whatNews(true);
-            });
         }).error(function(e){
             console.log(e);
         });
@@ -433,7 +399,6 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         var doc = $filter('filter')($scope.docs, {selected: true})[0];
         $http({method: 'POST', url: '/doc/' + doc.id + '/saveAs', data:{doc_id: doc.id}})
         .success(function(data, status, headers, config) {
-            console.log(data);
             $scope.getDocs();
             $scope.saving = false;
         }).error(function(e) {
@@ -441,147 +406,18 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         });
     };
 
-    $scope.whatNews = function(startup) {
-        $scope.$broadcast('popup', {startup: startup});
-    };
-
 })
-.directive('ngPopup', function() {
-    return {
-        restrict: "A",
-        scope: {
-            ngPopup: '='
-        },
-        controller: function ($scope, $element, $rootElement) {
-            $scope.$on('popup', function (event, args) {
-                if ($scope.ngPopup.show && $scope.ngPopup.tooltip && $scope.ngPopup.tooltip.startup == args.startup) {
-                    var popup = $element.popup({
-                        position: $scope.ngPopup.tooltip.position,
-                        html:     $scope.ngPopup.tooltip.html,
-                        on:       'manual'
-                    });
-                    $element.popup('show');
-                    $rootElement.on('click', function() {
-                        if (popup) {
-                            $element.popup('destroy');
-                        };
-                    });
-                };
-            });
+
+.filter('typeFilter', function() {
+    return function(items, search) {
+
+        if (!search || search.length == 0) {
+            return items;
         }
-    };
-});
 
-app.controller('shareController', function($scope, $filter, $http) {
-    $scope.groups = {};
-    $scope.users = [];
-    $scope.docs = [];
-    $scope.box = {open: false, type: 'share'};
-    $scope.wait = false;
-
-    $scope.boxClose = function() {
-        $scope.box.open = false;
-    };
-
-    $scope.boxOpen = function(type) {
-        $scope.box.open = true;
-        $scope.box.type = type;
-    };
-
-    $scope.select = function(target) {
-        target.selected = !target.selected;
-        target.changed = true;
-    };
-
-    $scope.unselectGroup = function() {
-        $filter('filter')($scope.groups, {open: true})[0].selected = false;
-    };
-
-    $scope.selectAll = function(group) {
-        for(i in group.users){
-            group.users[i].selected = group.selected;
-        }
-    };
-
-    $scope.getUsers = function(group) {
-        angular.forEach($filter('filter')($scope.groups, {open: true}), function(group){
-            group.open = false;
-        });
-        group.open = true;
-        if (group.users.length > 0){
-            $scope.users = group.users;
-            $scope.group_description = group.description;
-        } else {
-            $scope.users = [];
-        }
-    };
-
-    $scope.$on('getShareds', function(event, message) {
-        $scope.docs = message.docs;
-        $http({method: 'POST', url: '/docs/share/get', data:{docs: $scope.docs}})
-        .success(function(data, status, headers, config) {
-            $scope.groups = data.groups;
-            $scope.users = [];
-            $scope.boxOpen('share');
-        })
-        .error(function(e){
-            console.log(e);
-        });
-    });
-
-    $scope.$on('getRequesteds', function(event, message) {
-        $scope.docs = message.docs;
-        $http({method: 'POST', url: '/docs/request/get', data:{docs: $scope.docs}})
-        .success(function(data, status, headers, config) {
-            $scope.groups = data.groups;
-            $scope.users = [];
-            $scope.boxOpen('request');
-        })
-        .error(function(e){
-            console.log(e);
-        });
-    });
-
-    $scope.getSelectedGroups = function() {
-        var groups = [];
-        angular.forEach($scope.groups, function(group, key) {
-            var users = group.selected ? [] : $filter('filter')(group.users, {selected: true});
-            if (group.selected || users.length > 0)
-                groups.push({id: group.id, users: users});
-        });
-        return groups;
-    };
-
-    $scope.shareTo = function() {
-        $scope.wait = true;
-        var doc = $filter('filter')($scope.docs, {selected: true})[0];
-        $http({method: 'POST', url: '/doc/' + doc.id + '/shareTo', data:{groups: $scope.getSelectedGroups()}})
-        .success(function(data, status, headers, config) {
-            angular.extend(doc, data.doc);
-            $scope.wait = false;
-            $scope.boxClose();
-            doc.selected = false;
-        })
-        .error(function(e){
-            console.log(e);
+        return items.filter(function(element, index, array) {
+            return search.indexOf(element.type*1) >= 0;
         });
     };
-
-    $scope.requestTo = function(description) {
-        $scope.wait = true;
-        var doc = $filter('filter')($scope.docs, {selected: true})[0];
-        $http({method: 'POST', url: '/doc/' + doc.id + '/requestTo', data:{groups: $scope.getSelectedGroups(), description: description}})
-        .success(function(data, status, headers, config) {
-            angular.extend(doc, data.doc);
-            $scope.wait = false;
-            $scope.description = '';
-            $scope.boxClose();
-            doc.selected = false;
-        })
-        .error(function(e){
-            console.log(e);
-        });
-    };
-
 });
 </script>

@@ -27,6 +27,7 @@ Route::group(array('before' => 'auth'), function() {
     Route::post('docs/lists', 'FileController@docs');
     Route::post('apps/lists', 'FileController@apps');
     Route::get('docs/management', 'FileController@management');
+    Route::get('docs/management/templateSidenav', 'FileController@templateSidenav');
     Route::post('docs/share/get', 'FileController@shared');
     Route::post('docs/request/get', 'FileController@requested');
 
