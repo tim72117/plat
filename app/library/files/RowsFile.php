@@ -666,7 +666,9 @@ class RowsFile extends CommFile {
                 !in_array($column_value, $this->temp->works, true) && array_push($column_errors, '不是本校代碼');
             },
             'schid_105' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->works) && $this->temp->works = \Plat\Member::where('project_id', 1)->where('user_id', $this->user->id)->first()->organizations->load('now')->fetch('now.id')->toArray();
+                !isset($this->temp->works) && $this->temp->works = \Plat\Member::where('project_id', 1)->where('user_id', $this->user->id)->first()->organizations->load('every')->map(function($organization) {
+                     return $organization->every->lists('id');
+                })->flatten()->toArray();
                 !in_array($column_value, $this->temp->works, true) && array_push($column_errors, '不是本校代碼');
             },
             'depcode_104' => function($column_value, $column, &$column_errors) {
