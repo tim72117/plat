@@ -16,6 +16,11 @@ class Organization extends Eloquent {
         return $this->hasOne('Plat\Project\OrganizationDetail', 'organization_id', 'id')->orderBy('year', 'desc');
     }
 
+    public function every()
+    {
+        return $this->hasMany('Plat\Project\OrganizationDetail', 'organization_id', 'id');
+    }
+
 }
 
 class OrganizationDetail extends Eloquent {
