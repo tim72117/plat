@@ -94,7 +94,7 @@
                         <md-checkbox ng-model="row.selected" aria-label="刪除" ng-disabled="lock"></md-checkbox>
                     </td>
                     <td ng-repeat="column in table.columns" ng-if="true||row.writing" class="center aligned">
-                        <md-input-container md-no-float class="md-block" ng-if="column.rules!='bool' && column.answers==0">
+                        <md-input-container md-no-float class="md-block" ng-if="column.rules!='bool' && !column.answers">
                             <input ng-model="row['C' + column.id]" ng-disabled="column.readonly" placeholder="{{column.title}}" ng-change="setUpdating(row)">
                             <div class="md-input-messages-animation" ng-repeat="(id, errors) in row.errors" ng-if="id == column.id">
                                 <div class="no-animate" ng-repeat="error in errors">
