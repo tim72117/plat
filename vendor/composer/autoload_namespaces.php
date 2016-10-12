@@ -38,4 +38,8 @@ return array(
     'ClassPreloader' => array($vendorDir . '/classpreloader/classpreloader/src'),
     'Carbon' => array($vendorDir . '/nesbot/carbon/src'),
     'Boris' => array($vendorDir . '/d11wtq/boris/lib'),
+    'Behat\\Transliterator' => array($vendorDir . '/behat/transliterator/src'),
+    'Behat\\Testwork' => array($vendorDir . '/behat/behat/src'),
+    'Behat\\Gherkin' => array($vendorDir . '/behat/gherkin/src'),
+    'Behat\\Behat' => array($vendorDir . '/behat/behat/src'),
 );

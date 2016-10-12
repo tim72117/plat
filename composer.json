@@ -1,52 +1,53 @@
 {
-	"name": "laravel/laravel",
-	"description": "The Laravel Framework.",
-	"keywords": ["framework", "laravel"],
-	"license": "MIT",
-	"require": {
-		"laravel/framework": "4.2.*",
-		"maatwebsite/excel": "~1.3",
-		"lucadegasperi/oauth2-server-laravel": "3.0.*",
-		"league/oauth2-client": "^1.2",
-		"phpunit/phpunit": "5.2.*",
-		"larapack/dd": "1.*",
-		"tim72117/question": "1.*"
-	},
-	"repositories": [
-		{
-			"type": "path",
-			"url":  "../packages/tim72117/question"
-		}
-	],
-	"autoload": {
-		"classmap": [
-			"app/commands",
-			"app/controllers",
-			"app/models",
-			"app/database/migrations",
-			"app/database/seeds",
-			"app/tests/TestCase.php",
-			"app/library"
-		],
-		"files": [
-			"app/function/myfunction.php"
-		]
-	},
-	"scripts": {
-		"post-install-cmd": [
-			"php artisan clear-compiled",
-			"php artisan optimize"
-		],
-		"post-update-cmd": [
-			"php artisan clear-compiled",
-			"php artisan optimize"
-		],
-		"post-create-project-cmd": [
-			"php artisan key:generate"
-		]
-	},
-	"config": {
-		"preferred-install": "dist"
-	},
-	"minimum-stability": "stable"
+    "name": "laravel/laravel",
+    "description": "The Laravel Framework.",
+    "keywords": ["framework", "laravel"],
+    "license": "MIT",
+    "require": {
+        "laravel/framework": "4.2.*",
+        "maatwebsite/excel": "~1.3",
+        "lucadegasperi/oauth2-server-laravel": "3.0.*",
+        "league/oauth2-client": "^1.2",
+        "phpunit/phpunit": "5.2.*",
+        "larapack/dd": "1.*",
+        "tim72117/question": "1.*",
+        "behat/behat": "^3.2"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url":  "../packages/tim72117/question"
+        }
+    ],
+    "autoload": {
+        "classmap": [
+            "app/commands",
+            "app/controllers",
+            "app/models",
+            "app/database/migrations",
+            "app/database/seeds",
+            "app/tests/TestCase.php",
+            "app/library"
+        ],
+        "files": [
+            "app/function/myfunction.php"
+        ]
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "php artisan clear-compiled",
+            "php artisan optimize"
+        ],
+        "post-update-cmd": [
+            "php artisan clear-compiled",
+            "php artisan optimize"
+        ],
+        "post-create-project-cmd": [
+            "php artisan key:generate"
+        ]
+    },
+    "config": {
+        "preferred-install": "dist"
+    },
+    "minimum-stability": "stable"
 }
