@@ -97,4 +97,19 @@ angular.module('ngStruct', [])
 
         }
     };
+})
+
+.directive('resultTable', function() {
+    return {
+        restrict: 'A',
+        replace: false,
+        transclude: false,
+        scope: {
+            calculations: '=',
+            levels: '='
+        },
+        templateUrl: 'templateResultTable',
+        controller: function($scope, $filter) {
+        }
+    };
 });

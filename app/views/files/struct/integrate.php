@@ -235,88 +235,10 @@
             </md-tab>
             <md-tab label="分析結果">
                 <md-content class="md-padding">
-
+                    <div result-table calculations="calculations" levels="levels"></div>
                 </md-content>
             </md-tab>
         </md-tabs>
-
-            <table class="ui teal collapsing celled structured very compact bottom attached table" ng-class="{small:tableSize=='small', large:tableSize=='large'}" ng-show="page == 1">
-                <a id="resultTable"></a>
-                <thead>
-                    <tr>
-                        <th colspan="{{columns.length}}" ng-if="calculations.length>0">
-                            <md-input-container>
-                                <label>加入 %</label>
-                                <md-select ng-model="crossPercent">
-                                    <md-option ng-repeat="tableOption in tableOptions" ng-value="tableOption" ng-click="setPercent(tableOption)">
-                                        {{tableOption}}
-                                    </md-option>
-                                </md-select>
-                            </md-input-container>
-                            <button class="basic ui icon button" ng-click="exportExcel(structs)">
-                                <i class="download icon"></i> 下載結果
-                            </button>
-                        </th>
-                        <th colspan="{{calculations.length}}" ng-if="calculations.length>0">
-                            <div ng-hide="tableTitle.editing">
-                                <span ng-dblclick="edit()" ng-bind-html="tableTitle.title"></span>
-                            </div>
-                            <div ng-show="tableTitle.editing">
-                                <div type="text" contenteditable value="{{tableTitle.title}}" ng-model="tableTitle.title" style="margin:0"></div>
-                                <button class="ui mini button" ng-click="save()">儲存</button>
-                            </div>
-                        </th>
-                    </tr>
-                    <tr class="unselectable" >
-                        <th ng-if="columns.length == 0"></th>
-                        <th ng-repeat="(order,column) in columns" ng-mousedown="changeColumnFrom(order)" ng-mouseup="changeColumnTo(order)" ng-style="{cursor:changeColumnBefore.length==0 ? 'default' : 'move'}">
-                            <label class="compact ui icon mini button">
-                                <i class="move icon"></i>
-                            </label>
-                        </th>
-                        <th ng-repeat="(key,calculation) in calculations" class="top aligned" ng-mousedown="dragFrom(key)" ng-mouseup="dragTo(key)" ng-style="{cursor:dragBefore.length==0 ? 'default' : 'move'}">
-                            <label class="compact ui icon mini button">
-                                <i class="move icon"></i>
-                            </label>
-                            <button class="compact ui icon mini button" ng-click="removeCalculation(calculation)">
-                                <i class="close icon"></i>
-                            </button>
-                        </th>
-                    </tr>
-                    <tr>
-                        <th ng-if="columns.length == 0"></th>
-                        <th ng-repeat="column in columns">{{ column.title }}</th>
-                        <th ng-repeat="calculation in calculations" class="top aligned" style="max-width:200px">
-                            <div ng-repeat="struct in calculation.structs">
-                                {{ struct.title }}
-                                <div class="ui label" ng-repeat="row in struct.rows">
-                                    {{ row.title }} - {{ row.filter }}
-                                </div>
-                            </div>
-                            單位：人
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="level in levels">
-                        <td ng-repeat="parent in level.parents" rowspan="{{ parent.size }}" ng-if="parent.head">{{ parent.title }}</td>
-                        <td>{{ level.title }}</td>
-                        <td ng-repeat="calculation in calculations" ng-if="colPercent==rowPercent">{{ getResults(calculation.results, level) }}</td>
-                        <td ng-repeat="calculation in calculations" ng-if="colPercent">{{ getResults(calculation.results, level) }} ({{getTotalPercent(getResults(calculation.results, level),getNearestColumnTotal(calculation.results, level))| number : 2}} %)</td>
-                        <td ng-repeat="(key,calculation) in calculations" ng-if="rowPercent">{{ getResults(calculation.results, level) }} <span ng-if="restrictInvolve(key)">({{getRowPercent(key,level)| number : 2}} %)</span></td>
-                    </tr>
-                    <tr>
-                        <td ng-if="columns.length == 0">總和</td>
-                        <td ng-if="columns.length == 0" ng-repeat="calculation in calculations">{{ calculation.results[''] }}</td>
-                    </tr>
-                    <tr ng-if="calculations.length > 0 && columns.length > 0">
-                        <td colspan="{{ columns.length }}">總和</td>
-                        <td ng-repeat="calculation in calculations" ng-if="colPercent==rowPercent">{{getCrossColumnTotal(calculation.results, levels)}}</td>
-                        <td ng-repeat="calculation in calculations" ng-if="colPercent">{{getCrossColumnTotal(calculation.results, levels)}} </td>
-                        <td ng-repeat="calculation in calculations" ng-if="rowPercent">{{ getCrossColumnTotal(calculation.results, levels)}}</td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
     </div>
 
@@ -428,9 +350,9 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     $scope.toggleSidenavRight = function() {
         $scope.mdSidenav.right = !$scope.mdSidenav.right;
     };
-    $timeout(function() {
-        $scope.mdSidenav.left = true;
-    }, 1000);
+    // $timeout(function() {
+    //     $scope.mdSidenav.left = true;
+    // }, 1000);
 
     /*$scope.updateItem = function(selectSchoolID) {
         $http({method: 'POST', url: 'getItems', data:{schoolID: selectSchoolID}})
