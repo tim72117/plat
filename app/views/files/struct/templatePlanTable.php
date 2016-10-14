@@ -32,9 +32,7 @@
             </td>
 
             <td ng-if="struct.classExpanded" rowspan="{{ struct.expanded ? struct.rows.length : 1 }}" class="no-animate">
-                <a href="javascript:void(0)" ng-click="showFilter(struct)">
-                    {{ struct.title }}
-                </a>
+                <a href="javascript:void(0)" ng-click="showFilter(struct)">{{ struct.title }}</a>
                 <div class="compact ui icon mini basic vertical buttons">
                     <button class="ui button" ng-if="!struct.disabled" ng-click="toggleStruct(struct)" >
                         <i name="needHelp2" class="checkmark icon" ng-class="{green: !struct.disabled && struct.selected}"></i>
@@ -42,16 +40,12 @@
                 </div>
             </td>
 
-            <td colspan="2" ng-if="structClassShow && !struct.classExpanded && structClass[struct.title]" class="no-animate">
-            </td>
-            <td ng-if="structFilterShow && !struct.classExpanded && structClass[struct.title]" class="no-animate">
-            </td>
+            <td colspan="2" ng-if="structClassShow && !struct.classExpanded && structClass[struct.title]" class="no-animate"></td>
+            <td ng-if="structFilterShow && !struct.classExpanded && structClass[struct.title]" class="no-animate"></td>
 
             <td rowspan="{{ struct.expanded ? struct.rows.length : 1 }}" ng-if="struct.expanded" class="no-animate">
                 <div class="compact ui icon mini basic vertical buttons" ng-if="!struct.disabled || struct.expanded">
-                    <button class="ui button" ng-click="struct.expanded=false">
-                        <i class="compress icon"></i>
-                    </button>
+                    <button class="ui button" ng-click="struct.expanded=false"><i class="compress icon"></i></button>
                 </div>
             </td>
 

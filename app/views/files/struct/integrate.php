@@ -50,7 +50,7 @@
                         <md-input-container>
                             <md-select placeholder="學年度"
                                 ng-model="academicYearStart"
-                                md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)"
+                                md-on-open="loadItem(structs[idType], structs[idType].rows[academicYearType])"
                                 style="max-width: 100px"
                                 ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
                                 <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
@@ -62,7 +62,7 @@
                         <md-input-container>
                             <md-select placeholder="學年度"
                                 ng-model="academicYearEnd"
-                                md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)"
+                                md-on-open="loadItem(structs[idType], structs[idType].rows[academicYearType])"
                                 style="max-width: 100px"
                                 ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
                                 <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
@@ -78,7 +78,7 @@
                         <md-input-container>
                             <md-select placeholder="學年度"
                                 ng-model="academicYearStart"
-                                md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)"
+                                md-on-open="loadItem(structs[idType], structs[idType].rows[academicYearType])"
                                 style="max-width: 100px"
                                 ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
                                 <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
@@ -90,7 +90,7 @@
                         <md-input-container>
                             <md-select placeholder="學年度"
                                 ng-model="academicYearEnd"
-                                md-on-open="loadItem(structs[idType].title,structs[idType].rows[academicYearType].title)"
+                                md-on-open="loadItem(structs[idType], structs[idType].rows[academicYearType])"
                                 style="max-width: 100px"
                                 ng-change="setAcademicYear(academicYearStart,academicYearEnd,structs[idType],structs[idType].rows[academicYearType])">
                                 <md-progress-circular ng-if="!structs[idType].rows[academicYearType].items" md-diameter="20px"></md-progress-circular>
@@ -101,68 +101,54 @@
                 </div>
             </div>
             <div layout-padding>
-                <div class="ui ribbon label" align="center" style="background: #309292;color: white">
-                        <h4> 加入分類變項</h4>
-                </div>
+                <div class="ui ribbon label" align="center" style="background: #309292;color: white"><h4> 加入分類變項</h4></div>
                 <div layout="row" layout-sm="column" layout-align="space-around" ng-if="loading">
                     <md-progress-circular md-mode="indeterminate"></md-progress-circular>
                 </div>
                 <table class="ui teal celled table" style="background: #F5F5F5" ng-if="!loading">
                     <thead>
-                        <tr>
-                            <th>選擇分類變項</th>
-                        </tr>
+                        <tr><th>選擇分類變項{{lvs}}</th></tr>
                     </thead>
                     <tbody>
                         <tr ng-repeat="row in structs[idType].rows" ng-if="structs[idType].expanded">
-
-                            <td ng-class="{disabled: row.disabled}">
+                            <td ng-class="{negative: row.disabled, disabled: row.disabled}">
                                 <div ng-if="row.type=='slider'">
                                     {{ row.filter[0] }}年至{{ row.filter[1] }}
                                     <div ng-slider ng-model="row.filter" items="row.items"></div>
                                 </div>
-                                <md-input-container ng-if="!row.disabled && row.type!='slider'" style="margin-bottom: 0">
+                                <md-input-container ng-if="row.type!='slider'" style="margin-bottom: 0">
                                     <md-select multiple
                                         placeholder="{{ row.title }}"
-                                        ng-model="row.filter"
-                                        md-on-open="loadItem(structs[idType].title,row.title)"
-                                        ng-change="setFilter(structs[idType])">
-                                        <md-progress-circular ng-if="!row.items" md-diameter="20px"></md-progress-circular>
-                                        <md-optgroup >
-                                            <md-option ng-value="item" ng-repeat="item in row.items">{{item}}</md-option>
+                                        ng-model="lvs[row.id].items"
+                                        md-on-open="loadItem2(structs[idType], row)"
+                                        ng-change="toggleItems(row);row.selected = true">
+                                        <md-optgroup label="{{ row.title }}">
+                                            <md-option ng-value="item" ng-repeat="item in row.items">{{item.name}}</md-option>
                                         </md-optgroup>
                                     </md-select>
                                 </md-input-container>
                             </td>
-
                         </tr>
-
                     </tbody>
                 </table>
             </div>
             <div layout-padding>
-                <div class="ui ribbon label" align="center" style="background: #309292;color: white">
-                        <h4> 加入篩選條件</h4>
-                </div>
+                <div class="ui ribbon label" align="center" style="background: #309292;color: white"><h4> 加入篩選條件</h4></div>
                 <div layout="row" layout-sm="column" layout-align="space-around" ng-if="loading">
                     <md-progress-circular md-mode="indeterminate"></md-progress-circular>
                 </div>
                 <table class="ui teal collapsing celled table" style="background: #F5F5F5" ng-if="!loading">
                     <thead>
-                        <tr>
-                            <th>選擇篩選條件</th>
-                        </tr>
+                        <tr><th>選擇篩選條件</th></tr>
                     </thead>
                     <tbody>
                         <tr ng-repeat="row in structs[idType].rows" ng-if="structs[idType].expanded">
-
                             <td ng-class="{negative: row.disabled, disabled: row.disabled}">
                                 <i class="icon close" ng-if="row.disabled"></i>
                                 <md-checkbox ng-model="row.selected"
                                     aria-label="{{ structs[idType].rows[0].title }}"
                                     ng-change="toggleColumn(row, structs[idType])">{{ row.title }}</md-checkbox>
                             </td>
-
                             <td ng-class="{disabled: row.disabled}">
                                 <div ng-if="row.type=='slider'">
                                     {{ row.filter[0] }}年至{{ row.filter[1] }}
@@ -172,11 +158,11 @@
                                     <md-select multiple
                                         placeholder="{{ row.title }}"
                                         ng-model="row.filter"
-                                        md-on-open="loadItem(structs[idType].title,row.title)"
+                                        md-selected-text="item.name"
+                                        md-on-open="loadItem(structs[idType], row)"
                                         ng-change="setFilter(structs[idType])">
-                                        <md-progress-circular ng-if="!row.items" md-diameter="20px"></md-progress-circular>
                                         <md-optgroup >
-                                            <md-option ng-value="item" ng-repeat="item in row.items">{{item}}</md-option>
+                                            <md-option ng-value="item" ng-repeat="item in row.items">{{item.name}}</md-option>
                                         </md-optgroup>
                                     </md-select>
                                 </md-input-container>
@@ -271,8 +257,7 @@
             </thead>
             <tbody>
                 <tr ng-repeat="level in levels">
-                    <td ng-repeat="parent in level.parents" rowspan="{{ parent.size }}" ng-if="parent.head">{{ parent.title }}</td>
-                    <td>{{ level.title }}</td>
+                    <td ng-repeat="column in level" rowspan="{{ column.rowspan }}">{{ column.name }}</td>
                     <td ng-repeat="calculation in preCalculations"></td>
                 </tr>
                 <tr ng-if="preCalculations.length>0">
@@ -293,7 +278,7 @@
 
 <script>
 app.requires.push('ngStruct');
-app.controller('statusController', function($scope, $http, $filter, $timeout, $location, $anchorScroll, $mdDialog) {
+app.controller('statusController', function($scope, $http, $filter, $timeout, $location, $anchorScroll, $mdDialog, $q) {
     $scope.page = 0;
     $scope.helpChoosen = false;
     $scope.colPercent = false;
@@ -321,6 +306,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.tableOptions = ['行%', '列%', '不加%'];
+    $scope.lvs = {};
 
     $scope.loading = true;
     $scope.structs = [];
@@ -342,6 +328,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     $scope.$parent.main.loading = true;
     $http({method: 'POST', url: 'getStructs', data:{}})
     .success(function(data, status, headers, config) {
+        console.log(data);
         $scope.structs = data;
         $scope.structs[$scope.idType].expanded = true;
         $scope.loading = false;
@@ -383,23 +370,40 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         });
     };*/
 
-    $scope.loadItem = function(structTitle,rowTitle, callback) {
-        $http({method: 'POST', url: 'getEachItems', data:{schoolID: $scope.selectSchoolID,structTitle: structTitle,rowTitle: rowTitle}})
+    $scope.loadItem2 = function(struct, row) {
+        if (row.items) {
+            return row.items;
+        }
+
+        deferred = $q.defer();
+        $http({method: 'POST', url: 'getEachItems', data:{schoolID: $scope.selectSchoolID, structTitle: struct.title, rowTitle: row.title}})
         .success(function(data, status, headers, config) {
-            var struct = $scope.structs[data.key];
-            var rows = data.tables[struct.title] || {};
-            struct.disabled = Object.keys(rows).length == 0;
-            for (var j in struct.rows) {
-                if (struct.rows[j].title == rowTitle) {
-                    struct.rows[j].items = rows[struct.rows[j].title] || [];
-                    struct.rows[j].disabled = struct.rows[j].items == 0;
-                    if (struct.rows[j].title == '年齡') struct.rows[j].disabled = true;
-                }
-            };
+            console.log(data);
+            struct.disabled = data.items.length == 0;
+            row.items = data.items || [];
+            row.disabled = row.items.length == 0;
+            if (row.title == '年齡') row.disabled = true;
             $scope.structs[0].rows[1].type = 'slider';
-            if (callback) {
-                callback();
-            }
+            deferred.resolve(data.items);
+        })
+        .error(function(e) {
+            console.log(e);
+        });
+
+        return deferred.promise;
+    };
+
+    $scope.loadItem = function(struct, row, callback) {
+        console.log(struct);
+        $http({method: 'POST', url: 'getEachItems', data:{schoolID: $scope.selectSchoolID, structTitle: struct.title, rowTitle: row.title}})
+        .success(function(data, status, headers, config) {
+            console.log(data);
+            struct.disabled = data.items.length == 0;
+            row.items = data.items || [];
+            row.disabled = row.items.length == 0;
+            if (row.title == '年齡') row.disabled = true;
+            $scope.structs[0].rows[1].type = 'slider';
+            if (callback) callback();
         }).error(function(e) {
             console.log(e);
         });
@@ -418,7 +422,10 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     });
 
     $scope.$watchCollection('columns', function(columns) {
+        //$scope.levels = $scope.getLevels(columns, 0);
+        console.log(columns);
         $scope.levels = $scope.getLevels(columns, 0);
+        console.log($scope.levels);
         $scope.preCalculations.length = 0;
         if (columns.length > 0) {
             $scope.addPreCalculation();
@@ -446,29 +453,31 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         }
     });
 
-    $scope.getLevels = function(columns, index) {
-        var items = [];
-        if (!columns[index] || columns[index].items.length == 0) return items;
-
-        for (var i = 0; i < columns[index].items.length; i++) {
-            if (columns.length > index+1) {
-                var childrens = $scope.getLevels(columns, index+1);
-
-                for(j in childrens) {
-                    if (!childrens[j].parents)
-                        childrens[j].parents = [];
-                    childrens[j].parents[index] = {title: columns[index].items[i], size: childrens.length, head: j==0}
+    $scope.getLevels = function (columns, index) {
+        var amount = 1;
+        var levels = [];
+        var rows = [];
+        for (i in columns) {
+            var items = columns[i].items;//$filter('filter')(columns[i].items, {selected: true});
+            amount *= items.length;
+            levels[i] = {amount: amount, items: items};
+        }
+        console.log(columns);
+        for (var j = 0; j < amount; j++) {
+            rows[j] = [];
+            for (i in levels) {
+                var step = amount / levels[i].amount;
+                var part = parseInt(j / step);
+                var item = levels[i].items[part % levels[i].items.length];
+                if (part * step == j) {
+                    item.rowspan = step;
+                    rows[j].push(item);
                 }
-
-                items = items.concat(childrens);
-            } else {
-                items.push({title: columns[index].items[i]});
             }
+        }
 
-        };
-
-        return items;
-    };
+        return rows;
+    }
 
     $scope.getResults = function(result, level) {
         var result = $scope.getParentResult(result, level.parents);
@@ -482,41 +491,25 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         return result;
     };
 
-    $scope.toggleColumn = function(column, struct) {
-        if (column.items == null) {
-            $scope.loadItem(struct.title,column.title, function() {
-                var index = $scope.columns.indexOf(column);
-                if (index == -1) {
-                    column.struct = struct.title;
-                    $scope.columns.push(column);
-                    struct.selected = true;
-                    var isadd = true;
-                } else {
-                    $scope.columns.splice(index, 1);
-                    var isadd = false;
-                };
+    $scope.toggleItems = function(row) {
+        if (!$scope.lvs[row.id].rank) {
+            $scope.lvs[row.id].rank = Object.keys($scope.lvs).length;
+        }
+        var arr = Object.keys($scope.lvs).map(function (key) { return $scope.lvs[key]; });
+        var gg = $filter('orderBy')(arr, 'rank');
+        $scope.levels = $scope.getLevels(gg);
+        console.log(gg);
+    };
 
-                var inStructs = 0;
-                if ($scope.calculations.length>0) {
-                    for (var i in $scope.calculations) {
-                        for (var j in $scope.calculations[i].structs) {
-                            if ($scope.calculations[i].structs[j].title == struct.title ) {
-                                inStructs = 1;
-                            }
-                        }
-                        if (inStructs==0 && isadd) {
-                            $scope.calculations[i].structs.push({title: struct.title, rows: {}});
-                        }
-                    }
-                }
-                if ($scope.calculations.length>0) {
-                    for (var i in $scope.calculations) {
-                        $scope.calculations[i].results = {};
-                    }
-                }
-                $scope.needHelp3();
-            });
-        } else {
+    $scope.toggleColumn = function(column, struct) {
+        for (i in column.itemSelecteds) {
+            var index = column.items.indexOf(column.itemSelecteds[i]);
+            column.items[index].selected = true;
+        }
+
+        console.log(column.items);
+
+        function setColumns() {
             var index = $scope.columns.indexOf(column);
             if (index == -1) {
                 column.struct = struct.title;
@@ -547,6 +540,12 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
                 }
             }
             $scope.needHelp3();
+        }
+
+        if (column.items == null) {
+            $scope.loadItem(struct, column, setColumns);
+        } else {
+            setColumns();
         }
     };
 
