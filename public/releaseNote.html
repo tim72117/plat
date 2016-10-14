@@ -11,28 +11,39 @@
 <script src="/js/angular/1.5.8/angular-messages.min.js"></script>
 <script src="/js/angular_material/1.1.1/angular-material.min.js"></script>
 <link rel="stylesheet" href="/js/angular_material/1.1.1/angular-material.min.css">
+<link rel="stylesheet" href="/css/Semantic-UI/2.2.4/semantic.min.css" />
 <script>
 var app = angular.module('app', ['ngMaterial']);
 </script>
 </head>
-<body layout="row"  layout-align="center start">
-    <md-content>
+<body>
+    <md-content layout="row" layout-align="center start">
+        <div>
+
+            <br/><br/><br/>
+            <div class="ui blue large label">後中 <div class="detail">v1.4.7</div></div>
+            <div class="ui green large label">師培 <div class="detail">v1.4.6</div></div>
+
+<!-- release notes start -->
+
 <br/><br/><br/>
         <h1>Release Notes - 資料查詢平台 - Version v1.4.7</h1>
 
 <h2>        Bug
 </h2>
 <ul>
+<li>[<a href='http://104.199.155.0:8080/browse/PLAT-303'>PLAT-303</a>] -         後中回收率 - 全國回收率學生數太多時會出現錯誤
+</li>
+<li>[<a href='http://104.199.155.0:8080/browse/PLAT-310'>PLAT-310</a>] -         修復首頁公告功能
+</li>
 <li>[<a href='http://104.199.155.0:8080/browse/PLAT-311'>PLAT-311</a>] -         學校代碼配對問題
 </li>
 </ul>
 
-<h2>        New Feature
+<h2>        Improvement
 </h2>
 <ul>
-<li>[<a href='http://104.199.155.0:8080/browse/PLAT-23'>PLAT-23</a>] -         表單資料轉移介面
-</li>
-<li>[<a href='http://104.199.155.0:8080/browse/PLAT-191'>PLAT-191</a>] -         讀取篩選條件，人員名單(可搜尋)，依條件設定擁有人
+<li>[<a href='http://104.199.155.0:8080/browse/PLAT-174'>PLAT-174</a>] -         105高二家長調查各校回收率、全國回收率查詢
 </li>
 </ul>
 <br/><br/><br/>
@@ -97,6 +108,8 @@ var app = angular.module('app', ['ngMaterial']);
 <li>[<a href='http://104.199.155.0:8080/browse/PLAT-293'>PLAT-293</a>] -         上傳表單 - 部分欄位條件更改數值的介面改成選單
 </li>
 </ul>
+
+        </div>
     </md-content>
 </body>
 </html>
