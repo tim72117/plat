@@ -41,7 +41,7 @@ class StructFile extends CommFile {
             return 'files.struct.organize';
         } else {
             return 'files.struct.integrate';
-        }        
+        }
     }
 
     public function templateHelp()
@@ -193,7 +193,7 @@ class StructFile extends CommFile {
         $table = $this->tables[$name];
         $columnNames = Input::get('rowTitle');
         $mainSelects = $columnNames. ' AS 0';
-        $selects = 'analysis_tted.dbo.'.$table.'.'.$columnNames. ' AS 0';
+        $selects = 'analysis_tted.dbo.'.$table.'.'.$columnNames. ' AS name';
         $columns = 'analysis_tted.dbo.'.$table.'.'.$columnNames;
         if ($this->file->configs[0]->value == 1) {
             $mainTable = 'TEV103_TE_StudentInSchool_OK';
@@ -221,44 +221,39 @@ class StructFile extends CommFile {
         //Cache::flush();
         //Cache::forget(DB::connection('sqlsrv_tted')->table($table)->groupBy($columns)->select($selects)->getCacheKey());
         if ($table == $mainTable) {
-            $values = Cache::remember(DB::connection('sqlsrv_tted')
+            $query = DB::connection('sqlsrv_tted')
                 ->table($table)
                 ->whereIn(DB::raw('substring(學校代碼,3,4)'),$schoolID)
                 ->groupBy($columnNames)
-                ->select($mainSelects)
-                ->getCacheKey(), 300, function() use ($table, $mainSelects, $schoolID, $columnNames) {
-                $rows = DB::connection('sqlsrv_tted')->table($table)->whereIn(DB::raw('substring(學校代碼,3,4)'),$schoolID)
-                    ->groupBy($columnNames)
-                    ->select($mainSelects)
-                    ->get();
+                ->select($mainSelects);
+                Cache::forget($query->getCacheKey());
+            $items = Cache::remember($query->getCacheKey(), 300, function() use ($query) {
+                $rows = $query->get();
                 $values = [];
-                $values[$columnNames] = array_values(array_unique(array_pluck($rows,0)));
+                $items = array_values(array_unique(array_pluck($rows,0)));
+                rsort($items);
+                $values[$columnNames] =
                 rsort($values[$columnNames]);
-                return $values;
+                return $items;
             });
         } else{
-            $remember_key = DB::connection('sqlsrv_tted')
-                    ->table('analysis_tted.dbo.'.$mainTable)
-                    ->join('analysis_tted.dbo.'.$table,'analysis_tted.dbo.'.$mainTable.'.身分證字號','=','analysis_tted.dbo.'.$table.'.身分證字號')
-                    ->whereIn(DB::raw('substring(analysis_tted.dbo.'.$mainTable.'.學校代碼,3,4)'),$schoolID)
-                    ->groupBy($columns)
-                    ->select($selects)
-                    ->getCacheKey();
-            $values = Cache::remember($remember_key, 300, function() use ($table, $columns, $selects, $schoolID, $columnNames, $mainTable) {
-                $rows = DB::connection('sqlsrv_tted')->table('analysis_tted.dbo.'.$mainTable)
-                    ->join('analysis_tted.dbo.'.$table,'analysis_tted.dbo.'.$mainTable.'.身分證字號','=','analysis_tted.dbo.'.$table.'.身分證字號')
-                    ->whereIn(DB::raw('substring(analysis_tted.dbo.'.$mainTable.'.學校代碼,3,4)'),$schoolID)
-                    ->groupBy($columns)
-                    ->select($selects)
-                    ->get();
-                $values = [];
-                $values[$columnNames] = array_values(array_unique(array_pluck($rows, 0)));
-                rsort($values[$columnNames]);
-                return $values;
+            $query = DB::connection('sqlsrv_tted')
+                ->table('analysis_tted.dbo.'.$mainTable)
+                ->join('analysis_tted.dbo.'.$table,'analysis_tted.dbo.'.$mainTable.'.身分證字號','=','analysis_tted.dbo.'.$table.'.身分證字號')
+                ->whereIn(DB::raw('substring(analysis_tted.dbo.'.$mainTable.'.學校代碼,3,4)'),$schoolID)
+                ->groupBy($columns)
+                ->select($selects);
+                    Cache::forget($query->getCacheKey());
+            $items = Cache::remember($query->getCacheKey(), 300, function() use ($query) {
+                $items = array_map(function($item) {
+                    return ['name' => $item];
+                }, $query->lists('name'));
+                return $items;
             });
         }
-        $tables[$name] = $values;
-        return ['tables' => $tables,'key' => $order];
+
+        sleep(2);
+        return ['items' => $items, 'key' => $order];
     }
 
     public function calibration()
@@ -330,7 +325,7 @@ class StructFile extends CommFile {
     }
 
     public function getPopulation(){
-        $population = $this->file->configs[0]->value;
+        $population = 1;//$this->file->configs[0]->value;
         return($population);
     }
 
@@ -474,10 +469,10 @@ class StructFile extends CommFile {
         $count              = 0;
         $tableTitle         = implode("\r\n", $tableTitle);
         $rows[$count++][]   = $tableTitle;
-        
+
         if (Input::get('columns')) {
             $columns = array_pluck(Input::get('columns'), 'title');
-            
+
             foreach ($columns as $column) {
                 $rows[$count][] = $column;
             }
@@ -592,7 +587,7 @@ class StructFile extends CommFile {
                 $rows[$count][] = $calculations[$i]['results'][0];
             }
         }
-        
+
         \Excel::create($this->file->title, function($excel) use($rows){
             $excel->sheet('Sheetname', function($sheet) use($rows) {
                 $sheet->fromArray($rows, null, 'A1', false, false);
@@ -1159,12 +1154,12 @@ class StructFile extends CommFile {
         return ['results' => $query->select($selects)->get(), 'columns' => $columnNames];
     }
 
-    
+
     public function export_org_excel()
     {
         $calculation       = Input::get('calculation');
         $tableTitle         = Input::get('tableTitle');
-        
+
 
         $count              = 0;
         $tableTitle         = implode("\r\n", $tableTitle);
@@ -1183,8 +1178,8 @@ class StructFile extends CommFile {
                 }
                 $count++;
             }
-         } 
-        
+         }
+
         \Excel::create($tableTitle, function($excel) use($rows){
             $excel->sheet('Sheetname', function($sheet) use($rows) {
                 $sheet->fromArray($rows, null, 'A1', false, false);
