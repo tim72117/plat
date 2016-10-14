@@ -1,5 +1,5 @@
 <?php
 
-$organizations = Project\Yearbook\User::find(Auth::user()->id)->works->unique()->lists('sch_id');
+$organizations = Plat\Member::where('user_id', $member->user_id)->where('project_id', $project->id)->first()->organizations;
 
-$member->organizations()->attach($organizations);
+$member->organizations()->sync($organizations->lists('id'));

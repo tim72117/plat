@@ -93,21 +93,15 @@ class UserAuthedController extends BaseController {
 
     public function profile($project, $parameter = null)
     {
-        $member = Auth::user()->members()->where('project_id', $project->id)->first();
-
-        View::share('parameter', $parameter);
-
-        return View::make('project.main', ['project' => $project])->nest('context', 'project.' . $project->code . '.profile', ['member' => $member]);
+        return View::make('project.main', ['project' => $project])->nest('context', 'project.profile', []);
     }
 
     public function profileSave($project, $parameter = null)
     {
         switch ($parameter) {
             case 'power':
-                $attributes = ['user_id' => Auth::user()->id, 'project_id' => Input::get('project_id'), 'actived' => false];
+                $attributes = ['user_id' => Auth::user()->id, 'project_id' => Input::get('project_id')];
                 $member = Plat\Member::where($attributes)->withTrashed()->first() ?: Plat\Member::create($attributes);
-
-                $member->actived = false;
 
                 require app_path() . '\\views\\project\\' . $project->code . '\\auth\\register_power.php';
 
@@ -128,23 +122,19 @@ class UserAuthedController extends BaseController {
 
             case 'contact':
                 $member = Auth::user()->members()->where('project_id', $project->id)->first();
-                $member->contact->title = Input::get('title');
-                $member->contact->tel = Input::get('tel');
-                $member->contact->fax = Input::get('fax');
-                $member->contact->email2 = Input::get('email2');
-
+                $member->contact->title = Input::get('contact.title');
+                $member->contact->tel = Input::get('contact.tel');
+                $member->contact->fax = Input::get('contact.fax');
+                $member->contact->email2 = Input::get('contact.email2');
                 $member->push();
                 break;
 
             case 'changeUser':
-                $user = Auth::user();
-                $user->username = Input::get('username');
-                $user->email = Input::get('email');
-                $user->valid();
-                $user->members->each(function($member) {
-                    $member->actived = false;
-                });
-                $user->push();
+                $member = Auth::user()->members()->where('project_id', $project->id)->first();
+                $member->user->username = Input::get('user.username');
+                $member->user->email = Input::get('user.email');
+                $member->user->valid();
+                $member->user->save();
                 break;
 
             default:
@@ -152,7 +142,18 @@ class UserAuthedController extends BaseController {
                 break;
         }
 
-        return Redirect::to(Request::path());
+        return ['member' => $member->load('applying')];
+    }
+
+    public function getMyMembers($project) {
+
+        $projects = Plat\Project::all()->keyBy('id');
+
+        $members = Auth::user()->members->load('user', 'contact', 'applying', 'organizations.now')->each(function($member) use ($projects) {
+            $projects[$member->project_id]->member = $member;
+        });
+
+        return ['projects' => $projects, 'projectNow' => $project];
     }
 
 }
