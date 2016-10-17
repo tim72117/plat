@@ -1,9 +1,9 @@
 <?php
-namespace Plat\Analysis;
+namespace Plat\Struct;
 
 use Eloquent;
 
-class ClassStruct extends Eloquent{
+class Category extends Eloquent{
     protected $table = 'analysis_tted.dbo.class_struct';
 
     public $timestamps = false;

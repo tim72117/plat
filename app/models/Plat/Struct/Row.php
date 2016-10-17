@@ -1,9 +1,9 @@
 <?php
-namespace Plat\Analysis;
+namespace Plat\Struct;
 
 use Eloquent;
 
-class RowStruct extends Eloquent{
+class Row extends Eloquent{
     protected $table = 'analysis_tted.dbo.row_struct';
 
     public $timestamps = false;
