@@ -655,6 +655,13 @@ class RowsFile extends CommFile {
         return [$query, $power];
     }
 
+    public function get_own_organizations($project_id)
+    {
+        return \Plat\Member::where('project_id', $project_id)->where('user_id', $this->user->id)->first()->organizations->load('every')->map(function($organization) {
+                    return $organization->every->lists('id');
+        })->flatten()->toArray();
+    }
+
     public function checker($name)
     {
         $checkers = [
@@ -662,56 +669,40 @@ class RowsFile extends CommFile {
                 !check_id_number($column_value) && array_push($column_errors, $column->title . '無效');
             },
             'schid_104' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->works) && $this->temp->works = \Plat\Member::where('project_id', 1)->where('user_id', $this->user->id)->first()->organizations->load('every')->map(function($organization) {
-                        return $organization->every->lists('id');
-                })->flatten()->toArray();
+                !isset($this->temp->works) && $this->temp->works = $this->get_own_organizations(1);
                 !in_array($column_value, $this->temp->works, true) && array_push($column_errors, '不是本校代碼');
             },
             'schid_105' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->works) && $this->temp->works = \Plat\Member::where('project_id', 1)->where('user_id', $this->user->id)->first()->organizations->load('every')->map(function($organization) {
-                        return $organization->every->lists('id');
-                })->flatten()->toArray();
+                !isset($this->temp->works) && $this->temp->works = $this->get_own_organizations(1);
                 !in_array($column_value, $this->temp->works, true) && array_push($column_errors, '不是本校代碼');
             },
             'depcode_104' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->dep_codes_104) && $this->temp->dep_codes_104 = DB::table('rows.dbo.row_20150910_175955_h23of')
-                    ->whereIn('C246', \Plat\Member::where('project_id', 1)->where('user_id', $this->user->id)->first()->organizations->load('every')->map(function($organization) {
-                        return $organization->every->lists('id');
-                })->flatten()->toArray())->lists('C248');
+                    ->whereIn('C246', $this->get_own_organizations(1))->lists('C248');
                 !in_array($column_value, $this->temp->dep_codes_104, true) && array_push($column_errors, '不是本校科別代碼');
             },
             'depcode_105' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->dep_codes_105) && $this->temp->dep_codes_105 = DB::table('rows.dbo.row_20160622_111650_ykezh')
-                    ->whereIn('C1106', \Plat\Member::where('project_id', 1)->where('user_id', $this->user->id)->first()->organizations->load('every')->map(function($organization) {
-                        return $organization->every->lists('id');
-                })->flatten()->toArray())->lists('C1108');
+                    ->whereIn('C1106', $this->get_own_organizations(1))->lists('C1108');
                 !in_array($column_value, $this->temp->dep_codes_105, true) && array_push($column_errors, '不是本校科別代碼');
             },
             'tted_sch' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->schools) && $this->temp->schools = \Plat\Member::where('project_id', 2)->where('user_id', $this->user->id)->first()->organizations->load('every')->map(function($organization) {
-                        return $organization->every->lists('id');
-                })->flatten()->toArray();
+                !isset($this->temp->schools) && $this->temp->schools = $this->get_own_organizations(2);
                 !in_array($column_value, $this->temp->schools, true) && array_push($column_errors, '不是本校代碼');
             },
             'tted_depcode_103' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->dep_codes_103) && $this->temp->dep_codes_103 = DB::table('plat_public.dbo.pub_depcode_tted')
-                    ->whereIn('sch_id', \Plat\Member::where('project_id', 2)->where('user_id', $this->user->id)->first()->organizations->load('every')->map(function($organization) {
-                        return $organization->every->lists('id');
-                })->flatten()->toArray())->where('year','=','103')->lists('id');
+                    ->whereIn('sch_id', $this->get_own_organizations(2))->where('year','=','103')->lists('id');
                 !in_array($column_value, $this->temp->dep_codes_103, true) && array_push($column_errors, '不是本校系所代碼');
             },
             'tted_depcode_104' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->dep_codes_104) && $this->temp->dep_codes_104 = DB::table('plat_public.dbo.pub_depcode_tted')
-                    ->whereIn('sch_id', \Plat\Member::where('project_id', 2)->where('user_id', $this->user->id)->first()->organizations->load('every')->map(function($organization) {
-                        return $organization->every->lists('id');
-                })->flatten()->toArray())->where('year','=','104')->lists('id');
+                    ->whereIn('sch_id', $this->get_own_organizations(2))->where('year','=','104')->lists('id');
                 !in_array($column_value, $this->temp->dep_codes_104, true) && array_push($column_errors, '不是本校系所代碼');
             },
             'junior_schools_in_city' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->junior_schools_in_city) && $this->temp->junior_schools_in_city = DB::table('rows.dbo.row_20151022_135158_5xtfu')
-                    ->whereIn('C404', \Plat\Member::where('project_id', 1)->where('user_id', $this->user->id)->first()->organizations->load('every')->map(function($organization) {
-                        return $organization->every->lists('id');
-                })->flatten()->toArray())->lists('C406');
+                    ->whereIn('C404', $this->get_own_organizations(1))->lists('C406');
                 !in_array($column_value, $this->temp->junior_schools_in_city, true) && array_push($column_errors, '不是本縣市所屬學校代碼');
             },
             'counties' => function($column_value, $column, &$column_errors) {
