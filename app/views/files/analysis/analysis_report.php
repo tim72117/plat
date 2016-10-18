@@ -3,7 +3,7 @@
 
 
 
-    <div class="page" ng-repeat="question in questions" ng-if="question.answers.length > 0 && question.answers.length < 10" ng-style="{top: 297*$index+'mm'}">
+    <div class="page" ng-repeat="question in questions" ng-if="question.answers.length > 1 && question.answers.length < 10" ng-style="{top: 297*$index+'mm'}">
         <table cellspacing="0" style="width:100%">
             <tr>
                 <th class="question-title" colspan="{{(question.answers.length+1)*2+1}}">{{question.title}}</th>
@@ -144,28 +144,29 @@ app.controller('reportController', function($scope, $http, $filter) {
     $scope.percent = 0;
     $scope.selected = 0;
     $scope.groups = [
-        {title: '學制別', name: 'type_school', targets: [
+        {title: '學制別', name: 'type_school', type: 'crosstable', targets: [
             {name: '高中', value: 1},
             {name: '高職', value: 2},
             {name: '五專', value: 3},
             {name: '進校', value: 4}
         ]},
-        {title: '設立別', name: 'type_establish', targets: [
+        {title: '設立別', name: 'type_establish', type: 'crosstable', targets: [
             {name: '國立', value: 1},
             {name: '私立', value: 2},
             {name: '縣市立', value: 3}
         ]},
-        {title: '學制別', name: 'type_program', targets: [
-            {name: '1', value: 1},
-            {name: '2', value: 2},
-            {name: '3', value: 3},
-            {name: '4', value: 4}
+        {title: '學制別', name: 'type_program', type: 'crosstable', targets: [
+            {name: '普通科', value: 1},
+            {name: '專業群科', value: 2},
+            {name: '綜合高中', value: 3},
+            {name: '實用技能學程', value: 4},
+            {name: '五專', value: 5}
         ]},
-        {title: '性別', name: 'stdsex', targets: [
+        {title: '性別', name: 'stdsex', type: 'crosstable', targets: [
             {name: '男', value: 1},
             {name: '女', value: 2}
         ]},
-        {title: '縣市別', name: 'city', targets: [
+        {title: '縣市別', name: 'city', type: 'crosstable', targets: [
             {name: '臺北市', value: '30'},
             {name: '高雄市', value: '64'},
             {name: '新北市', value: '01'},
@@ -188,17 +189,16 @@ app.controller('reportController', function($scope, $http, $filter) {
             {name: '連江縣', value: '72'},
             {name: '金門縣', value: '71'},
             {name: '桃園市', value: '03'}
-        ]}
+        ]},
+        {title: '全國', name: 'all', type: 'frequence', targets: [{name: '全國', value: 'all'}]}
     ];
     $scope.start = 0;
     $scope.amount = 10;
 
     $scope.get_analysis_questions = function() {
         //$scope.$parent.main.loading = true;
-        console.log($scope.start);console.log($scope.amount);
         $http({method: 'POST', url: 'get_analysis_questions', data:{start: $scope.start, amount: $scope.amount}})
         .success(function(data, status, headers, config) {
-            console.log(data);
             $scope.selected = 1;
             $scope.questions = data.questions;//[data.questions[0], data.questions[1], data.questions[2]];
             //$scope.$parent.main.loading = false;
@@ -227,40 +227,79 @@ app.controller('reportController', function($scope, $http, $filter) {
 
     function calculation_group() {
         if ($scope.groups[group_index]) {
-            $http({method: 'POST', url: 'get_crosstable', data: {
-                    name1: $scope.questions[question_index].name,
-                    name2: $scope.groups[group_index].name,
-                    group_key: 'all',
-                    target_key: 'all',
-                    weight: true
-                }
-            }).success(function(data, status, headers, config) {
-                console.log(data);
-                group_name = $scope.groups[group_index].name;
-                $scope.questions[question_index][group_name] = $scope.questions[question_index][group_name] ? $scope.questions[question_index][group_name] : {};
-                $scope.questions[question_index][group_name].crosstable = data.crosstable;
-                $scope.questions[question_index][group_name].crosstable.sum = {};
-                for (target_index in $scope.groups[group_index].targets) {
-                    var target = $scope.groups[group_index].targets[target_index];
-                    for (answer_index in $scope.questions[question_index].answers) {
-                        var answer = $scope.questions[question_index].answers[answer_index];
-                        var sum = $scope.questions[question_index][group_name].crosstable.sum[target.value]*1 || 0;
-                        var count = $scope.questions[question_index][group_name].crosstable[answer.value][target.value]*1 || 0;
-                        $scope.questions[question_index][group_name].crosstable.sum[target.value] = sum*1+count;
-                    }
-                }
-                console.log($scope.questions[question_index][group_name].crosstable);
-                group_index++;
-                calculation_group();
-            }).error(function(e){
-                console.log(e);
-            });
+            if ($scope.groups[group_index].type == 'crosstable') {
+                get_crosstable();
+            }
+            if ($scope.groups[group_index].type == 'frequence') {
+                get_frequence();
+            }
         } else {
             group_index = 0;
             question_index++;
             $scope.percent = question_index*100/$scope.questions.length;
             calculation_question();
         }
+    }
+
+    function get_crosstable() {
+        $http({method: 'POST', url: 'get_crosstable', data: {
+                name1: $scope.questions[question_index].name,
+                name2: $scope.groups[group_index].name,
+                group_key: 'all',
+                target_key: 'all',
+                weight: true
+            }
+        }).success(function(data, status, headers, config) {
+            group_name = $scope.groups[group_index].name;
+            $scope.questions[question_index][group_name] = $scope.questions[question_index][group_name] ? $scope.questions[question_index][group_name] : {};
+            $scope.questions[question_index][group_name].crosstable = data.crosstable;
+            $scope.questions[question_index][group_name].crosstable.sum = {};
+            for (target_index in $scope.groups[group_index].targets) {
+                var target = $scope.groups[group_index].targets[target_index];
+                for (answer_index in $scope.questions[question_index].answers) {
+                    var answer = $scope.questions[question_index].answers[answer_index];
+                    var sum = $scope.questions[question_index][group_name].crosstable.sum[target.value]*1 || 0;
+                    var count = $scope.questions[question_index][group_name].crosstable[answer.value][target.value]*1 || 0;
+                    $scope.questions[question_index][group_name].crosstable.sum[target.value] = sum*1+count;
+                }
+            }
+            group_index++;
+            calculation_group();
+        }).error(function(e){
+            console.log(e);
+        });
+    }
+
+    function get_frequence() {
+        $http({method: 'POST', url: 'get_frequence', data: {
+                name: $scope.questions[question_index].name,
+                group_key: 'all',
+                target_key: 'all',
+                weight: true
+            }
+        }).success(function(data, status, headers, config) {
+            group_name = $scope.groups[group_index].name;
+            $scope.questions[question_index][group_name] = $scope.questions[question_index][group_name] ? $scope.questions[question_index][group_name] : {};
+            var crosstable = {};
+            for (var i in data.frequence) {
+                crosstable[i] = {all: data.frequence[i]};
+            }
+            $scope.questions[question_index][group_name].crosstable = crosstable;
+            $scope.questions[question_index][group_name].crosstable.sum = {};
+            for (target_index in $scope.groups[group_index].targets) {
+                var target = $scope.groups[group_index].targets[target_index];
+                for (answer_index in $scope.questions[question_index].answers) {
+                    var answer = $scope.questions[question_index].answers[answer_index];
+                    var sum = $scope.questions[question_index][group_name].crosstable.sum[target.value]*1 || 0;
+                    var count = $scope.questions[question_index][group_name].crosstable[answer.value][target.value]*1 || 0;
+                    $scope.questions[question_index][group_name].crosstable.sum[target.value] = sum*1+count;
+                }
+            }
+            group_index++;
+            calculation_group();
+        }).error(function(e) {
+            console.log(e);
+        });
     }
 
 });

@@ -128,7 +128,10 @@ class AnalysisFile extends CommFile {
 
         $data_query = $this->get_data_query([$name]);
 
-        $frequence = $data_query->groupBy($name)->select(DB::raw('count(*) AS total'), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->remember(3)->lists('total', 'name');
+        $total_query = Input::get('weight', false) ? 'CONVERT(int, ROUND(sum(w_final), 0)) AS total' : 'count(*) AS total';
+
+        $frequence = $data_query->groupBy($name)
+        ->select(DB::raw($total_query), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->remember(3)->lists('total', 'name');
 
         return ['frequence' => $frequence];
     }
