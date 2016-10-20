@@ -95,7 +95,7 @@ class RowsFile extends CommFile {
      */
     public function get_views()
     {
-        return ['open', 'import', 'rows', 'analysis'];
+        return ['open', 'import', 'rows', 'analysis', 'setRowsOwnerView'];
     }
 
     /**
@@ -162,6 +162,16 @@ class RowsFile extends CommFile {
     public function analysis()
     {
         return 'files.analysis.analysis';
+    }
+
+    /**
+     * Get set rows owner view path.
+     *
+     * @return string
+     */
+    public function setRowsOwnerView()
+    {
+        return 'files.rows.set_rows_owner';
     }
 
     public function generate_table()
@@ -1186,6 +1196,47 @@ class RowsFile extends CommFile {
             return $message;
 
         }, $this->import['rows']);
+    }
+
+    public function getGroupColumnValues()
+    {
+        $table = $this->file->sheets->first()->tables->first();
+
+        $column_name = 'C' . Input::get('column_id');
+
+        $values = DB::table($table->database . '.dbo.' . $table->name)->whereNull('deleted_at')->groupBy($column_name)->select($column_name . ' AS text')->get();
+
+        return ['values' => $values];
+    }
+
+    public function queryUsersByEmail()
+    {
+        $users = User::where('email', 'like', '%' . Input::get('query') . '%')->limit(1000)->get(['id', 'email', 'username']);
+
+        return ['users' => $users];
+    }
+
+    public function getProjectPositions()
+    {
+        return ['positions' => $this->user->members->sortByDesc('logined_at')->first()->project->positions];
+    }
+
+    public function setRowsOwner()
+    {
+        if (!$this->isCreater()) {
+            $message = '您沒有權限更改資料';
+        } else {
+            $table = $this->file->sheets->first()->tables->first();
+
+            $column_name = 'C' . Input::get('selected.column_id');
+
+            $updated = DB::table($table->database . '.dbo.' . $table->name)
+                ->where($column_name, Input::get('selected.value_text'))->update(['created_by' => Input::get('selected.user.id')]);
+
+            $message = $updated . '筆資料已儲存';
+        }
+
+        return ['message' => $message];
     }
 
 }

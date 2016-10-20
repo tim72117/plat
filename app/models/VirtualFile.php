@@ -123,15 +123,15 @@ class Struct_file {
                 $tools = [
                     //['name' => 'edit_information', 'title' => '編輯檔案資訊', 'method' => 'edit_information', 'icon' => 'edit'],
                     ['name' => 'analysis',         'title' => '分析結果',     'method' => 'analysis',         'icon' => 'pie-chart'],
-                    ['name' => 'rows',             'title' => '資料列',       'method' => 'rows',             'icon' => 'create'],
+                    ['name' => 'rows',             'title' => '編輯資料列',   'method' => 'rows',             'icon' => 'create'],
                     ['name' => 'import',           'title' => '匯入資料',     'method' => 'import',           'icon' => 'file-upload'],
                     ['name' => 'export',           'title' => '匯出資料',     'method' => 'exportAllRows',    'icon' => 'file-download'],
+                    ['name' => 'setRowsOwnerView', 'title' => '設定資料列擁有人', 'method' => 'setRowsOwnerView',     'icon' => 'assignment-ind'],
                 ];
             break;
             case 7:
                 $tools = [
-                    ['name' => 'analysis_report', 'title' => '描述性分析報告', 'method' => 'analysis_report', 'icon' => 'description">
-'],
+                    ['name' => 'analysis_report', 'title' => '描述性分析報告', 'method' => 'analysis_report', 'icon' => 'description'],
                 ];
             break;
             default:
