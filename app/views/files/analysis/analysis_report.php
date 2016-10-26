@@ -3,15 +3,16 @@
 
 
 
-    <div class="page" ng-repeat="question in questions" ng-if="question.answers.length > 1 && question.answers.length < 10" ng-style="{top: 297*$index+'mm'}">
+    <div class="page" ng-repeat="question in questions" ng-style="{top: 297*$index+'mm'}">
         <table cellspacing="0" style="width:100%">
             <tr>
-                <th class="question-title" colspan="{{(question.answers.length+1)*2+1}}">{{question.title}}</th>
+                <th class="question-title" colspan="{{(question.answers.length+1)*2+(question.type=='scale' ? 2 :1)}}">{{question.title}}</th>
             </tr>
             <tr>
                 <th></th>
                 <th class="answer-title" colspan="2" ng-repeat="answer in question.answers">{{answer.title}}</th>
                 <th class="answer-title" colspan="2">小計</th>
+                <th class="answer-title" ng-if="question.type=='scale'"></th>
             </tr>
             <tr>
                 <th class="answer-title"></th>
@@ -19,6 +20,7 @@
                 <th class="answer-title" style="width:20mm" ng-repeat-end>列N%</th>
                 <th class="answer-title" style="width:20mm">計數</th>
                 <th class="answer-title" style="width:20mm">列N%</th>
+                <th class="answer-title" style="width:20mm" ng-if="question.type=='scale'">平均數</th>
             </tr>
             <tr ng-repeat-start="group in groups">
                 <th class="group-title" style="text-align:left;font-weight:bold" colspan="{{(question.answers.length+1)*2+1}}">{{group.title}}</th>
@@ -29,6 +31,7 @@
                 <td class="row-value" ng-repeat-end>{{getRate(question[group.name].crosstable, target.value, question[group.name].crosstable[answer.value][target.value])}}%</td>
                 <td class="row-value">{{question[group.name].crosstable.sum[target.value]}}</td>
                 <td class="row-value">100.0%</td>
+                <td class="row-value" ng-if="question.type=='scale'">{{getMean(question, group, target)}}</td>
             </tr>
         </table>
     </div>
@@ -113,7 +116,7 @@ th {
 }
 
 .row-value {
-    font-size: 12px;
+    font-size: 10px;
     text-align: right;
 }
 
@@ -144,11 +147,12 @@ app.controller('reportController', function($scope, $http, $filter) {
     $scope.percent = 0;
     $scope.selected = 0;
     $scope.groups = [
-        {title: '學制別', name: 'type_school', type: 'crosstable', targets: [
+        {title: '學制別', name: 'sch_type', type: 'crosstable', targets: [
             {name: '高中', value: 1},
             {name: '高職', value: 2},
-            {name: '五專', value: 3},
-            {name: '進校', value: 4}
+            {name: '高中進校', value: 3},
+            {name: '高職進校', value: 4},
+            {name: '五專學校', value: 5}
         ]},
         {title: '設立別', name: 'type_establish', type: 'crosstable', targets: [
             {name: '國立', value: 1},
@@ -192,15 +196,18 @@ app.controller('reportController', function($scope, $http, $filter) {
         ]},
         {title: '全國', name: 'all', type: 'frequence', targets: [{name: '全國', value: 'all'}]}
     ];
-    $scope.start = 0;
-    $scope.amount = 10;
+    $scope.start = 9;
+    $scope.amount = 1;
 
     $scope.get_analysis_questions = function() {
         //$scope.$parent.main.loading = true;
         $http({method: 'POST', url: 'get_analysis_questions', data:{start: $scope.start, amount: $scope.amount}})
         .success(function(data, status, headers, config) {
             $scope.selected = 1;
-            $scope.questions = data.questions;//[data.questions[0], data.questions[1], data.questions[2]];
+            $scope.questions = $filter('filter')(data.questions, function(question) {
+                return question.answers.length > 1 && question.answers.length < 10;
+            });
+            console.log($scope.questions);
             //$scope.$parent.main.loading = false;
             calculation_question();
         }).error(function(e){
@@ -210,13 +217,27 @@ app.controller('reportController', function($scope, $http, $filter) {
 
     $scope.getValue = function(value) {
         return !value ? 0 : value;
-    }
+    };
 
     $scope.getRate = function(crosstable, target, value) {
         var sum = !crosstable ? [] : crosstable.sum;
         var value = value || 0;
         var rate = !sum[target] ? 0 : Math.round(1000*value/crosstable.sum[target])/10;
         return rate;
+    };
+
+    $scope.getMean = function(question, group, target) {
+        if (!question[group.name]) return '';
+
+        var crosstable = question[group.name].crosstable;
+        var value = 0;
+        var sum = 0;
+        for (var i in question.answers) {
+            sum += crosstable[question.answers[i].value][target.value]*question.answers[i].value;
+            value += crosstable[question.answers[i].value][target.value]*1;
+        }
+
+        return Math.round(1000*sum/value)/1000;
     };
 
     function calculation_question() {
