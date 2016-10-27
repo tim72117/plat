@@ -34,6 +34,8 @@ class Table extends Eloquent {
 
     protected $fillable = array('database', 'name', 'lock', 'builded_at', 'construct_at');
 
+    protected $attributes = ['lock' => false, 'construct_at' => ' rrr'];
+
     public function getLockAttribute($value) {
         return (boolean)$value;
     }
@@ -52,6 +54,12 @@ class Table extends Eloquent {
         return $this->belongsTo('Row\Sheet', 'sheet_id', 'id');
     }
 
+    public function setConstructAtAttribute($value)
+    {
+        dd(1);
+        $this->attributes['construct_at'] = \Carbon\Carbon::now()->toDateTimeString();
+    }
+    
 }
 
 class Column extends Eloquent {
@@ -61,6 +69,8 @@ class Column extends Eloquent {
     public $timestamps = true;
 
     protected $fillable = array('name', 'title', 'rules', 'unique', 'encrypt', 'isnull', 'readonly');
+
+    protected $attributes = ['unique' => false, 'encrypt' => false, 'isnull' => false, 'readonly' => false];
 
     function __construct(array $attributes = array())
     {
@@ -111,7 +121,7 @@ class Column extends Eloquent {
     }
 
     public function setNameAttribute($value)
-    {
+    {        
         $this->attributes['name'] = strtolower($value);
     }
 
