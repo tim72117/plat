@@ -4,20 +4,20 @@
     <div class="page" ng-repeat="question in questions" ng-style="{top: 297*$index+'mm'}">
         <table cellspacing="0" style="width:100%">
             <tr>
-                <th class="question-title" colspan="{{(question.answers.length+1)*2+(question.type=='scale' ? 2 :1)}}">表{{start+$index+1}}:{{question.title}}</th>
+                <th class="question-title" colspan="{{(question.answers.length+1)*2+(question.type=='scale' ? 2 :1)}}">表{{question.index}}:{{question.title}}</th>
             </tr>
             <tr>
                 <th></th>
                 <th class="answer-title" colspan="2" ng-repeat="answer in question.answers">{{answer.title}}</th>
-                <th class="answer-title" ng-if="question.type!='scale'">小計</th>
-                <th class="answer-title" ng-if="question.type=='scale'"></th>
+                <th class="answer-title" ng-if="other!='mean'&&(other=='sum'||question.type!='scale')">小計</th>
+                <th class="answer-title" ng-if="other!='sum'&&(other=='mean'||question.type=='scale')"></th>
             </tr>
             <tr>
                 <th class="answer-title"></th>
                 <th class="answer-title" style="width:20mm" ng-repeat-start="answer in question.answers">計數</th>
                 <th class="answer-title" style="width:20mm" ng-repeat-end>列N%</th>
-                <th class="answer-title" style="width:20mm" ng-if="question.type!='scale'">計數</th>
-                <th class="answer-title" style="width:20mm" ng-if="question.type=='scale'">平均數</th>
+                <th class="answer-title" style="width:20mm" ng-if="other!='mean'&&(other=='sum'||question.type!='scale')">計數</th>
+                <th class="answer-title" style="width:20mm" ng-if="other!='sum'&&(other=='mean'||question.type=='scale')">平均數</th>
             </tr>
             <tr ng-repeat-start="group in groups">
                 <th class="group-title" style="text-align:left;font-weight:bold" colspan="{{(question.answers.length+1)*2+1}}">{{group.title}}</th>
@@ -26,15 +26,16 @@
                 <td class="row-title" style="min-width:15mm">{{target.name}}</td>
                 <td class="row-value" ng-repeat-start="answer in question.answers">{{getValue(question[group.name].crosstable[answer.value][target.value]) | number}}</td>
                 <td class="row-value" ng-repeat-end>{{getRate(question[group.name].crosstable, target.value, question[group.name].crosstable[answer.value][target.value])}}%</td>
-                <td class="row-value" ng-if="question.type!='scale'">{{question[group.name].crosstable.sum[target.value]}}</td>
-                <td class="row-value" ng-if="question.type=='scale'">{{getMean(question, group, target)}}</td>
+                <td class="row-value" ng-if="other!='mean'&&(other=='sum'||question.type!='scale')">{{question[group.name].crosstable.sum[target.value]}}</td>
+                <td class="row-value" ng-if="other!='sum'&&(other=='mean'||question.type=='scale')">{{getMean(question, group, target)}}</td>
             </tr>
         </table>
     </div>
 
     <md-button class="not-print" ng-click="get_analysis_questions()">開始計算</md-button>
     <div class="not-print">
-        <input type="number" ng-model="start"> - <input type="number" ng-model="amount">{{percent}}%
+        start <input type="number" ng-model="start"> amount <input type="number" ng-model="amount">{{percent}}%
+        <input type="radio" ng-model="other" value="mean">平均數<input type="radio" ng-model="other" value="sum">小計
     </div>
     <table class="not-print">
         <thead ng-repeat-start="group in groups">
@@ -50,7 +51,7 @@
         <tbody ng-repeat-end>
             <tr ng-repeat="target in group.targets">
                 <td>
-                    <md-input-container md-no-float class="md-block" >
+                    <md-input-container md-no-float class="md-block">
                     <input ng-model="target.name" placeholder="變項名稱">
                     </md-input-container>
                 </td>
@@ -192,15 +193,18 @@ app.controller('reportController', function($scope, $http, $filter) {
         ]},
         {title: '全國', name: 'all', type: 'frequence', targets: [{name: '全國', value: 'all'}]}
     ];
-    $scope.start = 1;
-    $scope.amount = 10;
+    $scope.start = 3;
+    $scope.amount = 1;
 
     $scope.get_analysis_questions = function() {
         //$scope.$parent.main.loading = true;
         $http({method: 'POST', url: 'get_analysis_questions', data:{start: $scope.start, amount: $scope.amount}})
         .success(function(data, status, headers, config) {
             $scope.selected = 1;
+            var index = $scope.start;
             $scope.questions = $filter('filter')(data.questions, function(question) {
+                question.index = index;
+                index++;
                 return question.answers.length > 1 && question.answers.length < 10;
             });
             //$scope.$parent.main.loading = false;
