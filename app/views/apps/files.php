@@ -10,7 +10,7 @@
                     <md-input-container style="margin-bottom:0">
                         <label>選擇資料格式</label>
                         <md-select multiple ng-model="searchType">
-                            <md-option ng-repeat="type in types" ng-value="type.id">{{type.title}}</md-option>
+                            <md-option ng-repeat="type in types" ng-value="type.id">{{type.description}}</md-option>
                         </md-select>
                     </md-input-container>
                     <md-input-container style="margin-bottom:0" class="no-errors-spacer">
@@ -23,9 +23,9 @@
                         <md-icon md-svg-icon="insert-drive-file"></md-icon>新增
                     </md-button>
                     <md-menu-content width="3">
-                        <md-menu-item><md-button ng-click="addDoc(5)"><md-icon md-svg-icon="insert-drive-file" md-menu-align-target></md-icon>資料檔</md-button></md-menu-item>
-                        <md-menu-item><md-button ng-click="addDoc(1)"><md-icon md-svg-icon="insert-drive-file" md-menu-align-target></md-icon>問卷</md-button></md-menu-item>
-                        <md-menu-item><md-button ng-click="addDoc(9)"><md-icon md-svg-icon="insert-drive-file" md-menu-align-target></md-icon>面訪問卷</md-button></md-menu-item>
+                        <md-menu-item ng-repeat="type in types | filter:{setup: true}"><md-button ng-click="addDoc(type)">
+                            <md-icon md-svg-icon="insert-drive-file" md-menu-align-target></md-icon>{{type.description}}</md-button>
+                        </md-menu-item>
                     </md-menu-content>
                 </md-menu>
                 <label class="md-button md-raised" ng-disabled="uploading" for="file_upload">
@@ -75,9 +75,9 @@
                 <tr ng-if="newDoc">
                     <td></td>
                     <td>
-                        <i class="icon" ng-class="types[newDoc.type]"></i>
+                        <i class="icon" ng-class="newDoc.type.icon"></i>
                         <div class="ui mini input"><input type="text" ng-model="newDoc.title" size="50" placeholder="檔案名稱"></div>
-                        <div class="ui basic mini button" ng-click="createDoc()"><i class="icon save"></i>確定</div>
+                        <div class="ui basic mini button" ng-click="createDoc(newDoc)"><i class="icon save"></i>確定</div>
                     </td>
                     <td></td><td></td>
                     <td></td><td></td>
@@ -87,7 +87,7 @@
                         <md-checkbox ng-model="doc.selected" aria-label="選取檔案" style="margin-bottom:0" ng-disabled="!doc.selected && (docs | filter:{selected: true}).length > 0"></md-checkbox>
                     </td>
                     <td class="no-outline" style="min-width:400px" ng-click="rename(doc)">
-                        <i class="icon" ng-class="(types | filter:{id: doc.type*1}:true)[0].icon"></i>
+                        <i class="icon" ng-class="doc.type.icon"></i>
                         <a href="{{ doc.link }}" ng-if="!doc.renaming" ng-click="$event.stopPropagation()">{{ doc.title }}</a>
                         <div class="ui mini icon input" ng-class="{loading: doc.saving}" ng-if="doc.renaming" ng-click="$event.stopPropagation()">
                             <input type="text" ng-model="doc.title" size="50" placeholder="檔案名稱">
@@ -170,17 +170,6 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     $scope.max = $scope.docs.length;
     $scope.pages = Math.ceil($scope.max/$scope.limit);
     $scope.timenow = new Date();
-    $scope.types = [
-        {id: 1,  icon: 'file text outline',     title: '問卷'},
-        {id: 2,  icon: 'code',                  title: '程式'},
-        {id: 3,  icon: 'file outline blue',     title: '一般檔案'},
-        {id: 5,  icon: 'file text',             title: '資料檔'},
-        {id: 7,  icon: 'bar chart',             title: '線上分析'},
-        {id: 9,  icon: 'file text outline red', title: '面訪問卷'},
-        {id: 10, icon: 'file excel outline',    title: 'EXCEL'},
-        {id: 11, icon: 'users',                 title: '帳號管理'},
-        {id: 14, icon: 'database',              title: '分類統計'}
-    ];
     $scope.uploading = false;
     $scope.loading = false;
     $scope.information = {};
@@ -270,8 +259,10 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         $scope.$parent.main.loading = true;
         $http({method: 'POST', url: '/docs/lists', data:{} })
         .success(function(data, status, headers, config) {
+            console.log(data);
             $scope.docs = data.docs;
             $scope.setPaginate();
+            $scope.types = data.types;
             $scope.$parent.main.loading = false;
         }).error(function(e){
             console.log(e);
@@ -326,11 +317,14 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         $scope.newDoc = {type: type, title: ''};
     };
 
-    $scope.createDoc = function(type) {
-        $http({method: 'POST', url: '/file/create', data:{fileInfo: $scope.newDoc}})
+    $scope.createDoc = function(newDoc) {
+        $http({method: 'POST', url: '/file/create', data:{newDoc: newDoc}})
         .success(function(data, status, headers, config) {
-            $scope.docs.push(data.doc);
-            $scope.newDoc = null;
+            if (!data.errors) {                
+                $scope.docs.push(data.doc);
+                $scope.searchType.push(data.doc.type.id);
+                $scope.newDoc = null;
+            }
         }).error(function(e){
             console.log(e);
         });
@@ -416,7 +410,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         }
 
         return items.filter(function(element, index, array) {
-            return search.indexOf(element.type*1) >= 0;
+            return search.indexOf(element.type.id) >= 0;
         });
     };
 });

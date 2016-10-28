@@ -13,6 +13,8 @@ use ShareFile;
  */
 class AnalysisFile extends CommFile {
 
+    protected static $views = ['open', 'menu', 'analysis', 'analysis_report'];
+
     function __construct(Files $file, User $user)
     {
         parent::__construct($file, $user);
@@ -23,9 +25,14 @@ class AnalysisFile extends CommFile {
         return true;
     }
 
+    public static function views()
+    {
+        return self::$views;
+    }
+
     public function get_views()
     {
-        return ['open', 'menu', 'analysis', 'analysis_report'];
+        return self::$views;
     }
 
     public static function tools()

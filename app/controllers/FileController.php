@@ -149,10 +149,12 @@ class FileController extends BaseController {
 
     public function create()
     {
-        if (!Input::has('fileInfo'))
-            throw new ValidateException(new MessageBag(array('no_file_info' => '沒有輸入檔案資訊')));
+        $validator = Validator::make(Input::get('newDoc'), ['title' => 'required', 'type.id' => 'required'], []);
 
-        $file = $this->createFile(Input::get('fileInfo')['type'], Input::get('fileInfo')['title']);
+        if ($validator->fails())
+            throw new Plat\Files\ValidateException($validator);
+
+        $file = $this->createFile(Input::get('newDoc.type.id'), Input::get('newDoc.title'));
 
         $class = $file->isType->class;
 
@@ -286,7 +288,7 @@ class FileController extends BaseController {
             'menu'   => ['startup' => false, 'position' => 'left center', 'html' => '<h2 class="ui header">勾選將這個檔案加到左邊快捷選單中。</h2>'],
         ];
 
-        return ['docs' => $docs, 'tooltip' => $tooltip];
+        return ['docs' => $docs, 'tooltip' => $tooltip, 'types' => FileType::all()];
     }
 
     public function templateSidenav() {

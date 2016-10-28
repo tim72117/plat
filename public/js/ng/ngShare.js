@@ -15,6 +15,7 @@ angular.module('ngShare', [])
             $scope.docs = [];
             $scope.box = {open: false, type: 'share'};
             $scope.wait = false;
+            $scope.selecteds = {methods: ["open"]};
 
             $scope.boxClose = function() {
                 $scope.box.open = false;
@@ -54,10 +55,13 @@ angular.module('ngShare', [])
 
             $scope.$on('getShareds', function(event, message) {
                 $scope.docs = message.docs;
+                console.log($scope.docs);
                 $http({method: 'POST', url: '/docs/share/get', data:{docs: $scope.docs}})
                 .success(function(data, status, headers, config) {
+                    console.log(data);
                     $scope.groups = data.groups;
                     $scope.users = [];
+                    $scope.methods = $scope.docs[0].methods;
                     $scope.boxOpen('share');
                 })
                 .error(function(e){
@@ -91,8 +95,9 @@ angular.module('ngShare', [])
             $scope.shareTo = function() {
                 $scope.wait = true;
                 var doc = $filter('filter')($scope.docs, {selected: true})[0];
-                $http({method: 'POST', url: '/doc/' + doc.id + '/shareTo', data:{groups: $scope.getSelectedGroups()}})
+                $http({method: 'POST', url: '/doc/' + doc.id + '/shareTo', data:{groups: $scope.getSelectedGroups(), methods: $scope.selecteds.methods}})
                 .success(function(data, status, headers, config) {
+                    console.log(data);
                     angular.extend(doc, data.doc);
                     $scope.wait = false;
                     $scope.boxClose();
@@ -118,6 +123,24 @@ angular.module('ngShare', [])
                     console.log(e);
                 });
             };
+
+            $scope.toogleMethods = function(method) {
+                var idx = $scope.selecteds.methods.indexOf(method);
+                if (idx > -1) {
+                    $scope.selecteds.methods.splice(idx, 1);
+                } else {
+                    $scope.selecteds.methods.push(method);
+                }
+            };
+
+            $scope.defaultMethod = function(method) {
+                return $scope.selecteds.methods[0] == method;
+            };
+
+            $scope.checkedMethod = function(method) {
+                return $scope.selecteds.methods.indexOf(method) > -1;
+            };
+
         }
     };
 });

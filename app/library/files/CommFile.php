@@ -152,8 +152,10 @@ class CommFile {
                     'file_id' => $this->doc->file_id,
                     'target' => 'group',
                     'target_id' => $group['id'],
+                    'created_by' => $this->user->id,
+                ], [
                     'visible' => true,
-                    'created_by' => $this->user->id
+                    'methods' => Input::get('methods', []),
                 ]);
             }
             if (count($group['users']) != 0){
@@ -162,8 +164,10 @@ class CommFile {
                         'file_id' => $this->doc->file_id,
                         'target' => 'user',
                         'target_id' => $user['id'],
+                        'created_by' => $this->user->id,
+                    ], [
                         'visible' => true,
-                        'created_by' => $this->user->id
+                        'methods' => Input::get('methods', []),
                     ]);
                 }
             }

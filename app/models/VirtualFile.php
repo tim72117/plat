@@ -59,6 +59,12 @@ class FileType extends Eloquent {
     public $timestamps = false;
 
     protected $fillable = array();
+
+    public function getSetupAttribute($value)
+    {
+        return (bool)$value;
+    }
+
 }
 
 class ShareFile extends Eloquent {
@@ -69,7 +75,9 @@ class ShareFile extends Eloquent {
 
     public $timestamps = true;
 
-    protected $fillable = array('file_id', 'target', 'target_id', 'created_by', 'visible');
+    protected $fillable = array('file_id', 'target', 'target_id', 'created_by', 'visible', 'methods');
+
+    protected $appends = ['methods'];
 
     public function isFile() {
         return $this->hasOne('Files', 'id', 'file_id');
@@ -95,6 +103,16 @@ class ShareFile extends Eloquent {
         return is_null($value) ? Carbon\Carbon::minValue() : Carbon\Carbon::parse($value);
     }
 
+    public function getMethodsAttribute($value)
+    {
+        return $value ? json_decode($value) : [];
+    }
+
+    public function setMethodsAttribute($value)
+    {
+        $this->attributes['methods'] = json_encode($value);
+    }
+
 }
 
 class Tag extends Eloquent {
@@ -118,7 +136,7 @@ class Struct_file {
             'created_at' => $doc->created_at->toIso8601String(),
             'opened_at'  => $doc->opened_at->toIso8601String(),
             'link'       => '/doc/' . $doc->id . '/open',
-            'type'       => $doc->isFile->type,
+            'type'       => $doc->isFile->isType,
             'tools'      => method_exists($class, 'tools') ? $class::tools() : [],
             'visible'    => $doc->visible,
             'shared'     => array_count_values($doc->shareds->map(function($shared){
@@ -127,6 +145,7 @@ class Struct_file {
             'requested'  => array_count_values($doc->requesteds->map(function($requested){
                             return $requested->target;
                         })->all()),
+            'methods'    => method_exists($class, 'views') ? $class::views() : [],
         ];
     }
 }
