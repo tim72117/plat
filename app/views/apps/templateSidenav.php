@@ -25,7 +25,7 @@
         <md-divider ></md-divider>
         <md-list flex="50" ng-if="users.length > 0" style="htight:100%">
             <md-subheader class="md-no-sticky">成員({{ group_description }})</md-subheader>
-            <md-list-item ng-repeat="user in users">
+            <md-list-item ng-repeat="user in users | limitTo:20">
                 <div class="md-list-item-text" layout="column">
                     <p>{{ user.username }}</p>
                     <md-checkbox class="md-secondary" ng-model="user.selected" aria-label="成員" ng-change="unselectGroup()"></md-checkbox>
