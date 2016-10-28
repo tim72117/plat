@@ -13,7 +13,7 @@ class Organization extends Eloquent {
 
     public function now()
     {
-        return $this->hasOne('Plat\Project\OrganizationDetail', 'organization_id', 'id')->orderBy('year', 'desc');
+        return $this->hasOne('Plat\Project\OrganizationDetail', 'organization_id', 'id')->orderBy('year', 'desc')->orderBy('id');
     }
 
     public function every()
