@@ -29,6 +29,17 @@ class QuesFile extends CommFile {
         return ['open', 'open_ng', 'codebook', 'receives', 'spss', 'report', 'analysis'];
     }
 
+    public static function tools()
+    {
+        return [
+            ['name' => 'codebook', 'title' => 'codebook', 'method' => 'codebook', 'icon' => 'list'],
+            ['name' => 'receives', 'title' => '回收狀況', 'method' => 'receives', 'icon' => 'show-chart'],
+            ['name' => 'analysis', 'title' => '分析結果', 'method' => 'analysis', 'icon' => 'pie-chart'],
+            ['name' => 'spss',     'title' => 'spss',     'method' => 'spss',     'icon' => 'code'],
+            ['name' => 'report',   'title' => '問題回報', 'method' => 'report',   'icon' => 'question-answer']
+        ];
+    }
+
     public function create()
     {
         parent::create();

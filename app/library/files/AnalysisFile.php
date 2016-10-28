@@ -28,6 +28,13 @@ class AnalysisFile extends CommFile {
         return ['open', 'menu', 'analysis', 'analysis_report'];
     }
 
+    public static function tools()
+    {
+        return [
+            ['name' => 'analysis_report', 'title' => '描述性分析報告', 'method' => 'analysis_report', 'icon' => 'description'],
+        ];
+    }
+
     public function open()
     {
         View::share('title', '線上分系系統');
