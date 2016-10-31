@@ -25,7 +25,7 @@ class Files extends Eloquent {
     }
 
     public function isType() {
-        return $this->hasOne('FileType', 'id', 'type');
+        return $this->hasOne('Plat\Files\FileType', 'id', 'type');
     }
 
     public function configs() {
@@ -34,7 +34,7 @@ class Files extends Eloquent {
 
     public function tags()
     {
-        return $this->hasMany('Tag', 'file_id', 'id');
+        return $this->hasMany('Plat\Files\Tag', 'file_id', 'id');
     }
 
 }
@@ -50,15 +50,6 @@ class RequestFile extends Eloquent {
     public function isDoc() {
         return $this->hasOne('ShareFile', 'id', 'doc_id');
     }
-}
-
-class FileType extends Eloquent {
-
-    protected $table = 'file_type';
-
-    public $timestamps = false;
-
-    protected $fillable = array();
 }
 
 class ShareFile extends Eloquent {
@@ -94,14 +85,6 @@ class ShareFile extends Eloquent {
     {
         return is_null($value) ? Carbon\Carbon::minValue() : Carbon\Carbon::parse($value);
     }
-
-}
-
-class Tag extends Eloquent {
-
-    protected $table = 'file_tags';
-
-    public $timestamps = false;
 
 }
 

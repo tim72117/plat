@@ -1,9 +1,25 @@
 <?php
-return array(
-    'open' => function() {
+
+namespace Plat\Files\Custom\Mailer;
+
+use Input;
+use DB;
+use Carbon\Carbon;
+use Mail;
+use Auth;
+use Plat\Group;
+
+class Sender {
+
+    public $full = false;
+
+    public function open()
+    {
         return 'apps.mailer';
-    },
-    'send' => function() {
+    }
+
+    public function send()
+    {
         $tables = [
             'fieldwork104' => (object)[
                 'title'         => '104年實習師資生(未填完者)',
@@ -109,8 +125,10 @@ return array(
             $count++;
         }
         return Response::json(['results'=>$results]);
-    },
-    'sendMail' => function() {
+    }
+
+    public function sendMail()
+    {
         try {
             Mail::send('emails.empty', ['context' => Input::get('context')], function($message) {
                 $message->to(Input::get('email'))->subject(Input::get('title'));
@@ -119,19 +137,25 @@ return array(
         } catch (Exception $e){
             return ['sended' => false];
         }
-    },
-    'save' => function() {
+    }
+
+    public function save()
+    {
         DB::table('mail_context')->insert([
             'context'=> Input::get('context'),
             'created_by'=> Auth::user()->id,
             'created_at'=> date("Y-n-d H:i:s"),
         ]);
         return ['data'=>Input::get('context')];
-    },
-    'group' => function() {
+    }
+
+    public function group()
+    {
         return ['groups' => Auth::user()->groups];
-    },
-    'tables' => function() {
+    }
+
+    public function tables()
+    {
         $tables = [
             0 => (object)[
                 'name'     => 'fieldwork104',
@@ -143,10 +167,13 @@ return array(
             ]
         ];
         return ['tables'=>$tables];
-    },
-    'getUsers' => function() {
-        $users = Plat\Group::find(Input::get('group_id'))->users;
+    }
+
+    public function getUsers()
+    {
+        $users = Group::find(Input::get('group_id'))->users;
 
         return ['users' => $users];
-    },
-);
+    }
+
+}

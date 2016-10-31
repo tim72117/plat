@@ -1,29 +1,45 @@
 <?php
+
+namespace Plat\Files\Custom;
+
+use Input;
+use DB;
+use Auth;
+use Carbon\Carbon;
+use Files;
 use Plat\Files\CommFile;
+use Plat\Post;
+use Plat\Project\PostFile;
 
-return [
-    'open' => function() {
+class Poster {
+
+    public $full = false;
+
+    public function open()
+    {
         return 'apps.poster';
-    },
-    'getPosts' => function() {
+    }
 
+    public function getPosts()
+    {
         $member = Auth::user()->members()->logined()->orderBy('logined_at', 'desc')->first();
 
         $posts = $member->project->posts->load('files');
 
         return ['posts' => $posts];
+    }
 
-    },
-    'savePost' => function() {
+    public function savePost()
+    {
         $member = Auth::user()->members()->logined()->orderBy('logined_at', 'desc')->first();
         $context = json_decode(urldecode(base64_decode(Input::get('context'))));
 
         if (!Input::has('id')) {
 
-            $post = new Plat\Post([
+            $post = new Post([
                 'title' => Input::get('title'),
                 'context' => $context,
-                'publish_at' => Carbon\Carbon::parse(Input::get('publish_at'))->toDateString(),
+                'publish_at' => Carbon::parse(Input::get('publish_at'))->toDateString(),
                 'display_at' => '{"intro":false}',
                 'created_by' => Auth::user()->id,
             ]);
@@ -36,32 +52,37 @@ return [
 
         }else{
 
-            $post = Plat\Post::find(Input::get('id'));
+            $post = Post::find(Input::get('id'));
 
             $updated = $post->update([
                 'title' => Input::get('title'),
                 'context' => $context,
-                'publish_at' => Carbon\Carbon::parse(Input::get('publish_at'))->toDateString(),
+                'publish_at' => Carbon::parse(Input::get('publish_at'))->toDateString(),
             ]);
 
             $method = 'update';
         }
 
         return ['post' => $post, 'method' => $method];
-    },
-    'setDisplay' => function() {
-        $updated = Plat\Post::find(Input::get('id'))->update(['display_at' => json_encode(Input::get('display_at'))]);
+    }
+
+    public function setDisplay()
+    {
+        $updated = Post::find(Input::get('id'))->update(['display_at' => json_encode(Input::get('display_at'))]);
 
         return ['updated' => $updated];
-    },
-    'deletePost' => function() {
-        $post = Plat\Post::find(Input::get('id'));
+    }
+
+    public function deletePost()
+    {
+        $post = Post::find(Input::get('id'));
         $post->files()->detach();
 
         return ['deleted' => $post->delete()];
-    },
-    'uploadFile' => function(){
+    }
 
+    public function uploadFile()
+    {
         $file = new Files(['type' => 3, 'title' => Input::file('file_upload')->getClientOriginalName()]);
 
         $user = Auth::user();
@@ -70,14 +91,15 @@ return [
 
         $file_upload->upload(Input::file('file_upload'));
 
-        Plat\Post::find(Input::get('post_id'))->files()->attach($file_upload->id());
+        Post::find(Input::get('post_id'))->files()->attach($file_upload->id());
 
-        return ['files' => Plat\Post::find(Input::get('post_id'))->files];
-    },
-    'deleteFile' => function() {
+        return ['files' => Post::find(Input::get('post_id'))->files];
+    }
 
+    public function deleteFile()
+    {
         $pivot_id = Input::get('file')['pivot']['id'];
 
-        return ['deleted' => Plat\Project\PostFile::find($pivot_id)->delete()];
-    },
-];
+        return ['deleted' => PostFile::find($pivot_id)->delete()];
+    }
+}
