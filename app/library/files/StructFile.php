@@ -34,7 +34,7 @@ class StructFile extends CommFile {
 
     public function open()
     {
-        return $this->configs['population'] == 4 ? 'files.struct.organize' : 'files.struct.integrate';
+        return 'files.struct.'.$this->configs['view'];
     }
 
     public function templateHelp()
@@ -230,7 +230,7 @@ class StructFile extends CommFile {
                      ->first()
                      ->organizations
                      ->load('now')
-                     ->fetch('now.id');
+                     ->fetch('now.organization_id');
         $schoolNames = \Plat\Member::where('user_id', $this->user->id)
                      ->where('project_id', 2)
                      ->first()
@@ -239,7 +239,7 @@ class StructFile extends CommFile {
                      ->fetch('now.name');
         $schools = [];
         foreach ($schoolIDs as $key => $schoolID) {
-            $school = ['id' => $schoolID,'name'];
+            $school = ['id' => $schoolID];
             array_push($schools,$school);
         }
 
@@ -948,9 +948,10 @@ class StructFile extends CommFile {
     public function getItems()
     {
         $tables = [];
-        $schoolID = Input::get('schoolID');
+        $organizeIDs = Input::get('schoolID');
+        $schoolID = \Plat\Project\OrganizationDetail::whereIn('organization_id',$organizeIDs)->lists('id');
         $allTables = \Plat\Analysis\OrgTable::all();
-
+        
         foreach ($allTables as $table) {
             $query = DB::connection('sqlsrv_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table->name)
                 ->whereIn('COLUMN_NAME', ['國私立別','師培學校屬性','縣市','師資類科','學年度/期數','必修/選修','學年度','師培屬性','年度']);
@@ -994,7 +995,8 @@ class StructFile extends CommFile {
     public function get_organize_detail()
     {
         $structs = Input::get('structs');
-        $schoolID = Input::get('schoolID');
+        $organizeIDs = Input::get('schoolID');
+        $schoolID = \Plat\Project\OrganizationDetail::whereIn('organization_id',$organizeIDs)->lists('id');
         $first_table_title = '師培大學基本資料';
         $first_table = 'TEV103_TM_學校基本資料_OK';
         $query = DB::connection('sqlsrv_tted')->table($first_table)->whereIn(DB::raw('substring(analysis_tted.dbo.'.$first_table.'.學校代碼,3,4)'),$schoolID);

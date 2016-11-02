@@ -245,7 +245,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         for (var i in $scope.selectSchool) {
             $scope.selectSchoolID.push($scope.selectSchool[i].id);
         };
-        $scope.updateItem($scope.selectSchool);
+        $scope.updateItem($scope.selectSchoolID);
     }).error(function(e){
         console.log(e);
     });
@@ -263,6 +263,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         for (var i in selectSchool) {
             $scope.selectSchoolID.push(selectSchool[i].id);
         };
+        
         $scope.updateItem($scope.selectSchoolID);
     });
 
