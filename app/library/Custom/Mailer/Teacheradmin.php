@@ -45,7 +45,9 @@ class Teacheradmin {
                 DB::raw('CASE WHEN pstatA.newcid IS NULL THEN 1 ELSE 0 END AS notLoginedA'),
                 DB::raw('CASE WHEN pstatB.newcid IS NULL THEN 1 ELSE 0 END AS notLoginedB'),
                 DB::raw('CASE WHEN tokenA.sented IS NULL THEN 1 ELSE ~tokenA.sented END AS notSentedA'),
-                DB::raw('CASE WHEN tokenB.sented IS NULL THEN 1 ELSE ~tokenB.sented END AS notSentedB')
+                DB::raw('CASE WHEN tokenB.sented IS NULL THEN 1 ELSE ~tokenB.sented END AS notSentedB'),
+                DB::raw('CASE WHEN pstatA.page < 8 THEN 1 ELSE 0 END AS notCompletedA'),
+                DB::raw('CASE WHEN pstatB.page < 8 THEN 1 ELSE 0 END AS notCompletedB')
             )
             ->get();
 
@@ -75,7 +77,7 @@ class Teacheradmin {
                 'admin'       => Input::get('admin'),
                 'name'        => $name,
                 'sented'      => 0,
-                'created_at'  => Carbon\Carbon::now()->toDateTimeString(),
+                'created_at'  => Carbon::now()->toDateTimeString(),
             ]);
         }
 

@@ -56,7 +56,10 @@ class NewTeacher {
                 DB::raw('CASE WHEN pstatB.newcid IS NULL THEN 1 ELSE 0 END AS notLoginedB'),
                 DB::raw('CASE WHEN map.sented IS NULL THEN 1 ELSE ~map.sented END AS notSentedT'),
                 DB::raw('CASE WHEN peerA.sented IS NULL THEN 1 ELSE ~peerA.sented END AS notSentedA'),
-                DB::raw('CASE WHEN peerB.sented IS NULL THEN 1 ELSE ~peerB.sented END AS notSentedB'))
+                DB::raw('CASE WHEN peerB.sented IS NULL THEN 1 ELSE ~peerB.sented END AS notSentedB'),
+                DB::raw('CASE WHEN pstatT.page < 13 THEN 1 ELSE 0 END AS notCompletedT'),
+                DB::raw('CASE WHEN pstatA.page < 7 THEN 1 ELSE 0 END AS notCompletedA'),
+                DB::raw('CASE WHEN pstatB.page < 7 THEN 1 ELSE 0 END AS notCompletedB'))
             ->get();
 
         return ['teachers' => $teachers];
@@ -121,7 +124,7 @@ class NewTeacher {
         $url = 'https://teacher.edu.tw/ques/'.$tables[$type]['dir'].'?token='.$query->first()->{$tables[$type]['key']};
 
         Mail::send('customs.emails.newteacher', array('url' => $url), function($message) use($email) {
-            $message->to($email)->subject('懇請協助填寫教育部104學年度師資培育回饋調查問卷');
+            // $message->to($email)->subject('懇請協助填寫教育部104學年度師資培育回饋調查問卷');
         });
 
         $query->update(['sented' => true]);
