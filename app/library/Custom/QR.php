@@ -111,6 +111,8 @@ class QR {
 
         ->leftJoin('rows.dbo.row_20151120_115629_t0ixj_map AS token', 'info.C95', '=', 'token.stdidnumber')
 
+        ->whereRaw('SUBSTRING(info.C95, 1, 4) = \'NOID\'')
+
         ->whereNull('info.deleted_at')
 
         ->select('token.newcid AS token', 'info.C86 AS school', 'info.C87 AS name')
