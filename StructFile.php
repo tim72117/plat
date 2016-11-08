@@ -103,8 +103,12 @@ class StructFile extends CommFile {
     public function getEachItems()
     {
         $tables = [];
-        $schoolID = Input::get('schoolID');
+        $organizations = \Plat\Project\Organization::find(array_fetch(Input::get('organizations'), 'id'))->load('every')->map(function($organization) {
+            return $organization->every->lists('id');
+        })->flatten()->toArray();
+
         $table = \Row\Table::find(Input::get('table_id'));
+
         $columnNames = Input::get('rowTitle');
         $mainSelects = $columnNames. ' AS name';
         $selects = 'analysis_tted.dbo.'.$table->name.'.'.$columnNames. ' AS name';
@@ -121,16 +125,16 @@ class StructFile extends CommFile {
         }
 
         if ($table->name == $mainTable) {
-            $query = DB::connection('sqlsrv_tted')
+            $query = DB::connection('sqlsrv_analysis_tted')
                 ->table($table->name)
-                ->whereIn(DB::raw('substring(學校代碼,3,4)'),$schoolID)
+                ->whereIn(DB::raw('substring(學校代碼,3,4)'), $organizations)
                 ->groupBy($columnNames)
                 ->select($mainSelects);
         } else{
-            $query = DB::connection('sqlsrv_tted')
+            $query = DB::connection('sqlsrv_analysis_tted')
                 ->table('analysis_tted.dbo.'.$mainTable)
                 ->join('analysis_tted.dbo.'.$table,'analysis_tted.dbo.'.$mainTable.'.身分證字號','=','analysis_tted.dbo.'.$table.'.身分證字號')
-                ->whereIn(DB::raw('substring(analysis_tted.dbo.'.$mainTable.'.學校代碼,3,4)'),$schoolID)
+                ->whereIn(DB::raw('substring(analysis_tted.dbo.'.$mainTable.'.學校代碼,3,4)'), $organizations)
                 ->groupBy($columns)
                 ->select($selects);
         }
@@ -225,29 +229,9 @@ class StructFile extends CommFile {
 
     public function getSchools()
     {
-        $schoolIDs = \Plat\Member::where('user_id', $this->user->id)
-                     ->where('project_id', 2)
-                     ->first()
-                     ->organizations
-                     ->load('now')
-                     ->fetch('now.organization_id');
-        $schoolNames = \Plat\Member::where('user_id', $this->user->id)
-                     ->where('project_id', 2)
-                     ->first()
-                     ->organizations
-                     ->load('now')
-                     ->fetch('now.name');
-        $schools = [];
-        foreach ($schoolIDs as $key => $schoolID) {
-            $school = ['id' => $schoolID];
-            array_push($schools,$school);
-        }
+        $organizations = \Plat\Member::where('user_id', $this->user->id)->where('project_id', 2)->first()->organizations->load('now');
 
-        foreach ($schoolNames as $key => $schoolName) {
-            $schools[$key]['name'] = $schoolName;
-        }
-
-        return($schools);
+        return ['organizations' => $organizations];
     }
 
     private $tables = [
@@ -951,7 +935,7 @@ class StructFile extends CommFile {
         $organizeIDs = Input::get('schoolID');
         $schoolID = \Plat\Project\OrganizationDetail::whereIn('organization_id',$organizeIDs)->lists('id');
         $allTables = \Plat\Analysis\OrgTable::all();
-        
+
         foreach ($allTables as $table) {
             $query = DB::connection('sqlsrv_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table->name)
                 ->whereIn('COLUMN_NAME', ['國私立別','師培學校屬性','縣市','師資類科','學年度/期數','必修/選修','學年度','師培屬性','年度']);
