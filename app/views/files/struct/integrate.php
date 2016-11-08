@@ -20,10 +20,10 @@
                 <div class="item" align="center">
                 <md-input-container>
                     <label>學校</label>
-                    <md-select ng-model="selectSchool" aria-label="schools" multiple md-selected-text="selectSchool.length+'所學校'">
+                    <md-select ng-model="selectSchools" aria-label="選擇分析學校" multiple md-selected-text="selectSchools.length+'所學校'">
                         <md-button layout-fill value="all" ng-click="selectAllSchool()">全選</md-button>
-                        <md-optgroup >
-                            <md-option ng-value="school" ng-repeat="school in schools">{{school.name}}</md-option>
+                        <md-optgroup>
+                            <md-option ng-value="organization" ng-repeat="organization in organizations">{{organization.now.name}}</md-option>
                         </md-optgroup>
                     </md-select>
                 </md-input-container>
@@ -297,8 +297,12 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
             return row.items;
         }
 
+        var schools = $filter('filter')($scope.schools, function() {
+            return true;
+        });
+
         deferred = $q.defer();
-        $http({method: 'POST', url: 'getEachItems', data:{schoolID: $scope.selectSchoolID, table_id: table.id, rowTitle: column.title}})
+        $http({method: 'POST', url: 'getEachItems', data:{organizations: $scope.selectSchools, table_id: table.id, rowTitle: column.title}})
         .success(function(data, status, headers, config) {
             console.log(data);
             table.disabled = data.items.length == 0;
@@ -317,12 +321,9 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
 
     $http({method: 'POST', url: 'getSchools', data:{}})
     .success(function(data, status, headers, config) {
-        $scope.schools = data;
-        $scope.selectSchool = $scope.schools;
-        $scope.selectSchoolID = [];
-        for (var i in $scope.selectSchool) {
-            $scope.selectSchoolID.push($scope.selectSchool[i].id);
-        };
+        console.log(data);
+        $scope.organizations = data.organizations;
+        $scope.selectSchools = $scope.organizations;
     }).error(function(e) {
         console.log(e);
     });
@@ -340,11 +341,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         $scope.rowPercent = false;
     });
 
-    $scope.$watchCollection('selectSchool', function(selectSchool) {
-        $scope.selectSchoolID = [];
-        for (var i in selectSchool) {
-            $scope.selectSchoolID.push(selectSchool[i].id);
-        };
+    $scope.$watchCollection('selectSchools', function(selectSchools) {
         $scope.columns = [];
         $scope.calculations = [];
         $scope.levels = [];
@@ -486,7 +483,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.addCalculation = function(calculateStructs,calculation) {
-        $http({method: 'POST', url: 'calculate', data:{structs: calculateStructs, columns: $scope.columns, schoolID: $scope.selectSchoolID}})
+        $http({method: 'POST', url: 'calculate', data:{structs: calculateStructs, columns: $scope.columns, schoolID: $scope.selectSchools}})
         .success(function(data, status, headers, config) {
             calculation.results = data.results;
         }).error(function(e) {
@@ -763,11 +760,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.selectAllSchool = function() {
-        if (JSON.stringify($scope.selectSchool) === JSON.stringify($scope.schools) ) {
-            $scope.selectSchool = [];
-        }else{
-            $scope.selectSchool = $scope.schools;
-        }
+       $scope.selectSchools = $scope.organizations;
     };
 
     $(".unselectable").css( {
