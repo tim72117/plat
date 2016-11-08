@@ -72,7 +72,7 @@ class StructFile extends CommFile {
         $tables = [];
 
         foreach ($this->tables as $name => $table) {
-            $columns = DB::connection('sqlsrv_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
+            $columns = DB::connection('sqlsrv_analysis_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
 
             $columns = array_diff($columns, ['身分識別碼']);
 
@@ -80,7 +80,7 @@ class StructFile extends CommFile {
                 return $column . ' AS ' . $key;
             }, array_keys($columns), $columns);
 
-            $rows = DB::connection('sqlsrv_tted')->table($table)->groupBy($columns)->select($selects)->get();
+            $rows = DB::connection('sqlsrv_analysis_tted')->table($table)->groupBy($columns)->select($selects)->get();
 
             $values = [];
             foreach ($columns as $key => $column) {
@@ -97,7 +97,7 @@ class StructFile extends CommFile {
     private $populations = [
         0 => ['id' => 186, 'title' => '新進師資生', 'yearColumnIndex' => 1, 'yearTitle' => '占教育部核定名額學年度', 'table' => 'TEV103_TE_StudentInSchool_OK'],
         1 => ['id' => 194, 'title' => '實習師資生', 'yearColumnIndex' => 2, 'yearTitle' => '參與教育實習學年度',     'table' => 'TE2_D_OK'],
-        2 => ['id' => 4,   'title' => '',                                                                          'table' => 'TE2_E_OK'],
+        //2 => ['id' => 4,   'title' => '',                                                                          'table' => 'TE2_E_OK'],
     ];
 
     public function getEachItems()
@@ -106,6 +106,7 @@ class StructFile extends CommFile {
         $organizations = \Plat\Project\Organization::find(array_fetch(Input::get('organizations'), 'id'))->load('every')->map(function($organization) {
             return $organization->every->lists('id');
         })->flatten()->toArray();
+
 
         $table = \Row\Table::find(Input::get('table_id'));
 
@@ -154,7 +155,7 @@ class StructFile extends CommFile {
     {
         return [];
         $columns = ['year' => '年報資料年度', 'program' => '報考師資類科', 'isPass' => '通過狀態', 'isApply' => '應考情形', 'isAttain' => '到考情況'];
-        $rows = DB::connection('sqlsrv_tted')->table('TTED_MAIN.dbo.YB_CH04_OK')->groupBy(array_keys($columns))
+        $rows = DB::connection('sqlsrv_analysis_tted')->table('TTED_MAIN.dbo.YB_CH04_OK')->groupBy(array_keys($columns))
             ->select(array_keys($columns))->addSelect(DB::raw('COUNT(*) AS count'))->get();
 
         $output = [];
@@ -169,8 +170,8 @@ class StructFile extends CommFile {
         $tables = [];
 
         foreach ($this->tables as $name => $table) {
-            $tableId = DB::connection('sqlsrv_tted')->table('analysis_tted.dbo.table_struct')->where('title','=', $name)->select('id')->get();
-            $query = DB::connection('sqlsrv_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table)
+            $tableId = DB::connection('sqlsrv_analysis_tted')->table('analysis_tted.dbo.table_struct')->where('title','=', $name)->select('id')->get();
+            $query = DB::connection('sqlsrv_analysis_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table)
                 ->where('COLUMN_NAME', '<>', '身分證字號')
                 ->where('COLUMN_NAME', '<>', '學校代碼')
                 ->where('COLUMN_NAME', '<>', '學校名稱')
@@ -183,8 +184,8 @@ class StructFile extends CommFile {
                 return $column . ' AS ' . $key;
             }, array_keys($columns), $columns);
 
-            $values = Cache::remember(DB::connection('sqlsrv_tted')->table($table)->groupBy($columns)->select($selects)->getCacheKey(), 300, function() use ($table, $columns, $selects) {
-                $rows = DB::connection('sqlsrv_tted')->table($table)->groupBy($columns)->select($selects)->get();
+            $values = Cache::remember(DB::connection('sqlsrv_analysis_tted')->table($table)->groupBy($columns)->select($selects)->getCacheKey(), 300, function() use ($table, $columns, $selects) {
+                $rows = DB::connection('sqlsrv_analysis_tted')->table($table)->groupBy($columns)->select($selects)->get();
                 $values = [];
                 foreach ($columns as $key => $column) {
                     $values[$column] = array_values(array_unique(array_pluck($rows, $key)));
@@ -192,12 +193,12 @@ class StructFile extends CommFile {
                 }
              });
             foreach ($columns as $key => $column) {
-                $rowId = DB::connection('sqlsrv_tted')->table('analysis_tted.dbo.row_struct')
+                $rowId = DB::connection('sqlsrv_analysis_tted')->table('analysis_tted.dbo.row_struct')
                         ->where('table_struct_id','=', $tableId[0]->id)
                         ->where('title','=', $column)
                         ->get();
                 foreach ($values[$column] as $key => $item) {
-                    DB::connection('sqlsrv_tted')->table('analysis_tted.dbo.item_struct2')->insert(
+                    DB::connection('sqlsrv_analysis_tted')->table('analysis_tted.dbo.item_struct2')->insert(
                         array('row_struct_id' => $rowId[0]->id, 'item_title' => $item)
                     );
                 }
@@ -259,7 +260,8 @@ class StructFile extends CommFile {
     public function calculate()
     {
         $structs = Input::get('structs');
-        $schoolID = Input::get('schoolID');
+        $organizeIDs = Input::get('schoolID');
+        $schoolID = \Plat\Project\OrganizationDetail::whereIn('organization_id',$organizeIDs)->lists('id');
 
         if ($this->configs['population']  == 1) {
             $first_table_title = '就學資訊';
@@ -270,7 +272,7 @@ class StructFile extends CommFile {
         }
 
         $first_table = $this->tables[$first_table_title];
-        $query = DB::connection('sqlsrv_tted')->table($first_table)->whereIn(DB::raw('substring(analysis_tted.dbo.'.$first_table.'.學校代碼,3,4)'),$schoolID);
+        $query = DB::connection('sqlsrv_analysis_tted')->table($first_table)->whereIn(DB::raw('substring(analysis_tted.dbo.'.$first_table.'.學校代碼,3,4)'),$schoolID);
 
         foreach ($structs as $i => $struct) {
             $table = $this->tables[$struct['title']];
@@ -473,7 +475,7 @@ class StructFile extends CommFile {
         ];
         foreach ($data['internYears'] as $internYear) {
             foreach ($data['semesters'] as $key => $semester) {
-                $data['data'][$internYear.$key] = DB::connection('sqlsrv_tted')->table($table)
+                $data['data'][$internYear.$key] = DB::connection('sqlsrv_analysis_tted')->table($table)
                     ->where('實習學年度', $internYear)
                     ->where('學期',$semester)
                     ->select(DB::raw('count(distinct 身分證字號) as allIntern'))
@@ -485,7 +487,7 @@ class StructFile extends CommFile {
                         if ($internYear+1 >= $testYear && $key != '1'){
                             $contents = [0,0,0,0];
                         } else {
-                            $rows = DB::connection('sqlsrv_tted')->table($table)
+                            $rows = DB::connection('sqlsrv_analysis_tted')->table($table)
                                 ->where('實習學年度', $internYear)
                                 ->where('學期',$semester)
                                 ->where('報考教檢年度',$testYear)
@@ -493,7 +495,7 @@ class StructFile extends CommFile {
                                 ->lists('total');
                             $contents[] = $rows[0];
 
-                            $rows = DB::connection('sqlsrv_tted')->table($table)
+                            $rows = DB::connection('sqlsrv_analysis_tted')->table($table)
                                 ->where('實習學年度', $internYear)
                                 ->where('學期',$semester)
                                 ->where('報考教檢年度',$testYear)
@@ -502,7 +504,7 @@ class StructFile extends CommFile {
                                 ->lists('total');
                             $contents[] = $rows[0];
 
-                            $rows = DB::connection('sqlsrv_tted')->table($table)
+                            $rows = DB::connection('sqlsrv_analysis_tted')->table($table)
                                 ->where('實習學年度', $internYear)
                                 ->where('學期',$semester)
                                 ->where('報考教檢年度',$testYear)
@@ -513,7 +515,7 @@ class StructFile extends CommFile {
                             $contents[] = $rows[0];
 
                             if ($unionTable == null) {
-                                $unionTable = DB::connection('sqlsrv_tted')->table($table)
+                                $unionTable = DB::connection('sqlsrv_analysis_tted')->table($table)
                                     ->where('實習學年度', $internYear)
                                     ->where('學期',$semester)
                                     ->where('報考教檢年度',$testYear)
@@ -521,7 +523,7 @@ class StructFile extends CommFile {
                                     ->whereIn('職業狀況',['正式教師','代理代課教師'])
                                     ->select(DB::raw('count(distinct 身分證字號) as total'));
                             } else {
-                                $unionTable = DB::connection('sqlsrv_tted')->table($table)
+                                $unionTable = DB::connection('sqlsrv_analysis_tted')->table($table)
                                     ->where('實習學年度', $internYear)
                                     ->where('學期',$semester)
                                     ->where('報考教檢年度',$testYear)
@@ -531,7 +533,7 @@ class StructFile extends CommFile {
                                     ->unionAll($unionTable);
                             }
 
-                            $rows = DB::connection('sqlsrv_tted')->table(DB::raw("({$unionTable->toSql()}) AS unionTable"))
+                            $rows = DB::connection('sqlsrv_analysis_tted')->table(DB::raw("({$unionTable->toSql()}) AS unionTable"))
                                 ->mergeBindings($unionTable)
                                 ->select(DB::raw('sum(unionTable.total) as total'))
                                 ->lists('total');
@@ -579,7 +581,7 @@ class StructFile extends CommFile {
         $total = 0;
         switch ($internData['type_key']) {
             case '0':
-                $rows = DB::connection('sqlsrv_tted')->table($table)
+                $rows = DB::connection('sqlsrv_analysis_tted')->table($table)
                     ->where('實習學年度', $setData['internYear'][$internData['intern_year']]['year'])
                     ->where('學期',$setData['internYear'][$internData['intern_year']]['semesters'])
                     ->select(DB::raw('count(distinct(身分證字號)) as total,性別 as sex, 學制 as grade'))
@@ -603,7 +605,7 @@ class StructFile extends CommFile {
                 }
                 break;
             case '1':
-                $rows = DB::connection('sqlsrv_tted')->table($table)
+                $rows = DB::connection('sqlsrv_analysis_tted')->table($table)
                     ->where('實習學年度', $setData['internYear'][$internData['intern_year']]['year'])
                     ->where('學期',$setData['internYear'][$internData['intern_year']]['semesters'])
                     ->where('報考教檢年度',$internData['process_year'])
@@ -628,7 +630,7 @@ class StructFile extends CommFile {
                 }
                 break;
             case '2':
-                $rows = DB::connection('sqlsrv_tted')->table($table)
+                $rows = DB::connection('sqlsrv_analysis_tted')->table($table)
                     ->where('實習學年度', $setData['internYear'][$internData['intern_year']]['year'])
                     ->where('學期',$setData['internYear'][$internData['intern_year']]['semesters'])
                     ->where('報考教檢年度',$internData['process_year'])
@@ -675,7 +677,7 @@ class StructFile extends CommFile {
                 }
                 break;
             case '3':
-                $rows = DB::connection('sqlsrv_tted')->table($table)
+                $rows = DB::connection('sqlsrv_analysis_tted')->table($table)
                     ->where('實習學年度', $setData['internYear'][$internData['intern_year']]['year'])
                     ->where('學期',$setData['internYear'][$internData['intern_year']]['semesters'])
                     ->where('報考教檢年度',$internData['process_year'])
@@ -737,7 +739,7 @@ class StructFile extends CommFile {
                                 continue;
                             } else {
                                 if ($unionTable == null) {
-                                    $unionTable = DB::connection('sqlsrv_tted')->table($table)
+                                    $unionTable = DB::connection('sqlsrv_analysis_tted')->table($table)
                                         ->where('實習學年度', $internYear)
                                         ->where('學期',$semester)
                                         ->where('報考教檢年度',$processYear)
@@ -745,7 +747,7 @@ class StructFile extends CommFile {
                                         ->select(DB::raw('count(distinct(身分證字號)) as total,性別 as sex, 學制 as grade,發證年度 as licenseYear,職業狀況 as job'))
                                         ->groupBy(DB::raw('性別,學制,發證年度,職業狀況'));
                                 } else {
-                                    $unionTable = DB::connection('sqlsrv_tted')->table($table)
+                                    $unionTable = DB::connection('sqlsrv_analysis_tted')->table($table)
                                         ->where('實習學年度', $internYear)
                                         ->where('學期',$semester)
                                         ->where('報考教檢年度',$processYear)
@@ -818,7 +820,7 @@ class StructFile extends CommFile {
             $table = $this->tables[$struct['title']];
             if ($i == 0) {
                 $first_table = $table;
-                $query = DB::connection('sqlsrv_tted')->table($first_table);
+                $query = DB::connection('sqlsrv_analysis_tted')->table($first_table);
             } else {
                 $query->join($table, $first_table . '.身分識別碼', '=', $table . '.身分識別碼');
             }
@@ -932,12 +934,13 @@ class StructFile extends CommFile {
     public function getItems()
     {
         $tables = [];
-        $organizeIDs = Input::get('schoolID');
-        $schoolID = \Plat\Project\OrganizationDetail::whereIn('organization_id',$organizeIDs)->lists('id');
+        $organizations = \Plat\Project\Organization::find(array_fetch(Input::get('organizations'), 'id'))->load('every')->map(function($organization) {
+            return $organization->every->lists('id');
+        })->flatten()->toArray();
         $allTables = \Plat\Analysis\OrgTable::all();
 
         foreach ($allTables as $table) {
-            $query = DB::connection('sqlsrv_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table->name)
+            $query = DB::connection('sqlsrv_analysis_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table->name)
                 ->whereIn('COLUMN_NAME', ['國私立別','師培學校屬性','縣市','師資類科','學年度/期數','必修/選修','學年度','師培屬性','年度']);
 
             $columnNames = $query->select('COLUMN_NAME')
@@ -953,14 +956,14 @@ class StructFile extends CommFile {
                 array_push($columns, 'analysis_tted.dbo.'.$table->name.'.'.$columnName);
             }
             Cache::flush();
-            //Cache::forget(DB::connection('sqlsrv_tted')->table($table)->groupBy($columns)->select($selects)->getCacheKey());
-            $values = Cache::remember(DB::connection('sqlsrv_tted')
+            //Cache::forget(DB::connection('sqlsrv_analysis_tted')->table($table)->groupBy($columns)->select($selects)->getCacheKey());
+            $values = Cache::remember(DB::connection('sqlsrv_analysis_tted')
                 ->table($table->name)
-                ->whereIn(DB::raw('substring(學校代碼,3,4)'),$schoolID)
+                ->whereIn(DB::raw('substring(學校代碼,3,4)'),$organizations)
                 ->groupBy($columnNames)
                 ->select($selects)
-                ->getCacheKey(), 300, function() use ($table, $selects, $schoolID, $columnNames) {
-                $rows = DB::connection('sqlsrv_tted')->table($table->name)->whereIn(DB::raw('substring(學校代碼,3,4)'),$schoolID)
+                ->getCacheKey(), 300, function() use ($table, $selects, $organizations, $columnNames) {
+                $rows = DB::connection('sqlsrv_analysis_tted')->table($table->name)->whereIn(DB::raw('substring(學校代碼,3,4)'),$organizations)
                     ->groupBy($columnNames)
                     ->select($selects)
                     ->get();
@@ -979,11 +982,12 @@ class StructFile extends CommFile {
     public function get_organize_detail()
     {
         $structs = Input::get('structs');
-        $organizeIDs = Input::get('schoolID');
-        $schoolID = \Plat\Project\OrganizationDetail::whereIn('organization_id',$organizeIDs)->lists('id');
+        $organizations = \Plat\Project\Organization::find(array_fetch(Input::get('organizations'), 'id'))->load('every')->map(function($organization) {
+            return $organization->every->lists('id');
+        })->flatten()->toArray();
         $first_table_title = '師培大學基本資料';
         $first_table = 'TEV103_TM_學校基本資料_OK';
-        $query = DB::connection('sqlsrv_tted')->table($first_table)->whereIn(DB::raw('substring(analysis_tted.dbo.'.$first_table.'.學校代碼,3,4)'),$schoolID);
+        $query = DB::connection('sqlsrv_analysis_tted')->table($first_table)->whereIn(DB::raw('substring(analysis_tted.dbo.'.$first_table.'.學校代碼,3,4)'),$organizations);
 
         foreach ($structs as $i => $struct) {
             $table = $struct['name'];
@@ -996,7 +1000,7 @@ class StructFile extends CommFile {
             }
         }
 
-        $columnNames = DB::connection('sqlsrv_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')
+        $columnNames = DB::connection('sqlsrv_analysis_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')
                 ->where('TABLE_NAME', $structs[1]['name'])
                 ->where('COLUMN_NAME', '<>', '學校代碼')
                 ->select('COLUMN_NAME')

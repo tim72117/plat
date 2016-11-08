@@ -11,10 +11,10 @@
                     <div class="item" align="center">
                         <md-input-container>
                                 <label>學校</label>
-                                <md-select ng-model="selectSchool" aria-label="schools" multiple md-selected-text="selectSchool.length+'所學校'">
+                                <md-select ng-model="selectSchools" aria-label="選擇分析學校" multiple md-selected-text="selectSchools.length+'所學校'">
                                     <md-button layout-fill value="all" ng-click="selectAllSchool()">全選</md-button>
                                     <md-optgroup >
-                                        <md-option ng-value="school" ng-repeat="school in schools">{{school.name}}</md-option>
+                                        <md-option ng-value="organization" ng-repeat="organization in organizations">{{organization.now.name}}</md-option>
                                     </md-optgroup>
                                 </md-select>
                         </md-input-container>
@@ -239,36 +239,29 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
 
     $http({method: 'POST', url: 'getSchools', data:{}})
     .success(function(data, status, headers, config) {
-        $scope.schools = data;
-        $scope.selectSchool = $scope.schools;
-        $scope.selectSchoolID = [];
-        for (var i in $scope.selectSchool) {
-            $scope.selectSchoolID.push($scope.selectSchool[i].id);
-        };
-        $scope.updateItem($scope.selectSchoolID);
+       $scope.organizations = data.organizations;
+        $scope.selectSchools = $scope.organizations;
+        $scope.updateItem($scope.selectSchools);
     }).error(function(e){
         console.log(e);
     });
 
     $scope.selectAllSchool = function(){
-        if (JSON.stringify($scope.selectSchool) === JSON.stringify($scope.schools) ){
-            $scope.selectSchool = [];
+        if (JSON.stringify($scope.selectSchools) === JSON.stringify($scope.organizations) ){
+            $scope.selectSchools = [];
         }else{
-            $scope.selectSchool = $scope.schools;
+            $scope.selectSchools = $scope.organizations;
         }
     };
 
-    $scope.$watchCollection('selectSchool', function(selectSchool) {
-        $scope.selectSchoolID = [];
-        for (var i in selectSchool) {
-            $scope.selectSchoolID.push(selectSchool[i].id);
-        };
-        
-        $scope.updateItem($scope.selectSchoolID);
+    $scope.$watchCollection('selectSchools', function(selectSchools) {
+       if ( typeof(selectSchools) != 'undefined' ) {
+            $scope.updateItem(selectSchools);
+        }
     });
 
-    $scope.updateItem = function(selectSchoolID){
-        $http({method: 'POST', url: 'getItems', data:{schoolID: selectSchoolID}})
+    $scope.updateItem = function(selectSchools){
+        $http({method: 'POST', url: 'getItems', data:{organizations: selectSchools}})
         .success(function(data, status, headers, config) {
             for (var i in $scope.structs) {
                 var struct = $scope.structs[i];
@@ -304,7 +297,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         if (selectedStruct.title == '具實習資格人數') {
             $scope.sumButton = 2;
         }
-        $http({method: 'POST', url: 'get_organize_detail', data:{structs: $scope.calculation.structs, schoolID: $scope.selectSchoolID}})
+        $http({method: 'POST', url: 'get_organize_detail', data:{structs: $scope.calculation.structs, organizations: $scope.selectSchools}})
         .success(function(data, status, headers, config) {
             $scope.calculation.results = data.results;
             $scope.calculation.columns = data.columns;
