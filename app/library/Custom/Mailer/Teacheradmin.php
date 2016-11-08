@@ -23,11 +23,13 @@ class Teacheradmin {
             ->leftJoin('rows.dbo.row_20160121_182751_kljan_token AS tokenA', function($join) {
                 $join->on('info.C105', '=', 'tokenA.school_id')->on('info.C107', '=', 'tokenA.name');
             })
+            ->where('tokenA.admin','A')
             ->leftJoin('tted_104.dbo.teacheradmin104_pstat AS pstatA', 'tokenA.token', '=', 'pstatA.newcid')
 
             ->leftJoin('rows.dbo.row_20160121_182751_kljan_token AS tokenB', function($join) {
                 $join->on('info.C105', '=', 'tokenB.school_id')->on('info.C110', '=', 'tokenB.name');
             })
+            ->where('tokenB.admin','B')
             ->leftJoin('tted_104.dbo.teacheradmin104_pstat AS pstatB', 'tokenB.token', '=', 'pstatB.newcid')
             ->whereNull('info.deleted_at');
 
