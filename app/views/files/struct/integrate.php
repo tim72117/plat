@@ -74,7 +74,7 @@
                                     {{ column.filter[0] }}年至{{ column.filter[1] }}
                                     <div ng-slider ng-model="column.filter" items="column.items"></div>
                                 </div>
-                                <struct-items table="mainTable" column="column" select-schools="selectSchools" selected-columns="selectedColumns" toggle-items="toggleItems"></struct-items>
+                                <struct-items table="mainTable" column="column" select-schools="selectSchools" toggle-items="toggleItems"></struct-items>
                             </td>
                         </tr>
                     </tbody>
@@ -169,7 +169,6 @@
                         load-item="loadItem"
                         call-calculation="callCalculation"
                         select-schools="selectSchools"
-                        selected-columns="selectedColumns"
                         toggle-items="toggleItems"></div>
                 </div>
                 <div flex="50" layout="column" style="height:100%">
@@ -285,33 +284,6 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     //     $scope.mdSidenav.left = true;
     // }, 1000);
 
-    $scope.loadItem = function(table, column) {
-        if (column.items) {
-            return column.items;
-        }
-
-        var schools = $filter('filter')($scope.schools, function() {
-            return true;
-        });
-
-        deferred = $q.defer();
-        $http({method: 'POST', url: 'getEachItems', data:{organizations: $scope.selectSchools, table_id: table.id, rowTitle: column.title}})
-        .success(function(data, status, headers, config) {
-            console.log(data);
-            table.disabled = data.items.length == 0;
-            column.items = data.items || [];
-            column.disabled = column.items.length == 0;
-            if (column.title == '年齡') column.disabled = true;
-            //$scope.population.columns[1].type = 'slider';
-            deferred.resolve(data.items);
-        })
-        .error(function(e) {
-            console.log(e);
-        });
-
-        return deferred.promise;
-    };
-
     $http({method: 'POST', url: 'getSchools', data:{}})
     .success(function(data, status, headers, config) {
         console.log(data);
@@ -387,14 +359,14 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         return result;
     };
 
-    $scope.toggleItems = function(column) {
-        console.log($scope.selectedColumns);
-        if ($scope.selectedColumns[column.id]) {
+    $scope.toggleItems = function(table, column) {
+        console.log(table.selectedColumns);
+        if (table.selectedColumns[column.id]) {
             console.log(column.id);
-            if (!$scope.selectedColumns[column.id].rank) {
-                $scope.selectedColumns[column.id].rank = Object.keys($scope.selectedColumns).length;
+            if (!table.selectedColumns[column.id].rank) {
+                table.selectedColumns[column.id].rank = Object.keys(table.selectedColumns).length;
             }
-            var selectedColumns = Object.keys($scope.selectedColumns).map(function (key) { return $scope.selectedColumns[key]; });
+            var selectedColumns = Object.keys(table.selectedColumns).map(function (key) { return table.selectedColumns[key]; });
             $scope.levels = $scope.getLevels($filter('orderBy')(selectedColumns, 'rank'));
         }
     };
@@ -470,16 +442,17 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     $scope.callCalculation = function() {
         for (var i in $scope.calculations) {
             if ($.isEmptyObject($scope.calculations[i].results)) {
-                $scope.addCalculation($scope.calculations[i].structs, $scope.calculations[i]);
+                $scope.addCalculation($scope.calculations[i]);
             }
         }
         $scope.getTitle();
         $scope.gotoResultTable();
     };
 
-    $scope.addCalculation = function(calculateStructs,calculation) {
-        $http({method: 'POST', url: 'calculate', data:{structs: calculateStructs, columns: $scope.columns, schoolID: $scope.selectSchools}})
+    $scope.addCalculation = function(calculation) {
+        $http({method: 'POST', url: 'calculate', data:{structs: calculation.structs, columns: $scope.columns, schoolID: $scope.selectSchools}})
         .success(function(data, status, headers, config) {
+            console.log(data);
             calculation.results = data.results;
         }).error(function(e) {
             console.log(e);

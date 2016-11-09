@@ -51,7 +51,7 @@
 
             <td ng-if="struct.expanded && struct.classExpanded" ng-class="{negative: struct.columns[0].disabled, disabled: struct.columns[0].disabled}" class="no-animate">
                 <i class="icon close" ng-if="struct.columns[0].disabled"></i>
-                <struct-items table="struct" column="struct.columns[0]" select-schools="selectSchools" selected-columns="selectedColumns" toggle-items="toggleItems"></struct-items>
+                <struct-items table="struct" column="struct.columns[0]" select-schools="selectSchools" toggle-items="toggleItems"></struct-items>
             </td>
 
             <td ng-if="!struct.expanded && struct.classExpanded" colspan="{{struct.expanded ? 1 : 2}}" class="no-animate">
@@ -62,7 +62,7 @@
 
             <td ng-class="{disabled: struct.columns[0].disabled}" ng-if="struct.classExpanded && structFilterShow" class="no-animate">
                 <div ng-if="!struct.columns[0].disabled && struct.expanded">
-                    <struct-items table="struct" column="struct.columns[0]" select-schools="selectSchools" selected-columns="filterItems" toggle-items="setFilter"></struct-items>
+                    <struct-items table="struct" column="struct.columns[0]" select-schools="selectSchools" toggle-items="setFilter"></struct-items>
                 </div>
             </td>
         </tr>
@@ -71,7 +71,7 @@
 
             <td ng-class="{negative: row.disabled, disabled: row.disabled}" class="no-animate">
                 <i class="icon close" ng-if="row.disabled"></i>
-                <struct-items table="struct" column="row" select-schools="selectSchools" selected-columns="selectedColumns" toggle-items="toggleItems"></struct-items>
+                <struct-items table="struct" column="row" select-schools="selectSchools" toggle-items="toggleItems"></struct-items>
             </td>
 
             <td ng-class="{disabled: row.disabled}" ng-if="structFilterShow" >
@@ -80,7 +80,7 @@
                     <div ng-slider ng-model="row.filter" items="row.items"></div>
                 </div>
                 <div ng-if="!row.disabled && row.type!='slider'">
-                    <struct-items table="struct" column="row" select-schools="selectSchools" selected-columns="filterItems" toggle-items="setFilter"></struct-items>
+                    <struct-items table="struct" column="row" select-schools="selectSchools" toggle-items="setFilter"></struct-items>
                 </div>
             </td>
 

@@ -11,19 +11,21 @@ angular.module('ngStruct', [])
             table: '=',
             column: '=',
             selectSchools: '=',
-            selectedColumns: '=',
             toggleItems: '='
         },
         template: `
             <md-select multiple ng-if="column.type!='slider'" style="margin:0"
                 placeholder="{{column.title}}"
-                ng-model="selectedColumns[column.id].items"
+                ng-model="table.selectedColumns[column.id].items"
                 md-on-open="loadItem(table, column)"
-                ng-change="toggleItems(column);column.selected = true">
+                ng-change="toggleItems(table, column);column.selected = true">
                 <md-option ng-value="item" ng-repeat="item in column.items">{{item.name}}</md-option>
             </md-select>
         `,
         controller: function($scope, $http, $q) {
+            if (!$scope.table.selectedColumns) {
+                $scope.table.selectedColumns = {};
+            }
             $scope.loadItem = function(table, column) {
                 if (column.items) {
                     return column.items;
@@ -63,7 +65,6 @@ angular.module('ngStruct', [])
             toggleColumn: '=',
             loadItem: '=',
             callCalculation: '=',
-            selectedColumns: '=',
             selectSchools: '=',
             toggleItems: '='
         },
@@ -87,15 +88,19 @@ angular.module('ngStruct', [])
 
             $scope.addNewCalStruct = function() {
                 var calculation = {structs: [], results: {}};
-                var structs = $filter('filter')($scope.structs, {selected: true});
-                for (var i in structs) {
-                    var columns = [];
-                    angular.forEach($filter('filter')(structs[i].columns, function(column, index, array) { return column.filter && column.filter!=''; }), function(column, key) {
-                        this.push({title: column.title, filter: column.filter.toString()});
-                    }, columns);
-                    calculation.structs.push({title: $scope.structs[i].title, columns: columns});
-                }
-                console.log(calculation.structs);
+                var structs = $filter('filter')($scope.structs, function(table) {
+                    return table.selectedColumns && Object.keys(table.selectedColumns).length > 0;
+                });
+                console.log(structs);
+                // for (var i in structs) {
+                //     var columns = [];
+                //     angular.forEach($filter('filter')(structs[i].columns, function(column, index, array) { return column.filter && column.filter!=''; }), function(column, key) {
+                //         this.push({title: column.title, filter: column.filter.toString()});
+                //     }, columns);
+                //     calculation.structs.push({title: $scope.structs[i].title, columns: columns});
+                // }
+                calculation.structs = structs;
+
                 $scope.calculations.push(calculation);
                 $scope.callCalculation();
             };
