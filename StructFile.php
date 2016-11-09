@@ -134,7 +134,7 @@ class StructFile extends CommFile {
         } else{
             $query = DB::connection('sqlsrv_analysis_tted')
                 ->table('analysis_tted.dbo.'.$mainTable)
-                ->join('analysis_tted.dbo.'.$table,'analysis_tted.dbo.'.$mainTable.'.身分證字號','=','analysis_tted.dbo.'.$table.'.身分證字號')
+                ->leftJoin('analysis_tted.dbo.'.$table->name, 'analysis_tted.dbo.' . $mainTable . '.身分證字號', '=', 'analysis_tted.dbo.'.$table->name.'.身分證字號')
                 ->whereIn(DB::raw('substring(analysis_tted.dbo.'.$mainTable.'.學校代碼,3,4)'), $organizations)
                 ->groupBy($columns)
                 ->select($selects);
