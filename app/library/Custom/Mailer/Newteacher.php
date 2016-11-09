@@ -124,7 +124,7 @@ class NewTeacher {
         $url = 'https://teacher.edu.tw/ques/'.$tables[$type]['dir'].'?token='.$query->first()->{$tables[$type]['key']};
 
         Mail::send('customs.emails.newteacher', array('url' => $url), function($message) use($email) {
-            // $message->to($email)->subject('懇請協助填寫教育部104學年度師資培育回饋調查問卷');
+            $message->to($email)->subject('懇請協助填寫教育部104學年度師資培育回饋調查問卷');
         });
 
         $query->update(['sented' => true]);
