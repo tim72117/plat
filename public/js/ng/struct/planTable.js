@@ -2,6 +2,54 @@ angular.module('ngStruct', []);
 
 angular.module('ngStruct', [])
 
+.directive('structItems', function() {
+    return {
+        restrict: 'E',
+        replace: false,
+        transclude: false,
+        scope: {
+            table: '=',
+            column: '=',
+            selectSchools: '=',
+            selectedColumns: '=',
+            toggleItems: '='
+        },
+        template: `
+            <md-select multiple ng-if="column.type!='slider'" style="margin:0"
+                placeholder="{{column.title}}"
+                ng-model="selectedColumns[column.id].items"
+                md-on-open="loadItem(table, column)"
+                ng-change="toggleItems(column);column.selected = true">
+                <md-option ng-value="item" ng-repeat="item in column.items">{{item.name}}</md-option>
+            </md-select>
+        `,
+        controller: function($scope, $http, $q) {
+            $scope.loadItem = function(table, column) {
+                if (column.items) {
+                    return column.items;
+                }
+
+                deferred = $q.defer();
+                $http({method: 'POST', url: 'getEachItems', data:{organizations: $scope.selectSchools, table_id: table.id, rowTitle: column.title}})
+                .success(function(data, status, headers, config) {
+                    console.log(data);
+                    table.disabled = data.items.length == 0;
+                    column.items = data.items || [];
+                    column.disabled = column.items.length == 0;
+                    if (column.title == '年齡') column.disabled = true;
+                    //$scope.population.columns[1].type = 'slider';
+                    deferred.resolve(data.items);
+                })
+                .error(function(e) {
+                    console.log(e);
+                });
+
+                return deferred.promise;
+            };
+        }
+    };
+})
+
 .directive('planTable', function() {
     return {
         restrict: 'A',
@@ -14,10 +62,15 @@ angular.module('ngStruct', [])
             calculations: '=',
             toggleColumn: '=',
             loadItem: '=',
-            callCalculation: '='
+            callCalculation: '=',
+            selectedColumns: '=',
+            selectSchools: '=',
+            toggleItems: '='
         },
         templateUrl: 'templatePlanTable',
         controller: function($scope, $filter) {
+
+            $scope.filterItems = {};
 
             $scope.structInClass = {
                 '基本資料':{structs: [{title: '個人資料'}]},
@@ -32,17 +85,17 @@ angular.module('ngStruct', [])
                 '語言檢定':{structs: [{title: '閩南語檢定'},{title: '客語檢定'}]}
             };
 
-            $scope.addNewCalStruct = function(structs) {
+            $scope.addNewCalStruct = function() {
                 var calculation = {structs: [], results: {}};
+                var structs = $filter('filter')($scope.structs, {selected: true});
                 for (var i in structs) {
-                    if (structs[i].selected && !structs[i].disabled) {
-                        var columns = [];
-                        angular.forEach($filter('filter')(structs[i].columns, function(column, index, array) { return column.filter && column.filter!=''; }), function(column, key) {
-                            this.push({title: column.title, filter: column.filter.toString()});
-                        }, columns);
-                        calculation.structs.push({title: $scope.structs[i].title, columns: columns});
-                    };
+                    var columns = [];
+                    angular.forEach($filter('filter')(structs[i].columns, function(column, index, array) { return column.filter && column.filter!=''; }), function(column, key) {
+                        this.push({title: column.title, filter: column.filter.toString()});
+                    }, columns);
+                    calculation.structs.push({title: $scope.structs[i].title, columns: columns});
                 }
+                console.log(calculation.structs);
                 $scope.calculations.push(calculation);
                 $scope.callCalculation();
             };

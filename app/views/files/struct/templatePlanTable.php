@@ -13,7 +13,7 @@
 
         <tr ng-repeat-start="(index, struct) in structs" ng-hide="struct.hide" class="no-animate">
             <td rowspan="{{ getRowSpan(structs) }}" ng-if="$first" class="no-animate">
-                <button class="compact ui olive icon large button" ng-click="addNewCalStruct(structs);destroyPopup()" style="background: #93A42A;color: white">
+                <button class="compact ui olive icon large button" ng-click="addNewCalStruct();destroyPopup()" style="background: #93A42A;color: white">
                     <i name="needHelp4" class="play icon"></i> 開始計算
                 </button>
             </td>
@@ -51,14 +51,7 @@
 
             <td ng-if="struct.expanded && struct.classExpanded" ng-class="{negative: struct.columns[0].disabled, disabled: struct.columns[0].disabled}" class="no-animate">
                 <i class="icon close" ng-if="struct.columns[0].disabled"></i>
-                <md-checkbox
-                    ng-model="struct.columns[0].selected"
-                    aria-label="{{ struct.columns[0].title }}"
-                    ng-change="toggleColumn(struct.columns[0], struct)"
-                    ng-click="needHelp2()"
-                    name="needHelp5">
-                    {{ struct.columns[0].title }}
-                </md-checkbox>
+                <struct-items table="struct" column="struct.columns[0]" select-schools="selectSchools" selected-columns="selectedColumns" toggle-items="toggleItems"></struct-items>
             </td>
 
             <td ng-if="!struct.expanded && struct.classExpanded" colspan="{{struct.expanded ? 1 : 2}}" class="no-animate">
@@ -68,18 +61,9 @@
             </td>
 
             <td ng-class="{disabled: struct.columns[0].disabled}" ng-if="struct.classExpanded && structFilterShow" class="no-animate">
-                <md-input-container ng-if="!struct.columns[0].disabled && struct.expanded">
-                    <md-select multiple
-                        placeholder="{{ struct.columns[0].title }}"
-                        ng-model="struct.columns[0].filter"
-                        md-on-open="loadItem(struct.title,struct.columns[0].title)"
-                        ng-change="setFilter(struct)">
-                        <md-progress-circular ng-if="!struct.columns[0].items" md-diameter="20px"></md-progress-circular>
-                        <md-optgroup >
-                            <md-option ng-value="item" ng-repeat="item in struct.columns[0].items" ng-click="needHelp4()">{{item}}</md-option>
-                        </md-optgroup>
-                    </md-select>
-                </md-input-container>
+                <div ng-if="!struct.columns[0].disabled && struct.expanded">
+                    <struct-items table="struct" column="struct.columns[0]" select-schools="selectSchools" selected-columns="filterItems" toggle-items="setFilter"></struct-items>
+                </div>
             </td>
         </tr>
 
@@ -87,9 +71,7 @@
 
             <td ng-class="{negative: row.disabled, disabled: row.disabled}" class="no-animate">
                 <i class="icon close" ng-if="row.disabled"></i>
-                <md-checkbox ng-model="row.selected" aria-label="{{ struct.columns[0].title }}" ng-change="toggleColumn(row, struct)" ng-click="needHelp2()">
-                    {{ row.title }}
-                </md-checkbox>
+                <struct-items table="struct" column="row" select-schools="selectSchools" selected-columns="selectedColumns" toggle-items="toggleItems"></struct-items>
             </td>
 
             <td ng-class="{disabled: row.disabled}" ng-if="structFilterShow" >
@@ -97,11 +79,9 @@
                     {{ row.filter[0] }}年至{{ row.filter[1] }}
                     <div ng-slider ng-model="row.filter" items="row.items"></div>
                 </div>
-                <md-input-container ng-if="!row.disabled && row.type!='slider'">
-                    <md-select placeholder="{{ row.title }}" ng-model="row.filter" md-on-open="loadItem(struct, row)" multiple ng-change="setFilter(struct)">
-                        <md-option ng-value="item" ng-repeat="item in row.items" >{{item.name}}</md-option>
-                    </md-select>
-                </md-input-container>
+                <div ng-if="!row.disabled && row.type!='slider'">
+                    <struct-items table="struct" column="row" select-schools="selectSchools" selected-columns="filterItems" toggle-items="setFilter"></struct-items>
+                </div>
             </td>
 
         </tr>

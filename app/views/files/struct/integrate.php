@@ -74,17 +74,7 @@
                                     {{ column.filter[0] }}年至{{ column.filter[1] }}
                                     <div ng-slider ng-model="column.filter" items="column.items"></div>
                                 </div>
-                                <md-input-container ng-if="column.type!='slider'" style="margin-bottom: 0">
-                                    <md-select multiple
-                                        placeholder="{{column.title}}"
-                                        ng-model="lvs[column.id].items"
-                                        md-on-open="loadItem(mainTable, column)"
-                                        ng-change="toggleItems(column);column.selected = true">
-                                        <md-optgroup label="{{column.title}}">
-                                            <md-option ng-value="item" ng-repeat="item in column.items">{{item.name}}</md-option>
-                                        </md-optgroup>
-                                    </md-select>
-                                </md-input-container>
+                                <struct-items table="mainTable" column="column" select-schools="selectSchools" selected-columns="selectedColumns" toggle-items="toggleItems"></struct-items>
                             </td>
                         </tr>
                     </tbody>
@@ -177,7 +167,10 @@
                         calculations="calculations"
                         toggle-column="toggleColumn"
                         load-item="loadItem"
-                        call-calculation="callCalculation"></div>
+                        call-calculation="callCalculation"
+                        select-schools="selectSchools"
+                        selected-columns="selectedColumns"
+                        toggle-items="toggleItems"></div>
                 </div>
                 <div flex="50" layout="column" style="height:100%">
 
@@ -260,7 +253,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.tableOptions = ['行%', '列%', '不加%'];
-    $scope.lvs = {};
+    $scope.selectedColumns = {};
 
     $scope.loading = true;
     $scope.structs = [];
@@ -394,14 +387,16 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         return result;
     };
 
-    $scope.toggleItems = function(row) {
-        if (!$scope.lvs[row.id].rank) {
-            $scope.lvs[row.id].rank = Object.keys($scope.lvs).length;
+    $scope.toggleItems = function(column) {
+        console.log($scope.selectedColumns);
+        if ($scope.selectedColumns[column.id]) {
+            console.log(column.id);
+            if (!$scope.selectedColumns[column.id].rank) {
+                $scope.selectedColumns[column.id].rank = Object.keys($scope.selectedColumns).length;
+            }
+            var selectedColumns = Object.keys($scope.selectedColumns).map(function (key) { return $scope.selectedColumns[key]; });
+            $scope.levels = $scope.getLevels($filter('orderBy')(selectedColumns, 'rank'));
         }
-        var arr = Object.keys($scope.lvs).map(function (key) { return $scope.lvs[key]; });
-        var gg = $filter('orderBy')(arr, 'rank');
-        $scope.levels = $scope.getLevels(gg);
-        console.log(gg);
     };
 
     $scope.toggleColumn = function(column, struct) {
@@ -475,7 +470,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     $scope.callCalculation = function() {
         for (var i in $scope.calculations) {
             if ($.isEmptyObject($scope.calculations[i].results)) {
-                $scope.addCalculation($scope.calculations[i].structs,$scope.calculations[i]);
+                $scope.addCalculation($scope.calculations[i].structs, $scope.calculations[i]);
             }
         }
         $scope.getTitle();
