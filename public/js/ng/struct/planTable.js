@@ -11,7 +11,6 @@ angular.module('ngStruct', [])
             structClass: '=',
             structClassShow: '=',
             structs: '=',
-            idType: '=',
             calculations: '=',
             toggleColumn: '=',
             loadItem: '=',
@@ -37,11 +36,11 @@ angular.module('ngStruct', [])
                 var calculation = {structs: [], results: {}};
                 for (var i in structs) {
                     if (structs[i].selected && !structs[i].disabled) {
-                        var rows = [];
-                        angular.forEach($filter('filter')(structs[i].rows, function(row, index, array) { return row.filter && row.filter!=''; }), function(row, key) {
-                            this.push({title: row.title, filter: row.filter.toString()});
-                        }, rows);
-                        calculation.structs.push({title: $scope.structs[i].title, rows: rows});
+                        var columns = [];
+                        angular.forEach($filter('filter')(structs[i].columns, function(column, index, array) { return column.filter && column.filter!=''; }), function(column, key) {
+                            this.push({title: column.title, filter: column.filter.toString()});
+                        }, columns);
+                        calculation.structs.push({title: $scope.structs[i].title, columns: columns});
                     };
                 }
                 $scope.calculations.push(calculation);
@@ -77,7 +76,7 @@ angular.module('ngStruct', [])
 
             $scope.toggleStruct = function(struct) {
                 if (struct.selected) {
-                    angular.forEach($filter('filter')(struct.rows, {selected: true}), function(row) {
+                    angular.forEach($filter('filter')(struct.columns, {selected: true}), function(row) {
                         $scope.toggleColumn(row, struct);
                         row.selected = false;
                     });

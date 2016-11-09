@@ -172,7 +172,6 @@
                 <div flex="50">
                     <div plan-table
                         structs="tables"
-                        id-type="idType"
                         struct-class="structClass"
                         struct-class-show="structClassShow"
                         calculations="calculations"
@@ -271,8 +270,9 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     .success(function(data, status, headers, config) {
         console.log(data);
         $scope.tables = data.tables;
-        $scope.mainTable = $filter('filter')($scope.tables, {id: data.population.id}, true);
+        $scope.mainTable = $filter('filter')($scope.tables, {id: data.population.id+''}, true)[0];
         $scope.population = data.population;
+        $scope.mainTable.hide = true;
         $scope.mainTable.expanded = true;
         $scope.loading = false;
         $scope.$parent.main.loading = false;
