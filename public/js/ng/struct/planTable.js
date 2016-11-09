@@ -20,8 +20,6 @@ angular.module('ngStruct', [])
         templateUrl: 'templatePlanTable',
         controller: function($scope, $filter) {
 
-            console.log($scope);
-
             $scope.structInClass = {
                 '基本資料':{structs: [{title: '個人資料'}]},
                 '就學資訊':{structs: [{title: '就學資訊'}]},
@@ -54,7 +52,7 @@ angular.module('ngStruct', [])
                 var rowSpan = structs.length - $filter('filter')(structs, {expanded: true}).length;
                 for (i in structs) {
                     if (structs[i].expanded) {
-                        rowSpan += structs[i].rows.length;
+                        rowSpan += structs[i].columns.length;
                     };
                 }
                 return rowSpan;
