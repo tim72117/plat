@@ -98,11 +98,8 @@
                     <div ng-slider ng-model="row.filter" items="row.items"></div>
                 </div>
                 <md-input-container ng-if="!row.disabled && row.type!='slider'">
-                    <md-select placeholder="{{ row.title }}" ng-model="row.filter" md-on-open="loadItem(struct.title,row.title)" multiple ng-change="setFilter(struct)">
-                        <md-progress-circular ng-if="!row.items" md-diameter="20px"></md-progress-circular>
-                        <md-optgroup >
-                            <md-option ng-value="item" ng-repeat="item in row.items" >{{item}}</md-option>
-                        </md-optgroup>
+                    <md-select placeholder="{{ row.title }}" ng-model="row.filter" md-on-open="loadItem(struct, row)" multiple ng-change="setFilter(struct)">
+                        <md-option ng-value="item" ng-repeat="item in row.items" >{{item.name}}</md-option>
                     </md-select>
                 </md-input-container>
             </td>
