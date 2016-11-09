@@ -216,7 +216,7 @@ class StructFile extends CommFile {
         //     });
         // });
 
-        $tables = \Row\Sheet::find(148)->tables->load('columns')->keyBy('id');//\Plat\Analysis\TableStruct::with('rows')->get()->each(function() {});
+        $tables = \Row\Sheet::find(148)->tables->load('columns');//->keyBy('id');//\Plat\Analysis\TableStruct::with('rows')->get()->each(function() {});
 
         return ['tables' => $tables, 'population' => $this->populations[$this->configs['population']]];
     }

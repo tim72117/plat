@@ -171,7 +171,7 @@
                 <md-content class="md-padding" layout="row" style="height:100%">
                 <div flex="50">
                     <div plan-table
-                        structs="structs"
+                        structs="tables"
                         id-type="idType"
                         struct-class="structClass"
                         struct-class-show="structClassShow"
@@ -271,7 +271,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     .success(function(data, status, headers, config) {
         console.log(data);
         $scope.tables = data.tables;
-        $scope.mainTable = $scope.tables[data.population.id];
+        $scope.mainTable = $filter('filter')($scope.tables, {id: data.population.id}, true);
         $scope.population = data.population;
         $scope.mainTable.expanded = true;
         $scope.loading = false;
@@ -294,7 +294,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
 
     $scope.loadItem = function(table, column) {
         if (column.items) {
-            return row.items;
+            return column.items;
         }
 
         var schools = $filter('filter')($scope.schools, function() {
