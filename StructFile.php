@@ -95,8 +95,8 @@ class StructFile extends CommFile {
     }
 
     private $populations = [
-        0 => ['id' => 186, 'title' => '新進師資生', 'yearColumnIndex' => 1, 'yearTitle' => '占教育部核定名額學年度', 'table' => 'TEV103_TE_StudentInSchool_OK'],
-        1 => ['id' => 194, 'title' => '實習師資生', 'yearColumnIndex' => 2, 'yearTitle' => '參與教育實習學年度',     'table' => 'TE2_D_OK'],
+        0 => ['id' => 186, 'title' => '新進師資生', 'yearColumnIndex' => 1, 'yearTitle' => '占教育部核定名額學年度', 'table' => 'TEV103_TE_StudentInSchool_OK', 'table_id' => 186],
+        1 => ['id' => 194, 'title' => '實習師資生', 'yearColumnIndex' => 2, 'yearTitle' => '參與教育實習學年度',     'table' => 'TE2_D_OK',                     'table_id' => 194],
         //2 => ['id' => 4,   'title' => '',                                                                          'table' => 'TE2_E_OK'],
     ];
 
@@ -263,27 +263,22 @@ class StructFile extends CommFile {
         $organizeIDs = Input::get('schoolID');
         $schoolID = \Plat\Project\OrganizationDetail::whereIn('organization_id',$organizeIDs)->lists('id');
 
-        if ($this->configs['population']  == 1) {
-            $first_table_title = '就學資訊';
-        } else if ($this->configs['population']  == 2) {
-            $first_table_title = '實際參與實習';
-        } else {
-            $first_table_title = '修畢師資職前教育證明書';
-        }
+        $mainTable_id = $this->populations[$this->configs['population']]['table_id'];
+        $mainTable = \Row\Table::find($mainTable_id);
 
-        $first_table = $this->tables[$first_table_title];
-        $query = DB::connection('sqlsrv_analysis_tted')->table($first_table)->whereIn(DB::raw('substring(analysis_tted.dbo.'.$first_table.'.學校代碼,3,4)'),$schoolID);
+        $query = DB::connection('sqlsrv_analysis_tted')->table($mainTable->database . '.dbo.' . $mainTable->name . ' AS mainTable')
+            ->whereIn(DB::raw('substring(mainTable.學校代碼,3,4)'), $schoolID);
 
         foreach ($structs as $i => $struct) {
-            $table = $this->tables[$struct['title']];
+            // $table = $this->tables[$struct['title']];
 
-            if ($struct['title'] != $first_table_title) {
-                $query->join($table, $first_table . '.身分證字號', '=', $table . '.身分證字號');
-            }
+            // if ($struct['title'] != $mainTable->title) {
+            //     $query->join($table, $first_table . '.身分證字號', '=', $table . '.身分證字號');
+            // }
 
-            foreach ($struct['rows'] as $row) {
-                $query->whereIn($table . '.' . $row['title'], explode(',', $row['filter']));
-            }
+            // foreach ($struct['rows'] as $row) {
+            //     $query->whereIn($table . '.' . $row['title'], explode(',', $row['filter']));
+            // }
         }
 
         $columns = array_pluck(Input::get('columns'), 'title');
@@ -297,7 +292,7 @@ class StructFile extends CommFile {
         }
 
         $query->select($selects)
-            ->addSelect(DB::raw('count(DISTINCT ' . $first_table . '.身分證字號) as total'));
+            ->addSelect(DB::raw('count(DISTINCT mainTable.身分證字號) as total'));
 
         //var_dump($query->toSql());exit;
 
