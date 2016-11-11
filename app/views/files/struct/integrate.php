@@ -162,7 +162,7 @@
                 <div flex="50">
                     <div plan-table
                         structs="tables"
-                        struct-class="structClass"
+                        categories="categories"
                         struct-class-show="structClassShow"
                         calculations="calculations"
                         toggle-column="toggleColumn"
@@ -262,6 +262,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     .success(function(data, status, headers, config) {
         console.log(data);
         $scope.tables = data.tables;
+        $scope.categories = data.categories;
         $scope.mainTable = $filter('filter')($scope.tables, {id: data.population.id+''}, true)[0];
         $scope.population = data.population;
         $scope.mainTable.hide = true;
@@ -749,33 +750,9 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         })
     };
 
-    function explainController(scope) {
-        scope.explans = [];
-        scope.structClass = $scope.structClass;
-
-        $http({method: 'POST', url: 'getExplans', data:{}})
-        .success(function(data, status, headers, config) {
-            console.log(data);
-            scope.explans = data;
-        }).error(function(e) {
-            console.log(e);
-        });
-
-        scope.getExplanSpan = function(explans) {
-            var explanSpan = explans.length - $filter('filter')(explans, {expanded: true}).length;
-            for (i in explans) {
-                if (explans[i].expanded) {
-                    explanSpan += explans[i].explanations.length;
-                };
-            }
-            return explanSpan;
-        };
-    }
-
     $scope.showExplain = function(ev) {
         $mdDialog.show({
-            controller: explainController,
-            templateUrl: 'templateExplain',
+            template: '<struct-explain struct-class="structClass"></struct-explain>',
             clickOutsideToClose: true
         })
         .then(function(answer) {

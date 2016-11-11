@@ -9,49 +9,41 @@
             </tr>
         </thead>
         <tbody>
-
-            <tr ng-repeat-start="(index, explan) in explans" class="no-animate">
-
-                <td rowspan="{{ getExplanSpan(explans.slice(index, index+structClass[explan.title].size)) }}" ng-if="structClass[explan.title]">{{ structClass[explan.title].title }}</td>
-
-                <td rowspan="{{ explan.expanded ? explan.explanations.length : 1 }}">{{ explan.title }}</td>
-
-                <td class="no-animate" rowspan="{{ explan.expanded ? explan.explanations.length : 1 }}">
-                    <div class="compact ui icon mini basic vertical buttons" ng-if="!explan.disabled || explan.expanded">
-                        <button class="ui button" ng-if="!explan.expanded" ng-click="explan.expanded=true">
+            <tr ng-repeat-start="(index, table) in tables" class="no-animate">
+                <td rowspan="{{ getExplanSpan(table) }}" ng-if="categories[table.title]">{{ categories[table.title].title }}</td>
+                <td rowspan="{{ table.expanded ? table.explains.length : 1 }}">{{ table.title }}</td>
+                <td class="no-animate" rowspan="{{ table.expanded ? table.explains.length : 1 }}">
+                    <div class="compact ui icon mini basic vertical buttons" ng-if="!table.disabled || table.expanded">
+                        <button class="ui button" ng-if="!table.expanded" ng-click="table.expanded=true">
                             <i class="expand icon"></i>
                         </button>
-                        <button class="ui button" ng-if="explan.expanded" ng-click="explan.expanded=false">
+                        <button class="ui button" ng-if="table.expanded" ng-click="table.expanded=false">
                             <i class="compress icon"></i>
                         </button>
                     </div>
                 </td>
-
-                <td class="no-animate" ng-if="explan.expanded">
-                    {{ explan.explanations[0].title }}
+                <td class="no-animate" ng-if="table.expanded">
+                    {{ table.explains[0].title }}
                 </td>
-                <td class="no-animate" ng-if="explan.expanded">
-                    {{ explanation.content }}
+                <td class="no-animate" ng-if="table.expanded">
+                    {{ table.explains[0].context }}
                 </td>
-                <td class="no-animate" ng-if="!explan.expanded">
+                <td class="no-animate" ng-if="!table.expanded">
                     <div style="width:180px;text-overflow: ellipsis;overflow:hidden !important;white-space: nowrap">
-                        <span class="item" ng-repeat="explanation in explan.explanations">{{ explanation.title }}{{ $last ? '' : ',' }}</span>
+                        <span class="item" ng-repeat="explain in table.explains">{{ explain.title }}{{ $last ? '' : ',' }}</span>
                     </div>
                 </td>
-                <td class="no-animate" ng-if="!explan.expanded">
+                <td class="no-animate" ng-if="!table.expanded">
                 </td>
             </tr>
-
-            <tr ng-repeat-end ng-repeat="explanation in explan.explanations" ng-if="!$first && explan.expanded" class="no-animate">
-
+            <tr ng-repeat-end ng-repeat="explain in table.explains" ng-if="!$first && table.expanded" class="no-animate">
                 <td>
-                    {{ explanation.title }}
+                    {{ explain.title }}
                 </td>
                 <td>
-                    {{ explanation.content }}
+                    {{ explain.context }}
                 </td>
             </tr>
-
         </tbody>
     </table>
 </div>

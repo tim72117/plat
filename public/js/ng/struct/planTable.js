@@ -58,7 +58,7 @@ angular.module('ngStruct', [])
         replace: false,
         transclude: false,
         scope: {
-            structClass: '=',
+            categories: '=',
             structClassShow: '=',
             structs: '=',
             calculations: '=',
@@ -115,8 +115,9 @@ angular.module('ngStruct', [])
                 return rowSpan;
             };
 
-            $scope.showStruct = function(firstStruct,classTitle) {
-                $scope.structClass[firstStruct].expanded = true;
+            $scope.showStruct = function(table, category, firstStruct,classTitle) {
+                var classTitle = category.title;
+                category.expanded = true;
                 $scope.structClassShow = true;
                 for (var i in $scope.structInClass[classTitle].structs) {
                     for (var j in $scope.structs) {
@@ -129,7 +130,7 @@ angular.module('ngStruct', [])
 
             $scope.showFilter = function(struct) {
                 $scope.structFilterShow = true;
-                struct.expanded=true;
+                struct.expanded = !struct.expanded;
             };
 
             $scope.toggleStruct = function(struct) {
@@ -165,6 +166,39 @@ angular.module('ngStruct', [])
         },
         templateUrl: 'templateResultTable',
         controller: function($scope, $filter) {
+        }
+    };
+})
+
+.directive('structExplain', function() {
+    return {
+        restrict: 'E',
+        replace: false,
+        transclude: false,
+        scope: {},
+        templateUrl: 'templateExplain',
+        controller: function($scope, $http, $filter) {
+            $scope.explans = [];
+
+            $http({method: 'POST', url: 'getExplans', data:{}})
+            .success(function(data, status, headers, config) {
+                console.log(data);
+                $scope.tables = data.tables;
+                $scope.categories = data.categories;
+            }).error(function(e) {
+                console.log(e);
+            });
+
+            $scope.getExplanSpan = function(table) {
+                var explans = $scope.tables.slice(index, index+categories[table.title].size)
+                var explanSpan = table.explans.length - $filter('filter')(table.explans, {expanded: true}).length;
+                for (i in explans) {
+                    if (explans[i].expanded) {
+                        explanSpan += explans[i].explanations.length;
+                    };
+                }
+                return explanSpan;
+            };
         }
     };
 });
