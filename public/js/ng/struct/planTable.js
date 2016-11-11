@@ -2,7 +2,16 @@ angular.module('ngStruct', []);
 
 angular.module('ngStruct', [])
 
-.directive('structItems', function() {
+.factory('structService', function($http, $timeout) {
+    var selectedColumns = {};
+    var selected = {schools: []};
+    return {
+        selectedColumns: selectedColumns,
+        selected: selected
+    }
+})
+
+.directive('structItems', function(structService) {
     return {
         restrict: 'E',
         replace: false,
@@ -10,29 +19,40 @@ angular.module('ngStruct', [])
         scope: {
             table: '=',
             column: '=',
-            selectSchools: '=',
+            multiple: '=',
             toggleItems: '='
         },
         template: `
-            <md-select multiple ng-if="column.type!='slider'" style="margin:0"
-                placeholder="{{column.title}}"
-                ng-model="table.selectedColumns[column.id].items"
-                md-on-open="loadItem(table, column)"
-                ng-change="toggleItems(table, column);column.selected = true">
-                <md-option ng-value="item" ng-repeat="item in column.items">{{item.name}}</md-option>
-            </md-select>
+            <md-input-container>
+                <label>{{column.title}}</label>
+                <md-select multiple ng-if="multiple && column.type!='slider'" style="margin:0"
+                    placeholder="{{column.title}}"
+                    ng-model="selectedColumns[column.id].items"
+                    md-on-open="loadItem(table, column)"
+                    ng-change="toggleItems(column);column.selected = true">
+                    <md-option ng-value="item" ng-repeat="item in column.items">{{item.name}}</md-option>
+                </md-select>
+                <md-select ng-if="!multiple && column.type!='slider'" style="margin:0"
+                    placeholder="{{column.title}}"
+                    ng-model="selectedColumns[column.id].items"
+                    md-on-open="loadItem(table, column)"
+                    ng-change="toggleItems(column);column.selected = true">
+                    <md-option ng-value="item" ng-repeat="item in column.items">{{item.name}}</md-option>
+                </md-select>
+            </md-input-container>
         `,
+        link: function(scope, element) {
+            scope.selectedColumns = structService.selectedColumns
+        },
         controller: function($scope, $http, $q) {
-            if (!$scope.table.selectedColumns) {
-                $scope.table.selectedColumns = {};
-            }
+
             $scope.loadItem = function(table, column) {
                 if (column.items) {
                     return column.items;
                 }
 
                 deferred = $q.defer();
-                $http({method: 'POST', url: 'getEachItems', data:{organizations: $scope.selectSchools, table_id: table.id, rowTitle: column.title}})
+                $http({method: 'POST', url: 'getEachItems', data:{organizations: structService.selected.schools, table_id: table.id, rowTitle: column.title}})
                 .success(function(data, status, headers, config) {
                     console.log(data);
                     table.disabled = data.items.length == 0;
@@ -48,6 +68,7 @@ angular.module('ngStruct', [])
 
                 return deferred.promise;
             };
+
         }
     };
 })
@@ -60,12 +81,11 @@ angular.module('ngStruct', [])
         scope: {
             categories: '=',
             structClassShow: '=',
-            structs: '=',
+            tables: '=',
             calculations: '=',
             toggleColumn: '=',
             loadItem: '=',
             callCalculation: '=',
-            selectSchools: '=',
             toggleItems: '='
         },
         templateUrl: 'templatePlanTable',
@@ -115,14 +135,14 @@ angular.module('ngStruct', [])
                 return rowSpan;
             };
 
-            $scope.showStruct = function(table, category, firstStruct,classTitle) {
+            $scope.showStruct = function(table, category) {
                 var classTitle = category.title;
                 category.expanded = true;
                 $scope.structClassShow = true;
                 for (var i in $scope.structInClass[classTitle].structs) {
-                    for (var j in $scope.structs) {
-                        if ($scope.structs[j].title == $scope.structInClass[classTitle].structs[i].title) {
-                            $scope.structs[j].classExpanded = true;
+                    for (var j in $scope.tables) {
+                        if ($scope.tables[j].title == $scope.structInClass[classTitle].structs[i].title) {
+                            $scope.tables[j].classExpanded = true;
                         }
                     }
                 }

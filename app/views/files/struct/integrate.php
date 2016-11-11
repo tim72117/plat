@@ -20,7 +20,7 @@
                 <div class="item" align="center">
                 <md-input-container>
                     <label>學校</label>
-                    <md-select ng-model="selectSchools" aria-label="選擇分析學校" multiple md-selected-text="selectSchools.length+'所學校'">
+                    <md-select ng-model="selected.schools" aria-label="選擇分析學校" multiple md-selected-text="selected.schools.length+'所學校'">
                         <md-button layout-fill value="all" ng-click="selectAllSchool()">全選</md-button>
                         <md-optgroup>
                             <md-option ng-value="organization" ng-repeat="organization in organizations">{{organization.now.name}}</md-option>
@@ -74,7 +74,7 @@
                                     {{ column.filter[0] }}年至{{ column.filter[1] }}
                                     <div ng-slider ng-model="column.filter" items="column.items"></div>
                                 </div>
-                                <struct-items table="mainTable" column="column" select-schools="selectSchools" toggle-items="toggleItems"></struct-items>
+                                <struct-items table="mainTable" column="column" multiple="true" toggle-items="toggleItems"></struct-items>
                             </td>
                         </tr>
                     </tbody>
@@ -161,14 +161,12 @@
                 <md-content class="md-padding" layout="row" style="height:100%">
                 <div flex="50">
                     <div plan-table
-                        structs="tables"
+                        tables="tables"
                         categories="categories"
                         struct-class-show="structClassShow"
                         calculations="calculations"
                         toggle-column="toggleColumn"
-                        load-item="loadItem"
                         call-calculation="callCalculation"
-                        select-schools="selectSchools"
                         toggle-items="toggleItems"></div>
                 </div>
                 <div flex="50" layout="column" style="height:100%">
@@ -227,7 +225,7 @@
 
 <script>
 app.requires.push('ngStruct');
-app.controller('statusController', function($scope, $http, $filter, $timeout, $location, $anchorScroll, $mdDialog, $q) {
+app.controller('statusController', function($scope, $http, $filter, $timeout, $location, $anchorScroll, $mdDialog, $q, structService) {
     $scope.page = 0;
     $scope.helpChoosen = false;
     $scope.colPercent = false;
@@ -285,11 +283,13 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     //     $scope.mdSidenav.left = true;
     // }, 1000);
 
+    $scope.selected = structService.selected;
+
     $http({method: 'POST', url: 'getSchools', data:{}})
     .success(function(data, status, headers, config) {
         console.log(data);
         $scope.organizations = data.organizations;
-        $scope.selectSchools = $scope.organizations;
+        structService.selected.schools = $scope.organizations;
     }).error(function(e) {
         console.log(e);
     });
@@ -307,7 +307,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         $scope.rowPercent = false;
     });
 
-    $scope.$watchCollection('selectSchools', function(selectSchools) {
+    $scope.$watchCollection('select.schools', function(selectSchools) {
         $scope.columns = [];
         $scope.calculations = [];
         $scope.levels = [];
@@ -360,14 +360,12 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         return result;
     };
 
-    $scope.toggleItems = function(table, column) {
-        console.log(table.selectedColumns);
-        if (table.selectedColumns[column.id]) {
-            console.log(column.id);
-            if (!table.selectedColumns[column.id].rank) {
-                table.selectedColumns[column.id].rank = Object.keys(table.selectedColumns).length;
+    $scope.toggleItems = function(column) {
+        if (structService.selectedColumns[column.id]) {
+            if (!structService.selectedColumns[column.id].rank) {
+                structService.selectedColumns[column.id].rank = Object.keys(structService.selectedColumns).length;
             }
-            var selectedColumns = Object.keys(table.selectedColumns).map(function (key) { return table.selectedColumns[key]; });
+            var selectedColumns = Object.keys(structService.selectedColumns).map(function (key) { return structService.selectedColumns[key]; });
             $scope.levels = $scope.getLevels($filter('orderBy')(selectedColumns, 'rank'));
         }
     };
@@ -451,7 +449,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.addCalculation = function(calculation) {
-        $http({method: 'POST', url: 'calculate', data:{structs: calculation.structs, columns: $scope.columns, schoolID: $scope.selectSchools}})
+        $http({method: 'POST', url: 'calculate', data:{structs: calculation.structs, columns: $scope.columns, schoolID: $scope.select.schools}})
         .success(function(data, status, headers, config) {
             console.log(data);
             calculation.results = data.results;
@@ -729,7 +727,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.selectAllSchool = function() {
-       $scope.selectSchools = $scope.organizations;
+       $scope.select.schools = $scope.organizations;
     };
 
     $(".unselectable").css( {

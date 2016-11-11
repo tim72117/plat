@@ -11,13 +11,13 @@
     </thead>
     <tbody>
 
-        <tr ng-repeat-start="(index, struct) in structs" ng-hide="struct.hide" class="no-animate">
-            <td rowspan="{{ getRowSpan(structs) }}" ng-if="$first" class="no-animate">
+        <tr ng-repeat-start="(index, struct) in tables" ng-hide="struct.hide" class="no-animate">
+            <td rowspan="{{ getRowSpan(tables) }}" ng-if="$first" class="no-animate">
                 <button class="compact ui olive icon large button" ng-click="addNewCalStruct();destroyPopup()" style="background: #93A42A;color: white">
                     <i name="needHelp4" class="play icon"></i> 開始計算
                 </button>
             </td>
-            <td rowspan="{{ categories[struct.title].expanded ? getRowSpan(structs.slice(index, index+categories[struct.title].size)) : 1 }}"
+            <td rowspan="{{ categories[struct.title].expanded ? getRowSpan(tables.slice(index, index+categories[struct.title].size)) : 1 }}"
                 ng-if="categories[struct.title]"
                 class="no-animate">
                 <a href="javascript:void(0)" ng-click="showStruct(struct, categories[struct.title])">
@@ -39,7 +39,7 @@
             <!--<td ng-if="structFilterShow && !struct.classExpanded && categories[struct.title]" class="no-animate"></td>-->
 
             <td ng-if="struct.expanded && struct.classExpanded" ng-class="{negative: struct.columns[0].disabled, disabled: struct.columns[0].disabled}" class="no-animate">
-                <struct-items table="struct" column="struct.columns[0]" select-schools="selectSchools" toggle-items="toggleItems"></struct-items>
+                <struct-items table="struct" column="struct.columns[0]" multiple="true" toggle-items="toggleItems"></struct-items>
             </td>
 
             <td ng-if="!struct.expanded && struct.classExpanded" colspan="{{struct.expanded ? 1 : 2}}" class="no-animate">
@@ -50,7 +50,7 @@
 
             <!--<td ng-class="{disabled: struct.columns[0].disabled}" ng-if="struct.classExpanded && structFilterShow" class="no-animate">
                 <div ng-if="!struct.columns[0].disabled && struct.expanded">
-                    <struct-items table="struct" column="struct.columns[0]" select-schools="selectSchools" toggle-items="setFilter"></struct-items>
+                    <struct-items table="struct" column="struct.columns[0]" multiple="true" toggle-items="setFilter"></struct-items>
                 </div>
             </td>-->
         </tr>
@@ -58,7 +58,7 @@
         <tr ng-repeat-end ng-repeat="row in struct.columns" ng-if="!$first && struct.expanded" ng-hide="struct.hide">
 
             <td ng-class="{negative: row.disabled, disabled: row.disabled}" class="no-animate">
-                <struct-items table="struct" column="row" select-schools="selectSchools" toggle-items="toggleItems"></struct-items>
+                <struct-items table="struct" column="row" multiple="true" toggle-items="toggleItems"></struct-items>
             </td>
 
             <!--<td ng-class="{disabled: row.disabled}" ng-if="structFilterShow" >
@@ -67,7 +67,7 @@
                     <div ng-slider ng-model="row.filter" items="row.items"></div>
                 </div>
                 <div ng-if="!row.disabled && row.type!='slider'">
-                    <struct-items table="struct" column="row" select-schools="selectSchools" toggle-items="setFilter"></struct-items>
+                    <struct-items table="struct" column="row" multiple="true" toggle-items="setFilter"></struct-items>
                 </div>
             </td>-->
 
