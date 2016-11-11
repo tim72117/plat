@@ -280,13 +280,15 @@ class StructFile extends CommFile {
     {
         $structs = Input::get('structs');
         $organizeIDs = Input::get('schoolID');
-        $schoolID = \Plat\Project\OrganizationDetail::whereIn('organization_id',$organizeIDs)->lists('id');
+        $organizations = \Plat\Project\Organization::find(array_fetch($organizeIDs, 'id'))->load('every')->map(function($organization) {
+            return $organization->every->lists('id');
+        })->flatten()->toArray();
 
         $mainTable_id = $this->populations[$this->configs['population']]['table_id'];
         $mainTable = \Row\Table::find($mainTable_id);
 
         $query = DB::connection('sqlsrv_analysis_tted')->table($mainTable->database . '.dbo.' . $mainTable->name . ' AS mainTable')
-            ->whereIn(DB::raw('substring(mainTable.學校代碼,3,4)'), $schoolID);
+            ->whereIn(DB::raw('substring(mainTable.學校代碼,3,4)'), $organizations);
 
         foreach ($structs as $i => $struct) {
             // $table = $this->tables[$struct['title']];
