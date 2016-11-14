@@ -3,7 +3,7 @@
         <a id="resultTable"></a>
         <thead>
             <tr>
-                <th colspan="{{status.levels[0].length}}" ng-if="status.calculations.length>0">
+                <th colspan="{{status.levels[0].columns.length}}" ng-if="status.calculations.length>0">
                     <md-input-container>
                         <label>加入 %</label>
                         <md-select ng-model="crossPercent">
@@ -27,8 +27,8 @@
                 </th>
             </tr>
             <tr class="unselectable" >
-                <th ng-if="status.levels[0].length == 0"></th>
-                <th ng-repeat="(order,column) in status.levels[0]" ng-mousedown="changeColumnFrom(order)" ng-mouseup="changeColumnTo(order)" ng-style="{cursor:changeColumnBefore.length==0 ? 'default' : 'move'}">
+                <th ng-if="status.levels[0].columns.length == 0"></th>
+                <th ng-repeat="(order,column) in status.levels[0].columns" ng-mousedown="changeColumnFrom(order)" ng-mouseup="changeColumnTo(order)" ng-style="{cursor:changeColumnBefore.length==0 ? 'default' : 'move'}">
                     <label class="compact ui icon mini button">
                         <i class="move icon"></i>
                     </label>
