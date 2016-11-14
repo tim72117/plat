@@ -267,7 +267,7 @@ class StructFile extends CommFile {
 
     public function calculate()
     {
-        $structs = Input::get('structs');
+        $columns = Input::get('columns');
         $organizeIDs = Input::get('schoolID');
         $organizations = \Plat\Project\Organization::find(array_fetch($organizeIDs, 'id'))->load('every')->map(function($organization) {
             return $organization->every->lists('id');
@@ -279,7 +279,7 @@ class StructFile extends CommFile {
         $query = DB::connection('sqlsrv_analysis_tted')->table($mainTable->database . '.dbo.' . $mainTable->name . ' AS mainTable')
             ->whereIn(DB::raw('substring(mainTable.學校代碼,3,4)'), $organizations);
 
-        foreach ($structs as $i => $struct) {
+        foreach ($columns as $i => $column) {
             // $table = $this->tables[$struct['title']];
 
             // if ($struct['title'] != $mainTable->title) {
@@ -291,15 +291,17 @@ class StructFile extends CommFile {
             // }
         }
 
-        $columns = array_pluck(Input::get('columns'), 'title');
+        // $columns = array_pluck(Input::get('columns'), 'title');
 
-        $selects = array_map(function($key, $column) {
-            return $this->tables[$column['struct']] . '.' . $column['title'] . ' AS C' . $key;
-        }, array_keys($columns), Input::get('columns'));
+        // $selects = array_map(function($key, $column) {
+        //     return $this->tables[$column['struct']] . '.' . $column['title'] . ' AS C' . $key;
+        // }, array_keys($columns), Input::get('columns'));
 
-        foreach (Input::get('columns') as $column) {
-            $query->groupBy($this->tables[$column['struct']] . '.' . $column['title']);
-        }
+        // foreach (Input::get('columns') as $column) {
+        //     $query->groupBy($this->tables[$column['struct']] . '.' . $column['title']);
+        // }
+
+        $selects = [];
 
         $query->select($selects)
             ->addSelect(DB::raw('count(DISTINCT mainTable.身分證字號) as total'));
