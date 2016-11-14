@@ -76,6 +76,8 @@ angular.module('ngStruct', [])
             $scope.toggleItems = function(column) {
                 //console.log(column)
                 //console.log(structService)
+
+                structService.selected.columns[column.id].title = column.title;
                 if (structService.selected.columns[column.id]) {
                     if (!structService.selected.columns[column.id].rank) {
                         structService.selected.columns[column.id].rank = Object.keys(structService.selected.columns).length;
@@ -254,6 +256,7 @@ angular.module('ngStruct', [])
         scope: {},
         templateUrl: 'templateResultTable',
         link: function(scope) {
+            scope.selected = structService.selected;
             scope.status = structService.status;
         },
         controller: function($scope, $filter) {

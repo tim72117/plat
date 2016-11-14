@@ -44,7 +44,7 @@
             </tr>
             <tr>
                 <th ng-if="status.levels[0].length == 0"></th>
-                <th ng-repeat="column in status.levels[0]">{{ column.title }}</th>
+                <th ng-repeat="column in selected.columns">{{ column.title }}</th>
                 <th ng-repeat="calculation in status.calculations" class="top aligned" style="max-width:200px">
                     <!--<div ng-repeat="struct in calculation.structs">
                         {{ struct.title }}

@@ -180,32 +180,34 @@
         <md-toolbar class="md-theme-indigo">
             <h1 class="md-toolbar-tools">預覽</h1>
         </md-toolbar>
-        <table flex="50" class="ui collapsing celled structured very compact bottom attached table" ng-class="{small:tableSize=='small', large:tableSize=='large'}">
-            <thead>
-                <tr>
-                    <th ng-repeat="column in columns">{{ column.title }}</th>
-                    <th ng-repeat="calculation in preCalculations" class="top aligned" style="max-width:200px">
-                        <div ng-repeat="struct in calculation.structs">
-                            {{ struct.title }}
-                            <div class="ui label" ng-repeat="row in struct.rows">
-                                {{ row.title }} - {{ row.filter }}
+        <md-content flex layout-padding>
+            <table class="ui collapsing celled structured very compact bottom attached table" ng-class="{small:tableSize=='small', large:tableSize=='large'}">
+                <thead>
+                    <tr>
+                        <th ng-repeat="column in selected.columns">{{ column.title }}</th>
+                        <th ng-repeat="calculation in preCalculations" class="top aligned" style="max-width:200px">
+                            <div ng-repeat="struct in calculation.structs">
+                                {{ struct.title }}
+                                <div class="ui label" ng-repeat="row in struct.rows">
+                                    {{ row.title }} - {{ row.filter }}
+                                </div>
                             </div>
-                        </div>
-                        單位：人
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="level in status.levels">
-                    <td ng-repeat="column in level.columns" rowspan="{{ column.rowspan }}">{{ column.name }}</td>
-                    <td ng-repeat="calculation in preCalculations"></td>
-                </tr>
-                <tr ng-if="preCalculations.length>0">
-                    <td colspan="{{ columns.length }}">總和</td>
-                    <td ng-repeat="calculation in preCalculations"></td>
-                </tr>
-            </tbody>
-        </table>
+                            單位：人
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="level in status.levels">
+                        <td ng-repeat="column in level.columns" rowspan="{{ column.rowspan }}">{{ column.name }}</td>
+                        <td ng-repeat="calculation in preCalculations"></td>
+                    </tr>
+                    <tr ng-if="preCalculations.length>0">
+                        <td colspan="{{ columns.length }}">總和</td>
+                        <td ng-repeat="calculation in preCalculations"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </md-content>
     </md-sidenav>
 </md-content>
 
