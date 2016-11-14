@@ -252,6 +252,202 @@ angular.module('ngStruct', [])
             scope.status = structService.status;
         },
         controller: function($scope, $filter) {
+
+            $scope.getResults = function(result, level) {
+                var result = $scope.getParentResult(result, level.parents);
+                return result[level.title] || 0;
+            };
+
+            $scope.getParentResult = function(result, parents) {
+                for (var i in parents) {
+                    result = result[parents[i].title] || {};
+                };
+                return result;
+            };
+
+            $scope.getCrossColumnTotal = function(calculation,levels) {
+                var crossColumnTotal = 0;
+                for (var i in levels) {
+                    crossColumnTotal = crossColumnTotal+ 1*$scope.getResults(calculation, levels[i]);
+                }
+                return crossColumnTotal;
+            };
+
+            $scope.getTotalPercent = function(value,total) {
+                return total == 0 ? 0 : value*100/total;
+            };
+
+            $scope.getRowPercent = function(key,level) {
+                if (key>0) {
+                    var denominator = $scope.getResults($scope.calculations[key-1].results,level);
+                    var molecular = $scope.getResults($scope.calculations[key].results,level);
+                    return $scope.getTotalPercent(molecular,denominator)
+                }
+            };
+
+            $scope.restrictInvolve = function(key) {
+                if (key>0) {
+                    var denominator = $scope.getStructsTitile (key-1);
+                    var molecular = $scope.getStructsTitile (key);
+                    return denominator.every($scope.checkInArray,molecular);
+                }else{
+                    return false;
+                }
+            };
+
+            $scope.checkInArray = function(value) {
+                if (this.indexOf(value)>-1) {
+                    return true;
+                }else{
+                    return false;
+                }
+            };
+
+            $scope.getNearestColumnTotal = function(calculation,level) {
+                var nearestColumnTotal = 0;
+                var  nearestColumn = $scope.getParentResult(calculation, level.parents);
+                for (var i in nearestColumn) {
+                    nearestColumnTotal = nearestColumnTotal+ 1*nearestColumn[i];
+                }
+                return nearestColumnTotal;
+            };
+
+            $scope.removeCalculation = function(calculation) {
+                var index = $scope.calculations.indexOf(calculation);
+                if (index > -1) {
+                    $scope.calculations.splice(index, 1);
+                }
+            };
+
+            $scope.getTitle = function() {
+                $scope.tableTitle = {};
+                var titles = [];
+                for (i in $scope.calculations) {
+                    var title = '';
+                    for (j in $scope.calculations[i].structs) {
+                        title = title+$scope.calculations[i].structs[j].title+' ';
+                        for (k in $scope.calculations[i].structs[j].rows) {
+                            title = title+$scope.calculations[i].structs[j].rows[k].title+'-'+$scope.calculations[i].structs[j].rows[k].filter;
+                        }
+                    }
+                    titles.push(title);
+                }
+                $scope.tableTitle.title_text = titles;
+                $scope.tableTitle.title = '<div>' + titles.join('</div><div>') + '</div>';
+
+            }
+
+            $scope.edit = function() {
+                $scope.tableTitle.editing = true;
+            };
+
+            $scope.save = function() {
+                delete $scope.tableTitle.editing;
+            };
+
+            $scope.setPercent = function(mode) {
+                if (mode == '行%')
+                    $scope.setColPercent();
+                if (mode == '列%')
+                    $scope.setRowPercent();
+                if (mode == '不加%')
+                    $scope.setNoPercent();
+            };
+
+            $scope.setRowPercent = function() {
+                $scope.colPercent = false;
+                $scope.rowPercent = true;
+            };
+
+            $scope.setColPercent = function() {
+                $scope.colPercent = true;
+                $scope.rowPercent = false;
+            };
+
+            $scope.setNoPercent = function() {
+                $scope.colPercent = false;
+                $scope.rowPercent = false;
+            };
+
+            $scope.getStructsTitile = function(key) {
+                var title = [];
+                for (i in $scope.calculations[key].structs) {
+                    title.push($scope.calculations[key].structs[i].title);
+                    for (j in $scope.calculations[key].structs[i].rows) {
+                            title.push($scope.calculations[key].structs[i].rows[j].title);
+                            title.push($scope.calculations[key].structs[i].rows[j].title+'-'+$scope.calculations[key].structs[i].rows[j].filter);
+                    }
+                }
+                return title;
+            };
+
+            $scope.exportExcel = function(structs) {
+                var tableTitle = '';
+                if ($scope.columns == '') {
+                    alert('請勾選欲顯示欄位');
+                    return false;
+                };
+
+                if ($scope.tableTitle !== undefined) {
+                    tableTitle = $scope.tableTitle.title_text;
+                }
+                jQuery.fileDownload('export_excel', {
+                    httpMethod: "POST",
+                    data:{tableTitle: tableTitle, columns: $scope.columns,levels:$scope.levels,calculations: $scope.calculations},
+                    failCallback: function (responseHtml, url) { console.log(responseHtml); }
+                });
+            };
+
+            $scope.dragFrom = function(key) {
+                $scope.dragBefore = key;
+            };
+
+            $scope.dragTo = function(key) {
+                var dragAfter = key;
+                var moveCalculation = {structs: [], results: {}};
+                moveCalculation.results = $scope.calculations[$scope.dragBefore]['results'];
+                moveCalculation.structs = $scope.calculations[$scope.dragBefore]['structs'];
+
+                if ($scope.dragBefore > dragAfter) {
+                    $scope.calculations.splice($scope.dragBefore,1);
+                    $scope.calculations.splice(dragAfter+1,0,moveCalculation);
+                }
+                if ($scope.dragBefore < dragAfter) {
+                    $scope.calculations.splice(dragAfter+1,0,moveCalculation);
+                    $scope.calculations.splice($scope.dragBefore,1);
+                }
+                $scope.dragBefore = [];
+            };
+
+            $scope.changeColumnFrom = function(key) {
+                $scope.changeColumnBefore = key;
+            };
+            $scope.changeColumnTo = function(key) {
+                var dragAfter = key;
+                var moveColumn = {struct: '', title: '',items: {}};
+                moveColumn.title = $scope.columns[$scope.changeColumnBefore]['title'];
+                moveColumn.struct = $scope.columns[$scope.changeColumnBefore]['struct'];
+                moveColumn.items = $scope.columns[$scope.changeColumnBefore]['items'];
+
+                if ($scope.calculations.length>0) {
+                    for (var i in $scope.calculations) {
+                        $scope.calculations[i].results = {};
+                    }
+                }
+
+                if ($scope.changeColumnBefore > dragAfter) {
+                    $scope.columns.splice($scope.changeColumnBefore,1);
+                    $scope.columns.splice(dragAfter+1,0,moveColumn);
+                    $scope.callCalculation();
+                }
+                if ($scope.changeColumnBefore < dragAfter) {
+                    $scope.columns.splice(dragAfter+1,0,moveColumn);
+                    $scope.columns.splice($scope.changeColumnBefore,1);
+                    $scope.callCalculation();
+                }
+                $scope.changeColumnBefore = [];
+            };
+
         }
     };
 })
