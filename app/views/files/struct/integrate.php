@@ -236,22 +236,8 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     $scope.changeColumnBefore = [];
     $scope.structClassShow = false;
     $scope.structFilterShow = false;
-    $scope.structClass = {
-        '個人資料': {title: '基本資料', size: 1},
-        '就學資訊': {title: '就學資訊', size: 1},
-        '完成教育專業課程': {title: '修課狀況', size: 2},
-        '卓越師資培育獎學金': {title: '相關活動', size: 5},
-        '實際參與實習': {title: '教育實習', size: 1},
-        '教師資格檢定': {title: '教檢情形', size: 1},
-        '教師專長': {title: '教師專長', size: 1},
-        '教甄資料': {title: '教師甄試', size: 1},
-        '在職教師': {title: '教師就業狀況', size: 4},
-        '閩南語檢定': {title: '語言檢定', size: 2}
-    };
-
     $scope.tableOptions = ['行%', '列%', '不加%'];
     $scope.selectedColumns = {};
-
     $scope.loading = true;
     $scope.structs = [];
 
@@ -750,7 +736,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
 
     $scope.showExplain = function(ev) {
         $mdDialog.show({
-            template: '<struct-explain struct-class="structClass"></struct-explain>',
+            template: '<struct-explain></struct-explain>',
             clickOutsideToClose: true
         })
         .then(function(answer) {

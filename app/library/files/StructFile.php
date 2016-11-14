@@ -224,15 +224,7 @@ class StructFile extends CommFile {
 
     public function getTables()
     {
-        // \Plat\Struct\Table::with('rows')->get()->each(function($table) {
-        //     $t = \Row\Table::where('title', $table->title)->first();
-        //     $dt = \Plat\Data\Table::make($t);
-        //     $table->rows->each(function($row) use($dt) {
-        //         $dt->addColumn(['name' => $row->id, 'title' => $row->title]);
-        //     });
-        // });
-
-        $tables = \Row\Sheet::find(148)->tables->load('columns');//->keyBy('id');//\Plat\Analysis\TableStruct::with('rows')->get()->each(function() {});
+        $tables = \Row\Sheet::find(148)->tables->load('columns');
 
         return ['tables' => $tables, 'categories' => $this->getCategories(), 'population' => $this->populations[$this->configs['population']]];
     }
@@ -242,9 +234,6 @@ class StructFile extends CommFile {
         $tables = \Plat\Struct\Table::find(\Row\Sheet::find(148)->tables->fetch('id')->toArray())->load('columns', 'explains');
 
         return ['tables' => $tables, 'categories' => $this->getCategories()];
-        $table = \Plat\Analysis\TableStruct::all();
-        $explan = $table->load('explanations');
-        return($explan);
     }
 
     public function getSchools()
