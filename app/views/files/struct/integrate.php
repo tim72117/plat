@@ -69,7 +69,7 @@
                     </thead>
                     <tbody>
                         <tr ng-repeat="column in mainTable.columns" ng-if="mainTable.expanded">
-                            <td ng-class="{negative: column.disabled, disabled: column.disabled}">
+                            <td ng-class="{negative: column.disabled}">
                                 <div ng-if="column.type=='slider'">
                                     {{ column.filter[0] }}年至{{ column.filter[1] }}
                                     <div ng-slider ng-model="column.filter" items="column.items"></div>
@@ -292,28 +292,10 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     });
 
     $scope.changeSchools = function() {
-        for (var i in $scope.tables) {
-            for (var j in $scope.tables[i].columns) {
-                //$scope.tables[i].columns[j].items = NULL;
-            }
-        }
         structService.selected.columns = {};
-    };
-
-    $scope.$watchCollection('selected.schools', function(selectSchools) {
-        $scope.columns = [];
         $scope.calculations = [];
         $scope.levels = [];
-        for (var i in $scope.structs) {
-            $scope.structs[i].selected = false;
-            for (var j in $scope.structs[i].rows) {
-                $scope.structs[i].rows[j].selected = false;
-                $scope.structs[i].rows[j].filter = [];
-                $scope.structs[i].rows[j].items = null;
-                $scope.structs[i].rows[j].disabled = false;
-            }
-        }
-    });
+    };
 
     $scope.getLevels = function (columns) {
         var amount = 1;

@@ -45,13 +45,14 @@ angular.module('ngStruct', [])
         controller: function($scope, $http, $q) {
 
             $scope.loadItem = function(table, column) {
-                if (column.items) {
+                if (column.items && column.itemsLoadBy == structService.selected.schools) {
                     return column.items;
                 }
 
                 deferred = $q.defer();
                 $http({method: 'POST', url: 'getEachItems', data:{organizations: structService.selected.schools, table_id: table.id, rowTitle: column.title}})
                 .success(function(data, status, headers, config) {
+                    column.itemsLoadBy = structService.selected.schools;
                     table.disabled = data.items.length == 0;
                     column.items = data.items || [];
                     column.disabled = column.items.length == 0;
