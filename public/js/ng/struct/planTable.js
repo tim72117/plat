@@ -4,8 +4,10 @@ angular.module('ngStruct', [])
 
 .factory('structService', function($http, $timeout) {
     var selected = {schools: [], columns: {}};
+    var status = {levels: [], page: 0, calculations: []};
     return {
-        selected: selected
+        selected: selected,
+        status: status
     }
 })
 
@@ -17,8 +19,7 @@ angular.module('ngStruct', [])
         scope: {
             table: '=',
             column: '=',
-            multiple: '=',
-            toggleItems: '='
+            multiple: '='
         },
         template: `
             <md-input-container>
@@ -42,7 +43,7 @@ angular.module('ngStruct', [])
         link: function(scope, element) {
             scope.selected = structService.selected;
         },
-        controller: function($scope, $http, $q) {
+        controller: function($scope, $http, $filter, $q) {
 
             $scope.loadItem = function(table, column) {
                 if (column.items && column.itemsLoadBy == structService.selected.schools) {
@@ -67,11 +68,52 @@ angular.module('ngStruct', [])
                 return deferred.promise;
             };
 
+            $scope.toggleItems = function(column) {
+                //console.log(column)
+                console.log(structService)
+                if (structService.selected.columns[column.id]) {
+                    if (!structService.selected.columns[column.id].rank) {
+                        structService.selected.columns[column.id].rank = Object.keys(structService.selected.columns).length;
+                    }
+                    if (structService.selected.columns[column.id].items.length == 0) {
+                    delete structService.selected.columns[column.id];
+                    }
+                    var selectedColumns = Object.keys(structService.selected.columns).map(function (key) { return structService.selected.columns[key]; });
+                    structService.status.levels = $scope.getLevels($filter('orderBy')(selectedColumns, 'rank'));
+                }
+            };
+
+            $scope.getLevels = function (columns) {
+                var amount = 1;
+                var levels = [];
+                var rows = [];
+                for (i in columns) {
+                    var items = columns[i].items;//$filter('filter')(columns[i].items, {selected: true});
+                    amount *= items.length;
+                    levels[i] = {amount: amount, items: items};
+                }
+                //console.log(levels);
+                for (var j = 0; j < amount; j++) {
+                    rows[j] = [];
+                    for (i in levels) {
+                        var step = amount / levels[i].amount;
+                        var part = parseInt(j / step);
+                        var item = levels[i].items[part % levels[i].items.length];
+                        if (part * step == j) {
+                            item.rowspan = step;
+                            rows[j].push(item);
+                        }
+                    }
+                }
+
+                return rows;
+            }
+
         }
     };
 })
 
-.directive('planTable', function() {
+.directive('planTable', function(structService) {
     return {
         restrict: 'A',
         replace: false,
@@ -80,14 +122,11 @@ angular.module('ngStruct', [])
             categories: '=',
             structClassShow: '=',
             tables: '=',
-            calculations: '=',
             toggleColumn: '=',
-            loadItem: '=',
-            callCalculation: '=',
             toggleItems: '='
         },
         templateUrl: 'templatePlanTable',
-        controller: function($scope, $filter, structService) {
+        controller: function($scope, $http, $filter) {
 
             $scope.filterItems = {};
 
@@ -120,8 +159,29 @@ angular.module('ngStruct', [])
                 // }
                 calculation.structs = structs;
 
-                $scope.calculations.push(calculation);
+                structService.status.calculations.push(calculation);
                 $scope.callCalculation();
+            };
+
+            $scope.callCalculation = function() {
+                for (var i in structService.status.calculations) {
+                    if ($.isEmptyObject(structService.status.calculations[i].results)) {
+                        $scope.addCalculation(structService.status.calculations[i]);
+                    }
+                }
+                //$scope.getTitle(); in integrate.php
+                $scope.goToResultTable();
+            };
+
+            $scope.addCalculation = function(calculation) {
+                //$http({method: 'POST', url: 'calculate', data:{structs: calculation.structs, columns: $scope.columns, schoolID: $scope.selected.schools}})
+                $http({method: 'POST', url: 'calculate', data:{columns: structService.selected.columns, schoolID: structService.selected.schools}})
+                .success(function(data, status, headers, config) {
+                    console.log(data);
+                    calculation.results = data.results;
+                }).error(function(e) {
+                    console.log(e);
+                });
             };
 
             $scope.getRowSpan = function(structs) {
@@ -163,6 +223,12 @@ angular.module('ngStruct', [])
                 struct.selected = !struct.selected;
             };
 
+            $scope.goToResultTable = function() {
+                structService.status.page = 1;
+                //$location.hash('resultTable');
+                //$anchorScroll();
+            };
+
             $scope.destroyPopup = function() {
                 $('#needHelp').popup('destroy');
                 $('[name=needHelp2]').popup('destroy');
@@ -175,16 +241,16 @@ angular.module('ngStruct', [])
     };
 })
 
-.directive('resultTable', function() {
+.directive('resultTable', function(structService) {
     return {
         restrict: 'A',
         replace: false,
         transclude: false,
-        scope: {
-            calculations: '=',
-            levels: '='
-        },
+        scope: {},
         templateUrl: 'templateResultTable',
+        link: function(scope) {
+            scope.status = structService.status;
+        },
         controller: function($scope, $filter) {
         }
     };

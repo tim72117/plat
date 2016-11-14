@@ -3,7 +3,7 @@
         <a id="resultTable"></a>
         <thead>
             <tr>
-                <th colspan="{{columns.length}}" ng-if="calculations.length>0">
+                <th colspan="{{columns.length}}" ng-if="status.calculations.length>0">
                     <md-input-container>
                         <label>加入 %</label>
                         <md-select ng-model="crossPercent">
@@ -16,7 +16,7 @@
                         <i class="download icon"></i> 下載結果
                     </button>
                 </th>
-                <th colspan="{{calculations.length}}" ng-if="calculations.length>0">
+                <th colspan="{{status.calculations.length}}" ng-if="status.calculations.length>0">
                     <div ng-hide="tableTitle.editing">
                         <span ng-dblclick="edit()" ng-bind-html="tableTitle.title"></span>
                     </div>
@@ -33,7 +33,7 @@
                         <i class="move icon"></i>
                     </label>
                 </th>
-                <th ng-repeat="(key,calculation) in calculations" class="top aligned" ng-mousedown="dragFrom(key)" ng-mouseup="dragTo(key)" ng-style="{cursor:dragBefore.length==0 ? 'default' : 'move'}">
+                <th ng-repeat="(key,calculation) in status.calculations" class="top aligned" ng-mousedown="dragFrom(key)" ng-mouseup="dragTo(key)" ng-style="{cursor:dragBefore.length==0 ? 'default' : 'move'}">
                     <label class="compact ui icon mini button">
                         <i class="move icon"></i>
                     </label>
@@ -45,7 +45,7 @@
             <tr>
                 <th ng-if="columns.length == 0"></th>
                 <th ng-repeat="column in columns">{{ column.title }}</th>
-                <th ng-repeat="calculation in calculations" class="top aligned" style="max-width:200px">
+                <th ng-repeat="calculation in status.calculations" class="top aligned" style="max-width:200px">
                     <div ng-repeat="struct in calculation.structs">
                         {{ struct.title }}
                         <div class="ui label" ng-repeat="row in struct.rows">
@@ -57,22 +57,22 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="level in levels">
+            <tr ng-repeat="level in status.levels">
                 <td ng-repeat="parent in level.parents" rowspan="{{ parent.size }}" ng-if="parent.head">{{ parent.title }}</td>
                 <td>{{ level.title }}</td>
-                <td ng-repeat="calculation in calculations" ng-if="colPercent==rowPercent">{{ getResults(calculation.results, level) }}</td>
-                <td ng-repeat="calculation in calculations" ng-if="colPercent">{{ getResults(calculation.results, level) }} ({{getTotalPercent(getResults(calculation.results, level),getNearestColumnTotal(calculation.results, level))| number : 2}} %)</td>
-                <td ng-repeat="(key,calculation) in calculations" ng-if="rowPercent">{{ getResults(calculation.results, level) }} <span ng-if="restrictInvolve(key)">({{getRowPercent(key,level)| number : 2}} %)</span></td>
+                <td ng-repeat="calculation in status.calculations" ng-if="colPercent==rowPercent">{{ getResults(calculation.results, level) }}</td>
+                <td ng-repeat="calculation in status.calculations" ng-if="colPercent">{{ getResults(calculation.results, level) }} ({{getTotalPercent(getResults(calculation.results, level),getNearestColumnTotal(calculation.results, level))| number : 2}} %)</td>
+                <td ng-repeat="(key,calculation) in status.calculations" ng-if="rowPercent">{{ getResults(calculation.results, level) }} <span ng-if="restrictInvolve(key)">({{getRowPercent(key,level)| number : 2}} %)</span></td>
             </tr>
             <tr>
                 <td ng-if="columns.length == 0">總和</td>
-                <td ng-if="columns.length == 0" ng-repeat="calculation in calculations">{{ calculation.results[''] }}</td>
+                <td ng-if="columns.length == 0" ng-repeat="calculation in status.calculations">{{ calculation.results[''] }}</td>
             </tr>
-            <tr ng-if="calculations.length > 0 && columns.length > 0">
+            <tr ng-if="status.calculations.length > 0 && columns.length > 0">
                 <td colspan="{{ columns.length }}">總和</td>
-                <td ng-repeat="calculation in calculations" ng-if="colPercent==rowPercent">{{getCrossColumnTotal(calculation.results, levels)}}</td>
-                <td ng-repeat="calculation in calculations" ng-if="colPercent">{{getCrossColumnTotal(calculation.results, levels)}} </td>
-                <td ng-repeat="calculation in calculations" ng-if="rowPercent">{{ getCrossColumnTotal(calculation.results, levels)}}</td>
+                <td ng-repeat="calculation in status.calculations" ng-if="colPercent==rowPercent">{{getCrossColumnTotal(calculation.results, levels)}}</td>
+                <td ng-repeat="calculation in status.calculations" ng-if="colPercent">{{getCrossColumnTotal(calculation.results, levels)}} </td>
+                <td ng-repeat="calculation in status.calculations" ng-if="rowPercent">{{ getCrossColumnTotal(calculation.results, levels)}}</td>
             </tr>
         </tbody>
     </table>

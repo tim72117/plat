@@ -156,7 +156,7 @@
         </md-toolbar>
         <div class="ui basic segment" ng-class="{loading: loading}" style="overflow-y: auto">
 
-        <md-tabs md-dynamic-height md-selected="page">
+        <md-tabs md-dynamic-height md-selected="status.page">
             <md-tab label="串聯其他表單">
                 <md-content class="md-padding" layout="row" style="height:100%">
                 <div flex="50">
@@ -164,9 +164,7 @@
                         tables="tables"
                         categories="categories"
                         struct-class-show="structClassShow"
-                        calculations="calculations"
                         toggle-column="toggleColumn"
-                        call-calculation="callCalculation"
                         toggle-items="toggleItems"></div>
                 </div>
                 <div flex="50" layout="column" style="height:100%">
@@ -203,7 +201,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="level in levels">
+                <tr ng-repeat="level in status.levels">
                     <td ng-repeat="column in level" rowspan="{{ column.rowspan }}">{{ column.name }}</td>
                     <td ng-repeat="calculation in preCalculations"></td>
                 </tr>
@@ -226,7 +224,6 @@
 <script>
 app.requires.push('ngStruct');
 app.controller('statusController', function($scope, $http, $filter, $timeout, $location, $anchorScroll, $mdDialog, $q, structService) {
-    $scope.page = 0;
     $scope.helpChoosen = false;
     $scope.colPercent = false;
     $scope.rowPercent = false;
@@ -237,9 +234,9 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     $scope.structClassShow = false;
     $scope.structFilterShow = false;
     $scope.tableOptions = ['行%', '列%', '不加%'];
-    $scope.selectedColumns = {};
     $scope.loading = true;
-    $scope.structs = [];
+    $scope.selected = structService.selected;
+    $scope.status = structService.status;
 
     $scope.$parent.main.loading = true;
     $http({method: 'POST', url: 'getTables', data:{}})
@@ -268,8 +265,6 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     //     $scope.mdSidenav.left = true;
     // }, 1000);
 
-    $scope.selected = structService.selected;
-
     $http({method: 'POST', url: 'getSchools', data:{}})
     .success(function(data, status, headers, config) {
         $scope.organizations = data.organizations;
@@ -281,7 +276,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     $scope.$watchCollection('columns', function(columns) {
         //$scope.levels = $scope.getLevels(columns, 0);
         //console.log(columns);
-        $scope.levels = $scope.getLevels(columns, 0);
+        //$scope.levels = $scope.getLevels(columns, 0);
         //console.log($scope.levels);
         $scope.preCalculations.length = 0;
         if (columns.length > 0) {
@@ -297,32 +292,6 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         $scope.levels = [];
     };
 
-    $scope.getLevels = function (columns) {
-        var amount = 1;
-        var levels = [];
-        var rows = [];
-        for (i in columns) {
-            var items = columns[i].items;//$filter('filter')(columns[i].items, {selected: true});
-            amount *= items.length;
-            levels[i] = {amount: amount, items: items};
-        }
-        //console.log(levels);
-        for (var j = 0; j < amount; j++) {
-            rows[j] = [];
-            for (i in levels) {
-                var step = amount / levels[i].amount;
-                var part = parseInt(j / step);
-                var item = levels[i].items[part % levels[i].items.length];
-                if (part * step == j) {
-                    item.rowspan = step;
-                    rows[j].push(item);
-                }
-            }
-        }
-
-        return rows;
-    }
-
     $scope.getResults = function(result, level) {
         var result = $scope.getParentResult(result, level.parents);
         return result[level.title] || 0;
@@ -335,20 +304,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         return result;
     };
 
-    $scope.toggleItems = function(column) {
-        //console.log(column)
-        console.log(structService)
-        if (structService.selected.columns[column.id]) {
-            if (!structService.selected.columns[column.id].rank) {
-                structService.selected.columns[column.id].rank = Object.keys(structService.selected.columns).length;
-            }
-            if (structService.selected.columns[column.id].items.length == 0) {
-               delete structService.selected.columns[column.id];
-            }
-            var selectedColumns = Object.keys(structService.selected.columns).map(function (key) { return structService.selected.columns[key]; });
-            $scope.levels = $scope.getLevels($filter('orderBy')(selectedColumns, 'rank'));
-        }
-    };
+
 
     $scope.toggleColumn = function(column, struct) {
         console.log(column)
@@ -419,27 +375,6 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         }
         $scope.preCalculations=[];
         $scope.preCalculations.push(calculation);
-    };
-
-    $scope.callCalculation = function() {
-        for (var i in $scope.calculations) {
-            if ($.isEmptyObject($scope.calculations[i].results)) {
-                $scope.addCalculation($scope.calculations[i]);
-            }
-        }
-        $scope.getTitle();
-        $scope.gotoResultTable();
-    };
-
-    $scope.addCalculation = function(calculation) {
-        //$http({method: 'POST', url: 'calculate', data:{structs: calculation.structs, columns: $scope.columns, schoolID: $scope.selected.schools}})
-        $http({method: 'POST', url: 'calculate', data:{columns: calculation.selectedColumns, schoolID: $scope.selected.schools}})
-        .success(function(data, status, headers, config) {
-            console.log(data);
-            calculation.results = data.results;
-        }).error(function(e) {
-            console.log(e);
-        });
     };
 
     $scope.removeCalculation = function(calculation) {
@@ -523,12 +458,6 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
 
     $scope.getTotalPercent = function(value,total) {
          return total == 0 ? 0 : value*100/total;
-    };
-
-    $scope.gotoResultTable = function() {
-        $scope.page = 1;
-        //$location.hash('resultTable');
-        //$anchorScroll();
     };
 
     $scope.getTitle = function() {
