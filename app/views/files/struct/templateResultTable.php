@@ -1,9 +1,9 @@
-<div>
+<div ng-if="status.calculations.length>0">
     <table class="ui teal collapsing celled structured very compact bottom attached table" ng-class="{small:tableSize=='small', large:tableSize=='large'}">
         <a id="resultTable"></a>
         <thead>
             <tr>
-                <th colspan="{{status.levels[0].columns.length}}" ng-if="status.calculations.length>0">
+                <th colspan="{{status.levels[0].columns.length}}">
                     <md-input-container>
                         <label>加入 %</label>
                         <md-select ng-model="crossPercent">
@@ -16,7 +16,7 @@
                         <i class="download icon"></i> 下載結果
                     </button>
                 </th>
-                <th colspan="{{status.calculations.length}}" ng-if="status.calculations.length>0">
+                <th colspan="{{status.calculations.length}}">
                     <div ng-hide="tableTitle.editing">
                         <span ng-dblclick="edit()" ng-bind-html="tableTitle.title"></span>
                     </div>
@@ -27,7 +27,7 @@
                 </th>
             </tr>
             <tr class="unselectable" >
-                <th ng-if="status.levels[0].columns.length == 0"></th>
+                <th ng-if="status.levels.length == 0"></th>
                 <th ng-repeat="(order,column) in status.levels[0].columns" ng-mousedown="changeColumnFrom(order)" ng-mouseup="changeColumnTo(order)" ng-style="{cursor:changeColumnBefore.length==0 ? 'default' : 'move'}">
                     <label class="compact ui icon mini button">
                         <i class="move icon"></i>
@@ -43,7 +43,7 @@
                 </th>
             </tr>
             <tr>
-                <th ng-if="status.levels[0].length == 0"></th>
+                <th ng-if="status.levels.length == 0"></th>
                 <th ng-repeat="column in selected.columns">{{ column.title }}</th>
                 <th ng-repeat="calculation in status.calculations" class="top aligned" style="max-width:200px">
                     <!--<div ng-repeat="struct in calculation.structs">

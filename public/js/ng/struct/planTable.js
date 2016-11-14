@@ -288,8 +288,8 @@ angular.module('ngStruct', [])
 
             $scope.getRowPercent = function(key,level) {
                 if (key>0) {
-                    var denominator = $scope.getResults($scope.calculations[key-1].results,level);
-                    var molecular = $scope.getResults($scope.calculations[key].results,level);
+                    var denominator = $scope.getResults($scope.status.calculations[key-1].results,level);
+                    var molecular = $scope.getResults($scope.status.calculations[key].results,level);
                     return $scope.getTotalPercent(molecular,denominator)
                 }
             };
@@ -322,21 +322,21 @@ angular.module('ngStruct', [])
             };
 
             $scope.removeCalculation = function(calculation) {
-                var index = $scope.calculations.indexOf(calculation);
+                var index = $scope.status.calculations.indexOf(calculation);
                 if (index > -1) {
-                    $scope.calculations.splice(index, 1);
+                    $scope.status.calculations.splice(index, 1);
                 }
             };
 
             $scope.getTitle = function() {
                 $scope.tableTitle = {};
                 var titles = [];
-                for (i in $scope.calculations) {
+                for (i in $scope.status.calculations) {
                     var title = '';
-                    for (j in $scope.calculations[i].structs) {
-                        title = title+$scope.calculations[i].structs[j].title+' ';
-                        for (k in $scope.calculations[i].structs[j].rows) {
-                            title = title+$scope.calculations[i].structs[j].rows[k].title+'-'+$scope.calculations[i].structs[j].rows[k].filter;
+                    for (j in $scope.status.calculations[i].structs) {
+                        title = title+$scope.status.calculations[i].structs[j].title+' ';
+                        for (k in $scope.status.calculations[i].structs[j].rows) {
+                            title = title+$scope.status.calculations[i].structs[j].rows[k].title+'-'+$scope.status.calculations[i].structs[j].rows[k].filter;
                         }
                     }
                     titles.push(title);
@@ -380,11 +380,11 @@ angular.module('ngStruct', [])
 
             $scope.getStructsTitile = function(key) {
                 var title = [];
-                for (i in $scope.calculations[key].structs) {
-                    title.push($scope.calculations[key].structs[i].title);
-                    for (j in $scope.calculations[key].structs[i].rows) {
-                            title.push($scope.calculations[key].structs[i].rows[j].title);
-                            title.push($scope.calculations[key].structs[i].rows[j].title+'-'+$scope.calculations[key].structs[i].rows[j].filter);
+                for (i in $scope.status.calculations[key].structs) {
+                    title.push($scope.status.calculations[key].structs[i].title);
+                    for (j in $scope.status.calculations[key].structs[i].rows) {
+                            title.push($scope.status.calculations[key].structs[i].rows[j].title);
+                            title.push($scope.status.calculations[key].structs[i].rows[j].title+'-'+$scope.status.calculations[key].structs[i].rows[j].filter);
                     }
                 }
                 return title;
@@ -402,7 +402,7 @@ angular.module('ngStruct', [])
                 }
                 jQuery.fileDownload('export_excel', {
                     httpMethod: "POST",
-                    data:{tableTitle: tableTitle, columns: $scope.columns,levels:$scope.levels,calculations: $scope.calculations},
+                    data:{tableTitle: tableTitle, columns: $scope.columns,levels:$scope.levels,calculations: $scope.status.calculations},
                     failCallback: function (responseHtml, url) { console.log(responseHtml); }
                 });
             };
@@ -414,16 +414,16 @@ angular.module('ngStruct', [])
             $scope.dragTo = function(key) {
                 var dragAfter = key;
                 var moveCalculation = {structs: [], results: {}};
-                moveCalculation.results = $scope.calculations[$scope.dragBefore]['results'];
-                moveCalculation.structs = $scope.calculations[$scope.dragBefore]['structs'];
+                moveCalculation.results = $scope.status.calculations[$scope.dragBefore]['results'];
+                moveCalculation.structs = $scope.status.calculations[$scope.dragBefore]['structs'];
 
                 if ($scope.dragBefore > dragAfter) {
-                    $scope.calculations.splice($scope.dragBefore,1);
-                    $scope.calculations.splice(dragAfter+1,0,moveCalculation);
+                    $scope.status.calculations.splice($scope.dragBefore,1);
+                    $scope.status.calculations.splice(dragAfter+1,0,moveCalculation);
                 }
                 if ($scope.dragBefore < dragAfter) {
-                    $scope.calculations.splice(dragAfter+1,0,moveCalculation);
-                    $scope.calculations.splice($scope.dragBefore,1);
+                    $scope.status.calculations.splice(dragAfter+1,0,moveCalculation);
+                    $scope.status.calculations.splice($scope.dragBefore,1);
                 }
                 $scope.dragBefore = [];
             };
@@ -438,9 +438,9 @@ angular.module('ngStruct', [])
                 moveColumn.struct = $scope.columns[$scope.changeColumnBefore]['struct'];
                 moveColumn.items = $scope.columns[$scope.changeColumnBefore]['items'];
 
-                if ($scope.calculations.length>0) {
-                    for (var i in $scope.calculations) {
-                        $scope.calculations[i].results = {};
+                if ($scope.status.calculations.length>0) {
+                    for (var i in $scope.status.calculations) {
+                        $scope.status.calculations[i].results = {};
                     }
                 }
 
