@@ -20,7 +20,7 @@
                 <div class="item" align="center">
                 <md-input-container>
                     <label>學校</label>
-                    <md-select ng-model="selected.schools" aria-label="選擇分析學校" multiple md-selected-text="selected.schools.length+'所學校'">
+                    <md-select ng-model="selected.schools" aria-label="選擇分析學校" multiple md-selected-text="selected.schools.length+'所學校'" ng-change="changeSchools()">
                         <md-button layout-fill value="all" ng-click="selectAllSchool()">全選</md-button>
                         <md-optgroup>
                             <md-option ng-value="organization" ng-repeat="organization in organizations">{{organization.now.name}}</md-option>
@@ -29,7 +29,7 @@
                 </md-input-container>
                 </div>
             </div>
-            <div layout-padding>
+            <!--<div layout-padding>
                 <div class="ui ribbon label" style="background: #309292;color: white">
                     <h4>{{population.yearTitle}}</h4>
                 </div>
@@ -57,7 +57,7 @@
                         </md-input-container>
                     學年度止</p>
                 </div>
-            </div>
+            </div>-->
             <div layout-padding>
                 <div class="ui ribbon label" align="center" style="background: #309292;color: white"><h4> 加入分類變項</h4></div>
                 <div layout="row" layout-sm="column" layout-align="space-around" ng-if="loading">
@@ -269,7 +269,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     // }, 1000);
 
     $scope.selected = structService.selected;
-    
+
     $http({method: 'POST', url: 'getSchools', data:{}})
     .success(function(data, status, headers, config) {
         $scope.organizations = data.organizations;
@@ -290,6 +290,15 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         $scope.colPercent = false;
         $scope.rowPercent = false;
     });
+
+    $scope.changeSchools = function() {
+        for (var i in $scope.tables) {
+            for (var j in $scope.tables[i].columns) {
+                //$scope.tables[i].columns[j].items = NULL;
+            }
+        }
+        structService.selected.columns = {};
+    };
 
     $scope.$watchCollection('selected.schools', function(selectSchools) {
         $scope.columns = [];
@@ -328,7 +337,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
                 }
             }
         }
-        
+
         return rows;
     }
 
@@ -347,14 +356,14 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     $scope.toggleItems = function(column) {
         //console.log(column)
         console.log(structService)
-        if (structService.selectedColumns[column.id]) {
-            if (!structService.selectedColumns[column.id].rank) {
-                structService.selectedColumns[column.id].rank = Object.keys(structService.selectedColumns).length;
+        if (structService.selected.columns[column.id]) {
+            if (!structService.selected.columns[column.id].rank) {
+                structService.selected.columns[column.id].rank = Object.keys(structService.selected.columns).length;
             }
-            if (structService.selectedColumns[column.id].items.length == 0) {
-               delete structService.selectedColumns[column.id];
+            if (structService.selected.columns[column.id].items.length == 0) {
+               delete structService.selected.columns[column.id];
             }
-            var selectedColumns = Object.keys(structService.selectedColumns).map(function (key) { return structService.selectedColumns[key]; });
+            var selectedColumns = Object.keys(structService.selected.columns).map(function (key) { return structService.selected.columns[key]; });
             $scope.levels = $scope.getLevels($filter('orderBy')(selectedColumns, 'rank'));
         }
     };

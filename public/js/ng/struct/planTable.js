@@ -3,10 +3,8 @@ angular.module('ngStruct', []);
 angular.module('ngStruct', [])
 
 .factory('structService', function($http, $timeout) {
-    var selectedColumns = {};
-    var selected = {schools: []};
+    var selected = {schools: [], columns: {}};
     return {
-        selectedColumns: selectedColumns,
         selected: selected
     }
 })
@@ -27,14 +25,14 @@ angular.module('ngStruct', [])
                 <label>{{column.title}}</label>
                 <md-select multiple ng-if="multiple && column.type!='slider'" style="margin:0"
                     placeholder="{{column.title}}"
-                    ng-model="selectedColumns[column.id].items"
+                    ng-model="selected.columns[column.id].items"
                     md-on-open="loadItem(table, column)"
                     ng-change="toggleItems(column);column.selected = true">
                     <md-option ng-value="item" ng-repeat="item in column.items">{{item.name}}</md-option>
                 </md-select>
                 <md-select ng-if="!multiple && column.type!='slider'" style="margin:0"
                     placeholder="{{column.title}}"
-                    ng-model="selectedColumns[column.id].items"
+                    ng-model="selected.columns[column.id].items"
                     md-on-open="loadItem(table, column)"
                     ng-change="toggleItems(column);column.selected = true">
                     <md-option ng-value="item" ng-repeat="item in column.items">{{item.name}}</md-option>
@@ -42,7 +40,7 @@ angular.module('ngStruct', [])
             </md-input-container>
         `,
         link: function(scope, element) {
-            scope.selectedColumns = structService.selectedColumns
+            scope.selected = structService.selected;
         },
         controller: function($scope, $http, $q) {
 
@@ -109,7 +107,7 @@ angular.module('ngStruct', [])
                 console.log(structService)
                 var calculation = {structs: [], results: {}};
                 var structs = $filter('filter')($scope.tables, function(table) {
-                    return table.selectedColumns && Object.keys(table.selectedColumns).length > 0;
+                    return structService.selected.columns && Object.keys(structService.selected.columns).length > 0;
                 });
                 console.log(structs);
                 // for (var i in structs) {
@@ -156,7 +154,7 @@ angular.module('ngStruct', [])
             $scope.toggleStruct = function(struct) {
                 if (struct.selected) {
                     angular.forEach($filter('filter')(struct.columns, {selected: true}), function(row) {
-                        
+
                         $scope.toggleColumn(row, struct);
                         row.selected = false;
                     });
