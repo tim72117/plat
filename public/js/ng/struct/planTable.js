@@ -54,7 +54,6 @@ angular.module('ngStruct', [])
                 deferred = $q.defer();
                 $http({method: 'POST', url: 'getEachItems', data:{organizations: structService.selected.schools, table_id: table.id, rowTitle: column.title}})
                 .success(function(data, status, headers, config) {
-                    console.log(data);
                     table.disabled = data.items.length == 0;
                     column.items = data.items || [];
                     column.disabled = column.items.length == 0;
@@ -89,7 +88,7 @@ angular.module('ngStruct', [])
             toggleItems: '='
         },
         templateUrl: 'templatePlanTable',
-        controller: function($scope, $filter) {
+        controller: function($scope, $filter, structService) {
 
             $scope.filterItems = {};
 
@@ -107,8 +106,9 @@ angular.module('ngStruct', [])
             };
 
             $scope.addNewCalStruct = function() {
+                console.log(structService)
                 var calculation = {structs: [], results: {}};
-                var structs = $filter('filter')($scope.structs, function(table) {
+                var structs = $filter('filter')($scope.tables, function(table) {
                     return table.selectedColumns && Object.keys(table.selectedColumns).length > 0;
                 });
                 console.log(structs);
@@ -156,6 +156,7 @@ angular.module('ngStruct', [])
             $scope.toggleStruct = function(struct) {
                 if (struct.selected) {
                     angular.forEach($filter('filter')(struct.columns, {selected: true}), function(row) {
+                        
                         $scope.toggleColumn(row, struct);
                         row.selected = false;
                     });

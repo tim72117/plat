@@ -80,7 +80,7 @@
                     </tbody>
                 </table>
             </div>
-            <div layout-padding>
+            <!--<div layout-padding>
                 <div class="ui ribbon label" align="center" style="background: #309292;color: white"><h4> 加入篩選條件</h4></div>
                 <div layout="row" layout-sm="column" layout-align="space-around" ng-if="loading">
                     <md-progress-circular md-mode="indeterminate"></md-progress-circular>
@@ -118,7 +118,7 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+            </div>-->
         </div>
     </md-sidenav>
 
@@ -244,7 +244,6 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     $scope.$parent.main.loading = true;
     $http({method: 'POST', url: 'getTables', data:{}})
     .success(function(data, status, headers, config) {
-        console.log(data);
         $scope.tables = data.tables;
         $scope.categories = data.categories;
         $scope.mainTable = $filter('filter')($scope.tables, {id: data.population.id+''}, true)[0];
@@ -270,10 +269,9 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     // }, 1000);
 
     $scope.selected = structService.selected;
-
+    
     $http({method: 'POST', url: 'getSchools', data:{}})
     .success(function(data, status, headers, config) {
-        console.log(data);
         $scope.organizations = data.organizations;
         structService.selected.schools = $scope.organizations;
     }).error(function(e) {
@@ -282,9 +280,9 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
 
     $scope.$watchCollection('columns', function(columns) {
         //$scope.levels = $scope.getLevels(columns, 0);
-        console.log(columns);
+        //console.log(columns);
         $scope.levels = $scope.getLevels(columns, 0);
-        console.log($scope.levels);
+        //console.log($scope.levels);
         $scope.preCalculations.length = 0;
         if (columns.length > 0) {
             $scope.addPreCalculation();
@@ -293,7 +291,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         $scope.rowPercent = false;
     });
 
-    $scope.$watchCollection('select.schools', function(selectSchools) {
+    $scope.$watchCollection('selected.schools', function(selectSchools) {
         $scope.columns = [];
         $scope.calculations = [];
         $scope.levels = [];
@@ -308,7 +306,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         }
     });
 
-    $scope.getLevels = function (columns, index) {
+    $scope.getLevels = function (columns) {
         var amount = 1;
         var levels = [];
         var rows = [];
@@ -317,7 +315,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
             amount *= items.length;
             levels[i] = {amount: amount, items: items};
         }
-        console.log(columns);
+        //console.log(levels);
         for (var j = 0; j < amount; j++) {
             rows[j] = [];
             for (i in levels) {
@@ -330,7 +328,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
                 }
             }
         }
-
+        
         return rows;
     }
 
@@ -347,9 +345,14 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.toggleItems = function(column) {
+        //console.log(column)
+        console.log(structService)
         if (structService.selectedColumns[column.id]) {
             if (!structService.selectedColumns[column.id].rank) {
                 structService.selectedColumns[column.id].rank = Object.keys(structService.selectedColumns).length;
+            }
+            if (structService.selectedColumns[column.id].items.length == 0) {
+               delete structService.selectedColumns[column.id];
             }
             var selectedColumns = Object.keys(structService.selectedColumns).map(function (key) { return structService.selectedColumns[key]; });
             $scope.levels = $scope.getLevels($filter('orderBy')(selectedColumns, 'rank'));
@@ -357,12 +360,13 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.toggleColumn = function(column, struct) {
+        console.log(column)
         for (i in column.itemSelecteds) {
             var index = column.items.indexOf(column.itemSelecteds[i]);
             column.items[index].selected = true;
         }
 
-        console.log(column.items);
+       // console.log(column.items);
 
         function setColumns() {
             var index = $scope.columns.indexOf(column);
@@ -410,7 +414,9 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     $scope.results = [];
 
     $scope.addPreCalculation = function() {
+        console.log(123)
         var calculation = {structs: [], results: {}};
+        //console.log($scope.structs)
         for (i in $scope.structs) {
             if ($scope.structs[i].selected && !$scope.structs[i].disabled) {
                 var rows = [];
@@ -435,7 +441,8 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.addCalculation = function(calculation) {
-        $http({method: 'POST', url: 'calculate', data:{structs: calculation.structs, columns: $scope.columns, schoolID: $scope.select.schools}})
+        console.log(calculation)
+        $http({method: 'POST', url: 'calculate', data:{structs: calculation.structs, columns: $scope.columns, schoolID: $scope.selected.schools}})
         .success(function(data, status, headers, config) {
             console.log(data);
             calculation.results = data.results;
@@ -713,7 +720,11 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.selectAllSchool = function() {
-       $scope.select.schools = $scope.organizations;
+        if (JSON.stringify($scope.selected.schools) === JSON.stringify($scope.organizations) ) {
+            $scope.selected.schools = [];
+        }else{
+            $scope.selected.schools = $scope.organizations;
+        }
     };
 
     $(".unselectable").css( {
@@ -733,6 +744,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
           clickOutsideToClose:true
         })
     };
+
 
     $scope.showExplain = function(ev) {
         $mdDialog.show({

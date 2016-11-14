@@ -20,11 +20,11 @@
                         </md-input-container>
                     </div>
 
-                    <div class="ui ribbon label" align="center" style="background: #309292;color: white" ng-show="schools.length > 1">
+                    <div class="ui ribbon label" align="center" style="background: #309292;color: white" ng-show="organizations.length > 1">
                         <h4>選擇分析對象</h4>
                     </div>
                     
-                    <div ng-show="schools.length > 1">
+                    <div ng-show="organizations.length > 1">
                         <div class="ui teal styled fluid accordion">
                             <div class="title">
                                 <i class="dropdown icon"></i>
