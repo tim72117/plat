@@ -58,14 +58,14 @@
         </thead>
         <tbody>
             <tr ng-repeat="level in status.levels">
-                <td ng-repeat="column in level" rowspan="{{ column.rowspan }}">{{ column.name }}</td>
+                <td ng-repeat="column in level.columns" rowspan="{{ column.rowspan }}">{{ column.name }}</td>
                 <td ng-repeat="calculation in status.calculations" ng-if="colPercent==rowPercent">{{ getResults(calculation.results, level) }}</td>
                 <td ng-repeat="calculation in status.calculations" ng-if="colPercent">{{ getResults(calculation.results, level) }} ({{getTotalPercent(getResults(calculation.results, level),getNearestColumnTotal(calculation.results, level))| number : 2}} %)</td>
                 <td ng-repeat="(key,calculation) in status.calculations" ng-if="rowPercent">{{ getResults(calculation.results, level) }} <span ng-if="restrictInvolve(key)">({{getRowPercent(key,level)| number : 2}} %)</span></td>
             </tr>
-            <tr>
-                <td ng-if="columns.length == 0">總和</td>
-                <td ng-if="columns.length == 0" ng-repeat="calculation in status.calculations">{{ calculation.results[''] }}</td>
+            <tr ng-if="status.levels.length == 0">
+                <td>總和</td>
+                <td ng-repeat="calculation in status.calculations">{{ calculation.results[''] }}</td>
             </tr>
             <tr ng-if="status.calculations.length > 0 && columns.length > 0">
                 <td colspan="{{ columns.length }}">總和</td>

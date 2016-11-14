@@ -197,7 +197,7 @@
             </thead>
             <tbody>
                 <tr ng-repeat="level in status.levels">
-                    <td ng-repeat="column in level" rowspan="{{ column.rowspan }}">{{ column.name }}</td>
+                    <td ng-repeat="column in level.columns" rowspan="{{ column.rowspan }}">{{ column.name }}</td>
                     <td ng-repeat="calculation in preCalculations"></td>
                 </tr>
                 <tr ng-if="preCalculations.length>0">

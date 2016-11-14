@@ -99,14 +99,14 @@ angular.module('ngStruct', [])
                 }
                 //console.log(levels);
                 for (var j = 0; j < amount; j++) {
-                    rows[j] = [];
+                    rows[j] = {columns: []};
                     for (i in levels) {
                         var step = amount / levels[i].amount;
                         var part = parseInt(j / step);
                         var item = levels[i].items[part % levels[i].items.length];
                         if (part * step == j) {
                             item.rowspan = step;
-                            rows[j].push(item);
+                            rows[j].columns.push(item);
                         }
                     }
                 }
@@ -265,14 +265,9 @@ angular.module('ngStruct', [])
             $scope.tableOptions = ['行%', '列%', '不加%'];
 
             $scope.getResults = function(result, level) {
-                var result = $scope.getParentResult(result, level.parents);
-                return result[level.title] || 0;
-            };
-
-            $scope.getParentResult = function(result, parents) {
-                for (var i in parents) {
-                    result = result[parents[i].title] || {};
-                };
+                for (var i in level.columns) {
+                    result = result[level.columns[i].name] || 0;
+                }
                 return result;
             };
 
