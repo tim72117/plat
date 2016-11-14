@@ -5,9 +5,14 @@ angular.module('ngStruct', [])
 .factory('structService', function($http, $timeout) {
     var selected = {schools: [], columns: {}};
     var status = {levels: [], page: 0, calculations: []};
+    var calculate = function() {
+        $scope.colPercent = false;
+        $scope.rowPercent = false;
+    };
     return {
         selected: selected,
-        status: status
+        status: status,
+        calculate: calculate
     }
 })
 
@@ -120,7 +125,6 @@ angular.module('ngStruct', [])
         transclude: false,
         scope: {
             categories: '=',
-            structClassShow: '=',
             tables: '=',
             toggleColumn: '=',
             toggleItems: '='
@@ -128,6 +132,8 @@ angular.module('ngStruct', [])
         templateUrl: 'templatePlanTable',
         controller: function($scope, $http, $filter) {
 
+            $scope.structClassShow = false;
+            $scope.structFilterShow = false;
             $scope.filterItems = {};
 
             $scope.structInClass = {
@@ -252,6 +258,12 @@ angular.module('ngStruct', [])
             scope.status = structService.status;
         },
         controller: function($scope, $filter) {
+
+            $scope.colPercent = false;
+            $scope.rowPercent = false;
+            $scope.dragBefore = [];
+            $scope.changeColumnBefore = [];
+            $scope.tableOptions = ['行%', '列%', '不加%'];
 
             $scope.getResults = function(result, level) {
                 var result = $scope.getParentResult(result, level.parents);

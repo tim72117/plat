@@ -74,7 +74,7 @@
                                     {{ column.filter[0] }}年至{{ column.filter[1] }}
                                     <div ng-slider ng-model="column.filter" items="column.items"></div>
                                 </div>
-                                <struct-items table="mainTable" column="column" multiple="true" toggle-items="toggleItems"></struct-items>
+                                <struct-items table="mainTable" column="column" multiple="true"></struct-items>
                             </td>
                         </tr>
                     </tbody>
@@ -160,19 +160,14 @@
             <md-tab label="串聯其他表單">
                 <md-content class="md-padding" layout="row" style="height:100%">
                 <div flex="50">
-                    <div plan-table
-                        tables="tables"
-                        categories="categories"
-                        struct-class-show="structClassShow"
-                        toggle-column="toggleColumn"
-                        toggle-items="toggleItems"></div>
+                    <div plan-table tables="tables" categories="categories"></div>
                 </div>
                 <div flex="50" layout="column" style="height:100%">
 
                 </div>
                 </md-content>
             </md-tab>
-            <md-tab label="分析結果">
+            <md-tab label="分析結果" md-on-select="calculate()">
                 <md-content class="md-padding">
                     <div result-table calculations="calculations" levels="levels"></div>
                 </md-content>
@@ -225,20 +220,14 @@
 app.requires.push('ngStruct');
 app.controller('statusController', function($scope, $http, $filter, $timeout, $location, $anchorScroll, $mdDialog, $q, structService) {
     $scope.helpChoosen = false;
-    $scope.colPercent = false;
-    $scope.rowPercent = false;
     $scope.tableSize = '';
     $scope.preCalculations = [];
-    $scope.dragBefore = [];
-    $scope.changeColumnBefore = [];
-    $scope.structClassShow = false;
-    $scope.structFilterShow = false;
-    $scope.tableOptions = ['行%', '列%', '不加%'];
     $scope.loading = true;
     $scope.selected = structService.selected;
     $scope.status = structService.status;
-
     $scope.$parent.main.loading = true;
+    $scope.mdSidenav = {left: false, right: false};
+
     $http({method: 'POST', url: 'getTables', data:{}})
     .success(function(data, status, headers, config) {
         $scope.tables = data.tables;
@@ -253,7 +242,6 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         console.log(e);
     });
 
-    $scope.mdSidenav = {left:false, right: false};
     $scope.toggleSidenav = function() {
         $scope.mdSidenav.left = !$scope.mdSidenav.left;
     };
@@ -273,78 +261,15 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         console.log(e);
     });
 
-    $scope.$watchCollection('columns', function(columns) {
-        //$scope.levels = $scope.getLevels(columns, 0);
-        //console.log(columns);
-        //$scope.levels = $scope.getLevels(columns, 0);
-        //console.log($scope.levels);
-        $scope.preCalculations.length = 0;
-        if (columns.length > 0) {
-            $scope.addPreCalculation();
-        };
-        $scope.colPercent = false;
-        $scope.rowPercent = false;
-    });
-
     $scope.changeSchools = function() {
         structService.selected.columns = {};
         $scope.calculations = [];
         $scope.levels = [];
     };
 
-    $scope.toggleColumn = function(column, struct) {
-        console.log(column)
-        for (i in column.itemSelecteds) {
-            var index = column.items.indexOf(column.itemSelecteds[i]);
-            column.items[index].selected = true;
-        }
-
-       // console.log(column.items);
-
-        function setColumns() {
-            var index = $scope.columns.indexOf(column);
-            if (index == -1) {
-                column.struct = struct.title;
-                $scope.columns.push(column);
-                struct.selected = true;
-                var isadd = true;
-            } else {
-                $scope.columns.splice(index, 1);
-                var isadd = false;
-            };
-
-            var inStructs = 0;
-            if ($scope.calculations.length>0) {
-                for (var i in $scope.calculations) {
-                    for (var j in $scope.calculations[i].structs) {
-                        if ($scope.calculations[i].structs[j].title == struct.title ) {
-                            inStructs = 1;
-                        }
-                    }
-                    if (inStructs==0 && isadd) {
-                        $scope.calculations[i].structs.push({title: struct.title, rows: {}});
-                    }
-                }
-            }
-            if ($scope.calculations.length>0) {
-                for (var i in $scope.calculations) {
-                    $scope.calculations[i].results = {};
-                }
-            }
-            $scope.needHelp3();
-        }
-
-        if (column.items == null) {
-            $scope.loadItem(struct, column, setColumns);
-        } else {
-            setColumns();
-        }
+    $scope.calculate = function() {
+        // call calculate service
     };
-
-
-    $scope.columns = [];
-    $scope.calculations = [];
-    $scope.results = [];
 
     $scope.addPreCalculation = function() {
         console.log(123)

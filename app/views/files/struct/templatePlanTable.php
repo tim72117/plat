@@ -39,7 +39,7 @@
             <!--<td ng-if="structFilterShow && !struct.classExpanded && categories[struct.title]" class="no-animate"></td>-->
 
             <td ng-if="struct.expanded && struct.classExpanded" ng-class="{negative: struct.columns[0].disabled, disabled: struct.columns[0].disabled}" class="no-animate">
-                <struct-items table="struct" column="struct.columns[0]" multiple="true" toggle-items="toggleItems"></struct-items>
+                <struct-items table="struct" column="struct.columns[0]" multiple="true"></struct-items>
             </td>
 
             <td ng-if="!struct.expanded && struct.classExpanded" colspan="{{struct.expanded ? 1 : 2}}" class="no-animate">
@@ -58,7 +58,7 @@
         <tr ng-repeat-end ng-repeat="row in struct.columns" ng-if="!$first && struct.expanded" ng-hide="struct.hide">
 
             <td ng-class="{negative: row.disabled, disabled: row.disabled}" class="no-animate">
-                <struct-items table="struct" column="row" multiple="true" toggle-items="toggleItems"></struct-items>
+                <struct-items table="struct" column="row" multiple="true"></struct-items>
             </td>
 
             <!--<td ng-class="{disabled: row.disabled}" ng-if="structFilterShow" >
