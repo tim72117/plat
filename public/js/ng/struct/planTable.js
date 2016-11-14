@@ -75,7 +75,7 @@ angular.module('ngStruct', [])
 
             $scope.toggleItems = function(column) {
                 //console.log(column)
-                console.log(structService)
+                //console.log(structService)
                 if (structService.selected.columns[column.id]) {
                     if (!structService.selected.columns[column.id].rank) {
                         structService.selected.columns[column.id].rank = Object.keys(structService.selected.columns).length;
@@ -150,12 +150,10 @@ angular.module('ngStruct', [])
             };
 
             $scope.addNewCalStruct = function() {
-                console.log(structService)
-                var calculation = {structs: [], results: {}};
-                var structs = $filter('filter')($scope.tables, function(table) {
+                var calculation = {selectedColumns: [], results: {}};
+                /*var structs = $filter('filter')($scope.tables, function(table) {
                     return structService.selected.columns && Object.keys(structService.selected.columns).length > 0;
-                });
-                console.log(structs);
+                });*/
                 // for (var i in structs) {
                 //     var columns = [];
                 //     angular.forEach($filter('filter')(structs[i].columns, function(column, index, array) { return column.filter && column.filter!=''; }), function(column, key) {
@@ -163,7 +161,7 @@ angular.module('ngStruct', [])
                 //     }, columns);
                 //     calculation.structs.push({title: $scope.structs[i].title, columns: columns});
                 // }
-                calculation.structs = structs;
+                calculation.selectedColumns = structService.selected.columns;
 
                 structService.status.calculations.push(calculation);
                 $scope.callCalculation();
@@ -180,6 +178,7 @@ angular.module('ngStruct', [])
             };
 
             $scope.addCalculation = function(calculation) {
+                console.log(structService.selected.columns)
                 //$http({method: 'POST', url: 'calculate', data:{structs: calculation.structs, columns: $scope.columns, schoolID: $scope.selected.schools}})
                 $http({method: 'POST', url: 'calculate', data:{columns: structService.selected.columns, schoolID: structService.selected.schools}})
                 .success(function(data, status, headers, config) {

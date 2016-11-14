@@ -267,7 +267,7 @@ class StructFile extends CommFile {
 
     public function calculate()
     {
-        $columns = Input::get('columns');
+        //$structs = Input::get('structs');
         $organizeIDs = Input::get('schoolID');
         $organizations = \Plat\Project\Organization::find(array_fetch($organizeIDs, 'id'))->load('every')->map(function($organization) {
             return $organization->every->lists('id');
@@ -276,10 +276,10 @@ class StructFile extends CommFile {
         $mainTable_id = $this->populations[$this->configs['population']]['table_id'];
         $mainTable = \Row\Table::find($mainTable_id);
 
-        $query = DB::connection('sqlsrv_analysis_tted')->table($mainTable->database . '.dbo.' . $mainTable->name . ' AS mainTable')
-            ->whereIn(DB::raw('substring(mainTable.學校代碼,3,4)'), $organizations);
+        $query = DB::connection('sqlsrv_analysis_tted')->table($mainTable->database . '.dbo.' . $mainTable->name )
+            ->whereIn(DB::raw('substring('.$mainTable->name.'.學校代碼,3,4)'), $organizations);
 
-        foreach ($columns as $i => $column) {
+        /*foreach ($structs as $i => $struct) {
             // $table = $this->tables[$struct['title']];
 
             // if ($struct['title'] != $mainTable->title) {
@@ -289,22 +289,37 @@ class StructFile extends CommFile {
             // foreach ($struct['rows'] as $row) {
             //     $query->whereIn($table . '.' . $row['title'], explode(',', $row['filter']));
             // }
+        }*/
+
+        $columns = Input::get('columns');
+        $selectedTables = [];
+        foreach ($columns as $i => $column) {
+            $selectedTable = \Row\Column::find($i)->load('inTable')['inTable']['name'];
+            if (!in_array($selectedTable,$selectedTables)) {
+                array_push($selectedTables,$selectedTable);
+            }
         }
 
-        // $columns = array_pluck(Input::get('columns'), 'title');
+        foreach ($selectedTables as $selectedTable) {
+            if ($selectedTable != $mainTable->name) {
+                 $query->join($selectedTable, $mainTable->name . '.身分證字號', '=', $selectedTable . '.身分證字號');
+             }
+        }
 
-        // $selects = array_map(function($key, $column) {
-        //     return $this->tables[$column['struct']] . '.' . $column['title'] . ' AS C' . $key;
-        // }, array_keys($columns), Input::get('columns'));
+        $selects = array_map(function($key, $column) {
+            $selectedTable = \Row\Column::find($key)->load('inTable')['inTable']['name'];
+            $selectedColTitle = \Row\Column::find($key)['title'];
+            return $selectedTable . '.' . $selectedColTitle . ' AS C' . $key;
+        }, array_keys($columns), Input::get('columns'));
 
-        // foreach (Input::get('columns') as $column) {
-        //     $query->groupBy($this->tables[$column['struct']] . '.' . $column['title']);
-        // }
-
-        $selects = [];
+        foreach ($columns as $i => $column) {
+            $selectedTable = \Row\Column::find($i)->load('inTable')['inTable']['name'];
+            $selectedColTitle = \Row\Column::find($i)['title'];
+            $query->groupBy($selectedTable . '.' . $selectedColTitle);
+        }
 
         $query->select($selects)
-            ->addSelect(DB::raw('count(DISTINCT mainTable.身分證字號) as total'));
+            ->addSelect(DB::raw('count(DISTINCT '. $mainTable->name.'.身分證字號) as total'));
 
         //var_dump($query->toSql());exit;
 
