@@ -432,8 +432,8 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.addCalculation = function(calculation) {
-        console.log(calculation)
-        $http({method: 'POST', url: 'calculate', data:{structs: calculation.structs, columns: $scope.columns, schoolID: $scope.selected.schools}})
+        //$http({method: 'POST', url: 'calculate', data:{structs: calculation.structs, columns: $scope.columns, schoolID: $scope.selected.schools}})
+        $http({method: 'POST', url: 'calculate', data:{columns: calculation.selectedColumns, schoolID: $scope.selected.schools}})
         .success(function(data, status, headers, config) {
             console.log(data);
             calculation.results = data.results;
