@@ -7,12 +7,12 @@ angular.module('ngStruct', [])
         $scope.colPercent = false;
         $scope.rowPercent = false;
     };
-    var getLevels = function (columns) {
+    var getLevels = function () {
         var amount = 1;
         var levels = [];
         var rows = [];
-        for (i in columns) {
-            var items = columns[i].selectedItems;
+        for (i in selected.columns) {
+            var items = selected.columns[i].selectedItems;
             amount *= items.length;
             levels[i] = {amount: amount, items: items};
         }
@@ -28,23 +28,12 @@ angular.module('ngStruct', [])
                 }
             }
         }
-
         status.levels = rows;
     }
-    var toggleItems = function(column) {
-        // selected.columns[column.id].title = column.title;
-        // if (selected.columns[column.id]) {
-        //     if (!selected.columns[column.id].rank) {
-        //         selected.columns[column.id].rank = Object.keys(selected.columns).length;
-        //     }
-        //     if (selected.columns[column.id].items.length == 0) {
-        //         delete selected.columns[column.id];
-        //     }
-        //     var selectedColumns = Object.keys(selected.columns).map(function (key) { return selected.columns[key]; });
-        //     status.levels = getLevels($filter('orderBy')(selectedColumns, 'rank'));
-        // }
-    };
     var clean = function() {
+        selected.columns.forEach(function(column) {
+            column.selectedItems = [];
+        });
         selected.columns = [];
         status.calculations = [];
         status.levels = [];
@@ -53,7 +42,6 @@ angular.module('ngStruct', [])
         selected: selected,
         status: status,
         calculate: calculate,
-        toggleItems: toggleItems,
         clean: clean,
         getLevels: getLevels
     }
@@ -94,10 +82,7 @@ angular.module('ngStruct', [])
         },
         controller: function($scope, $http, $filter, $q) {
 
-            //$scope.selectedColumn = $filter('filter')($scope.selected.columns, 'rank')
-            //$scope.column.selectedItems = [];
             $scope.toggleItems = function() {
-
                 var index = structService.selected.columns.indexOf($scope.column);
                 if (index == -1) {
                     structService.selected.columns.push($scope.column);
@@ -106,8 +91,7 @@ angular.module('ngStruct', [])
                         structService.selected.columns.splice(index, 1);
                     }
                 }
-                console.log(structService.selected.columns);
-                structService.getLevels(structService.selected.columns);
+                structService.getLevels();
             }
 
             $scope.loadItem = function(table, column) {
@@ -276,12 +260,11 @@ angular.module('ngStruct', [])
             scope.selected = structService.selected;
             scope.status = structService.status;
         },
-        controller: function($scope, $filter) {
+        controller: function($scope, $filter, $timeout) {
 
             $scope.colPercent = false;
             $scope.rowPercent = false;
             $scope.dragBefore = [];
-            $scope.changeColumnBefore = [];
             $scope.tableOptions = ['行%', '列%', '不加%'];
 
             $scope.getResults = function(result, level) {
@@ -424,13 +407,13 @@ angular.module('ngStruct', [])
                 });
             };
 
-            $scope.moveColumnLeft = function(index) {
-                //$scope.selected.columns.indexOf(column);
-                //console.log(column);
-                var column = $scope.selected.columns[index];
-                $scope.selected.columns.splice(index-1, 1);
-                $scope.selected.columns.splice(index, 0, column);
-                console.log($scope.selected.columns);
+            $scope.moveColumn = function(index, offect) {
+                $timeout(function() {
+                    var column = $scope.selected.columns[index+offect];
+                    $scope.selected.columns.splice(index+offect, 1);
+                    $scope.selected.columns.splice(index, 0, column);
+                    structService.getLevels();
+                }, 300);
             };
 
             $scope.dragFrom = function(key) {
@@ -452,35 +435,6 @@ angular.module('ngStruct', [])
                     $scope.status.calculations.splice($scope.dragBefore,1);
                 }
                 $scope.dragBefore = [];
-            };
-
-            $scope.changeColumnFrom = function(key) {
-                $scope.changeColumnBefore = key;
-            };
-            $scope.changeColumnTo = function(key) {
-                var dragAfter = key;
-                var moveColumn = {struct: '', title: '',items: {}};
-                moveColumn.title = $scope.columns[$scope.changeColumnBefore]['title'];
-                moveColumn.struct = $scope.columns[$scope.changeColumnBefore]['struct'];
-                moveColumn.items = $scope.columns[$scope.changeColumnBefore]['items'];
-
-                if ($scope.status.calculations.length>0) {
-                    for (var i in $scope.status.calculations) {
-                        $scope.status.calculations[i].results = {};
-                    }
-                }
-
-                if ($scope.changeColumnBefore > dragAfter) {
-                    $scope.columns.splice($scope.changeColumnBefore,1);
-                    $scope.columns.splice(dragAfter+1,0,moveColumn);
-                    $scope.callCalculation();
-                }
-                if ($scope.changeColumnBefore < dragAfter) {
-                    $scope.columns.splice(dragAfter+1,0,moveColumn);
-                    $scope.columns.splice($scope.changeColumnBefore,1);
-                    $scope.callCalculation();
-                }
-                $scope.changeColumnBefore = [];
             };
 
         }
