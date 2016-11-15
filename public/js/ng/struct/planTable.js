@@ -153,7 +153,28 @@ angular.module('ngStruct', [])
             };
 
             $scope.addNewCalStruct = function() {
-                var calculation = {selectedColumns: [], results: {}};
+                //console.log(structService.selected.columns)
+                //console.log(Object.keys(structService.selected.columns))
+               if (structService.status.calculations.length > 0){
+                    if (JSON.stringify(structService.status.calculations[0].selectedColumns) != JSON.stringify(structService.selected.columns.map( function(column) { return column.id} ))) {
+                        var selectedColumns = structService.selected.columns.map( function(column) { return column.id} );
+                        structService.status.calculations = [];
+                        var calculation = {selectedColumns: [], results: {}};
+                        calculation.selectedColumns = selectedColumns;
+                        structService.status.calculations.push(calculation);
+                        $scope.callCalculation();
+                    }else{
+                        $scope.goToResultTable();
+                    }
+                }else{
+                    var selectedColumns = structService.selected.columns.map( function(column) { return column.id} );
+                    var calculation = {selectedColumns: [], results: {}};
+                    calculation.selectedColumns = selectedColumns;
+                    structService.status.calculations.push(calculation);
+                    $scope.callCalculation();
+                }
+                
+                
                 /*var structs = $filter('filter')($scope.tables, function(table) {
                     return structService.selected.columns && Object.keys(structService.selected.columns).length > 0;
                 });*/
@@ -164,10 +185,7 @@ angular.module('ngStruct', [])
                 //     }, columns);
                 //     calculation.structs.push({title: $scope.structs[i].title, columns: columns});
                 // }
-                calculation.selectedColumns = structService.selected.columns;
-
-                structService.status.calculations.push(calculation);
-                $scope.callCalculation();
+               
             };
 
             $scope.callCalculation = function() {
@@ -181,9 +199,8 @@ angular.module('ngStruct', [])
             };
 
             $scope.addCalculation = function(calculation) {
-                console.log(structService.selected.columns)
                 //$http({method: 'POST', url: 'calculate', data:{structs: calculation.structs, columns: $scope.columns, schoolID: $scope.selected.schools}})
-                $http({method: 'POST', url: 'calculate', data:{columns: structService.selected.columns, schoolID: structService.selected.schools}})
+                $http({method: 'POST', url: 'calculate', data:{columns: calculation.selectedColumns, schoolID: structService.selected.schools}})
                 .success(function(data, status, headers, config) {
                     console.log(data);
                     calculation.results = data.results;
