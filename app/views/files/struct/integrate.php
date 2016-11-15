@@ -2,33 +2,22 @@
 <md-content ng-cloak ng-controller="statusController" layout="row" style="height:100%">
 
     <md-sidenav class="md-sidenav-left" md-is-open="mdSidenav.left" layout="column" style="min-width: 500px">
-        <md-toolbar md-scroll-shrink class="md-theme-indigo">
-            <div class="md-toolbar-tools" style="font-weight: bold;color: white" ng-style="{background: {186: '#046D8B', 194: '#4A970A'}[academicYearType]}">
+        <md-toolbar md-scroll-shrink>
+            <div class="md-toolbar-tools" style="color: white" md-colors="{background: population.color}">
                 <h2>{{population.title}}</h2>
                 <span flex></span>
                 <md-button aria-label="預覽表格" ng-click="toggleSidenavRight()">
                     <md-icon md-svg-icon="icon-eye"></md-icon>
                     預覽表格
                 </md-button>
+                <md-button aria-label="開始計算" md-colors="{background: 'accent'}" ng-click="calculate()">
+                    <md-icon md-svg-icon="icon-eye"></md-icon>
+                    開始計算
+                </md-button>
             </div>
         </md-toolbar>
         <div style="overflow-y: auto">
-            <div layout-padding>
-                <div class="ui ribbon label" style="background: #309292;color: white">
-                    <h4>選擇分析學校</h4>
-                </div>
-                <div class="item" align="center">
-                <md-input-container>
-                    <label>學校</label>
-                    <md-select ng-model="selected.schools" aria-label="選擇分析學校" multiple md-selected-text="selected.schools.length+'所學校'" ng-change="changeSchools()">
-                        <md-button layout-fill value="all" ng-click="selectAllSchool()">全選</md-button>
-                        <md-optgroup>
-                            <md-option ng-value="organization" ng-repeat="organization in organizations">{{organization.now.name}}</md-option>
-                        </md-optgroup>
-                    </md-select>
-                </md-input-container>
-                </div>
-            </div>
+
             <!--<div layout-padding>
                 <div class="ui ribbon label" style="background: #309292;color: white">
                     <h4>{{population.yearTitle}}</h4>
@@ -58,28 +47,7 @@
                     學年度止</p>
                 </div>
             </div>-->
-            <div layout-padding>
-                <div class="ui ribbon label" align="center" style="background: #309292;color: white"><h4> 加入分類變項</h4></div>
-                <div layout="row" layout-sm="column" layout-align="space-around" ng-if="loading">
-                    <md-progress-circular md-mode="indeterminate"></md-progress-circular>
-                </div>
-                <table class="ui teal celled table" style="background: #F5F5F5" ng-if="!loading">
-                    <thead>
-                        <tr><th>選擇分類變項</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat="column in mainTable.columns" ng-if="mainTable.expanded">
-                            <td ng-class="{negative: column.disabled}">
-                                <div ng-if="column.type=='slider'">
-                                    {{ column.filter[0] }}年至{{ column.filter[1] }}
-                                    <div ng-slider ng-model="column.filter" items="column.items"></div>
-                                </div>
-                                <struct-items table="mainTable" column="column" multiple="true"></struct-items>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+
             <!--<div layout-padding>
                 <div class="ui ribbon label" align="center" style="background: #309292;color: white"><h4> 加入篩選條件</h4></div>
                 <div layout="row" layout-sm="column" layout-align="space-around" ng-if="loading">
@@ -123,26 +91,31 @@
     </md-sidenav>
 
     <div flex layout="column">
-        <md-toolbar class="md-theme-indigo">
-            <div class="md-toolbar-tools" style="background: #046D8B;color: white">
-                <md-button aria-label="快速設定" ng-click="toggleSidenav()">
+        <md-toolbar>
+            <div class="md-toolbar-tools" style="color: white" md-colors="{background: population.color}">
+                <!--<md-button aria-label="快速設定" ng-click="toggleSidenav()">
                     <md-icon md-svg-icon="settings"></md-icon>
                     快速設定
-                </md-button>
+                </md-button>-->
                 <md-button aria-label="資料欄位說明" ng-click="showExplain()">
                     <md-icon md-svg-icon="help-outline"></md-icon>
                     資料欄位說明
                 </md-button>
-                <md-button aria-label="資料欄位說明" href="/files/explan.xlsx">
-                    <md-icon md-svg-icon="file-download"></md-icon>
-                    資料欄位說明
-                </md-button>
+
                 <md-button aria-label="預覽表格" ng-click="toggleSidenavRight()">
                     <md-icon md-svg-icon="icon-eye"></md-icon>
                     預覽表格
                 </md-button>
+                <md-button aria-label="開始計算" md-colors="{background: 'accent'}" ng-click="calculate()">
+                    <md-icon md-svg-icon="icon-eye"></md-icon>
+                    開始計算
+                </md-button>
                 <span flex></span>
                 <!--<md-button aria-label="需要幫忙" ng-click="showTabDialog($event)"><md-icon md-svg-icon="help"></md-icon>需要幫忙</md-button>-->
+                <md-button aria-label="資料欄位說明" href="/files/explan.xlsx">
+                    <md-icon md-svg-icon="file-download"></md-icon>
+                    資料欄位說明
+                </md-button>
                 <md-menu>
                     <md-button aria-label="表單大小" ng-click="$mdOpenMenu($event)">
                         表單大小
@@ -157,6 +130,47 @@
         <div class="ui basic segment" ng-class="{loading: loading}" style="overflow-y: auto">
 
         <md-tabs md-dynamic-height md-selected="status.page">
+            <md-tab label="快速設定">
+                <md-content class="md-padding" flex="30" layout="column" style="height:100%">
+                    <div layout-padding>
+                        <!--<div class="ui ribbon label" style="background: #309292;color: white">
+                            <h4>選擇分析學校</h4>
+                        </div>-->
+                        <md-input-container>
+                            <label>選擇分析學校</label>
+                            <md-select ng-model="selected.schools" aria-label="選擇分析學校" multiple md-selected-text="selected.schools.length+'所學校'" ng-change="changeSchools()">
+                                <md-button layout-fill value="all" ng-click="selectAllSchool()">全選</md-button>
+                                <md-optgroup>
+                                    <md-option ng-value="organization" ng-repeat="organization in organizations">{{organization.now.name}}</md-option>
+                                </md-optgroup>
+                            </md-select>
+                        </md-input-container>
+                    </div>
+                    <div layout-padding>
+                        <!--<div class="ui ribbon label" align="center" style="background: #309292;color: white"><h4> 加入分類變項</h4></div>-->
+                        <div layout="row" layout-sm="column" layout-align="space-around" ng-if="loading">
+                            <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+                        </div>
+                        <table class="ui teal celled table" style="background: #F5F5F5" ng-if="!loading">
+                            <thead>
+                                <tr><th>選擇分類變項</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="column in mainTable.columns" ng-if="mainTable.expanded">
+                                    <td ng-class="{negative: column.disabled}">
+                                        <div ng-if="column.type=='slider'">
+                                            {{ column.filter[0] }}年至{{ column.filter[1] }}
+                                            <div ng-slider ng-model="column.filter" items="column.items"></div>
+                                        </div>
+                                        <struct-items table="mainTable" column="column" multiple="true"></struct-items>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </md-content>
+            </md-tab>
             <md-tab label="串聯其他表單">
                 <md-content class="md-padding" layout="row" style="height:100%">
                 <div flex="50">
@@ -229,6 +243,8 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     $scope.status = structService.status;
     $scope.$parent.main.loading = true;
     $scope.mdSidenav = {left: false, right: false};
+    $scope.population = {color: 'blue'};
+    $scope.calculate = structService.calculate;
 
     $http({method: 'POST', url: 'getTables', data:{}})
     .success(function(data, status, headers, config) {
@@ -251,6 +267,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     $scope.toggleSidenavRight = function() {
         $scope.mdSidenav.right = !$scope.mdSidenav.right;
     };
+
     // $timeout(function() {
     //     $scope.mdSidenav.left = true;
     // }, 1000);
@@ -265,10 +282,6 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
 
     $scope.changeSchools = function() {
         structService.clean();
-    };
-
-    $scope.calculate = function() {
-        // call calculate service
     };
 
     $scope.addPreCalculation = function() {
