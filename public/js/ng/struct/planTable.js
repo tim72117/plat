@@ -1,18 +1,61 @@
-angular.module('ngStruct', []);
-
 angular.module('ngStruct', [])
 
-.factory('structService', function($http, $timeout) {
-    var selected = {schools: [], columns: {}};
+.factory('structService', function($http, $filter, $timeout) {
+    var selected = {schools: [], columns: []};
     var status = {levels: [], page: 0, calculations: []};
     var calculate = function() {
         $scope.colPercent = false;
         $scope.rowPercent = false;
     };
+    var getLevels = function (columns) {
+        var amount = 1;
+        var levels = [];
+        var rows = [];
+        for (i in columns) {
+            var items = columns[i].selectedItems;
+            amount *= items.length;
+            levels[i] = {amount: amount, items: items};
+        }
+        for (var j = 0; j < amount; j++) {
+            rows[j] = {columns: []};
+            for (i in levels) {
+                var step = amount / levels[i].amount;
+                var part = parseInt(j / step);
+                var item = levels[i].items[part % levels[i].items.length];
+                if (part * step == j) {
+                    item.rowspan = step;
+                    rows[j].columns.push(item);
+                }
+            }
+        }
+
+        status.levels = rows;
+    }
+    var toggleItems = function(column) {
+        // selected.columns[column.id].title = column.title;
+        // if (selected.columns[column.id]) {
+        //     if (!selected.columns[column.id].rank) {
+        //         selected.columns[column.id].rank = Object.keys(selected.columns).length;
+        //     }
+        //     if (selected.columns[column.id].items.length == 0) {
+        //         delete selected.columns[column.id];
+        //     }
+        //     var selectedColumns = Object.keys(selected.columns).map(function (key) { return selected.columns[key]; });
+        //     status.levels = getLevels($filter('orderBy')(selectedColumns, 'rank'));
+        // }
+    };
+    var clean = function() {
+        selected.columns = [];
+        status.calculations = [];
+        status.levels = [];
+    };
     return {
         selected: selected,
         status: status,
-        calculate: calculate
+        calculate: calculate,
+        toggleItems: toggleItems,
+        clean: clean,
+        getLevels: getLevels
     }
 })
 
@@ -31,24 +74,41 @@ angular.module('ngStruct', [])
                 <label>{{column.title}}</label>
                 <md-select multiple ng-if="multiple && column.type!='slider'" style="margin:0"
                     placeholder="{{column.title}}"
-                    ng-model="selected.columns[column.id].items"
+                    ng-model="column.selectedItems"
                     md-on-open="loadItem(table, column)"
-                    ng-change="toggleItems(column);column.selected = true">
+                    ng-change="toggleItems(column)">
                     <md-option ng-value="item" ng-repeat="item in column.items">{{item.name}}</md-option>
                 </md-select>
-                <md-select ng-if="!multiple && column.type!='slider'" style="margin:0"
-                    placeholder="{{column.title}}"
-                    ng-model="selected.columns[column.id].items"
-                    md-on-open="loadItem(table, column)"
-                    ng-change="toggleItems(column);column.selected = true">
-                    <md-option ng-value="item" ng-repeat="item in column.items">{{item.name}}</md-option>
-                </md-select>
+
             </md-input-container>
         `,
+                //         <md-select ng-if="!multiple && column.type!='slider'" style="margin:0"
+                //     placeholder="{{column.title}}"
+                //     ng-model="selected.columns[column.id].items"
+                //     md-on-open="loadItem(table, column)"
+                //     ng-change="toggleItems(column)">
+                //     <md-option ng-value="item" ng-repeat="item in column.items">{{item.name}}</md-option>
+                // </md-select>
         link: function(scope, element) {
             scope.selected = structService.selected;
         },
         controller: function($scope, $http, $filter, $q) {
+
+            //$scope.selectedColumn = $filter('filter')($scope.selected.columns, 'rank')
+            //$scope.column.selectedItems = [];
+            $scope.toggleItems = function() {
+
+                var index = structService.selected.columns.indexOf($scope.column);
+                if (index == -1) {
+                    structService.selected.columns.push($scope.column);
+                } else {
+                    if ($scope.column.selectedItems.length == 0) {
+                        structService.selected.columns.splice(index, 1);
+                    }
+                }
+                console.log(structService.selected.columns);
+                structService.getLevels(structService.selected.columns);
+            }
 
             $scope.loadItem = function(table, column) {
                 if (column.items && column.itemsLoadBy == structService.selected.schools) {
@@ -72,49 +132,6 @@ angular.module('ngStruct', [])
 
                 return deferred.promise;
             };
-
-            $scope.toggleItems = function(column) {
-                //console.log(column)
-                //console.log(structService)
-
-                structService.selected.columns[column.id].title = column.title;
-                if (structService.selected.columns[column.id]) {
-                    if (!structService.selected.columns[column.id].rank) {
-                        structService.selected.columns[column.id].rank = Object.keys(structService.selected.columns).length;
-                    }
-                    if (structService.selected.columns[column.id].items.length == 0) {
-                    delete structService.selected.columns[column.id];
-                    }
-                    var selectedColumns = Object.keys(structService.selected.columns).map(function (key) { return structService.selected.columns[key]; });
-                    structService.status.levels = $scope.getLevels($filter('orderBy')(selectedColumns, 'rank'));
-                }
-            };
-
-            $scope.getLevels = function (columns) {
-                var amount = 1;
-                var levels = [];
-                var rows = [];
-                for (i in columns) {
-                    var items = columns[i].items;//$filter('filter')(columns[i].items, {selected: true});
-                    amount *= items.length;
-                    levels[i] = {amount: amount, items: items};
-                }
-                //console.log(levels);
-                for (var j = 0; j < amount; j++) {
-                    rows[j] = {columns: []};
-                    for (i in levels) {
-                        var step = amount / levels[i].amount;
-                        var part = parseInt(j / step);
-                        var item = levels[i].items[part % levels[i].items.length];
-                        if (part * step == j) {
-                            item.rowspan = step;
-                            rows[j].columns.push(item);
-                        }
-                    }
-                }
-
-                return rows;
-            }
 
         }
     };
@@ -405,6 +422,15 @@ angular.module('ngStruct', [])
                     data:{tableTitle: tableTitle, columns: $scope.columns,levels:$scope.levels,calculations: $scope.status.calculations},
                     failCallback: function (responseHtml, url) { console.log(responseHtml); }
                 });
+            };
+
+            $scope.moveColumnLeft = function(index) {
+                //$scope.selected.columns.indexOf(column);
+                //console.log(column);
+                var column = $scope.selected.columns[index];
+                $scope.selected.columns.splice(index-1, 1);
+                $scope.selected.columns.splice(index, 0, column);
+                console.log($scope.selected.columns);
             };
 
             $scope.dragFrom = function(key) {

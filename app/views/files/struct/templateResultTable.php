@@ -28,7 +28,13 @@
             </tr>
             <tr class="unselectable" >
                 <th ng-if="status.levels.length == 0"></th>
-                <th ng-repeat="(order,column) in status.levels[0].columns" ng-mousedown="changeColumnFrom(order)" ng-mouseup="changeColumnTo(order)" ng-style="{cursor:changeColumnBefore.length==0 ? 'default' : 'move'}">
+                <th ng-repeat="column in selected.columns" ng-mousedown="changeColumnFrom1(order)" ng-mouseup="changeColumnTo1(order)" ng-style="{cursor:changeColumnBefore.length==0 ? 'default' : 'move'}">
+                    <md-button class="md-icon-button" aria-label="左移" ng-click="moveColumnLeft($index)">
+                        <md-icon md-svg-icon="keyboard-arrow-left"></md-icon>
+                    </md-button>
+                    <md-button class="md-icon-button" aria-label="右移">
+                        <md-icon md-svg-icon="keyboard-arrow-right"></md-icon>
+                    </md-button>
                     <label class="compact ui icon mini button">
                         <i class="move icon"></i>
                     </label>

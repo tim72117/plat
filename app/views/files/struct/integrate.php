@@ -264,9 +264,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     });
 
     $scope.changeSchools = function() {
-        structService.selected.columns = {};
-        $scope.calculations = [];
-        $scope.levels = [];
+        structService.clean();
     };
 
     $scope.calculate = function() {
