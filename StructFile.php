@@ -95,8 +95,8 @@ class StructFile extends CommFile {
     }
 
     private $populations = [
-        0 => ['id' => 186, 'title' => '新進師資生', 'yearColumnIndex' => 1, 'yearTitle' => '占教育部核定名額學年度', 'table' => 'TEV103_TE_StudentInSchool_OK', 'table_id' => 186],
-        1 => ['id' => 194, 'title' => '實習師資生', 'yearColumnIndex' => 2, 'yearTitle' => '參與教育實習學年度',     'table' => 'TE2_D_OK',                     'table_id' => 194],
+        0 => ['id' => 186, 'title' => '新進師資生', 'yearColumnIndex' => 1, 'yearTitle' => '占教育部核定名額學年度', 'table' => 'TEV103_TE_StudentInSchool_OK', 'table_id' => 186, 'color' => 'blue'],
+        1 => ['id' => 194, 'title' => '實習師資生', 'yearColumnIndex' => 2, 'yearTitle' => '參與教育實習學年度',     'table' => 'TE2_D_OK',                     'table_id' => 194, 'color' => 'teal'],
         //2 => ['id' => 4,   'title' => '',                                                                          'table' => 'TE2_E_OK'],
     ];
 
