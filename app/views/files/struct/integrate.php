@@ -97,11 +97,14 @@
                     <md-icon md-svg-icon="settings"></md-icon>
                     快速設定
                 </md-button>-->
-                <md-button aria-label="資料欄位說明" ng-click="showExplain()">
+                <md-button aria-label="欄位說明" ng-click="showExplain()">
                     <md-icon md-svg-icon="help-outline"></md-icon>
-                    資料欄位說明
+                    欄位說明
                 </md-button>
-
+                <md-button aria-label="下載欄位說明" href="/files/explan.xlsx">
+                    <md-icon md-svg-icon="file-download"></md-icon>
+                    下載欄位說明
+                </md-button>
                 <md-button aria-label="預覽表格" ng-click="toggleSidenavRight()">
                     <md-icon md-svg-icon="icon-eye"></md-icon>
                     預覽表格
@@ -112,10 +115,6 @@
                 </md-button>
                 <span flex></span>
                 <!--<md-button aria-label="需要幫忙" ng-click="showTabDialog($event)"><md-icon md-svg-icon="help"></md-icon>需要幫忙</md-button>-->
-                <md-button aria-label="資料欄位說明" href="/files/explan.xlsx">
-                    <md-icon md-svg-icon="file-download"></md-icon>
-                    資料欄位說明
-                </md-button>
                 <md-menu>
                     <md-button aria-label="表單大小" ng-click="$mdOpenMenu($event)">
                         表單大小
@@ -131,7 +130,7 @@
 
         <md-tabs md-dynamic-height md-selected="status.page">
             <md-tab label="快速設定">
-                <md-content class="md-padding" flex="30" layout="column" style="height:100%">
+                <md-content class="md-padding" flex-sm="80" flex-md="60" flex-lg="50" flex-xl="30" layout="column" style="height:100%">
                     <div layout-padding>
                         <!--<div class="ui ribbon label" style="background: #309292;color: white">
                             <h4>選擇分析學校</h4>
