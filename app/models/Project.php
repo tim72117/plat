@@ -139,7 +139,7 @@ class Post extends Eloquent {
 
     public $timestamps = true;
 
-    protected $fillable = array('title', 'context', 'publish_at', 'display_at', 'created_by');
+    protected $fillable = array('title', 'context', 'publish_at', 'display_at', 'created_by', 'perpetual');
 
     public function files()
     {

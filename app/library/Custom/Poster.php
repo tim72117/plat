@@ -102,4 +102,11 @@ class Poster {
 
         return ['deleted' => PostFile::find($pivot_id)->delete()];
     }
+
+    public function setPerpetual()
+    {
+        $updated = Post::find(Input::get('id'))->update(['perpetual' => Input::get('perpetual')]);
+
+        return ['updated' => $updated];
+    }
 }

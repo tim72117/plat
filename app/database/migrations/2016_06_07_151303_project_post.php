@@ -19,6 +19,7 @@ class ProjectPost extends Migration {
             $table->text('context');
             $table->timestamp('publish_at')->nullable();
             $table->timestamp('display_at')->nullable();
+            $table->tinyInteger('perpetual');
             $table->integer('created_by');
             $table->timestamps();
             $table->softDeletes();
