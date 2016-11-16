@@ -3,15 +3,15 @@
         <a id="resultTable"></a>
         <thead>
             <tr>
-                <th colspan="{{status.levels[0].columns.length}}">
-                    <md-input-container>
+               <th colspan="{{status.levels[0].columns.length}}">
+                    <!--<md-input-container>
                         <label>加入 %</label>
                         <md-select ng-model="percentType">
                             <md-option ng-repeat="tableOption in tableOptions" ng-value="tableOption.id">
                                 {{tableOption.title}}
                             </md-option>
                         </md-select>
-                    </md-input-container>
+                    </md-input-container>-->
                     <button class="basic ui icon button" ng-click="exportExcel(structs)">
                         <i class="download icon"></i> 下載結果
                     </button>

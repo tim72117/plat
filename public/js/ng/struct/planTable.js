@@ -38,7 +38,6 @@ angular.module('ngStruct', [])
         //$http({method: 'POST', url: 'calculate', data:{structs: calculation.structs, columns: $scope.columns, schoolID: $scope.selected.schools}})
         $http({method: 'POST', url: 'calculate', data:{columns: calculation.selectedColumns, schoolID: selected.schools}})
         .success(function(data, status, headers, config) {
-            console.log(data);
             calculation.results = data.results;
         }).error(function(e) {
             console.log(e);
@@ -53,7 +52,6 @@ angular.module('ngStruct', [])
             amount *= items.length;
             levels[i] = {amount: amount, items: items};
         }
-        console.log(levels)
         for (var j = 0; j < amount; j++) {
             rows[j] = {columns: [], parents: []};
             for (i in levels) {
@@ -434,6 +432,7 @@ angular.module('ngStruct', [])
                     $scope.selected.columns.splice(index+offect, 1);
                     $scope.selected.columns.splice(index, 0, column);
                     structService.getLevels();
+                    structService.calculate()
                 }, 300);
             };
 

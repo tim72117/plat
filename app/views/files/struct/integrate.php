@@ -395,9 +395,9 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
             clickOutsideToClose: true
         })
         .then(function(answer) {
-            $scope.status = 'You said the information was "' + answer + '".';
+            $scope.explainStatus = 'You said the information was "' + answer + '".';
         }, function() {
-            $scope.status = 'You cancelled the dialog.';
+            $scope.explainStatus = 'You cancelled the dialog.';
         });
     };
 
