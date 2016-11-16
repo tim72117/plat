@@ -291,31 +291,32 @@ class StructFile extends CommFile {
             // }
         }*/
 
-        $columns = Input::get('columns');
-        $selectedTables = [];
-        foreach ($columns as $i => $column) {
-            $selectedTable = \Row\Column::find($i)->load('inTable')['inTable']['name'];
-            if (!in_array($selectedTable,$selectedTables)) {
-                array_push($selectedTables,$selectedTable);
-            }
+        $columnIDs = Input::get('columns');
+        $columns = \Illuminate\Database\Eloquent\Collection::make([]);
+        foreach ($columnIDs as $columnID) {
+            $columns->push(\Row\Column::find($columnID)->load('inTable'));
         }
+        
+        $selectedTables = [];
+        $columns->each(function($column) use(&$selectedTables) {
+            if (!in_array($column->in_table->name,$selectedTables)) {
+                    array_push($selectedTables,$column->in_table->name);
+            }
+        });
 
         foreach ($selectedTables as $selectedTable) {
             if ($selectedTable != $mainTable->name) {
                  $query->join($selectedTable, $mainTable->name . '.身分證字號', '=', $selectedTable . '.身分證字號');
              }
         }
+        
+        $selects = [];
+        $columns->each(function($column) use(&$selects){
+            array_push($selects,$column->in_table->name . '.' . $column->title . ' AS C' . $column->id);
+        });
 
-        $selects = array_map(function($key, $column) {
-            $selectedTable = \Row\Column::find($key)->load('inTable')['inTable']['name'];
-            $selectedColTitle = \Row\Column::find($key)['title'];
-            return $selectedTable . '.' . $selectedColTitle . ' AS C' . $key;
-        }, array_keys($columns), Input::get('columns'));
-
-        foreach ($columns as $i => $column) {
-            $selectedTable = \Row\Column::find($i)->load('inTable')['inTable']['name'];
-            $selectedColTitle = \Row\Column::find($i)['title'];
-            $query->groupBy($selectedTable . '.' . $selectedColTitle);
+        foreach ($columns as $column) {
+            $query->groupBy($column->in_table->name . '.' . $column->title);
         }
 
         $query->select($selects)
