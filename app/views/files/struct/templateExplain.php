@@ -10,7 +10,7 @@
         </thead>
         <tbody>
             <tr ng-repeat-start="(index, table) in tables" class="no-animate">
-                <td rowspan="{{ getExplanSpan(table) }}" ng-if="categories[table.title]">{{ categories[table.title].title }}</td>
+                <td rowspan="{{ getExplanSpan(index,table) }}" ng-if="categories[table.title]">{{ categories[table.title].title }}</td>
                 <td rowspan="{{ table.expanded ? table.explains.length : 1 }}">{{ table.title }}</td>
                 <td class="no-animate" rowspan="{{ table.expanded ? table.explains.length : 1 }}">
                     <div class="compact ui icon mini basic vertical buttons" ng-if="!table.disabled || table.expanded">

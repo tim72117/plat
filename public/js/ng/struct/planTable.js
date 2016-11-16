@@ -53,6 +53,7 @@ angular.module('ngStruct', [])
             amount *= items.length;
             levels[i] = {amount: amount, items: items};
         }
+        console.log(levels)
         for (var j = 0; j < amount; j++) {
             rows[j] = {columns: [], parents: []};
             for (i in levels) {
@@ -473,19 +474,18 @@ angular.module('ngStruct', [])
 
             $http({method: 'POST', url: 'getExplans', data:{}})
             .success(function(data, status, headers, config) {
-                console.log(data);
                 $scope.tables = data.tables;
                 $scope.categories = data.categories;
             }).error(function(e) {
                 console.log(e);
             });
 
-            $scope.getExplanSpan = function(table) {
-                var explans = $scope.tables.slice(index, index+categories[table.title].size)
-                var explanSpan = table.explans.length - $filter('filter')(table.explans, {expanded: true}).length;
+            $scope.getExplanSpan = function(index,table) {
+                var explans = $scope.tables.slice(index, index+$scope.categories[table.title].size);
+                var explanSpan = explans.length - $filter('filter')(explans, {expanded: true}).length;
                 for (i in explans) {
                     if (explans[i].expanded) {
-                        explanSpan += explans[i].explanations.length;
+                        explanSpan += explans[i].explains.length;
                     };
                 }
                 return explanSpan;
