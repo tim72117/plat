@@ -6,9 +6,9 @@
                 <th colspan="{{status.levels[0].columns.length}}">
                     <md-input-container>
                         <label>加入 %</label>
-                        <md-select ng-model="crossPercent">
-                            <md-option ng-repeat="tableOption in tableOptions" ng-value="tableOption" ng-click="setPercent(tableOption)">
-                                {{tableOption}}
+                        <md-select ng-model="percentType">
+                            <md-option ng-repeat="tableOption in tableOptions" ng-value="tableOption.id">
+                                {{tableOption.title}}
                             </md-option>
                         </md-select>
                     </md-input-container>
@@ -16,7 +16,7 @@
                         <i class="download icon"></i> 下載結果
                     </button>
                 </th>
-                <th colspan="{{status.calculations.length}}">
+                <th colspan="{{status.calculations.length * (percentType=='no' ? 1 : 2) }}">
                     <div ng-hide="tableTitle.editing">
                         <span ng-dblclick="edit()" ng-bind-html="tableTitle.title"></span>
                     </div>
@@ -36,19 +36,24 @@
                         <md-icon md-svg-icon="keyboard-arrow-right"></md-icon>
                     </md-button>
                 </th>
-                <th ng-repeat="(key,calculation) in status.calculations" class="top aligned" ng-mousedown="dragFrom(key)" ng-mouseup="dragTo(key)" ng-style="{cursor:dragBefore.length==0 ? 'default' : 'move'}">
-                    <label class="compact ui icon mini button">
+                <th colspan="{{percentType=='no' ? 1: 2 }}" ng-repeat="(key,calculation) in status.calculations"
+                    class="top aligned"
+                    ng-mousedown="dragFrom(key)"
+                    ng-mouseup="dragTo(key)"
+                    ng-style="{cursor:dragBefore.length==0 ? 'default' : 'move'}">
+                    <!--<label class="compact ui icon mini button">
                         <i class="move icon"></i>
-                    </label>
-                    <button class="compact ui icon mini button" ng-click="removeCalculation(calculation)">
-                        <i class="close icon"></i>
-                    </button>
+                    </label>-->
+                    <md-button aria-label="刪除" class="md-icon-button" ng-click="removeCalculation($index)">
+                        <md-icon md-svg-icon="clear"></md-icon>
+                    </md-button>
                 </th>
             </tr>
             <tr>
                 <th ng-if="status.levels.length == 0"></th>
                 <th ng-repeat="column in selected.columns">{{ column.title }}</th>
-                <th ng-repeat="calculation in status.calculations" class="top aligned" style="max-width:200px">
+                <th ng-repeat-start="calculation in status.calculations" class="top aligned" style="max-width:200px">
+                    計數
                     <!--<div ng-repeat="struct in calculation.structs">
                         {{ struct.title }}
                         <div class="ui label" ng-repeat="row in struct.rows">
@@ -57,24 +62,25 @@
                     </div>
                     單位：人-->
                 </th>
+                <th ng-repeat-end ng-if="percentType!='no'">
+                    百分比
+                </th>
             </tr>
         </thead>
         <tbody>
             <tr ng-repeat="level in status.levels">
                 <td ng-repeat="column in level.columns" rowspan="{{ column.rowspan }}">{{ column.name }}</td>
-                <td ng-repeat="calculation in status.calculations" ng-if="colPercent==rowPercent">{{ getResults(calculation.results, level) }}</td>
-                <td ng-repeat="calculation in status.calculations" ng-if="colPercent">{{ getResults(calculation.results, level) }} ({{getTotalPercent(getResults(calculation.results, level),getNearestColumnTotal(calculation.results, level))| number : 2}} %)</td>
-                <td ng-repeat="(key,calculation) in status.calculations" ng-if="rowPercent">{{ getResults(calculation.results, level) }} <span ng-if="restrictInvolve(key)">({{getRowPercent(key,level)| number : 2}} %)</span></td>
+                <td ng-repeat-start="calculation in status.calculations">{{ getResults(calculation, level) }}</td>
+                <td ng-repeat-end ng-if="percentType!='no'">{{ getPercent(calculation, level, percentType) | number:2 }}%</td>
+                <!--<td ng-repeat="(key,calculation) in status.calculations" ng-if="rowPercent">
+                    {{ getResults(calculation, level) }}
+                    <span ng-if="restrictInvolve(key)">({{getRowPercent(key,level)| number : 2}} %)</span>
+                </td>-->
             </tr>
-            <tr ng-if="status.levels.length == 0">
-                <td>總和</td>
-                <td ng-repeat="calculation in status.calculations">{{ calculation.results[''] }}</td>
-            </tr>
-            <tr ng-if="status.calculations.length > 0 && columns.length > 0">
-                <td colspan="{{ columns.length }}">總和</td>
-                <td ng-repeat="calculation in status.calculations" ng-if="colPercent==rowPercent">{{ getCrossColumnTotal(calculation.results, levels) }}</td>
-                <td ng-repeat="calculation in status.calculations" ng-if="colPercent">{{ getCrossColumnTotal(calculation.results, levels) }}</td>
-                <td ng-repeat="calculation in status.calculations" ng-if="rowPercent">{{ getCrossColumnTotal(calculation.results, levels) }}</td>
+            <tr ng-if="status.calculations.length > 0">
+                <td colspan="{{ selected.columns.length == 0 ? 1 : selected.columns.length }}">總和</td>
+                <td ng-repeat="calculation in status.calculations">{{ getCrossColumnTotal(calculation) }}</td>
+                <td ng-if="percentType!='no'"></td>
             </tr>
         </tbody>
     </table>

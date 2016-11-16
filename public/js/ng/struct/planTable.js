@@ -4,8 +4,6 @@ angular.module('ngStruct', [])
     var selected = {schools: [], columns: []};
     var status = {levels: [], page: 0, calculations: []};
     var calculate = function() {
-        colPercent = false;
-        rowPercent = false;
         if (status.calculations.length > 0){
             if (JSON.stringify(status.calculations[0].selectedColumns) != JSON.stringify(selected.columns.map( function(column) { return column.id} ))) {
                 var selectedColumns = selected.columns.map( function(column) { return column.id} );
@@ -56,7 +54,7 @@ angular.module('ngStruct', [])
             levels[i] = {amount: amount, items: items};
         }
         for (var j = 0; j < amount; j++) {
-            rows[j] = {columns: []};
+            rows[j] = {columns: [], parents: []};
             for (i in levels) {
                 var step = amount / levels[i].amount;
                 var part = parseInt(j / step);
@@ -64,6 +62,8 @@ angular.module('ngStruct', [])
                 if (part * step == j) {
                     item.rowspan = step;
                     rows[j].columns.push(item);
+                } else {
+                    rows[j].parents.push(item);
                 }
             }
         }
@@ -280,27 +280,56 @@ angular.module('ngStruct', [])
         },
         controller: function($scope, $filter, $timeout) {
 
-            $scope.colPercent = false;
-            $scope.rowPercent = false;
             $scope.dragBefore = [];
-            $scope.tableOptions = ['行%', '列%', '不加%'];
+            $scope.tableOptions = [
+                {id: 'no', title: '不加%'},
+                {id:'row', title: '行%'}
+                // {key: 'col', title: '列%'}
+            ];
+            $scope.percentType = 'no';
 
-            $scope.getResults = function(result, level) {
-                for (var i in level.columns) {
-                    result = result[level.columns[i].name] || 0;
+            $scope.getResults = function(calculation, level) {
+                var results = calculation.results;
+                for (var i in level.parents) {
+                    results = results[level.parents[i].name] || 0;
                 }
-                return result;
+                for (var i in level.columns) {
+                    results = results[level.columns[i].name] || 0;
+                }
+                return results;
             };
 
-            $scope.getCrossColumnTotal = function(calculation,levels) {
+            $scope.getParentResult = function(calculation, level) {
+                var results = calculation.results;
+                for (var i in level.parents) {
+                    results = results[level.parents[i].name] || {};
+                };
+                return results;
+            };
+
+            $scope.getPercent = function(calculation, level, percentType) {
+                switch (percentType) {
+                    case 'row':
+                        var percent = $scope.getTotalPercent($scope.getResults(calculation, level), $scope.getCrossColumnTotal(calculation));
+                        break;
+                    case 'col':
+                        var percent = $scope.getNearestColumnTotal(calculation, level);
+                        break;
+                    default:
+                        var percent = 0;
+                        break;
+                }
+                return percent;
+            }
+            $scope.getCrossColumnTotal = function(calculation) {
                 var crossColumnTotal = 0;
-                for (var i in levels) {
-                    crossColumnTotal = crossColumnTotal+ 1*$scope.getResults(calculation, levels[i]);
+                for (var i in $scope.status.levels) {
+                    crossColumnTotal = crossColumnTotal + 1*$scope.getResults(calculation, $scope.status.levels[i]);
                 }
                 return crossColumnTotal;
             };
 
-            $scope.getTotalPercent = function(value,total) {
+            $scope.getTotalPercent = function(value, total) {
                 return total == 0 ? 0 : value*100/total;
             };
 
@@ -330,20 +359,17 @@ angular.module('ngStruct', [])
                 }
             };
 
-            $scope.getNearestColumnTotal = function(calculation,level) {
+            $scope.getNearestColumnTotal = function(calculation, level) {
                 var nearestColumnTotal = 0;
-                var  nearestColumn = $scope.getParentResult(calculation, level.parents);
+                var nearestColumn = $scope.getParentResult(calculation, level);
                 for (var i in nearestColumn) {
-                    nearestColumnTotal = nearestColumnTotal+ 1*nearestColumn[i];
+                    nearestColumnTotal = nearestColumnTotal + 1*nearestColumn[i];
                 }
                 return nearestColumnTotal;
             };
 
-            $scope.removeCalculation = function(calculation) {
-                var index = $scope.status.calculations.indexOf(calculation);
-                if (index > -1) {
-                    $scope.status.calculations.splice(index, 1);
-                }
+            $scope.removeCalculation = function(index) {
+                $scope.status.calculations.splice(index, 1);
             };
 
             $scope.getTitle = function() {
@@ -370,30 +396,6 @@ angular.module('ngStruct', [])
 
             $scope.save = function() {
                 delete $scope.tableTitle.editing;
-            };
-
-            $scope.setPercent = function(mode) {
-                if (mode == '行%')
-                    $scope.setColPercent();
-                if (mode == '列%')
-                    $scope.setRowPercent();
-                if (mode == '不加%')
-                    $scope.setNoPercent();
-            };
-
-            $scope.setRowPercent = function() {
-                $scope.colPercent = false;
-                $scope.rowPercent = true;
-            };
-
-            $scope.setColPercent = function() {
-                $scope.colPercent = true;
-                $scope.rowPercent = false;
-            };
-
-            $scope.setNoPercent = function() {
-                $scope.colPercent = false;
-                $scope.rowPercent = false;
             };
 
             $scope.getStructsTitile = function(key) {

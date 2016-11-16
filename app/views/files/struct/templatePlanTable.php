@@ -1,8 +1,7 @@
-<div>
-<table class="ui teal collapsing celled structured very compact table" ng-class="{small:tableSize=='small', large:tableSize=='large'}" style="background: #F5F5F5">
+<table class="ui teal celled structured table" ng-class="{small:tableSize=='small', large:tableSize=='large'}">
     <thead>
         <tr>
-            <th></th>
+            <!--<th></th>-->
             <th>發展歷程</th>
             <th>表單名稱</th>
             <th ng-if="structClassShow">選擇欄位</th>
@@ -12,11 +11,11 @@
     <tbody>
 
         <tr ng-repeat-start="(index, struct) in tables" ng-hide="struct.hide" class="no-animate">
-            <td rowspan="{{ getRowSpan(tables) }}" ng-if="$first" class="no-animate">
+            <!--<td rowspan="{{ getRowSpan(tables) }}" ng-if="$first" class="no-animate">
                 <button class="compact ui olive icon large button" ng-click="addNewCalStruct();destroyPopup()" style="background: #93A42A;color: white">
                     <i name="needHelp4" class="play icon"></i> 開始計算
                 </button>
-            </td>
+            </td>-->
             <td rowspan="{{ categories[struct.title].expanded ? getRowSpan(tables.slice(index, index+categories[struct.title].size)) : 1 }}"
                 ng-if="categories[struct.title]"
                 class="no-animate">
@@ -75,4 +74,3 @@
 
     </tbody>
 </table>
-</div>

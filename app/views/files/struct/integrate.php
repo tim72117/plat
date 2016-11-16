@@ -109,7 +109,7 @@
                     <md-icon md-svg-icon="icon-eye"></md-icon>
                     預覽表格
                 </md-button>
-                <md-button aria-label="開始計算" md-colors="{background: 'accent'}" ng-click="calculate()">
+                <md-button aria-label="開始計算" class="md-raised md-warn" ng-click="calculate()">
                     <md-icon md-svg-icon="icon-eye"></md-icon>
                     開始計算
                 </md-button>
@@ -130,54 +130,37 @@
 
         <md-tabs md-dynamic-height md-selected="status.page">
             <md-tab label="快速設定">
-                <md-content class="md-padding" flex-sm="80" flex-md="60" flex-lg="50" flex-xl="30" layout="column" style="height:100%">
-                    <div layout-padding>
-                        <!--<div class="ui ribbon label" style="background: #309292;color: white">
-                            <h4>選擇分析學校</h4>
-                        </div>-->
-                        <md-input-container>
-                            <label>選擇分析學校</label>
-                            <md-select ng-model="selected.schools" aria-label="選擇分析學校" multiple md-selected-text="selected.schools.length+'所學校'" ng-change="changeSchools()">
-                                <md-button layout-fill value="all" ng-click="selectAllSchool()">全選</md-button>
-                                <md-optgroup>
-                                    <md-option ng-value="organization" ng-repeat="organization in organizations">{{organization.now.name}}</md-option>
-                                </md-optgroup>
-                            </md-select>
-                        </md-input-container>
-                    </div>
-                    <div layout-padding>
-                        <!--<div class="ui ribbon label" align="center" style="background: #309292;color: white"><h4> 加入分類變項</h4></div>-->
-                        <div layout="row" layout-sm="column" layout-align="space-around" ng-if="loading">
-                            <md-progress-circular md-mode="indeterminate"></md-progress-circular>
-                        </div>
-                        <table class="ui teal celled table" style="background: #F5F5F5" ng-if="!loading">
-                            <thead>
-                                <tr><th>選擇分類變項</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr ng-repeat="column in mainTable.columns" ng-if="mainTable.expanded">
-                                    <td ng-class="{negative: column.disabled}">
-                                        <div ng-if="column.type=='slider'">
-                                            {{ column.filter[0] }}年至{{ column.filter[1] }}
-                                            <div ng-slider ng-model="column.filter" items="column.items"></div>
-                                        </div>
-                                        <struct-items table="mainTable" column="column" multiple="true"></struct-items>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
+                <md-content class="md-padding" flex-sm="80" flex-md="60" flex-lg="50" flex-xl="30" layout="column">
+                    <md-input-container>
+                        <label>選擇分析學校</label>
+                        <md-select ng-model="selected.schools" aria-label="選擇分析學校" multiple md-selected-text="selected.schools.length+'所學校'" ng-change="changeSchools()">
+                            <md-button layout-fill value="all" ng-click="selectAllSchool()">全選</md-button>
+                            <md-optgroup>
+                                <md-option ng-value="organization" ng-repeat="organization in organizations">{{organization.now.name}}</md-option>
+                            </md-optgroup>
+                        </md-select>
+                    </md-input-container>
+                    <table class="ui teal celled table" style="background: #F5F5F5" ng-if="!loading">
+                        <thead>
+                            <tr><th>選擇分類變項</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="column in mainTable.columns" ng-if="mainTable.expanded">
+                                <td ng-class="{negative: column.disabled}">
+                                    <div ng-if="column.type=='slider'">
+                                        {{ column.filter[0] }}年至{{ column.filter[1] }}
+                                        <div ng-slider ng-model="column.filter" items="column.items"></div>
+                                    </div>
+                                    <struct-items table="mainTable" column="column" multiple="true"></struct-items>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </md-content>
             </md-tab>
             <md-tab label="串聯其他表單">
-                <md-content class="md-padding" layout="row" style="height:100%">
-                <div flex="50">
+                <md-content class="md-padding" flex-sm="100" flex-md="80" flex-lg="70" flex-xl="50" layout="column">
                     <div plan-table tables="tables" categories="categories"></div>
-                </div>
-                <div flex="50" layout="column" style="height:100%">
-
-                </div>
                 </md-content>
             </md-tab>
             <md-tab label="分析結果" md-on-select="calculate()">
