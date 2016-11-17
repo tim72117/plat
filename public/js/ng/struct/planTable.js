@@ -470,12 +470,14 @@ angular.module('ngStruct', [])
         scope: {},
         templateUrl: 'templateExplain',
         controller: function($scope, $http, $filter) {
+            $scope.loading = true;
             $scope.explans = [];
 
             $http({method: 'POST', url: 'getExplans', data:{}})
             .success(function(data, status, headers, config) {
                 $scope.tables = data.tables;
                 $scope.categories = data.categories;
+                $scope.loading = false;
             }).error(function(e) {
                 console.log(e);
             });
