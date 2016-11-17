@@ -1,6 +1,5 @@
-<div ng-if="status.calculations.length>0">
-    <table class="ui teal collapsing celled structured very compact bottom attached table" ng-class="{small:tableSize=='small', large:tableSize=='large'}">
-        <a id="resultTable"></a>
+<div ng-if="status.calculations.length > 0">
+    <table class="ui teal celled structured table" ng-class="{small:tableSize=='small', large:tableSize=='large'}">
         <thead>
             <tr>
                <th colspan="{{status.levels[0].columns.length}}">

@@ -130,7 +130,7 @@
 
         <md-tabs md-dynamic-height md-selected="status.page">
             <md-tab label="快速設定">
-                <md-content class="md-padding" flex-sm="80" flex-md="60" flex-lg="50" flex-xl="30" layout="column">
+                <md-content class="md-padding" flex-sm="100" flex-md="60" flex-lg="50" flex-xl="30" layout="column">
                     <md-input-container>
                         <label>選擇分析學校</label>
                         <md-select ng-model="selected.schools" aria-label="選擇分析學校" multiple md-selected-text="selected.schools.length+'所學校'" ng-change="changeSchools()">
@@ -140,7 +140,7 @@
                             </md-optgroup>
                         </md-select>
                     </md-input-container>
-                    <table class="ui teal celled table" style="background: #F5F5F5" ng-if="!loading">
+                    <table class="ui teal celled table" ng-if="!loading">
                         <thead>
                             <tr><th>選擇分類變項</th></tr>
                         </thead>
@@ -164,7 +164,7 @@
                 </md-content>
             </md-tab>
             <md-tab label="分析結果" md-on-select="calculate()">
-                <md-content class="md-padding">
+                <md-content class="md-padding" flex-sm="100" flex-md="80" flex-lg="70" flex-xl="50" layout="column">
                     <div result-table calculations="calculations" levels="levels"></div>
                 </md-content>
             </md-tab>
@@ -172,12 +172,16 @@
         </div>
     </div>
 
-    <md-sidenav class="md-sidenav-right" md-is-open="mdSidenav.right" layout="column" style="min-width: 800px">
-        <md-toolbar class="md-theme-indigo">
-            <h1 class="md-toolbar-tools">預覽</h1>
+    <md-sidenav class="md-sidenav-right" md-is-open="status.preview" md-disable-backdrop layout="column" style="min-width:{{getPreviewWidth()}}px">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>預覽</h2>
+                <div flex></div>
+                <md-button aria-label="關閉" ng-click="status.preview = false">關閉</md-button>
+            </div>
         </md-toolbar>
         <md-content flex layout-padding>
-            <table class="ui collapsing celled structured very compact bottom attached table" ng-class="{small:tableSize=='small', large:tableSize=='large'}">
+            <table class="ui collapsing celled structured table" ng-class="{small:tableSize=='small', large:tableSize=='large'}">
                 <thead>
                     <tr>
                         <th ng-repeat="column in selected.columns">{{ column.title }}</th>
@@ -207,16 +211,12 @@
     </md-sidenav>
 </md-content>
 
-<script src="/js/jquery-ui/1.11.4/jquery-ui.min.js"></script>
-<link rel="stylesheet" href="/js/jquery-ui/1.11.4/jquery-ui.min.css" />
-
 <script src="/js/jquery.fileDownload.js"></script>
-
 <script src="/js/ng/struct/planTable.js"></script>
 
 <script>
 app.requires.push('ngStruct');
-app.controller('statusController', function($scope, $http, $filter, $timeout, $location, $anchorScroll, $mdDialog, $q, structService) {
+app.controller('statusController', function($scope, $http, $filter, $timeout, $location, $anchorScroll, $mdDialog, $q, structService, $mdMedia) {
     $scope.helpChoosen = false;
     $scope.tableSize = '';
     $scope.preCalculations = [];
@@ -247,12 +247,8 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.toggleSidenavRight = function() {
-        $scope.mdSidenav.right = !$scope.mdSidenav.right;
+        structService.status.preview = !structService.status.preview;
     };
-
-    // $timeout(function() {
-    //     $scope.mdSidenav.left = true;
-    // }, 1000);
 
     $http({method: 'POST', url: 'getSchools', data:{}})
     .success(function(data, status, headers, config) {
@@ -264,6 +260,14 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
 
     $scope.changeSchools = function() {
         structService.clean();
+    };
+
+    $scope.selectAllSchool = function() {
+        if (JSON.stringify($scope.selected.schools) === JSON.stringify($scope.organizations) ) {
+            $scope.selected.schools = [];
+        }else{
+            $scope.selected.schools = $scope.organizations;
+        }
     };
 
     $scope.addPreCalculation = function() {
@@ -362,12 +366,18 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         }
     };
 
-    $scope.selectAllSchool = function() {
-        if (JSON.stringify($scope.selected.schools) === JSON.stringify($scope.organizations) ) {
-            $scope.selected.schools = [];
-        }else{
-            $scope.selected.schools = $scope.organizations;
+    $scope.getPreviewWidth = function() {
+        var width = 0;
+        if ($mdMedia('sm')) {
+            width = 100;
+        } else if ($mdMedia('md')) {
+            width = 400;
+        } else if ($mdMedia('lg')) {
+            width = 700;
+        } else if ($mdMedia('gt-lg')) {
+            width = 1000;
         }
+        return width;
     };
 
     $(".unselectable").css( {
@@ -403,15 +413,15 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
 
     function DialogController($scope, $mdDialog) {
         $scope.hide = function() {
-          $mdDialog.hide();
+            $mdDialog.hide();
         };
 
         $scope.cancel = function() {
-          $mdDialog.cancel();
+            $mdDialog.cancel();
         };
 
         $scope.answer = function(answer) {
-          $mdDialog.hide(answer);
+            $mdDialog.hide(answer);
         };
     }
 })

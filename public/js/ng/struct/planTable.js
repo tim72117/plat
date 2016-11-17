@@ -2,7 +2,7 @@ angular.module('ngStruct', [])
 
 .factory('structService', function($http, $filter, $timeout) {
     var selected = {schools: [], columns: []};
-    var status = {levels: [], page: 0, calculations: []};
+    var status = {levels: [], page: 0, calculations: [], preview: false};
     var calculate = function() {
         if (status.calculations.length > 0){
             if (JSON.stringify(status.calculations[0].selectedColumns) != JSON.stringify(selected.columns.map( function(column) { return column.id} ))) {
@@ -32,10 +32,10 @@ angular.module('ngStruct', [])
         }
         //$scope.getTitle(); in integrate.php
         status.page = 2;
+        status.preview = false;
     };
 
     var addCalculation = function(calculation) {
-        //$http({method: 'POST', url: 'calculate', data:{structs: calculation.structs, columns: $scope.columns, schoolID: $scope.selected.schools}})
         $http({method: 'POST', url: 'calculate', data:{columns: calculation.selectedColumns, schoolID: selected.schools}})
         .success(function(data, status, headers, config) {
             calculation.results = data.results;
@@ -96,7 +96,7 @@ angular.module('ngStruct', [])
             multiple: '='
         },
         template: `
-            <md-input-container>
+            <md-input-container style="margin-bottom: 0">
                 <label>{{column.title}}</label>
                 <md-select multiple ng-if="multiple && column.type!='slider'" style="margin:0"
                     placeholder="{{column.title}}"
@@ -118,7 +118,7 @@ angular.module('ngStruct', [])
         link: function(scope, element) {
             scope.selected = structService.selected;
         },
-        controller: function($scope, $http, $filter, $q) {
+        controller: function($scope, $http, $filter, $q, $mdMedia) {
 
             $scope.toggleItems = function() {
                 var index = structService.selected.columns.indexOf($scope.column);
@@ -130,6 +130,7 @@ angular.module('ngStruct', [])
                     }
                 }
                 structService.getLevels();
+                structService.status.preview = !$mdMedia('xs') && !$mdMedia('sm');
             }
 
             $scope.loadItem = function(table, column) {
