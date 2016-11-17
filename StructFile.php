@@ -102,53 +102,30 @@ class StructFile extends CommFile {
 
     public function getEachItems()
     {
-        $tables = [];
         $organizations = \Plat\Project\Organization::find(array_fetch(Input::get('organizations'), 'id'))->load('every')->map(function($organization) {
             return $organization->every->lists('id');
         })->flatten()->toArray();
 
+        $column = \Row\Column::find(Input::get('column_id'));
 
-        $table = \Row\Table::find(Input::get('table_id'));
-
-        $columnNames = Input::get('rowTitle');
-        $mainSelects = $columnNames. ' AS name';
-        $selects = 'analysis_tted.dbo.'.$table->name.'.'.$columnNames. ' AS name';
-        $columns = 'analysis_tted.dbo.'.$table->name.'.'.$columnNames;
         $mainTable = $this->populations[$this->configs['population']]['table'];
 
-        $order = 0;
-        foreach ($this->tables as $key => $eachtTable) {
-            if ($key == $table->name) {
-                break;
-            }else {
-                $order ++;
-            }
+        $query = DB::connection('sqlsrv_analysis_tted')
+            ->table($mainTable)
+            ->whereIn(DB::raw('substring(' . $mainTable . '.學校代碼,3,4)'), $organizations)
+            ->groupBy($column->in_table->name . '.' . $column->title)
+            ->select($column->in_table->name . '.' . $column->title . ' AS name')
+            ->orderBy($column->in_table->name . '.' . $column->title);
+
+        if ($column->in_table->name != $mainTable) {
+            $query->leftJoin($column->in_table->name, $mainTable . '.身分證字號', '=', $column->in_table->name . '.身分證字號');
         }
 
-        if ($table->name == $mainTable) {
-            $query = DB::connection('sqlsrv_analysis_tted')
-                ->table($table->name)
-                ->whereIn(DB::raw('substring(學校代碼,3,4)'), $organizations)
-                ->groupBy($columnNames)
-                ->select($mainSelects);
-        } else{
-            $query = DB::connection('sqlsrv_analysis_tted')
-                ->table('analysis_tted.dbo.'.$mainTable)
-                ->leftJoin('analysis_tted.dbo.'.$table->name, 'analysis_tted.dbo.' . $mainTable . '.身分證字號', '=', 'analysis_tted.dbo.'.$table->name.'.身分證字號')
-                ->whereIn(DB::raw('substring(analysis_tted.dbo.'.$mainTable.'.學校代碼,3,4)'), $organizations)
-                ->groupBy($columns)
-                ->select($selects);
-        }
-
-        Cache::forget($query->getCacheKey());
-        $items = Cache::remember($query->getCacheKey(), 300, function() use ($query) {
-            $items = array_map(function($item) {
-                return ['name' => $item];
-            }, $query->lists('name'));
-            return $items;
+        $items = Cache::remember($query->getCacheKey(), 1, function() use ($query) {
+            return $query->get('name');
         });
 
-        return ['items' => $items, 'key' => $order];
+        return ['items' => $items];
     }
 
     public function calibration()
@@ -296,7 +273,7 @@ class StructFile extends CommFile {
         foreach ($columnIDs as $columnID) {
             $columns->push(\Row\Column::find($columnID)->load('inTable'));
         }
-        
+
         $selectedTables = [];
         $columns->each(function($column) use(&$selectedTables) {
             if (!in_array($column->in_table->name,$selectedTables)) {
@@ -309,7 +286,7 @@ class StructFile extends CommFile {
                  $query->join($selectedTable, $mainTable->name . '.身分證字號', '=', $selectedTable . '.身分證字號');
              }
         }
-        
+
         $selects = [];
         $columns->each(function($column) use(&$selects){
             array_push($selects,$column->in_table->name . '.' . $column->title . ' AS C' . $column->id);
