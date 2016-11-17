@@ -28,12 +28,15 @@
             <tr class="unselectable" >
                 <th ng-if="status.levels.length == 0"></th>
                 <th ng-repeat="column in selected.columns">
-                    <md-button class="md-icon-button" aria-label="左移" ng-click="moveColumn($index, -1)" ng-if="!$first">
-                        <md-icon md-svg-icon="keyboard-arrow-left"></md-icon>
-                    </md-button>
-                    <md-button class="md-icon-button" aria-label="右移" ng-click="moveColumn($index, 1)" ng-if="!$last">
-                        <md-icon md-svg-icon="keyboard-arrow-right"></md-icon>
-                    </md-button>
+                    <div layout="row">
+                        <md-button class="md-icon-button" aria-label="左移" ng-click="moveColumn($index, -1)" ng-if="!$first">
+                            <md-icon md-svg-icon="keyboard-arrow-left"></md-icon>
+                        </md-button>
+                        <span flex></span>
+                        <md-button class="md-icon-button" aria-label="右移" ng-click="moveColumn($index, 1)" ng-if="!$last">
+                            <md-icon md-svg-icon="keyboard-arrow-right"></md-icon>
+                        </md-button>
+                    </div>
                 </th>
                 <th colspan="{{percentType=='no' ? 1: 2 }}" ng-repeat="(key,calculation) in status.calculations"
                     class="top aligned"

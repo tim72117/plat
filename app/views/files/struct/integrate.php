@@ -195,6 +195,19 @@
                             單位：人
                         </th>
                     </tr>
+                    <tr ng-if="selected.columns.length > 1">
+                        <th ng-repeat="column in selected.columns">
+                            <div layout="row">
+                                <md-button class="md-icon-button" aria-label="左移" ng-click="moveColumn($index, -1)" ng-if="!$first">
+                                    <md-icon md-svg-icon="keyboard-arrow-left"></md-icon>
+                                </md-button>
+                                <span flex></span>
+                                <md-button class="md-icon-button" aria-label="右移" ng-click="moveColumn($index, 1)" ng-if="!$last">
+                                    <md-icon md-svg-icon="keyboard-arrow-right"></md-icon>
+                                </md-button>
+                            </div>
+                        </th>
+                    </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="level in status.levels">
@@ -380,6 +393,15 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
         return width;
     };
 
+    $scope.moveColumn = function(index, offect) {
+        $timeout(function() {
+            var column = $scope.selected.columns[index+offect];
+            $scope.selected.columns.splice(index+offect, 1);
+            $scope.selected.columns.splice(index, 0, column);
+            structService.getLevels();
+        }, 300);
+    };
+
     $(".unselectable").css( {
        'mozUserSelect': 'mozNone',
        'khtmlUserSelect': 'none',
@@ -397,7 +419,6 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
           clickOutsideToClose:true
         })
     };
-
 
     $scope.showExplain = function(ev) {
         $mdDialog.show({
