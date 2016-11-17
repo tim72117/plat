@@ -38,7 +38,7 @@
             <!--<td ng-if="structFilterShow && !struct.classExpanded && categories[struct.title]" class="no-animate"></td>-->
 
             <td ng-if="struct.expanded && struct.classExpanded" ng-class="{negative: struct.columns[0].disabled, disabled: struct.columns[0].disabled}" class="no-animate">
-                <struct-items table="struct" column="struct.columns[0]" multiple="true"></struct-items>
+                <struct-items column="struct.columns[0]" multiple="true"></struct-items>
             </td>
 
             <td ng-if="!struct.expanded && struct.classExpanded" colspan="{{struct.expanded ? 1 : 2}}" class="no-animate">
@@ -49,7 +49,7 @@
 
             <!--<td ng-class="{disabled: struct.columns[0].disabled}" ng-if="struct.classExpanded && structFilterShow" class="no-animate">
                 <div ng-if="!struct.columns[0].disabled && struct.expanded">
-                    <struct-items table="struct" column="struct.columns[0]" multiple="true" toggle-items="setFilter"></struct-items>
+                    <struct-items column="struct.columns[0]" multiple="true" toggle-items="setFilter"></struct-items>
                 </div>
             </td>-->
         </tr>
@@ -57,7 +57,7 @@
         <tr ng-repeat-end ng-repeat="row in struct.columns" ng-if="!$first && struct.expanded" ng-hide="struct.hide">
 
             <td ng-class="{negative: row.disabled, disabled: row.disabled}" class="no-animate">
-                <struct-items table="struct" column="row" multiple="true"></struct-items>
+                <struct-items column="row" multiple="true"></struct-items>
             </td>
 
             <!--<td ng-class="{disabled: row.disabled}" ng-if="structFilterShow" >
@@ -66,7 +66,7 @@
                     <div ng-slider ng-model="row.filter" items="row.items"></div>
                 </div>
                 <div ng-if="!row.disabled && row.type!='slider'">
-                    <struct-items table="struct" column="row" multiple="true" toggle-items="setFilter"></struct-items>
+                    <struct-items column="row" multiple="true" toggle-items="setFilter"></struct-items>
                 </div>
             </td>-->
 

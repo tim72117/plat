@@ -151,7 +151,7 @@
                                         {{ column.filter[0] }}年至{{ column.filter[1] }}
                                         <div ng-slider ng-model="column.filter" items="column.items"></div>
                                     </div>
-                                    <struct-items table="mainTable" column="column" multiple="true"></struct-items>
+                                    <struct-items column="column" multiple="true"></struct-items>
                                 </td>
                             </tr>
                         </tbody>
