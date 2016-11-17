@@ -91,7 +91,6 @@ angular.module('ngStruct', [])
         replace: false,
         transclude: false,
         scope: {
-            table: '=',
             column: '=',
             multiple: '='
         },
@@ -101,7 +100,7 @@ angular.module('ngStruct', [])
                 <md-select multiple ng-if="multiple && column.type!='slider'" style="margin:0"
                     placeholder="{{column.title}}"
                     ng-model="column.selectedItems"
-                    md-on-open="loadItem(table, column)"
+                    md-on-open="loadItem(column)"
                     ng-change="toggleItems(column)">
                     <md-option ng-value="item" ng-repeat="item in column.items">{{item.name}}</md-option>
                 </md-select>
@@ -111,7 +110,7 @@ angular.module('ngStruct', [])
                 //         <md-select ng-if="!multiple && column.type!='slider'" style="margin:0"
                 //     placeholder="{{column.title}}"
                 //     ng-model="selected.columns[column.id].items"
-                //     md-on-open="loadItem(table, column)"
+                //     md-on-open="loadItem(column)"
                 //     ng-change="toggleItems(column)">
                 //     <md-option ng-value="item" ng-repeat="item in column.items">{{item.name}}</md-option>
                 // </md-select>
@@ -133,16 +132,15 @@ angular.module('ngStruct', [])
                 structService.status.preview = !$mdMedia('xs') && !$mdMedia('sm');
             }
 
-            $scope.loadItem = function(table, column) {
+            $scope.loadItem = function(column) {
                 if (column.items && column.itemsLoadBy == structService.selected.schools) {
                     return column.items;
                 }
 
                 deferred = $q.defer();
-                $http({method: 'POST', url: 'getEachItems', data:{organizations: structService.selected.schools, table_id: table.id, rowTitle: column.title}})
+                $http({method: 'POST', url: 'getEachItems', data:{organizations: structService.selected.schools, column_id: column.id}})
                 .success(function(data, status, headers, config) {
                     column.itemsLoadBy = structService.selected.schools;
-                    table.disabled = data.items.length == 0;
                     column.items = data.items || [];
                     column.disabled = column.items.length == 0;
                     if (column.title == '年齡') column.disabled = true;
