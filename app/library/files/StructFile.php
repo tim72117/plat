@@ -24,12 +24,7 @@ class StructFile extends CommFile {
 
     public function get_views()
     {
-        return ['open', 'intern', 'integrate', 'organize'];
-    }
-
-    public function intern()
-    {
-        return 'files.struct.intern';
+        return ['open', 'integrate', 'organize'];
     }
 
     public function open()
@@ -67,32 +62,6 @@ class StructFile extends CommFile {
         return 'files.struct.organize';
     }
 
-    public function getIntern()
-    {
-        $tables = [];
-
-        foreach ($this->tables as $name => $table) {
-            $columns = DB::connection('sqlsrv_analysis_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
-
-            $columns = array_diff($columns, ['身分識別碼']);
-
-            $selects = array_map(function($key, $column) {
-                return $column . ' AS ' . $key;
-            }, array_keys($columns), $columns);
-
-            $rows = DB::connection('sqlsrv_analysis_tted')->table($table)->groupBy($columns)->select($selects)->get();
-
-            $values = [];
-            foreach ($columns as $key => $column) {
-                $values[$column] = array_values(array_unique(array_pluck($rows, $key)));
-                rsort($values[$column]);
-            }
-
-            $tables[$name] = $values;
-        }
-
-        return ['tables' => $tables];
-    }
 
     private $populations = [
         0 => ['id' => 186, 'title' => '新進師資生', 'yearColumnIndex' => 1, 'yearTitle' => '占教育部核定名額學年度', 'table' => 'TEV103_TE_StudentInSchool_OK', 'table_id' => 186, 'color' => 'blue'],
@@ -317,38 +286,38 @@ class StructFile extends CommFile {
 
     public function export_excel()
     {
-        $calculations = Input::get('calculations');
-        $columns      = Input::get('columns');
-        $levels       = Input::get('levels');
+        $results      = json_decode(Input::get('results'), true);
+        $columns      = json_decode(Input::get('columns'), true);
+        $levels       = json_decode(Input::get('levels'), true);
         $total        = Input::get('total');
         $rows         = [];
 
         $titles = array_map(function($column){
             return $column['title'];
-        },$columns);
-
-        array_push($titles,'計數');
-        array_push($rows,$titles);
+        }, $columns);
+        array_push($titles, '計數');
+        array_push($rows, $titles);
 
         foreach ($levels as $level) {
             $parents = isset($level['parents']) ? $level['parents']: [];
-            $values = array_merge($parents,$level['columns']);
+            $values = array_merge($parents, $level['columns']);
             $items = [];
             foreach ($values as $value) {
-                array_push($items,$value['name']);
+                array_push($items, $value['name']);
             }
             $string = implode('.', $items);
-            $calculation = !empty(array_fetch([$calculations], $string)) ? (string)array_fetch([$calculations], $string)[0] : '0';
-            array_push($items, $calculation);
+            $result = array_fetch([$results], $string);
+            $result = !empty($result) ? (string)$result[0] : '0';
+            array_push($items, $result);
             array_push($rows, $items);
         }
 
         $sum = ['總和'];
         for ($i=0; $i < count($items)-2; $i++) {
-            array_push($sum,'');
+            array_push($sum, '');
         }
-        array_push($sum,$total);
-        array_push($rows,$sum);
+        array_push($sum, $total);
+        array_push($rows, $sum);
 
         \Excel::create($this->file->title, function($excel) use($rows){
             $excel->sheet('Sheetname', function($sheet) use($rows) {

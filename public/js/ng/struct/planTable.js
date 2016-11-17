@@ -413,7 +413,7 @@ angular.module('ngStruct', [])
             $scope.exportExcel = function() {
                 jQuery.fileDownload('export_excel', {
                     httpMethod: "POST",
-                    data:{columns: $scope.selected.columns, calculations: $scope.status.calculations[0].results, levels: $scope.status.levels, total: $scope.getCrossColumnTotal($scope.status.calculations[0])},
+                    data:{columns: JSON.stringify($scope.selected.columns), results: JSON.stringify($scope.status.calculations[0].results), levels: JSON.stringify($scope.status.levels), total: $scope.getCrossColumnTotal($scope.status.calculations[0])},
                     failCallback: function (responseHtml, url) { console.log(responseHtml); }
                 });
             };

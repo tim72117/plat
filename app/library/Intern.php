@@ -4,6 +4,11 @@ namespace Plat\Other;
 
 class Intern {
 
+    public function intern()
+    {
+        return 'files.struct.intern';
+    }
+
     public function get_intern_count()
     {
 
@@ -351,6 +356,33 @@ class Intern {
         }
         // print_r($frequence);exit();
         return $frequence;
+    }
+
+    public function getIntern()
+    {
+        $tables = [];
+
+        foreach ($this->tables as $name => $table) {
+            $columns = DB::connection('sqlsrv_analysis_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
+
+            $columns = array_diff($columns, ['身分識別碼']);
+
+            $selects = array_map(function($key, $column) {
+                return $column . ' AS ' . $key;
+            }, array_keys($columns), $columns);
+
+            $rows = DB::connection('sqlsrv_analysis_tted')->table($table)->groupBy($columns)->select($selects)->get();
+
+            $values = [];
+            foreach ($columns as $key => $column) {
+                $values[$column] = array_values(array_unique(array_pluck($rows, $key)));
+                rsort($values[$column]);
+            }
+
+            $tables[$name] = $values;
+        }
+
+        return ['tables' => $tables];
     }
 
 }
