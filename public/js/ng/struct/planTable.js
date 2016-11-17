@@ -410,19 +410,10 @@ angular.module('ngStruct', [])
                 return title;
             };
 
-            $scope.exportExcel = function(structs) {
-                var tableTitle = '';
-                if ($scope.columns == '') {
-                    alert('請勾選欲顯示欄位');
-                    return false;
-                };
-
-                if ($scope.tableTitle !== undefined) {
-                    tableTitle = $scope.tableTitle.title_text;
-                }
+            $scope.exportExcel = function() {
                 jQuery.fileDownload('export_excel', {
                     httpMethod: "POST",
-                    data:{tableTitle: tableTitle, columns: $scope.columns,levels:$scope.levels,calculations: $scope.status.calculations},
+                    data:{columns: $scope.selected.columns, calculations: $scope.status.calculations[0].results, levels: $scope.status.levels, total: $scope.getCrossColumnTotal($scope.status.calculations[0])},
                     failCallback: function (responseHtml, url) { console.log(responseHtml); }
                 });
             };

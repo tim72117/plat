@@ -11,7 +11,7 @@
                             </md-option>
                         </md-select>
                     </md-input-container>-->
-                    <button class="basic ui icon button" ng-click="exportExcel(structs)">
+                    <button class="basic ui icon button" ng-click="exportExcel()">
                         <i class="download icon"></i> 下載結果
                     </button>
                 </th>
