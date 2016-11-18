@@ -491,9 +491,9 @@ angular.module('ngStruct', [])
             var chart = new Highcharts.Chart({
                 chart: {
                     renderTo: $element[0],
-                    plotBackgroundColor: null,
-                    plotBorderWidth: null,
                     plotShadow: false,
+                    width: 800,
+                    height: 600,
                     type: 'pie'
                 },
                 title: {
