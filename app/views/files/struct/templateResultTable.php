@@ -14,6 +14,10 @@
                     <button class="basic ui icon button" ng-click="exportExcel()">
                         <i class="download icon"></i> 下載結果
                     </button>
+                    <md-button class="md-icon-button md-primary" aria-label="統計圖表" ng-click="openChart()">
+                        <md-icon md-svg-icon="pie-chart"></md-icon>
+                        <md-tooltip md-direction="right">圓餅圖</md-tooltip>
+                    </md-button>
                 </th>
                 <th colspan="{{status.calculations.length * (percentType=='no' ? 1 : 2) }}">
                     <div ng-hide="tableTitle.editing">

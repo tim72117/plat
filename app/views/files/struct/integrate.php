@@ -214,6 +214,7 @@
 
 <script src="/js/jquery.fileDownload.js"></script>
 <script src="/js/ng/struct/planTable.js"></script>
+<script src="/js/Highcharts-4.1.8/js/highcharts.js"></script>
 
 <style>
 .selectSelectHeader .header-searchbox {

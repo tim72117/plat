@@ -4,28 +4,31 @@ angular.module('ngStruct', [])
     var selected = {schools: [], columns: []};
     var status = {levels: [], page: 0, calculations: [], preview: false};
     var calculate = function() {
+        var selectedColumns = selected.columns.map( function(column) { return column.id });
         if (status.calculations.length > 0){
-            if (JSON.stringify(status.calculations[0].selectedColumns) != JSON.stringify(selected.columns.map( function(column) { return column.id} ))) {
-                var selectedColumns = selected.columns.map( function(column) { return column.id} );
+            if (JSON.stringify(status.calculations[0].selectedColumns) != JSON.stringify(selectedColumns)) {
                 status.calculations = [];
                 var calculation = {selectedColumns: [], results: {}};
                 calculation.selectedColumns = selectedColumns;
                 status.calculations.push(calculation);
-                callCalculation();
+                callCalculation(selectedColumns);
             }else{
                 status.page = 2;
             }
         }else{
-            var selectedColumns = selected.columns.map( function(column) { return column.id} );
             var calculation = {selectedColumns: [], results: {}};
             calculation.selectedColumns = selectedColumns;
             status.calculations.push(calculation);
-            callCalculation();
+            callCalculation(selectedColumns);
         }
+
         //status.page = 2;
     };
-    var callCalculation = function() {
+    var callCalculation = function(selectedColumns) {
         for (var i in status.calculations) {
+            if (JSON.stringify(status.calculations[i].selectedColumns) != JSON.stringify(selectedColumns)) {
+                status.calculations[i].results = {};
+            }
             if ($.isEmptyObject(status.calculations[i].results)) {
                 addCalculation(status.calculations[i]);
             }
@@ -43,6 +46,7 @@ angular.module('ngStruct', [])
             console.log(e);
         });
     };
+
     var getLevels = function () {
         var amount = 1;
         var levels = [];
@@ -67,6 +71,9 @@ angular.module('ngStruct', [])
             }
         }
         status.levels = rows;
+        status.calculations.forEach(function(calculation) {
+            calculation.results = {};
+        });
     }
     var clean = function() {
         selected.columns.forEach(function(column) {
@@ -236,7 +243,7 @@ angular.module('ngStruct', [])
             scope.selected = structService.selected;
             scope.status = structService.status;
         },
-        controller: function($scope, $filter, $timeout) {
+        controller: function($scope, $filter, $timeout, $mdDialog) {
 
             $scope.dragBefore = [];
             $scope.tableOptions = [
@@ -254,7 +261,7 @@ angular.module('ngStruct', [])
                 for (var i in level.columns) {
                     results = results[level.columns[i].name] || 0;
                 }
-                return results;
+                return results*1;
             };
 
             $scope.getParentResult = function(calculation, level) {
@@ -376,6 +383,13 @@ angular.module('ngStruct', [])
                 });
             };
 
+            $scope.openChart = function() {
+                $mdDialog.show({
+                    template: '<div struct-chart></div>',
+                    clickOutsideToClose: true
+                })
+            };
+
             $scope.moveColumn = function(index, offect) {
                 $timeout(function() {
                     var column = $scope.selected.columns[index+offect];
@@ -441,6 +455,72 @@ angular.module('ngStruct', [])
                 }
                 return explanSpan;
             };
+        }
+    };
+})
+
+.directive('structChart', function(structService) {
+    return {
+        restrict: 'A',
+        replace: false,
+        transclude: false,
+        scope: {},
+        template: '<div></div>',
+        controller: function($scope, $http, $filter, $element) {
+
+            var getResults = function(calculation, level) {
+                var results = calculation.results;
+                for (var i in level.parents) {
+                    results = results[level.parents[i].name] || 0;
+                }
+                for (var i in level.columns) {
+                    results = results[level.columns[i].name] || 0;
+                }
+                return results*1;
+            }
+
+            var data = [];
+            for (var i in structService.status.levels) {
+                var name = structService.status.levels[i].parents.concat(structService.status.levels[i].columns).map(function(parent) { return parent.name; });
+                data.push({
+                    name: name,
+                    y: getResults(structService.status.calculations[0], structService.status.levels[i])
+                });
+            }
+
+            var chart = new Highcharts.Chart({
+                chart: {
+                    renderTo: $element[0],
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie'
+                },
+                title: {
+                    text: ''
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.y}人 {point.percentage:.1f} %',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    name: '',
+                    colorByPoint: true,
+                    data: data
+                }]
+            });
         }
     };
 });
