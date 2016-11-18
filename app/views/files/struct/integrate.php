@@ -93,10 +93,6 @@
     <div flex layout="column">
         <md-toolbar>
             <div class="md-toolbar-tools" style="color: white" md-colors="{background: population.color}">
-                <!--<md-button aria-label="快速設定" ng-click="toggleSidenav()">
-                    <md-icon md-svg-icon="settings"></md-icon>
-                    快速設定
-                </md-button>-->
                 <md-button aria-label="欄位說明" ng-click="showExplain()">
                     <md-icon md-svg-icon="help-outline"></md-icon>
                     欄位說明
@@ -131,31 +127,23 @@
         <md-tabs md-dynamic-height md-selected="status.page">
             <md-tab label="快速設定">
                 <md-content class="md-padding" flex-sm="100" flex-md="60" flex-lg="50" flex-xl="30" layout="column">
+                    <h5>選擇分析學校</h5>
                     <md-input-container>
-                        <label>選擇分析學校</label>
-                        <md-select ng-model="selected.schools" aria-label="選擇分析學校" multiple md-selected-text="selected.schools.length+'所學校'" ng-change="changeSchools()">
-                            <md-button layout-fill value="all" ng-click="selectAllSchool()">全選</md-button>
-                            <md-optgroup>
-                                <md-option ng-value="organization" ng-repeat="organization in organizations">{{organization.now.name}}</md-option>
-                            </md-optgroup>
+                        <label>學校</label>
+                        <md-select ng-model="selected.schools" aria-label="學校" multiple md-selected-text="getEllipsisSchools()" ng-change="changeSchools()" data-md-container-class="selectSelectHeader">
+                            <md-select-header class="select-header">
+                                <md-checkbox aria-label="全選"
+                                ng-checked="isSelectAllSchool()"
+                                md-indeterminate="isIndeterminateSchool()"
+                                ng-click="selectAllSchool()">
+                                <span ng-if="isSelectAllSchool()">取消</span>全選
+                                </md-checkbox>
+                            </md-select-header>
+                            <md-option ng-value="organization" ng-repeat="organization in organizations">{{organization.now.name}}</md-option>
                         </md-select>
                     </md-input-container>
-                    <table class="ui teal celled table" ng-if="!loading">
-                        <thead>
-                            <tr><th>選擇分類變項</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="column in mainTable.columns" ng-if="mainTable.expanded">
-                                <td ng-class="{negative: column.disabled}">
-                                    <div ng-if="column.type=='slider'">
-                                        {{ column.filter[0] }}年至{{ column.filter[1] }}
-                                        <div ng-slider ng-model="column.filter" items="column.items"></div>
-                                    </div>
-                                    <struct-items column="column" multiple="true"></struct-items>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <h5>設定分類變項</h5>
+                    <struct-items ng-repeat="column in mainTable.columns" column="column" multiple="true"></struct-items>
                 </md-content>
             </md-tab>
             <md-tab label="串聯其他表單">
@@ -227,6 +215,26 @@
 <script src="/js/jquery.fileDownload.js"></script>
 <script src="/js/ng/struct/planTable.js"></script>
 
+<style>
+.selectSelectHeader .header-searchbox {
+    border: none;
+    outline: none;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+}
+.selectSelectHeader .select-header {
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(0, 0, 0, 0.14), 0 0 0 0 rgba(0, 0, 0, 0.12);
+    padding-left: 10.667px;
+    height: 48px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: auto;
+}
+</style>
+
 <script>
 app.requires.push('ngStruct');
 app.controller('statusController', function($scope, $http, $filter, $timeout, $location, $anchorScroll, $mdDialog, $q, structService, $mdMedia) {
@@ -240,6 +248,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     $scope.mdSidenav = {left: false, right: false};
     $scope.population = {color: 'blue'};
     $scope.calculate = structService.calculate;
+    $scope.organizations = [];
 
     $http({method: 'POST', url: 'getTables', data:{}})
     .success(function(data, status, headers, config) {
@@ -276,11 +285,25 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.selectAllSchool = function() {
-        if (JSON.stringify($scope.selected.schools) === JSON.stringify($scope.organizations) ) {
+        if ($scope.selected.schools.length === $scope.organizations.length) {
             $scope.selected.schools = [];
         }else{
             $scope.selected.schools = $scope.organizations;
         }
+    };
+
+    $scope.isSelectAllSchool = function() {
+        return $scope.selected.schools.length === $scope.organizations.length;
+    };
+
+    $scope.isIndeterminateSchool = function() {
+        return $scope.selected.schools.length !== 0 && $scope.selected.schools.length !== $scope.organizations.length;
+    };
+
+    $scope.getEllipsisSchools = function() {
+        return structService.selected.schools.length > 3
+            ? '已選取' + structService.selected.schools.length + '所學校'
+            : structService.selected.schools.map(function(school) { return school.now.name; }).join(',')
     };
 
     $scope.addPreCalculation = function() {

@@ -88,25 +88,32 @@ angular.module('ngStruct', [])
 .directive('structItems', function(structService) {
     return {
         restrict: 'E',
-        replace: false,
+        replace: true,
         transclude: false,
         scope: {
             column: '=',
             multiple: '='
         },
         template: `
-            <md-input-container style="margin-bottom: 0">
+            <md-input-container style="margin-bottom: 2px">
                 <label>{{column.title}}</label>
                 <md-select multiple ng-if="multiple && column.type!='slider'" style="margin:0"
                     placeholder="{{column.title}}"
                     ng-model="column.selectedItems"
                     md-on-open="loadItem(column)"
-                    ng-change="toggleItems(column)">
-                    <md-option ng-value="item" ng-repeat="item in column.items">{{item.name}}</md-option>
+                    ng-change="toggleItems(column)"
+                    data-md-container-class="selectSelectHeader">
+                    <md-select-header class="select-header" ng-if="column.items.length > 10">
+                        <input ng-model="searchTerm.name" ng-keydown="$event.stopPropagation()" type="search" placeholder="尋找{{column.title}}" class="header-searchbox">
+                    </md-select-header>
+                    <md-option ng-value="item" ng-repeat="item in column.items | filter:searchTerm">{{item.name}}</md-option>
                 </md-select>
-
             </md-input-container>
         `,
+                // <div ng-if="column.type=='slider'">
+                //     {{ column.filter[0] }}年至{{ column.filter[1] }}
+                //     <div ng-slider ng-model="column.filter" items="column.items"></div>
+                // </div>
                 //         <md-select ng-if="!multiple && column.type!='slider'" style="margin:0"
                 //     placeholder="{{column.title}}"
                 //     ng-model="selected.columns[column.id].items"
@@ -114,10 +121,9 @@ angular.module('ngStruct', [])
                 //     ng-change="toggleItems(column)">
                 //     <md-option ng-value="item" ng-repeat="item in column.items">{{item.name}}</md-option>
                 // </md-select>
-        link: function(scope, element) {
-            scope.selected = structService.selected;
-        },
         controller: function($scope, $http, $filter, $q, $mdMedia) {
+
+            $scope.searchTerm = {};
 
             $scope.toggleItems = function() {
                 var index = structService.selected.columns.indexOf($scope.column);
