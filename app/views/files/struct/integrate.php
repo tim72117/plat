@@ -186,11 +186,15 @@
                     <tr ng-if="selected.columns.length > 1">
                         <th ng-repeat="column in selected.columns">
                             <div layout="row">
-                                <md-button class="md-icon-button" aria-label="左移" ng-click="moveColumn($index, -1)" ng-if="!$first">
+                                <md-button class="md-icon-button" aria-label="左移" ng-click="moveColumn($index, -1)" ng-disabled="$first">
                                     <md-icon md-svg-icon="keyboard-arrow-left"></md-icon>
                                 </md-button>
                                 <span flex></span>
-                                <md-button class="md-icon-button" aria-label="右移" ng-click="moveColumn($index, 1)" ng-if="!$last">
+                                <md-button aria-label="刪除" class="md-icon-button" ng-click="removeColumn($index)">
+                                    <md-icon md-svg-icon="clear"></md-icon>
+                                </md-button>
+                                <span flex></span>
+                                <md-button class="md-icon-button" aria-label="右移" ng-click="moveColumn($index, 1)" ng-disabled="$last">
                                     <md-icon md-svg-icon="keyboard-arrow-right"></md-icon>
                                 </md-button>
                             </div>
@@ -424,6 +428,11 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
             $scope.selected.columns.splice(index, 0, column);
             structService.getLevels();
         }, 300);
+    };
+
+    $scope.removeColumn = function(index) {
+        $scope.selected.columns.splice(index, 1);
+        structService.getLevels();
     };
 
     $(".unselectable").css( {

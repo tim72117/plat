@@ -396,8 +396,14 @@ angular.module('ngStruct', [])
                     $scope.selected.columns.splice(index+offect, 1);
                     $scope.selected.columns.splice(index, 0, column);
                     structService.getLevels();
-                    structService.calculate()
+                    structService.calculate();
                 }, 300);
+            };
+
+            $scope.removeColumn = function(index) {
+                $scope.selected.columns.splice(index, 1);
+                structService.getLevels();
+                structService.calculate();
             };
 
             $scope.dragFrom = function(key) {

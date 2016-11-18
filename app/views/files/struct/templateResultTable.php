@@ -33,11 +33,15 @@
                 <th ng-if="status.levels.length == 0"></th>
                 <th ng-repeat="column in selected.columns">
                     <div layout="row">
-                        <md-button class="md-icon-button" aria-label="左移" ng-click="moveColumn($index, -1)" ng-if="!$first">
+                        <md-button class="md-icon-button" aria-label="左移" ng-click="moveColumn($index, -1)" ng-disabled="$first">
                             <md-icon md-svg-icon="keyboard-arrow-left"></md-icon>
                         </md-button>
                         <span flex></span>
-                        <md-button class="md-icon-button" aria-label="右移" ng-click="moveColumn($index, 1)" ng-if="!$last">
+                        <md-button aria-label="刪除" class="md-icon-button" ng-click="removeColumn($index)">
+                            <md-icon md-svg-icon="clear"></md-icon>
+                        </md-button>
+                        <span flex></span>
+                        <md-button class="md-icon-button" aria-label="右移" ng-click="moveColumn($index, 1)" ng-disabled="$last">
                             <md-icon md-svg-icon="keyboard-arrow-right"></md-icon>
                         </md-button>
                     </div>
