@@ -172,7 +172,6 @@ angular.module('ngStruct', [])
         templateUrl: 'templatePlanTable',
         controller: function($scope, $http, $filter) {
 
-            $scope.structClassShow = false;
             $scope.structFilterShow = false;
             $scope.filterItems = {};
 
@@ -189,25 +188,6 @@ angular.module('ngStruct', [])
                 '語言檢定':{structs: [{title: '閩南語檢定'},{title: '客語檢定'}]}
             };
 
-            $scope.addNewCalStruct = function() {
-                //console.log(structService.selected.columns)
-                //console.log(Object.keys(structService.selected.columns))
-
-
-
-                /*var structs = $filter('filter')($scope.tables, function(table) {
-                    return structService.selected.columns && Object.keys(structService.selected.columns).length > 0;
-                });*/
-                // for (var i in structs) {
-                //     var columns = [];
-                //     angular.forEach($filter('filter')(structs[i].columns, function(column, index, array) { return column.filter && column.filter!=''; }), function(column, key) {
-                //         this.push({title: column.title, filter: column.filter.toString()});
-                //     }, columns);
-                //     calculation.structs.push({title: $scope.structs[i].title, columns: columns});
-                // }
-
-            };
-
             $scope.getRowSpan = function(structs) {
                 var rowSpan = structs.length - $filter('filter')(structs, {expanded: true}).length;
                 for (i in structs) {
@@ -218,39 +198,13 @@ angular.module('ngStruct', [])
                 return rowSpan;
             };
 
-            $scope.showStruct = function(table, category) {
-                var classTitle = category.title;
-                category.expanded = true;
-                $scope.structClassShow = true;
-                for (var i in $scope.structInClass[classTitle].structs) {
-                    for (var j in $scope.tables) {
-                        if ($scope.tables[j].title == $scope.structInClass[classTitle].structs[i].title) {
-                            $scope.tables[j].classExpanded = true;
-                        }
-                    }
-                }
-            };
-
-            $scope.showFilter = function(struct) {
+            $scope.showColumns = function(table) {
                 $scope.structFilterShow = true;
-                struct.expanded = !struct.expanded;
+                table.expanded = !table.expanded;
             };
 
-            $scope.toggleStruct = function(struct) {
-                if (struct.selected) {
-                    angular.forEach($filter('filter')(struct.columns, {selected: true}), function(row) {
-
-                        $scope.toggleColumn(row, struct);
-                        row.selected = false;
-                    });
-                };
-                struct.selected = !struct.selected;
-            };
-
-            $scope.goToResultTable = function() {
-                structService.status.page = 1;
-                //$location.hash('resultTable');
-                //$anchorScroll();
+            $scope.getEllipsis = function(table) {
+                return table.columns.map(function(column) { return column.title; }).join(',');
             };
 
             $scope.destroyPopup = function() {
