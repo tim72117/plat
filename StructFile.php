@@ -83,7 +83,7 @@ class StructFile extends CommFile {
             ->table($mainTable)
             ->whereIn(DB::raw('substring(' . $mainTable . '.學校代碼,3,4)'), $organizations)
             ->groupBy($column->in_table->name . '.' . $column->title)
-            ->select($column->in_table->name . '.' . $column->title . ' AS name')
+            ->select(DB::raw('CASE WHEN ' . $column->in_table->name . '.' . $column->title . ' IS NULL THEN \'\' ELSE ' . $column->in_table->name . '.' . $column->title . ' END AS name'))
             ->orderBy($column->in_table->name . '.' . $column->title);
 
         if ($column->in_table->name != $mainTable) {
