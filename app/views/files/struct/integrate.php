@@ -152,7 +152,7 @@
                 </md-content>
             </md-tab>
             <md-tab label="分析結果" md-on-select="calculate()">
-                <md-content class="md-padding" flex-sm="100" flex-md="80" flex-lg="70" flex-xl="50" layout="column">
+                <md-content class="md-padding"  layout="column">
                     <div result-table calculations="calculations" levels="levels"></div>
                 </md-content>
             </md-tab>
@@ -188,14 +188,17 @@
                             <div layout="row">
                                 <md-button class="md-icon-button" aria-label="左移" ng-click="moveColumn($index, -1)" ng-disabled="$first">
                                     <md-icon md-svg-icon="keyboard-arrow-left"></md-icon>
+                                    <md-tooltip md-direction="bottom">左移</md-tooltip>
                                 </md-button>
                                 <span flex></span>
                                 <md-button aria-label="刪除" class="md-icon-button" ng-click="removeColumn($index)">
                                     <md-icon md-svg-icon="clear"></md-icon>
+                                    <md-tooltip md-direction="bottom">刪除</md-tooltip>
                                 </md-button>
                                 <span flex></span>
                                 <md-button class="md-icon-button" aria-label="右移" ng-click="moveColumn($index, 1)" ng-disabled="$last">
                                     <md-icon md-svg-icon="keyboard-arrow-right"></md-icon>
+                                    <md-tooltip md-direction="bottom">右移</md-tooltip>
                                 </md-button>
                             </div>
                         </th>

@@ -71,9 +71,6 @@ angular.module('ngStruct', [])
             }
         }
         status.levels = rows;
-        status.calculations.forEach(function(calculation) {
-            calculation.results = {};
-        });
     }
     var clean = function() {
         selected.columns.forEach(function(column) {

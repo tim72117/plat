@@ -1,5 +1,5 @@
 <div ng-if="status.calculations.length > 0">
-    <table class="ui teal celled structured table" ng-class="{small:tableSize=='small', large:tableSize=='large'}">
+    <table class="ui teal celled collapsing structured table" ng-class="{small:tableSize=='small', large:tableSize=='large'}">
         <thead>
             <tr>
                <th colspan="{{status.levels[0].columns.length}}">
@@ -35,14 +35,17 @@
                     <div layout="row">
                         <md-button class="md-icon-button" aria-label="左移" ng-click="moveColumn($index, -1)" ng-disabled="$first">
                             <md-icon md-svg-icon="keyboard-arrow-left"></md-icon>
+                            <md-tooltip md-direction="bottom">左移</md-tooltip>
                         </md-button>
                         <span flex></span>
                         <md-button aria-label="刪除" class="md-icon-button" ng-click="removeColumn($index)">
                             <md-icon md-svg-icon="clear"></md-icon>
+                            <md-tooltip md-direction="bottom">刪除</md-tooltip>
                         </md-button>
                         <span flex></span>
                         <md-button class="md-icon-button" aria-label="右移" ng-click="moveColumn($index, 1)" ng-disabled="$last">
                             <md-icon md-svg-icon="keyboard-arrow-right"></md-icon>
+                            <md-tooltip md-direction="bottom">右移</md-tooltip>
                         </md-button>
                     </div>
                 </th>
@@ -56,6 +59,7 @@
                     </label>-->
                     <md-button aria-label="刪除" class="md-icon-button" ng-click="removeCalculation($index)">
                         <md-icon md-svg-icon="clear"></md-icon>
+                        <md-tooltip md-direction="bottom">刪除</md-tooltip>
                     </md-button>
                 </th>
             </tr>
