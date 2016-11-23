@@ -97,61 +97,6 @@ class StructFile extends CommFile {
         return ['items' => $items];
     }
 
-    public function calibration()
-    {
-        return [];
-        $columns = ['year' => '年報資料年度', 'program' => '報考師資類科', 'isPass' => '通過狀態', 'isApply' => '應考情形', 'isAttain' => '到考情況'];
-        $rows = DB::connection('sqlsrv_analysis_tted')->table('TTED_MAIN.dbo.YB_CH04_OK')->groupBy(array_keys($columns))
-            ->select(array_keys($columns))->addSelect(DB::raw('COUNT(*) AS count'))->get();
-
-        $output = [];
-        foreach ($rows as $row) {
-            array_set($output, join('.', array_values((array)$row)), $row->count);
-        }
-        return ['rows' => $rows, 'columns' => array_add($columns, 'count', '人次')];
-    }
-
-    public function setLevel()
-    {
-        $tables = [];
-
-        foreach ($this->tables as $name => $table) {
-            $tableId = DB::connection('sqlsrv_analysis_tted')->table('analysis_tted.dbo.table_struct')->where('title','=', $name)->select('id')->get();
-            $query = DB::connection('sqlsrv_analysis_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table)
-                ->where('COLUMN_NAME', '<>', '身分證字號')
-                ->where('COLUMN_NAME', '<>', '學校代碼')
-                ->where('COLUMN_NAME', '<>', '學校名稱')
-                ->where('COLUMN_NAME', '<>', '就讀科系代碼');
-
-            $columns = $query->select('COLUMN_NAME')
-                ->lists('COLUMN_NAME');
-
-            $selects = array_map(function($key, $column) {
-                return $column . ' AS ' . $key;
-            }, array_keys($columns), $columns);
-
-            $values = Cache::remember(DB::connection('sqlsrv_analysis_tted')->table($table)->groupBy($columns)->select($selects)->getCacheKey(), 300, function() use ($table, $columns, $selects) {
-                $rows = DB::connection('sqlsrv_analysis_tted')->table($table)->groupBy($columns)->select($selects)->get();
-                $values = [];
-                foreach ($columns as $key => $column) {
-                    $values[$column] = array_values(array_unique(array_pluck($rows, $key)));
-                    rsort($values[$column]);
-                }
-             });
-            foreach ($columns as $key => $column) {
-                $rowId = DB::connection('sqlsrv_analysis_tted')->table('analysis_tted.dbo.row_struct')
-                        ->where('table_struct_id','=', $tableId[0]->id)
-                        ->where('title','=', $column)
-                        ->get();
-                foreach ($values[$column] as $key => $item) {
-                    DB::connection('sqlsrv_analysis_tted')->table('analysis_tted.dbo.item_struct2')->insert(
-                        array('row_struct_id' => $rowId[0]->id, 'item_title' => $item)
-                    );
-                }
-            }
-        }
-    }
-
     public function getCategories()
     {
         return [
