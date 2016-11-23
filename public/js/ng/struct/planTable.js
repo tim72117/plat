@@ -107,7 +107,7 @@ angular.module('ngStruct', [])
                     md-on-open="loadItem(column)"
                     ng-change="toggleItems(column)"
                     data-md-container-class="selectSelectHeader">
-                    <md-select-header class="select-header" ng-if="column.items.length > 10">
+                    <md-select-header class="select-header">
                         <input ng-model="searchTerm.name" ng-keydown="$event.stopPropagation()" type="search" placeholder="尋找{{column.title}}" class="header-searchbox">
                     </md-select-header>
                     <md-option ng-value="item" ng-repeat="item in column.items | filter:searchTerm">{{item.name}}</md-option>
