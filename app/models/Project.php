@@ -48,6 +48,8 @@ class Member extends Eloquent {
 
     public $timestamps = true;
 
+    protected $attributes = ['actived' => false];
+
     protected $fillable = array('user_id', 'project_id', 'actived');
 
     public function user()
