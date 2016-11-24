@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class WorkUsed extends Migration {
+class Work extends Migration {
 
     /**
      * Run the migrations.
@@ -12,12 +12,10 @@ class WorkUsed extends Migration {
      */
     public function up()
     {
-        Schema::create('work_used', function (Blueprint $table) {
+        Schema::create('works', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id');
-            $table->string('sch_id', 6);          
-            $table->enum('department_class', [1, 0]);
-            $table->timestamps();
+            $table->integer('member_id');
+            $table->integer('organization_id');
         });
     }
 
@@ -28,7 +26,7 @@ class WorkUsed extends Migration {
      */
     public function down()
     {
-        Schema::drop('work_used');
+        Schema::drop('works');
     }
 
 }
