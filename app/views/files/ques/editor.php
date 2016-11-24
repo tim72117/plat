@@ -1,5 +1,5 @@
 <?php
-$buildQuestion_editor_ver = app_path().'/views/editor/buildQuestion_editor__v2.0.laravel.php';
+$buildQuestion_editor_ver = app_path().'/views/files/ques/buildQuestion_editor__v2.0.laravel.php';
 
 include_once($buildQuestion_editor_ver);
 
@@ -706,7 +706,7 @@ $(document).ready(function() {
 
         if( addlayer==0 ){
             var target = $(this).parent('.addq_box').parent('div.main');
-            var newq = $('<div class="question_box ui tertiary segment" id="'+newid+'" uqid="'+newid+'" parrent="" layer="'+addlayer+'" style="display:none">').appendTo( $('<div class="main"></div>').insertAfter( target ) );
+            var newq = $('<div class="question_box ui tertiary segment" id="'+newid+'" uqid="'+newid+'" parrent="" layer="'+addlayer+'" style="display:none">').appendTo( $('<div class="main" style="width: 800px"></div>').insertAfter( target ) );
         }
         if( addlayer!=0 ){
             var target = $(this).parent().is('.addq_box') ? $(this) : $(this).parent('td').parent('tr').parent('tbody').parent('table');
@@ -1080,24 +1080,35 @@ function getPassword(length) {
 
 </head>
 
-<md-content layout="column" layout-align="start center">
-<form name="form1" action="" method="get">
-    <?=Form::select('page', $pages->lists('page', 'page'), $page->page, array('id' => 'page', 'onChange'=>'this.form.submit()'))?>  /  <?=$pages->count()?>
-    <!--<input id="btn_dpage" type="button" value="刪除整頁" disabled="disabled" />-->
-    <div class="ui basic mini button <?=($census->edit ? '' : 'disabled')?>" id="btn_cpage">
-        <i class="file outline icon"></i> 新增一頁
+<md-content layout="column" layout-align="start center" style="height:100%">
+
+
+<md-toolbar>
+    <div class="md-toolbar-tools">
+        <span flex></span>
+        <form name="form1" action="" method="get" style="color:#000">
+        <?=Form::select('page', $pages->lists('page', 'page'), $page->page, array('id' => 'page', 'onChange'=>'this.form.submit()'))?>  /  <?=$pages->count()?>
+        </form>
+        <md-button ng-disabled="<?=($census->edit ? 'false' : 'true')?>" id="btn_cpage">
+            <md-icon md-svg-icon="insert-drive-file"></md-icon> 新增一頁
+        </md-button>
+        <md-button ng-disabled="<?=($census->edit ? 'false' : 'true')?>" id="btn_save">
+            <md-icon md-svg-icon="save"></md-icon> 儲存
+        </md-button>
+        <md-button href="demo?page=1" target="_blank">
+            <md-icon md-svg-icon="icon-eye"></md-icon> 預覽
+        </md-button>
+        <span flex></span>
     </div>
-    <div class="ui basic mini button <?=($census->edit ? '' : 'disabled')?>" id="btn_save">
-        <i class="save icon"></i> 儲存
-    </div>
-    <a href="demo?page=1" target="_blank">預覽</a>
-</form>
+</md-toolbar>
 
-<div id="building" style="width:800px">
 
-    <div ng-cloak id="contents">
 
-    <div class="main">
+<div id="building" style="overflow-y: auto">
+
+    <div ng-cloak id="contents" layout="column" layout-align="start center">
+
+    <div class="main" style="width: 800px">
         <div class="addq_box" append="false">
             <div class="ui horizontal divider addquestion" anchor="ques" addlayer="0"><i class="add icon"></i>加入題目</div>
         </div>
@@ -1113,7 +1124,7 @@ function getPassword(length) {
             if($question->explain!="")
             echo '<div class="readme"><h3><b>'.iconv('utf-8', 'big5',$question->explain).'</b></h3></div>';
 
-            echo '<div class="main">';
+            echo '<div class="main" style="width: 800px">';
             buildQuestion($question,$question_array,0,"no");
             echo '</div>';
         }

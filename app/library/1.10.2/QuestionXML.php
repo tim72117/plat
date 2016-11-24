@@ -11,7 +11,7 @@ class QuestionXML {
         $content->title = preg_replace('/&nbsp;/', '', $content->title);
     }
 
-    static function get_subs($subs, $index, &$questions, $parent_title = null)
+    static function get_subs($subs, $index, &$questions, $parent_title = null, $isText = false)
     {
         foreach($subs as $sub) {
             self::str_filter($sub);
@@ -27,7 +27,7 @@ class QuestionXML {
                 array_push($questions, $sub);
 
                 foreach($sub->answers as $answer) {
-                    self::get_subs($answer->subs, $index, $questions, $sub->title . '-' . $answer->title);
+                    self::get_subs($answer->subs, $index, $questions, $sub->title . '-' . $answer->title, $isText);
                 }
             }
 
@@ -52,7 +52,20 @@ class QuestionXML {
                     $question->answers = [(object)['title' => '是', 'value' => '1'], (object)['title' => '否', 'value' => '0']];
                     array_push($questions, $question);
 
-                    self::get_subs($question->subs, $index, $questions, $question->title);
+                    self::get_subs($question->subs, $index, $questions, $question->title, $isText);
+                }
+            }
+
+            if ($isText) {
+                switch ($sub->type) {
+                    case 'text':
+                    case 'textarea':
+                        foreach ($sub->questions as $subQuestion) {
+                            self::str_filter($subQuestion);
+                            $subQuestion->title = $subQuestion->title . '-' . $sub->title;
+                            array_push($questions, $subQuestion);
+                        }
+                        break;
                 }
             }
         }

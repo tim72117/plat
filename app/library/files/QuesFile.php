@@ -26,7 +26,18 @@ class QuesFile extends CommFile {
 
     public function get_views()
     {
-        return ['open', 'open_ng', 'codebook', 'receives', 'spss', 'report', 'analysis'];
+        return ['open', 'codebook', 'receives', 'spss', 'report', 'analysis'];
+    }
+
+    public static function tools()
+    {
+        return [
+            ['name' => 'codebook', 'title' => 'codebook', 'method' => 'codebook', 'icon' => 'list'],
+            ['name' => 'receives', 'title' => '回收狀況', 'method' => 'receives', 'icon' => 'show-chart'],
+            ['name' => 'analysis', 'title' => '分析結果', 'method' => 'analysis', 'icon' => 'pie-chart'],
+            ['name' => 'spss',     'title' => 'spss',     'method' => 'spss',     'icon' => 'code'],
+            ['name' => 'report',   'title' => '問題回報', 'method' => 'report',   'icon' => 'question-answer']
+        ];
     }
 
     public function create()
@@ -48,24 +59,7 @@ class QuesFile extends CommFile {
 
         View::share('census', $this->file->census);
 
-        return 'editor.editor';
-    }
-
-    public function open_temp()
-    {
-        if (!$this->file->census->pages()->getQuery()->exists())
-            $this->add_page();
-
-        View::share('census', $this->file->census);
-
-        return 'editor.editor-temp';
-    }
-
-    public function open_ng()
-    {
-        View::share('census', $this->file->census);
-
-        return 'editor.editor-ng';
+        return 'files.ques.editor';
     }
 
     public function analysis()
@@ -85,27 +79,18 @@ class QuesFile extends CommFile {
 
     public function demo()
     {
-        $page = $this->file->census->pages->filter(function($page) {
-            return $page->page == Input::get('page', 1);
-        })->first();
+        $this->newpage = new \app\library\page;
+        $this->newpage->loadxml($this->file->census, Input::get('page', 1));
+        $this->newpage->bulidQuestion();
+        $percent = floor(((Input::get('page', 1)-1)/$this->file->census->pages->count())*100);
 
-        $questions = simplexml_load_string($page->xml);
-
-        $questionHTML = '';
-        foreach ($questions as $key => $question) {
-            if ($question->getName()=='question') {
-                $questionHTML .= buildQuestion::build($question, $questions, 0, 'no');
-            }
-        }
-
-        return View::make('editor.page', [
-            'question'            => $questionHTML,
-            'questionEvent'       => buildQuestionEvent::buildEvent($questions),
-            'questionEvent_check' => '',
-            'init_value'          => '',
-            'isPhone'             => false,
-            'census'              => $this->file->census,
-        ])->nest('child_footer', 'project.use.footer');
+        View::share(array('page' => Input::get('page', 1), 'doc' => $this->file->census, 'percent' => $percent, 'isPhone' => false));
+        return View::make('files.ques.demo', [
+            'question'            => $this->newpage->question_html,
+            'questionEvent'       => $this->newpage->buildQuestionEvent(),
+            'questionEvent_check' => $this->newpage->buildQuestionEvent_check(),
+            'init_value'          => ''
+        ])->nest('child_footer', 'files.ques.demo_footer');
     }
 
     public function codebook()
@@ -148,7 +133,7 @@ class QuesFile extends CommFile {
 
     public function xml_to_array()
     {
-        $pages = $this->file->census->pages->map(function($page) {
+        $pages = $this->file->census->pages->sortBy('page')->map(function($page) {
             $question_box = (object)['index' => $page->page, 'questions' => []];
             $questions = simplexml_load_string($page->xml);
             QuestionXML::$questions = $questions;
@@ -719,7 +704,7 @@ class QuesFile extends CommFile {
 
         foreach($this->xml_to_array()['pages'] as $index => $page) {
             $questions = [];
-            QuestionXML::get_subs($page->questions, $index, $questions);
+            QuestionXML::get_subs($page->questions, $index, $questions, '', true);
 
             if (count($questions) > 0) {
                 $table = $sheet->tables()->create(['database' => $database, 'name' => $tablename . '_page' . ($page->index), 'lock' => true, 'construct_at' => Carbon::now()->toDateTimeString()]);
