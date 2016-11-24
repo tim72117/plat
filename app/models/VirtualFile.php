@@ -109,34 +109,7 @@ class Struct_file {
 
     static function open($doc)
     {
-        switch($doc->isFile->type) {
-            case 1:
-                $tools = [
-                    ['name' => 'codebook', 'title' => 'codebook', 'method' => 'codebook', 'icon' => 'list'],
-                    ['name' => 'receives', 'title' => '回收狀況', 'method' => 'receives', 'icon' => 'show-chart'],
-                    ['name' => 'analysis', 'title' => '分析結果', 'method' => 'analysis', 'icon' => 'pie-chart'],
-                    ['name' => 'spss',     'title' => 'spss',     'method' => 'spss',     'icon' => 'code'],
-                    ['name' => 'report',   'title' => '問題回報', 'method' => 'report',   'icon' => 'question-answer']
-                ];
-            break;
-            case 5:
-                $tools = [
-                    //['name' => 'edit_information', 'title' => '編輯檔案資訊', 'method' => 'edit_information', 'icon' => 'edit'],
-                    ['name' => 'analysis',         'title' => '分析結果',     'method' => 'analysis',         'icon' => 'pie-chart'],
-                    ['name' => 'rows',             'title' => '資料列',       'method' => 'rows',             'icon' => 'create'],
-                    ['name' => 'import',           'title' => '匯入資料',     'method' => 'import',           'icon' => 'file-upload'],
-                    ['name' => 'export',           'title' => '匯出資料',     'method' => 'exportAllRows',    'icon' => 'file-download'],
-                ];
-            break;
-            case 7:
-                $tools = [
-                    ['name' => 'analysis_report', 'title' => '描述性分析報告', 'method' => 'analysis_report', 'icon' => 'description">
-'],
-                ];
-            break;
-            default:
-            break;
-        }
+        $class = $doc->isFile->isType->class;
 
         return [
             'id'         => $doc->id,
@@ -146,7 +119,7 @@ class Struct_file {
             'opened_at'  => $doc->opened_at->toIso8601String(),
             'link'       => '/doc/' . $doc->id . '/open',
             'type'       => $doc->isFile->type,
-            'tools'      => isset($tools) ? $tools : [],
+            'tools'      => method_exists($class, 'tools') ? $class::tools() : [],
             'visible'    => $doc->visible,
             'shared'     => array_count_values($doc->shareds->map(function($shared){
                             return $shared->target;

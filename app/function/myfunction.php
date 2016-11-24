@@ -159,6 +159,6 @@ if ( ! function_exists('ddd'))
 	 */
 	function ddd()
 	{
-		call_user_func_array('dump', func_get_args()); die;
+		call_user_func_array('var_dump', func_get_args()); die;
 	}
 }

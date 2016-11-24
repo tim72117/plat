@@ -33,7 +33,9 @@ class CustomFile extends CommFile {
 
     public function is_full()
     {
-        return false;
+        $is_full = $this->module->get($this->file->file . '.is_full', false);
+
+        return $is_full;
     }
 
     public function __call($method, $args)

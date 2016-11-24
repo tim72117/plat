@@ -14,6 +14,8 @@ class DataFile extends CommFile {
     function __construct(Files $file, User $user)
     {
         parent::__construct($file, $user);
+
+        $this->configs = $this->file->configs->lists('value', 'name');
     }
 
     public function is_full()
@@ -36,24 +38,14 @@ class DataFile extends CommFile {
         \Excel::create($this->file->title, function($excel) {
 
             $this->file->sheets->each(function($sheet) use($excel) {
-                $excel->sheet($sheet->title, function($excelSheet) use($sheet) {
+                $sheetTitle = $sheet->title ? $sheet->title : 'sheet';
+                $excel->sheet($sheetTitle, function($excelSheet) use($sheet) {
 
-                    list($query, $power) = $this->get_rows_query($sheet->tables);
-
-                    $rows = [];
-                    $heads = [];
-                    $titles = [];
-
-                    $sheet->tables->load('columns')->each(function($table) use(&$titles, &$heads) {
-                        $table->columns->each(function($column) use(&$titles, &$heads) {
-                            array_push($titles, $column->title);
-                            array_push($heads, $column->name);
-                        });
-                    });
+                    list($query, $power, $titles) = $this->get_rows_query($sheet->tables);
 
                     $rows = array_map(function($row) {
                         return array_values(get_object_vars($row));
-                    }, $query->select($heads)->get());
+                    }, $query->get());
 
                     array_unshift($rows, $titles);
 
@@ -69,23 +61,34 @@ class DataFile extends CommFile {
                 });
             });
 
-        })->download('xls');
+        })->download('xlsx');
     }
 
     //uncomplete
     private function get_rows_query($tables)
     {
+        $heads = [];
+        $titles = [];
+
         foreach($tables as $index => $table) {
             if( $index==0 ){
                 $query = DB::table($table->database . '.dbo.' . $table->name.' AS t0');
             }else{
                 //join not complete
-                $query->leftJoin($table->database . '.dbo.' . $table->name . ' AS t' . $index, 't0.newcid', '=', 't' . $index . '.newcid');
+                $firstJoinKey = isset($this->configs['firstJoinKey']) ? $this->configs['firstJoinKey'] : 'newcid';
+
+                $query->leftJoin($table->database . '.dbo.' . $table->name . ' AS t' . $index, 't0.' . $firstJoinKey, '=', 't' . $index . '.newcid');
             }
+            $table->columns->each(function($column) use(&$titles, &$heads, $index) {
+                array_push($titles, $column->title);
+                array_push($heads, 't' . $index . '.' . $column->name);
+            });
         }
         $power = [];
 
-        return [$query, $power];
+        $query->select($heads);
+
+        return [$query, $power, $titles];
     }
 
     public function get_columns()
