@@ -79,7 +79,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
                     <div class="item" ng-repeat="type in types">
                         <div class="header">{{ type.title }}</div>
                         <div class="menu">
-                            <a class="item" ng-repeat="doc in docs | filter: {analysis: {target_people: type.key}}| orderBy:'analysis.code_year'" ng-class="{active: doc.selected}" ng-click="selectDoc(doc)">
+                            <a class="item" ng-repeat="doc in docs | filter: {analysis: {target_people: type.key}}:true | orderBy:'analysis.code_year'" ng-class="{active: doc.selected}" ng-click="selectDoc(doc)">
                                 {{ doc.is_file.title }}
                             </a>
                         </div>
