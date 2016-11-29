@@ -48,6 +48,7 @@ class RowsFile extends CommFile {
         'tted_sch'         => ['sort' => 23, 'type' => 'string',   'size' => 10,   'title' => 'TTED大專院校學校代碼',      'function' => 'tted_sch'],
         'tted_depcode_103' => ['sort' => 24, 'type' => 'string',   'size' => 6,   'title' => 'TTED大專院校系所代碼103年', 'function' => 'tted_depcode_103'],
         'tted_depcode_104' => ['sort' => 25, 'type' => 'string',   'size' => 6,   'title' => 'TTED大專院校系所代碼104年', 'function' => 'tted_depcode_104'],
+        'tted_depcode_105' => ['sort' => 25, 'type' => 'string',   'size' => 6,   'title' => 'TTED大專院校系所代碼105年', 'function' => 'tted_depcode_105'],
         'stdschoolstage'   => ['sort' => 26, 'type' => 'tinyInteger',             'title' => 'TTED教育階段',              'validator' => 'in:1,2,3'],
         'schoolsys'        => ['sort' => 27, 'type' => 'tinyInteger',             'title' => 'TTED學制別',                'validator' => 'in:1,2'],
         'program'          => ['sort' => 28, 'type' => 'tinyInteger',             'title' => 'TTED修課資格',              'validator' => 'in:0,1,2,3'],
@@ -721,6 +722,11 @@ class RowsFile extends CommFile {
                 !isset($this->temp->dep_codes_104) && $this->temp->dep_codes_104 = DB::table('plat_public.dbo.pub_depcode_tted')
                     ->whereIn('sch_id', $this->get_own_organizations(2))->where('year','=','104')->lists('id');
                 !in_array($column_value, $this->temp->dep_codes_104, true) && array_push($column_errors, '不是本校系所代碼');
+            },
+            'tted_depcode_105' => function($column_value, $column, &$column_errors) {
+                !isset($this->temp->dep_codes_105) && $this->temp->dep_codes_105 = DB::table('plat_public.dbo.pub_depcode_tted')
+                    ->whereIn('sch_id', $this->get_own_organizations(2))->where('year','=','104')->orWhere('year','=','105')->lists('id');
+                !in_array($column_value, $this->temp->dep_codes_105, true) && array_push($column_errors, '不是本校系所代碼');
             },
             'junior_schools_in_city' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->junior_schools_in_city) && $this->temp->junior_schools_in_city = DB::table('rows.dbo.row_20151022_135158_5xtfu')
