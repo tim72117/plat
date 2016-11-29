@@ -85,57 +85,56 @@
             </div>
 
             <div ng-if="!confirming">
-                <?=Form::open(array(
-                    'url' => 'project/' . $project->code . '/register/save',
-                    'method' => 'post',
-                    'class' => 'ui form segment attached' . ($errors->isEmpty() ? '' : ' error'),
-                    'name' => 'registerForm'))?>
+                <form class="ui form segment attached" action="register/save" method="post" ng-submit="save($event)" ng-class="{error: errors.length > 0}">
 
                     <div class="field">
                         <label>登入帳號 (e-mail)</label>
-                        <?=Form::text('user[email]', '', array())?>
+                        <input type="email" required name="email" ng-model="user.email" />
                     </div>
 
                     <div class="two fields">
                         <div class="field">
                             <label>姓名</label>
-                            <?=Form::text('user[username]', '', array())?>
+                            <input type="text" required ng-model="user.username" />
                         </div>
                         <div class="field">
                             <label>職稱</label>
-                            <?=Form::text('user[contact][title]', '', array())?>
+                            <input type="text" required ng-model="user.contact.title" />
                         </div>
                     </div>
 
                     <div class="field">
                         <label>聯絡電話(服務單位)</label>
-                        <?=Form::text('user[contact][tel]', '', array('placeholder' => '例：02-7734-3645#0000'))?>
+                        <input type="tel" required ng-model="user.contact.tel" placeholder="例：02-7734-3645#0000" />
                     </div>
 
                     <div class="field">
                         <label>學校所在縣市</label>
-                        <select ng-model="mySchool.cityname" ng-options="city.cityname as city.cityname for city in citys" class="ui search dropdown">
+                        <select ng-model="mySchool.cityname" class="ui search dropdown">
                             <option value="">選擇您服務的機構所在縣市</option>
+                            <option ng-repeat="city in citys" ng-value="city.name">@{{city.name}}</option>
                         </select>
                     </div>
                      <div class="field">
-                        <label>學校名稱</label>
-                        <select ng-model="sch_id" ng-options="school.id+' - '+school.name for school in schools | filter:mySchool | orderBy:'id' track by school.id" name="user[work][sch_id]" class="ui search dropdown">
+                        <label>學校名稱@{{user.work.selectedItem}}</label>
+                        <select ng-model="user.work.selectedItem" ng-options="school.code+' - '+school.name for school in schools | filter:mySchool" class="ui search dropdown">
                             <option value="">選擇您機構的單位</option>
                         </select>
                     </div>
 
                     <div class="ui error message">
                         <div class="header">資料錯誤</div>
-                        <p><?=implode('、', array_filter($errors->all()))?></p>
+                        <div class="ui horizontal list">
+                        <span class="item" ng-repeat="error in errors">@{{ error }}</span>
+                        </div>
                     </div>
 
                     <div class="field">
                         <label>一旦點擊註冊，即表示你同意 <a href="register/terms" target="_blank">使用條款</a>。</label>
                     </div>
 
-                    <div class="ui submit positive button" onclick="registerForm.submit()">註冊</div>
-                <?=Form::close()?>
+                    <button type="submit" class="ui submit positive button" ng-class="{loading: saving}">註冊</button>
+                </form>
 
                 <div class="ui bottom attached warning message">
                     @include('project.auth-login-bottom')
@@ -148,20 +147,43 @@
 
 </div>
 
-<?php
-$citys = DB::table('plat_public.dbo.university_school')->where('year', 103)->whereNotNull('cityname')->groupBy('cityname')->select('cityname')->get();
-$schools = DB::table('plat_public.dbo.university_school')->where('year', 103)->orderBy('cityname', 'ASC', 'id')->groupBy('cityname', 'name', 'id', 'type')->select('id', 'name', 'type', 'cityname')->get();
-?>
 <script>
-angular.module('app', [])
-.controller('register', function($scope) {
-    $scope.citys = angular.fromJson(<?=json_encode($citys)?>);
-    $scope.schools = angular.fromJson(<?=json_encode($schools)?>);
-    $scope.confirming = <?=($errors->isEmpty() ? 'true' : 'false')?>;
+app.constant("CSRF_TOKEN", '{{ csrf_token() }}')
+
+.config(['$httpProvider', function($httpProvider) {
+    $httpProvider.defaults.headers.common["X-Requested-With"] = 'XMLHttpRequest';
+}])
+
+.controller('register', function($scope, $http, CSRF_TOKEN) {
+    $scope.user = {work: {}, contact: {}};
+    $scope.confirming = true;
 
     $scope.confirmed = function() {
         $scope.confirming = false;
-    }
+    };
+
+    $scope.save = function(event) {
+        event.preventDefault();
+        $scope.saving = true;
+        $scope.user.work.organization_id = $scope.user.work.selectedItem != undefined ? $scope.user.work.selectedItem.id : '';
+        $http({method: 'POST', url: 'register/save', data:{'_token': CSRF_TOKEN, user: $scope.user}})
+        .success(function(data, status, headers, config) {
+            $scope.errors = data.errors;
+            $scope.saving = false;
+        })
+        .error(function(e) {
+            console.log(e);
+        });
+    };
+
+    $http({method: 'GET', url: 'register/ajax/citysAndSchools', params:{}})
+    .success(function(data, status, headers, config) {
+        $scope.citys = data.citys;
+        $scope.schools = data.schools;
+    })
+    .error(function(e) {
+        console.log(e);
+    });
 });
 </script>
 
