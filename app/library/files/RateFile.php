@@ -51,15 +51,33 @@ class RateFile extends CommFile {
 
                 $groups = array_fetch($survey['categories'], 'name');
 
-                //$receives = $this->getQuery((object)$survey)->groupBy($groups)->select($selects)->addSelect(DB::raw('count(*) AS count'))->get();
-
-                $downs = $this->getQuery((object)$survey)->groupBy($groups)->select($selects)
+                $query = $this->getQuery((object)$survey)->groupBy($groups)->select($selects)
                     ->addSelect(DB::raw('count(CASE WHEN (pstat.page > 1) then 1 ELSE NULL END) AS down'))
-                    ->addSelect(DB::raw('count(*) AS receive'))->get();
+                    ->addSelect(DB::raw('count(*) AS receive'));
+
+                if (isset($survey['categories'])) {
+                    $query = DB::table(DB::raw('(' . $query->toSql() . ') AS sub'))->select('down', 'receive');
+                }
+
+                foreach ($surveys[$index]['categories'] as $j => $category) {
+                    if (isset($category['filter'])) {
+                        $member = \Plat\Member::where('project_id', $category['project_id'])->where('user_id', Auth::user()->id)->first();
+                        $organizations = $member->organizations->load('now');
+
+                        $query->leftJoin('organization_details AS detail', 'sub.' . $category['aliases'], '=', 'detail.id');
+
+                        $query->distinct()->addSelect('detail.organization_id' . ' AS ' . $category['aliases']);
+                        $query->whereIn('detail.organization_id', $organizations->lists('id'));
+                        $surveys[$index]['categories'][$j]['groups'] = $organizations->keyBy('id');
+                    } else {
+                        $query->addSelect($category['aliases']);
+                    }
+                }
+
+                $downs = $query->get();
 
                 $surveys[$index]['downs'] = $downs;
             }
-
 
             $surveys[$index]['receive'] = $this->getQuery((object)$survey)->count();
             $surveys[$index]['down'] = $this->getQuery((object)$survey)->where('pstat.page', '>=', $survey['pages'])->count();
@@ -75,30 +93,15 @@ class RateFile extends CommFile {
 
     public function getQuery($survey)
     {
-        $userinfo = $survey->userinfo;
-        $pstat = $survey->pstat;
-        $against = $survey->against;
-        $hidden = $survey->hidden;
+        $query = DB::table($survey->info['database'] . '.dbo.' . $survey->info['table'] . ' AS info');
 
-        $query = DB::table($userinfo['database'] . '.dbo.' . $userinfo['table'] . ' AS userinfo');
+        if (property_exists($survey, 'map')) {
 
-        if (isset($userinfo['map'])) {
-
-            $query->leftJoin($userinfo['database'] . '.dbo.' . $userinfo['table'] . '_map AS userinfo_map', 'userinfo.' . $userinfo['primaryKey'], '=', 'userinfo_map.' . $userinfo['map']);
-
-            $query->leftJoin($pstat['database'] . '.dbo.' . $pstat['table'] . ' AS pstat', 'userinfo_map.newcid', '=', 'pstat.newcid');
-
-        } else if (isset($userinfo['id'])) {
-
-            $query->leftJoin($pstat['database'] . '.dbo.' . $userinfo['table'] . '_id AS userinfo_map', 'userinfo.' . $userinfo['primaryKey'], '=', 'userinfo_map.' . $userinfo['id']);
-
-            $query->leftJoin($pstat['database'] . '.dbo.' . $pstat['table'] . ' AS pstat', 'userinfo_map.newcid', '=', 'pstat.newcid');
-
-        } else {
-
-            $query->leftJoin($pstat['database'] . '.dbo.' . $pstat['table'] . ' AS pstat', 'userinfo.' . $userinfo['primaryKey'], '=', 'pstat.newcid');
+            $query->leftJoin($survey->map['database'] . '.dbo.' . $survey->map['table'] . ' AS map', $survey->map['info_key'], '=', $survey->map['map_key']);
 
         }
+
+        $query->leftJoin($survey->pstat['database'] . '.dbo.' . $survey->pstat['table'] . ' AS pstat', $survey->pstat['join_Key'], '=', 'pstat.newcid');
 
         return $query;
     }
@@ -111,19 +114,18 @@ class RateFile extends CommFile {
         $surveys_index = array_search(Input::get('table'), $surveys_id);
         $survey = (object)$surveys[$surveys_index];
 
-        $columns = DB::table($survey->userinfo['database'] . '.INFORMATION_SCHEMA.COLUMNS')
-            ->where('TABLE_NAME', $survey->userinfo['table'])
+        $columns = DB::table($survey->info['database'] . '.INFORMATION_SCHEMA.COLUMNS')
+            ->where('TABLE_NAME', $survey->info['table'])
             ->whereNotIn('COLUMN_NAME', $survey->against)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
 
         if (count($columns) > 0) {
 
             $query = $this->getQuery($survey);
 
-            $this->setDeletedAtQuery($query, $survey->userinfo);
+            $this->setDeletedAtQuery($query, $survey->info);
 
             $query
-                //->where('userinfo.' . $userinfo['school'], $school_selected)
-                ->select(array_map(function($column){ return 'userinfo.' . $column; }, $columns))
+                ->select(array_map(function($column){ return 'info.' . $column; }, $columns))
                 ->addSelect(DB::raw('CASE WHEN pstat.page IS NULL THEN 0 ELSE pstat.page END AS page'))
                 ->limit(10000);
 
@@ -150,10 +152,10 @@ class RateFile extends CommFile {
         );
     }
 
-    private function setDeletedAtQuery($query, $userinfo)
+    private function setDeletedAtQuery($query, $info)
     {
-        if (isset($userinfo['deleted_at']) && $userinfo['deleted_at']) {
-            $query->whereNull('userinfo.deleted_at');
+        if (isset($info['deleted_at']) && $info['deleted_at']) {
+            $query->whereNull('info.deleted_at');
         }
         return $query;
     }
@@ -163,8 +165,8 @@ class RateFile extends CommFile {
             [
                 'id'       => 'kindom_app',
                 'title'    => '冠德建設：APP客戶滿意度問卷',
-                'userinfo' => ['database' => 'rows', 'table' => 'row_20160719_152336_bn4vu', 'primaryKey' => 'id', 'school' => 'C418', 'deleted_at' => true],
-                'pstat'    => ['database' => 'tiped_kindom', 'table' => 'app_pstat', 'primaryKey' => 'newcid'],
+                'info'     => ['database' => 'rows', 'table' => 'row_20160719_152336_bn4vu', 'school' => 'C418', 'deleted_at' => true],
+                'pstat'    => ['database' => 'tiped_kindom', 'table' => 'app_pstat', 'join_Key' => 'info.id'],
                 'pages'    => 3,
                 'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at'],
                 'hidden'   => ['id'],
@@ -176,15 +178,37 @@ class RateFile extends CommFile {
             [
                 'id'       => 'adulthood',
                 'title'    => '成人初顯期的特徵與發展結果：探討家庭社經地位與文化的影響力',
-                'userinfo' => ['database' => 'tiped_kindom', 'table' => 'adulthood', 'primaryKey' => 'id', 'school' => 'C418', 'deleted_at' => false],
-                'pstat'    => ['database' => 'tiped_kindom', 'table' => 'adulthood_pstat', 'primaryKey' => 'newcid'],
+                'info'     => ['database' => 'tiped_kindom', 'table' => 'adulthood', 'school' => 'C418', 'deleted_at' => false],
+                'pstat'    => ['database' => 'tiped_kindom', 'table' => 'adulthood_pstat', 'join_Key' => 'info.id'],
                 'pages'    => 20,
                 'against'  => ['department_id'],
                 'hidden'   => ['id'],
                 'columns'  => ['id4' => '身分證後4碼', 'school_code' => '學校代碼', 'department_code' => '系所代碼', 'page' => '填答頁數'],
                 'categories' => [
-                    ['title' => '學校代碼', 'name' => 'userinfo.school_code', 'aliases' => 'school_code'],
-                    ['title' => '系所代碼', 'name' => 'userinfo.department_code', 'aliases' => 'department_code'],
+                    ['title' => '學校代碼', 'name' => 'info.school_code', 'aliases' => 'school_code'],
+                    ['title' => '系所代碼', 'name' => 'info.department_code', 'aliases' => 'department_code'],
+                ],
+                'result'   => [
+                    'rate' => false,
+                    'down' => true,
+                ],
+                'predicate' => ['page'],
+            ],
+        ],
+        'fieldwork105' => [
+            [
+                'id'       => 'fieldwork105',
+                'title'    => '105年實習師資生調查問卷',
+                'info'     => ['database' => 'rows', 'table' => 'row_20161003_094948_fuaiq', 'school' => 'C1250', 'deleted_at' => true],
+                'map'      => ['database' => 'tted_105', 'table' => 'fieldwork105_id', 'info_key' => 'info.C1258', 'map_key' => 'map.stdidnumber'],
+                'pstat'    => ['database' => 'tted_105', 'table' => 'fieldwork105_pstat', 'join_Key' => 'map.newcid'],
+                'pages'    => 11,
+                'against'  => ['C1251', 'C1261', 'C1262', 'C1263', 'C1264', 'C1265', 'C1266', 'C1267', 'C1268', 'C1269', 'C1270', 'C1271', 'C1272', 'C1273',
+                               'file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at'],
+                'hidden'   => ['id'],
+                'columns'  => [],
+                'categories' => [
+                    ['title' => '學校名稱', 'name' => 'info.C1250', 'aliases' => 'code', 'filter' => 'organization', 'project_id' => 2, 'groups' => []],
                 ],
                 'result'   => [
                     'rate' => false,

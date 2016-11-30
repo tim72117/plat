@@ -1,7 +1,7 @@
 
 <div ng-controller="rateController">
 
-    <md-content class="md-padding" layout="row" layout-align="center start">
+    <md-content class="md-padding" layout="column" layout-align="start center">
         <md-card ng-repeat="survey in surveys">
             <md-card-title>
             <md-card-title-text>
@@ -28,7 +28,7 @@
                         <td>總人數</td>
                     </tr>
                     <tr ng-repeat="down in survey.downs">
-                        <td ng-repeat="category in survey.categories">{{ down[category.aliases] }}</td>
+                        <td ng-repeat="category in survey.categories">{{ category.groups ? category.groups[down[category.aliases]].now.name : down[category.aliases] }}</td>
                         <td>{{ down.down }}</td>
                         <td>{{ down.receive }}</td>
                     </tr>
@@ -41,6 +41,26 @@
     </md-content>
 
 </div>
+
+<style>
+.demo-header-searchbox {
+    border: none;
+    outline: none;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+}
+.demo-select-header {
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(0, 0, 0, 0.14), 0 0 0 0 rgba(0, 0, 0, 0.12);
+    padding-left: 10.667px;
+    height: 48px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: auto;
+}
+</style>
 
 <script src="/js/jquery.fileDownload.js"></script>
 
@@ -56,8 +76,9 @@ app.controller('rateController', function($scope, $http, $filter, $mdDialog) {
 
     $scope.getSurveys = function() {
         $scope.$parent.main.loading = true;
-        $http({method: 'POST', url: 'ajax/getSurveys', data:{init: true}})
+        $http({method: 'POST', url: 'ajax/getSurveys', data:{}})
         .success(function(data, status, headers, config) {
+            console.log(data);
             $scope.surveys = data.surveys;
             $scope.$parent.main.loading = false;
         })
