@@ -56,6 +56,15 @@ class QuestionXML {
                 }
             }
 
+            if ($sub->type=='list') {
+                if (isset($parent_title))
+                    $sub->title = $parent_title . '-' . $sub->title;
+
+                foreach($sub->questions as $question) {
+                    self::get_subs($question->subs, $index, $questions, $sub->title, $isText);
+                }
+            }
+
             if ($isText) {
                 switch ($sub->type) {
                     case 'text':
