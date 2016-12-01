@@ -122,6 +122,17 @@ class RateFile extends CommFile {
 
             $query = $this->getQuery($survey);
 
+            if (property_exists($survey, 'categories')) {
+                foreach ($survey->categories as $category) {
+                    if (isset($category['filter']) && $category['filter'] == 'organization') {
+                        $details_id = \Plat\Project\Organization::find(Input::get('down.' . $category['aliases']))->every->lists('id');
+                        $query->whereIn($category['name'], $details_id);
+                    } else {
+                        $query->where($category['name'], Input::get('down.' . $category['aliases']));
+                    }
+                }
+            }
+
             $this->setDeletedAtQuery($query, $survey->info);
 
             $query
@@ -144,9 +155,6 @@ class RateFile extends CommFile {
             'students' => $students,
             'columns'  => array_merge(array_diff($columns, $survey->hidden), ['page']),
             'columnsName' => $survey->columns,
-            //'schools' => $schools,
-            //'school_selected' => $school_selected,
-            //'recode_columns'  => $recode_columns,
             'predicate'  => $survey->predicate,
             'queryLog' => DB::getQueryLog(),
         );
@@ -165,7 +173,7 @@ class RateFile extends CommFile {
             [
                 'id'       => 'kindom_app',
                 'title'    => '冠德建設：APP客戶滿意度問卷',
-                'info'     => ['database' => 'rows', 'table' => 'row_20160719_152336_bn4vu', 'school' => 'C418', 'deleted_at' => true],
+                'info'     => ['database' => 'rows', 'table' => 'row_20160719_152336_bn4vu', 'deleted_at' => true],
                 'pstat'    => ['database' => 'tiped_kindom', 'table' => 'app_pstat', 'join_Key' => 'info.id'],
                 'pages'    => 3,
                 'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at'],
@@ -178,7 +186,7 @@ class RateFile extends CommFile {
             [
                 'id'       => 'adulthood',
                 'title'    => '成人初顯期的特徵與發展結果：探討家庭社經地位與文化的影響力',
-                'info'     => ['database' => 'tiped_kindom', 'table' => 'adulthood', 'school' => 'C418', 'deleted_at' => false],
+                'info'     => ['database' => 'tiped_kindom', 'table' => 'adulthood', 'deleted_at' => false],
                 'pstat'    => ['database' => 'tiped_kindom', 'table' => 'adulthood_pstat', 'join_Key' => 'info.id'],
                 'pages'    => 20,
                 'against'  => ['department_id'],
@@ -199,14 +207,15 @@ class RateFile extends CommFile {
             [
                 'id'       => 'fieldwork105',
                 'title'    => '105年實習師資生調查問卷',
-                'info'     => ['database' => 'rows', 'table' => 'row_20161003_094948_fuaiq', 'school' => 'C1250', 'deleted_at' => true],
+                'info'     => ['database' => 'rows', 'table' => 'row_20161003_094948_fuaiq', 'deleted_at' => true],
                 'map'      => ['database' => 'tted_105', 'table' => 'fieldwork105_id', 'info_key' => 'info.C1258', 'map_key' => 'map.stdidnumber'],
                 'pstat'    => ['database' => 'tted_105', 'table' => 'fieldwork105_pstat', 'join_Key' => 'map.newcid'],
                 'pages'    => 11,
-                'against'  => ['C1251', 'C1261', 'C1262', 'C1263', 'C1264', 'C1265', 'C1266', 'C1267', 'C1268', 'C1269', 'C1270', 'C1271', 'C1272', 'C1273',
+                'against'  => ['C1251', 'C1254', 'C1255', 'C1257', 'C1261', 'C1262', 'C1263', 'C1264', 'C1265', 'C1266', 'C1267', 'C1268', 'C1269', 'C1270', 'C1271', 'C1272', 'C1273',
                                'file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at'],
                 'hidden'   => ['id'],
-                'columns'  => [],
+                'columns'  => ['C1250' => '學校代碼', 'C1252' => '系所代碼', 'C1253' => '就讀系所', 'C1256' => '姓名', 'C1258' => '身分證字號',
+                               'C1259' => '電子郵件信箱', 'C1260' => '連絡電話', 'page' => '填答頁數'],
                 'categories' => [
                     ['title' => '學校名稱', 'name' => 'info.C1250', 'aliases' => 'code', 'filter' => 'organization', 'project_id' => 2, 'groups' => []],
                 ],

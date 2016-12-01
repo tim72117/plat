@@ -21,20 +21,26 @@
                     <div class="value">{{ getRate(survey.down, survey.receive) }}%</div>
                     <div class="label">回收率</div>
                 </div>
+                <div style="max-height:350px;overflow:scroll">
                 <table class="ui table" ng-if="survey.result">
+                    <thead>
                     <tr>
-                        <td ng-repeat="category in survey.categories">{{ category.title }}</td>
-                        <td>填答完成人數</td>
-                        <td>總人數</td>
+                        <th ng-repeat="category in survey.categories">{{ category.title }}</th>
+                        <th>填答完成人數</th>
+                        <th>總人數</th>
+                        <th>詳細資料</th>
                     </tr>
+                    </thead>
                     <tr ng-repeat="down in survey.downs">
                         <td ng-repeat="category in survey.categories">{{ category.groups ? category.groups[down[category.aliases]].now.name : down[category.aliases] }}</td>
                         <td>{{ down.down }}</td>
                         <td>{{ down.receive }}</td>
+                        <td><md-button aria-label="詳細資料" ng-click="showWriters(down)">詳細資料</md-button></td>
                     </tr>
                 </table>
+                </div>
             </md-card-content>
-            <md-card-actions layout="row" layout-align="end center">
+            <md-card-actions layout="row" layout-align="end center" ng-if="!survey.categories">
                 <md-button aria-label="詳細資料" ng-click="showWriters()">詳細資料</md-button>
             </md-card-actions>
         </md-card>
@@ -78,7 +84,6 @@ app.controller('rateController', function($scope, $http, $filter, $mdDialog) {
         $scope.$parent.main.loading = true;
         $http({method: 'POST', url: 'ajax/getSurveys', data:{}})
         .success(function(data, status, headers, config) {
-            console.log(data);
             $scope.surveys = data.surveys;
             $scope.$parent.main.loading = false;
         })
@@ -89,10 +94,13 @@ app.controller('rateController', function($scope, $http, $filter, $mdDialog) {
 
     $scope.getSurveys();
 
-    $scope.showWriters = function() {
+    $scope.showWriters = function(down) {
         $mdDialog.show({
-            template: '<div rate-writers></div>',
-            clickOutsideToClose: true
+            template: '<div rate-writers down="down"></div>',
+            clickOutsideToClose: true,
+            controller: function($scope) {
+                $scope.down = down;
+            }
         })
     };
 
@@ -103,7 +111,9 @@ angular.module('rate', []).directive('rateWriters', function() {
         restrict: 'A',
         replace: true,
         transclude: false,
-        scope: {},
+        scope: {
+            down: '='
+        },
         template: `
     <div class="ui basic segment" ng-cloak ng-class="{loading: sheetLoading}" style="overflow: auto;min-width: 800px;min-height: 600px">
 
@@ -202,13 +212,12 @@ angular.module('rate', []).directive('rateWriters', function() {
             $scope.getUser = function(reflash) {
                 $scope.sheetLoading = true;
                 reflash = typeof reflash !== 'undefined' ? reflash : false;
-                $http({method: 'POST', url: 'ajax/getStudents', data:{ reflash: reflash, table: $scope.table_id, school_selected: $scope.school_selected }})
+                $http({method: 'POST', url: 'ajax/getStudents', data:{reflash: reflash, table: $scope.table_id, down: $scope.down}})
                 .success(function(data, status, headers, config) {
                     $scope.table = data.table;
                     $scope.rows = data.students;
                     $scope.rows_filted = data.students;
                     $scope.schools = data.schools;
-                    $scope.school_selected = data.school_selected;
                     $scope.columns = data.columns;
                     $scope.columnsName = data.columnsName;
                     $scope.recode_columns = data.recode_columns;
