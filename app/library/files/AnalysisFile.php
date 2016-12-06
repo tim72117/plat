@@ -335,7 +335,7 @@ class AnalysisFile extends CommFile {
                 break;
         }
 
-        return ['groups' => $groups];
+        return ['groups' => $this->isCreater() ? $groups : []];
     }
 
     public function process_r($rows)
