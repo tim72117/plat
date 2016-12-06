@@ -17,7 +17,7 @@ class Sender {
     {
         return 'apps.mailer';
     }
-    
+
     /*public function send()
     {
         $tables = [
@@ -201,15 +201,15 @@ class Sender {
         $surveys_index = array_search(Input::get('table_name'), $surveys_id);
         $survey = (object)$surveys[$surveys_index];
         $query = DB::table($survey->info['database'] . '.dbo.' . $survey->info['table'] . ' AS info');
-        
+
         if (property_exists($survey, 'map')) {
 
             $query->leftJoin($survey->map['database'] . '.dbo.' . $survey->map['table'] . ' AS map', $survey->map['info_key'], '=', $survey->map['map_key']);
-        
+
         }
         $query->leftJoin($survey->pstat['database'] . '.dbo.' . $survey->pstat['table'] . ' AS pstat', $survey->pstat['join_Key'], '=', 'pstat.newcid');
-        $query->leftJoin('plat_tted.dbo.organization_details AS organization_details', 'info.C1250', '=', 'organization_details.id');
-        
+        $query->leftJoin('plat.dbo.organization_details AS organization_details', 'info.C1250', '=', 'organization_details.id');
+
         $columns = DB::table($survey->info['database'] . '.INFORMATION_SCHEMA.COLUMNS')
             ->where('TABLE_NAME', $survey->info['table'])
             ->whereNotIn('COLUMN_NAME', $survey->against)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
@@ -219,7 +219,7 @@ class Sender {
             ->addSelect(DB::raw('CASE WHEN pstat.page IS NULL THEN 0 ELSE pstat.page END AS page'))
             ->addSelect(DB::raw('organization_details.name'))
             ->get();
-                        
+
         return ['users' => $users];
     }
 
