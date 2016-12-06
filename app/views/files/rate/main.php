@@ -167,9 +167,9 @@ angular.module('rate', []).directive('rateWriters', function() {
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="user in rows | orderBy:predicate | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
-                    <td ng-repeat="column in columns">{{ user[column] }}
-                        <span ng-if="recode_columns[column]">{{ operator(user[column], recode_columns[column]) }}</span>
+                <tr ng-repeat="row in rows | orderBy:predicate | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
+                    <td ng-repeat="column in columns">{{ row[column] }}
+                        <span ng-if="table.recodes[column]">({{ operator(row[column], table.recodes[column]) }})</span>
                     </td>
                 </tr>
             </tbody>
@@ -220,7 +220,6 @@ angular.module('rate', []).directive('rateWriters', function() {
                     $scope.schools = data.schools;
                     $scope.columns = data.columns;
                     $scope.columnsName = data.columnsName;
-                    $scope.recode_columns = data.recode_columns;
                     $scope.max = $scope.rows.length;
                     $scope.pages = Math.ceil($scope.max/$scope.limit);
                     $scope.page = 1;
