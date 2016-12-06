@@ -169,7 +169,7 @@ angular.module('rate', []).directive('rateWriters', function() {
             <tbody>
                 <tr ng-repeat="row in rows | orderBy:predicate | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
                     <td ng-repeat="column in columns">{{ row[column] }}
-                        <span ng-if="table.recodes[column]">({{ operator(row[column], table.recodes[column]) }})</span>
+                        <span ng-if="operator(row[column], table.recodes[column])">({{ operator(row[column], table.recodes[column]) }})</span>
                     </td>
                 </tr>
             </tbody>

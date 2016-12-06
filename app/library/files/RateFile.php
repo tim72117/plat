@@ -52,7 +52,7 @@ class RateFile extends CommFile {
                 $groups = array_fetch($survey['categories'], 'name');
 
                 $query = $this->getQuery((object)$survey)->groupBy($groups)->select($selects)
-                    ->addSelect(DB::raw('count(CASE WHEN (pstat.page > 1) then 1 ELSE NULL END) AS down'))
+                    ->addSelect(DB::raw('count(CASE WHEN (pstat.page >= ' . $survey['pages'] . ') then 1 ELSE NULL END) AS down'))
                     ->addSelect(DB::raw('count(*) AS receive'));
 
                 if (isset($survey['categories'])) {
