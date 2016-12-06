@@ -223,6 +223,13 @@ class RateFile extends CommFile {
                     'rate' => false,
                     'down' => true,
                 ],
+                'recodes' =>[
+                    'page' => [
+                        'operator' => '>',
+                        'value' => 10,
+                        'text' => ['true' => '填答完成', 'false' => '']
+                    ],
+                ],
                 'predicate' => ['page'],
             ],
         ],
