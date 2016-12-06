@@ -211,10 +211,10 @@ class RateFile extends CommFile {
                 'map'      => ['database' => 'tted_105', 'table' => 'fieldwork105_id', 'info_key' => 'info.C1258', 'map_key' => 'map.stdidnumber'],
                 'pstat'    => ['database' => 'tted_105', 'table' => 'fieldwork105_pstat', 'join_Key' => 'map.newcid'],
                 'pages'    => 11,
-                'against'  => ['C1251', 'C1254', 'C1255', 'C1257', 'C1261', 'C1262', 'C1263', 'C1264', 'C1265', 'C1266', 'C1267', 'C1268', 'C1269', 'C1270', 'C1271', 'C1272', 'C1273',
+                'against'  => ['C1258', 'C1254', 'C1255', 'C1257', 'C1261', 'C1262', 'C1263', 'C1264', 'C1265', 'C1266', 'C1267', 'C1268', 'C1269', 'C1270', 'C1271', 'C1272', 'C1273',
                                'file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at'],
                 'hidden'   => ['id'],
-                'columns'  => ['C1250' => '學校代碼', 'C1252' => '系所代碼', 'C1253' => '就讀系所', 'C1256' => '姓名', 'C1258' => '身分證字號',
+                'columns'  => ['C1250' => '學校代碼', 'C1252' => '系所代碼', 'C1253' => '就讀系所', 'C1256' => '姓名', 'C1251' => '學號',
                                'C1259' => '電子郵件信箱', 'C1260' => '連絡電話', 'page' => '填答頁數'],
                 'categories' => [
                     ['title' => '學校名稱', 'name' => 'info.C1250', 'aliases' => 'code', 'filter' => 'organization', 'project_id' => 2, 'groups' => []],
