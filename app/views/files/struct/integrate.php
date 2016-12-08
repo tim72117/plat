@@ -101,6 +101,14 @@
                     <md-icon md-svg-icon="file-download"></md-icon>
                     下載欄位說明
                 </md-button>
+                <md-button aria-label="分析秘笈" ng-click="showManual()">
+                    <md-icon md-svg-icon="help-outline"></md-icon>
+                    分析秘笈
+                </md-button>
+                <md-button aria-label="下載分析秘笈" href="/files/integrateManual/Manual.pdf">
+                    <md-icon md-svg-icon="file-download"></md-icon>
+                    下載分析秘笈
+                </md-button>
                 <md-button aria-label="預覽表格" ng-click="toggleSidenavRight()">
                     <md-icon md-svg-icon="icon-eye"></md-icon>
                     預覽表格
@@ -125,36 +133,51 @@
         <div class="ui basic segment" ng-class="{loading: loading}" style="overflow-y: auto">
 
         <md-tabs md-dynamic-height md-selected="status.page">
-            <md-tab label="快速設定">
-                <md-content class="md-padding" flex-sm="100" flex-md="60" flex-lg="50" flex-xl="30" layout="column">
-                    <h5>選擇分析學校</h5>
-                    <md-input-container>
-                        <label>學校</label>
-                        <md-select ng-model="selected.schools" aria-label="學校" multiple md-selected-text="getEllipsisSchools()" ng-change="changeSchools()" data-md-container-class="selectSelectHeader">
-                            <md-select-header class="select-header">
-                                <md-checkbox aria-label="全選"
-                                ng-checked="isSelectAllSchool()"
-                                md-indeterminate="isIndeterminateSchool()"
-                                ng-click="selectAllSchool()">
-                                <span ng-if="isSelectAllSchool()">取消</span>全選
-                                </md-checkbox>
-                            </md-select-header>
-                            <md-option ng-value="organization" ng-repeat="organization in organizations">{{organization.now.name}}</md-option>
-                        </md-select>
-                    </md-input-container>
-                    <h5>設定分類變項</h5>
-                    <struct-items ng-repeat="column in mainTable.columns" column="column" multiple="true"></struct-items>
-                </md-content>
+            <md-tab>
+                <md-tab-label>
+                    <h4 >快速設定</h4>
+                </md-tab-label>
+                <md-tab-body>
+                    <md-content class="md-padding" flex-sm="100" flex-md="60" flex-lg="50" flex-xl="30" layout="column">
+                        <h5>選擇分析學校</h5>
+                        <md-input-container>
+                            <label>學校</label>
+                            <md-select ng-model="selected.schools" aria-label="學校" multiple md-selected-text="getEllipsisSchools()" ng-change="changeSchools()" data-md-container-class="selectSelectHeader">
+                                <md-select-header class="select-header">
+                                    <md-checkbox aria-label="全選"
+                                    ng-checked="isSelectAllSchool()"
+                                    md-indeterminate="isIndeterminateSchool()"
+                                    ng-click="selectAllSchool()">
+                                    <span ng-if="isSelectAllSchool()">取消</span>全選
+                                    </md-checkbox>
+                                </md-select-header>
+                                <md-option ng-value="organization" ng-repeat="organization in organizations">{{organization.now.name}}</md-option>
+                            </md-select>
+                        </md-input-container>
+                        <h5>設定分類變項</h5>
+                        <struct-items ng-repeat="column in mainTable.columns" column="column" multiple="true"></struct-items>
+                    </md-content>
+                </md-tab-body>
             </md-tab>
-            <md-tab label="串聯其他表單">
-                <md-content class="md-padding" flex-sm="100" flex-md="80" flex-lg="70" flex-xl="50" layout="column">
-                    <div plan-table tables="tables" categories="categories"></div>
-                </md-content>
+            <md-tab>
+                <md-tab-label>
+                    <h4>串聯其他表單</h4>
+                </md-tab-label>
+                <md-tab-body>
+                    <md-content class="md-padding" flex-sm="100" flex-md="80" flex-lg="70" flex-xl="50" layout="column">
+                        <div plan-table tables="tables" categories="categories"></div>
+                    </md-content>
+                </md-tab-body>
             </md-tab>
-            <md-tab label="分析結果" md-on-select="calculate()">
-                <md-content class="md-padding"  layout="column">
-                    <div result-table calculations="calculations" levels="levels"></div>
-                </md-content>
+            <md-tab md-on-select="calculate()">
+                 <md-tab-label>
+                    <h4 >分析結果</h4>
+                </md-tab-label>
+                <md-tab-body>
+                    <md-content class="md-padding"  layout="column">
+                        <div result-table calculations="calculations" levels="levels"></div>
+                    </md-content>
+                </md-tab-body>
             </md-tab>
         </md-tabs>
         </div>
@@ -446,12 +469,9 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
        'userSelect': 'none'
     });
 
-    $scope.showTabDialog = function(ev) {
+    $scope.showManual = function(ev) {
         $mdDialog.show({
-          controller: DialogController,
-          templateUrl: 'templateHelp',
-          parent: angular.element(document.body),
-          targetEvent: ev,
+          templateUrl: 'templateManual',
           clickOutsideToClose:true
         })
     };

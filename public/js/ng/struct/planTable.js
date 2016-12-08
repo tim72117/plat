@@ -2,7 +2,7 @@ angular.module('ngStruct', [])
 
 .factory('structService', function($http, $filter, $timeout) {
     var selected = {schools: [], columns: []};
-    var status = {levels: [], page: 0, calculations: [], preview: false};
+    var status = {levels: [], page: 0, calculations: [], preview: false, tableTitle: {}};
     var calculate = function() {
         var selectedColumns = selected.columns.map( function(column) { return column.id });
         if (status.calculations.length > 0){
@@ -42,6 +42,7 @@ angular.module('ngStruct', [])
         $http({method: 'POST', url: 'calculate', data:{columns: calculation.selectedColumns, schoolID: selected.schools}})
         .success(function(data, status, headers, config) {
             calculation.results = data.results;
+            getTitle();
         }).error(function(e) {
             console.log(e);
         });
@@ -80,6 +81,22 @@ angular.module('ngStruct', [])
         status.calculations = [];
         status.levels = [];
     };
+
+    var getTitle = function() {
+        var titles = [];
+        for (i in selected.columns) {
+            var title = '';
+            title = title+selected.columns[i].title+' ';
+            for (j in selected.columns[i].selectedItems) {
+                title = title+'-'+selected.columns[i].selectedItems[j].name+' ';
+            }
+            titles.push(title);
+        }
+        status.tableTitle.title_text = titles;
+        status.tableTitle.title = '<div>' + titles.join('</div><div>') + '</div>';
+
+    };
+
     return {
         selected: selected,
         status: status,
@@ -334,7 +351,7 @@ angular.module('ngStruct', [])
                 $scope.status.calculations.splice(index, 1);
             };
 
-            $scope.getTitle = function() {
+            /*$scope.getTitle = function() {
                 $scope.tableTitle = {};
                 var titles = [];
                 for (i in $scope.status.calculations) {
@@ -347,17 +364,18 @@ angular.module('ngStruct', [])
                     }
                     titles.push(title);
                 }
+                console.log(titles)
                 $scope.tableTitle.title_text = titles;
                 $scope.tableTitle.title = '<div>' + titles.join('</div><div>') + '</div>';
 
-            }
+            }*/
 
             $scope.edit = function() {
-                $scope.tableTitle.editing = true;
+                $scope.status.tableTitle.editing = true;
             };
 
             $scope.save = function() {
-                delete $scope.tableTitle.editing;
+                delete $scope.status.tableTitle.editing;
             };
 
             $scope.getStructsTitile = function(key) {
@@ -375,7 +393,7 @@ angular.module('ngStruct', [])
             $scope.exportExcel = function() {
                 jQuery.fileDownload('export_excel', {
                     httpMethod: "POST",
-                    data:{columns: JSON.stringify($scope.selected.columns), results: JSON.stringify($scope.status.calculations[0].results), levels: JSON.stringify($scope.status.levels), total: $scope.getCrossColumnTotal($scope.status.calculations[0])},
+                    data:{columns: JSON.stringify($scope.selected.columns), results: JSON.stringify($scope.status.calculations[0].results), levels: JSON.stringify($scope.status.levels), total: $scope.getCrossColumnTotal($scope.status.calculations[0]), tableTitle: $scope.status.tableTitle.title},
                     failCallback: function (responseHtml, url) { console.log(responseHtml); }
                 });
             };

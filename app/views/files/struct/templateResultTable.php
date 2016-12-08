@@ -20,11 +20,11 @@
                     </md-button>
                 </th>
                 <th colspan="{{status.calculations.length * (percentType=='no' ? 1 : 2) }}">
-                    <div ng-hide="tableTitle.editing">
-                        <span ng-dblclick="edit()" ng-bind-html="tableTitle.title"></span>
+                    <div ng-hide="status.tableTitle.editing">
+                        <span ng-dblclick="edit()" ng-bind-html="status.tableTitle.title"></span>
                     </div>
-                    <div ng-show="tableTitle.editing">
-                        <div type="text" contenteditable value="{{tableTitle.title}}" ng-model="tableTitle.title" style="margin:0"></div>
+                    <div ng-show="status.tableTitle.editing">
+                        <div type="text" contenteditable value="{{status.tableTitle.title}}" ng-model="status.tableTitle.title" style="margin:0"></div>
                         <button class="ui mini button" ng-click="save()">儲存</button>
                     </div>
                 </th>
