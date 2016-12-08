@@ -32,9 +32,9 @@ class StructFile extends CommFile {
         return 'files.struct.'.$this->configs['view'];
     }
 
-    public function templateHelp()
+    public function templateManual()
     {
-        return View::make('files.struct.templateHelp');
+        return View::make('files.struct.templateManual');
     }
 
     public function templateExplain()
@@ -235,11 +235,12 @@ class StructFile extends CommFile {
         $columns      = json_decode(Input::get('columns'), true);
         $levels       = json_decode(Input::get('levels'), true);
         $total        = Input::get('total');
+        $tableTitle   = [implode(" ",explode("<div>",str_replace("</div>","<div>",Input::get('tableTitle'))))];
         $rows         = [];
-
         $titles = array_map(function($column){
             return $column['title'];
         }, $columns);
+        array_push($rows, $tableTitle);
         array_push($titles, '計數');
         array_push($rows, $titles);
 
@@ -268,6 +269,14 @@ class StructFile extends CommFile {
             $excel->sheet('Sheetname', function($sheet) use($rows) {
                 $sheet->fromArray($rows, null, 'A1', false, false);
                 $sheet->setFontSize(12);
+                $lastColumn = $sheet->getHighestColumn();
+                $lastRow = $sheet->getHighestRow();
+                $sheet->getDefaultStyle()->getAlignment()->setWrapText(true);
+                $sheet->mergeCells('A1:'.$lastColumn.'1');
+                $sheet->cells('A1:'.$lastColumn.'1', function($cells) {
+                    $cells->setAlignment('center');
+                    $cells->setValignment('center');
+                });
             });
         })->export('xls');
     }
@@ -295,7 +304,7 @@ class StructFile extends CommFile {
 
         foreach ($allTables as $table) {
             $query = DB::connection('sqlsrv_analysis_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table->name)
-                ->whereIn('COLUMN_NAME', ['國私立別','師培學校屬性','縣市','師資類科','學年度/期數','必修/選修','學年度','師培屬性','年度']);
+                ->whereIn('COLUMN_NAME', ['公私立別','師培學校屬性','縣市','師資類科','學年度/期數','必修/選修','學年度','師培屬性','年度']);
 
             $columnNames = $query->select('COLUMN_NAME')
                 ->lists('COLUMN_NAME');
