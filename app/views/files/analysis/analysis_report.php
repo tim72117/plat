@@ -33,6 +33,10 @@
     </div>
 
     <md-button class="not-print" ng-click="get_analysis_questions()">開始計算</md-button>
+    <md-button class="not-print" ng-click="get_list_questions()">題目列表</md-button>
+
+    <div ng-repeat="menuQuestion in menuQuestions">表{{menuQuestion.index}}:{{menuQuestion.title}}</div>
+
     <div class="not-print">
         start <input type="number" ng-model="start"> amount <input type="number" ng-model="amount">{{percent}}%
         <input type="radio" ng-model="other" value="mean">平均數<input type="radio" ng-model="other" value="sum">小計
@@ -154,6 +158,21 @@ app.controller('reportController', function($scope, $http, $filter) {
     }).error(function(e) {
         console.log(e);
     });
+
+    $scope.get_list_questions = function() {
+        $http({method: 'POST', url: 'get_analysis_questions', data:{start: $scope.start, amount: $scope.amount}})
+        .success(function(data, status, headers, config) {
+            $scope.selected = 1;
+            var index = $scope.start;
+            $scope.menuQuestions = $filter('filter')(data.questions, function(question) {
+                question.index = index+1;
+                index++;
+                return question.answers.length > 1 && question.answers.length < 10;
+            });
+        }).error(function(e) {
+            console.log(e);
+        });
+    };
 
     $scope.get_analysis_questions = function() {
         $http({method: 'POST', url: 'get_analysis_questions', data:{start: $scope.start, amount: $scope.amount}})
