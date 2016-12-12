@@ -351,25 +351,6 @@ angular.module('ngStruct', [])
                 $scope.status.calculations.splice(index, 1);
             };
 
-            /*$scope.getTitle = function() {
-                $scope.tableTitle = {};
-                var titles = [];
-                for (i in $scope.status.calculations) {
-                    var title = '';
-                    for (j in $scope.status.calculations[i].structs) {
-                        title = title+$scope.status.calculations[i].structs[j].title+' ';
-                        for (k in $scope.status.calculations[i].structs[j].rows) {
-                            title = title+$scope.status.calculations[i].structs[j].rows[k].title+'-'+$scope.status.calculations[i].structs[j].rows[k].filter;
-                        }
-                    }
-                    titles.push(title);
-                }
-                console.log(titles)
-                $scope.tableTitle.title_text = titles;
-                $scope.tableTitle.title = '<div>' + titles.join('</div><div>') + '</div>';
-
-            }*/
-
             $scope.edit = function() {
                 $scope.status.tableTitle.editing = true;
             };

@@ -105,7 +105,7 @@
                     <md-icon md-svg-icon="help-outline"></md-icon>
                     分析秘笈
                 </md-button>
-                <md-button aria-label="下載分析秘笈" href="/files/integrateManual/Manual.pdf">
+                <md-button aria-label="下載分析秘笈" href="/files/integrateManual/Manual.pdf"  target="_blank">
                     <md-icon md-svg-icon="file-download"></md-icon>
                     下載分析秘笈
                 </md-button>
@@ -135,7 +135,7 @@
         <md-tabs md-dynamic-height md-selected="status.page">
             <md-tab>
                 <md-tab-label>
-                    <h4 >快速設定</h4>
+                    <h4 >設定分析對象</h4>
                 </md-tab-label>
                 <md-tab-body>
                     <md-content class="md-padding" flex-sm="100" flex-md="60" flex-lg="50" flex-xl="30" layout="column">
@@ -154,14 +154,14 @@
                                 <md-option ng-value="organization" ng-repeat="organization in organizations">{{organization.now.name}}</md-option>
                             </md-select>
                         </md-input-container>
-                        <h5>設定分類變項</h5>
+                        <h5>設定篩選條件</h5>
                         <struct-items ng-repeat="column in mainTable.columns" column="column" multiple="true"></struct-items>
                     </md-content>
                 </md-tab-body>
             </md-tab>
             <md-tab>
                 <md-tab-label>
-                    <h4>串聯其他表單</h4>
+                    <h4>聯結其他發展歷程</h4>
                 </md-tab-label>
                 <md-tab-body>
                     <md-content class="md-padding" flex-sm="100" flex-md="80" flex-lg="70" flex-xl="50" layout="column">
