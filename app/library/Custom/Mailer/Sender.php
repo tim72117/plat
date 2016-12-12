@@ -208,7 +208,7 @@ class Sender {
 
         }
         $query->leftJoin($survey->pstat['database'] . '.dbo.' . $survey->pstat['table'] . ' AS pstat', $survey->pstat['join_Key'], '=', 'pstat.newcid');
-        $query->leftJoin('plat.dbo.organization_details AS organization_details', 'info.C1250', '=', 'organization_details.id');
+        $query->leftJoin('plat.dbo.organization_details AS organization_details', 'info.'.array_search("schoolID",$survey->columns), '=', 'organization_details.id');
 
         $columns = DB::table($survey->info['database'] . '.INFORMATION_SCHEMA.COLUMNS')
             ->where('TABLE_NAME', $survey->info['table'])
@@ -216,8 +216,11 @@ class Sender {
         $columns = array_intersect($columns,array_keys($survey->columns));
         $users = $query
             ->select(array_map(function($column) use ($survey){ return 'info.' . $column . ' AS ' .$survey->columns[$column]; }, $columns))
+            ->addSelect(DB::raw('CASE WHEN pstat.page IS NULL THEN 1 ELSE 0 END AS notLogined'))
             ->addSelect(DB::raw('CASE WHEN pstat.page IS NULL THEN 0 ELSE pstat.page END AS page'))
+            ->addSelect(DB::raw('CASE WHEN pstat.page < '.$survey->pages.' THEN 1 ELSE 0 END AS notCompleted'))
             ->addSelect(DB::raw('organization_details.name'))
+            
             ->get();
 
         return ['users' => $users];

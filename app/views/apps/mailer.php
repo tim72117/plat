@@ -58,6 +58,17 @@
                                 全部不選
                             </md-button>
                         </md-menu-item>
+                        <md-menu-item>
+                            <md-button ng-click="setUnlogin()">
+                                <md-icon md-svg-icon="check-box"></md-icon>
+                                完全沒登入
+                            </md-button>
+                        </md-menu-item>
+                        <md-menu-item>
+                            <md-button ng-click="setComplete()">
+                                <md-icon md-svg-icon="check-box"></md-icon>
+                                登入未填完
+                        </md-menu-item>
                     </md-menu-content>
                 </md-menu>
                 <md-chips ng-model="searchTexts" placeholder="搜尋姓名"></md-chips>
@@ -71,6 +82,7 @@
                         <p> {{ user.dep }} </p>
                         <p> {{ user.stdnumber }} </p>
                         <p> {{ user.email }} </p>
+                        <p>已填 {{ user.page }} 頁</p>
                     </div>
                     <md-checkbox class="md-secondary" ng-model="user.selected"></md-checkbox>
                 </md-list-item>
@@ -272,6 +284,22 @@ app.controller('mailerController', function($scope, $filter, $http, $interval, $
     $scope.setUsers = function(selected) {
         for (var i in $scope.users) {
             $scope.users[i].selected = selected;
+        };
+    };
+
+    $scope.setUnlogin = function() {
+        for (var i in $scope.users) {
+            if ($scope.users[i].notLogined == '1') {
+                $scope.users[i].selected = true;
+            }
+        };
+    };
+
+    $scope.setComplete = function() {
+        for (var i in $scope.users) {
+            if ($scope.users[i].notCompleted == '1') {
+                $scope.users[i].selected = true;
+            }
         };
     };
 
