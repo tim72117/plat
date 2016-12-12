@@ -60,6 +60,12 @@ Route::get('project/{project}/register/finish/{token}', 'UserController@register
 Route::get('project/{project}/register/print/{token}', 'UserController@registerPrint');
 Route::get('project/{project}/register/ajax/{method}', 'UserController@registerAjax');
 
+Route::get('survey/{book_id}/page', 'SurveyController@page');
+Route::post('survey/{book_id}/getBook', 'SurveyController@getBook');
+Route::post('survey/{book_id}/getNextNode', 'SurveyController@getNextNode');
+Route::post('survey/{book_id}/getNextNodes', 'SurveyController@getNextNodes');
+Route::post('survey/{book_id}/getChildren', 'SurveyController@getChildren');
+
 Route::get('api/projects', 'ApiController@projects');
 Route::get('api/news/{project_id}/{to}/{from?}', 'ApiController@news');
 Route::get('api/news/download/{post_id}', 'ApiController@postFileDownload')->where('post_id', '[0-9]+');

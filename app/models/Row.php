@@ -56,7 +56,6 @@ class Table extends Eloquent {
 
     public function setConstructAtAttribute($value)
     {
-        dd(1);
         $this->attributes['construct_at'] = \Carbon\Carbon::now()->toDateTimeString();
     }
     
