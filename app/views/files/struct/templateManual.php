@@ -20,31 +20,9 @@
             <img style="margin: auto; max-width: 100%;" alt="Manual1" src="/files/integrateManual/Manual5.jpg">
             <p></p>
             <img style="margin: auto; max-width: 100%;" alt="Manual1" src="/files/integrateManual/Manual6.jpg">
+            <p></p>
+            <img style="margin: auto; max-width: 100%;" alt="Manual1" src="/files/integrateManual/Manual7.jpg">
           </md-content>
-        </md-tab>
-        <md-tab label="Case 2.">
-          <md-content class="md-padding">
-            <img style="margin: auto; max-width: 100%;" alt="Manual1" src="/files/integrateManual/Manual2.jpg">
-          </md-content>
-        </md-tab>
-        <md-tab label="Case 3.">
-          <md-content class="md-padding">
-            <img style="margin: auto; max-width: 100%;" alt="Manual1" src="/files/integrateManual/Manual3.jpg">
-          </md-content>
-        </md-tab>
-        <md-tab label="Case 4.">
-          <md-content class="md-padding">
-            <img style="margin: auto; max-width: 100%;" alt="Manual1" src="/files/integrateManual/Manual4.jpg">
-          </md-content>
-        </md-tab>
-        <md-tab label="Case 5.">
-          <md-content class="md-padding">
-            <img style="margin: auto; max-width: 100%;" alt="Manual1" src="/files/integrateManual/Manual5.jpg">
-          </md-content>
-        </md-tab>
-        <md-tab label="Case 6.">
-          <md-content class="md-padding">
-            <img style="margin: auto; max-width: 100%;" alt="Manual1" src="/files/integrateManual/Manual6.jpg">
           </md-content>
         </md-tab>
       </md-tabs>
