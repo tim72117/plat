@@ -115,14 +115,14 @@ class StructFile extends CommFile {
 
     public function getTables()
     {
-        $tables = \Row\Sheet::find(148)->tables->load('columns');
+        $tables = \Row\Sheet::find($this->configs['sheets'])->tables->load('columns');
 
         return ['tables' => $tables, 'categories' => $this->getCategories(), 'population' => $this->populations[$this->configs['population']]];
     }
 
     public function getExplans()
     {
-        $tables = \Plat\Struct\Table::find(\Row\Sheet::find(148)->tables->fetch('id')->toArray())->load('columns', 'explains');
+        $tables = \Plat\Struct\Table::find(\Row\Sheet::find($this->configs['sheets'])->tables->fetch('id')->toArray())->load('columns', 'explains');
 
         return ['tables' => $tables, 'categories' => $this->getCategories()];
     }

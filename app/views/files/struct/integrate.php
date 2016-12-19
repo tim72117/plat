@@ -119,7 +119,7 @@
                 </md-button>
                 <span flex></span>
                 <!--<md-button aria-label="需要幫忙" ng-click="showTabDialog($event)"><md-icon md-svg-icon="help"></md-icon>需要幫忙</md-button>-->
-                <md-menu>
+                <!--<md-menu>
                     <md-button aria-label="表單大小" ng-click="$mdOpenMenu($event)">
                         表單大小
                     </md-button>
@@ -127,7 +127,7 @@
                         <md-menu-item><md-button aria-label="中" ng-click="tableSize=''"><i class="table icon"></i>中</md-button></md-menu-item>
                         <md-menu-item><md-button aria-label="大" ng-click="tableSize='large'"><i class="table large icon"></i>大</md-button></md-menu-item>
                     </md-menu-content>
-                </md-menu>
+                </md-menu>-->
             </div>
         </md-toolbar>
         <div class="ui basic segment" ng-class="{loading: loading}" style="overflow-y: auto">
