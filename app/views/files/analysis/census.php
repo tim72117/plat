@@ -133,7 +133,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
                         </tr>
                         <tr>
                             <td class="collapsing">問卷內容 :</td>
-                            <td><a href="{{file.path}}">{{file.name}}</a></td>
+                            <td><a href="{{file.path}}" target="_blank">{{file.name}}</a></td>
                         </tr>
                     </tbody>
                 </table>
