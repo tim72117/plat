@@ -15,6 +15,8 @@ class StructFile extends CommFile {
         parent::__construct($file, $user);
 
         $this->configs = $this->file->configs->lists('value', 'name');
+        $this->populations[$this->configs['population']]['table_id'] = $this->configs['maintable_id'];
+        $this->populations[$this->configs['population']]['id'] = $this->configs['maintable_id'];
     }
 
     public function is_full()
@@ -78,14 +80,13 @@ class StructFile extends CommFile {
         $column = \Row\Column::find(Input::get('column_id'));
 
         $mainTable = $this->populations[$this->configs['population']]['table'];
-
+        
         $query = DB::connection('sqlsrv_analysis_tted')
             ->table($mainTable)
             ->whereIn(DB::raw('substring(' . $mainTable . '.學校代碼,3,4)'), $organizations)
             ->groupBy($column->in_table->name . '.' . $column->title)
             ->select(DB::raw('CASE WHEN ' . $column->in_table->name . '.' . $column->title . ' IS NULL THEN \'\' ELSE ' . $column->in_table->name . '.' . $column->title . ' END AS name'))
             ->orderBy($column->in_table->name . '.' . $column->title);
-
         if ($column->in_table->name != $mainTable) {
             $query->leftJoin($column->in_table->name, $mainTable . '.身分證字號', '=', $column->in_table->name . '.身分證字號');
         }
@@ -115,14 +116,14 @@ class StructFile extends CommFile {
 
     public function getTables()
     {
-        $tables = \Row\Sheet::find($this->configs['sheets'])->tables->load('columns');
+        $tables = \Row\Sheet::find($this->configs['sheet_id'])->tables->load('columns');
 
         return ['tables' => $tables, 'categories' => $this->getCategories(), 'population' => $this->populations[$this->configs['population']]];
     }
 
     public function getExplans()
     {
-        $tables = \Plat\Struct\Table::find(\Row\Sheet::find($this->configs['sheets'])->tables->fetch('id')->toArray())->load('columns', 'explains');
+        $tables = \Plat\Struct\Table::find(\Row\Sheet::find($this->configs['sheet_id'])->tables->fetch('id')->toArray())->load('columns', 'explains');
 
         return ['tables' => $tables, 'categories' => $this->getCategories()];
     }

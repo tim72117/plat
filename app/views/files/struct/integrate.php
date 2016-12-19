@@ -338,9 +338,7 @@ app.controller('statusController', function($scope, $http, $filter, $timeout, $l
     };
 
     $scope.addPreCalculation = function() {
-        console.log(123)
         var calculation = {structs: [], results: {}};
-        //console.log($scope.structs)
         for (i in $scope.structs) {
             if ($scope.structs[i].selected && !$scope.structs[i].disabled) {
                 var rows = [];
