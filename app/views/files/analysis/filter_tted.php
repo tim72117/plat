@@ -3,7 +3,8 @@ $organizations = [];
 Plat\Member::where('project_id', 2)->where('user_id', Auth::user()->id)->first()->organizations->load('now')->each(function($organization) use(&$organizations) {
     $organizations['my-schools-' . $organization->now->id] = ['name' => $organization->now->name, 'uid' => [$organization->now->id]];
 });
-return [
+
+$filter = [
     'FW'  => 'FWT',
     // 'uid' =>    ['name' => '本校', 'uid' => User_tted::find(Auth::user()->id)->schools->map(function($school)
     //                                         {
@@ -11,11 +12,6 @@ return [
     //                                         })->all()
     //             ],
     'groups' => [
-        'my' => [
-            'key' =>'my-schools',
-            'name' => '本校',
-            'targets' =>  $organizations,
-        ],
         'all' => [
             'key'   => 'all',
             'name'  => '全國',
@@ -48,5 +44,30 @@ return [
             ],
         ],
     ],
-
 ];
+
+$programs = [
+    'program-child' => ['name' => '幼教類科', 'class_k' => 1],
+    'program-pri'   => ['name' => '小教類科', 'class_e' => 1],
+    'program-sec'   => ['name' => '中教類科', 'class_m' => 1],
+    'program-spe'   => ['name' => '特教類科', 'class_s' => 1],
+];
+
+$school = [];
+foreach ($organizations as $organization) {
+    $myPrograms = $programs;
+    $school['my-schools-' . $organization['uid'][0]]['key'] = 'my-schools-' . $organization['uid'][0];
+    $school['my-schools-' . $organization['uid'][0]]['name'] = $organization['name'];
+    $school['my-schools-' . $organization['uid'][0]]['targets']['my-schools-' . $organization['uid'][0]]['name'] = $organization['name'];
+    $school['my-schools-' . $organization['uid'][0]]['targets']['my-schools-' . $organization['uid'][0]]['uid'] = $organization['uid'];
+    foreach ($programs as $mkey => $program) {
+        $myPrograms[$mkey]['name'] = $organization['name'].$programs[$mkey]['name'];
+        $myPrograms[$mkey]['uid'][0] = $organization['uid'][0];
+    }
+    foreach($myPrograms as $key => $myProgram) {
+        $school['my-schools-' . $organization['uid'][0]]['targets']['my-schools-' . $organization['uid'][0] . '-' . $key] = $myProgram;
+    }
+}
+
+$filter['groups'] = array_merge($school, $filter['groups']);
+return $filter;
