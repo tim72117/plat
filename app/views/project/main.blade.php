@@ -42,7 +42,7 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
     $mdIconProvider.defaultIconSet('/js/angular_material/core-icons.svg', 24);
 })
 
-.controller('mainController', function($scope, $mdSidenav, $mdToast) {
+.controller('mainController', function($scope, $mdSidenav, $mdToast, $timeout) {
     $scope.main = {};
     $scope.main.pathname = window.location.pathname;
     $scope.main.isOpenLeftMenu = false;
@@ -60,6 +60,20 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
             .highlightAction(true)
         );
     };
+
+    $scope.second = 600;
+    angular.element(document).bind('mousemove', function (e) { $scope.second = 600; });
+    function idle() {
+        $timeout(function() {
+            $scope.second--;
+            if ($scope.second < 0) {
+                window.location = '/auth/logout';
+            }
+            idle();
+        }, 1000);
+    }
+    idle();
+
 })
 
 .controller('leftMenuController', function($scope, $http) {
