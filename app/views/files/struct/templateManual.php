@@ -1,4 +1,4 @@
-<md-dialog aria-label="Mango (Fruit)">
+<md-dialog aria-label="操作手冊">
   <form>
     <md-toolbar>
       <div class="md-toolbar-tools">
