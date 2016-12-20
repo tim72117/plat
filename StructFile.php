@@ -15,8 +15,10 @@ class StructFile extends CommFile {
         parent::__construct($file, $user);
 
         $this->configs = $this->file->configs->lists('value', 'name');
-        $this->populations[$this->configs['population']]['table_id'] = $this->configs['maintable_id'];
-        $this->populations[$this->configs['population']]['id'] = $this->configs['maintable_id'];
+        if (isset($this->configs['population'])){
+            $this->populations[$this->configs['population']]['table_id'] = $this->configs['maintable_id'];
+            $this->populations[$this->configs['population']]['id'] = $this->configs['maintable_id'];
+        }
     }
 
     public function is_full()
