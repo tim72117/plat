@@ -21,7 +21,7 @@ angular.module('ngStruct', [])
             status.calculations.push(calculation);
             callCalculation(selectedColumns);
         }
-
+        getTitle();
         //status.page = 2;
     };
     var callCalculation = function(selectedColumns) {
@@ -42,7 +42,6 @@ angular.module('ngStruct', [])
         $http({method: 'POST', url: 'calculate', data:{columns: calculation.selectedColumns, schoolID: selected.schools}})
         .success(function(data, status, headers, config) {
             calculation.results = data.results;
-            getTitle();
         }).error(function(e) {
             console.log(e);
         });
