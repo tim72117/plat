@@ -263,6 +263,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         $scope.todo.clone = docs.length > 0;
         for(var i in docs) {
             if (docs[i].type != '5') { $scope.todo.request = false; $scope.todo.saveAs = false; $scope.todo.clone = false };
+            if (docs[i].type == '6') { $scope.todo.request = true; };
         }
     });
 

@@ -58,10 +58,10 @@ class FileController extends BaseController {
             });
 
         })->where('disabled', false)->get()->map(function($request) {
-
+            $method = $request->isDoc->isFile->type == '6' ? 'application' : 'import';
             return [
                 'title' => $request->description,
-                'link'  => 'request/' . $request->id . '/import',
+                'link'  => 'request/' . $request->id . '/' . $method,
                 'created_at' => $request->created_at->toIso8601String(),
             ];
 
@@ -72,13 +72,13 @@ class FileController extends BaseController {
 
     public function request($request_id, $method = null)
     {
+
         $request = RequestFile::find($request_id);
 
         $doc = ShareFile::find($request->doc_id);
         if (!isset($doc)) {
             return $this->no();
         }
-
         View::share('request', $request);
 
         return $this->active($doc, $method);
@@ -112,7 +112,6 @@ class FileController extends BaseController {
         $file = new $class($doc->isFile, $this->user);
 
         $file->setDoc($doc);
-
         if (in_array($method, $file->get_views())) {
             if ($file->is_full()) {
                 $member = $this->user->members()->logined()->orderBy('logined_at', 'desc')->first();
