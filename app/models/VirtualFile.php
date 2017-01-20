@@ -37,6 +37,10 @@ class Files extends Eloquent {
         return $this->hasMany('Tag', 'file_id', 'id');
     }
 
+    public function Docs() {
+        return $this->hasMany('ShareFile', 'file_id', 'id');
+    }
+
 }
 
 class RequestFile extends Eloquent {
@@ -93,6 +97,11 @@ class ShareFile extends Eloquent {
     public function getOpenedAtAttribute($value)
     {
         return is_null($value) ? Carbon\Carbon::minValue() : Carbon\Carbon::parse($value);
+    }
+
+    public function scopeOfMe($query)
+    {
+        return $query->where('target', 'user')->where('target_id', Auth::user()->id);
     }
 
 }
