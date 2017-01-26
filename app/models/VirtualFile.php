@@ -37,7 +37,7 @@ class Files extends Eloquent {
         return $this->hasMany('Tag', 'file_id', 'id');
     }
 
-    public function Docs() {
+    public function docs() {
         return $this->hasMany('ShareFile', 'file_id', 'id');
     }
 
