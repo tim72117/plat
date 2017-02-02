@@ -28,7 +28,7 @@ class ApiController extends BaseController {
             return Response::json(['error' => $e->getMessage()]);
         }
 
-        $posts = Plat\Project::find($project_id)->posts()->whereBetween('publish_at', [$toDate, $fromDate])->select(['id','title', 'context', 'publish_at','display_at'])->get()->load('files');
+        $posts = Plat\Project::find($project_id)->posts()->whereBetween('publish_at', [$toDate, $fromDate])->select(['id','title', 'context', 'publish_at','display_at'])->orWhere('perpetual', 1)->get()->load('files');
 
         return Response::json($posts);
     }

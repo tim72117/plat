@@ -14,13 +14,14 @@
         </form>
         <div class="ui divided list " >
             <div class="item" ng-repeat="post in posts | orderBy:['publish_at']:true" ng-class="{disabled: post.deleted_at}">
-                <div class="content right floated " style="width:450px;">
+                <div class="content right floated " style="width:500px;">
                     <div class="ui toggle checkbox left floated" ng-click="setDisplay(post)">
                         <input type="checkbox" ng-model="post.display_at.intro" ng-disabled="post.disabled">
                         <label>公告於首頁</label>
                     </div>
                     <label for="file_upload" class="ui blue button basic mini left floated" ng-class="{loading: uploading}" ng-model="selected" ng-click="setPost(post)"><i class="icon upload"></i>上傳附件</label>
                     <button class="ui red basic icon mini button left floated" ng-class="{disabled: post.deleted_at}" ng-click="delete(post)"><i class="trash outline icon"></i> 刪除</button>
+                    <md-switch class="left floated" ng-model="post.perpetual" ng-true-value="'1'" ng-false-value="'0'" ng-change="setPerpetual(post)" aria-label="永久顯示">永久顯示</md-switch>
                     <div class="ui list left floated" ng-repeat="file in post.files">
                         <div class="item">
                             <table class="ui striped table" style="width:450px;">
@@ -147,7 +148,6 @@ angular.module('app')
                 $scope.posts.push(data.post);
             }
             if( data.method==='update' ){
-                // $filter('filter')($scope.posts, {id: data.post.id}, function(actual, expected) { return angular.equals(actual, expected); })[0] = data.post;
                 angular.extend($filter('filter')($scope.posts, {id: data.post.id}, function(actual, expected) { return angular.equals(actual, expected); })[0], data.post);
             }
             $timeout(function() {
@@ -168,7 +168,6 @@ angular.module('app')
     $scope.delete = function(post) {
         $http({method: 'POST', url: 'ajax/deletePost', data:{id: post.id,post:post}})
         .success(function(data, status, headers, config) {
-            console.log(data);
             if (data.deleted) {
                 $scope.posts.splice($scope.posts.indexOf(post), 1);
             };
@@ -180,7 +179,6 @@ angular.module('app')
     $scope.getPosts = function(){
         $http({method: 'POST', url: 'ajax/getPosts', data:{} })
         .success(function(data, status, headers, config) {
-            console.log(data);
 
             angular.forEach(data, function(post, key) {
                 post.display_at = angular.fromJson(post.display_at) || {};
@@ -213,6 +211,17 @@ angular.module('app')
         } else {
             return false;
         }
+    };
+
+    $scope.setPerpetual = function(post) {
+        $http({method: 'POST', url: 'ajax/setPerpetual', data:{id: post.id, perpetual: post.perpetual}})
+        .success(function(data, status, headers, config) {
+            if (!data.updated) {
+                post.perpetual = 0;
+            };
+        }).error(function(e){
+            console.log(e);
+        });
     };
 
     $scope.getPosts();
