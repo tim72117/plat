@@ -400,6 +400,9 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     });
 
     $scope.uploader.onBeforeUploadItem = function(item) {
+        var folder = $scope.paths[$scope.paths.length-1];
+        var folder_id = folder ? folder.id : null;
+        item.formData.push({folder_id: folder_id});
         $scope.uploading = true;
         $scope.progress = 0;
     };
