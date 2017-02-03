@@ -51,7 +51,7 @@ class TTED {
 
     public function open()
     {
-        return 'customs.lookup_ques_tted';
+        return 'files.custom.lookup_ques_tted';
     }
 
     public function getStudents()

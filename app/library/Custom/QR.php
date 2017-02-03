@@ -13,7 +13,7 @@ class QR {
 
     public function open()
     {
-        return 'customs.qr_master';
+        return 'files.custom.qr_master';
     }
 
     public function init()

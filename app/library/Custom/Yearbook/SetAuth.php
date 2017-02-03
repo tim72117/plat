@@ -15,7 +15,7 @@ class SetAuth {
 
     public function open()
     {
-        return 'customs.setAuth_yb';
+        return 'files.custom.setAuth_yb';
     }
 
     public function getProfiles()

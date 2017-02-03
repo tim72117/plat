@@ -13,7 +13,7 @@ class Teacheradmin {
 
     public function open()
     {
-        return 'customs.mailer_teacheradmin';
+        return 'files.custom.mailer_teacheradmin';
     }
 
     public function getTeachers()

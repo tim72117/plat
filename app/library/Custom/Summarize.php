@@ -13,7 +13,7 @@ class Summarize {
 
     public function open()
     {
-        return 'customs.question';
+        return 'files.custom.question';
     }
 
     public function getServers()
