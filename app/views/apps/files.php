@@ -53,10 +53,10 @@
                     <i class="file outline icon"></i>
                     <span class="text">新增</span>
                     <div class="menu transition" tabindex="-1">
-                        <a class="item" href="javascript:void(0)" ng-click="addDoc(5)"><i class="file text icon"></i>資料檔</a>
-                        <a class="item" href="javascript:void(0)" ng-click="addDoc(1)"><i class="file text outline icon"></i>問卷</a>
-                        <a class="item" href="javascript:void(0)" ng-click="addDoc(9)"><i class="file text outline icon red"></i>面訪問卷</a>
-                        <a class="item" href="javascript:void(0)" ng-click="addDoc(20)"><i class="folder icon"></i>資料夾</a>
+                        <a class="item" href="javascript:void(0)" ng-click="addDoc(5, $event)"><i class="file text icon"></i>資料檔</a>
+                        <a class="item" href="javascript:void(0)" ng-click="addDoc(1, $event)"><i class="file text outline icon"></i>問卷</a>
+                        <a class="item" href="javascript:void(0)" ng-click="addDoc(9, $event)"><i class="file text outline icon red"></i>面訪問卷</a>
+                        <a class="item" href="javascript:void(0)" ng-click="addDoc(20, $event)"><i class="folder icon"></i>資料夾</a>
                     </div>
                 </div>
                 <label for="file_upload" class="ui basic mini button" ng-class="{loading: uploading}"><i class="icon upload"></i>上傳</label>
@@ -104,9 +104,7 @@
                     <th></th>
                     <th>
                         <div class="ui breadcrumb">
-                            <a class="section" ng-click="getDocs(null)"> 我的檔案 </a>
-                            <div class="divider"> / </div>
-                            <a class="section" ng-repeat-start="path in paths" ng-click="getDocs(path.id)">{{path.is_file.title}}</a>
+                            <a class="section" ng-repeat-start="path in paths" ng-click="getDocs(path)">{{path.is_file.title}}</a>
                             <div ng-repeat-end class="divider"> / </div>
                         </div>
                     </th>
@@ -117,23 +115,13 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-if="newDoc">
-                    <td></td>
-                    <td>
-                        <i class="icon" ng-class="types[newDoc.type]"></i>
-                        <div class="ui mini input"><input type="text" ng-model="newDoc.title" size="50" placeholder="檔案名稱"></div>
-                        <div class="ui basic mini button" ng-click="createDoc()"><i class="icon save"></i>確定</div>
-                    </td>
-                    <td></td><td></td>
-                    <td></td><td></td>
-                </tr>
                 <tr ng-repeat="doc in docs | orderBy:'created_at':true | filter:searchText | filter:searchType:true | startFrom:(page-1)*limit | limitTo:limit">
                     <td width="50">
                         <md-checkbox ng-model="doc.selected" aria-label="選取檔案" style="margin-bottom:0" ng-disabled="!doc.selected && (docs | filter:{selected: true}).length > 0"></md-checkbox>
                     </td>
                     <td style="min-width:400px">
                         <i class="icon" ng-class="types[doc.type]"></i>
-                        <a ng-if="doc.type==20" href ng-click="getDocs(doc.id)">{{ doc.title }}</a>
+                        <a ng-if="doc.type==20" href ng-click="getDocs(doc)">{{ doc.title }}</a>
                         <a ng-if="doc.type!=20" href="{{ doc.link }}">{{ doc.title }}</a>
                     </td>
                     <td class="collapsing">
@@ -231,6 +219,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     $scope.information = {};
     $scope.todo = {share: false, request: false, delete: false, clone: false};
     $scope.parentTables = false;
+    $scope.initPaths = [{id: null, is_file: {title: '我的檔案'}}];
 
     $interval(function() {
         $scope.timenow = new Date();
@@ -310,12 +299,12 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         $scope.page = $scope.page > $scope.pages ? 1 : $scope.page;
     };
 
-    $scope.getDocs = function(path) {
+    $scope.getDocs = function(folder) {
         $scope.$parent.main.loading = true;
-        $http({method: 'POST', url: '/docs/lists', data:{path: path} })
+        $http({method: 'POST', url: '/docs/lists', data:{folder: folder} })
         .success(function(data, status, headers, config) {
             $scope.docs = data.docs;
-            $scope.paths = data.paths;
+            $scope.paths = $scope.initPaths.concat(data.paths);
             $scope.setPaginate();
             $scope.$parent.main.loading = false;
         }).error(function(e){
@@ -323,7 +312,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         });
     };
 
-    $scope.getDocs();
+    $scope.getDocs($scope.initPaths[0]);
 
     $scope.deleteDoc = function() {
         $scope.deleting = true;
@@ -378,17 +367,28 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         $scope.$parent.$broadcast('getRequesteds', {docs: $filter('filter')($scope.docs, {selected: true})});
     };
 
-    $scope.addDoc = function(type) {
-        $scope.newDoc = {type: type, title: ''};
-    };
+    $scope.addDoc = function(type, ev) {
+        var confirm = $mdDialog.prompt()
+        .title('新增檔案')
+        .placeholder('檔案名稱')
+        .ariaLabel('檔案名稱')
+        .initialValue('')
+        .targetEvent(ev)
+        .ok('確定')
+        .cancel('取消');
 
-    $scope.createDoc = function(type) {
-        $http({method: 'POST', url: '/file/create', data:{fileInfo: $scope.newDoc}})
-        .success(function(data, status, headers, config) {
-            $scope.docs.push(data.doc);
-            $scope.newDoc = null;
-        }).error(function(e){
-            console.log(e);
+        $mdDialog.show(confirm).then(function(title) {
+            var folder = $scope.paths[$scope.paths.length-1];
+            var folder_id = folder ? folder.id : null;
+            var newDoc = {type: type, title: title};
+            $http({method: 'POST', url: '/file/create', data:{fileInfo: newDoc, folder_id: folder_id}})
+            .success(function(data, status, headers, config) {
+                $scope.docs.push(data.doc);
+            }).error(function(e){
+                console.log(e);
+            });
+        }, function() {
+
         });
     };
 
@@ -470,8 +470,8 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
                     <md-dialog-content class="md-dialog-content" style="min-width: 500px" layout="row">
                         <md-input-container flex>
                             <label>選擇資料夾</label>
-                            <md-select ng-model="folder_id">
-                                <md-option ng-repeat="folder in folders" ng-value="folder.id">{{folder.is_file.title}}</md-option>
+                            <md-select ng-model="folder">
+                                <md-option ng-repeat="folder in folders" ng-value="folder">{{folder.is_file.title}}</md-option>
                             </md-select>
                         </md-input-container>
                     </md-dialog-content>
@@ -481,31 +481,40 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
                     </md-dialog-actions>
                 </md-dialog>
             `,
-            controller: function($scope, $mdDialog) {
+            controller: function(scope, $mdDialog) {
+                scope.folders = [{id: null, is_file: {title: '/'}}];
 
                 $http({method: 'GET', url: '/folders/lists', data:{}})
                 .success(function(data, status, headers, config) {
-                    $scope.folders = data.folders;
+                    scope.folders = scope.folders.concat(data.folders);
                 }).error(function(e) {
                     console.log(e);
                 });
 
-                $scope.cancel = function() {
+                scope.cancel = function() {
                     $mdDialog.cancel();
                 };
 
-                $scope.hide = function() {
-                    $http({method: 'POST', url: '/doc/' + doc.id + '/moveToFolder', data:{folder_id: $scope.folder_id}})
+                scope.hide = function() {
+                    $http({method: 'POST', url: '/doc/' + doc.id + '/moveToFolder', data:{folder_id: scope.folder.id}})
                     .success(function(data, status, headers, config) {
-                        console.log(data);
-                        $mdDialog.hide();
+                        if (data.moved) {
+                            var index = $scope.docs.indexOf(doc);
+                            $scope.docs.splice(index, 1);
+                            $mdDialog.hide(scope.folder);
+                        }
                     }).error(function(e) {
-                        console.log(e);
+                        $mdDialog.cancel();
                     });
                 };
             }
-        }).then(function(result) {
-            console.log(1);
+        }).then(function(folder) {
+            $mdToast.show(
+                $mdToast.simple()
+                .textContent(doc.title + '   已移動到   ' + folder.is_file.title)
+                .position('bottom left')
+                .hideDelay(3000)
+            );
         }, function() {
             console.log(2);
         });

@@ -218,7 +218,7 @@ class CommFile {
     {
         $this->doc->folder_id = Input::get('folder_id');
 
-        return ['saved' => $this->doc->save()];
+        return ['moved' => $this->doc->save()];
     }
 
 }

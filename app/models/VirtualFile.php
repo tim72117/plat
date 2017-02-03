@@ -60,7 +60,7 @@ class ShareFile extends Eloquent {
 
     public $timestamps = true;
 
-    protected $fillable = array('file_id', 'target', 'target_id', 'created_by', 'visible');
+    protected $fillable = array('file_id', 'target', 'target_id', 'created_by', 'visible', 'folder_id');
 
     public function isFile() {
         return $this->hasOne('Files', 'id', 'file_id');

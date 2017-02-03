@@ -224,6 +224,7 @@ class FileController extends BaseController {
             'target_id'  => $this->user->id,
             'created_by' => $this->user->id,
         ], [
+            'folder_id'  => Input::get('folder_id'),
             'visible' => false,
         ]);
     }
@@ -278,13 +279,13 @@ class FileController extends BaseController {
 
             });
 
-        })->where('folder_id', Input::get('path'))->get()->map(function($doc) {
+        })->where('folder_id', Input::get('folder.id'))->get()->map(function($doc) {
 
             return Struct_file::open($doc);
 
         })->toArray();
 
-        $paths = Input::has('path') ? ShareFile::find(Input::get('path'))->getPaths()->load('isFile') : null;
+        $paths = Input::has('folder.id') ? ShareFile::find(Input::get('folder.id'))->getPaths()->load('isFile') : [];
 
         return ['docs' => $docs, 'paths' => $paths];
     }
