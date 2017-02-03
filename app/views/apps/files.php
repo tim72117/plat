@@ -97,6 +97,7 @@
                         <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋..."><i class="search icon"></i></div>
                     </th>
                     <th>更多</th>
+                    <th>共用</th>
                     <th>更新時間</th>
                     <th>擁有人</th>
                 </tr>
