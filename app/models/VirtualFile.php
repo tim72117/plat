@@ -76,6 +76,18 @@ class ShareFile extends Eloquent {
         return $this->hasMany('RequestFile', 'doc_id', 'id');
     }
 
+    public function folder()
+    {
+        return $this->belongsTo('ShareFile');
+    }
+
+    public function getPaths()
+    {
+        $paths = $this->folder ? $this->folder->getPaths()->add($this) : \Illuminate\Database\Eloquent\Collection::make([$this]);
+
+        return $paths;
+    }
+
     public function getVisibleAttribute($value)
     {
         return (bool)$value;

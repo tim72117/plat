@@ -56,6 +56,7 @@
                         <a class="item" href="javascript:void(0)" ng-click="addDoc(5)"><i class="file text icon"></i>資料檔</a>
                         <a class="item" href="javascript:void(0)" ng-click="addDoc(1)"><i class="file text outline icon"></i>問卷</a>
                         <a class="item" href="javascript:void(0)" ng-click="addDoc(9)"><i class="file text outline icon red"></i>面訪問卷</a>
+                        <a class="item" href="javascript:void(0)" ng-click="addDoc(20)"><i class="folder icon"></i>資料夾</a>
                     </div>
                 </div>
                 <label for="file_upload" class="ui basic mini button" ng-class="{loading: uploading}"><i class="icon upload"></i>上傳</label>
@@ -63,9 +64,6 @@
                 <div class="ui basic mini button" ng-class="{loading: saving}" ng-if="todo.saveAs" ng-click="saveAs()"><i class="icons"><i class="file outline icon"></i><i class="write icon"></i></i>另存</div>
                 <div class="ui basic mini button" ng-if="todo.share" ng-click="getShareds()"><i class="icon external share"></i>共用</div>
                 <div class="ui basic mini button" ng-if="todo.request" ng-click="getRequesteds()"><i class="icon exchange"></i>請求</div>
-                <div class="ui basic mini button yellow" ng-click="$event.stopPropagation();whatNews(false)" ng-popup="{show: true, tooltip: tooltip['start']}">
-                    <i class="icon help outline"></i>有什麼新功能
-                </div>
             </div>
             <div class="right floated right aligned nine wide column">
                 <div class="ui label">第 {{ page }} 頁<div class="detail">共 {{ pages }} 頁</div></div>
@@ -79,14 +77,6 @@
 
         <table class="ui very compact table">
             <thead>
-                <tr>
-                    <th></th>
-                    <th>檔名</th>
-                    <th>更多</th>
-                    <th>已共用</th>
-                    <th>更新時間</th>
-                    <th>擁有人</th>
-                </tr>
                 <tr>
                     <th></th>
                     <th>
@@ -105,6 +95,20 @@
                             </div>
                         </div>
                         <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋..."><i class="search icon"></i></div>
+                    </th>
+                    <th>更多</th>
+                    <th>更新時間</th>
+                    <th>擁有人</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th>
+                        <div class="ui breadcrumb">
+                            <a class="section" ng-click="getDocs(null)"> 我的檔案 </a>
+                            <div class="divider"> / </div>
+                            <a class="section" ng-repeat-start="path in paths" ng-click="getDocs(path.id)">{{path.is_file.title}}</a>
+                            <div ng-repeat-end class="divider"> / </div>
+                        </div>
                     </th>
                     <th></th>
                     <th></th>
@@ -129,7 +133,8 @@
                     </td>
                     <td style="min-width:400px" ng-click="rename(doc)">
                         <i class="icon" ng-class="types[doc.type]"></i>
-                        <a href="{{ doc.link }}" ng-if="!doc.renaming" ng-click="$event.stopPropagation()" ng-popup="{show: $first, tooltip: tooltip['rename']}">{{ doc.title }}</a>
+                        <a ng-if="doc.type==20 && !doc.renaming" href ng-click="getDocs(doc.id)">{{ doc.title }}</a>
+                        <a ng-if="doc.type!=20 && !doc.renaming" href="{{ doc.link }}" ng-click="$event.stopPropagation()">{{ doc.title }}</a>
                         <div class="ui mini icon input" ng-class="{loading: doc.saving}" ng-if="doc.renaming" ng-click="$event.stopPropagation()">
                             <input type="text" ng-model="doc.title" size="50" placeholder="檔案名稱">
                             <i class="search icon" ng-if="doc.saving"></i>
@@ -210,7 +215,8 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         9: 'file text outline red',
         10: 'file excel outline',
         11: 'users',
-        14: 'database'
+        14: 'database',
+        20: 'folder'
     };
     $scope.uploading = false;
     $scope.loading = false;
@@ -296,17 +302,14 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         $scope.page = $scope.page > $scope.pages ? 1 : $scope.page;
     };
 
-    $scope.getDocs = function() {
+    $scope.getDocs = function(path) {
         $scope.$parent.main.loading = true;
-        $http({method: 'POST', url: '/docs/lists', data:{} })
+        $http({method: 'POST', url: '/docs/lists', data:{path: path} })
         .success(function(data, status, headers, config) {
             $scope.docs = data.docs;
+            $scope.paths = data.paths;
             $scope.setPaginate();
             $scope.$parent.main.loading = false;
-            $scope.tooltip = data.tooltip;
-            $timeout(function() {
-                $scope.whatNews(true);
-            });
         }).error(function(e){
             console.log(e);
         });
@@ -441,35 +444,6 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         });
     };
 
-    $scope.whatNews = function(startup) {
-        $scope.$broadcast('popup', {startup: startup});
-    };
-
-})
-.directive('ngPopup', function() {
-    return {
-        restrict: "A",
-        scope: {
-            ngPopup: '='
-        },
-        controller: function ($scope, $element, $rootElement) {
-            $scope.$on('popup', function (event, args) {
-                if ($scope.ngPopup.show && $scope.ngPopup.tooltip && $scope.ngPopup.tooltip.startup == args.startup) {
-                    var popup = $element.popup({
-                        position: $scope.ngPopup.tooltip.position,
-                        html:     $scope.ngPopup.tooltip.html,
-                        on:       'manual'
-                    });
-                    $element.popup('show');
-                    $rootElement.on('click', function() {
-                        if (popup) {
-                            $element.popup('destroy');
-                        };
-                    });
-                };
-            });
-        }
-    };
 });
 
 app.controller('shareController', function($scope, $filter, $http) {
