@@ -25,6 +25,7 @@ Route::group(array('before' => 'auth'), function() {
     Route::post('file/create', 'FileController@create');
     Route::post('file/upload', 'FileController@upload');
     Route::post('docs/lists', 'FileController@docs');
+    Route::get('folders/lists', 'FileController@folders');
     Route::post('apps/lists', 'FileController@apps');
     Route::get('docs/management', 'FileController@management');
     Route::post('docs/share/get', 'FileController@shared');

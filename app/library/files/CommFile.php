@@ -214,4 +214,11 @@ class CommFile {
         return $doc;
     }
 
+    public function moveToFolder()
+    {
+        $this->doc->folder_id = Input::get('folder_id');
+
+        return ['saved' => $this->doc->save()];
+    }
+
 }

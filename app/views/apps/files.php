@@ -131,14 +131,10 @@
                     <td width="50">
                         <md-checkbox ng-model="doc.selected" aria-label="選取檔案" style="margin-bottom:0" ng-disabled="!doc.selected && (docs | filter:{selected: true}).length > 0"></md-checkbox>
                     </td>
-                    <td style="min-width:400px" ng-click="rename(doc)">
+                    <td style="min-width:400px">
                         <i class="icon" ng-class="types[doc.type]"></i>
-                        <a ng-if="doc.type==20 && !doc.renaming" href ng-click="getDocs(doc.id)">{{ doc.title }}</a>
-                        <a ng-if="doc.type!=20 && !doc.renaming" href="{{ doc.link }}" ng-click="$event.stopPropagation()">{{ doc.title }}</a>
-                        <div class="ui mini icon input" ng-class="{loading: doc.saving}" ng-if="doc.renaming" ng-click="$event.stopPropagation()">
-                            <input type="text" ng-model="doc.title" size="50" placeholder="檔案名稱">
-                            <i class="search icon" ng-if="doc.saving"></i>
-                        </div>
+                        <a ng-if="doc.type==20" href ng-click="getDocs(doc.id)">{{ doc.title }}</a>
+                        <a ng-if="doc.type!=20" href="{{ doc.link }}">{{ doc.title }}</a>
                     </td>
                     <td class="collapsing">
                         <md-menu>
@@ -153,6 +149,18 @@
                                     </md-button>
                                 </md-menu-item>
                                 <md-menu-divider ng-if="doc.tools.length>0"></md-menu-divider>
+                                <md-menu-item>
+                                    <md-button ng-click="moveToFolder(doc, $event)">
+                                        <md-icon md-svg-icon="send"></md-icon>
+                                        移動到...
+                                    </md-button>
+                                </md-menu-item>
+                                <md-menu-item>
+                                    <md-button ng-click="renaming(doc, $event)">
+                                        <md-icon md-svg-icon="edit"></md-icon>
+                                        重新命名
+                                    </md-button>
+                                </md-menu-item>
                                 <md-menu-item ng-model="doc.visible">
                                     <md-button ng-click="setVisible(doc)">
                                         <md-icon md-svg-icon="speaker-notes{{doc.visible ? '-off' : ''}}"></md-icon>
@@ -195,7 +203,7 @@
 <script>
 app.requires.push('angularify.semantic.dropdown');
 app.requires.push('angularFileUpload');
-app.controller('fileController', function($scope, $filter, $interval, $http, $cookies, $timeout, FileUploader) {
+app.controller('fileController', function($scope, $filter, $interval, $http, $cookies, $timeout, $mdDialog, $mdToast, FileUploader) {
     $scope.docs = [];
     $scope.predicate = 'created_at';
     $scope.searchText = $cookies.getObject('file_text_filter') || {};
@@ -332,23 +340,34 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         });
     };
 
-    $scope.rename = function(doc) {
-        if (!doc.renaming) {
-            if (doc.created_by == '我') {
-                doc.renaming = true;
-                doc.saving = false;
-            };
-        } else {
+    $scope.renaming = function(doc, ev) {
+        var confirm = $mdDialog.prompt()
+        .title('重新命名')
+        .placeholder('重新命名')
+        .ariaLabel('重新命名')
+        .initialValue(doc.title)
+        .targetEvent(ev)
+        .ok('確定')
+        .cancel('取消');
+
+        $mdDialog.show(confirm).then(function(title) {
             doc.saving = true;
-            $http({method: 'POST', url: '/doc/' + doc.id + '/rename', data:{title: doc.title} })
+            $http({method: 'POST', url: '/doc/' + doc.id + '/rename', data:{title: title} })
             .success(function(data, status, headers, config) {
-                angular.extend(doc, data.doc);
                 doc.saving = false;
-                doc.renaming = false;
+                $mdToast.show(
+                    $mdToast.simple()
+                    .textContent(doc.title + '   已重新命名為   ' + data.doc.title)
+                    .position('bottom left')
+                    .hideDelay(3000)
+                );
+                angular.extend(doc, data.doc);
             }).error(function(e){
                 console.log(e);
             });
-        }
+        }, function() {
+
+        });
     };
 
     $scope.getShareds = function() {
@@ -441,6 +460,54 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
             $scope.saving = false;
         }).error(function(e) {
             console.log(e);
+        });
+    };
+
+    $scope.moveToFolder = function(doc, ev) {
+        $mdDialog.show({
+            template: `
+                <md-dialog aria-label="Mango (Fruit)">
+                    <md-dialog-content class="md-dialog-content" style="min-width: 500px" layout="row">
+                        <md-input-container flex>
+                            <label>選擇資料夾</label>
+                            <md-select ng-model="folder_id">
+                                <md-option ng-repeat="folder in folders" ng-value="folder.id">{{folder.is_file.title}}</md-option>
+                            </md-select>
+                        </md-input-container>
+                    </md-dialog-content>
+                    <md-dialog-actions>
+                        <md-button ng-click="cancel()">取消</md-button>
+                        <md-button ng-click="hide()">確定</md-button>
+                    </md-dialog-actions>
+                </md-dialog>
+            `,
+            controller: function($scope, $mdDialog) {
+
+                $http({method: 'GET', url: '/folders/lists', data:{}})
+                .success(function(data, status, headers, config) {
+                    $scope.folders = data.folders;
+                }).error(function(e) {
+                    console.log(e);
+                });
+
+                $scope.cancel = function() {
+                    $mdDialog.cancel();
+                };
+
+                $scope.hide = function() {
+                    $http({method: 'POST', url: '/doc/' + doc.id + '/moveToFolder', data:{folder_id: $scope.folder_id}})
+                    .success(function(data, status, headers, config) {
+                        console.log(data);
+                        $mdDialog.hide();
+                    }).error(function(e) {
+                        console.log(e);
+                    });
+                };
+            }
+        }).then(function(result) {
+            console.log(1);
+        }, function() {
+            console.log(2);
         });
     };
 

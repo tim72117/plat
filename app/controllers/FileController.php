@@ -289,4 +289,29 @@ class FileController extends BaseController {
         return ['docs' => $docs, 'paths' => $paths];
     }
 
+    public function folders()
+    {
+        $folders = ShareFile::whereHas('isFile', function($query) {
+
+            $query->where('type', 20);
+
+        })->where(function($query) {
+
+            $query->where(function($query) {
+
+                $query->where('target', 'user')->where('target_id', $this->user->id);
+
+            })->orWhere(function($query) {
+
+                $inGroups = $this->user->inGroups->lists('id');
+
+                count($inGroups)>0 && $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $this->user->id);
+
+            });
+
+        })->get()->load('isFile');
+
+        return ['folders' => $folders];
+    }
+
 }
