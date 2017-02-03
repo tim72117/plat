@@ -12,7 +12,7 @@ class USED {
 
     public $full = false;
 
-    private $allow_table = ['seniorTwo103', 'seniorOne103', 'seniorOne104', 'seniorOne104_fix', 'seniorTwo104', 'teacher104', 'principal104','seniorOne105','parentTwo105'];
+    private $allow_table = ['seniorTwo103', 'seniorOne103', 'seniorOne104', 'seniorOne104_fix', 'seniorTwo104', 'teacher104', 'principal104', 'seniorOne105', 'parentTwo105', 'seniorTwo105'];
 
     private $cname_columns = [
         'shid'=>'學校代碼',
@@ -172,6 +172,17 @@ class USED {
                 'predicate' => ['+1189','+1188'],
                 'title' => ' 105學年度高二/專二學生家長調查',
             ],
+            'seniorTwo105' => (object)[
+                'userinfo' => (object)['database' => 'rows', 'table' => 'row_20160516_093710_gwq2h', 'primaryKey' => 'C1148', 'school' => 'C1143', 'id' => 'stdidnumber', 'stdname' => 'C1147'],
+                'pstat'    => (object)['database' => 'use_105', 'table' => 'seniorTwo105_pstat', 'primaryKey' => 'newcid'],
+                'pages'    => 26,
+                'against'  => [
+                    'file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at', 'C1148', 'C1149'
+                ],
+                'hidden'   => ['id'],
+                'predicate' => ['+C1146','+C1145'],
+                'title' => '105學年度高二/專二學生調查',
+            ],
         ];
 
         $this->recode_columns = [
@@ -190,7 +201,7 @@ class USED {
 
     public function open()
     {
-        return 'customs.lookup_ques_use';
+        return 'files.custom.lookup_ques_use';
     }
 
     public function getTitles() {
@@ -199,6 +210,7 @@ class USED {
                 // ['name'  => 'seniorTwo104','title' => '104學年度高二/專二學生調查',],
                 ['name'  => 'seniorOne105','title' => '105學年度高一/專一學生調查',],
                 ['name'  => 'parentTwo105','title' => '105學年度高二/專二學生家長調查',],
+                ['name'  => 'seniorTwo105','title' => '105學年度高二/專二學生調查',],
             ],
             'use_staff' => (object)[
                 // ['name'  => 'teacher104','title' => '104學年度學校人員教師調查'],
