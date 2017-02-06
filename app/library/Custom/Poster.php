@@ -39,6 +39,7 @@ class Poster {
             $post = new Post([
                 'title' => Input::get('title'),
                 'context' => $context,
+                'perpetual' => false,
                 'publish_at' => Carbon::parse(Input::get('publish_at'))->toDateString(),
                 'display_at' => '{"intro":false}',
                 'created_by' => Auth::user()->id,
