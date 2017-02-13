@@ -39,7 +39,7 @@ class FolderComponent extends CommFile {
 
     public function open()
     {
-        return 'apps.files';
+        return 'files.folder.files';
     }
 
     public function docs()

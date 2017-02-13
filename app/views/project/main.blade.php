@@ -103,10 +103,10 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
 <body ng-cloak ng-controller="mainController" layout="column">
     <md-toolbar>
         <div class="md-toolbar-tools">
-            <md-button ng-class="{'md-raised': main.isOpenLeftMenu}" ng-click="main.toggleLeftMenu()">
+            <!--<md-button ng-class="{'md-raised': main.isOpenLeftMenu}" ng-click="main.toggleLeftMenu()">
                 <md-icon ng-style="{fill: main.isOpenLeftMenu ? '#000' : '#fff'}" md-svg-icon="history"></md-icon>
                 近期存取
-            </md-button>
+            </md-button>-->
             <md-button ng-class="{'md-raised': main.pathname == '/project/{{ $project->code }}/intro'}" href="/project/{{ $project->code }}/intro">
                 <md-icon ng-style="{fill: main.pathname == '/project/{{ $project->code }}/intro' ? '#000' : '#fff'}" md-svg-icon="home"></md-icon>
                 {{ $project->name }}
