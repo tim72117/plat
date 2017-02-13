@@ -94,7 +94,7 @@ angular.module('share', [])
 
             $scope.$on('getShareds', function(event, message) {
                 $scope.docs = message.docs;
-                $http({method: 'POST', url: '/docs/share/get', data:{docs: $scope.docs}})
+                $http({method: 'POST', url: 'shared', data:{docs: $scope.docs}})
                 .success(function(data, status, headers, config) {
                     $scope.groups = data.groups;
                     $scope.users = [];
@@ -107,7 +107,7 @@ angular.module('share', [])
 
             $scope.$on('getRequesteds', function(event, message) {
                 $scope.docs = message.docs;
-                $http({method: 'POST', url: '/docs/request/get', data:{docs: $scope.docs}})
+                $http({method: 'POST', url: 'requested', data:{docs: $scope.docs}})
                 .success(function(data, status, headers, config) {
                     $scope.groups = data.groups;
                     $scope.users = [];

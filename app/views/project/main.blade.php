@@ -111,11 +111,15 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
                 <md-icon ng-style="{fill: main.pathname == '/project/{{ $project->code }}/intro' ? '#000' : '#fff'}" md-svg-icon="home"></md-icon>
                 {{ $project->name }}
             </md-button>
-            <md-button ng-class="{'md-raised': main.pathname == '/docs/management'}" href="/docs/management">
-                <md-icon md-svg-icon="@{{main.pathname == '/docs/management' ? 'folder-open' : 'folder'}}"></md-icon>
-                我的檔案
+            @foreach ($paths as $index => $path)
+            <md-button ng-class="md-raised" href="/doc/{{$path->id}}/open">
+                @if ($index==0)
+                <md-icon md-svg-icon="folder"></md-icon>
+                @endif
+                {{$path->isFile->title}}
             </md-button>
-            <h2> / {{ @$doc->isFile->title }}</h2>
+            @if ($index < count($paths)-1) / @endif
+            @endforeach
             <span flex></span>
             <md-button ng-class="{'md-raised': main.pathname == '/project/{{ $project->code }}/profile'}" href="/project/{{ $project->code }}/profile">個人資料</md-button>
             <md-button ng-class="{'md-raised': main.pathname == '/auth/password/change'}" href="/auth/password/change">更改密碼</md-button>

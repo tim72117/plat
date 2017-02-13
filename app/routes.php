@@ -22,14 +22,8 @@ Route::group(array('before' => 'auth'), function() {
     Route::any('doc/{doc_id}/{method}', 'FileController@open');
     Route::any('doc/{doc_id}/ajax/{method}', 'FileController@open');
     Route::any('request/{doc_id}/{method}', 'FileController@request');
-    Route::post('file/create', 'FileController@create');
-    Route::post('file/upload', 'FileController@upload');
-    Route::post('docs/lists', 'FileController@docs');
-    Route::get('folders/lists', 'FileController@folders');
     Route::post('apps/lists', 'FileController@apps');
-    Route::get('docs/management', 'FileController@management');
-    Route::post('docs/share/get', 'FileController@shared');
-    Route::post('docs/request/get', 'FileController@requested');
+    Route::any('management', 'FileController@management');
 
     Route::get('project/{project}/intro', 'FileController@project');
     Route::get('project/{project}/profile/{parameter?}', 'UserAuthedController@profile')->where('parameter', 'power|contact|changeUser');

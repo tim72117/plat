@@ -81,13 +81,6 @@ class ShareFile extends Eloquent {
         return $this->belongsTo('ShareFile');
     }
 
-    public function getPaths()
-    {
-        $paths = $this->folder ? $this->folder->getPaths()->add($this) : \Illuminate\Database\Eloquent\Collection::make([$this]);
-
-        return $paths;
-    }
-
     public function getVisibleAttribute($value)
     {
         return (bool)$value;

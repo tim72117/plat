@@ -67,19 +67,6 @@
                     <th>更新時間</th>
                     <th>擁有人</th>
                 </tr>
-                <tr>
-                    <th></th>
-                    <th>
-                        <div class="ui breadcrumb">
-                            <a class="section" ng-repeat-start="path in paths" ng-click="getDocs(path)">{{path.is_file.title}}</a>
-                            <div ng-repeat-end class="divider"> / </div>
-                        </div>
-                    </th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                </tr>
             </thead>
             <tbody>
                 <tr ng-repeat="doc in docs | orderBy:'created_at':true | filter:searchText | filter:searchType:true | startFrom:(page-1)*limit | limitTo:limit">
@@ -88,8 +75,7 @@
                     </td>
                     <td style="min-width:400px">
                         <i class="icon" ng-class="types[doc.type]"></i>
-                        <a ng-if="doc.type==20" href ng-click="getDocs(doc)">{{ doc.title }}</a>
-                        <a ng-if="doc.type!=20" href="{{ doc.link }}">{{ doc.title }}</a>
+                        <a href="{{ doc.link }}">{{ doc.title }}</a>
                     </td>
                     <td class="collapsing">
                         <md-menu>
@@ -188,7 +174,6 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
     $scope.information = {};
     $scope.todo = {share: false, request: false, delete: false, clone: false};
     $scope.parentTables = false;
-    $scope.initPaths = [{id: null, is_file: {title: '我的檔案'}}];
 
     $interval(function() {
         $scope.timenow = new Date();
@@ -269,12 +254,12 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         $scope.page = $scope.page > $scope.pages ? 1 : $scope.page;
     };
 
-    $scope.getDocs = function(folder) {
+    $scope.getDocs = function() {
         $scope.$parent.main.loading = true;
-        $http({method: 'POST', url: '/docs/lists', data:{folder: folder} })
+        $http({method: 'POST', url: 'docs', data:{}})
         .success(function(data, status, headers, config) {
             $scope.docs = data.docs;
-            $scope.paths = $scope.initPaths.concat(data.paths);
+            $scope.paths = data.paths;
             $scope.setPaginate();
             $scope.$parent.main.loading = false;
         }).error(function(e){
@@ -282,7 +267,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         });
     };
 
-    $scope.getDocs($scope.initPaths[0]);
+    $scope.getDocs();
 
     $scope.deleteDoc = function() {
         $scope.deleting = true;
@@ -348,10 +333,8 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
         .cancel('取消');
 
         $mdDialog.show(confirm).then(function(title) {
-            var folder = $scope.paths[$scope.paths.length-1];
-            var folder_id = folder ? folder.id : null;
             var newDoc = {type: type, title: title};
-            $http({method: 'POST', url: '/file/create', data:{fileInfo: newDoc, folder_id: folder_id}})
+            $http({method: 'POST', url: 'createComponent', data:{fileInfo: newDoc}})
             .success(function(data, status, headers, config) {
                 $scope.docs.push(data.doc);
             }).error(function(e){
@@ -364,7 +347,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
 
     $scope.uploader = new FileUploader({
         alias: 'file_upload',
-        url: '/file/upload',
+        url: 'uploadFile',
         autoUpload: true,
         removeAfterUpload: true
     });
@@ -457,7 +440,7 @@ app.controller('fileController', function($scope, $filter, $interval, $http, $co
             controller: function(scope, $mdDialog) {
                 scope.folders = [{id: null, is_file: {title: '/'}}];
 
-                $http({method: 'GET', url: '/folders/lists', data:{}})
+                $http({method: 'GET', url: 'folders', data:{}})
                 .success(function(data, status, headers, config) {
                     scope.folders = scope.folders.concat(data.folders);
                 }).error(function(e) {
