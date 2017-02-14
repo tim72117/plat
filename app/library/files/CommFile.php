@@ -214,4 +214,30 @@ class CommFile {
         return $doc;
     }
 
+    public function moveToFolder()
+    {
+        $this->doc->folder_id = Input::get('folder_id');
+
+        return ['moved' => $this->doc->save()];
+    }
+
+    public function getPaths()
+    {
+        if ($this->doc->folder) {
+
+            $folder = new FolderComponent($this->doc->folder->isFile, $this->user);
+
+            $folder->setDoc($this->doc->folder);
+
+            $paths = $folder->getPaths()->add($this->doc);
+
+        } else {
+
+            $paths = \Illuminate\Database\Eloquent\Collection::make([$this->doc]);
+
+        }
+
+        return $paths;
+    }
+
 }
