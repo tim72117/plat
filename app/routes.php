@@ -60,6 +60,7 @@ Route::post('survey/{book_id}/getBook', 'SurveyController@getBook');
 Route::post('survey/{book_id}/getNextNode', 'SurveyController@getNextNode');
 Route::post('survey/{book_id}/getNextNodes', 'SurveyController@getNextNodes');
 Route::post('survey/{book_id}/getChildren', 'SurveyController@getChildren');
+Route::post('survey/{book_id}/getRules', 'SurveyController@getRules');
 
 Route::get('api/projects', 'ApiController@projects');
 Route::get('api/news/{project_id}/{to}/{from?}', 'ApiController@news');
