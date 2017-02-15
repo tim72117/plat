@@ -152,8 +152,10 @@ class CommFile {
                     'file_id' => $this->doc->file_id,
                     'target' => 'group',
                     'target_id' => $group['id'],
-                    'visible' => true,
                     'created_by' => $this->user->id
+                ], [
+                    'visible' => true,
+                    'folder_id' => $this->getPaths()->first()->id,
                 ]);
             }
             if (count($group['users']) != 0){
@@ -162,8 +164,10 @@ class CommFile {
                         'file_id' => $this->doc->file_id,
                         'target' => 'user',
                         'target_id' => $user['id'],
-                        'visible' => true,
                         'created_by' => $this->user->id
+                    ], [
+                        'visible' => true,
+                        'folder_id' => $this->getPaths()->first()->id,
                     ]);
                 }
             }
