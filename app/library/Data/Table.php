@@ -1,5 +1,4 @@
 <?php
-
 namespace Plat\Data;
 
 use Carbon\Carbon;
@@ -44,6 +43,23 @@ class Table {
         }
 
         return $instances;
+    }
+
+    public function addColumn(array $attributes)
+    {
+        $defaults = [
+            'rules' => 'nvarchar',
+            'unique' => false,
+            'encrypt' => false,
+            'isnull' => false,
+            'readonly' => false
+        ];
+
+        foreach ($defaults as $key => $default) {
+            !isset($attributes[$key]) && $attributes[$key] = $default;
+        }
+
+        $column = $this->table->columns()->create($attributes);
     }
 
 }

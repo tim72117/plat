@@ -1,31 +1,128 @@
 
 <div ng-controller="rateController">
 
-    <div class="ui basic segment" ng-cloak ng-class="{loading: sheetLoading}" style="overflow: auto">
+    <md-content class="md-padding" layout="column" layout-align="start center">
+        <md-card ng-repeat="survey in surveys">
+            <md-card-title>
+            <md-card-title-text>
+            <span class="md-headline">{{survey.title}}</span>
+            </md-card-title-text>
+            </md-card-title>
+            <md-card-content>
+                <div class="ui mini statistic">
+                    <div class="value">{{ survey.down }}</div>
+                    <div class="label">填答完成人數</div>
+                </div>
+                <div class="ui mini statistic">
+                    <div class="value">{{ survey.receive }}</div>
+                    <div class="label">總人數</div>
+                </div>
+                <div class="ui mini statistic">
+                    <div class="value">{{ getRate(survey.down, survey.receive) }}%</div>
+                    <div class="label">回收率</div>
+                </div>
+                <div style="max-height:350px;overflow:scroll">
+                <table class="ui table" ng-if="survey.result">
+                    <thead>
+                    <tr>
+                        <th ng-repeat="category in survey.categories">{{ category.title }}</th>
+                        <th>填答完成人數</th>
+                        <th>總人數</th>
+                        <th>詳細資料</th>
+                    </tr>
+                    </thead>
+                    <tr ng-repeat="down in survey.downs">
+                        <td ng-repeat="category in survey.categories">{{ category.groups ? category.groups[down[category.aliases]].now.name : down[category.aliases] }}</td>
+                        <td>{{ down.down }}</td>
+                        <td>{{ down.receive }}</td>
+                        <td><md-button aria-label="詳細資料" ng-click="showWriters(down)">詳細資料</md-button></td>
+                    </tr>
+                </table>
+                </div>
+            </md-card-content>
+            <md-card-actions layout="row" layout-align="end center" ng-if="!survey.categories">
+                <md-button aria-label="詳細資料" ng-click="showWriters()">詳細資料</md-button>
+            </md-card-actions>
+        </md-card>
+    </md-content>
 
-        <div class="ui mini statistic">
-            <div class="value">{{ rate.finish }}</div>
-            <div class="label">回收數</div>
-        </div>
-        <div class="ui mini statistic">
-            <div class="value">{{ rate.rows }}</div>
-            <div class="label">總人數</div>
-        </div>
-        <div class="ui mini statistic">
-            <div class="value">{{ rate.rate }}%</div>
-            <div class="label">回收率</div>
-        </div>
+</div>
+
+<style>
+.demo-header-searchbox {
+    border: none;
+    outline: none;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+}
+.demo-select-header {
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(0, 0, 0, 0.14), 0 0 0 0 rgba(0, 0, 0, 0.12);
+    padding-left: 10.667px;
+    height: 48px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: auto;
+}
+</style>
+
+<script src="/js/jquery.fileDownload.js"></script>
+
+<script>
+app.requires.push('rate');
+app.controller('rateController', function($scope, $http, $filter, $mdDialog) {
+
+    $scope.surveys = [];
+
+    $scope.getRate = function(receive, total) {
+        return total == 0 ? 0 : Math.floor(receive/total*1000)/10;
+    };
+
+    $scope.getSurveys = function() {
+        $scope.$parent.main.loading = true;
+        $http({method: 'POST', url: 'ajax/getSurveys', data:{}})
+        .success(function(data, status, headers, config) {
+            $scope.surveys = data.surveys;
+            $scope.$parent.main.loading = false;
+        })
+        .error(function(e){
+            console.log(e);
+        });
+    };
+
+    $scope.getSurveys();
+
+    $scope.showWriters = function(down) {
+        $mdDialog.show({
+            template: '<div rate-writers down="down"></div>',
+            clickOutsideToClose: true,
+            controller: function($scope) {
+                $scope.down = down;
+            }
+        })
+    };
+
+});
+
+angular.module('rate', []).directive('rateWriters', function() {
+    return {
+        restrict: 'A',
+        replace: true,
+        transclude: false,
+        scope: {
+            down: '='
+        },
+        template: `
+    <div class="ui basic segment" ng-cloak ng-class="{loading: sheetLoading}" style="overflow: auto;min-width: 800px;min-height: 600px">
+
 <!--         <div class="ui mini statistic">
             <div class="value">{{ rate.all_rate }}%</div>
             <div class="label">全國回收率</div>
         </div> -->
-        <div class="ui basic segment">
+        <div>
 <!--             <div class="ui secondary menu">
-                <div class="item">
-                    <select class="ui search dropdown" ng-model="table_id" ng-change="changeTable()">
-                        <option ng-repeat="table in quesGroups" value="{{table.id}}">{{table.title}}</option>
-                    </select>
-                </div>
                 <div class="item" style="width:400px">
                     <div ng-dropdown-search-menu class="ui fluid search selection dropdown" ng-model="school_selected" ng-change="changeSchool()" items="schools" title="選擇學校">
                         <i class="dropdown icon"></i>
@@ -53,25 +150,10 @@
 
         <div class="ui mini basic button" ng-click="downloadRate()"><i class="download icon"></i>下載回收率</div> -->
 
-        <div class="ui mini red button" ng-class="{'left attached': deleteStatus.confrim, loading: deleteStatus.deleting}" ng-show="(rows | filter: {selected: true}).length > 0" ng-click="deleteStatus.confrim=true">
-            <i class="trash icon"></i>刪除調查名單 ({{ (rows | filter: {selected: true}).length }}筆資料)
-        </div>
-        <div class="ui mini right attached button" ng-show="(rows | filter: {selected: true}).length > 0 && deleteStatus.confrim" ng-click="delete()">
-            <i class="checkmark icon"></i> 確定
-        </div>
-
 <!--        <div class="ui item search selection dropdown" ng-dropdown ng-model="sheet" title="資料表" ng-change="action.toSelect(sheet)" style="z-index:104;width:250px"></div>-->
 
         <table class="ui very compact small table">
             <thead>
-                <tr>
-                    <th colspan="{{ columns.length }}">
-                        <div class="ui action input">
-                            <input type="text" ng-model="search_student" placeholder="搜尋姓名...">
-                            <div class="ui button" ng-click="searchStudents()">搜尋</div>
-                        </div>
-                    </th>
-                </tr>
                 <tr>
 <!--                     <th></th> -->
                     <th ng-repeat="column in columns">{{ columnsName[column] }}</th>
@@ -85,206 +167,139 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="user in rows | orderBy:predicate | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
-                    <td ng-repeat="column in columns">{{ user[column] }}
-                        <span ng-if="recode_columns[column]">{{ operator(user[column], recode_columns[column]) }}</span>
+                <tr ng-repeat="row in rows | orderBy:predicate | filter:searchText | startFrom:(page-1)*limit | limitTo:limit">
+                    <td ng-repeat="column in columns">{{ row[column] }}
+                        <span ng-if="operator(row[column], table.recodes[column])">({{ operator(row[column], table.recodes[column]) }})</span>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
+        `,
+        controller: function($scope, $http, $filter) {
 
-</div>
+            $scope.rows = [];
+            $scope.predicate = ['page'];
+            $scope.page = 1;
+            $scope.limit = 20;
+            $scope.max = 0;
+            $scope.pages = 0;
+            $scope.searchText = {};
 
-<script src="/js/jquery.fileDownload.js"></script>
+            $scope.$watchCollection('searchText', function(query) {
+                $scope.max = $filter("filter")($scope.rows, query).length;
+                $scope.rows_filted = $filter("filter")($scope.rows, query);
+                $scope.pages = Math.ceil($scope.max/$scope.limit);
+                $scope.page = 1;
+            });
 
-<script>
-app.requires.push('angularify.semantic.dropdown');
-app.controller('rateController', function($scope, $http, $filter) {
-    $scope.rows = [];
-    $scope.predicate = ['page'];
-    $scope.page = 1;
-    $scope.limit = 20;
-    $scope.max = 0;
-    $scope.pages = 0;
-    $scope.searchText = {};
-    $scope.table_id = '';
-    $scope.rate = {};
-    $scope.deleteStatus = {confirm: false, deleting: false};
-
-    $scope.groups = [{id:1, name:'use'}];
-
-    $scope.$watchCollection('searchText', function(query) {
-        $scope.max = $filter("filter")($scope.rows, query).length;
-        $scope.rows_filted = $filter("filter")($scope.rows, query);
-        $scope.pages = Math.ceil($scope.max/$scope.limit);
-        $scope.page = 1;
-        $scope.getRate();
-    });
-
-    $scope.getRate = function() {
-        var finish = $filter("filter")($scope.rows_filted, function(row, index){ return row.page >= $scope.table['pages']; });
-        var rate = $scope.rows_filted.length>0 ? Math.floor(finish.length/$scope.rows_filted.length*1000)/10 : 0;
-        $scope.rate = {finish: finish.length, rows: $scope.rows_filted.length, rate: rate, all_rate: $scope.all_rate};
-    };
-
-    $scope.next = function() {
-        if( $scope.page < $scope.pages )
-            $scope.page++;
-    };
-
-    $scope.prev = function() {
-        if( $scope.page > 1 )
-            $scope.page--;
-    };
-
-    $scope.all = function() {
-        $scope.page = 1;
-        $scope.limit = $scope.max;
-        $scope.pages = 1;
-    };
-
-    $scope.changeTable = function() {
-        $scope.getUser(true);
-    };
-
-    $scope.changeSchool = function() {
-        $scope.getUser(true);
-    };
-
-    $scope.getTitles = function() {
-        $scope.$parent.main.loading = true;
-        $http({method: 'POST', url: 'ajax/getTitles', data:{init: true}})
-        .success(function(data, status, headers, config) {
-            $scope.$parent.main.loading = false;
-            if( typeof data.quesGroups[0] === 'undefined' ) {
-                return 0
+            $scope.next = function() {
+                if( $scope.page < $scope.pages )
+                    $scope.page++;
             };
-            $scope.quesGroups = data.quesGroups;
-            $scope.table_id = data.quesGroups[0].id;
-            $scope.getUser();
-        })
-        .error(function(e){
-            console.log(e);
-        });
-    };
 
-    $scope.getTitles();
+            $scope.prev = function() {
+                if( $scope.page > 1 )
+                    $scope.page--;
+            };
 
-    $scope.getUser = function(reflash) {
-        $scope.sheetLoading = true;
-        reflash = typeof reflash !== 'undefined' ? reflash : false;
-        $http({method: 'POST', url: 'ajax/getStudents', data:{ reflash: reflash, table: $scope.table_id, school_selected: $scope.school_selected }})
-        .success(function(data, status, headers, config) {
-            $scope.table = data.table;
-            $scope.rows = data.students;
-            $scope.rows_filted = data.students;
-            $scope.schools = data.schools;
-            $scope.school_selected = data.school_selected;
-            $scope.columns = data.columns;
-            $scope.columnsName = data.columnsName;
-            $scope.recode_columns = data.recode_columns;
-            $scope.max = $scope.rows.length;
-            $scope.pages = Math.ceil($scope.max/$scope.limit);
-            $scope.page = 1;
-            $scope.all_rate = data.all_rate;
-            $scope.sheetLoading = false;
-            $scope.getRate();
-            $scope.predicate = data.predicate;
-        })
-        .error(function(e){
-            console.log(e);
-        });
-    };
+            $scope.all = function() {
+                $scope.page = 1;
+                $scope.limit = $scope.max;
+                $scope.pages = 1;
+            };
 
-    $scope.download = function(){
-        var csvContent = '\uFEFF';
-        var rows = $filter('orderBy')($scope.rows, $scope.predicate);
-        csvContent += "=\"" + ['學校代碼', '科別代碼', '學生姓名', '班級名稱', '學號', '填答頁數'].join("\",=\"") + "\"\r\n";
-        for (var index in rows) {
-            row = [];
-            for (var key in rows[index]) {
-                if ($scope.columns.indexOf(key) > -1)
-                    row.push(rows[index][key]);
-            }
-            csvContent +=  "=\"" + row.join("\",=\"") + "\"\r\n";
-        }
-        var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            $scope.getUser = function(reflash) {
+                $scope.sheetLoading = true;
+                reflash = typeof reflash !== 'undefined' ? reflash : false;
+                $http({method: 'POST', url: 'ajax/getStudents', data:{reflash: reflash, table: $scope.table_id, down: $scope.down}})
+                .success(function(data, status, headers, config) {
+                    $scope.table = data.table;
+                    $scope.rows = data.students;
+                    $scope.rows_filted = data.students;
+                    $scope.schools = data.schools;
+                    $scope.columns = data.columns;
+                    $scope.columnsName = data.columnsName;
+                    $scope.max = $scope.rows.length;
+                    $scope.pages = Math.ceil($scope.max/$scope.limit);
+                    $scope.page = 1;
+                    $scope.all_rate = data.all_rate;
+                    $scope.sheetLoading = false;
+                    $scope.predicate = data.predicate;
+                })
+                .error(function(e){
+                    console.log(e);
+                });
+            };
 
-        if (navigator.msSaveBlob) { // IE 10+
-            navigator.msSaveBlob(blob, $scope.table_id+".csv");
-        } else {
-            var link = document.createElement("a");
-            var url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", $scope.table_id+".csv");
-
-            link.click();
-        }
-    };
-
-    $scope.downloadRate = function(){
-        jQuery.fileDownload('ajax/export', {
-            httpMethod: "POST",
-            data: {table: $scope.table_id},
-            failCallback: function (responseHtml, url) { console.log(responseHtml);angular.element('.queryLog').append(responseHtml); }
-        });
-    };
-
-    $scope.countSchool = function(input) {
-        if( !angular.isObject(input) ) {
-            return 0;
-        }
-        return Object.keys(input).length;
-    };
-
-    $scope.toggleSelected = function() {
-        $scope.deleteStatus = {confirm: false, deleting: false};
-        var set_value = $filter("filter")($scope.rows, {selected: true}).length === 0;
-        angular.forEach($scope.rows, function(row){
-            row.selected = set_value;
-        });
-    };
-
-    $scope.delete = function() {
-        $scope.deleteStatus = {confirm: false, deleting: true};
-        var students_id = [];
-        var students = $filter("filter")($scope.rows, {selected: true});
-        angular.forEach(students, function(row){
-            students_id.push(row.id);
-        });
-        $http({method: 'POST', url: 'ajax/delete', data:{ table: $scope.table_id, students_id: students_id }})
-        .success(function(data, status, headers, config) {
-            $scope.deleteStatus.deleting = false;
             $scope.getUser(true);
-        })
-        .error(function(e){
-            console.log(e);
-        });
-    };
 
-    $scope.searchStudents = function() {
-        $scope.sheetLoading = true;
-        $http({method: 'POST', url: 'ajax/searchStudents', data:{ table: $scope.table_id, searchText: $scope.search_student }})
-        .success(function(data, status, headers, config) {
-            $scope.rows = data.students;
-            $scope.max = $scope.rows.length;
-            $scope.pages = Math.ceil($scope.max/$scope.limit);
-            $scope.page = 1;
-            $scope.sheetLoading = false;
-        })
-        .error(function(e){
-            console.log(e);
-        });
-    };
+            $scope.searchStudents = function() {
+                $scope.sheetLoading = true;
+                $http({method: 'POST', url: 'ajax/searchStudents', data:{ table: $scope.table_id, searchText: $scope.search_student }})
+                .success(function(data, status, headers, config) {
+                    $scope.rows = data.students;
+                    $scope.max = $scope.rows.length;
+                    $scope.pages = Math.ceil($scope.max/$scope.limit);
+                    $scope.page = 1;
+                    $scope.sheetLoading = false;
+                })
+                .error(function(e){
+                    console.log(e);
+                });
+            };
 
-    $scope.operator = function(a, recode) {
-        var operators = {
-            '>':  function(a, b) { return a > b; }
-        };
-        var result = operators[recode.operator](a, recode.value);
-        return recode.text[result];
-    };
+            $scope.operator = function(a, recode) {
+                var operators = {
+                    '>':  function(a, b) { return a > b; }
+                };
+                var result = operators[recode.operator](a, recode.value);
+                return recode.text[result];
+            };
 
+            $scope.download = function(){
+                var csvContent = '\uFEFF';
+                var rows = $filter('orderBy')($scope.rows, $scope.predicate);
+                csvContent += "=\"" + ['學校代碼', '科別代碼', '學生姓名', '班級名稱', '學號', '填答頁數'].join("\",=\"") + "\"\r\n";
+                for (var index in rows) {
+                    row = [];
+                    for (var key in rows[index]) {
+                        if ($scope.columns.indexOf(key) > -1)
+                            row.push(rows[index][key]);
+                    }
+                    csvContent +=  "=\"" + row.join("\",=\"") + "\"\r\n";
+                }
+                var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+                if (navigator.msSaveBlob) { // IE 10+
+                    navigator.msSaveBlob(blob, $scope.table_id+".csv");
+                } else {
+                    var link = document.createElement("a");
+                    var url = URL.createObjectURL(blob);
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", $scope.table_id+".csv");
+
+                    link.click();
+                }
+            };
+
+            $scope.downloadRate = function(){
+                jQuery.fileDownload('ajax/export', {
+                    httpMethod: "POST",
+                    data: {table: $scope.table_id},
+                    failCallback: function (responseHtml, url) { console.log(responseHtml);angular.element('.queryLog').append(responseHtml); }
+                });
+            };
+
+            $scope.changeTable = function() {
+                $scope.getUser(true);
+            };
+
+            $scope.changeSchool = function() {
+                $scope.getUser(true);
+            };
+
+        }
+    };
 });
 </script>

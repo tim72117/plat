@@ -6,14 +6,14 @@
         <form class="ui form">
             <div class="field">
                 <label>寄送對象</label>
-                <select class="ui fluid dropdown" ng-model="tableSelected">
+                <select class="ui fluid dropdown" ng-model="tableSelected" ng-change="getUsers()">
                     <option value="">請選擇</option>
                     <option value="groups">我的群組</option>
-                    <option ng-repeat="table in tables" value="{{table.name}}" >{{table.title}}</option>
+                    <option ng-repeat="table in tables" value="{{table.name}}">{{table.title}}</option>
                 </select>
                 <select class="ui fluid dropdown" ng-model="selecteds.group" ng-if="tableSelected == 'groups'" ng-change="getUsers()">
                     <option value="">請選擇群組</option>
-                    <option ng-repeat="group in groups" value="{{group.id}}" >{{group.description}}</option>
+                    <option ng-repeat="group in groups" value="{{group.id}}">{{group.description}}</option>
                 </select>
                 <md-button ng-click="openSidenav()">開啟名單 </md-button>
             </div>
@@ -58,6 +58,17 @@
                                 全部不選
                             </md-button>
                         </md-menu-item>
+                        <md-menu-item>
+                            <md-button ng-click="setUnlogin()">
+                                <md-icon md-svg-icon="check-box"></md-icon>
+                                完全沒登入
+                            </md-button>
+                        </md-menu-item>
+                        <md-menu-item>
+                            <md-button ng-click="setComplete()">
+                                <md-icon md-svg-icon="check-box"></md-icon>
+                                登入未填完
+                        </md-menu-item>
                     </md-menu-content>
                 </md-menu>
                 <md-chips ng-model="searchTexts" placeholder="搜尋姓名"></md-chips>
@@ -67,7 +78,11 @@
                     <md-icon md-svg-icon="account-circle" class="md-avatar-icon"></md-icon>
                     <div class="md-list-item-text">
                         <h3> {{ user.username }} </h3>
+                        <p> {{ user.name }} </p>
+                        <p> {{ user.dep }} </p>
+                        <p> {{ user.stdnumber }} </p>
                         <p> {{ user.email }} </p>
+                        <p>已填 {{ user.page }} 頁</p>
                     </div>
                     <md-checkbox class="md-secondary" ng-model="user.selected"></md-checkbox>
                 </md-list-item>
@@ -160,7 +175,6 @@ app.controller('mailerController', function($scope, $filter, $http, $interval, $
 
     $http({method: 'POST', url: 'ajax/group', data:{group: 1}})
     .success(function(data, status, headers, config) {
-        console.log(data);
         $scope.groups = data.groups;
     })
     .error(function(e){
@@ -170,7 +184,6 @@ app.controller('mailerController', function($scope, $filter, $http, $interval, $
     $http({method: 'POST', url: 'ajax/tables', data:{}})
     .success(function(data, status, headers, config) {
         $scope.tables = data.tables;
-        console.log(data);
     })
     .error(function(e){
         console.log(e);
@@ -195,7 +208,6 @@ app.controller('mailerController', function($scope, $filter, $http, $interval, $
             });
         });
 
-        console.log($scope.users);
     };
 
     $scope.mail_save = function() {
@@ -204,7 +216,6 @@ app.controller('mailerController', function($scope, $filter, $http, $interval, $
             context: $scope.context
         }})
         .success(function(data, status, headers, config) {
-            console.log(data);
         })
         .error(function(e){
             console.log(e);
@@ -238,8 +249,6 @@ app.controller('mailerController', function($scope, $filter, $http, $interval, $
             }})
             .success(function(data, status, headers, config) {
                 $scope.results = data.results;
-                // console.log($scope.results);
-                console.log(data);
                 $scope.sheetLoading = false;
 
             })
@@ -255,11 +264,11 @@ app.controller('mailerController', function($scope, $filter, $http, $interval, $
             $http({method: 'POST', url: 'ajax/sendMail', data:{
                 email: user.email,
                 title: $scope.title,
-                context: $scope.context
+                context: $scope.context,
+                table_name: $scope.tableSelected
             }})
             .success(function(data, status, headers, config) {
                 user.selected = !data.sended;
-                console.log(data);
                 $scope.sendStart();
             })
             .error(function(e){
@@ -278,6 +287,22 @@ app.controller('mailerController', function($scope, $filter, $http, $interval, $
         };
     };
 
+    $scope.setUnlogin = function() {
+        for (var i in $scope.users) {
+            if ($scope.users[i].notLogined == '1') {
+                $scope.users[i].selected = true;
+            }
+        };
+    };
+
+    $scope.setComplete = function() {
+        for (var i in $scope.users) {
+            if ($scope.users[i].notCompleted == '1') {
+                $scope.users[i].selected = true;
+            }
+        };
+    };
+
     $scope.openSidenav = function() {
         $mdSidenav('right').open();
     };
@@ -290,15 +315,24 @@ app.controller('mailerController', function($scope, $filter, $http, $interval, $
 
     $scope.getUsers = function() {
         $mdSidenav('right').open();
-
-        $http({method: 'POST', url: 'ajax/getUsers', data:{group_id: $scope.selecteds.group}})
-        .success(function(data, status, headers, config) {
-            console.log(data);
-            $scope.users = data.users;
-        })
-        .error(function(e){
-            console.log(e);
-        });
+        if ($scope.tableSelected == 'groups') {
+            $http({method: 'POST', url: 'ajax/getUsers', data:{group_id: $scope.selecteds.group}})
+            .success(function(data, status, headers, config) {
+                $scope.users = data.users;
+            })
+            .error(function(e){
+                console.log(e);
+            });
+        }else{
+            $http({method: 'POST', url: 'ajax/getQuery', data:{table_name: $scope.tableSelected}})
+            .success(function(data, status, headers, config) {
+                $scope.users = data.users;
+            })
+            .error(function(e){
+                console.log(e);
+            });
+        }
+        
     };
 
 })

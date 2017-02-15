@@ -14,9 +14,11 @@ class CustomFile extends CommFile {
     {
         parent::__construct($file, $user);
 
-        $fileLoader = new FileLoader(new Filesystem, app_path() . '/views');
+        $this->configs = $this->file->configs->lists('value', 'name');
 
-        $this->module = new Repository($fileLoader, '');
+        $class = $this->file->isType->modules()->find($this->configs['module'])->class;
+
+        $this->module = new $class();
     }
 
     public function get_views()
@@ -26,24 +28,16 @@ class CustomFile extends CommFile {
 
     public function open()
     {
-        $func = $this->module->get($this->file->file . '.open');
-
-        return call_user_func($func);
+        return $this->module->open();
     }
 
     public function is_full()
     {
-        $is_full = $this->module->get($this->file->file . '.is_full', false);
-
-        return $is_full;
+        return $this->module->full;
     }
 
     public function __call($method, $args)
     {
-        $func = $this->module->get($this->file->file . '.' . $method);
-
-        if (is_callable($func)) {
-            return call_user_func($func);
-        }
+        return $this->module->$method();
     }
 }

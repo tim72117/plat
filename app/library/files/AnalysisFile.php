@@ -28,6 +28,13 @@ class AnalysisFile extends CommFile {
         return ['open', 'menu', 'analysis', 'analysis_report'];
     }
 
+    public static function tools()
+    {
+        return [
+            ['name' => 'analysis_report', 'title' => '描述性分析報告', 'method' => 'analysis_report', 'icon' => 'description'],
+        ];
+    }
+
     public function open()
     {
         View::share('title', '線上分系系統');
@@ -128,7 +135,10 @@ class AnalysisFile extends CommFile {
 
         $data_query = $this->get_data_query([$name]);
 
-        $frequence = $data_query->groupBy($name)->select(DB::raw('count(*) AS total'), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->remember(3)->lists('total', 'name');
+        $total_query = Input::get('weight', false) ? 'CONVERT(int, ROUND(sum(w_final), 0)) AS total' : 'count(*) AS total';
+
+        $frequence = $data_query->groupBy($name)
+        ->select(DB::raw($total_query), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->remember(3)->lists('total', 'name');
 
         return ['frequence' => $frequence];
     }
@@ -237,6 +247,95 @@ class AnalysisFile extends CommFile {
         }
 
         return ['frequencesTable' => $frequencesTable, 'otherinf' => $otherinf];
+    }
+
+    public function get_analysis_groups()
+    {
+        $site = $this->file->analysis->site;
+
+        switch ($site) {
+            case 'use':
+                $groups = [
+                    ['title' => '學校類型', 'name' => 'sch_type', 'type' => 'crosstable', 'selected' => true, 'targets' => [
+                        ['name' => '高中', 'value' => 1],
+                        ['name' => '高職', 'value' => 2],
+                        ['name' => '進校', 'value' => 4],
+                        ['name' => '五專', 'value' => 3],
+                    ]],
+                    ['title' => '設立別', 'name' => 'type_establish', 'type' => 'crosstable', 'selected' => true, 'targets' => [
+                        ['name' => '國立', 'value' => 1],
+                        ['name' => '私立', 'value' => 2],
+                        ['name' => '縣市立', 'value' => 3],
+                    ]],
+                    ['title' => '科別類型', 'name' => 'type_program', 'type' => 'crosstable', 'selected' => true, 'targets' => [
+                        ['name' => '普通科', 'value' => 1],
+                        ['name' => '專業群科', 'value' => 2],
+                        ['name' => '綜合高中', 'value' => 3],
+                        ['name' => '進修部/學校', 'value' => 4],
+                        ['name' => '實用技能學程', 'value' => 5],
+                        ['name' => '五專', 'value' => 6],
+                    ]],
+                    ['title' => '性別', 'name' => 'stdsex', 'type' => 'crosstable', 'selected' => true, 'targets' => [
+                        ['name' => '男', 'value' => 1],
+                        ['name' => '女', 'value' => 2],
+                    ]],
+                    ['title' => '縣市別', 'name' => 'city', 'type' => 'crosstable', 'selected' => false, 'targets' => [
+                        ['name' => '臺北市', 'value' => '30'],
+                        ['name' => '高雄市', 'value' => '64'],
+                        ['name' => '新北市', 'value' => '01'],
+                        ['name' => '臺中市', 'value' => '66'],
+                        ['name' => '臺南市', 'value' => '67'],
+                        ['name' => '宜蘭縣', 'value' => '02'],
+                        ['name' => '新竹縣', 'value' => '04'],
+                        ['name' => '苗栗縣', 'value' => '05'],
+                        ['name' => '彰化縣', 'value' => '07'],
+                        ['name' => '南投縣', 'value' => '08'],
+                        ['name' => '雲林縣', 'value' => '09'],
+                        ['name' => '嘉義縣', 'value' => '10'],
+                        ['name' => '屏東縣', 'value' => '13'],
+                        ['name' => '臺東縣', 'value' => '14'],
+                        ['name' => '花蓮縣', 'value' => '15'],
+                        ['name' => '澎湖縣', 'value' => '16'],
+                        ['name' => '基隆市', 'value' => '17'],
+                        ['name' => '新竹市', 'value' => '18'],
+                        ['name' => '嘉義市', 'value' => '20'],
+                        ['name' => '連江縣', 'value' => '72'],
+                        ['name' => '金門縣', 'value' => '71'],
+                        ['name' => '桃園市', 'value' => '03'],
+                    ]],
+                    ['title' => '全國', 'name' => 'all', 'type' => 'frequence', 'targets' => [['name' => '全國', 'value' => 'all']]],
+                ];
+                break;
+
+            case 'tted':
+                $groups = [
+                    ['title' => '教育階段', 'name' => 'stage_type', 'type' => 'crosstable', 'selected' => true, 'targets' => [
+                        ['name' => '幼兒園', 'value' => 1],
+                        ['name' => '國民小學', 'value' => 2],
+                        ['name' => '國民中學', 'value' => 3],
+                        ['name' => '高級中學', 'value' => 4],
+                        ['name' => '特殊教育學校', 'value' => 5],
+                    ]],
+                    ['title' => '設立別', 'name' => 'type_establish', 'type' => 'crosstable', 'selected' => true, 'targets' => [
+                        ['name' => '私立', 'value' => 1],
+                        ['name' => '公立', 'value' => 2],
+                    ]],
+                    ['title' => '區域別', 'name' => 'area_type', 'type' => 'crosstable', 'selected' => true, 'targets' => [
+                        ['name' => '北部區域', 'value' => 1],
+                        ['name' => '中部區域', 'value' => 2],
+                        ['name' => '南部區域', 'value' => 3],
+                        ['name' => '東部區域及離島地區', 'value' => 4],
+                    ]],
+                    ['title' => '小計', 'name' => 'all', 'type' => 'frequence', 'selected' => true, 'targets' => [['name' => '全國', 'value' => 'all']]],
+                ];
+                break;
+
+            default:
+                $groups = [];
+                break;
+        }
+
+        return ['groups' => $this->isCreater() ? $groups : []];
     }
 
     public function process_r($rows)
