@@ -396,4 +396,33 @@ class AnalysisFile extends CommFile {
 
         return $ouput_data;
     }
+
+    public function correlation()
+    {
+        $paras = array_reduce(Input::get('items'), function($carry, $item) {
+            array_push($carry, 'columns' . (count($carry)+1) . '=' . $item['name']);
+            return $carry;
+        }, []);
+
+        $query = DB::table($this->file->analysis->tablename);
+
+        foreach (Input::get('items') as $item) {
+            $query->addSelect($item['name']);
+            $query->where($item['name'], '<>', '\'\'')->where($item['name'], '<>', -8)->where($item['name'], '<>', -9);
+        }
+
+        $sql = $query->toSql();
+
+        foreach ($query->getBindings() as $binding) {
+            $sql = preg_replace('/\?/', $binding, $sql, 1);
+        }
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'http://localhost:8000/cor?sql=' . urlencode($sql));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $data = curl_exec($ch);
+
+        curl_close($ch);
+        return json_decode($data);
+    }
 }

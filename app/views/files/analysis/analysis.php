@@ -75,7 +75,7 @@
                         <?php include_once('tb/use/tb1_inner_tiped.php') ?>
                     </md-tab>
                     <md-tab label="相關分析">
-                        <ng-correlation></ng-correlation>
+                        <ng-correlation items="items"></ng-correlation>
                     </md-tab>
                 </md-tabs>
             </md-card>
@@ -202,6 +202,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
         if ($filter("filter")($scope.columns, {selected: true}).length > $scope.limit) {
             column.selected = false;
         };
+        $scope.items = $filter("filter")($scope.columns, {selected: true});
         $scope.getCount();
     }
 
