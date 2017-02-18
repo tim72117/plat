@@ -20,7 +20,7 @@ class AnalysisFile extends CommFile {
 
     public function is_full()
     {
-        return true;
+        return false;
     }
 
     public function get_views()
@@ -37,15 +37,11 @@ class AnalysisFile extends CommFile {
 
     public function open()
     {
-        View::share('title', '線上分系系統');
-
         return 'files.analysis.census';
     }
 
     public function menu()
     {
-        View::share('title', '線上分系系統');
-
         return 'files.analysis.menu';
     }
 
@@ -53,7 +49,7 @@ class AnalysisFile extends CommFile {
     {
         Input::has('columns_choosed') && Session::put('analysis-columns-choosed', Input::get('columns_choosed', []));
 
-        return 'files.analysis.analysis-layout';
+        return 'files.analysis.analysis';
     }
 
     public function editor()

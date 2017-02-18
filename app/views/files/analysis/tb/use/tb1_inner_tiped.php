@@ -25,6 +25,21 @@
     </div>
 </div>
 
+            <div class="ui top attached tabular menu">
+                <div class="right menu">
+                    <div class="item">
+                        <div ng-semantic-dropdown-menu ng-model="result" ng-change="changeChart()" class="ui top pointing dropdown">
+                            <span class="default text"><i class="wizard icon"></i>{{outputType}}</span>
+                            <div class="menu">
+                                <div class="item" ng-repeat="chart in charts" ng-class="{disabled: disabledCharts[chart.name]}" data-value="{{ chart.name }}" >
+                                    <i class="{{ chart.icon }} icon"></i> {{ chart.title }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 <div class="ui basic segment" ng-class="{loading: loading || counting}">
 
     <div>

@@ -1,28 +1,22 @@
 
-<script src="/js/Highcharts-4.1.8/js/highcharts.js"></script>
-<script src="/css/Semantic-UI/2.1.8/semantic.min.js"></script>
-<script src="/js/chart/bar.js"></script>
-<script src="/js/chart/pie.js"></script>
-<script src="/js/chart/donut.js"></script>
+<div ng-cloak ng-controller="analysisController">
 
-<div ng-cloak ng-controller="analysisController" ng-class="{'ui container': full}" style="{{ !full ? 'max-width:1127px' : '' }}">
-
-    <div class="ui basic segment" ng-if="full">
-        <div class="ui small breadcrumb">
-            <a class="section" href="/project/intro">查詢平台</a>
-            <i class="right chevron icon divider"></i>
-            <a class="section" href="open">選擇資料庫</a>
-            <i class="right chevron icon divider"></i>
-            <a class="section" href="menu">選擇題目</a>
-            <i class="right chevron icon divider"></i>
-            <div class="active section">開始分析</div>
+    <md-toolbar md-colors="{background: 'grey-100'}">
+        <div class="md-toolbar-tools">
+            <span flex></span>
+            <div class="ui small breadcrumb" style="width: 1200px">
+                <a class="section" href="open">選擇資料庫</a>
+                <i class="right chevron icon divider"></i>
+                <a class="section" href="menu">選擇題目</a>
+                <i class="right chevron icon divider"></i>
+                <div class="active section">開始分析</div>
+            </div>
+            <span flex></span>
         </div>
-    </div>
+    </md-toolbar>
 
-    <div class="ui basic segment">
-        <div class="ui blue ribbon label">
-            {{title}}
-        </div>
+    <div class="ui container">
+
     <div class="ui grid">
 
         <div class="five wide column dimmable dimmed">
@@ -73,48 +67,18 @@
         </div>
 
         <div class="eleven wide column">
-
-            <div class="ui top attached tabular menu">
-                <div class="item" ng-class="{active: tool===1}" ng-click="tool=1">次數分配 / 交叉表</div>
 <!--                 <div class="item" ng-class="{active: tool===2}" ng-click="tool=3">平均數比較</div>
-                <div class="item" ng-class="{active: tool===3}" ng-click="tool=4">相關分析</div>
                 <div class="item" ng-class="{active: tool===4}" ng-click="tool=5">迴歸分析</div> -->
-                <div class="right menu">
-                    <div class="item">
-<!--                             <md-input-container style="margin-bottom:0">
-                                <label>樣式</label>
-                                <md-select ng-model="result" ng-change="changeChart()" aria-label="樣式">
-                                    <md-option ng-repeat="chart in charts" ng-disabled="disabledCharts[chart.name]" value="{{chart.name}}">
-                                        <i class="{{chart.icon}} icon"></i>{{chart.title}}
-                                    </md-option>
-                                </md-select>
-                            </md-input-container> -->
-                        <div ng-semantic-dropdown-menu ng-model="result" ng-change="changeChart()" class="ui top pointing dropdown">
-                            <span class="default text"><i class="wizard icon"></i>{{outputType}}</span>
-                            <div class="menu">
-                                <div class="item" ng-repeat="chart in charts" ng-class="{disabled: disabledCharts[chart.name]}" data-value="{{ chart.name }}" >
-                                    <i class="{{ chart.icon }} icon"></i> {{ chart.title }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="ui bottom attached tab segment" ng-class="{active: tool===1}" style="min-height:600px">
-                <?php include_once('tb/use/tb1_inner_tiped.php') ?>
-            </div>
-            <div class="ui bottom attached tab segment" ng-class="{active: tool===2}" style="height:500px">
-                <?php // include_once('tb/use/'.$tb3_inner)?>3
-            </div>
-            <div class="ui bottom attached tab segment" ng-class="{active: tool===3}" style="height:500px">
-                <?php // include_once('tb/use/'.$tb4_inner)?>4
-            </div>
-            <div class="ui bottom attached tab segment" ng-class="{active: tool===4}" style="height:500px">
-                <?php // include_once('tb/use/'.$tb5_inner)?>5
-            </div>
-
-
+            <md-card class="md-padding" style="min-height:600px">
+                <md-tabs md-dynamic-height md-border-bottom>
+                    <md-tab label="次數分配 / 交叉表">
+                        <?php include_once('tb/use/tb1_inner_tiped.php') ?>
+                    </md-tab>
+                    <md-tab label="相關分析">
+                        <ng-correlation></ng-correlation>
+                    </md-tab>
+                </md-tabs>
+            </md-card>
         </div>
 
     </div>
@@ -122,10 +86,16 @@
 
 </div>
 
+<script src="/js/Highcharts-4.1.8/js/highcharts.js"></script>
+<script src="/css/Semantic-UI/2.1.8/semantic.min.js"></script>
+<script src="/js/chart/bar.js"></script>
+<script src="/js/chart/pie.js"></script>
+<script src="/js/chart/donut.js"></script>
+<script src="/js/ng/analysis/ngCorrelation.js"></script>
+
 <script>
-var full = full || false;
+app.requires.push('analysis');
 app.controller('analysisController', function($scope, $filter, $interval, $http, countService) {
-    $scope.tool = 1;
     $scope.frequence = {};
     $scope.crosstable = {};
     $scope.targets = [];
@@ -138,7 +108,6 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
     $scope.loadingQuestions = false;
     $scope.loadingTargets = false;
     $scope.counting = false;
-    $scope.full = full;
     $scope.auto_length = 500;
     $scope.outputType = '輸出樣式:表格(預設)';
     $scope.colPercent = false;
@@ -696,7 +665,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
             $scope.rowPercent = false;
             $scope.totalPercent = false;
             $scope.meanSet = 0;
-        }        
+        }
     };
 
     $scope.setNoPercent = function() {

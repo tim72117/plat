@@ -1,99 +1,21 @@
-<!DOCTYPE html>
-<html xml:lang="zh-TW" lang="zh-TW" ng-app="app">
-<head>
-<meta charset="utf-8" />
-<title><?=$doc->isFile->title?></title>
 
-<!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
-<script src="/js/angular/1.5.3/angular.min.js"></script>
+<div ng-controller="analysisController" layout="column">
 
-<link rel="stylesheet" href="/css/Semantic-UI/2.1.8/semantic.min.css" />
-
-<script>
-var app = angular.module('app', []);
-app.controller('analysisController', function($scope, $filter, $interval, $http) {
-    $scope.columns = [];
-    $scope.question = {};
-    $scope.is_variable = false;
-    $scope.loading = false;
-
-    $scope.getColumns = function() {
-        $scope.loading = true;
-        $http({method: 'POST', url: 'get_analysis_questions', data:{} })
-        .success(function(data, status, headers, config) {
-            $scope.columns = data.questions;
-            $scope.title = data.title;
-            $scope.loading = false;
-        }).error(function(e){
-            console.log(e);
-        });
-    };
-
-    $scope.getAnswers = function(question) {
-        $scope.question = question;
-        $scope.is_variable = true;
-    };
-
-    $scope.selectAll = function() {
-        angular.forEach($scope.columns, function(column) {
-            column.choosed = $scope.isSelectAll;
-        });
-    };
-
-    $scope.selectSome = function() {
-        var isSelected = 0;
-        angular.forEach($scope.columns, function(column) {
-            if (column.choosed){
-                isSelected = isSelected +1;
-            }
-        });
-        if (isSelected == $scope.columns.length){
-            document.getElementById("selectAll").indeterminate = false;
-            $scope.isSelectAll = true;
-        }else if(isSelected>0){
-        123
-            document.getElementById("selectAll").indeterminate = true;
-        }else{
-            document.getElementById("selectAll").indeterminate = false;
-            $scope.isSelectAll = false;
-        }
-    };	
-
-    $scope.nextStep = function() {
-        var myForm = document.getElementById('form-columns');
-        if ($filter('filter')($scope.columns, {choosed: true}).length > 0) {
-            myForm.submit();
-        }
-    };
-
-    $scope.closeVariable = function() {
-        $scope.is_variable = false;
-    };
-
-    $scope.getColumns();
-
-});
-
-</script>
-</head>
-<body ng-controller="analysisController" ng-click="closeVariable()">
-
-	<div class="ui container">
-
-        <div class="ui basic segment">
-            <div class="ui small breadcrumb">
-                <a class="section" href="/project/intro">查詢平台</a>
-                <i class="right chevron icon divider"></i>
+    <md-toolbar md-colors="{background: 'grey-100'}">
+        <div class="md-toolbar-tools">
+            <span flex></span>
+            <div class="ui small breadcrumb" style="width: 1200px">
                 <a class="section" href="open">選擇資料庫</a>
                 <i class="right chevron icon divider"></i>
                 <div class="active section">選擇題目</div>
             </div>
+            <span flex></span>
         </div>
+    </md-toolbar>
+
+    <div class="ui container">
 
         <div class="ui top attached segment">
-            <div class="ui blue ribbon label">
-                {{title}}
-            </div>
             <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋關鍵字..."><i class="search icon"></i></div>
             <a class="ui button" href="open">上一步</a>
             <a class="ui olive button" href="javascript:void(0)" ng-click="nextStep()">下一步</a>
@@ -121,7 +43,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
                             <option value="1">連續變項</option>
                             <option value="0">非連續變項</option>
                         </select> -->
-                        <div class="ui right floated mini button" ng-click="$event.stopPropagation();getAnswers(column)">選項定義</div>
+                        <div class="ui right floated mini button" ng-click="$event.stopPropagation();showTabDialog(column, $event)">選項定義</div>
                     </div>
                 </div>
 
@@ -129,7 +51,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
             </div>
         </div>
 
-	</div>
+    </div>
 
     <div class="ui container">
         <div class="ui divider"></div>
@@ -140,30 +62,98 @@ app.controller('analysisController', function($scope, $filter, $interval, $http)
         </div>
     </div>
 
-    <div class="ui modal transition visible active" style="margin-top: -300px" ng-if="is_variable" ng-click="$event.stopPropagation()">
-
-        <h3 class="ui header">{{ question.title }}</h3>
-
-        <div class="ui basic segment" style="max-height:500px;overflow-y:auto">
-
-            <table class="ui celled table">
-            <thead>
-                <tr>
-                    <th>數值</th>
-                    <th>選項名稱</th>
-                </tr>
-            </thead>
-            <tr ng-repeat="answer in question.answers">
-                <td>{{ answer.value }}</td>
-                <td>{{ answer.title }}</td>
-            </tr>
-            </table>
-        </div>
-    </div>
-
     <form method="post" action="analysis" id="form-columns" style="display:none">
         <input type="text" name="columns_choosed[]" ng-model="column.name" ng-repeat="column in columns | filter: {choosed: true}" />
     </form>
 
-</body>
-</html>
+</div>
+
+<script>
+app.controller('analysisController', function($scope, $filter, $interval, $http, $mdDialog) {
+    $scope.columns = [];
+    $scope.question = {};
+    $scope.loading = false;
+
+    $scope.getColumns = function() {
+        $scope.loading = true;
+        $http({method: 'POST', url: 'get_analysis_questions', data:{} })
+        .success(function(data, status, headers, config) {
+            $scope.columns = data.questions;
+            $scope.title = data.title;
+            $scope.loading = false;
+        }).error(function(e){
+            console.log(e);
+        });
+    };
+
+    $scope.selectAll = function() {
+        angular.forEach($scope.columns, function(column) {
+            column.choosed = $scope.isSelectAll;
+        });
+    };
+
+    $scope.selectSome = function() {
+        var isSelected = 0;
+        angular.forEach($scope.columns, function(column) {
+            if (column.choosed){
+                isSelected = isSelected +1;
+            }
+        });
+        if (isSelected == $scope.columns.length){
+            document.getElementById("selectAll").indeterminate = false;
+            $scope.isSelectAll = true;
+        }else if(isSelected>0){
+            document.getElementById("selectAll").indeterminate = true;
+        }else{
+            document.getElementById("selectAll").indeterminate = false;
+            $scope.isSelectAll = false;
+        }
+    };
+
+    $scope.nextStep = function() {
+        var myForm = document.getElementById('form-columns');
+        if ($filter('filter')($scope.columns, {choosed: true}).length > 0) {
+            myForm.submit();
+        }
+    };
+
+    $scope.getColumns();
+
+    $scope.showTabDialog = function(question, ev) {
+        $mdDialog.show({
+            template: `
+                <md-dialog aria-label="選項定義" style="min-width:800px;max-width:1000px">
+                    <md-toolbar>
+                        <div class="md-toolbar-tools">
+                            <h2>{{ question.title }}</h2>
+                        </div>
+                    </md-toolbar>
+                    <md-dialog-content>
+                        <div class="md-dialog-content" style="max-height:500px;overflow-y:auto">
+                            <table class="ui celled table">
+                            <thead>
+                                <tr>
+                                    <th>數值</th>
+                                    <th>選項名稱</th>
+                                </tr>
+                            </thead>
+                            <tr ng-repeat="answer in question.answers">
+                                <td>{{ answer.value }}</td>
+                                <td>{{ answer.title }}</td>
+                            </tr>
+                            </table>
+                        </div>
+                    </md-dialog-content>
+                </md-dialog>
+            `,
+            controller: function(scope) {
+                scope.question = question;
+            },
+            parent: angular.element(document.body),
+            targetEvent: ev,
+            clickOutsideToClose: true
+        });
+    };
+
+});
+</script>
