@@ -423,6 +423,38 @@ class AnalysisFile extends CommFile {
         $data = curl_exec($ch);
 
         curl_close($ch);
-        return json_decode($data);
+        return ['report' => json_decode($data)];
     }
+
+    public function regression()
+    {
+        $independents = array_pluck(Input::get('independents'), 'name');
+        $r = Input::get('dependent.name') . '~' . implode('+', $independents);
+
+        $query = DB::table($this->file->analysis->tablename);
+
+        $query->addSelect(Input::get('dependent.name'));
+
+
+
+        foreach (Input::get('independents') as $item) {
+            $query->addSelect($item['name']);
+            $query->where($item['name'], '<>', '\'\'')->where($item['name'], '<>', -8)->where($item['name'], '<>', -9);
+        }
+
+        $sql = $query->toSql();
+
+        foreach ($query->getBindings() as $binding) {
+            $sql = preg_replace('/\?/', $binding, $sql, 1);
+        }
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'http://localhost:8000/reg?sql=' . urlencode($sql) . '&r=' . urlencode($r));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $data = curl_exec($ch);
+
+        curl_close($ch);
+        return ['report' => json_decode($data)];
+    }
+
 }

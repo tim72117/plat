@@ -7,40 +7,51 @@ angular.module('analysis', [])
         replace: true,
         transclude: false,
         scope: {
-            items: '='
+            choosed: '='
         },
         template: `
-            <div>
-                <md-chips ng-model="items" md-removable="ctrl.removable" md-max-chips="2" placeholder="">
-                    <md-chip-template>
-                        <strong>{{$chip.title}}</strong>
-                    </md-chip-template>
-                </md-chips>
+            <div layout="column">
+                <md-input-container flex>
+                    <label>選擇自變數</label>
+                    <md-select ng-model="items" multiple ng-change="reset()">
+                        <md-option ng-value="item" ng-repeat="item in choosed.items">{{item.title}}</md-option>
+                    </md-select>
+                </md-input-container>
                 <md-button ng-click="count()">開始計算</md-button>
-            <div class="ui inverted dimmer" ng-class="{active: loading}">
-                <div class="ui text loader">計算中...</div>
-            </div>
-                <table class="ui table">
-                    <tr ng-repeat="column in columns">
+                <div class="ui inverted dimmer" ng-class="{active: loading}">
+                    <div class="ui text loader">計算中...</div>
+                </div>
+                <table class="ui table" ng-if="report">
+                    <tr>
+                        <td></td>
+                        <td ng-repeat="item in items">{{item.name}}</td>
+                    </tr>
+                    <tr ng-repeat="column in report">
+                        <td>{{items[$index].name}}</td>
                         <td ng-repeat="row in column">{{row}}</td>
                     </tr>
                 </table>
             </div>
         `,
         link: function(scope) {
-            console.log(scope);
+
+            scope.reset = function() {
+                scope.report = null;
+            }
+
             scope.count = function() {
                 console.log(scope.items);
                 scope.loading = true;
                 $http({method: 'POST', url: 'correlation', data:{items: scope.items}})
                 .success(function(data, status, headers, config) {
                     console.log(data);
-                    scope.columns = data;
+                    scope.report = data.report;
                     scope.loading = false;
                 }).error(function(e) {
                     console.log(e);
                 });
             }
+
         }
     };
 })
@@ -51,40 +62,70 @@ angular.module('analysis', [])
         replace: true,
         transclude: false,
         scope: {
-            items: '='
+            choosed: '='
         },
         template: `
-            <div>
-                <md-chips ng-model="items" md-removable="ctrl.removable" md-max-chips="2" placeholder="">
-                    <md-chip-template>
-                        <strong>{{$chip.title}}</strong>
-                    </md-chip-template>
-                </md-chips>
+            <div layout="column">
+                <md-input-container flex>
+                    <label>選擇依變數</label>
+                    <md-select ng-model="dependent" ng-change="reset()">
+                        <md-option ng-value="item" ng-repeat="item in choosed.items">{{item.title}}</md-option>
+                    </md-select>
+                </md-input-container>
+                <md-input-container flex>
+                    <label>選擇自變數</label>
+                    <md-select ng-model="independents" multiple ng-change="reset()">
+                        <md-option ng-value="item" ng-repeat="item in choosed.items">{{item.title}}</md-option>
+                    </md-select>
+                </md-input-container>
                 <md-button ng-click="count()">開始計算</md-button>
-            <div class="ui inverted dimmer" ng-class="{active: loading}">
-                <div class="ui text loader">計算中...</div>
-            </div>
-                <table class="ui table">
-                    <tr ng-repeat="column in columns">
-                        <td ng-repeat="row in column">{{row}}</td>
+                <div class="ui inverted dimmer" ng-class="{active: loading}">
+                    <div class="ui text loader">計算中...</div>
+                </div>
+                <table class="ui table" ng-if="report">
+                    <tr ng-repeat="(index, variable) in report['variables']">
+                        <td ng-repeat="column in columns" ng-if="index==0 || $first">{{report[column][index]}}</td>
+                        <td ng-repeat="column in columns" ng-if="index!=0 && !$first">{{report[column][index] | number:2}}</td>
+                    </tr>
+                </table>
+                <table class="ui table" ng-if="report">
+                    <tr ng-repeat="other in others">
+                        <td ng-repeat="value in report[other]">{{value}}</td>
                     </tr>
                 </table>
             </div>
         `,
         link: function(scope) {
-            console.log(scope);
+
+            scope.columns = [
+                'variables',
+                'Estimate',
+                'Std..Error',
+                't.value',
+                'Pr...t..',
+            ];
+
+            scope.others = [
+                'R_squared',
+                'adj_R_squared',
+            ];
+
+            scope.reset = function() {
+                scope.report = null;
+            }
+
             scope.count = function() {
-                console.log(scope.items);
                 scope.loading = true;
-                $http({method: 'POST', url: 'correlation', data:{items: scope.items}})
+                $http({method: 'POST', url: 'regression', data:{dependent: scope.dependent, independents: scope.independents}})
                 .success(function(data, status, headers, config) {
                     console.log(data);
-                    scope.columns = data;
+                    scope.report = data.report;
                     scope.loading = false;
                 }).error(function(e) {
                     console.log(e);
                 });
             }
+
         }
     };
 });

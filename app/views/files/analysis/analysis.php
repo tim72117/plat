@@ -16,72 +16,70 @@
     </md-toolbar>
 
     <div class="ui container">
+        <md-card class="md-padding" style="min-height:600px">
+            <md-tabs md-selected="tabSelected" md-dynamic-height md-border-bottom>
+                <md-tab label="次數分配 / 交叉表">
+                    <div layout="row" class="md-padding">
+                    <div flex="30">
 
-    <div class="ui grid">
+                        <div class="ui inverted dimmer" ng-class="{active: loading}">
+                            <div class="ui text loader">Loading</div>
+                        </div>
 
-        <div class="five wide column dimmable dimmed">
-
-            <div class="ui inverted dimmer" ng-class="{active: loading}">
-                <div class="ui text loader">Loading</div>
-            </div>
-
-            <div class="ui small fluid vertical accordion menu" style="margin-top:0">
-                <div class="item">
-                    <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋關鍵字..."><i class="search icon"></i></div>
-                </div>
-                <div class="item">
-                    <div class="content">
-                        <div class="menu" style="overflow-y: auto;max-height:{{ targets.size > 1 ? 250 : 500 }}px">
-                            <div class="item" ng-repeat="column in columns | filter: {choosed: true} | filter: searchText">
+                        <div class="ui small fluid vertical accordion menu" style="margin-top:0">
+                            <div class="item" ng-if="tabSelected==0">
+                                <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋關鍵字..."><i class="search icon"></i></div>
+                            </div>
+                            <div class="item" ng-if="tabSelected==0">
                                 <div class="content">
-                                    <div class="ui checkbox" style="display: block">
-                                        <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.selected" ng-change="setColumns(column)" />
-                                        <label for="column-{{ $index }}" style="overflow:hidden;white-space: nowrap;text-overflow: ellipsis" title="{{ column.title }}">{{ column.title }}</label>
+                                    <div class="menu" style="overflow-y: auto;max-height:{{ targets.size > 1 ? 250 : 500 }}px">
+                                        <div class="item" ng-repeat="column in columns | filter: {choosed: true} | filter: searchText">
+                                            <div class="content">
+                                                <div class="ui checkbox" style="display: block">
+                                                    <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.selected" ng-change="setColumns(column)" />
+                                                    <label for="column-{{ $index }}" style="overflow:hidden;white-space: nowrap;text-overflow: ellipsis" title="{{ column.title }}">{{ column.title }}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <h4 class="ui header">加入篩選條件</h4>
+                            </div>
+                            <div class="item" ng-repeat="(group_key, group) in targets.groups">
+                                <a class="title" ng-class="{active: group.selected}" ng-click="setGroup(group)">
+                                    <i class="dropdown icon"></i>
+                                    {{ group.name }}
+                                </a>
+                                <div class="content" ng-class="{active: group.selected}">
+                                    <div class="menu" style="overflow-y: auto;max-height:200px">
+                                        <div class="item" ng-repeat="(target_key, target) in group.targets">
+                                            <div class="ui checkbox" style="display: block">
+                                                <input type="checkbox" class="hidden" id="target-{{ target_key }}" ng-model="target.selected" ng-change="getCount()" />
+                                                <label for="target-{{ target_key }}" style="overflow:hidden;white-space: nowrap;text-overflow: ellipsis" title="{{ target.name }}">{{ target.name }}</label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="item">
-                    <h4 class="ui header">加入篩選條件</h4>
-                </div>
-                <div class="item" ng-repeat="(group_key, group) in targets.groups">
-                    <a class="title" ng-class="{active: group.selected}" ng-click="setGroup(group)">
-                        <i class="dropdown icon"></i>
-                        {{ group.name }}
-                    </a>
-                    <div class="content" ng-class="{active: group.selected}">
-                        <div class="menu" style="overflow-y: auto;max-height:200px">
-                            <div class="item" ng-repeat="(target_key, target) in group.targets">
-                                <div class="ui checkbox" style="display: block">
-                                    <input type="checkbox" class="hidden" id="target-{{ target_key }}" ng-model="target.selected" ng-change="getCount()" />
-                                    <label for="target-{{ target_key }}" style="overflow:hidden;white-space: nowrap;text-overflow: ellipsis" title="{{ target.name }}">{{ target.name }}</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-        </div>
-
-        <div class="eleven wide column">
-<!--                 <div class="item" ng-class="{active: tool===2}" ng-click="tool=3">平均數比較</div>
-                <div class="item" ng-class="{active: tool===4}" ng-click="tool=5">迴歸分析</div> -->
-            <md-card class="md-padding" style="min-height:600px">
-                <md-tabs md-dynamic-height md-border-bottom>
-                    <md-tab label="次數分配 / 交叉表">
+                    </div>
+                    <div flex></div>
+                    <div flex="65" layout="column">
                         <?php include_once('tb/use/tb1_inner_tiped.php') ?>
-                    </md-tab>
-                    <md-tab label="相關分析">
-                        <ng-correlation items="items"></ng-correlation>
-                    </md-tab>
-                </md-tabs>
-            </md-card>
-        </div>
-
-    </div>
+                    </div>
+                    </div>
+                </md-tab>
+                <md-tab label="相關分析">
+                    <ng-correlation ng-if="tabSelected==1" choosed="choosed"></ng-correlation>
+                </md-tab>
+                <md-tab label="迴歸分析">
+                    <ng-regression ng-if="tabSelected==2" choosed="choosed"></ng-regression>
+                </md-tab>
+            </md-tabs>
+        </md-card>
     </div>
 
 </div>
@@ -91,7 +89,7 @@
 <script src="/js/chart/bar.js"></script>
 <script src="/js/chart/pie.js"></script>
 <script src="/js/chart/donut.js"></script>
-<script src="/js/ng/analysis/ngCorrelation.js"></script>
+<script src="/js/ng/analysis/advanced.js"></script>
 
 <script>
 app.requires.push('analysis');
@@ -117,6 +115,8 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
     $scope.tableOption = '個數';
     $scope.tableOptions = ('行% 列% 總和% 平均數 個數').split(' ').map(function (eachOption) { return { abbrev: eachOption }; });
     $scope.charts = [{title: '表格', name: 'table', icon: 'table'}, {title: '長條圖', name: 'bar', icon: 'bar chart'}, {title: '圓餅圖', name: 'pie', icon: 'pie chart'}];
+    $scope.choosed = {items: []};
+    $scope.tabSelected;
 
     $scope.getColumns = function() {
         $scope.loadingQuestions = true;
@@ -124,6 +124,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
         $http({method: 'POST', url: 'get_analysis_questions', data:{} })
         .success(function(data, status, headers, config) {
             $scope.columns = data.questions;
+            $scope.choosed.items = $filter('filter')($scope.columns, {choosed: true});
             $scope.title = data.title;
             $scope.loadingQuestions = false;
             $scope.loading = $scope.loadingQuestions || $scope.loadingTargets;
