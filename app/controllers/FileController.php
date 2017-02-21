@@ -13,11 +13,12 @@ class FileController extends BaseController {
 
     public function management()
     {
-        return $this->createView(View::make('project.main')->nest('context', 'apps.files'));
+        return Redirect::to('doc/3171/open');
     }
 
     public function project()
     {
+        View::share('paths', [ShareFile::whereNull('folder_id')->first()]);
         return $this->createView(View::make('project.main')->nest('context', 'project.intro1'));
     }
 
@@ -96,6 +97,7 @@ class FileController extends BaseController {
             ($doc->target == 'user' && $doc->target_id != $this->user->id) ||
             ($doc->target == 'group' && !in_array($doc->target_id, $inGroups))
         ) {
+            if (!($doc->target == 'user' && $doc->target_id == 0))
             return $this->deny();
         }
 
@@ -119,6 +121,7 @@ class FileController extends BaseController {
                 View::share('project', $member->project);
                 $view = View::make($file->$method(), ['doc' => $doc]);
             } else {
+                View::share('paths', $file->getPaths()->load('isFile'));
                 $context = View::make('project.main', ['doc' => $doc])->nest('context', $file->$method());
                 $view = $this->createView($context);
             }
@@ -127,105 +130,6 @@ class FileController extends BaseController {
         }
 
         return $view;
-    }
-
-    public function upload()
-    {
-        if (!Input::hasFile('file_upload'))
-            throw new ValidateException(new MessageBag(array('no_file_upload' => '檔案錯誤')));
-
-        $file = $this->createFile(3, Input::file('file_upload')->getClientOriginalName());
-
-        $class = $file->isType->class;
-
-        $app = new $class($file, $this->user);
-
-        $app->upload(Input::file('file_upload'));
-
-        $doc = $this->createDoc($file);
-
-        return ['doc' => Struct_file::open($doc)];
-    }
-
-    public function create()
-    {
-        if (!Input::has('fileInfo'))
-            throw new ValidateException(new MessageBag(array('no_file_info' => '沒有輸入檔案資訊')));
-
-        $file = $this->createFile(Input::get('fileInfo')['type'], Input::get('fileInfo')['title']);
-
-        $class = $file->isType->class;
-
-        $app = new $class($file, $this->user);
-
-        $app->create();
-
-        $doc = $this->createDoc($file);
-
-        return ['doc' => Struct_file::open($doc)];
-    }
-
-    public function shared()
-    {
-        $groups = $this->user->groups()->with(['users' => function ($query) {
-            $query->where('disabled', false)->where('actived', true);
-        }])->get();
-
-        if (count(Input::get('docs'))==1) {
-            $shareds = ShareFile::find(Input::get('docs')[0]['id'])->shareds->reduce(function ($carry, $item) {
-                array_push($carry[$item->target], $item->target_id);
-                return $carry;
-            }, ['group' => [], 'user' => []]);
-
-            $groups->each(function ($group) use($shareds) {
-                $group->selected = in_array($group->id, $shareds['group']);
-                $group->users->each(function ($user) use($shareds) {
-                    $user->selected = in_array($user->id, $shareds['user']);
-                });
-            });
-        }
-
-        return ['groups' => $groups->toArray()];
-    }
-
-    public function requested()
-    {
-        $groups = $this->user->groups()->with(['users' => function ($query) {
-            $query->where('disabled', false)->where('actived', true);
-        }])->get();
-
-        if (count(Input::get('docs'))==1) {
-            $requesteds = ShareFile::find(Input::get('docs')[0]['id'])->requesteds->reduce(function ($carry, $item) {
-                array_push($carry[$item->target], $item->target_id);
-                return $carry;
-            }, ['group' => [], 'user' => []]);
-
-            $groups->each(function ($group) use($requesteds) {
-                $group->selected = in_array($group->id, $requesteds['group']);
-                $group->users->each(function ($user) use($requesteds) {
-                    $user->selected = in_array($user->id, $requesteds['user']);
-                });
-            });
-        }
-
-        return ['groups' => $groups->toArray()];
-    }
-
-    private function createFile($type_id, $title)
-    {
-        return new Files(['type' => $type_id, 'title' => $title]);
-    }
-
-    private function createDoc($file)
-    {
-        return ShareFile::updateOrCreate([
-            'file_id'    => $file->id,
-            'target'     => 'user',
-            'target_id'  => $this->user->id,
-            'created_by' => $this->user->id,
-        ], [
-            'visible' => false,
-        ]);
     }
 
     private function createView($view)
@@ -260,33 +164,6 @@ class FileController extends BaseController {
         foreach ($queries as $query) {
             var_dump($query);echo '<br /><br />';
         }
-    }
-
-    public function docs()
-    {
-        $docs = ShareFile::with(['isFile', 'isFile.isType', 'shareds', 'requesteds'])->where(function($query) {
-
-            $query->where('target', 'user')->where('target_id', $this->user->id);
-
-        })->orWhere(function($query) {
-
-            $inGroups = $this->user->inGroups->lists('id');
-
-            count($inGroups)>0 && $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $this->user->id);
-
-        })->get()->map(function($doc) {
-
-            return Struct_file::open($doc);
-
-        })->toArray();
-
-        $tooltip = [
-            'start'  => ['startup' => true,  'position' => 'bottom center', 'html' => '<h2 class="ui header">有新的功能</h2>更新時間2016-01-29'],
-            'rename' => ['startup' => false, 'position' => 'right center', 'html' => '<h2 class="ui header">點擊檔案名稱右邊的空白處，即可修改檔案名稱，修改完後再點擊一次空白處儲存變更。</h2><i class="info icon"></i>只有檔案的擁有人可以變更名稱'],
-            'menu'   => ['startup' => false, 'position' => 'left center', 'html' => '<h2 class="ui header">勾選將這個檔案加到左邊快捷選單中。</h2>'],
-        ];
-
-        return ['docs' => $docs, 'tooltip' => $tooltip];
     }
 
 }

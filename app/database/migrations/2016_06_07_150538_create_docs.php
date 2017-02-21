@@ -17,6 +17,7 @@ class CreateDocs extends Migration {
             $table->integer('file_id');
             $table->string('target', 10);
             $table->integer('target_id');
+            $table->integer('folder_id');
             $table->boolean('visible');
             $table->integer('created_by');
             $table->timestamps();

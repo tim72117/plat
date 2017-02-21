@@ -152,8 +152,10 @@ class CommFile {
                     'file_id' => $this->doc->file_id,
                     'target' => 'group',
                     'target_id' => $group['id'],
-                    'visible' => true,
                     'created_by' => $this->user->id
+                ], [
+                    'visible' => true,
+                    'folder_id' => $this->getPaths()->first()->id,
                 ]);
             }
             if (count($group['users']) != 0){
@@ -162,8 +164,10 @@ class CommFile {
                         'file_id' => $this->doc->file_id,
                         'target' => 'user',
                         'target_id' => $user['id'],
-                        'visible' => true,
                         'created_by' => $this->user->id
+                    ], [
+                        'visible' => true,
+                        'folder_id' => $this->getPaths()->first()->id,
                     ]);
                 }
             }
@@ -212,6 +216,32 @@ class CommFile {
         $doc->file_id = $file->id;
         $doc->save();
         return $doc;
+    }
+
+    public function moveToFolder()
+    {
+        $this->doc->folder_id = Input::get('folder_id');
+
+        return ['moved' => $this->doc->save()];
+    }
+
+    public function getPaths()
+    {
+        if ($this->doc->folder) {
+
+            $folder = new FolderComponent($this->doc->folder->isFile, $this->user);
+
+            $folder->setDoc($this->doc->folder);
+
+            $paths = $folder->getPaths()->add($this->doc);
+
+        } else {
+
+            $paths = \Illuminate\Database\Eloquent\Collection::make([$this->doc]);
+
+        }
+
+        return $paths;
     }
 
 }

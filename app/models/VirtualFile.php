@@ -60,7 +60,7 @@ class ShareFile extends Eloquent {
 
     public $timestamps = true;
 
-    protected $fillable = array('file_id', 'target', 'target_id', 'created_by', 'visible');
+    protected $fillable = array('file_id', 'target', 'target_id', 'created_by', 'visible', 'folder_id');
 
     public function isFile() {
         return $this->hasOne('Files', 'id', 'file_id');
@@ -74,6 +74,11 @@ class ShareFile extends Eloquent {
 
     public function requesteds() {
         return $this->hasMany('RequestFile', 'doc_id', 'id');
+    }
+
+    public function folder()
+    {
+        return $this->belongsTo('ShareFile');
     }
 
     public function getVisibleAttribute($value)
@@ -93,6 +98,8 @@ class Struct_file {
     static function open($doc)
     {
         $class = $doc->isFile->isType->class;
+        $shareds = $doc->shareds->groupBy('target');
+        $requesteds = $doc->requesteds->groupBy('target');
 
         return [
             'id'         => $doc->id,
@@ -104,12 +111,8 @@ class Struct_file {
             'type'       => $doc->isFile->type,
             'tools'      => method_exists($class, 'tools') ? $class::tools() : [],
             'visible'    => $doc->visible,
-            'shared'     => array_count_values($doc->shareds->map(function($shared){
-                            return $shared->target;
-                        })->all()),
-            'requested'  => array_count_values($doc->requesteds->map(function($requested){
-                            return $requested->target;
-                        })->all()),
+            'shared'     => ['user'=> isset($shareds['user']) ? count($shareds['user']) : 0, 'group'=> isset($shareds['group']) ? count($shareds['group']) : 0],
+            'requested'  => ['user'=> isset($requesteds['user']) ? count($requesteds['user']) : 0, 'group'=> isset($requesteds['group']) ? count($requesteds['group']) : 0],
         ];
     }
 }

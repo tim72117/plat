@@ -50,6 +50,8 @@ class UserAuthedController extends BaseController {
     {
         $member = Auth::user()->members()->logined()->orderBy('logined_at', 'desc')->first();
 
+        View::share('paths', []);
+
         $contents = View::make('project.main', ['project' => $member->project])->nest('context','project.passwordChange');
 
         $this->layout->content = $contents;
@@ -96,6 +98,7 @@ class UserAuthedController extends BaseController {
         $member = Auth::user()->members()->where('project_id', $project->id)->first();
 
         View::share('parameter', $parameter);
+        View::share('paths', []);
 
         return View::make('project.main', ['project' => $project])->nest('context', 'project.' . $project->code . '.profile', ['member' => $member]);
     }
