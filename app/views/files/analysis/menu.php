@@ -1,5 +1,5 @@
 
-<div ng-controller="analysisController" layout="column">
+<div ng-controller="analysisController" layout="column" layout-align="center center">
 
     <md-toolbar md-colors="{background: 'grey-100'}">
         <div class="md-toolbar-tools">
@@ -13,8 +13,7 @@
         </div>
     </md-toolbar>
 
-    <div class="ui container">
-
+    <div style="width: 1200px">
         <div class="ui top attached segment">
             <div class="ui icon input"><input type="text" ng-model="searchText.title" placeholder="搜尋關鍵字..."><i class="search icon"></i></div>
             <a class="ui button" href="open">上一步</a>
@@ -22,39 +21,20 @@
         </div>
 
         <div class="ui attached segment" ng-class="{loading: loading}">
-            <div class="list">
-            <div class="ui checkbox">
-                <input type="checkbox" id="selectAll" ng-model="isSelectAll" ng-change="selectAll()">
-                <label for="selectAll">全選(勾選題目時，建議您參考問卷，以完整瞭解題目原意！)</label>
-            </div>
-
-            <div class="ui divider"></div>
-
-            <div class="ui middle aligned divided list" style="min-height:600px;max-height:600px;overflow-y:scroll">
-
-                <div class="item" ng-repeat="column in columns | filter: searchText">
-                    <div class="content">
-                        <div class="ui checkbox" style="max-width:920px">
-                            <input type="checkbox" class="hidden" id="column-{{ $index }}" ng-model="column.choosed" ng-change="selectSome()" />
-                            <label for="column-{{ $index }}">{{ column.title }}</label>
-                        </div>
-<!--                         <select class="ui right floated mini button">
-                            <option value="">變項類型</option>
-                            <option value="1">連續變項</option>
-                            <option value="0">非連續變項</option>
-                        </select> -->
-                        <div class="ui right floated mini button" ng-click="$event.stopPropagation();showTabDialog(column, $event)">選項定義</div>
-                    </div>
-                </div>
-
-            </div>
-            </div>
+            <md-content style="height:600px">
+                <md-subheader><md-checkbox ng-model="column.choosed">全選(勾選題目時，建議您參考問卷，以完整瞭解題目原意！)</md-checkbox></md-subheader>
+                <md-list>
+                    <md-list-item class="secondary-button-padding" ng-repeat="column in columns | filter: searchText">
+                        <md-checkbox ng-model="column.choosed"></md-checkbox>
+                        <p>{{ column.title }}</p>
+                        <md-button class="md-secondary" ng-click="showTabDialog(column, $event)">選項定義</md-button>
+                    </md-list-item>
+                </md-list>
+            </md-content>
         </div>
-
     </div>
 
     <div class="ui container">
-        <div class="ui divider"></div>
         <div class="ui center aligned basic segment">
             <div class="ui horizontal bulleted link list">
                 <span class="item">© 2013 國立台灣師範大學 教育研究與評鑑中心</span>
