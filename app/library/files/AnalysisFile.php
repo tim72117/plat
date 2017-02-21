@@ -89,7 +89,7 @@ class AnalysisFile extends CommFile {
             return !in_array($question->name, $columns, true);
         })->slice(Input::get('start', 0), Input::get('amount', count($questions)));
 
-        return ['questions' => $questions, 'title' => $this->file->analysis->title];
+        return ['questions' => $questions];
     }
 
     public function all_census()

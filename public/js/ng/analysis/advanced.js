@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('analysis', [])
+angular.module('analysis.advanced', [])
 .directive('ngCorrelation', function($http) {
     return {
         restrict: 'E',
