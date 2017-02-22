@@ -65,7 +65,6 @@ angular.module('analysis.general', ['analysis.result'])
             </div>
         `,
         link: function(scope) {
-            scope.counting = false;
             scope.targets = [];
             scope.selected = {};
             scope.frequence = {};
@@ -157,7 +156,6 @@ angular.module('analysis.general', ['analysis.result'])
 
             scope.getFrequence = function(names, group_key, target_key) {
                 scope.targets.groups[group_key].targets[target_key].loading = true;
-                scope.counting = true;
 
                 ( requestForCount = countService.getCount('get_frequence', {name: names[0], group_key: group_key, target_key: target_key}) ).then(
                     function( newResoult ) {
@@ -173,14 +171,12 @@ angular.module('analysis.general', ['analysis.result'])
                         };
 
                         scope.targets.groups[group_key].targets[target_key].loading = false;
-                        scope.counting = false;
                         scope.counted++;
 
                     },
                     function( errorMessage ) {
                         // Flag the data as loaded (or rather, done trying to load). loading).
                         scope.targets.groups[group_key].targets[target_key].loading = false;
-                        //scope.counting = false;
                         console.warn( "Request for frequence was rejected." );
                         console.info( "Error:", errorMessage );
                     }
@@ -189,7 +185,6 @@ angular.module('analysis.general', ['analysis.result'])
 
             scope.getCrossTable = function(names, group_key, target_key) {
                 scope.targets.groups[group_key].targets[target_key].loading = true;
-                scope.counting = true;
 
                 ( requestForCount = countService.getCount('get_crosstable', {name1: names[0], name2: names[1], group_key: group_key, target_key: target_key}) ).then(
                     function( newResoult ) {
@@ -204,7 +199,6 @@ angular.module('analysis.general', ['analysis.result'])
                         };
 
                         scope.targets.groups[group_key].targets[target_key].loading = false;
-                        scope.counting = false;
                         scope.counted++;
 
                     },

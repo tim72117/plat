@@ -42,6 +42,7 @@
 <script src="/js/ng/analysis/advanced.js"></script>
 <script src="/js/ng/analysis/board.js"></script>
 <script src="/js/ng/analysis/chart.js"></script>
+<script src="/js/ng/analysis/table.js"></script>
 
 <script>
 app.requires.push('analysis.general');
