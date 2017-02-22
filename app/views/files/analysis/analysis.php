@@ -61,7 +61,7 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
         .success(function(data, status, headers, config) {
             $scope.choosed.items = $filter('filter')(data.questions, {choosed: true});
             $scope.loading = false;
-        }).error(function(e){
+        }).error(function(e) {
             console.log(e);
         });
     };

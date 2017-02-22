@@ -11,65 +11,67 @@ angular.module('analysis.general', ['analysis.result'])
         },
         template: `
             <div layout="row" class="md-padding">
+                <div class="ui inverted dimmer" ng-class="{active: loadingTargets}">
+                    <div class="ui text loader">Loading</div>
+                </div>
                 <div flex="30">
-                <div class="ui small fluid vertical accordion menu" style="margin-top:0">
-
-                    <md-input-container flex>
-                        <label>選擇欄變數</label>
-                        <md-select ng-model="selected.column" ng-change="reset()">
-                            <md-option ng-value="item" ng-repeat="item in choosed.items">{{item.title}}</md-option>
-                        </md-select>
-                    </md-input-container>
-                    <md-input-container flex>
-                        <label>選擇列變數</label>
-                        <md-select ng-model="selected.row" ng-change="reset()">
-                            <md-option ng-value="item" ng-repeat="item in choosed.items">{{item.title}}</md-option>
-                        </md-select>
-                    </md-input-container>
-                    <md-button ng-click="getCount()">開始計算</md-button>
-                    <md-button ng-click="exchange()">交換欄列變數</md-button>
-
-
-                    <div class="item">
-                        <h4 class="ui header">加入篩選條件</h4>
-                    </div>
-                    <div class="item">
-                        <div class="ui inverted dimmer" ng-class="{active: loadingTargets}">
-                            <div class="ui text loader">Loading</div>
+                    <div class="ui small fluid vertical accordion menu" style="margin-top:0">
+                        <div class="item">
+                            <h4 class="ui header">選擇分析對象</h4>
                         </div>
-                    </div>
-                    <div class="item" ng-repeat="(group_key, group) in targets.groups">
-                        <a class="title" ng-class="{active: group.selected}" ng-click="setGroup(group)">
-                            <i class="dropdown icon"></i>
-                            {{ group.name }}
-                        </a>
-                        <div class="content" ng-class="{active: group.selected}">
-                            <div class="menu" style="overflow-y: auto;max-height:200px">
-                                <div class="item" ng-repeat="(target_key, target) in group.targets">
-                                    <div class="ui checkbox" style="display: block">
-                                        <input type="checkbox" class="hidden" id="target-{{ target_key }}" ng-model="target.selected" ng-change="getCount()" />
-                                        <label for="target-{{ target_key }}" style="overflow:hidden;white-space: nowrap;text-overflow: ellipsis" title="{{ target.name }}">{{ target.name }}</label>
-                                    </div>
+                        <div class="item" ng-repeat="(group_key, group) in targets.groups">
+                            <a class="title" ng-class="{active: group.selected}" ng-click="setGroup(group)">
+                                <i class="dropdown icon"></i>
+                                {{ group.name }}
+                            </a>
+                            <div class="content" ng-class="{active: group.selected}" layout="column">
+                                <div flex ng-repeat="(target_key, target) in group.targets">
+                                    <md-checkbox ng-model="target.selected" ng-change="getCount()">{{ target.name }}</md-checkbox>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                </div>
 
                 <div flex></div>
 
                 <div flex="65" layout="column">
+                    <div layout="row" layout-align="start center">
+                        <div flex layout="column">
+                            <md-input-container>
+                                <label>分析對象</label>
+                                <md-chips ng-model="targetSelected">
+                                    <md-chip-template>{{$chip.name}}</md-chip-template>
+                                </md-chips>
+                            </md-input-container>
+                            <md-input-container>
+                                <label>選擇欄變數</label>
+                                <md-select ng-model="selected.column" ng-change="getCount()">
+                                    <md-option ng-value="null">無</md-option>
+                                    <md-option ng-value="item" ng-repeat="item in choosed.items">{{item.title}}</md-option>
+                                </md-select>
+                            </md-input-container>
+                            <md-input-container>
+                                <label>選擇列變數</label>
+                                <md-select ng-model="selected.row" ng-change="getCount()">
+                                    <md-option ng-value="null">無</md-option>
+                                    <md-option ng-value="item" ng-repeat="item in choosed.items">{{item.title}}</md-option>
+                                </md-select>
+                            </md-input-container>
+                        </div>
+                    </div>
+                    <md-button ng-click="exchange()"><md-icon md-svg-icon="swap-vert"></md-icon>交換欄列變數</md-button>
                     <ng-board selected="selected" targets="targetSelected" frequence="frequence" crosstable="crosstable" ng-if="counted"></ng-board>
                 </div>
             </div>
         `,
         link: function(scope) {
             scope.targets = [];
-            scope.selected = {};
+            scope.selected = {column: null, row: null};
             scope.frequence = {};
             scope.crosstable = {};
             scope.targetSelected = {};
+            scope.counted = 0;
 
             scope.targetsSelected = function() {
                 var selected = {};
@@ -93,7 +95,7 @@ angular.module('analysis.general', ['analysis.result'])
                     scope.targetSelected = scope.targetsSelected(scope.targets);
                     scope.targets.size = Object.keys(scope.targets.groups).length;
                     scope.loadingTargets = false;
-                }).error(function(e){
+                }).error(function(e) {
                     console.log(e);
                 });
             };
@@ -103,14 +105,9 @@ angular.module('analysis.general', ['analysis.result'])
                 group.selected = !group.selected;
             };
 
-            scope.reset = function() {
-                if ($('#bar-container').highcharts())
-                    $('#bar-container').highcharts().destroy();
-                if ($('#pie-container').highcharts())
-                    $('#pie-container').highcharts().destroy();
-            };
-
             scope.getCount = function() {
+                scope.counted = 0;
+                scope.targetSelected = scope.targetsSelected(scope.targets);
                 if (scope.selected.column && !scope.selected.row) {
                     var names = [scope.selected.column.name];
                     scope.getResults(scope.getFrequence, names);
@@ -126,7 +123,8 @@ angular.module('analysis.general', ['analysis.result'])
                     scope.getResults(scope.getCrossTable, names);
                 }
                 if (!scope.selected.column && !scope.selected.row) {
-                    scope.reset();
+                    scope.frequence = {};
+                    scope.crosstable = {};
                 };
             };
 
@@ -141,11 +139,7 @@ angular.module('analysis.general', ['analysis.result'])
 
             scope.getResults = function(method, names) {
                 requestForCount && requestForCount.abort();
-
-                scope.results = {};
-                scope.counted = 0;
                 var groups = scope.targets.groups;
-                console.log(groups);
                 for (var group_key in groups) {
                     for (var target_key in groups[group_key].targets) {
                         if (groups[group_key].targets[target_key].selected)
@@ -159,7 +153,6 @@ angular.module('analysis.general', ['analysis.result'])
 
                 ( requestForCount = countService.getCount('get_frequence', {name: names[0], group_key: group_key, target_key: target_key}) ).then(
                     function( newResoult ) {
-                        console.log(newResoult);
                         scope.frequence[target_key] = newResoult.frequence;
 
                         if (scope.selected.column && !scope.selected.column.answers) {
@@ -175,7 +168,6 @@ angular.module('analysis.general', ['analysis.result'])
 
                     },
                     function( errorMessage ) {
-                        // Flag the data as loaded (or rather, done trying to load). loading).
                         scope.targets.groups[group_key].targets[target_key].loading = false;
                         console.warn( "Request for frequence was rejected." );
                         console.info( "Error:", errorMessage );
@@ -203,7 +195,6 @@ angular.module('analysis.general', ['analysis.result'])
 
                     },
                     function( errorMessage ) {
-                        // Flag the data as loaded (or rather, done trying to load). loading).
                         scope.targets.groups[group_key].targets[target_key].loading = false;
                         console.warn( "Request for crosstable was rejected." );
                         console.info( "Error:", errorMessage );
@@ -226,9 +217,7 @@ angular.module('analysis.general', ['analysis.result'])
     };
 })
 
-.service(
-    "countService",
-    function( $http, $q ) {
+.service('countService', function( $http, $q ) {
 
         function getCount(url, data) {
 

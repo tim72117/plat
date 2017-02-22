@@ -31,7 +31,6 @@ angular.module('analysis.chart', [])
                 bar.series = [];
                 bar.xAxis.title = bar.xAxis.title || {};
                 bar.legend.title.text = '篩選條件';
-                console.log(targets);
 
                 for (var i in targets) {
                     var one = {name: targets[i].name, data: []};

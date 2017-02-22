@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('analysis.table', [])
-.directive('ngColumnTable', function($http, analysisMethod) {
+.directive('ngColTable', function($http, analysisMethod) {
     return {
         restrict: 'E',
         replace: true,
@@ -15,14 +15,17 @@ angular.module('analysis.table', [])
             <table class="ui celled structured table">
                 <thead>
                     <tr>
-                        <th><button class="ui mini button" ng-click="setMean(set)"><i class="plus icon"></i>平均數</button></th>
-                        <th class="left aligned" colspan="{{ selected.column.answers.length+set.meanSet+1 }}">{{ selected.column.title }}</th>
+                        <th></th>
+                        <th class="left aligned" colspan="{{ selected.column.answers.length+(set.mean ? 1 : 0)+1 }}">
+                            {{ selected.column.title }}
+                            <md-checkbox ng-model="set.mean" aria-label="平均數">平均數</md-checkbox>
+                        </th>
                     </tr>
                     <tr>
                         <th></th>
                         <th class="top aligned right aligned" style="min-width: 80px" ng-repeat="answer in selected.column.answers">{{ answer.title }}</th>
                         <th class="top aligned right aligned" style="min-width: 80px">總和</th>
-                        <th class="top aligned right aligned" style="min-width: 80px" ng-if="set.meanSet">平均</th>
+                        <th class="top aligned right aligned" style="min-width: 80px" ng-if="set.mean">平均</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -32,7 +35,7 @@ angular.module('analysis.table', [])
                             {{ frequence[id][answer.value] || 0 }} <br/>
                         </td>
                         <td class="right aligned">{{ getFrequenceTotal(selected.column.answers, frequence[id]) }}</td>
-                        <td ng-if="set.meanSet" class="right aligned" rowspan="2">{{ getMean(selected.column.answers, frequence[id]) | number : 2 }}</td>
+                        <td class="right aligned" ng-if="set.mean" rowspan="2">{{ getMean(selected.column.answers, frequence[id]) | number : 2 }}</td>
                     </tr>
                     <tr ng-repeat-end>
                         <td class="right aligned" ng-class="{disabled: target.loading}" ng-repeat="answer in selected.column.answers">
@@ -45,10 +48,7 @@ angular.module('analysis.table', [])
         `,
         link: function(scope, element) {
             scope.set = {
-                colPercent: false,
-                rowPercent: false,
-                totalPercent: false,
-                meanSet: 0,
+                mean: false,
             };
             scope.getMean = analysisMethod.getMean;
             scope.setMean = analysisMethod.setMean;
@@ -69,51 +69,48 @@ angular.module('analysis.table', [])
             frequence: '='
         },
         template: `
-            <div>
-                <table class="ui celled structured table">
-                    <tbody>
-                        <tr ng-repeat-start="(id, target) in targets">
-                            <td rowspan="{{ selected.row.answers.length+set.meanSet+1 }}" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">
-                                <button class="ui mini button" ng-click="setMean(set)"><i class="plus icon"></i>平均數</button>
-                            </td>
-                            <td rowspan="{{ selected.row.answers.length+set.meanSet+1 }}" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">{{ selected.row.title }}</td>
-                            <td rowspan="{{ selected.row.answers.length+set.meanSet+1 }}" style="font-weight: 700; background-color:#f9fafb">{{ target.name }}</td>
-                            <td class="left aligned" style="font-weight: 700">{{ selected.row.answers[0].title }}</td>
-                            <td class="right aligned" ng-class="{disabled: target.loading}">
-                                {{ frequence[id][selected.row.answers[0].value] || 0 }}
-                            </td>
-                            <td class="right aligned">
-                                {{ getTotalPercent(getFrequenceTotal(selected.row.answers, frequence[id]), frequence[id][selected.row.answers[0].value] || 0) | number : 2 }}%
-                            </td>
-                        </tr>
-                        <tr ng-repeat="(key, answer) in selected.row.answers" ng-if="key!=0">
-                            <td class="left aligned" style="font-weight: 700">{{ answer.title }}</td>
-                            <td class="right aligned" ng-class="{disabled: target.loading}">
-                                {{ frequence[id][answer.value] || 0 }}
-                            </td>
-                            <td class="right aligned">
-                                {{ getTotalPercent(getFrequenceTotal(selected.row.answers, frequence[id]), frequence[id][answer.value] || 0) | number : 2 }}%
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="left aligned" style="font-weight: 700">總和</td>
-                            <td class="right aligned" >{{ getFrequenceTotal(selected.row.answers, frequence[id]) }}</td>
-                            <td class="right aligned" >100%</td>
-                        </tr>
-                        <tr ng-if="set.meanSet" ng-repeat-end>
-                            <td class="left aligned" style="font-weight: 700">平均</td>
-                            <td class="right aligned" colspan="2">{{ getMean(selected.row.answers, frequence[id]) | number : 2 }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <table class="ui celled structured table">
+                <thead>
+                    <tr>
+                        <th colspan="5" style="text-align: right"><md-checkbox ng-model="set.mean" aria-label="平均數">平均數</md-checkbox></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat-start="(id, target) in targets">
+                        <td rowspan="{{ selected.row.answers.length+(set.mean ? 1 : 0)+1 }}" style="background: #f9fafb;text-align: inherit;color: rgba(0,0,0,.87);font-weight: 700">{{ selected.row.title }}</td>
+                        <td rowspan="{{ selected.row.answers.length+(set.mean ? 1 : 0)+1 }}" style="font-weight: 700; background-color:#f9fafb">{{ target.name }}</td>
+                        <td class="left aligned" style="font-weight: 700">{{ selected.row.answers[0].title }}</td>
+                        <td class="right aligned" ng-class="{disabled: target.loading}">
+                            {{ frequence[id][selected.row.answers[0].value] || 0 }}
+                        </td>
+                        <td class="right aligned">
+                            {{ getTotalPercent(getFrequenceTotal(selected.row.answers, frequence[id]), frequence[id][selected.row.answers[0].value] || 0) | number : 2 }}%
+                        </td>
+                    </tr>
+                    <tr ng-repeat="(key, answer) in selected.row.answers" ng-if="key!=0">
+                        <td class="left aligned" style="font-weight: 700">{{ answer.title }}</td>
+                        <td class="right aligned" ng-class="{disabled: target.loading}">
+                            {{ frequence[id][answer.value] || 0 }}
+                        </td>
+                        <td class="right aligned">
+                            {{ getTotalPercent(getFrequenceTotal(selected.row.answers, frequence[id]), frequence[id][answer.value] || 0) | number : 2 }}%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="left aligned" style="font-weight: 700">總和</td>
+                        <td class="right aligned" >{{ getFrequenceTotal(selected.row.answers, frequence[id]) }}</td>
+                        <td class="right aligned" >100%</td>
+                    </tr>
+                    <tr ng-if="set.mean" ng-repeat-end>
+                        <td class="left aligned" style="font-weight: 700">平均</td>
+                        <td class="right aligned" colspan="2">{{ getMean(selected.row.answers, frequence[id]) | number : 2 }}</td>
+                    </tr>
+                </tbody>
+            </table>
         `,
         link: function(scope, element) {
             scope.set = {
-                colPercent: false,
-                rowPercent: false,
-                totalPercent: false,
-                meanSet: 0,
+                mean: false,
             };
             scope.getMean = analysisMethod.getMean;
             scope.setMean = analysisMethod.setMean;

@@ -13,7 +13,7 @@ angular.module('analysis.result', ['analysis.chart', 'analysis.table'])
             crosstable: '='
         },
         template: `
-            <div>
+            <div layout="column">
                 <md-input-container flex>
                     <label>{{outputType}}</label>
                     <md-select ng-model="reportOutput" ng-change="drawChart()">
@@ -21,7 +21,7 @@ angular.module('analysis.result', ['analysis.chart', 'analysis.table'])
                     </md-select>
                 </md-input-container>
 
-                <div style="width:700px;height:500px;overflow:scroll">
+                <md-content flex>
                     <div>
                         <div ng-if="report.output=='pie'">
                             <div ng-if="!selected.row && selected.column">
@@ -36,12 +36,12 @@ angular.module('analysis.result', ['analysis.chart', 'analysis.table'])
                         <ng-cross-bar-chart ng-if="report.output=='bar' && report.type=='cross'" targets="targets" selected="selected" crosstable="crosstable"></ng-cross-bar-chart>
                         <ng-cross-pie-chart ng-if="report.output=='pie' && report.type=='cross'" targets="targets" selected="selected" crosstable="crosstable"></ng-cross-pie-chart>
                     </div>
-                    <div>
-                        <ng-column-table ng-if="report.output == 'table' && report.type == 'column'" targets="targets" selected="selected" frequence="frequence"></ng-column-table>
-                        <ng-row-table ng-if="report.output == 'table' && report.type == 'row'" targets="targets" selected="selected" frequence="frequence"></ng-row-table>
-                        <ng-cross-table ng-if="report.output == 'table' && report.type == 'cross'" targets="targets" selected="selected" crosstable="crosstable"></ng-cross-table>
+                    <div ng-if="report.output == 'table'">
+                        <ng-col-table ng-if="report.type == 'col'" targets="targets" selected="selected" frequence="frequence"></ng-col-table>
+                        <ng-row-table ng-if="report.type == 'row'" targets="targets" selected="selected" frequence="frequence"></ng-row-table>
+                        <ng-cross-table ng-if="report.type == 'cross'" targets="targets" selected="selected" crosstable="crosstable"></ng-cross-table>
                     </div>
-                </div>
+                </md-content>
             </div>
         `,
         link: function(scope) {
@@ -55,7 +55,7 @@ angular.module('analysis.result', ['analysis.chart', 'analysis.table'])
                 scope.disabledCharts = {bar: false, pie:  false};
                 if (scope.report.output == 'table') {
                     if (scope.selected.column && !scope.selected.row)
-                        scope.report.type = 'column';
+                        scope.report.type = 'col';
                     if (!scope.selected.column && scope.selected.row)
                         scope.report.type = 'row';
                     if (scope.selected.column && scope.selected.row)
@@ -76,11 +76,6 @@ angular.module('analysis.result', ['analysis.chart', 'analysis.table'])
             };
 
             scope.drawChart();
-
-            // scope.$watch('cross_percent', function(val) {
-            //     scope.colPercent = val == 'col';
-            // });
-
         }
     };
 });

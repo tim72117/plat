@@ -408,7 +408,7 @@ class AnalysisFile extends CommFile {
 
         foreach (Input::get('items') as $item) {
             $query->addSelect($item['name']);
-            $query->where($item['name'], '<>', '\'\'')->where($item['name'], '<>', -8)->where($item['name'], '<>', -9);
+            $query->where($item['name'], '<>', '\'\'')->where($item['name'], '<>', -8)->where($item['name'], '<>', -9)->whereNotNull($item['name']);
         }
 
         $sql = $query->toSql();
@@ -435,11 +435,9 @@ class AnalysisFile extends CommFile {
 
         $query->addSelect(Input::get('dependent.name'));
 
-
-
         foreach (Input::get('independents') as $item) {
             $query->addSelect($item['name']);
-            $query->where($item['name'], '<>', '\'\'')->where($item['name'], '<>', -8)->where($item['name'], '<>', -9);
+            $query->where($item['name'], '<>', '\'\'')->where($item['name'], '<>', -8)->where($item['name'], '<>', -9)->whereNotNull($item['name']);
         }
 
         $sql = $query->toSql();

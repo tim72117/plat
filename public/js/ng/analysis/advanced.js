@@ -10,7 +10,7 @@ angular.module('analysis.advanced', [])
             choosed: '='
         },
         template: `
-            <div layout="column">
+            <div layout="column" class="md-padding">
                 <md-input-container flex>
                     <label>選擇自變數</label>
                     <md-select ng-model="items" multiple ng-change="reset()">
@@ -40,11 +40,9 @@ angular.module('analysis.advanced', [])
             }
 
             scope.count = function() {
-                console.log(scope.items);
                 scope.loading = true;
                 $http({method: 'POST', url: 'correlation', data:{items: scope.items}})
                 .success(function(data, status, headers, config) {
-                    console.log(data);
                     scope.report = data.report;
                     scope.loading = false;
                 }).error(function(e) {
@@ -65,7 +63,7 @@ angular.module('analysis.advanced', [])
             choosed: '='
         },
         template: `
-            <div layout="column">
+            <div layout="column" class="md-padding">
                 <md-input-container flex>
                     <label>選擇依變數</label>
                     <md-select ng-model="dependent" ng-change="reset()">
@@ -78,7 +76,7 @@ angular.module('analysis.advanced', [])
                         <md-option ng-value="item" ng-repeat="item in choosed.items">{{item.title}}</md-option>
                     </md-select>
                 </md-input-container>
-                <md-button ng-click="count()">開始計算</md-button>
+                <md-button ng-click="count()" ng-disabled="independents.indexOf(dependent) > -1">開始計算</md-button>
                 <div class="ui inverted dimmer" ng-class="{active: loading}">
                     <div class="ui text loader">計算中...</div>
                 </div>
@@ -118,7 +116,6 @@ angular.module('analysis.advanced', [])
                 scope.loading = true;
                 $http({method: 'POST', url: 'regression', data:{dependent: scope.dependent, independents: scope.independents}})
                 .success(function(data, status, headers, config) {
-                    console.log(data);
                     scope.report = data.report;
                     scope.loading = false;
                 }).error(function(e) {
