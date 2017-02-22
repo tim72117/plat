@@ -22,7 +22,11 @@
 
         <div class="ui attached segment" ng-class="{loading: loading}">
             <md-content style="height:600px">
-                <md-subheader><md-checkbox ng-model="column.choosed">全選(勾選題目時，建議您參考問卷，以完整瞭解題目原意！)</md-checkbox></md-subheader>
+                <md-subheader>
+                    <md-checkbox ng-checked="isChecked()" md-indeterminate="isIndeterminate()" ng-click="toggleAll()">
+                        全選(勾選題目時，建議您參考問卷，以完整瞭解題目原意！)
+                    </md-checkbox>
+                </md-subheader>
                 <md-list>
                     <md-list-item class="secondary-button-padding" ng-repeat="column in columns | filter: searchText">
                         <md-checkbox ng-model="column.choosed"></md-checkbox>
@@ -66,27 +70,24 @@ app.controller('analysisController', function($scope, $filter, $interval, $http,
         });
     };
 
-    $scope.selectAll = function() {
-        angular.forEach($scope.columns, function(column) {
-            column.choosed = $scope.isSelectAll;
-        });
+    $scope.isIndeterminate = function() {
+        return ($filter('filter')($scope.columns, {choosed: true}).length !== 0 && $filter('filter')($scope.columns, {choosed: true}).length !== $scope.columns.length);
     };
 
-    $scope.selectSome = function() {
-        var isSelected = 0;
-        angular.forEach($scope.columns, function(column) {
-            if (column.choosed){
-                isSelected = isSelected +1;
-            }
-        });
-        if (isSelected == $scope.columns.length){
-            document.getElementById("selectAll").indeterminate = false;
-            $scope.isSelectAll = true;
-        }else if(isSelected>0){
-            document.getElementById("selectAll").indeterminate = true;
-        }else{
-            document.getElementById("selectAll").indeterminate = false;
-            $scope.isSelectAll = false;
+    $scope.isChecked = function() {
+        return $filter('filter')($scope.columns, {choosed: true}).length === $scope.columns.length;
+    };
+
+    $scope.toggleAll = function() {
+        var amount = $filter('filter')($scope.columns, {choosed: true}).length;
+        if (amount === $scope.columns.length) {
+            angular.forEach($scope.columns, function(column) {
+                column.choosed = false;
+            });
+        } else if (amount === 0 || amount > 0) {
+            angular.forEach($scope.columns, function(column) {
+                column.choosed = true;
+            });
         }
     };
 
