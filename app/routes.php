@@ -18,7 +18,6 @@ Route::get('test', function() {
 Route::patterns(['doc_id' => '[0-9]+', 'project' => '[a-z]+', 'token' => '[a-z0-9]+', 'project_id' => '[0-9]+']);
 //平台-------------------------------------------------------------------------------------------------------------------------------
 Route::group(array('before' => 'auth'), function() {
-
     Route::any('doc/{doc_id}/{method}', 'FileController@open');
     Route::any('doc/{doc_id}/ajax/{method}', 'FileController@open');
     Route::any('request/{doc_id}/{method}', 'FileController@request');
@@ -33,7 +32,6 @@ Route::group(array('before' => 'auth'), function() {
     Route::post('auth/password/change', array('before' => 'csrf|post_delay', 'uses' => 'UserAuthedController@passwordChange'));
 
 });
-
 Route::bind('project', function($value, $route)
 {
     return Plat\Project::where('code', $value)->firstOrFail();
@@ -61,6 +59,8 @@ Route::post('survey/{book_id}/getNextNode', 'SurveyController@getNextNode');
 Route::post('survey/{book_id}/getNextNodes', 'SurveyController@getNextNodes');
 Route::post('survey/{book_id}/getChildren', 'SurveyController@getChildren');
 Route::post('survey/{book_id}/getRules', 'SurveyController@getRules');
+Route::post('survey/{book_id}/getSurveyQuesion', 'SurveyController@getSurveyQuesion');
+Route::get('survey/{book_id}/surveyLogin', 'SurveyController@surveyLogin');
 
 Route::get('api/projects', 'ApiController@projects');
 Route::get('api/news/{project_id}/{to}/{from?}', 'ApiController@news');
