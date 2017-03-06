@@ -104,3 +104,15 @@ Route::filter('post_delay', function()
 
     Cache::put('post_delay' . $ip_requested, $ip_requested_cache, 10);
 });
+
+
+Route::filter('has_survey_login', function($route)
+{
+    $book_id = $route->getParameter('book_id');
+
+    if(!Session::has('survey_login_id')){
+
+        return Redirect::to('survey/'.$book_id.'/surveyLogin');
+       
+    }
+});

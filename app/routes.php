@@ -53,7 +53,7 @@ Route::get('project/{project}/register/finish/{token}', 'UserController@register
 Route::get('project/{project}/register/print/{token}', 'UserController@registerPrint');
 Route::get('project/{project}/register/ajax/{method}', 'UserController@registerAjax');
 
-Route::get('survey/{book_id}/page', 'SurveyController@page');
+Route::get('survey/{book_id}/page', array('before' => 'has_survey_login', 'uses' => 'SurveyController@page'));
 Route::post('survey/{book_id}/getBook', 'SurveyController@getBook');
 Route::post('survey/{book_id}/getNextNode', 'SurveyController@getNextNode');
 Route::post('survey/{book_id}/getNextNodes', 'SurveyController@getNextNodes');
