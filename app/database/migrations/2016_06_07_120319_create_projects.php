@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class FileTags extends Migration {
+class CreateProjects extends Migration {
 
     /**
      * Run the migrations.
@@ -12,10 +12,11 @@ class FileTags extends Migration {
      */
     public function up()
     {
-        Schema::create('file_tags', function (Blueprint $table) {
+        Schema::create('projects', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('file_id');
-            $table->string('title', 50);
+            $table->string('code', 20);
+            $table->string('name', 200);
+            $table->boolean('register');
         });
     }
 
@@ -26,7 +27,7 @@ class FileTags extends Migration {
      */
     public function down()
     {
-        Schema::drop('file_tags');
+        Schema::drop('projects');
     }
 
 }

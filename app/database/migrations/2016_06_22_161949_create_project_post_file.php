@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class Groups extends Migration {
+class CreateProjectPostFile extends Migration {
 
     /**
      * Run the migrations.
@@ -12,10 +12,10 @@ class Groups extends Migration {
      */
     public function up()
     {
-        Schema::create('groups', function (Blueprint $table) {
+        Schema::create('project_post_file', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name', 50);
-            $table->string('description', 200);
+            $table->integer('post_id');
+            $table->integer('file_id');
         });
     }
 
@@ -26,7 +26,7 @@ class Groups extends Migration {
      */
     public function down()
     {
-        Schema::drop('groups');
+        Schema::drop('project_post_file');
     }
 
 }

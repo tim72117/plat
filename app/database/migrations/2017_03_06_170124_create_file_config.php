@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class Projects extends Migration {
+class CreateFileConfig extends Migration {
 
     /**
      * Run the migrations.
@@ -12,11 +12,11 @@ class Projects extends Migration {
      */
     public function up()
     {
-        Schema::create('projects', function (Blueprint $table) {
+        Schema::create('file_config', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('code', 20);
-            $table->string('name', 200);
-            $table->boolean('register');
+            $table->integer('file_id');
+            $table->string('name', 50);
+            $table->string('value', 50);
         });
     }
 
@@ -27,7 +27,7 @@ class Projects extends Migration {
      */
     public function down()
     {
-        Schema::drop('projects');
+        Schema::drop('file_config');
     }
 
 }

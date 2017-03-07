@@ -5,13 +5,13 @@ use Illuminate\Database\Migrations\Migration;
 
 class CreateOrganizationDetailsTable extends Migration {
 
-	/**
-	 * Run the migrations.
-	 *
-	 * @return void
-	 */
-	public function up()
-	{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
         Schema::create('organization_details', function (Blueprint $table) {
             $table->integer('organization_id')->index();
             $table->string('id', 10);
@@ -25,16 +25,16 @@ class CreateOrganizationDetailsTable extends Migration {
             $table->string('type', 3)->nullable();
             $table->string('grade', 3)->nullable();
         });
-	}
+    }
 
-	/**
-	 * Reverse the migrations.
-	 *
-	 * @return void
-	 */
-	public function down()
-	{
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
         Schema::drop('organization_details');
-	}
+    }
 
 }
