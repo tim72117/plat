@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class FileBook extends Migration {
+class CreateFileBook extends Migration {
 
     /**
      * Run the migrations.
@@ -14,8 +14,9 @@ class FileBook extends Migration {
     {
         Schema::create('file_book', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('class', 50);
-            $table->string('description', 200);
+            $table->integer('file_id');
+            $table->string('title', 50);
+            $table->boolean('lock', 200);
         });
     }
 
