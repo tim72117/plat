@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UserPositions extends Migration {
+class CreateFileTags extends Migration {
 
     /**
      * Run the migrations.
@@ -12,10 +12,10 @@ class UserPositions extends Migration {
      */
     public function up()
     {
-        Schema::create('user_positions', function (Blueprint $table) {
+        Schema::create('file_tags', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id');
-            $table->integer('position_id');
+            $table->integer('file_id');
+            $table->string('title', 50);
         });
     }
 
@@ -26,7 +26,7 @@ class UserPositions extends Migration {
      */
     public function down()
     {
-        Schema::drop('user_positions');
+        Schema::drop('file_tags');
     }
 
 }

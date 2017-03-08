@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class MemberApplying extends Migration {
+class CreateWork extends Migration {
 
     /**
      * Run the migrations.
@@ -12,10 +12,10 @@ class MemberApplying extends Migration {
      */
     public function up()
     {
-        Schema::create('member_applying', function (Blueprint $table) {
-            $table->char('id', 40);
+        Schema::create('works', function (Blueprint $table) {
+            $table->increments('id');
             $table->integer('member_id');
-            $table->timestamps();
+            $table->integer('organization_id');
         });
     }
 
@@ -26,7 +26,7 @@ class MemberApplying extends Migration {
      */
     public function down()
     {
-        Schema::drop('member_applying');
+        Schema::drop('works');
     }
 
 }

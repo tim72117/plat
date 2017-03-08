@@ -1,15 +1,11 @@
-hotfix	        :        緊急修正作業
+# Plat
 
-dev-return	:        提供查詢各計畫回收率Model 包含Cache
+A clould files manager
 
-dev-sso	        :        單一簽入主機建立工作
+## Getting Started
 
-dev-editor	:        問卷編制軟體
+## Installation
 
-dev-row	        :        rawdata 檔案建立、匯入、瀏覽、分享
-
-dev-news        :         最新消息編輯
-
-dev-msg          :         訊息發布功能
-
-demo               :         開發主分支  
+```
+composer install
+```

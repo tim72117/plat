@@ -5,31 +5,31 @@ use Illuminate\Database\Migrations\Migration;
 
 class CreateRowSheets extends Migration {
 
-	/**
-	 * Run the migrations.
-	 *
-	 * @return void
-	 */
-	public function up()
-	{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
         Schema::create('row_sheets', function (Blueprint $table) {
             $table->increments('id');
-			$table->integer('file_id');
+            $table->integer('file_id');
             $table->string('title', 50);
             $table->boolean('editable');
             $table->boolean('fillable');
-			$table->timestamps();
+            $table->timestamps();
         });
-	}
+    }
 
-	/**
-	 * Reverse the migrations.
-	 *
-	 * @return void
-	 */
-	public function down()
-	{
-		Schema::drop('row_sheets');
-	}
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::drop('row_sheets');
+    }
 
 }

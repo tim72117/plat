@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class Work extends Migration {
+class CreateProjectPositions extends Migration {
 
     /**
      * Run the migrations.
@@ -12,10 +12,10 @@ class Work extends Migration {
      */
     public function up()
     {
-        Schema::create('works', function (Blueprint $table) {
+        Schema::create('project_positions', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('member_id');
-            $table->integer('organization_id');
+            $table->integer('project_id');
+            $table->string('title', 50);
         });
     }
 
@@ -26,7 +26,7 @@ class Work extends Migration {
      */
     public function down()
     {
-        Schema::drop('works');
+        Schema::drop('project_positions');
     }
 
 }

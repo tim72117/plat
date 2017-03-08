@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class DropControllerColumnFromFiles extends Migration {
+class CreateGroups extends Migration {
 
     /**
      * Run the migrations.
@@ -12,9 +12,10 @@ class DropControllerColumnFromFiles extends Migration {
      */
     public function up()
     {
-        Schema::table('files', function($table)
-        {
-            $table->dropColumn('controller');
+        Schema::create('groups', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name', 50);
+            $table->string('description', 200);
         });
     }
 
@@ -25,10 +26,7 @@ class DropControllerColumnFromFiles extends Migration {
      */
     public function down()
     {
-        Schema::table('files', function($table)
-        {
-            $table->string('controller', 50)->nullable();
-        });
+        Schema::drop('groups');
     }
 
 }

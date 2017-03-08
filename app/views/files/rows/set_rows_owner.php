@@ -17,20 +17,26 @@
 
                     <md-input-container style="margin: 0">
                         <label>欄位名稱</label>
-                        <md-select ng-model="selected.column_id" ng-change="getGroupColumnValues(selected.column_id)" class="md-no-underline">
+                        <md-select ng-model="selected.column_id" class="md-no-underline">
                             <md-option ng-repeat="column in columns" value="{{column.id}}">{{column.title}}</md-option>
                         </md-select>
                     </md-input-container>
 
-                    <md-input-container style="margin: 0">
-                        <label>欄位值</label>
-                        <md-select ng-model="selected.value_text" class="md-no-underline">
-                            <md-select-header class="demo-select-header">
-                            <input ng-model="searchTerm" type="search" placeholder="搜尋欄位值.." class="demo-header-searchbox md-text">
-                            </md-select-header>
-                            <md-option ng-repeat="value in values | filter:searchTerm" value="{{value.text}}">{{value.text}}</md-option>
-                        </md-select>
-                    </md-input-container>
+                    <md-autocomplete
+                        ng-disabled="!selected.column_id"
+                        md-selected-item="selected.value_text"
+                        md-search-text="searchTextValue"
+                        md-items="item in queryValueInColumn(searchTextValue)"
+                        md-item-text="item.text"
+                        md-min-length="2"
+                        placeholder="欄位值">
+                        <md-item-template>
+                            <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.text}}</span>
+                        </md-item-template>
+                        <md-not-found>
+                            未找到 "{{searchTextValue}}" 相關的資料.
+                        </md-not-found>
+                    </md-autocomplete>
                 </div>
                 <md-divider></md-divider>
                 <div layout="row" style="padding:30px">
@@ -123,13 +129,22 @@ app.controller('rowsOwnerController', function($scope, $http, $q, $timeout, $mdT
 
     $scope.getStatus();
 
-    $scope.getGroupColumnValues = function(column_id) {
-        $http({method: 'POST', url: 'getGroupColumnValues', data:{column_id: column_id}})
+    $scope.queryValueInColumn = function(query) {
+        if (!query) {
+            return [];
+        }
+
+        deferred = $q.defer();
+        $http({method: 'POST', url: 'queryValueInColumn', data:{query: query, column_id: $scope.selected.column_id}})
         .success(function(data, status, headers, config) {
-            $scope.values = data.values;
-        }).error(function(e){
+            console.log(data);
+            deferred.resolve(data.values);
+        })
+        .error(function(e) {
             console.log(e);
         });
+
+        return deferred.promise;
     };
 
     $scope.queryUsersByEmail = function(query) {
