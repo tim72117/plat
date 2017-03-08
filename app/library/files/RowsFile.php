@@ -1216,13 +1216,19 @@ class RowsFile extends CommFile {
         }, $this->import['rows']);
     }
 
-    public function getGroupColumnValues()
+    public function queryValueInColumn()
     {
         $table = $this->file->sheets->first()->tables->first();
 
         $column_name = 'C' . Input::get('column_id');
 
-        $values = DB::table($table->database . '.dbo.' . $table->name)->whereNull('deleted_at')->groupBy($column_name)->select($column_name . ' AS text')->get();
+        $values = DB::table($table->database . '.dbo.' . $table->name)
+            ->whereNull('deleted_at')
+            ->where($column_name, 'like', '%' . Input::get('query') . '%')
+            ->groupBy($column_name)
+            ->select($column_name . ' AS text')
+            ->limit(100)
+            ->get();
 
         return ['values' => $values];
     }
