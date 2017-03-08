@@ -18,6 +18,7 @@ Route::get('test', function() {
 Route::patterns(['doc_id' => '[0-9]+', 'project' => '[a-z]+', 'token' => '[a-z0-9]+', 'project_id' => '[0-9]+']);
 //平台-------------------------------------------------------------------------------------------------------------------------------
 Route::group(array('before' => 'auth'), function() {
+
     Route::any('doc/{doc_id}/{method}', 'FileController@open');
     Route::any('doc/{doc_id}/ajax/{method}', 'FileController@open');
     Route::any('request/{doc_id}/{method}', 'FileController@request');
@@ -32,6 +33,7 @@ Route::group(array('before' => 'auth'), function() {
     Route::post('auth/password/change', array('before' => 'csrf|post_delay', 'uses' => 'UserAuthedController@passwordChange'));
 
 });
+
 Route::bind('project', function($value, $route)
 {
     return Plat\Project::where('code', $value)->firstOrFail();
