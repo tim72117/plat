@@ -32,6 +32,19 @@
                         </div>
                     </md-list-item>
                     <md-divider ></md-divider>
+                    <md-subheader class="md-no-sticky" md-colors="{color: 'indigo-800'}"><h4>主題本登入條件設定</h4></md-subheader>
+                    <md-list-item>
+                        <md-select placeholder="請選擇" ng-model="loginConditionColumn" ng-change="loginSelected(loginConditionColumn)" style="width: 920px">
+                            <md-option ng-value="column" ng-repeat="column in columns">{{column.title}}</md-option>
+                        </md-select>
+
+                    </md-list-item>
+                    <md-list-item ng-if="empty.conditionColumn">
+                        <div class="ui negative message" flex>
+                            <div class="header">請選擇欄位</div>
+                        </div>
+                    </md-list-item>
+                    <md-divider ></md-divider>
                     <md-subheader class="md-no-sticky" md-colors="{color: 'indigo-800'}"><h4>變項選擇</h4></md-subheader>
                     <md-list-item ng-repeat="column in columns">
                         <p>{{column.title}}</p>
@@ -63,6 +76,11 @@
                     <md-subheader class="md-no-sticky" md-colors="{color: 'indigo-800'}"><h4>主題本進入加掛題本條件欄位設定</h4></md-subheader>
                     <md-list-item>
                         <p>{{conditionColumn.title}}</p>
+                    </md-list-item>
+                    <md-divider ></md-divider>
+                    <md-subheader class="md-no-sticky" md-colors="{color: 'indigo-800'}"><h4>主題本登入條件</h4></md-subheader>
+                    <md-list-item>
+                        <p>{{loginConditionColumn.title}}</p>
                     </md-list-item>
                     <md-divider ></md-divider>
                     <md-subheader class="md-no-sticky" md-colors="{color: 'indigo-800'}"><h4>變項選擇</h4></md-subheader>
@@ -119,7 +137,7 @@
             $scope.empty.conditionColumn = $scope.conditionColumn.length <= 0 ? true : false;
             var sent = !$scope.empty.table && !$scope.empty.column && !$scope.empty.questions && !$scope.empty.conditionColumn ? true : false;
 
-            return {'columns': columns, 'questions': questions, 'conditionColumn': $scope.conditionColumn, 'tablesSelected': $scope.tablesSelected, 'sent': sent};
+            return {'columns': columns, 'questions': questions, 'conditionColumn': $scope.conditionColumn, 'tablesSelected': $scope.tablesSelected, 'loginSelected': $scope.loginConditionColumn, 'sent': sent};
         }
 
         $scope.setParentList = function(mother_list_id){
@@ -163,6 +181,10 @@
             $scope.conditionColumn = column;
         }
 
+         $scope.loginSelected = function(loginConditionColumn) {
+            $scope.loginConditionColumn = loginConditionColumn;
+        }
+        
          $scope.getApplicableOptions();
     });
 </script>

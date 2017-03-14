@@ -55,12 +55,14 @@ Route::get('project/{project}/register/finish/{token}', 'UserController@register
 Route::get('project/{project}/register/print/{token}', 'UserController@registerPrint');
 Route::get('project/{project}/register/ajax/{method}', 'UserController@registerAjax');
 
-Route::get('survey/{book_id}/page', 'SurveyController@page');
+Route::get('survey/{book_id}/page', array('before' => 'has_survey_login', 'uses' => 'SurveyController@page'));
 Route::post('survey/{book_id}/getBook', 'SurveyController@getBook');
 Route::post('survey/{book_id}/getNextNode', 'SurveyController@getNextNode');
 Route::post('survey/{book_id}/getNextNodes', 'SurveyController@getNextNodes');
 Route::post('survey/{book_id}/getChildren', 'SurveyController@getChildren');
 Route::post('survey/{book_id}/getRules', 'SurveyController@getRules');
+Route::post('survey/{book_id}/getSurveyQuesion', 'SurveyController@getSurveyQuesion');
+Route::get('survey/{book_id}/surveyLogin', 'SurveyController@surveyLogin');
 
 Route::get('api/projects', 'ApiController@projects');
 Route::get('api/news/{project_id}/{to}/{from?}', 'ApiController@news');
