@@ -590,10 +590,10 @@ class SurveyFile extends CommFile
         if (!$root->rules()->first() == null) {
             $rules = $root->rules()->first()->expression;
         } else {
-            $rules = 'null';
+            $rules = [['conditions' => [['compareType' => 'question']]]];
         }
 
-        return $rules;
+        return ['rules' => $rules];
     }
 
     public function lockBook()
@@ -611,4 +611,34 @@ class SurveyFile extends CommFile
         return  ['ext_locked' => $locked];
     }
 
+    public function getExpressionExplanation()
+    {
+        $operators = [' && ' => '而且', ' || ' => '或者'];
+        $booleans = [' > ' => '大於', ' < ' => '小於', ' == ' => '等於', ' != ' => '不等於'];
+        $expressions = SurveyORM\Rule::find(Input::get('rule_id'))->expression;
+
+        $explanation = '';
+        foreach ($expressions as $expression) {
+            if (isset($expression['compareLogic'])) {
+                $operator = $operators[$expression['compareLogic']];
+                $explanation .= $operator;
+            }
+            $explanation .= ' ( ';
+            foreach ($expression['conditions'] as $condition) {
+
+                if (isset($condition['compareOperator'])) {
+                    $operator = $operators[$condition['compareOperator']];
+                    $explanation .= $operator;
+                }
+
+                $question = SurveyORM\Question::find($condition['question']);
+                $boolean = $booleans[$condition['logic']];
+
+                $explanation .= $question->title . $boolean . (isset($condition['compareQuestion']) ? SurveyORM\Question::find($condition['compareQuestion'])->title : $condition['value']);
+            }
+            $explanation .= ' ) ';
+        }
+
+        return ['explanation' => $explanation];
+    }
 }

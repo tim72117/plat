@@ -8,7 +8,7 @@ gulp.task('default', function() {
     // .pipe(eslint())
     // .pipe(eslint.format());
 
-    gulp.watch('app/library/**/*.php', { debounceDelay: 2000 }, ['phpunit']);       
+    gulp.watch(['app/library/**/*.php', 'app/tests/**/*.php'], { debounceDelay: 2000 }, ['phpunit']);
 });
 
 gulp.task('phpunit', function() {
