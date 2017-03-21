@@ -868,4 +868,22 @@ class QuesFile extends CommFile {
         }
     }
 
+    public function getTraffic()
+    {
+        $receives = [];
+
+        $pstats = DB::table($this->file->census->database . '.dbo.' . $this->file->census->table . '_pstat AS p')
+            ->where('page', '>=', $this->file->census->pages->max('page')+1)
+            ->groupBy(DB::raw('CONVERT(char(10), created_at, 120)'))
+            ->orderBy('created_at')
+            ->select(DB::raw('count(*) as count, CONVERT(char(10), created_at, 120) as created_at'))
+            ->get();
+
+        foreach ($pstats as $pstat) {
+            array_push($receives, [strtotime($pstat->created_at)*1000, (int)$pstat->count]);
+        }
+
+        return ['receives' => $receives, 'start' => strtotime($pstats[0]->created_at)*1000];
+    }
+
 }
