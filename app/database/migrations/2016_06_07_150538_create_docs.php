@@ -15,9 +15,9 @@ class CreateDocs extends Migration {
         Schema::create('docs', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('file_id');
-            $table->string('target', 10);
+            $table->string('target', 100);
             $table->integer('target_id');
-            $table->integer('folder_id');
+            $table->integer('folder_id')->nullable();
             $table->boolean('visible');
             $table->integer('created_by');
             $table->timestamps();
