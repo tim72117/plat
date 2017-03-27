@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Files extends Eloquent {
 
     protected $table = 'files';
@@ -54,7 +56,7 @@ class RequestFile extends Eloquent {
 
 class ShareFile extends Eloquent {
 
-    use SoftDeletingTrait;
+    use SoftDeletes;
 
     protected $table = 'docs';
 

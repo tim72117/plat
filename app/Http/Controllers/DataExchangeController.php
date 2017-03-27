@@ -1,5 +1,9 @@
 <?php
-class DataExchangeController extends BaseController {
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class DataExchangeController extends Controller {
 
 	/*
 	|--------------------------------------------------------------------------

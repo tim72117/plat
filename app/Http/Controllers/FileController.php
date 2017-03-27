@@ -1,6 +1,9 @@
 <?php
 
-class FileController extends BaseController {
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class FileController extends Controller {
 
     protected $layout = 'project.layout-main';
 

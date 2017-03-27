@@ -2,7 +2,7 @@
 namespace Cdb;
 
 use Eloquent;
-use Illuminate\Database\Eloquent\SoftDeletingTrait;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends \User {
 
@@ -35,7 +35,7 @@ class User extends \User {
 
 class Service extends Eloquent {
 
-    use SoftDeletingTrait;
+    use SoftDeletes;
 
     protected $table = 'cdb.dbo.services';
 
@@ -61,7 +61,7 @@ class Service extends Eloquent {
 
 class Management extends Eloquent {
 
-    use SoftDeletingTrait;
+    use SoftDeletes;
 
     protected $table = 'cdb.dbo.management';
 
@@ -115,7 +115,7 @@ class District extends Eloquent {
 
 class Baby extends Eloquent {
 
-    use SoftDeletingTrait;
+    use SoftDeletes;
 
     protected $table = 'cdb.dbo.babys';
 
@@ -157,7 +157,7 @@ class Turn_record extends Eloquent {
 
 class Menber_auth extends Eloquent {
 
-    use SoftDeletingTrait;
+    use SoftDeletes;
 
     protected $table = 'cdb.dbo.member_auth';
 

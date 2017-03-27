@@ -1,6 +1,9 @@
 <?php
 
-class OfflineController extends BaseController {
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class OfflineController extends Controller {
 
     protected $layout = 'project.layout-main';
 

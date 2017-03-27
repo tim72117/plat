@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Config\FileLoader;
 use Illuminate\Config\Repository;
 
-class UserController extends BaseController {
+class UserController extends Controller {
 
     protected $layout = 'project.layout-main';
 

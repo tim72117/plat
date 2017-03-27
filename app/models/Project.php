@@ -2,7 +2,7 @@
 namespace Plat;
 
 use Eloquent;
-use Illuminate\Database\Eloquent\SoftDeletingTrait;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Auth;
 
 class Project extends Eloquent {
@@ -42,7 +42,7 @@ class Project extends Eloquent {
 
 class Member extends Eloquent {
 
-    use SoftDeletingTrait;
+    use SoftDeletes;
 
     protected $table = 'user_member';
 
@@ -133,7 +133,7 @@ class Applying extends Eloquent {
 
 class Post extends Eloquent {
 
-    use SoftDeletingTrait;
+    use SoftDeletes;
 
     protected $table = 'project_post';
 
