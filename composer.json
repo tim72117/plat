@@ -16,6 +16,7 @@
             "app/commands",
             "app/controllers",
             "app/models",
+            "app/database/migrations",
             "app/tests/TestCase.php",
             "app/library"
         ],
