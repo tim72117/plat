@@ -1,9 +1,9 @@
-app/config
-app/storage
-vendor
-public/*
-!public/css
-!public/js
-!public/releaseNote.html
+/app/config
+/app/storage
+/vendor
+/ThemeBootstrap-master
+/node_modules
+/public/resource
+/public/packages
+/public/images
 Thumbs.db
-ThemeBootstrap-master

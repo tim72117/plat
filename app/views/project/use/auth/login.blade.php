@@ -2,7 +2,7 @@
 <md-content layout="column" layout-padding>
 
     <div layout="column" layout-align="center center" style="min-height:120px">
-        <img class="ui centered image" src="/analysis/use/images/logo_top.png" />
+        <img class="ui centered image" src="/images/use/logo_top.png" />
     </div>
 
     <div layout="column" layout-align="start center">
