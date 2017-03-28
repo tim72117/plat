@@ -1,4 +1,4 @@
-<?=Form::open(array('url' => URL::current(), 'method' => 'post', 'class' => 'ui warning form ' . ($errors->isEmpty() ? '' : 'error'), 'name' => 'loginForm'))?>	
+<form url="" method="post" class="ui warning form '<?=($errors->isEmpty() ? '' : 'error')?>" name="loginForm">
     <h4 class="ui dividing center aligned header">登入</h4>
     <div class="ui error message">
         <p><?=implode('、', array_filter($errors->all()))?></p>
@@ -22,4 +22,4 @@
     <div class="field">
         <a class="ui submit fluid button" href="/project/<?=$project->code?>/register">註冊帳號</a>
     </div>
-<?=Form::close()?>
+</form>

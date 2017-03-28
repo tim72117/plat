@@ -5,11 +5,11 @@ use Illuminate\Http\Request;
 
 class FileController extends Controller {
 
-    protected $layout = 'project.layout-main';
-
     public function __construct()
     {
         $this->user = Auth::user();
+
+        $this->layout = View::make('project.layout-main');
 
         Event::fire('ques.open', array());
     }
