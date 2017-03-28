@@ -67,7 +67,7 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
         $timeout(function() {
             $scope.second--;
             if ($scope.second < 0) {
-                window.location = '/auth/logout';
+                document.getElementById('logout-form').submit();
             }
             idle();
         }, 1000);
