@@ -1,12 +1,12 @@
 <?php
 namespace Plat\Files;
 
+use Illuminate\Http\Request;
 use App\User;
 use Files;
 use Input;
 use ShareFile;
 use Struct_file;
-use Plat\Files\FolderComponent;
 
 class FolderComponent extends CommFile {
 
@@ -17,9 +17,9 @@ class FolderComponent extends CommFile {
      * @param  User  $user
      * @return void
      */
-    function __construct(Files $file, User $user)
+    function __construct(Files $file, User $user, Request $request)
     {
-        parent::__construct($file, $user);
+        parent::__construct($file, $user, $request);
     }
 
     public function is_full()
@@ -96,14 +96,14 @@ class FolderComponent extends CommFile {
 
     public function createComponent()
     {
-        if (!Input::has('fileInfo'))
+        if (!$this->request->has('fileInfo'))
             throw new ValidateException(new MessageBag(array('no_file_info' => '沒有輸入檔案資訊')));
 
-        $file = $this->createFile(Input::get('fileInfo')['type'], Input::get('fileInfo')['title']);
+        $file = $this->createFile($this->request->get('fileInfo')['type'], $this->request->get('fileInfo')['title']);
 
         $class = $file->isType->class;
 
-        $app = new $class($file, $this->user);
+        $app = new $class($file, $this->user, $this->request);
 
         $app->create();
 
@@ -136,8 +136,8 @@ class FolderComponent extends CommFile {
             $query->where('disabled', false)->where('actived', true);
         }])->get();
 
-        if (count(Input::get('docs'))==1) {
-            $shareds = ShareFile::find(Input::get('docs')[0]['id'])->shareds->reduce(function ($carry, $item) {
+        if (count($this->request->get('docs'))==1) {
+            $shareds = ShareFile::find($this->request->get('docs')[0]['id'])->shareds->reduce(function ($carry, $item) {
                 array_push($carry[$item->target], $item->target_id);
                 return $carry;
             }, ['group' => [], 'user' => []]);
@@ -159,8 +159,8 @@ class FolderComponent extends CommFile {
             $query->where('disabled', false)->where('actived', true);
         }])->get();
 
-        if (count(Input::get('docs'))==1) {
-            $requesteds = ShareFile::find(Input::get('docs')[0]['id'])->requesteds->reduce(function ($carry, $item) {
+        if (count($this->request->get('docs'))==1) {
+            $requesteds = ShareFile::find($this->request->get('docs')[0]['id'])->requesteds->reduce(function ($carry, $item) {
                 array_push($carry[$item->target], $item->target_id);
                 return $carry;
             }, ['group' => [], 'user' => []]);
@@ -178,16 +178,16 @@ class FolderComponent extends CommFile {
 
     public function uploadFile()
     {
-        if (!Input::hasFile('file_upload'))
+        if (!$this->request->hasFile('file_upload'))
             throw new ValidateException(new MessageBag(array('no_file_upload' => '檔案錯誤')));
 
-        $file = $this->createFile(3, Input::file('file_upload')->getClientOriginalName());
+        $file = $this->createFile(3, $this->request->file('file_upload')->getClientOriginalName());
 
         $class = $file->isType->class;
 
-        $app = new $class($file, $this->user);
+        $app = new $class($file, $this->user, $this->request);
 
-        $app->upload(Input::file('file_upload'));
+        $app->upload($this->request->file('file_upload'));
 
         $doc = $this->createDoc($file);
 
