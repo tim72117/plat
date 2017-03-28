@@ -29,7 +29,7 @@
                 <div class="two fields">
                     <div class="field">
                         <label>姓名</label>
-                        <?=Form::text('name', '', array())?>
+                        <?=Form::text('username', '', array())?>
                     </div>
                     <div class="field">
                         <label>職稱</label>

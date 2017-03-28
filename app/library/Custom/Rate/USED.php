@@ -76,6 +76,15 @@ class USED {
         'C1194'  => '夜間部',
         'C1195'  => '狀態別',
         'C1196'  => '調查方式',
+        'C1154'  => '年級',
+        'C1155'  => '學校代碼',
+        'C1156'  => '科別代碼',
+        'C1157'  => '學生學號',
+        'C1158'  => '班級名稱',
+        'C1159'  => '學生姓名',
+        'C1162'  => '建教生',
+        'C1163'  => '夜間部',
+        'C1171'  => '狀態別',
     ];
 
     private $tables;
@@ -150,17 +159,17 @@ class USED {
                 'predicate' => ['+C1048'],
                 'title' => '104學年度學校人員校長調查',
             ],*/
-            'seniorOne105' => (object)[
-                'userinfo' => (object)['database' => 'rows', 'table' => 'row_20160516_093710_gwq2h', 'primaryKey' => 'C1148', 'school' => 'C1143', 'id' => 'stdidnumber', 'stdname' => 'C1147'],
-                'pstat'    => (object)['database' => 'use_105', 'table' => 'seniorOne105_pstat', 'primaryKey' => 'newcid'],
-                'pages'    => 21,
-                'against'  => [
-                    'file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at', 'C1148', 'C1149'
-                ],
-                'hidden'   => ['id'],
-                'predicate' => ['+C1146','+C1145'],
-                'title' => '105學年度高一/專一學生調查',
-            ],
+            // 'seniorOne105' => (object)[
+            //     'userinfo' => (object)['database' => 'rows', 'table' => 'row_20160516_093710_gwq2h', 'primaryKey' => 'C1148', 'school' => 'C1143', 'id' => 'stdidnumber', 'stdname' => 'C1147'],
+            //     'pstat'    => (object)['database' => 'use_105', 'table' => 'seniorOne105_pstat', 'primaryKey' => 'newcid'],
+            //     'pages'    => 21,
+            //     'against'  => [
+            //         'file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at', 'C1148', 'C1149'
+            //     ],
+            //     'hidden'   => ['id'],
+            //     'predicate' => ['+C1146','+C1145'],
+            //     'title' => '105學年度高一/專一學生調查',
+            // ],
             'parentTwo105' => (object)[
                 'userinfo' => (object)['database' => 'rows', 'table' => 'row_20160822_094434_qkbtr', 'primaryKey' => 'C1191', 'school' => 'C1186', 'id' => 'stdidnumber', 'stdname' => 'C1190'],
                 'pstat'    => (object)['database' => 'use_105', 'table' => 'parentTwo105_pstat', 'primaryKey' => 'newcid'],
@@ -173,14 +182,14 @@ class USED {
                 'title' => ' 105學年度高二/專二學生家長調查',
             ],
             'seniorTwo105' => (object)[
-                'userinfo' => (object)['database' => 'rows', 'table' => 'row_20160516_093710_gwq2h', 'primaryKey' => 'C1148', 'school' => 'C1143', 'id' => 'stdidnumber', 'stdname' => 'C1147'],
+                'userinfo' => (object)['database' => 'rows', 'table' => 'row_20160706_142632_hamhd', 'primaryKey' => 'C1160', 'school' => 'C1155', 'id' => 'stdidnumber', 'stdname' => 'C1159'],
                 'pstat'    => (object)['database' => 'use_105', 'table' => 'seniorTwo105_pstat', 'primaryKey' => 'newcid'],
                 'pages'    => 26,
                 'against'  => [
-                    'file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at', 'C1148', 'C1149'
+                    'file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at', 'C1160', 'C1161'
                 ],
                 'hidden'   => ['id'],
-                'predicate' => ['+C1146','+C1145'],
+                'predicate' => ['+C1158'],
                 'title' => '105學年度高二/專二學生調查',
             ],
         ];
@@ -188,7 +197,7 @@ class USED {
         $this->recode_columns = [
             'page' => [
                 'operator' => '>',
-                'value' => $this->tables[Input::get('table', 'seniorOne105')]->pages,
+                'value' => $this->tables[Input::get('table', 'seniorTwo105')]->pages,
                 'text' => ['true' => '填答完成', 'false' => '']
             ],
             [
@@ -208,9 +217,9 @@ class USED {
         $quesTitles = [
             'use' => (object)[
                 // ['name'  => 'seniorTwo104','title' => '104學年度高二/專二學生調查',],
-                ['name'  => 'seniorOne105','title' => '105學年度高一/專一學生調查',],
-                ['name'  => 'parentTwo105','title' => '105學年度高二/專二學生家長調查',],
+                // ['name'  => 'seniorOne105','title' => '105學年度高一/專一學生調查',],
                 ['name'  => 'seniorTwo105','title' => '105學年度高二/專二學生調查',],
+                ['name'  => 'parentTwo105','title' => '105學年度高二/專二學生家長調查',],
             ],
             'use_staff' => (object)[
                 // ['name'  => 'teacher104','title' => '104學年度學校人員教師調查'],
