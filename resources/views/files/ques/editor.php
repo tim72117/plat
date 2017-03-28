@@ -1087,7 +1087,7 @@ function getPassword(length) {
     <div class="md-toolbar-tools">
         <span flex></span>
         <form name="form1" action="" method="get" style="color:#000">
-        <?=Form::select('page', $pages->lists('page', 'page'), $page->page, array('id' => 'page', 'onChange'=>'this.form.submit()'))?>  /  <?=$pages->count()?>
+        <?=Form::select('page', $pages->pluck('page', 'page'), $page->page, array('id' => 'page', 'onChange'=>'this.form.submit()'))?>  /  <?=$pages->count()?>
         </form>
         <md-button ng-disabled="<?=($census->edit ? 'false' : 'true')?>" id="btn_cpage">
             <md-icon md-svg-icon="insert-drive-file"></md-icon> 新增一頁
