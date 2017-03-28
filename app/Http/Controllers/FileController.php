@@ -1,13 +1,27 @@
 <?php
 
-use App\Http\Controllers\Controller;
+namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
+use Auth;
+use View;
+use Event;
+use ShareFile;
+use RequestFile;
+use Redirect;
+use Carbon;
+use Plat\Files\FolderComponent;
+use Response;
 
 class FileController extends Controller {
 
     public function __construct()
     {
-        $this->user = Auth::user();
+        $this->middleware(function ($request, $next) {
+            $this->user= Auth::user();
+
+            return $next($request);
+        });
 
         $this->layout = View::make('project.layout-main');
 
@@ -32,7 +46,7 @@ class FileController extends Controller {
             $query->where(function($query) {
                 $query->where('target', 'user')->where('target_id', $this->user->id);
             })->orWhere(function($query) {
-                $inGroups = $this->user->inGroups->lists('id');
+                $inGroups = $this->user->inGroups->pluck('id');
                 $query->where('target', 'group')->whereIn('target_id', $inGroups);
             });
 
@@ -57,7 +71,7 @@ class FileController extends Controller {
             $query->where(function($query) {
                 $query->where('target', 'user')->where('target_id', $this->user->id);
             })->orWhere(function($query) {
-                $inGroups = $this->user->inGroups->lists('id');
+                $inGroups = $this->user->inGroups->pluck('id');
                 $query->where('target', 'group')->whereIn('target_id', $inGroups);
             });
 
@@ -95,7 +109,7 @@ class FileController extends Controller {
             return $this->no();
         }
 
-        $inGroups = $this->user->inGroups->lists('id');
+        $inGroups = $this->user->inGroups->pluck('id');
         if (
             ($doc->target == 'user' && $doc->target_id != $this->user->id) ||
             ($doc->target == 'group' && !in_array($doc->target_id, $inGroups))

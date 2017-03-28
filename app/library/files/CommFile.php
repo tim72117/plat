@@ -1,7 +1,7 @@
 <?php
 namespace Plat\Files;
 
-use User;
+use App\User;
 use Files;
 use Input, DB, Response, Validator, Session;
 use Illuminate\Filesystem\Filesystem;

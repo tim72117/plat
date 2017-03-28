@@ -1,7 +1,7 @@
 <?php
 namespace Plat\Files;
 
-use User;
+use App\User;
 use Files;
 use Input;
 use ShareFile;
@@ -52,7 +52,7 @@ class FolderComponent extends CommFile {
 
             })->orWhere(function($query) {
 
-                $inGroups = $this->user->inGroups->lists('id');
+                $inGroups = $this->user->inGroups->pluck('id');
 
                 count($inGroups)>0 && $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $this->user->id);
 
@@ -83,7 +83,7 @@ class FolderComponent extends CommFile {
 
             })->orWhere(function($query) {
 
-                $inGroups = $this->user->inGroups->lists('id');
+                $inGroups = $this->user->inGroups->pluck('id');
 
                 count($inGroups)>0 && $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $this->user->id);
 

@@ -107,21 +107,21 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
                 <md-icon ng-style="{fill: main.isOpenLeftMenu ? '#000' : '#fff'}" md-svg-icon="history"></md-icon>
                 近期存取
             </md-button>-->
-            <md-button ng-class="{'md-raised': main.pathname == '/project/{{ $project->code }}/intro'}" href="/project/{{ $project->code }}/intro">
-                <md-icon ng-style="{fill: main.pathname == '/project/{{ $project->code }}/intro' ? '#000' : '#fff'}" md-svg-icon="home"></md-icon>
-                {{ $project->name }}
+            <md-button ng-class="{'md-raised': main.pathname == '/project/{!! $project->code !!}/intro'}" href="/project/{!! $project->code !!}/intro">
+                <md-icon ng-style="{fill: main.pathname == '/project/{!! $project->code !!}/intro' ? '#000' : '#fff'}" md-svg-icon="home"></md-icon>
+                {!! $project->name !!}
             </md-button>
             @foreach ($paths as $index => $path)
-            <md-button ng-class="md-raised" href="/doc/{{$path->id}}/open">
+            <md-button ng-class="md-raised" href="/doc/{!!$path->id!!}/open">
                 @if ($index==0)
                 <md-icon md-svg-icon="folder"></md-icon>
                 @endif
-                {{$path->isFile->title}}
+                {!!$path->isFile->title!!}
             </md-button>
             @if ($index < count($paths)-1) / @endif
             @endforeach
             <span flex></span>
-            <md-button ng-class="{'md-raised': main.pathname == '/project/{{ $project->code }}/profile'}" href="/project/{{ $project->code }}/profile">個人資料</md-button>
+            <md-button ng-class="{'md-raised': main.pathname == '/project/{!! $project->code !!}/profile'}" href="/project/{!! $project->code !!}/profile">個人資料</md-button>
             <md-button ng-class="{'md-raised': main.pathname == '/auth/password/change'}" href="/auth/password/change">更改密碼</md-button>
             <md-button class="md-icon-button" aria-label="需要幫助" ng-click="main.showHelp()">
                 <md-icon md-svg-icon="help-outline"></md-icon>
@@ -149,7 +149,7 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
         </md-content>
     </md-sidenav>
     <md-content flex ng-show="!main.loading">
-        {{ $context }}
+        {!! $context !!}
     </md-content>
 </body>
 @stop
