@@ -212,7 +212,7 @@ class Sender {
 
         $columns = DB::table($survey->info['database'] . '.INFORMATION_SCHEMA.COLUMNS')
             ->where('TABLE_NAME', $survey->info['table'])
-            ->whereNotIn('COLUMN_NAME', $survey->against)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
+            ->whereNotIn('COLUMN_NAME', $survey->against)->select('COLUMN_NAME')->pluck('COLUMN_NAME');
         $columns = array_intersect($columns,array_keys($survey->columns));
         $users = $query
             ->select(array_map(function($column) use ($survey){ return 'info.' . $column . ' AS ' .$survey->columns[$column]; }, $columns))

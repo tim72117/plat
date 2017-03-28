@@ -1,7 +1,8 @@
 <?php
 namespace Plat\Files;
 
-use User;
+use Illuminate\Http\Request;
+use App\User;
 use Files;
 use Auth;
 use Input;
@@ -14,11 +15,11 @@ use Cache;
  */
 class RateFile extends CommFile {
 
-    function __construct(Files $file, User $user)
+    function __construct(Files $file, User $user, Request $request)
     {
-        parent::__construct($file, $user);
+        parent::__construct($file, $user, $request);
 
-        $this->configs = $this->file->configs->lists('value', 'name');
+        $this->configs = $this->file->configs->pluck('value', 'name');
     }
 
     public function is_full()
@@ -67,7 +68,7 @@ class RateFile extends CommFile {
                         $query->leftJoin('organization_details AS detail', 'sub.' . $category['aliases'], '=', 'detail.id');
 
                         $query->distinct()->addSelect('detail.organization_id' . ' AS ' . $category['aliases']);
-                        $query->whereIn('detail.organization_id', $organizations->lists('id'));
+                        $query->whereIn('detail.organization_id', $organizations->pluck('id'));
                         $surveys[$index]['categories'][$j]['groups'] = $organizations->keyBy('id');
                     } else {
                         $query->addSelect($category['aliases']);
@@ -116,7 +117,7 @@ class RateFile extends CommFile {
 
         $columns = DB::table($survey->info['database'] . '.INFORMATION_SCHEMA.COLUMNS')
             ->where('TABLE_NAME', $survey->info['table'])
-            ->whereNotIn('COLUMN_NAME', $survey->against)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
+            ->whereNotIn('COLUMN_NAME', $survey->against)->select('COLUMN_NAME')->remember(10)->pluck('COLUMN_NAME');
 
         if (count($columns) > 0) {
 
@@ -125,7 +126,7 @@ class RateFile extends CommFile {
             if (property_exists($survey, 'categories')) {
                 foreach ($survey->categories as $category) {
                     if (isset($category['filter']) && $category['filter'] == 'organization') {
-                        $details_id = \Plat\Project\Organization::find(Input::get('down.' . $category['aliases']))->every->lists('id');
+                        $details_id = \Plat\Project\Organization::find(Input::get('down.' . $category['aliases']))->every->pluck('id');
                         $query->whereIn($category['name'], $details_id);
                     } else {
                         $query->where($category['name'], Input::get('down.' . $category['aliases']));

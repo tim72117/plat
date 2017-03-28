@@ -1,7 +1,8 @@
 <?php
 namespace Plat\Files;
 
-use User;
+use Illuminate\Http\Request;
+use App\User;
 use Files;
 use Auth;
 use Cdb;
@@ -15,9 +16,9 @@ use DB;
 
 class ProcessFile extends CommFile {
 
-    function __construct(Files $file, User $user)
+    function __construct(Files $file, User $user, Request $request)
     {
-        parent::__construct($file, $user);
+        parent::__construct($file, $user, $request);
     }
 
     public function is_full()
@@ -259,7 +260,7 @@ class ProcessFile extends CommFile {
             return ['book' => null];
         }
         Input::get('record.rewriting') == true &&  Cdb\Visit_record::updateOrCreate(['id' => Input::get('record.id')], ['rewriting' => false]);
-        $repositories = Cdb\Ques_repository::with('answer')->where('record_id', Input::get('record.id'))->lists('answer_id', 'question_id');
+        $repositories = Cdb\Ques_repository::with('answer')->where('record_id', Input::get('record.id'))->pluck('answer_id', 'question_id');
 
         foreach ($books as $book) {
             foreach ($book->rules as $rule) {
@@ -1292,7 +1293,7 @@ class ProcessFile extends CommFile {
     {
         $record = Cdb\Visit_record::find(Input::get('record.id'));
 
-        $answers = Cdb\Ques_repository::where('record_id', $record->id)->lists('answer_id', 'question_id');
+        $answers = Cdb\Ques_repository::where('record_id', $record->id)->pluck('answer_id', 'question_id');
         //$questions = $record->book->first()->questions()->where('page', Input::get('currentPage'))->with('is')->get();
 
         $questions = array_filter(Input::get('questions'), function($question) use ($answers) {

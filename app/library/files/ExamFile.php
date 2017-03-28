@@ -2,6 +2,7 @@
 
 namespace Plat\Files;
 
+use Illuminate\Http\Request;
 use DB, View, Auth, ShareFile, Question;
 
 class ExamFile extends CommFile {

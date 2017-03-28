@@ -126,7 +126,10 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
             <md-button class="md-icon-button" aria-label="需要幫助" ng-click="main.showHelp()">
                 <md-icon md-svg-icon="help-outline"></md-icon>
             </md-button>
-            <md-button href="/auth/logout">登出</md-button>
+            <md-button href="/logout" onclick="event.preventDefault();document.getElementById('logout-form').submit();">登出</md-button>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                {{ csrf_field() }}
+            </form>
         </div>
     </md-toolbar>
     <div layout="column" flex layout-align="center center" ng-if="main.loading">

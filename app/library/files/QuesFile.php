@@ -1,7 +1,8 @@
 <?php
 namespace Plat\Files;
 
-use User;
+use Illuminate\Http\Request;
+use App\User;
 use Files;
 use DB, View, Response, Config, Schema, Session, Input, Auth;
 use DOMElement, DOMCdataSection, ShareFile;
@@ -14,9 +15,9 @@ use Carbon\Carbon;
  */
 class QuesFile extends CommFile {
 
-    function __construct(Files $file, User $user)
+    function __construct(Files $file, User $user, Request $request)
     {
-        parent::__construct($file, $user);
+        parent::__construct($file, $user, $request);
     }
 
     public function is_full()
@@ -193,7 +194,7 @@ class QuesFile extends CommFile {
 
         $data_query = DB::table($this->file->census->database . '.dbo.' . $table->TABLE_NAME);
 
-        $frequence = $data_query->groupBy($name)->select(DB::raw('count(*) AS total'), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->remember(3)->lists('total', 'name');
+        $frequence = $data_query->groupBy($name)->select(DB::raw('count(*) AS total'), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->remember(3)->pluck('total', 'name');
 
         return ['frequence' => $frequence];
     }
@@ -204,7 +205,7 @@ class QuesFile extends CommFile {
         $name2 = Input::get('name2');
 
         $tables = DB::table($this->file->census->database . '.INFORMATION_SCHEMA.COLUMNS')
-            ->whereIn('COLUMN_NAME', [$name1, $name2])->select('TABLE_NAME', 'COLUMN_NAME')->lists('TABLE_NAME', 'COLUMN_NAME');
+            ->whereIn('COLUMN_NAME', [$name1, $name2])->select('TABLE_NAME', 'COLUMN_NAME')->pluck('TABLE_NAME', 'COLUMN_NAME');
 
         $data_query = DB::table($this->file->census->database . '.dbo.' . $tables[$name1] . ' AS table1')
             ->leftJoin($this->file->census->database . '.dbo.' . $tables[$name2] . ' AS table2', 'table1.newcid', '=', 'table2.newcid');

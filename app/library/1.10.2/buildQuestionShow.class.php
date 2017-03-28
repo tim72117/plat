@@ -17,7 +17,7 @@ class buildQuestionShow {
     static function getData($tablename){
         self::$data = DB::table($tablename)->where('newcid',Session::get('newcid_show'))->select('*')->first();
         if( is_null(self::$data) )
-            self::$data = (object)DB::table('sys.columns')->whereRaw("object_id=OBJECT_ID('dbo.".$tablename."')")->select('name',DB::raw("'' AS value"))->lists('value','name');
+            self::$data = (object)DB::table('sys.columns')->whereRaw("object_id=OBJECT_ID('dbo.".$tablename."')")->select('name',DB::raw("'' AS value"))->pluck('value','name');
     }
 
     static function build($question,$question_array,$layer,$parrent){

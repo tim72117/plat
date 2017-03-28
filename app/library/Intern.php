@@ -38,7 +38,7 @@ class Intern {
                                 ->where('學期',$semester)
                                 ->where('報考教檢年度',$testYear)
                                 ->select(DB::raw('count(distinct 身分證字號) as total'))
-                                ->lists('total');
+                                ->pluck('total');
                             $contents[] = $rows[0];
 
                             $rows = DB::connection('sqlsrv_analysis_tted')->table($table)
@@ -47,7 +47,7 @@ class Intern {
                                 ->where('報考教檢年度',$testYear)
                                 ->where('通過狀態','通過')
                                 ->select(DB::raw('count(distinct 身分證字號) as total'))
-                                ->lists('total');
+                                ->pluck('total');
                             $contents[] = $rows[0];
 
                             $rows = DB::connection('sqlsrv_analysis_tted')->table($table)
@@ -57,7 +57,7 @@ class Intern {
                                 ->where('通過狀態','通過')
                                 ->whereIn('職業狀況',['正式教師','代理代課教師'])
                                 ->select(DB::raw('count(distinct 身分證字號) as total'))
-                                ->lists('total');
+                                ->pluck('total');
                             $contents[] = $rows[0];
 
                             if ($unionTable == null) {
@@ -82,7 +82,7 @@ class Intern {
                             $rows = DB::connection('sqlsrv_analysis_tted')->table(DB::raw("({$unionTable->toSql()}) AS unionTable"))
                                 ->mergeBindings($unionTable)
                                 ->select(DB::raw('sum(unionTable.total) as total'))
-                                ->lists('total');
+                                ->pluck('total');
 
                             $contents[] = $rows[0];
                         }
@@ -363,7 +363,7 @@ class Intern {
         $tables = [];
 
         foreach ($this->tables as $name => $table) {
-            $columns = DB::connection('sqlsrv_analysis_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
+            $columns = DB::connection('sqlsrv_analysis_tted')->table('analysis_tted.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table)->select('COLUMN_NAME')->remember(10)->pluck('COLUMN_NAME');
 
             $columns = array_diff($columns, ['身分識別碼']);
 
@@ -412,7 +412,7 @@ class Intern {
                 ->where('COLUMN_NAME', '<>', '就讀科系代碼');
 
             $columns = $query->select('COLUMN_NAME')
-                ->lists('COLUMN_NAME');
+                ->pluck('COLUMN_NAME');
 
             $selects = array_map(function($key, $column) {
                 return $column . ' AS ' . $key;

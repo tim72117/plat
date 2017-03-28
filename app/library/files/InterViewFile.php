@@ -1,7 +1,8 @@
 <?php
 namespace Plat\Files;
 
-use User;
+use Illuminate\Http\Request;
+use App\User;
 use Files;
 use DB, View, Response, Config, Schema, Session, Input, ShareFile, Auth, Cache;
 use Validator;
@@ -14,9 +15,9 @@ use Illuminate\Filesystem\Filesystem;
 
 class InterViewFile extends CommFile {
 
-    function __construct(Files $file, User $user)
+    function __construct(Files $file, User $user, Request $request)
     {
-        parent::__construct($file, $user);
+        parent::__construct($file, $user, $request);
     }
 
     public function is_full()

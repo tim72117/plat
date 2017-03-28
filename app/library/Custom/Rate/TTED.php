@@ -75,7 +75,7 @@ class TTED {
 
         $columns = DB::table($userinfo->database . '.INFORMATION_SCHEMA.COLUMNS')
         ->where('TABLE_NAME', $userinfo->table)
-        ->whereNotIn('COLUMN_NAME', $against)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
+        ->whereNotIn('COLUMN_NAME', $against)->select('COLUMN_NAME')->pluck('COLUMN_NAME');
 
         if (count($columns) > 0) {
 

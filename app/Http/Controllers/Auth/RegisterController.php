@@ -50,7 +50,14 @@ class RegisterController extends Controller
         return Validator::make($data, [
             'name' => 'required|max:255',
             'email' => 'required|email|max:255|unique:users',
-            'password' => 'required|min:6|confirmed',
+            'password' => 'required|min:6|regex:/^[0-9a-zA-Z!@#$%^&*]+$/|confirmed',
+        ], [
+            'email.required' => '電子郵件必填',
+            'email.email' => '電子郵件格式錯誤',
+            'password.required' => '密碼必填',
+            'password.regex' => '密碼格式錯誤',
+            'password.min' => '密碼長度必須大於 6 個字元',
+            'password.confirmed' => '確認密碼必須相同',
         ]);
     }
 

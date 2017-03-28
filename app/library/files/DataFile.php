@@ -2,7 +2,8 @@
 
 namespace Plat\Files;
 
-use User;
+use Illuminate\Http\Request;
+use App\User;
 use Files;
 use DB, View, Response, Config, Schema, Session, Input, Auth;
 use ShareFile;
@@ -11,11 +12,11 @@ use Carbon\Carbon;
 
 class DataFile extends CommFile {
 
-    function __construct(Files $file, User $user)
+    function __construct(Files $file, User $user, Request $request)
     {
-        parent::__construct($file, $user);
+        parent::__construct($file, $user, $request);
 
-        $this->configs = $this->file->configs->lists('value', 'name');
+        $this->configs = $this->file->configs->pluck('value', 'name');
     }
 
     public function is_full()

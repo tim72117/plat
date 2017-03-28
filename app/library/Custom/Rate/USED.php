@@ -226,7 +226,7 @@ class USED {
                 // ['name'  => 'principal104','title' => '104學年度學校人員校長調查'],
             ]
         ];
-        $groups = Auth::user()->inGroups()->orderBy('user_in_group.id')->lists('name');
+        $groups = Auth::user()->inGroups()->orderBy('user_in_group.id')->pluck('name');
 
         $quesGroups = [];
 
@@ -247,7 +247,7 @@ class USED {
         $member = Plat\Member::where('project_id', 1)->where('user_id', Auth::user()->id)->first();
         $organizations = $member->organizations->load('now');
         $organization_selected_id = Input::get('organization_selected_id', $organizations->first()->id);
-        $school_ids = Plat\Project\Organization::find($organization_selected_id)->every->lists('id');
+        $school_ids = Plat\Project\Organization::find($organization_selected_id)->every->pluck('id');
 
         if ($organizations->count()==0) {
             return [];
@@ -266,7 +266,7 @@ class USED {
 
         $columns = DB::table($userinfo->database . '.INFORMATION_SCHEMA.COLUMNS')
         ->where('TABLE_NAME', $userinfo->table)
-        ->whereNotIn('COLUMN_NAME', $against)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
+        ->whereNotIn('COLUMN_NAME', $against)->select('COLUMN_NAME')->remember(10)->pluck('COLUMN_NAME');
 
 
         if (count($columns) > 0) {
@@ -365,10 +365,10 @@ class USED {
                     ->whereNull('userinfo.deleted_at')
                     ->leftJoin('plat.dbo.organization_details', 'userinfo.'.$userinfo->school, '=', 'organization_details.id')
                     ->leftJoin('plat.dbo.organizations', 'organization_details.organization_id', '=', 'organizations.id')
-                    ->whereIn('organizations.id', $schools->lists('id'))
+                    ->whereIn('organizations.id', $schools->pluck('id'))
                     ->groupBy('organizations.id')
                     ->select('organizations.id AS school', DB::raw('count(*) AS count'))
-                    ->lists('count', 'school');
+                    ->pluck('count', 'school');
 
 
                 $query = DB::table($userinfo->database . '.dbo.' . $userinfo->table . ' AS userinfo');
@@ -390,10 +390,10 @@ class USED {
                     ->leftJoin('plat.dbo.organizations', 'organization_details.organization_id', '=', 'organizations.id')
                     ->whereNull('userinfo.deleted_at')
                     ->where('pstat.page', '>=', $this->tables[Input::get('table')]->pages)
-                    ->whereIn('organizations.id', $schools->lists('id'))
+                    ->whereIn('organizations.id', $schools->pluck('id'))
                     ->groupBy('organizations.id')
                     ->select('organizations.id AS school', DB::raw('count(*) AS count'))
-                    ->lists('count', 'school');
+                    ->pluck('count', 'school');
 
                 if (isset($this->tables[Input::get('table')]->rejecter)) {
                     $rejecter = $this->tables[Input::get('table')]->rejecter;
@@ -412,7 +412,7 @@ class USED {
                         ->where('page.' . $rejecter->column, '=', $rejecter->value)
                         ->groupBy('userinfo.' . $userinfo->school)
                         ->select('userinfo.' . $userinfo->school . ' AS school', DB::raw('count(*) AS count'))
-                        ->lists('count', 'school');
+                        ->pluck('count', 'school');
                 }
 
                 $rows = $schools->map(function($school) use($all, $finish, $rejects) {
@@ -435,7 +435,7 @@ class USED {
         $member = Plat\Member::where('project_id', 1)->where('user_id', Auth::user()->id)->first();
         $organizations = $member->organizations->load('now');
         $organization_selected_id = Input::get('organization_selected_id', $organizations->first()->id);
-        $school_ids = Plat\Project\Organization::find($organization_selected_id)->every->lists('id');
+        $school_ids = Plat\Project\Organization::find($organization_selected_id)->every->pluck('id');
 
         $userinfo = $this->tables[Input::get('table')]->userinfo;
         $pstat = $this->tables[Input::get('table')]->pstat;
@@ -444,7 +444,7 @@ class USED {
 
         $columns = DB::table($userinfo->database . '.INFORMATION_SCHEMA.COLUMNS')
             ->where('TABLE_NAME', $userinfo->table)
-            ->whereNotIn('COLUMN_NAME', $against)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
+            ->whereNotIn('COLUMN_NAME', $against)->select('COLUMN_NAME')->remember(10)->pluck('COLUMN_NAME');
 
         $query = DB::table($userinfo->database . '.dbo.' . $userinfo->table . ' AS userinfo');
 

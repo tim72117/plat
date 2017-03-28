@@ -1,7 +1,8 @@
 <?php
 namespace Plat\Files;
 
-use User;
+use Illuminate\Http\Request;
+use App\User;
 use Files;
 use DB;
 use Input;
@@ -10,11 +11,11 @@ use View;
 
 class StructFile extends CommFile {
 
-    function __construct(Files $file, User $user)
+    function __construct(Files $file, User $user, Request $request)
     {
-        parent::__construct($file, $user);
+        parent::__construct($file, $user, $request);
 
-        $this->configs = $this->file->configs->lists('value', 'name');
+        $this->configs = $this->file->configs->pluck('value', 'name');
         if (isset($this->configs['population'])){
             $this->populations[$this->configs['population']]['table_id'] = $this->configs['maintable_id'];
             $this->populations[$this->configs['population']]['id'] = $this->configs['maintable_id'];
@@ -76,7 +77,7 @@ class StructFile extends CommFile {
     public function getEachItems()
     {
         $organizations = \Plat\Project\Organization::find(array_fetch(Input::get('organizations'), 'id'))->load('every')->map(function($organization) {
-            return $organization->every->lists('id');
+            return $organization->every->pluck('id');
         })->flatten()->toArray();
 
         $column = \Row\Column::find(Input::get('column_id'));
@@ -164,7 +165,7 @@ class StructFile extends CommFile {
         //$structs = Input::get('structs');
         $organizeIDs = Input::get('schoolID');
         $organizations = \Plat\Project\Organization::find(array_fetch($organizeIDs, 'id'))->load('every')->map(function($organization) {
-            return $organization->every->lists('id');
+            return $organization->every->pluck('id');
         })->flatten()->toArray();
 
         $mainTable_id = $this->populations[$this->configs['population']]['table_id'];
@@ -301,7 +302,7 @@ class StructFile extends CommFile {
     {
         $tables = [];
         $organizations = \Plat\Project\Organization::find(array_fetch(Input::get('organizations'), 'id'))->load('every')->map(function($organization) {
-            return $organization->every->lists('id');
+            return $organization->every->pluck('id');
         })->flatten()->toArray();
         $allTables = \Plat\Analysis\OrgTable::all();
 
@@ -310,7 +311,7 @@ class StructFile extends CommFile {
                 ->whereIn('COLUMN_NAME', ['公私立別','師培學校屬性','縣市','師資類科','學年度/期數','必修/選修','學年度','師培屬性','年度']);
 
             $columnNames = $query->select('COLUMN_NAME')
-                ->lists('COLUMN_NAME');
+                ->pluck('COLUMN_NAME');
 
             $selects = array_map(function($key, $columnName) {
                 return $columnName . ' AS ' . $key;
@@ -349,7 +350,7 @@ class StructFile extends CommFile {
     {
         $structs = Input::get('structs');
         $organizations = \Plat\Project\Organization::find(array_fetch(Input::get('organizations'), 'id'))->load('every')->map(function($organization) {
-            return $organization->every->lists('id');
+            return $organization->every->pluck('id');
         })->flatten()->toArray();
         $first_table_title = '師培大學基本資料';
         $first_table = 'TEV103_TM_學校基本資料_OK';
@@ -370,7 +371,7 @@ class StructFile extends CommFile {
                 ->where('TABLE_NAME', $structs[1]['name'])
                 ->where('COLUMN_NAME', '<>', '學校代碼')
                 ->select('COLUMN_NAME')
-                ->lists('COLUMN_NAME');
+                ->pluck('COLUMN_NAME');
 
         $selects = array_map(function($key, $columnName) use($structs){
                 return $structs[1]['name'].'.'.$columnName . ' AS ' . $key;

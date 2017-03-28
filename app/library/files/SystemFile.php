@@ -2,16 +2,17 @@
 
 namespace Plat\Files;
 
-use User;
+use Illuminate\Http\Request;
+use App\User;
 use Files;
 use DB, Input, Cache, View, Session;
 use Carbon\Carbon;
 
 class SystemFile extends CommFile {
 
-    function __construct(Files $file, User $user)
+    function __construct(Files $file, User $user, Request $request)
     {
-        parent::__construct($file, $user);
+        parent::__construct($file, $user, $request);
     }
 
     public function is_full()
@@ -33,7 +34,7 @@ class SystemFile extends CommFile {
 
     public function get_requests()
     {
-        $developments = User::whereIn('id', [1, 5, 7, 10, 18, 1615])->lists('username', 'id');
+        $developments = User::whereIn('id', [1, 5, 7, 10, 18, 1615])->pluck('username', 'id');
         $requests = DB::table('development')->leftJoin('users', 'development.created_by', '=', 'users.id')->select(['development.*', 'users.username AS creater'])->get();
         return [
             'user_id'      => $this->user->id,

@@ -1,7 +1,8 @@
 <?php
 namespace Plat\Files;
 
-use User;
+use Illuminate\Http\Request;
+use App\User;
 use Files;
 use DB, View, Schema, Response, Input, Session;
 use ShareFile, RequestFile;
@@ -70,13 +71,13 @@ class RowsFile extends CommFile {
      * @param  User  $user
      * @return void
      */
-    function __construct(Files $file, User $user)
+    function __construct(Files $file, User $user, Request $request)
     {
-        parent::__construct($file, $user);
+        parent::__construct($file, $user, $request);
 
         $this->temp = (object)[];
 
-        $this->configs = $this->file->configs->lists('value', 'name');
+        $this->configs = $this->file->configs->pluck('value', 'name');
     }
 
     /**
@@ -393,7 +394,7 @@ class RowsFile extends CommFile {
             }
 
             if (!$column->unique && isset($rules['menu'])) {
-                if (!in_array($column_value, $column->answers->lists('value'), true)) {
+                if (!in_array($column_value, $column->answers->pluck('value'), true)) {
                     array_push($column_errors, $column->title . '未在選單中');
                 }
             }
@@ -681,7 +682,7 @@ class RowsFile extends CommFile {
     public function get_own_organizations($project_id)
     {
         return \Plat\Member::where('project_id', $project_id)->where('user_id', $this->user->id)->first()->organizations->load('every')->map(function($organization) {
-                    return $organization->every->lists('id');
+                    return $organization->every->pluck('id');
         })->flatten()->toArray();
     }
 
@@ -701,12 +702,12 @@ class RowsFile extends CommFile {
             },
             'depcode_104' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->dep_codes_104) && $this->temp->dep_codes_104 = DB::table('rows.dbo.row_20150910_175955_h23of')
-                    ->whereIn('C246', $this->get_own_organizations(1))->lists('C248');
+                    ->whereIn('C246', $this->get_own_organizations(1))->pluck('C248');
                 !in_array($column_value, $this->temp->dep_codes_104, true) && array_push($column_errors, '不是本校科別代碼');
             },
             'depcode_105' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->dep_codes_105) && $this->temp->dep_codes_105 = DB::table('rows.dbo.row_20160622_111650_ykezh')
-                    ->whereIn('C1106', $this->get_own_organizations(1))->lists('C1108');
+                    ->whereIn('C1106', $this->get_own_organizations(1))->pluck('C1108');
                 !in_array($column_value, $this->temp->dep_codes_105, true) && array_push($column_errors, '不是本校科別代碼');
             },
             'tted_sch' => function($column_value, $column, &$column_errors) {
@@ -715,26 +716,26 @@ class RowsFile extends CommFile {
             },
             'tted_depcode_103' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->dep_codes_103) && $this->temp->dep_codes_103 = DB::table('plat_public.dbo.pub_depcode_tted')
-                    ->whereIn('sch_id', $this->get_own_organizations(2))->where('year','=','103')->lists('id');
+                    ->whereIn('sch_id', $this->get_own_organizations(2))->where('year','=','103')->pluck('id');
                 !in_array($column_value, $this->temp->dep_codes_103, true) && array_push($column_errors, '不是本校系所代碼');
             },
             'tted_depcode_104' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->dep_codes_104) && $this->temp->dep_codes_104 = DB::table('plat_public.dbo.pub_depcode_tted')
-                    ->whereIn('sch_id', $this->get_own_organizations(2))->where('year','=','104')->lists('id');
+                    ->whereIn('sch_id', $this->get_own_organizations(2))->where('year','=','104')->pluck('id');
                 !in_array($column_value, $this->temp->dep_codes_104, true) && array_push($column_errors, '不是本校系所代碼');
             },
             'tted_depcode_105' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->dep_codes_105) && $this->temp->dep_codes_105 = DB::table('plat_public.dbo.pub_depcode_tted')
-                    ->whereIn('sch_id', $this->get_own_organizations(2))->where('year','=','104')->orWhere('year','=','105')->lists('id');
+                    ->whereIn('sch_id', $this->get_own_organizations(2))->where('year','=','104')->orWhere('year','=','105')->pluck('id');
                 !in_array($column_value, $this->temp->dep_codes_105, true) && array_push($column_errors, '不是本校系所代碼');
             },
             'junior_schools_in_city' => function($column_value, $column, &$column_errors) {
                 !isset($this->temp->junior_schools_in_city) && $this->temp->junior_schools_in_city = DB::table('rows.dbo.row_20151022_135158_5xtfu')
-                    ->whereIn('C404', $this->get_own_organizations(1))->lists('C406');
+                    ->whereIn('C404', $this->get_own_organizations(1))->pluck('C406');
                 !in_array($column_value, $this->temp->junior_schools_in_city, true) && array_push($column_errors, '不是本縣市所屬學校代碼');
             },
             'counties' => function($column_value, $column, &$column_errors) {
-                !isset($this->temp->counties) && $this->temp->counties = DB::table('plat_public.dbo.lists')->lists('code');
+                !isset($this->temp->counties) && $this->temp->counties = DB::table('plat_public.dbo.lists')->pluck('code');
                 !in_array($column_value, $this->temp->counties, true) && array_push($column_errors, '不是正確的縣市代碼');
             },
         ];
@@ -745,7 +746,7 @@ class RowsFile extends CommFile {
     {
         switch ($column->rules) {
             case 'counties':
-                $items = DB::table('plat_public.dbo.lists')->lists('name', 'code');
+                $items = DB::table('plat_public.dbo.lists')->pluck('name', 'code');
                 break;
 
             case 'gender':
@@ -761,7 +762,7 @@ class RowsFile extends CommFile {
                 break;
 
             case 'menu':
-                $column->answers->lists('title', 'value');
+                $column->answers->pluck('title', 'value');
                 $items = [];
                 break;
 
@@ -779,7 +780,7 @@ class RowsFile extends CommFile {
      */
     public function get_compact_files()
     {
-        $inGroups = $this->user->inGroups->lists('id');
+        $inGroups = $this->user->inGroups->pluck('id');
 
         $myRowFiles = ShareFile::with('isFile')->whereHas('isFile', function($query){
             $query->where('type', '=', 5);
@@ -939,7 +940,7 @@ class RowsFile extends CommFile {
 
         $data_query = DB::table($table->database . '.dbo.' . $table->name);
 
-        $frequence = $data_query->groupBy('C' . $id)->select(DB::raw('count(*) AS total'), DB::raw('CAST(C' . $id . ' AS varchar) AS name'))->remember(3)->lists('total', 'name');
+        $frequence = $data_query->groupBy('C' . $id)->select(DB::raw('count(*) AS total'), DB::raw('CAST(C' . $id . ' AS varchar) AS name'))->remember(3)->pluck('total', 'name');
 
         return ['frequence' => $frequence];
     }
@@ -1014,7 +1015,7 @@ class RowsFile extends CommFile {
 
             if (!$column->encrypt && (!$column->isnull || !empty($value)))
             {
-                $column->menu = $column->answers->lists('value');
+                $column->menu = $column->answers->pluck('value');
 
                 $column_errors = $this->check_column($column, $value);
 
@@ -1066,13 +1067,13 @@ class RowsFile extends CommFile {
         $parent_id          = input::get('table_id');
 
         $child['table']     = $this->file->sheets[0]->tables->first();
-        $child['columns']   = $child['table']->columns->lists('id','name');
+        $child['columns']   = $child['table']->columns->pluck('id','name');
         $child['has_table'] = $this->has_table($child['table']);
         $child['rows']      = [];
 
         $parent['table']    = Table::find($parent_id);
         $parent['sheet']    = $parent['table']->sheet;
-        $parent['columns']  = $parent['table']->columns->lists('name','id');
+        $parent['columns']  = $parent['table']->columns->pluck('name','id');
         $parent['rows']     = DB::table($parent['table']->database . '.dbo.' . $parent['table']->name)->where('created_by',$this->user->id)->whereNull('deleted_at')->get();
 
         if (!$child['has_table']) {

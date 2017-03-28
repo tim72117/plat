@@ -12,12 +12,13 @@
 */
 
 Route::get('test', function() {
+    
     return;
 });
 
 Route::patterns(['doc_id' => '[0-9]+', 'project' => '[a-z]+', 'token' => '[a-z0-9]+', 'project_id' => '[0-9]+']);
 //平台-------------------------------------------------------------------------------------------------------------------------------
-Route::group(array('before' => 'auth'), function() {
+//Route::group(array('before' => 'auth'), function() {
 
     Route::any('doc/{doc_id}/{method}', 'FileController@open');
     Route::any('doc/{doc_id}/ajax/{method}', 'FileController@open');
@@ -25,7 +26,7 @@ Route::group(array('before' => 'auth'), function() {
     Route::post('apps/lists', 'FileController@apps');
     Route::any('management', 'FileController@management');
 
-    Route::get('project/{project}/intro', 'FileController@project');
+    Route::get('project', 'FileController@project');
     Route::get('project/{project}/profile', 'UserAuthedController@profile');
     Route::get('project/{project}/profile/getMyMembers', 'UserAuthedController@getMyMembers');
     Route::post('project/{project}/profile/{parameter?}', 'UserAuthedController@profileSave')->where('parameter', 'power|contact|changeUser');
@@ -33,20 +34,12 @@ Route::group(array('before' => 'auth'), function() {
     Route::get('auth/password/change', array('before' => '', 'uses' => 'UserAuthedController@passwordChangePage'));
     Route::post('auth/password/change', array('before' => 'csrf|post_delay', 'uses' => 'UserAuthedController@passwordChange'));
 
-});
+//});
 
 Route::bind('project', function($value, $route)
 {
     return Plat\Project::where('code', $value)->firstOrFail();
 });
-
-Route::get('project/{project}/password/remind', 'UserController@remindPage');
-Route::post('project/{project}/password/remind', array('before' => 'csrf|post_delay', 'uses' => 'UserController@remind'));
-Route::get('project/{project}/password/reset/{token}', 'UserController@resetPage');
-Route::post('project/{project}/password/reset/{token}', array('before' => 'csrf|post_delay', 'uses' => 'UserController@reset'));
-
-Route::get('project/{project}', array('before' => 'guest', 'uses' => 'UserController@loginPage'));
-Route::post('project/{project}', array('before' => 'csrf|post_delay', 'uses' => 'UserController@login'));
 
 Route::get('project/{project}/register', 'UserController@registerPage');
 Route::get('project/{project}/register/terms', 'UserController@terms');
@@ -62,5 +55,9 @@ Route::get('api/news/download/{post_id}', 'ApiController@postFileDownload')->whe
 Route::post('data/post/{table}', 'DataExchangeController@post');
 //平台---------------------------------------------------------------------------------------------------------------------------------
 
-Route::get('project', function() { return Redirect::to('project/' . Config::get('project.default')); });
-Route::get('/', function() { return Redirect::to('project'); });
+//Route::get('project', function() { return Redirect::to('project/' . Config::get('project.default', 'cher')); });
+Route::get('/', function() { return Redirect::to('home');return Redirect::to('project'); });
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index');

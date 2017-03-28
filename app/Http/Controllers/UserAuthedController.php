@@ -1,10 +1,14 @@
 <?php
 
+namespace App\Http\Controllers;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Config\FileLoader;
 use Illuminate\Config\Repository;
+use Auth;
+use View;
 
 class UserAuthedController extends Controller {
 
@@ -28,24 +32,12 @@ class UserAuthedController extends Controller {
 
     public function __construct()
     {
-        $this->beforeFilter(function($route){
-            $project = $route->getParameter('project');
-            if (isset($project) && !Auth::user()->members()->logined()->where('project_id', $project->id)->exists()) {
-                return Response::view('noAuth', array(), 403);
-            }
-        });
-
-    }
-
-    public function logout()
-    {
-        $member = Auth::user()->members()->logined()->orderBy('logined_at', 'desc')->first();
-
-        Auth::logout();
-
-        if ($member) {
-            return Redirect::to('project/' . $member->project->code);
-        }
+        // $this->beforeFilter(function($route){
+        //     $project = $route->getParameter('project');
+        //     if (isset($project) && !Auth::user()->members()->logined()->where('project_id', $project->id)->exists()) {
+        //         return Response::view('noAuth', array(), 403);
+        //     }
+        // });
     }
 
     public function passwordChangePage()
