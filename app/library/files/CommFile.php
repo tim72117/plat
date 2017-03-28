@@ -54,7 +54,7 @@ class CommFile {
     public function rename()
     {
         if ($this->isCreater()) {
-            $this->file->title = Input::get('title');
+            $this->file->title = $this->request->get('title');
 
             $this->doc->touch();
 
@@ -140,7 +140,7 @@ class CommFile {
     public function setVisible()
     {
         if ($this->doc->target == 'user') {
-            $this->doc->visible = Input::get('visible');
+            $this->doc->visible = $this->request->get('visible');
             $this->doc->save();
         }
 
@@ -149,7 +149,7 @@ class CommFile {
 
     public function shareTo()
     {
-        foreach (Input::get('groups') as $group) {
+        foreach ($this->request->get('groups') as $group) {
             if (count($group['users']) == 0 && $this->user->groups->contains($group['id'])) {
                 \ShareFile::updateOrCreate([
                     'file_id' => $this->doc->file_id,
@@ -181,7 +181,7 @@ class CommFile {
 
     public function requestTo()
     {
-        foreach (Input::get('groups') as $group) {
+        foreach ($this->request->get('groups') as $group) {
             if (count($group['users']) == 0 && $this->user->groups->contains($group['id'])) {
                 \RequestFile::updateOrCreate([
                     'doc_id' => $this->doc->id,
@@ -190,7 +190,7 @@ class CommFile {
                     'created_by' => $this->user->id,
                 ], [
                     'disabled' => false,
-                    'description' => Input::get('description'),
+                    'description' => $this->request->get('description'),
                 ]);
             }
             if (count($group['users']) != 0){
@@ -202,7 +202,7 @@ class CommFile {
                         'created_by' => $this->user->id,
                     ], [
                         'disabled' => false,
-                        'description' => Input::get('description'),
+                        'description' => $this->request->get('description'),
                     ]);
                 }
             }
@@ -211,7 +211,8 @@ class CommFile {
         return ['doc' => \Struct_file::open($this->doc)];
     }
 
-    public function saveAs() {
+    public function saveAs()
+    {
         $file = $this->file->replicate();
         $file->title = $file->title . '(副本)';
         $file->save();
@@ -223,7 +224,7 @@ class CommFile {
 
     public function moveToFolder()
     {
-        $this->doc->folder_id = Input::get('folder_id');
+        $this->doc->folder_id = $this->request->get('folder_id');
 
         return ['moved' => $this->doc->save()];
     }
