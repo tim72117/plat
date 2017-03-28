@@ -88,18 +88,18 @@ class FileController extends Controller {
         return ['apps' => $apps, 'requests' => $requests];
     }
 
-    public function request($request_id, $method = null)
+    public function request($request_id, $method = null, Request $request)
     {
-        $request = RequestFile::find($request_id);
+        $requestFile = RequestFile::find($request_id);
 
-        $doc = ShareFile::find($request->doc_id);
+        $doc = ShareFile::find($requestFile->doc_id);
         if (!isset($doc)) {
             return $this->no();
         }
 
-        View::share('request', $request);
+        View::share('request', $requestFile);
 
-        return $this->active($doc, $method);
+        return $this->active($doc, $method, $request);
     }
 
     public function open($doc_id, $method = null, Request $request)

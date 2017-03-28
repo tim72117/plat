@@ -4,9 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Config\FileLoader;
-use Illuminate\Config\Repository;
 use Auth;
 use View;
 
@@ -80,13 +77,6 @@ class UserAuthedController extends Controller {
         }
     }
 
-    public function createHomeView(Plat\Project $project, $layout, $context, $args = [])
-    {
-        View::share('project', $project);
-
-        return View::make('project.layout-' . $layout)->nest('context', $context, $args)->nest('child_footer', 'project.' . $project->code . '.footer');
-    }
-
     public function profile($project, $parameter = null)
     {
         $member = Auth::user()->members()->where('project_id', $project->id)->first();
@@ -97,14 +87,14 @@ class UserAuthedController extends Controller {
         return View::make('project.main', ['project' => $project])->nest('context', 'project.profile', []);
     }
 
-    public function profileSave($project, $parameter = null)
+    public function profileSave($project, $parameter = null, Request $request)
     {
         switch ($parameter) {
             case 'power':
-                $attributes = ['user_id' => Auth::user()->id, 'project_id' => Input::get('project_id')];
-                $member = Plat\Member::where($attributes)->withTrashed()->first() ?: Plat\Member::create($attributes);
+                $attributes = ['user_id' => Auth::user()->id, 'project_id' => $request->get('project_id')];
+                $member = \Plat\Member::where($attributes)->withTrashed()->first() ?: Plat\Member::create($attributes);
 
-                require app_path() . '\\views\\project\\' . $project->code . '\\auth\\register_power.php';
+                require base_path() . '\\resources\\views\\project\\' . $project->code . '\\auth\\register_power.php';
 
                 if ($member->trashed()) {
                     $member->restore();
@@ -112,9 +102,9 @@ class UserAuthedController extends Controller {
                     Auth::user()->members()->save($member);
                 }
 
-                $member->contact()->save(Plat\Contact::firstOrNew(['member_id' => $member->id]));
+                $member->contact()->save(\Plat\Contact::firstOrNew(['member_id' => $member->id]));
 
-                $applying = new Plat\Applying(['member_id' => $member->id]);
+                $applying = new \Plat\Applying(['member_id' => $member->id]);
 
                 $applying->id = sha1(spl_object_hash(Auth::user()) . microtime(true));
 
@@ -123,18 +113,17 @@ class UserAuthedController extends Controller {
 
             case 'contact':
                 $member = Auth::user()->members()->where('project_id', $project->id)->first();
-                $member->contact->title = Input::get('contact.title');
-                $member->contact->tel = Input::get('contact.tel');
-                $member->contact->fax = Input::get('contact.fax');
-                $member->contact->email2 = Input::get('contact.email2');
+                $member->contact->title = $request->input('contact.title');
+                $member->contact->tel = $request->input('contact.tel');
+                $member->contact->fax = $request->input('contact.fax');
+                $member->contact->email2 = $request->input('contact.email2');
                 $member->push();
                 break;
 
             case 'changeUser':
                 $member = Auth::user()->members()->where('project_id', $project->id)->first();
-                $member->user->username = Input::get('user.username');
-                $member->user->email = Input::get('user.email');
-                $member->user->valid();
+                $member->user->username = $request->input('user.username');
+                $member->user->email = $request->input('user.email');
                 $member->user->save();
                 break;
 
@@ -148,7 +137,7 @@ class UserAuthedController extends Controller {
 
     public function getMyMembers($project) {
 
-        $projects = Plat\Project::all()->keyBy('id');
+        $projects = \Plat\Project::all()->keyBy('id');
 
         $members = Auth::user()->members->load('user', 'contact', 'applying', 'organizations.now')->each(function($member) use ($projects) {
             $projects[$member->project_id]->member = $member;

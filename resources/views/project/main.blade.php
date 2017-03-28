@@ -107,8 +107,8 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
                 <md-icon ng-style="{fill: main.isOpenLeftMenu ? '#000' : '#fff'}" md-svg-icon="history"></md-icon>
                 近期存取
             </md-button>-->
-            <md-button ng-class="{'md-raised': main.pathname == '/project/{!! $project->code !!}/intro'}" href="/project/{!! $project->code !!}/intro">
-                <md-icon ng-style="{fill: main.pathname == '/project/{!! $project->code !!}/intro' ? '#000' : '#fff'}" md-svg-icon="home"></md-icon>
+            <md-button ng-class="{'md-raised': main.pathname == '/project'}" href="/project">
+                <md-icon ng-style="{fill: main.pathname == '/project' ? '#000' : '#fff'}" md-svg-icon="home"></md-icon>
                 {!! $project->name !!}
             </md-button>
             @foreach ($paths as $index => $path)
