@@ -2,7 +2,7 @@
 $doc = ShareFile::with('isFile')->whereHas('isFile', function($query) {
     $query->where('files.type', 7);
 })->where(function($query) {
-    $inGroups = Auth::user()->inGroups->lists('id');
+    $inGroups = Auth::user()->inGroups->pluck('id');
     $query->where('target', 'group')->whereIn('target_id', $inGroups);
 })->first();
 

@@ -2,7 +2,8 @@
 
 namespace Plat\Files;
 
-use User;
+use Illuminate\Http\Request;
+use App\User;
 use Files;
 use DB, Input, Cache, View, Session;
 use ShareFile;
@@ -13,9 +14,9 @@ use ShareFile;
  */
 class AnalysisFile extends CommFile {
 
-    function __construct(Files $file, User $user)
+    function __construct(Files $file, User $user, Request $request)
     {
-        parent::__construct($file, $user);
+        parent::__construct($file, $user, $request);
     }
 
     public function is_full()
@@ -51,7 +52,7 @@ class AnalysisFile extends CommFile {
 
     public function analysis()
     {
-        Input::has('columns_choosed') && Session::put('analysis-columns-choosed', Input::get('columns_choosed', []));
+        $this->request->has('columns_choosed') && Session::put('analysis-columns-choosed', $this->request->get('columns_choosed', []));
 
         return 'files.analysis.analysis-layout';
     }
@@ -70,10 +71,10 @@ class AnalysisFile extends CommFile {
     {
         $questions = [];
 
-        $columns = DB::table('analysis_data.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $this->file->analysis->tablename)->select('COLUMN_NAME')->remember(10)->lists('COLUMN_NAME');
+        $columns = DB::table('analysis_data.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $this->file->analysis->tablename)->select('COLUMN_NAME')->pluck('COLUMN_NAME')->toArray();
 
         if (!is_null($this->file->analysis->ques)) {
-            $quesFile = new QuesFile($this->file->analysis->ques, $this->user);
+            $quesFile = new QuesFile($this->file->analysis->ques, $this->user, $this->request);
             foreach($quesFile->xml_to_array()['pages'] as $index => $page) {
                 QuestionXML::get_subs($page->questions, $index, $questions);
             }
@@ -91,9 +92,9 @@ class AnalysisFile extends CommFile {
         $questions = \Illuminate\Database\Eloquent\Collection::make($questions)->reject(function($question) use ($columns) {
             $question->choosed = in_array($question->name, Session::get('analysis-columns-choosed', []), true);
             return !in_array($question->name, $columns, true);
-        })->slice(Input::get('start', 0), Input::get('amount', count($questions)));
+        })->slice($this->request->get('start', 0), $this->request->get('amount', count($questions)));
 
-        return ['questions' => $questions, 'title' => $this->file->analysis->title];
+        return ['questions' => $questions->values(), 'title' => $this->file->analysis->title];
     }
 
     public function all_census()
@@ -106,7 +107,7 @@ class AnalysisFile extends CommFile {
         ->where(function($query) {
             $query->where('target', 'user')->where('target_id', $this->user->id);
             $query->orWhere(function($query) {
-                $inGroups = $this->user->inGroups->lists('id');
+                $inGroups = $this->user->inGroups->pluck('id');
                 $query->where('target', 'group')->whereIn('target_id', $inGroups)->where('created_by', '!=', $this->user->id);
             });
         })->get()->map(function($doc) {
@@ -126,34 +127,34 @@ class AnalysisFile extends CommFile {
 
     public function get_targets()
     {
-        return ['targets' => require(app_path() . '/views/files/analysis/filter_' . $this->file->analysis->site . '.php')];
+        return ['targets' => require(base_path() . '/resources/views/files/analysis/filter_' . $this->file->analysis->site . '.php')];
     }
 
     public function get_frequence()
     {
-        $name = Input::get('name');
+        $name = $this->request->get('name');
 
         $data_query = $this->get_data_query([$name]);
 
-        $total_query = Input::get('weight', false) ? 'CONVERT(int, ROUND(sum(w_final), 0)) AS total' : 'count(*) AS total';
+        $total_query = $this->request->get('weight', false) ? 'CONVERT(int, ROUND(sum(w_final), 0)) AS total' : 'count(*) AS total';
 
         $frequence = $data_query->groupBy($name)
-        ->select(DB::raw($total_query), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->remember(3)->lists('total', 'name');
+        ->select(DB::raw($total_query), DB::raw('CAST(' . $name . ' AS varchar) AS name'))->pluck('total', 'name');
 
         return ['frequence' => $frequence];
     }
 
     public function get_crosstable()
     {
-        $column_name1 = Input::get('name1');
-        $column_name2 = Input::get('name2');
+        $column_name1 = $this->request->get('name1');
+        $column_name2 = $this->request->get('name2');
 
         $data_query = $this->get_data_query([$column_name1, $column_name2]);
 
-        $total_query = Input::get('weight', false) ? 'CONVERT(int, ROUND(sum(w_final), 0)) AS total' : 'count(*) AS total';
+        $total_query = $this->request->get('weight', false) ? 'CONVERT(int, ROUND(sum(w_final), 0)) AS total' : 'count(*) AS total';
 
         $frequences = $data_query->groupBy($column_name1, $column_name2)
-        ->select(DB::raw($total_query . ', CAST(' . $column_name1 . ' AS varchar) AS name1, CAST(' . $column_name2 . ' AS varchar) AS name2'))->remember(3)->get();
+        ->select(DB::raw($total_query . ', CAST(' . $column_name1 . ' AS varchar) AS name1, CAST(' . $column_name2 . ' AS varchar) AS name2'))->get();
 
         //$columns_horizontal = [];
         //$columns_vertical = [];
@@ -173,7 +174,7 @@ class AnalysisFile extends CommFile {
     {
         $filter = $this->get_targets()['targets'];
 
-        $name = Input::get('name');
+        $name = $this->request->get('name');
 
         $get_data_query = DB::table('analysis_data.dbo.' . $this->file->analysis->tablename);
 
@@ -183,8 +184,8 @@ class AnalysisFile extends CommFile {
 
         //$get_data_query->where($question->spss_name, '<>', $question->skip_value);
 
-        $group = $filter['groups'][Input::get('group_key')];
-        $target = $group['targets'][Input::get('target_key')];
+        $group = $filter['groups'][$this->request->get('group_key')];
+        $target = $group['targets'][$this->request->get('target_key')];
 
         //todo run query if column exist
 
