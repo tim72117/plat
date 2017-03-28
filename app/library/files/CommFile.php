@@ -1,6 +1,7 @@
 <?php
 namespace Plat\Files;
 
+use Illuminate\Http\Request;
 use App\User;
 use Files;
 use Input, DB, Response, Validator, Session;
@@ -14,7 +15,7 @@ class CommFile {
 
     public $storage_path;
 
-    public function __construct(Files $file, User $user)
+    public function __construct(Files $file, User $user, Request $request)
     {
         if (is_null($file))
             throw new FileFailedException;
@@ -22,6 +23,8 @@ class CommFile {
         $this->file = $file;
 
         $this->user = $user;
+
+        $this->request = $request;
 
         $this->storage_path = storage_path() . '/file_upload';
     }
@@ -229,7 +232,7 @@ class CommFile {
     {
         if ($this->doc->folder) {
 
-            $folder = new FolderComponent($this->doc->folder->isFile, $this->user);
+            $folder = new FolderComponent($this->doc->folder->isFile, $this->user, $this->request);
 
             $folder->setDoc($this->doc->folder);
 

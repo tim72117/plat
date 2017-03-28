@@ -102,7 +102,7 @@ class FileController extends Controller {
         return $this->active($doc, $method);
     }
 
-    public function open($doc_id, $method = null)
+    public function open($doc_id, $method = null, Request $request)
     {
         $doc = ShareFile::find($doc_id);
         if (!isset($doc)) {
@@ -121,14 +121,14 @@ class FileController extends Controller {
         $doc->opened_at = Carbon\Carbon::now()->toDateTimeString();
         $doc->save();
 
-        return $this->active($doc, $method);
+        return $this->active($doc, $method, $request);
     }
 
-    private function active($doc, $method)
+    private function active($doc, $method, $request)
     {
         $class = $doc->isFile->isType->class;
 
-        $file = new $class($doc->isFile, $this->user);
+        $file = new $class($doc->isFile, $this->user, $request);
 
         $file->setDoc($doc);
 

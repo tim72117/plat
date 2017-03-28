@@ -54,7 +54,7 @@ class Member extends Eloquent {
 
     public function user()
     {
-        return $this->hasOne('User', 'id', 'user_id');
+        return $this->hasOne('App\User', 'id', 'user_id');
     }
 
     public function project()

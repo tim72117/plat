@@ -1,9 +1,10 @@
 <?php
 namespace Plat\Files;
 
-use User;
+use Illuminate\Http\Request;
+use App\User;
 use Files;
-use DB, View, Response, Config, Schema, Session, Input, Auth, Request;
+use DB, View, Response, Config, Schema, Session, Input, Auth;
 use ShareFile;
 use Carbon\Carbon;
 use Plat\Member;
@@ -11,11 +12,11 @@ use Plat\Project;
 
 class AccountFile extends CommFile {
 
-    function __construct(Files $file, User $user)
+    function __construct(Files $file, User $user, Request $request)
     {
-        parent::__construct($file, $user);
+        parent::__construct($file, $user, $request);
 
-        $this->configs = $this->file->configs->lists('value', 'name');
+        $this->configs = $this->file->configs->pluck('value', 'name');
     }
 
     public function is_full()
@@ -85,7 +86,7 @@ class AccountFile extends CommFile {
             'tel'    => $contact->tel,
             'fax'    => $contact->fax,
             'email2' => $contact->email2,
-            //'groups' => $user->groups->lists('id'),
+            //'groups' => $user->groups->pluck('id'),
         );
     }
 
@@ -170,38 +171,38 @@ class AccountFile extends CommFile {
 
         $members_query = Member::where('project_id', $project_id)->orderBy('user_id')->with(['user.positions', 'user.inGroups', 'contact', 'organizations.now']);
 
-        Input::has('search.position') && $members_query->whereHas('user.positions', function($query) {
-            $query->where('project_positions.id', Input::get('search.position'));
+        $this->request->has('search.position') && $members_query->whereHas('user.positions', function($query) {
+            $query->where('project_positions.id', $this->request->input('search.position'));
         });
 
-        Input::has('search.organization') && $members_query->whereHas('organizations', function($query) {
-            $query->where('works.organization_id', Input::get('search.organization.id'));
+        $this->request->has('search.organization') && $members_query->whereHas('organizations', function($query) {
+            $query->where('works.organization_id', $this->request->input('search.organization.id'));
         });
 
-        Input::has('search.username') && $members_query->whereHas('user', function($query) {
-            $query->where('users.username', Input::get('search.username'));
+        $this->request->has('search.username') && $members_query->whereHas('user', function($query) {
+            $query->where('users.username', $this->request->input('search.username'));
         });
 
-        Input::has('search.email') && $members_query->whereHas('user', function($query) {
-            $query->where('users.email', Input::get('search.email'));
+        $this->request->has('search.email') && $members_query->whereHas('user', function($query) {
+            $query->where('users.email', $this->request->input('search.email'));
         });
 
         $members = $members_query->paginate(10);
 
-        $profiles = $members->getCollection()->map(function($member) {
+        $profiles = array_map(function ($member) {
             return $this->setProfile($member);
-        });
+        }, $members->items());
 
-        return array('users' => $profiles, 'currentPage' => $members->getCurrentPage(), 'lastPage' => $members->getLastPage(), 'log' => DB::getQueryLog());
+        return array('users' => $profiles, 'currentPage' => $members->currentPage(), 'lastPage' => $members->lastPage(), 'log' => DB::getQueryLog());
     }
 
     public function activeUser()
     {
-        $member = Member::find(Input::get('member_id'));
+        $member = Member::find($this->request->get('member_id'));
 
-        $member->user->actived = Input::get('actived') ? true : $member->user->actived;
+        $member->user->actived = $this->request->get('actived') ? true : $member->user->actived;
 
-        $member->actived = Input::get('actived');
+        $member->actived = $this->request->get('actived');
 
         $member->push();
 
@@ -210,7 +211,7 @@ class AccountFile extends CommFile {
 
     public function disableUser()
     {
-        $member = Member::find(Input::get('member_id'));
+        $member = Member::find($this->request->get('member_id'));
 
         $disabled = isset($member) ? $member->delete() : false;
 
@@ -219,10 +220,10 @@ class AccountFile extends CommFile {
 
     public function addGroup()
     {
-        $member = Member::find(Input::get('member_id'));
+        $member = Member::find($this->request->get('member_id'));
 
-        if (!$member->user->inGroups->contains(Input::get('group_id'))) {
-            $member->user->inGroups()->attach(Input::get('group_id'));
+        if (!$member->user->inGroups->contains($this->request->get('group_id'))) {
+            $member->user->inGroups()->attach($this->request->get('group_id'));
         }
 
         return ['inGroups' => $member->user->inGroups()->getResults()];
@@ -230,22 +231,22 @@ class AccountFile extends CommFile {
 
     public function deleteGroup()
     {
-        $member = Member::find(Input::get('member_id'));
+        $member = Member::find($this->request->get('member_id'));
 
-        $member->user->inGroups()->detach(Input::get('group_id'));
+        $member->user->inGroups()->detach($this->request->get('group_id'));
 
         return ['inGroups' => $member->user->inGroups];
     }
 
     public function setUsername()
     {
-        $member = Member::find(Input::get('member_id'));
+        $member = Member::find($this->request->get('member_id'));
 
-        $member->user->username = Input::get('username');
+        $member->user->username = $this->request->get('username');
 
         $member->user->save();
 
-        $organizations = array_fetch(Input::get('organizations'), 'id');
+        $organizations = array_pluck($this->request->get('organizations'), 'id');
 
         $member->organizations()->sync($organizations);
 
@@ -257,8 +258,8 @@ class AccountFile extends CommFile {
     public function queryOrganizations()
     {
         $organizationDetails = \Plat\Project\OrganizationDetail::where(function($query) {
-            $query->where('name', 'like', '%' . Input::get('query') . '%')->orWhere('id', Input::get('query'));
-        })->limit(2000)->lists('organization_id');
+            $query->where('name', 'like', '%' . $this->request->get('query') . '%')->orWhere('id', $this->request->get('query'));
+        })->limit(2000)->pluck('organization_id')->toArray();
 
         $organizations = \Plat\Project\Organization::find($organizationDetails)->load('now');
 
@@ -270,8 +271,8 @@ class AccountFile extends CommFile {
         $project_id = $this->configs['project_id'];
 
         $usernames = Member::with('user')->where('project_id', $project_id)->whereHas('user', function($query) {
-            $query->where('users.username', 'like', '%' . Input::get('query') . '%')->groupBy('users.username');
-        })->limit(1000)->get()->fetch('user.username')->all();
+            $query->where('users.username', 'like', '%' . $this->request->get('query') . '%')->groupBy('users.username');
+        })->limit(1000)->get()->pluck('user.username')->all();
 
         return ['usernames' => array_unique($usernames)];
     }
@@ -281,8 +282,8 @@ class AccountFile extends CommFile {
         $project_id = $this->configs['project_id'];
 
         $emails = Member::with('user')->where('project_id', $project_id)->whereHas('user', function($query) {
-            $query->where('users.email', 'like', '%' . Input::get('query') . '%');
-        })->limit(1000)->get()->fetch('user.email');
+            $query->where('users.email', 'like', '%' . $this->request->get('query') . '%');
+        })->limit(1000)->get()->pluck('user.email');
 
         return ['emails' => $emails];
     }
