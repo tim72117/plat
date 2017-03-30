@@ -19,5 +19,5 @@
             </div>
         </md-input-container>
     </div>
-    <button ng-click="memberCtrl.save()">註冊</button>
+    <md-button ng-click="memberCtrl.save()">註冊</md-button>
 </div>

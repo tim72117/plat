@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Auth;
 use View;
+use DB;
 
 class ProfileController extends Controller {
 
@@ -153,7 +154,46 @@ class ProfileController extends Controller {
         return View::make($templates[$key]);
     }
 
-    public function getMember(Request $request)
+    public function getCitys()
+    {
+        $citys = DB::table('plat_public.dbo.lists')->where('type', 'city')->select('name', 'code')->get();
+
+        return ['citys' => $citys];
+    }
+
+    public function getOrganizations(Request $request)
+    {
+        $project = \Plat\Project::find($request->get('project_id'));
+
+        $grades = [
+            'tted' => ['0', '1', '3', '4', '5', '6', '7', '8', 'F', 'K', 'W', 'X', 'Y', 'Z', 'M', 'S'],
+            'use' => ['0', '1', '2', '3', '4', 'B', 'C'],
+            'yearbook' => ['0', '1'],
+        ];
+
+        $grade = $grades[$project->code];
+
+        $organizations = DB::table('plat.dbo.organizations AS organizations')
+            ->leftJoin('plat.dbo.organization_details AS details', 'organizations.id', '=', 'details.organization_id')
+            ->where(function($query) use($grade) {
+                $query->whereIn('details.grade', $grade)->orWhereNull('details.grade');
+            })
+            ->where('details.citycode', $request->get('city_code'))
+            ->select('organizations.id', 'details.name', 'details.sysname')
+            ->orderBy('details.year', 'desc')
+            ->get();
+
+        return ['organizations' => $organizations];
+    }
+
+    public function getPositions(Request $request)
+    {
+        $project = \Plat\Project::find($request->get('project_id'));
+
+        return ['positions' => $project->positions];
+    }
+
+    public function getMember()
     {
         $member = Auth::user()->members()->orderBy('logined_at', 'desc')->first()->load(['contact', 'applying', 'project']);
 
@@ -173,6 +213,12 @@ class ProfileController extends Controller {
         ]);
 
         $member->applying()->updateOrCreate([], ['id' => sha1(spl_object_hash(Auth::user()) . microtime(true))]);
+
+        $member->organizations()->attach($request->input('member.organization.id'));
+
+        $positions = array_keys(array_filter($request->input('member.user.positions')));
+
+        $member->user->positions()->attach($positions);
 
         return ['member' => $member->load('applying')];
 
