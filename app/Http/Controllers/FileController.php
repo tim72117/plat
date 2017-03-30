@@ -30,17 +30,6 @@ class FileController extends Controller {
         Event::fire('ques.open', array());
     }
 
-    public function management()
-    {
-        return Redirect::to('doc/3171/open');
-    }
-
-    public function project()
-    {
-        View::share('paths', [ShareFile::whereNull('folder_id')->first()]);
-        return $this->createView(View::make('project.main')->nest('context', 'project.intro1'));
-    }
-
     public function apps()
     {
         $apps = ShareFile::with(['isFile', 'isFile.isType', 'isFile.tags'])->where(function($query) {

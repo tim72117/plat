@@ -18,7 +18,6 @@ class CreateUserMember extends Migration {
             $table->integer('project_id');
             $table->boolean('actived');
             $table->timestamps();
-            $table->softDeletes();
             $table->timestamp('actived_at')->nullable();
             $table->timestamp('logined_at')->nullable();
         });

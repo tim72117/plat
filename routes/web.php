@@ -24,19 +24,23 @@ Route::any('request/{doc_id}/{method}', 'FileController@request');
 Route::post('apps/lists', 'FileController@apps');
 Route::any('management', 'FileController@management');
 
-Route::get('project', 'FileController@project');
-Route::get('project/{project}/profile', 'ProfileController@profile');
-Route::get('project/{project}/profile/getMyMembers', 'ProfileController@getMyMembers');
-Route::post('project/{project}/profile/{parameter?}', 'ProfileController@profileSave')->where('parameter', 'power|contact|changeUser');
+Route::get('project', 'HomeController@project');
+Route::get('projects', 'HomeController@getProjects');
+Route::get('project/{project_id}', 'HomeController@changeProject');
+Route::get('profile', 'ProfileController@profile');
+Route::get('profile/getMyMembers', 'ProfileController@getMyMembers');
+Route::get('profile/template/{key}', 'ProfileController@template');
+
+Route::get('profile/getMember', 'ProfileController@getMember');
+Route::post('profile/saveMember', 'ProfileController@saveMember');
+Route::post('profile/{parameter?}', 'ProfileController@profileSave')->where('parameter', 'power|contact|changeUser');
+Route::get('profile/print/{key}', 'ProfileController@registerPrint');
+
 Route::get('auth/password/change', 'ProfileController@passwordChangePage');
 Route::post('auth/password/change', 'ProfileController@passwordChange');
-Route::get('project/{project}/register', 'ProfileController@registerPage');
-Route::get('project/{project}/register/terms', 'ProfileController@terms');
-Route::get('project/{project}/register/help', 'ProfileController@help');
-Route::post('project/{project}/register/save', 'ProfileController@registerSave');
-Route::get('project/{project}/register/finish/{token}', 'ProfileController@registerFinish');
-Route::get('project/{project}/register/print/{token}', 'ProfileController@registerPrint');
-Route::get('project/{project}/register/ajax/{method}', 'ProfileController@registerAjax');
+
+Route::get('project/register/terms', 'ProfileController@terms');
+Route::get('project/register/help', 'ProfileController@help');
 
 Route::bind('project', function($value, $route)
 {

@@ -25,7 +25,6 @@ class CreateMemberContact extends Migration {
             $table->string('district', 50)->nullable();
             $table->string('address', 50)->nullable();
             $table->timestamps();
-            $table->softDeletes();
             $table->unique('member_id');
         });
     }

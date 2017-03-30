@@ -2,7 +2,6 @@
 namespace Plat;
 
 use Eloquent;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Contact extends Eloquent {
 

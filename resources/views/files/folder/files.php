@@ -140,7 +140,7 @@
 </div>
 
 <script src="/js/angular-file-upload.min.js"></script>
-<script src="/js/ng/folder/share.js"></script>
+<script src="/dist/js/ng/folder/share.js"></script>
 
 <script>
 app.requires.push('angularify.semantic.dropdown');

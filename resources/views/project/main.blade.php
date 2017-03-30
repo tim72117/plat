@@ -14,8 +14,8 @@
 <script src="/js/angular_material/1.1.1/angular-material.min.js"></script>
 <script src="/css/Semantic-UI/2.2.4/components/transition.min.js"></script>
 <script src="/css/Semantic-UI/2.2.4/components/popup.min.js"></script>
-<script src="/js/angular-semantic-ui/angularify.semantic.js"></script>
-<script src="/js/angular-semantic-ui/dropdown.js"></script>
+<script src="/dist/js/angular-semantic-ui/angularify.semantic.js"></script>
+<script src="/dist/js/angular-semantic-ui/dropdown.js"></script>
 
 <link rel="stylesheet" href="/css/Semantic-UI/2.2.4/semantic.min.css" />
 <link rel="stylesheet" href="/js/angular_material/1.1.1/angular-material.min.css">
@@ -42,7 +42,7 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
     $mdIconProvider.defaultIconSet('/js/angular_material/core-icons.svg', 24);
 })
 
-.controller('mainController', function($scope, $mdSidenav, $mdToast, $timeout) {
+.controller('mainController', function($scope, $mdSidenav, $mdToast, $timeout, $http) {
     $scope.main = {};
     $scope.main.pathname = window.location.pathname;
     $scope.main.isOpenLeftMenu = false;
@@ -73,6 +73,13 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
         }, 1000);
     }
     idle();
+
+    $http({method: 'GET', url: '/projects', data:{}})
+    .success(function(data, status, headers, config) {
+        $scope.main.projects = data.projects;
+    }).error(function(e) {
+        console.log(e);
+    });
 
 })
 
@@ -111,6 +118,16 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
                 <md-icon ng-style="{fill: main.pathname == '/project' ? '#000' : '#fff'}" md-svg-icon="home"></md-icon>
                 {!! $project->name !!}
             </md-button>
+            <md-menu>
+                <md-button aria-label="projects" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+                    <md-icon md-svg-icon="arrow-drop-down"></md-icon>
+                </md-button>
+                <md-menu-content width="4">
+                    <md-menu-item ng-repeat="project in main.projects">
+                        <md-button href="/project/@{{project.id}}">@{{project.name}}</md-button>
+                    </md-menu-item>
+                </md-menu-content>
+            </md-menu>
             @foreach ($paths as $index => $path)
             <md-button ng-class="md-raised" href="/doc/{!!$path->id!!}/open">
                 @if ($index==0)
@@ -151,7 +168,7 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
             </md-list>
         </md-content>
     </md-sidenav>
-    <md-content flex ng-show="!main.loading">
+    <md-content flex ng-show="!main.loading" id="context">
         {!! $context !!}
     </md-content>
 </body>
