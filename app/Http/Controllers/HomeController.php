@@ -17,7 +17,7 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware(['auth', 'member']);
     }
 
     /**
@@ -37,26 +37,6 @@ class HomeController extends Controller
         View::share('project', $member->project);
         View::share('paths', [ShareFile::whereNull('folder_id')->first()]);
 
-        return $member && $member->actived ? View::make('project.main')->nest('context', 'project.intro') : redirect('/profile');
-    }
-
-    public function getProjects()
-    {
-        $projects = Auth::user()->members->load('project')->pluck('project');
-
-        return ['projects' => $projects];
-    }
-
-    public function changeProject($project_id)
-    {
-        $project = \Plat\Project::find($project_id);
-
-        $member = $project->members()->where('user_id', Auth::user()->id)->first();
-
-        $member->logined_at = Carbon\Carbon::now()->toDateTimeString();
-
-        $member->save();
-
-        return redirect('/project');
+        return View::make('project.main')->nest('context', 'project.intro');
     }
 }

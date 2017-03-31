@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Auth;
 use View;
 use DB;
+use Carbon;
 
 class ProfileController extends Controller {
 
@@ -80,12 +81,12 @@ class ProfileController extends Controller {
 
     public function profile($parameter = null)
     {
-        $member = Auth::user()->members()->orderBy('logined_at', 'desc')->first();
+        //$member = Auth::user()->members()->orderBy('logined_at', 'desc')->first();
 
         View::share('parameter', $parameter);
         View::share('paths', []);
 
-        return View::make('project.main', ['project' => $member->project])->nest('context', 'profile.register', []);
+        return View::make('project.main', [])->nest('context', 'profile.register', []);
     }
 
     public function profileSave($project, $parameter = null, Request $request)
@@ -154,6 +155,33 @@ class ProfileController extends Controller {
         return View::make($templates[$key]);
     }
 
+    public function projects(Request $request)
+    {
+        $projects = \Plat\Project::where('name', 'like', '%' . $request->get('name') . '%')->get();
+
+        return ['projects' => $projects];
+    }
+
+    public function getMyProjects()
+    {
+        $projects = Auth::user()->members->load('project')->pluck('project');
+
+        return ['projects' => $projects];
+    }
+
+    public function changeProject($project_id)
+    {
+        $project = \Plat\Project::find($project_id);
+
+        $member = $project->members()->where('user_id', Auth::user()->id)->first();
+
+        $member->logined_at = Carbon\Carbon::now()->toDateTimeString();
+
+        $member->save();
+
+        return redirect('/project?project_id=' . $project_id);
+    }
+
     public function getCitys()
     {
         $citys = DB::table('plat_public.dbo.lists')->where('type', 'city')->select('name', 'code')->get();
@@ -193,16 +221,26 @@ class ProfileController extends Controller {
         return ['positions' => $project->positions];
     }
 
-    public function getMember()
+    public function getMember(Request $request)
     {
-        $member = Auth::user()->members()->orderBy('logined_at', 'desc')->first()->load(['contact', 'applying', 'project']);
+        if (!$request->has('project_id')) {
+            return [];
+        }
+
+        $project = \Plat\Project::find($request->get('project_id'));
+
+        $member = $project->members()->where('user_id', Auth::user()->id)->first();
+
+        if ($member) {
+            $member->load(['contact', 'applying', 'project']);
+        }
 
         return ['member' => $member];
     }
 
     public function saveMember(Request $request)
     {
-        $project = \Plat\Project::find($request->input('member.project_id'));
+        $project = \Plat\Project::find($request->input('member.project.id'));
 
         $member = $project->members()->updateOrCreate(['user_id' => Auth::user()->id], ['actived' => false]);
 
@@ -216,7 +254,7 @@ class ProfileController extends Controller {
 
         $member->organizations()->attach($request->input('member.organization.id'));
 
-        $positions = array_keys(array_filter($request->input('member.user.positions')));
+        $positions = array_keys(array_filter($request->input('member.user.positions' , [])));
 
         $member->user->positions()->attach($positions);
 

@@ -84,7 +84,7 @@
 
 </div>
 
-<script src="/js/ng/ngTime.js"></script>
+<script src="/dist/js/ng/ngTime.js"></script>
 
 <script>
 app.requires.push('ngTime');

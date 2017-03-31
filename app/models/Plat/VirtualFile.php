@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Plat\Files\Row\Sheet;
 
 class Files extends Eloquent {
 
@@ -11,7 +12,7 @@ class Files extends Eloquent {
     protected $fillable = array('title', 'type', 'file', 'created_by');
 
     public function sheets() {
-        return $this->hasMany('Row\Sheet', 'file_id', 'id');
+        return $this->hasMany(Sheet::class, 'file_id', 'id');
     }
 
     public function census() {
@@ -39,19 +40,6 @@ class Files extends Eloquent {
         return $this->hasMany('Plat\Files\Tag', 'file_id', 'id');
     }
 
-}
-
-class RequestFile extends Eloquent {
-
-    protected $table = 'docs_requested';
-
-    public $timestamps = true;
-
-    protected $fillable = array('doc_id', 'target', 'target_id', 'description', 'disabled', 'created_by');
-
-    public function isDoc() {
-        return $this->hasOne('ShareFile', 'id', 'doc_id');
-    }
 }
 
 class ShareFile extends Eloquent {

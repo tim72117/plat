@@ -1,46 +1,30 @@
 <div ng-controller="registerController as register" layout="column" layout-align="center center">
-    <md-card>
-        <md-card-content>
-    <member member="register.member" flex="50"></member>
-    <applying member="register.member" ng-if="register.member.applying"></applying>
+    <md-card style="min-width: 500px">
+        <md-card-content layout="column">
+            <md-autocomplete
+                md-search-text="searchProject"
+                md-selected-item-change=""
+                md-items="project in register.getProjects(searchProject)"
+                md-selected-item="register.member.project"
+                md-item-text="project.name"
+                md-min-length="0"
+                placeholder="選擇要加入的專案名稱"
+                md-no-cache="true"
+                md-floating-label="選擇要加入的專案名稱">
+                <md-item-template>
+                    <span md-highlight-text="searchCity">{{project.name}}</span>
+                </md-item-template>
+                <md-not-found>
+                    查無"{{searchProject}}"專案名稱
+                </md-not-found>
+            </md-autocomplete>
+            <member member="register.member" ng-if="register.member.project"></member>
         </md-card-content>
+        <md-card-actions layout="row" layout-align="end center">
+            <md-button ng-click="register.save()">註冊</md-button>
+        </md-card-actions>
     </md-card>
-
-
-                <div layout="row">
-                    <md-autocomplete
-                        md-search-text="searchCity"
-                        md-selected-item-change="getOrganizations(city)"
-                        md-items="city in citys"
-                        md-selected-item="city"
-                        md-item-text="city.name"
-                        md-min-length="0"
-                        placeholder="選擇您服務的機構所在縣市"
-                        md-no-cache="true">
-                        <md-item-template>
-                            <span md-highlight-text="searchCity">{{city.name}}</span>
-                        </md-item-template>
-                        <md-not-found>
-                            查無"{{searchCity}}"縣市名稱
-                        </md-not-found>
-                    </md-autocomplete>
-                    <md-autocomplete
-                        md-search-text="searchOrganizatio"
-                        md-items="organization in getOrganizations(city)"
-                        md-selected-item="register.member.organization"
-                        md-item-text="organization.name"
-                        md-min-length="0"
-                        placeholder="選擇您服務機構"
-                        md-no-cache="true">
-                        <md-item-template>
-                            <span md-highlight-text="searchOrganizatio" md-highlight-flags="^i">{{organization.name}}</span>
-                        </md-item-template>
-                        <md-not-found>
-                            查無"{{searchOrganizatio}}"服務機構名稱
-                        </md-not-found>
-                    </md-autocomplete>
-                    <md-checkbox ng-repeat="position in register.positions" ng-model="register.member.user.positions[position.id]">{{position.title}}</md-checkbox>
-                </div>
+    <applying member="register.member" ng-if="register.member.applying"></applying>
 </div>
 
 <script>
@@ -56,34 +40,31 @@ angular.module('app')
         var register = this;
 
         $scope.$parent.main.loading = true;
-        $http({method: 'GET', url: 'profile/getMember', data:{}})
+        $http({method: 'GET', url: 'profile/getMember', params:{}})
         .success(function(data, status, headers, config) {
             $scope.$parent.main.loading = false;
             register.member = data.member;
-            getPositions(register.member.project);
         })
         .error(function(e) {
             console.log(e);
         });
 
-        $http({method: 'GET', url: 'profile/getCitys', params:{}})
-        .then(function(response) {
-            $scope.citys = response.data.citys;
-        });
-
-        $scope.getOrganizations = function(city) {
-            return $http({method: 'GET', url: 'profile/getOrganizations', params:{project_id: register.member.project.id, city_code: city ? city.code : null}})
+        register.getProjects = function(name) {
+            return $http({method: 'GET', url: 'profile/projects', params:{name: name}})
             .then(function(response) {
-                return response.data.organizations;
+                return response.data.projects;
             });
         };
 
-        function getPositions(project) {
-            console.log(project);
-            $http({method: 'GET', url: 'profile/getPositions', params:{project_id: project.id}})
-            .then(function(response) {
-                console.log(response.data);
-                register.positions = response.data.positions;
+        register.save = function() {
+            console.log(register.member);
+            $http({method: 'POST', url: 'profile/saveMember', data:{member: register.member}})
+            .success(function(data, status, headers, config) {
+                console.log(data);
+                register.member.applying = data.member.applying;
+            })
+            .error(function(e) {
+                console.log(e);
             });
         };
     }
@@ -136,17 +117,23 @@ angular.module('app')
             controller: function($scope) {
                 var memberCtrl = this;
 
-                memberCtrl.save = function() {
-                    console.log($scope.member);
-                    $http({method: 'POST', url: 'profile/saveMember', data:{member: $scope.member}})
-                    .success(function(data, status, headers, config) {
-                        console.log(data);
-                        $scope.member.applying = data.member.applying;
-                    })
-                    .error(function(e) {
-                        console.log(e);
+                $http({method: 'GET', url: 'profile/getCitys', params:{}})
+                .then(function(response) {
+                    $scope.citys = response.data.citys;
+                });
+
+                $http({method: 'GET', url: 'profile/getPositions', params:{project_id: $scope.member.project.id}})
+                .then(function(response) {
+                    console.log(response.data);
+                    memberCtrl.positions = response.data.positions;
+                });
+
+                memberCtrl.getOrganizations = function(city) {
+                    return $http({method: 'GET', url: 'profile/getOrganizations', params:{project_id: $scope.member.project.id, city_code: city ? city.code : null}})
+                    .then(function(response) {
+                        return response.data.organizations;
                     });
-                }
+                };
             }
         }
     }

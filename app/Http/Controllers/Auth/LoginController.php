@@ -57,7 +57,7 @@ class LoginController extends Controller
 
             $members = $user->members->load('project')->filter(function ($member) {
 
-                return $member->actived;
+                return true;//$member->actived;
 
             })->sortBy(function ($member) use ($request) {
 

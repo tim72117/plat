@@ -25,9 +25,13 @@ Route::post('apps/lists', 'FileController@apps');
 Route::any('management', 'FileController@management');
 
 Route::get('project', 'HomeController@project');
-Route::get('projects', 'HomeController@getProjects');
-Route::get('project/{project_id}', 'HomeController@changeProject');
 Route::get('profile', 'ProfileController@profile');
+Route::get('profile/projects', 'ProfileController@projects');
+Route::get('profile/project/{project_id}', 'ProfileController@changeProject');
+Route::get('profile/getMyProjects', 'ProfileController@getMyProjects');
+Route::get('profile/getCitys', 'ProfileController@getCitys');
+Route::get('profile/getOrganizations', 'ProfileController@getOrganizations');
+Route::get('profile/getPositions', 'ProfileController@getPositions');
 Route::get('profile/getMyMembers', 'ProfileController@getMyMembers');
 Route::get('profile/template/{key}', 'ProfileController@template');
 

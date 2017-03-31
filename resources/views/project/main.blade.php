@@ -1,7 +1,7 @@
 @extends('project.layout-main')
 
 @section('head')
-<title>{{ $project->name }}</title>
+<title>project</title>
 
 <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
 <script src="/js/jquery-1.11.2.min.js"></script>
@@ -74,7 +74,7 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
     }
     idle();
 
-    $http({method: 'GET', url: '/projects', data:{}})
+    $http({method: 'GET', url: '/profile/getMyProjects', data:{}})
     .success(function(data, status, headers, config) {
         $scope.main.projects = data.projects;
     }).error(function(e) {
@@ -116,7 +116,7 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
             </md-button>-->
             <md-button ng-class="{'md-raised': main.pathname == '/project'}" href="/project">
                 <md-icon ng-style="{fill: main.pathname == '/project' ? '#000' : '#fff'}" md-svg-icon="home"></md-icon>
-                {!! $project->name !!}
+                project
             </md-button>
             <md-menu>
                 <md-button aria-label="projects" class="md-icon-button" ng-click="$mdOpenMenu($event)">
@@ -124,7 +124,7 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
                 </md-button>
                 <md-menu-content width="4">
                     <md-menu-item ng-repeat="project in main.projects">
-                        <md-button href="/project/@{{project.id}}">@{{project.name}}</md-button>
+                        <md-button href="/profile/project/@{{project.id}}">@{{project.name}}</md-button>
                     </md-menu-item>
                 </md-menu-content>
             </md-menu>
@@ -138,7 +138,7 @@ app.config(function ($compileProvider, $mdIconProvider, $mdThemingProvider) {
             @if ($index < count($paths)-1) / @endif
             @endforeach
             <span flex></span>
-            <md-button ng-class="{'md-raised': main.pathname == '/project/{!! $project->code !!}/profile'}" href="/project/{!! $project->code !!}/profile">個人資料</md-button>
+            <md-button ng-class="{'md-raised': main.pathname == '/project/profile'}" href="/project/profile">個人資料</md-button>
             <md-button ng-class="{'md-raised': main.pathname == '/auth/password/change'}" href="/auth/password/change">更改密碼</md-button>
             <md-button class="md-icon-button" aria-label="需要幫助" ng-click="main.showHelp()">
                 <md-icon md-svg-icon="help-outline"></md-icon>
