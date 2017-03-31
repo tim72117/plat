@@ -1,9 +1,9 @@
 
 <script src="/js/Highcharts-4.1.8/js/highcharts.js"></script>
 <script src="/css/Semantic-UI/2.1.8/semantic.min.js"></script>
-<script src="/js/chart/bar.js"></script>
-<script src="/js/chart/pie.js"></script>
-<script src="/js/chart/donut.js"></script>
+<script src="/dist/js/chart/bar.js"></script>
+<script src="/dist/js/chart/pie.js"></script>
+<script src="/dist/js/chart/donut.js"></script>
 
 <div ng-cloak ng-controller="analysisController" ng-class="{'ui container': full}" style="{{ !full ? 'max-width:1127px' : '' }}">
 

@@ -15,7 +15,7 @@ class CreateRowSheets extends Migration {
         Schema::create('row_sheets', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('file_id');
-            $table->string('title', 50);
+            $table->string('title', 50)->nullable();
             $table->boolean('editable');
             $table->boolean('fillable');
             $table->timestamps();

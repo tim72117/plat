@@ -1,14 +1,20 @@
 <?php
+
 namespace Plat\Files;
 
 use Illuminate\Http\Request;
 use App\User;
 use Files;
-use DB, View, Schema, Response, Input, Session;
-use ShareFile, RequestFile;
-use Row\Sheet;
-use Row\Table;
-use Row\Column;
+use DB;
+use View;
+use Schema;
+use Response;
+use Session;
+use ShareFile;
+use RequestFile;
+use Plat\Files\Row\Sheet;
+use Plat\Files\Row\Table;
+use Plat\Files\Row\Column;
 use Carbon\Carbon;
 use Illuminate\Support\MessageBag;
 
@@ -16,8 +22,8 @@ use Illuminate\Support\MessageBag;
  * Rows data Repository.
  *
  */
-class RowsFile extends CommFile {
-
+class RowsFile extends CommFile
+{
     protected $database = 'rows';
 
     protected $temp;
@@ -145,7 +151,7 @@ class RowsFile extends CommFile {
      */
     public function subs()
     {
-        return View::make('files.rows.subs.' . Input::get('tool', ''))->render();
+        return View::make('files.rows.subs.' . $this->request->get('tool', ''))->render();
     }
 
     /**
@@ -224,7 +230,7 @@ class RowsFile extends CommFile {
                 !$sheet->editable && $this->table_construct($table);
                 if ($this->has_table($table)) {
                     $query = DB::table($table->database. '.dbo.' . $table->name)->whereNull('deleted_at');
-                    if (!$this->isCreater() || !Input::get('editor', false)) {
+                    if (!$this->isCreater() || ! $this->request->get('editor', false)) {
                         $query->where('created_by', $this->user->id);
                     }
                     $table->count = $query->count();
@@ -252,30 +258,30 @@ class RowsFile extends CommFile {
 
     public function update_sheet()
     {
-        $sheet = $this->file->sheets()->with(['tables', 'tables.columns'])->find(Input::get('sheet')['id']);
+        $sheet = $this->file->sheets()->with(['tables', 'tables.columns'])->find($this->request->input('sheet.id'));
 
-        $sheet->update(['title' => Input::get('sheet')['title'], 'editable' => Input::get('sheet')['editable']]);
+        $sheet->update(['title' => $this->request->input('sheet.title', ''), 'editable' => $this->request->input('sheet.editable')]);
 
         return ['sheet' => $sheet->toArray()];
     }
 
     public function remove_column()
     {
-        $table = $this->file->sheets->find(Input::get('sheet_id'))->tables->find(Input::get('table_id'));
+        $table = $this->file->sheets->find($this->request->get('sheet_id'))->tables->find($this->request->get('table_id'));
 
-        $deleted = $table->columns->find(Input::get('column')['id'])->delete();
+        $deleted = $table->columns->find($this->request->input('column.id'))->delete();
 
         return ['deleted' => $deleted];
     }
 
     public function update_column()
     {
-        $input = Input::only(['column.name', 'column.title', 'column.rules', 'column.unique', 'column.encrypt', 'column.isnull', 'column.readonly'])['column'];
+        $input = $this->request->only(['column.name', 'column.title', 'column.rules', 'column.unique', 'column.encrypt', 'column.isnull', 'column.readonly'])['column'];
 
-        $table = $this->file->sheets->find(Input::get('sheet_id'))->tables->find(Input::get('table_id'));
+        $table = $this->file->sheets->find($this->request->get('sheet_id'))->tables->find($this->request->get('table_id'));
 
-        if (isset(Input::get('column')['id'])) {
-            $column = $table->columns->find(Input::get('column')['id']);
+        if ($this->request->has('column.id')) {
+            $column = $table->columns->find($this->request->input('column.id'));
             $column->update($input);
         } else {
             $column = $table->columns()->create($input);
@@ -288,7 +294,7 @@ class RowsFile extends CommFile {
     {
         $information = $this->get_information();
 
-        $information->comment = urldecode(base64_decode(Input::get('comment', '')));
+        $information->comment = urldecode(base64_decode($this->request->get('comment', '')));
 
         $this->put_information($information);
 
@@ -311,18 +317,18 @@ class RowsFile extends CommFile {
 
     public function import_upload()
     {
-        if (!Input::hasFile('file_upload'))
+        if (!$this->request->hasFile('file_upload'))
             throw new UploadFailedException(new MessageBag(['messages' => ['max' => '檔案格式或大小錯誤']]));
 
-        $file = new Files(['type' => 3, 'title' => Input::file('file_upload')->getClientOriginalName()]);
+        $file = new Files(['type' => 3, 'title' => $this->request->file('file_upload')->getClientOriginalName()]);
 
-        $file_upload = new CommFile($file, $this->user);
+        $file_upload = new CommFile($file, $this->user, $this->request);
 
-        $file_upload->upload(Input::file('file_upload'));
+        $file_upload->upload($this->request->file('file_upload'));
 
-        $table = $this->file->sheets[0]->tables[0];
+        $table = $this->file->sheets->first()->tables->first();
 
-        $table_columns = $table->columns->fetch('name')->toArray();
+        $table_columns = $table->columns->pluck('name')->toArray();
 
         $rows = \Excel::selectSheetsByIndex(0)->load(storage_path() . '/file_upload/' . $file_upload->file->file, function($reader) {
 
@@ -352,7 +358,7 @@ class RowsFile extends CommFile {
 
         $amounts = [];
 
-        if ($table->columns->groupBy('unique')->has(1))
+        if ($table->columns->containsStrict('unique', true))
             $amounts['removed'] = $this->removeRowsInTemp($table);
 
         $amounts['created'] = $this->moveRowsFromTemp($table);
@@ -456,37 +462,6 @@ class RowsFile extends CommFile {
         }
     }
 
-    /**
-     * Sent a request to import file.
-     */
-    public function request_to()
-    {
-        $input = Input::only('groups', 'description');
-
-        $myGroups = $this->user->groups;
-
-        if ($this->isCreater()) {
-            foreach($input['groups'] as $group) {
-                if (count($group['users']) == 0 && $myGroups->contains($group['id'])){
-                    RequestFile::updateOrCreate(
-                        ['target' => 'group', 'target_id' => $group['id'], 'doc_id' => $this->doc->id, 'created_by' => $this->user->id],
-                        ['description' => $input['description']]
-                    );
-                }
-                if (count($group['users']) != 0){
-                    foreach($group['users'] as $user){
-                        RequestFile::updateOrCreate(
-                            ['target' => 'user', 'target_id' => $user['id'], 'doc_id' => $this->doc->id, 'created_by' => $this->user->id],
-                            ['description' => $input['description']]
-                        );
-                    }
-                }
-            }
-        }
-
-        return Response::json(Input::all());
-    }
-
     public function generate_uniques()
     {
         $table = $this->file->sheets->each(function($sheet) {
@@ -528,11 +503,11 @@ class RowsFile extends CommFile {
 
             $excel->sheet('sample', function($sheet) {
 
-                $table = $this->file->sheets[0]->tables[0];
+                $table = $this->file->sheets->first()->tables->first();
 
                 $sheet->freezeFirstRow();
 
-                $sheet->fromArray($table->columns->fetch('name')->toArray());
+                $sheet->fromArray($table->columns->pluck('name')->toArray());
 
             });
 
@@ -545,20 +520,20 @@ class RowsFile extends CommFile {
 
             $excel->sheet('sample', function($sheet) {
 
-                $tables = $this->file->sheets->find(Input::get('sheet_id'))->tables;
+                $tables = $this->file->sheets->find($this->request->get('sheet_id'))->tables;
 
                 list($query, $power) = $this->get_rows_query($tables);
 
-                $head = $tables[0]->columns->map(function($column) { return 'C' . $column->id; })->toArray();
+                $head = $tables->first()->columns->map(function($column) { return 'C' . $column->id; })->toArray();
 
-                $encrypts = $tables[0]->columns->filter(function($column) { return $column->encrypt; });
+                $encrypts = $tables->first()->columns->filter(function($column) { return $column->encrypt; });
 
-                $rows = array_map(function($row) use($encrypts) {
+                $rows = $query->where('created_by', $this->user->id)->whereNull('deleted_at')->select($head)->get()->map(function($row) use($encrypts) {
                     $this->setEncrypts($row, $encrypts);
                     return array_values(get_object_vars($row));
-                }, $query->where('created_by', $this->user->id)->whereNull('deleted_at')->select($head)->get());
+                })->toArray();
 
-                array_unshift($rows, $tables[0]->columns->fetch('name')->toArray());
+                array_unshift($rows, $tables->first()->columns->pluck('name')->toArray());
 
                 $sheet->freezeFirstRow();
 
@@ -612,8 +587,8 @@ class RowsFile extends CommFile {
 
         $head = $tables[0]->columns->map(function($column) { return 'C' . $column->id; })->toArray();
 
-        if (Input::has('search.text') && Input::has('search.column_id')) {
-            $query->where('C' . Input::get('search.column_id'), Input::get('search.text'));
+        if ($this->request->has('search.text') && $this->request->has('search.column_id')) {
+            $query->where('C' . $this->request->input('search.column_id'), $this->request->input('search.text'));
         }
 
         $query->whereNull('deleted_at')->select($head)->addSelect('id');
@@ -622,7 +597,7 @@ class RowsFile extends CommFile {
             ? $query->addSelect('created_by')->paginate(15)
             : $query->where('created_by', $this->user->id)->paginate(15);
 
-        $encrypts = $tables[0]->columns->filter(function($column) { return $column->encrypt; });
+        $encrypts = $tables->first()->columns->filter(function($column) { return $column->encrypt; });
 
         if (!$encrypts->isEmpty()) {
             $paginate->getCollection()->each(function($row) use($encrypts) {
@@ -646,7 +621,7 @@ class RowsFile extends CommFile {
 
             !$this->isCreater() && $query->where('created_by', $this->user->id);
 
-            return $query->whereIn('id', Input::get('rows'))->update($updates);
+            return $query->whereIn('id', $this->request->get('rows'))->update($updates);
         });
 
         return ['tables' => $tables];
@@ -904,9 +879,9 @@ class RowsFile extends CommFile {
         $sheets = $this->file->sheets()->with(['tables', 'tables.columns'])->get()->each(function($sheet) use(&$questions) {
             $sheet->tables->each(function($table) use(&$questions) {
                 $table->columns->each(function($column) use(&$questions, $table) {
-                    $answers = array_map(function($answer) {
+                    $answers = DB::table($table->database . '.dbo.' . $table->name)->groupBy('C' . $column->id)->select('C' . $column->id . ' AS value')->get()->map(function($answer) {
                         return ['title' => $answer->value, 'value' => $answer->value];
-                    }, DB::table($table->database . '.dbo.' . $table->name)->groupBy('C' . $column->id)->select('C' . $column->id . ' AS value')->get());
+                    });
                     array_push($questions, ['name' => $column->id, 'title' => $column->title, 'choosed' => true, 'answers' => $answers]);
                 });
             });
@@ -934,13 +909,13 @@ class RowsFile extends CommFile {
      */
     public function get_frequence()
     {
-        $id = Input::get('name');
+        $id = $this->request->get('name');
 
         $table = Column::find($id)->inTable;
 
         $data_query = DB::table($table->database . '.dbo.' . $table->name);
 
-        $frequence = $data_query->groupBy('C' . $id)->select(DB::raw('count(*) AS total'), DB::raw('CAST(C' . $id . ' AS varchar) AS name'))->remember(3)->pluck('total', 'name');
+        $frequence = $data_query->groupBy('C' . $id)->select(DB::raw('count(*) AS total'), DB::raw('CAST(C' . $id . ' AS varchar) AS name'))->pluck('total', 'name');
 
         return ['frequence' => $frequence];
     }
@@ -1000,7 +975,7 @@ class RowsFile extends CommFile {
 
             return $row;
 
-        }, Input::get('rows'));
+        }, $this->request->get('rows'));
 
         return ['updated' => $updated];
     }
@@ -1064,7 +1039,7 @@ class RowsFile extends CommFile {
 
     public function cloneTableData()
     {
-        $parent_id          = input::get('table_id');
+        $parent_id          = $this->request->get('table_id');
 
         $child['table']     = $this->file->sheets[0]->tables->first();
         $child['columns']   = $child['table']->columns->pluck('id','name');
@@ -1221,11 +1196,11 @@ class RowsFile extends CommFile {
     {
         $table = $this->file->sheets->first()->tables->first();
 
-        $column_name = 'C' . Input::get('column_id');
+        $column_name = 'C' . $this->request->get('column_id');
 
         $values = DB::table($table->database . '.dbo.' . $table->name)
             ->whereNull('deleted_at')
-            ->where($column_name, 'like', '%' . Input::get('query') . '%')
+            ->where($column_name, 'like', '%' . $this->request->get('query') . '%')
             ->groupBy($column_name)
             ->select($column_name . ' AS text')
             ->limit(100)
@@ -1236,7 +1211,7 @@ class RowsFile extends CommFile {
 
     public function queryUsersByEmail()
     {
-        $users = User::where('email', 'like', '%' . Input::get('query') . '%')->limit(1000)->get(['id', 'email', 'username']);
+        $users = User::where('email', 'like', '%' . $this->request->get('query') . '%')->limit(1000)->get(['id', 'email', 'username']);
 
         return ['users' => $users];
     }
@@ -1253,10 +1228,10 @@ class RowsFile extends CommFile {
         } else {
             $table = $this->file->sheets->first()->tables->first();
 
-            $column_name = 'C' . Input::get('selected.column_id');
+            $column_name = 'C' . $this->request->input('selected.column_id');
 
             $updated = DB::table($table->database . '.dbo.' . $table->name)
-                ->where($column_name, Input::get('selected.value_text'))->update(['created_by' => Input::get('selected.user.id')]);
+                ->where($column_name, $this->request->input('selected.value_text'))->update(['created_by' => $this->request->input('selected.user.id')]);
 
             $message = $updated . '筆資料已儲存';
         }

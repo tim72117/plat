@@ -1,61 +1,11 @@
 <?php
-namespace Row;
+
+namespace Plat\Files\Row;
 
 use Eloquent;
 
-class Sheet extends Eloquent {
-
-    protected $table = 'row_sheets';
-
-    public $timestamps = true;
-
-    protected $fillable = array('title', 'editable', 'fillable');
-
-    public function getEditableAttribute($value) {
-        return (boolean)$value;
-    }
-
-    public function tables() {
-        return $this->hasMany('Row\Table', 'sheet_id', 'id');
-    }
-
-    public function file()
-    {
-        return $this->belongsTo('Files', 'file_id', 'id');
-    }
-
-}
-
-class Table extends Eloquent {
-
-    protected $table = 'row_tables';
-
-    public $timestamps = true;
-
-    protected $fillable = array('database', 'name', 'lock', 'builded_at', 'construct_at');
-
-    public function getLockAttribute($value) {
-        return (boolean)$value;
-    }
-
-    public function columns() {
-        return $this->hasMany('Row\Column', 'table_id', 'id');
-    }
-
-    public function depend_tables()
-    {
-        return $this->belongsToMany('Row\Table', 'row_table_depend', 'table_id', 'depend_table_id');
-    }
-
-    public function sheet()
-    {
-        return $this->belongsTo('Row\Sheet', 'sheet_id', 'id');
-    }
-
-}
-
-class Column extends Eloquent {
-
+class Column extends Eloquent
+{
     protected $table = 'row_columns';
 
     public $timestamps = true;
@@ -77,17 +27,17 @@ class Column extends Eloquent {
     }
 
     public function inTable() {
-        return $this->belongsTo('Row\Table', 'table_id');
+        return $this->belongsTo(Table::class, 'table_id');
     }
 
     public function answers()
     {
-        return $this->hasMany('Row\Answer', 'column_id', 'id');
+        return $this->hasMany(Answer::class, 'column_id', 'id');
     }
 
     public function skip()
     {
-        return $this->hasOne('Plat\Files\Row\Skip', 'column_id', 'id');
+        return $this->hasOne(Skip::class, 'column_id', 'id');
     }
 
     public function getUniqueAttribute($value)
@@ -134,15 +84,4 @@ class Column extends Eloquent {
     {
         $this->attributes['readonly'] = isset($value) ? $value : false;
     }
-
-}
-
-class Answer extends Eloquent {
-
-    protected $table = 'row_table_column_answers';
-
-    public $timestamps = false;
-
-    protected $fillable = array('value', 'title');
-
 }

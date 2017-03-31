@@ -1,10 +1,11 @@
 <?php
+
 namespace Plat\Files\Row;
 
 use Eloquent;
 
-class Skip extends Eloquent {
-
+class Skip extends Eloquent
+{
     protected $table = 'row_table_column_skip';
 
     public $timestamps = false;
@@ -15,5 +16,4 @@ class Skip extends Eloquent {
     {
         return json_decode($value);
     }
-
 }
