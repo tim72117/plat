@@ -69,5 +69,5 @@ foreach ($organizations as $organization) {
     }
 }
 
-$filter['groups'] = array_merge($school, $filter['groups']);
+$filter['groups'] = array_merge($filter['groups'], $school);
 return $filter;
