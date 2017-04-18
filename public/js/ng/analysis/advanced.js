@@ -24,10 +24,10 @@ angular.module('analysis.advanced', [])
                 <table class="ui table" ng-if="report">
                     <tr>
                         <td></td>
-                        <td ng-repeat="item in items">{{item.name}}</td>
+                        <td ng-repeat="item in items">{{item.title}}</td>
                     </tr>
                     <tr ng-repeat="column in report">
-                        <td>{{items[$index].name}}</td>
+                        <td>{{items[$index].title}}</td>
                         <td ng-repeat="row in column">{{row}}</td>
                     </tr>
                 </table>
@@ -94,7 +94,6 @@ angular.module('analysis.advanced', [])
             </div>
         `,
         link: function(scope) {
-
             scope.columns = [
                 'variables',
                 'Estimate',
