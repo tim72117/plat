@@ -75,7 +75,7 @@ app.controller('introController', function($scope, $filter, $http, $cookies, tim
     $scope.diff = timeService.diff;
     $scope.loading = true;
     $scope.getApps = function() {
-        $http({method: 'POST', url: '/apps/lists', data:{} })
+        $http({method: 'GET', url: '/apps/lists', data:{} })
         .success(function(data, status, headers, config) {
             $scope.apps = data.apps;
             $scope.requests = data.requests;

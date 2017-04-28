@@ -75,7 +75,7 @@ class UserController extends BaseController {
 
             $member->save();
 
-            Auth::login($user, true);
+            Auth::login($user);
 
             return Redirect::intended('project/' . $project->code . '/intro');
 

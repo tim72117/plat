@@ -8,7 +8,7 @@
     <div style="margin: 0 auto;width:600px;text-align: center">
         <p style="font-size:120px;color:#fff">400</p>
         <p style="font-size:20px;color:#fff;line-height: 40px">您的請求有誤。</p>
-        <p style="font-size:20px;color:#fff;line-height: 40px"><a href="<?=URL::previous()?>" style="color:#fff">返回到首頁</a></p>
+        <p style="font-size:20px;color:#fff;line-height: 40px"><a href="<?=htmlEntities(URL::previous())?>" style="color:#fff">返回到首頁</a></p>
     </div>
     
 </body>

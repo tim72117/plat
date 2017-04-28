@@ -25,7 +25,7 @@ Route::group(array('before' => 'auth'), function() {
     Route::post('file/create', 'FileController@create');
     Route::post('file/upload', 'FileController@upload');
     Route::post('docs/lists', 'FileController@docs');
-    Route::post('apps/lists', 'FileController@apps');
+    Route::get('apps/lists', 'FileController@apps');
     Route::get('docs/management', 'FileController@management');
     Route::post('docs/share/get', 'FileController@shared');
     Route::post('docs/request/get', 'FileController@requested');
@@ -67,4 +67,11 @@ Route::post('data/post/{table}', 'DataExchangeController@post');
 //平台---------------------------------------------------------------------------------------------------------------------------------
 
 Route::get('project', function() { return Redirect::to('project/' . Config::get('project.default')); });
-Route::get('/', function() { return Redirect::to('project'); });
+Route::get('/', function() { return View::make('web.index'); });
+Route::get('home/{page?}', 'WebController@web');
+Route::when('home/school', 'auth');
+
+Route::get('oauth/authorize/{project}', array('uses' => 'OAuthController@getAuthorize'));
+Route::post('oauth/authorize/{project}', array('uses' => 'OAuthController@postAuthorize'));
+Route::post('oauth/access_token', array('before' => '', 'uses' => 'OAuthController@postAccessToken'));
+Route::get('oauth/resource' , array('before' => 'oauth', 'uses' => 'OAuthController@resource'));
