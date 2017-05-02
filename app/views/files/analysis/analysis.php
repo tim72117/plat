@@ -19,13 +19,13 @@
         <md-card style="width: 1200px;min-height:600px">
             <md-tabs md-selected="tabSelected" md-dynamic-height md-border-bottom>
                 <md-tab label="次數分配 / 交叉表">
-                    <ng-frequence ng-if="tabSelected==0" choosed="choosed"></ng-frequence>
+                    <ng-frequence ng-show="tabSelected==0" choosed="choosed"></ng-frequence>
                 </md-tab>
                 <md-tab label="相關分析">
-                    <ng-correlation ng-if="tabSelected==1" choosed="choosed"></ng-correlation>
+                    <ng-correlation ng-show="tabSelected==1" choosed="choosed"></ng-correlation>
                 </md-tab>
                 <md-tab label="迴歸分析">
-                    <ng-regression ng-if="tabSelected==2" choosed="choosed"></ng-regression>
+                    <ng-regression ng-show="tabSelected==2" choosed="choosed"></ng-regression>
                 </md-tab>
             </md-tabs>
         </md-card>

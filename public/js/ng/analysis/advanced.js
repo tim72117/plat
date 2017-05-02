@@ -28,7 +28,7 @@ angular.module('analysis.advanced', [])
                     </tr>
                     <tr ng-repeat="column in report">
                         <td>{{items[$index].title}}</td>
-                        <td ng-repeat="row in column">{{row}}</td>
+                        <td ng-repeat="row in column">{{row | number:3}}</td>
                     </tr>
                 </table>
             </div>
@@ -83,12 +83,13 @@ angular.module('analysis.advanced', [])
                 <table class="ui table" ng-if="report">
                     <tr ng-repeat="(index, variable) in report['variables']">
                         <td ng-repeat="column in columns" ng-if="index==0 || $first">{{getTitle(report[column][index])}}</td>
-                        <td ng-repeat="column in columns" ng-if="index!=0 && !$first">{{report[column][index] | number:2}}</td>
+                        <td ng-repeat="column in columns" ng-if="index!=0 && !$first">{{report[column][index] | number:3}}</td>
                     </tr>
                 </table>
                 <table class="ui table" ng-if="report">
                     <tr ng-repeat="other in others">
-                        <td ng-repeat="value in report[other]">{{value}}</td>
+                        <td ng-repeat="value in report[other]" ng-if="index==0 || $first">{{value}}</td>
+                        <td ng-repeat="value in report[other]" ng-if="index!=0 && !$first">{{value | number:3}}</td>
                     </tr>
                 </table>
             </div>
