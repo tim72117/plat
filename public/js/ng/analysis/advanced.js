@@ -82,7 +82,7 @@ angular.module('analysis.advanced', [])
                 </div>
                 <table class="ui table" ng-if="report">
                     <tr ng-repeat="(index, variable) in report['variables']">
-                        <td ng-repeat="column in columns" ng-if="index==0 || $first">{{report[column][index]}}</td>
+                        <td ng-repeat="column in columns" ng-if="index==0 || $first">{{getTitle(report[column][index])}}</td>
                         <td ng-repeat="column in columns" ng-if="index!=0 && !$first">{{report[column][index] | number:2}}</td>
                     </tr>
                 </table>
@@ -109,6 +109,17 @@ angular.module('analysis.advanced', [])
 
             scope.reset = function() {
                 scope.report = null;
+            }
+
+            scope.getTitle = function(name) {
+                scope.title = name;
+                for (var i = 0; i < scope.choosed.items.length;i++) { 
+                    if (scope.title == scope.choosed.items[i].name){
+                        scope.title = scope.choosed.items[i].title;
+                        return scope.title;
+                    }
+                }
+                return scope.title;
             }
 
             scope.count = function() {
