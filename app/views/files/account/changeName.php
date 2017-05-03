@@ -16,6 +16,24 @@
                     </md-input-container>
                 </div>
                 <div>
+                    <md-input-container class="md-block">
+                        <label>職稱</label>
+                        <input ng-model="user.title">
+                    </md-input-container>
+                </div>
+                <div>
+                    <md-input-container class="md-block">
+                        <label>電話</label>
+                        <input ng-model="user.tel">
+                    </md-input-container>
+                </div>
+                <div>
+                    <md-input-container class="md-block">
+                        <label>傳真號碼</label>
+                        <input ng-model="user.fax">
+                    </md-input-container>
+                </div>
+                <div>
                     <md-chips class="contactChips"
                         ng-model="user.selectedOrganizations"
                         md-autocomplete-snap

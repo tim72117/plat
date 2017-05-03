@@ -6,6 +6,7 @@ use Files;
 use DB, View, Response, Config, Schema, Session, Input, Auth, Request;
 use ShareFile;
 use Carbon\Carbon;
+use Plat\Contact;
 use Plat\Member;
 use Plat\Project;
 
@@ -239,13 +240,23 @@ class AccountFile extends CommFile {
 
     public function setUsername()
     {
-        $member = Member::find(Input::get('member_id'));
+        $updateKeys = ["title", "tel", "fax"];
 
-        $member->user->username = Input::get('username');
+        $userData = Input::get('userdata');
+
+        $member = Member::find($userData['member_id']);
+
+        $update_data = array_filter($userData, function($var) use ($updateKeys) {
+            return in_array($var, $updateKeys);
+        },ARRAY_FILTER_USE_KEY);
+
+        $member->user->username = $userData['name'];
 
         $member->user->save();
 
-        $organizations = array_fetch(Input::get('organizations'), 'id');
+        Contact::where('member_id', $userData['member_id'])->update($update_data);
+
+        $organizations = array_fetch($userData['organizations'], 'id');
 
         $member->organizations()->sync($organizations);
 

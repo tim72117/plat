@@ -366,10 +366,9 @@ app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog, $timeout
             clickOutsideToClose: false
         })
         .then(function(userChanged) {
-            $http({method: 'POST', url: 'setUsername', data:{member_id: userChanged.member_id, username: userChanged.name, organizations: userChanged.selectedOrganizations}})
+            $http({method: 'POST', url: 'setUsername', data:{userdata: userChanged}})
             .success(function(data, status, headers, config) {
-                user.name = data.user.name;
-                user.organizations = data.user.organizations;
+                user = angular.extend(user, data.user);
                 user.saving = false;
             })
             .error(function(e) {
