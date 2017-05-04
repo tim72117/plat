@@ -316,4 +316,17 @@ class AccountFile extends CommFile {
         ];
     }
 
+    public function setActiveMail()
+    {
+        $email = Input::get('email');
+
+        try {
+            Mail::send('emails.empty'), ['context' => '帳號已開通'], function($message) {
+                $message->to(Input::get('email')->subject('帳號已開通'));
+            });
+            return ['sended' => true];
+        } catch (Exception $e) {
+            return ['sended' => false];
+        }
+    }
 }
