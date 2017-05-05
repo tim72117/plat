@@ -3,7 +3,7 @@ namespace Plat\Files;
 
 use User;
 use Files;
-use DB, View, Response, Config, Schema, Session, Input, Auth, Request;
+use DB, View, Response, Config, Schema, Session, Input, Auth, Request, Mail;
 use ShareFile;
 use Carbon\Carbon;
 use Plat\Contact;
@@ -316,17 +316,16 @@ class AccountFile extends CommFile {
         ];
     }
 
-    public function setActiveMail()
+    public function sendActiveMail()
     {
-        $email = Input::get('email');
-
         try {
-            Mail::send('emails.empty'), ['context' => '帳號已開通'], function($message) {
-                $message->to(Input::get('email')->subject('帳號已開通'));
+            Mail::send('emails.empty', ['context' => Input::get('context')], function($message) {
+                $message->to(Input::get('email'))->subject(Input::get('title'));
             });
             return ['sended' => true];
-        } catch (Exception $e) {
+        } catch (Exception $e){
             return ['sended' => false];
         }
     }
+
 }
