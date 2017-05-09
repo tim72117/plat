@@ -95,6 +95,8 @@ class RateFile extends CommFile {
     {
         $query = DB::table($survey->info['database'] . '.dbo.' . $survey->info['table'] . ' AS info');
 
+         $this->setDeletedAtQuery($query, $survey->info);
+
         if (property_exists($survey, 'map')) {
 
             $query->leftJoin($survey->map['database'] . '.dbo.' . $survey->map['table'] . ' AS map', $survey->map['info_key'], '=', $survey->map['map_key']);
@@ -132,8 +134,6 @@ class RateFile extends CommFile {
                     }
                 }
             }
-
-            $this->setDeletedAtQuery($query, $survey->info);
 
             $query
                 ->select(array_map(function($column){ return 'info.' . $column; }, $columns))
@@ -230,6 +230,20 @@ class RateFile extends CommFile {
                         'text' => ['true' => '填答完成', 'false' => '']
                     ],
                 ],
+                'predicate' => ['page'],
+            ],
+        ],
+        'school_evaluation' => [
+            [
+                'id'       => 'school_evaluation',
+                'title'    => ' 問卷調查狀況-928評鑑調查',
+                'info'     => ['database' => 'rows', 'table' => 'row_20170412_174724_amp6z', 'deleted_at' => true],
+                'map'      => ['database' => 'school_evaluation', 'table' => 'schoolEvaluation_id', 'info_key' => 'info.C1982', 'map_key' => 'map.stdidnumber'],
+                'pstat'    => ['database' => 'school_evaluation', 'table' => 'schoolEvaluation_pstat', 'join_Key' => 'map.newcid'],
+                'pages'    => 12,
+                'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at'],
+                'hidden'   => ['id'],
+                'columns'  => ['C1981' => '學校代碼', 'C1982' => '登入帳號', 'C1983' => '學校名稱', 'page' => '填答頁數'],
                 'predicate' => ['page'],
             ],
         ],
