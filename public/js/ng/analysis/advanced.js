@@ -120,7 +120,7 @@ angular.module('analysis.advanced', [])
                         break;
                     }
                 }
-                return title=='' ? name : title;
+                return title == '' ? name : title;
             }
 
             scope.count = function() {
