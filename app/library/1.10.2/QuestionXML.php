@@ -133,7 +133,7 @@ class QuestionXML {
                     array_push($question_new->questions, (object)['title' => (string)$item, 'subs' => $subs]);
                     break;
                 case "textarea":
-                    array_push($question_new->questions, (object)['size' => (string)$attr['size'], 'rows' => (string)$attr['rows'], 'cols' => (string)$attr['cols']]);
+                    array_push($question_new->questions, (object)['size' => (string)$attr['size'], 'rows' => (string)$attr['rows'], 'cols' => (string)$attr['cols'], 'title' => '', 'name' => (string)$question->answer->name]);
                     break;
             }
         }
