@@ -113,14 +113,14 @@ angular.module('analysis.advanced', [])
             }
 
             scope.getTitle = function(name) {
-                var title = name;
+                var title = '';
                 for (var i = 0; i < scope.choosed.items.length;i++) { 
-                    if (title == scope.choosed.items[i].name){
+                    if (name == scope.choosed.items[i].name){
                         title = scope.choosed.items[i].title;
-                        return title;
+                        break;
                     }
                 }
-                return title;
+                return title=='' ? name : title;
             }
 
             scope.count = function() {
