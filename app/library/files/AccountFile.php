@@ -201,12 +201,27 @@ class AccountFile extends CommFile {
         $member = Member::find(Input::get('member_id'));
 
         $member->user->actived = Input::get('actived') ? true : $member->user->actived;
-
         $member->actived = Input::get('actived');
-
         $member->push();
+        return $profile = [
+            'sended' => $this->sendActiveMail(),
+            'profile' => $this->setProfile($member),
+        ];
 
-        return ['profile' => $this->setProfile($member)];
+    }
+
+    public function sendActiveMail()
+    {
+        try {
+            Mail::send('emails.auth.register_active', ['context' => '恭禧您的帳號已開通！'], function($message) {
+                $message
+                    ->from('usedatabase.smtp2@gmail.com', '國立臺灣師範大學教育研究與評鑑中心')
+                    ->to(Input::get('email'))->subject('帳號啟用通知');
+            });
+            return '啟用通知信送出成功!';
+        } catch (Exception $e){
+            return '啟用通知信送出失敗!';
+        }
     }
 
     public function disableUser()
@@ -315,17 +330,4 @@ class AccountFile extends CommFile {
             'organizations' => $member->organizations,
         ];
     }
-
-    public function sendActiveMail()
-    {
-        try {
-            Mail::send('emails.empty', ['context' => Input::get('context')], function($message) {
-                $message->to(Input::get('email'))->subject(Input::get('title'));
-            });
-            return ['sended' => true];
-        } catch (Exception $e){
-            return ['sended' => false];
-        }
-    }
-
 }

@@ -121,7 +121,7 @@
                         <div ng-if="user.email2">{{ user.email2 }}</div>
                     </td>
                     <td class="center aligned">
-                        <md-checkbox ng-model="user.actived" ng-disabled="user.saving" aria-label="帳號開通" ng-change="activeUser(user)"" ng-click="sendActiveMail(user)"></md-checkbox>
+                        <md-checkbox ng-model="user.actived" ng-disabled="user.saving" aria-label="帳號開通" ng-change="activeUser(user)"></md-checkbox>
                     </td>
                     <td class="center aligned">
                         <i class="thumbs outline up green icon" ng-if="!user.password"></i>
@@ -172,7 +172,7 @@
 </div>
 
 <script>
-app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog, $timeout, $q) {
+app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog, $timeout, $q, $mdToast) {
     $scope.users = [];
     $scope.predicate = 'id';
     $scope.currentPage = 1;
@@ -217,14 +217,29 @@ app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog, $timeout
     };
 
     $scope.activeUser = function(profile) {
-        profile.saving = true;
-        $http({method: 'POST', url: 'activeUser', data:{member_id: profile.member_id, actived: profile.actived}})
-        .success(function(data, status, headers, config) {
-            profile.actived = data.profile.actived;
-            profile.saving = false;
-        })
-        .error(function(e) {
-            console.log(e);
+        var confirm = $mdDialog.confirm()
+                    .title((profile.actived) ? '是否要開通帳號?' : '是否要取消帳號?')
+                    .ok('是')
+                    .cancel('否') ;
+
+        $mdDialog.show(confirm).then(function()
+        {
+            $http({method: 'POST', url: 'activeUser', data:{member_id: profile.member_id, actived: profile.actived, email: profile.email}})
+            .success(function(data, status, headers, config) {
+                if (data.profile.actived)
+                {
+                    $mdToast.show(
+                      $mdToast.simple()
+                        .textContent(data.sended)
+                        .hideDelay(1000)
+                    );
+                }
+            })
+            .error(function(e) {
+                console.log(e);
+            });
+        }, function() {
+            profile.actived = (profile.actived) ? false : true;
         });
     };
 
@@ -380,50 +395,6 @@ app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog, $timeout
         });
     };
 
-    $scope.sendActiveMail = function(profile) {
-        var msg = (profile.actived) ? '確認取消此帳號嗎?' : '確認開通帳號並寄出通知信嗎?';
-        if (profile.actived) {
-            var confirm = $mdDialog.confirm()
-                .title(msg)
-                .textContent('')
-                .ariaLabel('')
-                .targetEvent(profile)
-                .ok('是')
-                .cancel('否') ;
-            $mdDialog.show(confirm).then(function() {
-                profile.actived = false;
-            }, function() {
-                profile.actived = true;
-            });
-        } else {
-            var confirm = $mdDialog.confirm()
-                .title(msg)
-                .textContent('')
-                .ariaLabel('')
-                .targetEvent(profile)
-                .cancel('否')
-                .ok('是');
-            $mdDialog.show(confirm).then(function() {
-                profile.actived = true;
-                $http({method: 'POST', url: 'ajax/sendActiveMail', data:{
-                    email: profile.email,
-                    title: '恭禧您的帳號已開通',
-                    context: '恭禧您的帳號已開通',
-                }})
-                .success(function(data, status, headers, config) {
-                    $mdToast.show(
-                      $mdToast.simple()
-                        .textContent('送出成功!')
-                        .hideDelay(1000)
-                    );
-                })
-                .error(function(e){
-                    console.log(e);
-                });
-            }, function() {
-                profile.actived = false;
-            });
-        }
-    }
+
 });
 </script>
