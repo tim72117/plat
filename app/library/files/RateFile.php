@@ -99,7 +99,17 @@ class RateFile extends CommFile {
 
         if (property_exists($survey, 'map')) {
 
-            $query->leftJoin($survey->map['database'] . '.dbo.' . $survey->map['table'] . ' AS map', $survey->map['info_key'], '=', $survey->map['map_key']);
+             if ($survey->id == 'workstd_106') {
+                $info_keys = explode(',',$survey->map['info_key']);
+                $map_keys = explode(',',$survey->map['map_key']);
+                $query->leftJoin($survey->map['database'] . '.dbo.' . $survey->map['table'] . ' AS map',function($join) use ($info_keys,$map_keys){
+                        $join->on($info_keys[2], '=', $map_keys[2]);
+                        $join->on($info_keys[1], '=', $map_keys[1]);
+                        $join->on($info_keys[0], '=', $map_keys[0]);
+                });
+            } else {
+                $query->leftJoin($survey->map['database'] . '.dbo.' . $survey->map['table'] . ' AS map', $survey->map['info_key'], '=', $survey->map['map_key']);
+            }
 
         }
 
@@ -244,6 +254,20 @@ class RateFile extends CommFile {
                 'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at'],
                 'hidden'   => ['id'],
                 'columns'  => ['C1981' => '學校代碼', 'C1982' => '登入帳號', 'C1983' => '學校名稱', 'page' => '填答頁數'],
+                'predicate' => ['page'],
+            ],
+        ],
+         'workstd_106' => [
+            [
+                'id'       => 'workstd_106',
+                'title'    => '106年度高中建教生權益保障事項調查',
+                'info'     => ['database' => 'rows', 'table' => 'row_20170504_174201_tfcz7', 'deleted_at' => true],
+                'map'      => ['database' => 'workstd_106', 'table' => 'workstd_106_id', 'info_key' => 'info.C2809,info.C2811,info.C2813', 'map_key' => 'map.sch_id,map.department_id,map.stu_id'],
+                'pstat'    => ['database' => 'workstd_106', 'table' => 'workstd_106_pstat', 'join_Key' => 'map.newcid'],
+                'pages'    => 3,
+                'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at'],
+                'hidden'   => ['id'],
+                'columns'  => ['C2809' => '學校代碼','C2810' => '學校名稱','C2811' => '科別代碼','C2812' => '科別', 'C2813' => '學號', 'C2814' => '學生姓名', 'page' => '填答頁數'],
                 'predicate' => ['page'],
             ],
         ],
