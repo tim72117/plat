@@ -15,6 +15,10 @@ class Sheet extends Eloquent {
         return (boolean)$value;
     }
 
+    public function getFillableAttribute($value) {
+        return (boolean)$value;
+    }
+
     public function tables() {
         return $this->hasMany('Row\Table', 'sheet_id', 'id');
     }

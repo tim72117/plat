@@ -10,14 +10,14 @@
         <md-card>
             <div class="ui attached red message" ng-if="sheet.editable">資料表修改中，暫時無法上傳資料。</div>
             <div style="padding:10px">
-                <label for="file_upload" class="ui red button" ng-class="{loading: uploading, disabled: sheet.editable}"><i class="icon upload"></i>上傳</label>
+                <label for="file_upload" class="ui red button" ng-class="{loading: uploading, disabled: sheet.editable || !sheet.fillable}"><i class="icon upload"></i>上傳</label>
                 <div class="ui green button" ng-click="exportSample(sheet)">
                     <i class="download icon"></i>下載上傳名單用的資料表格
                 </div>
                 <div class="ui green button" ng-click="exportRows(sheet)">
                     <i class="download icon"></i>下載已上傳名單
                 </div>
-                <a class="ui green button" href="rows">
+                <a class="ui green button" href="rows" ng-class="{disabled: !sheet.fillable}">
                     <i class="edit icon"></i>編輯名單
                 </a>
                 <div ng-dropdown-menu class="ui green dropdown button pointing top left floating" ng-if="parentTables.length > 0">
