@@ -1,0 +1,8 @@
+/app/storage
+/vendor
+/ThemeBootstrap-master
+/node_modules
+/public/resource
+/public/packages
+/public/images
+Thumbs.db
