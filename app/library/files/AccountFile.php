@@ -201,13 +201,12 @@ class AccountFile extends CommFile {
         $member = Member::find(Input::get('member_id'));
 
         $member->user->actived = Input::get('actived') ? true : $member->user->actived;
-        $member->actived = Input::get('actived');
-        $member->push();
-        return $profile = [
-            'sended' => $this->sendActiveMail(),
-            'profile' => $this->setProfile($member),
-        ];
 
+        $member->actived = Input::get('actived');
+
+        $member->push();
+
+        return ['profile' => $this->setProfile($member)];
     }
 
     public function sendActiveMail()
@@ -218,9 +217,9 @@ class AccountFile extends CommFile {
                     ->from('usedatabase.smtp2@gmail.com', '國立臺灣師範大學教育研究與評鑑中心')
                     ->to(Input::get('email'))->subject('帳號啟用通知');
             });
-            return '啟用通知信送出成功!';
+            return ['sended' => '開通通知信送出成功!'];
         } catch (Exception $e){
-            return '啟用通知信送出失敗!';
+            return ['sended' => '開通通知信送出失敗!'];
         }
     }
 

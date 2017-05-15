@@ -40,7 +40,7 @@
                     </th>
                     <th width="140">姓名</th>
                     <th width="250">email</th>
-                    <th width="100">帳號開通</th>
+                    <th width="100" colspan="2">帳號開通</th>
                     <th width="100">密碼狀態</th>
                     <th width="100">資料變更</th>
                     <th>職稱</th>
@@ -105,6 +105,7 @@
                     <th></th>
                     <th></th>
                     <th></th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -122,6 +123,9 @@
                     </td>
                     <td class="center aligned">
                         <md-checkbox ng-model="user.actived" ng-disabled="user.saving" aria-label="帳號開通" ng-change="activeUser(user)"></md-checkbox>
+                    </td>
+                    <td>
+                        <label for="send_mail" class="ui basic mini button {{ user.actived ? '' : 'disabled' }}" ng-class="{loading: sending}" ng-click="sendActiveMail(user)"><i class="icon mail"></i>寄送通知信</label>
                     </td>
                     <td class="center aligned">
                         <i class="thumbs outline up green icon" ng-if="!user.password"></i>
@@ -224,22 +228,43 @@ app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog, $timeout
 
         $mdDialog.show(confirm).then(function()
         {
+            profile.saving = true;
             $http({method: 'POST', url: 'activeUser', data:{member_id: profile.member_id, actived: profile.actived, email: profile.email}})
             .success(function(data, status, headers, config) {
-                if (data.profile.actived)
-                {
-                    $mdToast.show(
-                      $mdToast.simple()
-                        .textContent(data.sended)
-                        .hideDelay(1000)
-                    );
-                }
+                profile.actived = data.profile.actived;
+                profile.saving = false;
             })
             .error(function(e) {
                 console.log(e);
             });
         }, function() {
             profile.actived = (profile.actived) ? false : true;
+        });
+    };
+
+    $scope.sendActiveMail = function(profile) {
+        var confirm = $mdDialog.confirm()
+                    .title('是否要寄開通通知信')
+                    .ok('是')
+                    .cancel('否') ;
+
+        $mdDialog.show(confirm).then(function()
+        {
+            $scope.loading = true;
+            $http({method: 'POST', url: 'sendActiveMail', data:{email: profile.email}})
+            .success(function(data, status, headers, config) {
+                $mdToast.show(
+                  $mdToast.simple()
+                    .textContent(data.sended)
+                    .hideDelay(1000)
+                );
+                $scope.loading = false;
+            })
+            .error(function(e) {
+                console.log(e);
+            });
+        }, function() {
+
         });
     };
 
