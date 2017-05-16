@@ -264,7 +264,7 @@ class RateFile extends CommFile {
                 'info'     => ['database' => 'rows', 'table' => 'row_20170504_174201_tfcz7', 'deleted_at' => true],
                 'map'      => ['database' => 'workstd_106', 'table' => 'workstd_106_id', 'info_key' => 'info.C2809,info.C2811,info.C2813', 'map_key' => 'map.sch_id,map.department_id,map.stu_id'],
                 'pstat'    => ['database' => 'workstd_106', 'table' => 'workstd_106_pstat', 'join_Key' => 'map.newcid'],
-                'pages'    => 3,
+                'pages'    => 4,
                 'against'  => ['file_id', 'updated_by', 'created_by', 'deleted_by', 'updated_at', 'created_at', 'deleted_at'],
                 'hidden'   => ['id'],
                 'columns'  => ['C2809' => '學校代碼','C2810' => '學校名稱','C2811' => '科別代碼','C2812' => '科別', 'C2813' => '學號', 'C2814' => '學生姓名', 'page' => '填答頁數'],
