@@ -22,7 +22,7 @@ Route::group(array('before' => 'auth'), function() {
     Route::any('doc/{doc_id}/{method}', 'FileController@open');
     Route::any('doc/{doc_id}/ajax/{method}', 'FileController@open');
     Route::any('request/{doc_id}/{method}', 'FileController@request');
-    Route::post('apps/lists', 'FileController@apps');
+    Route::get('apps/lists', 'FileController@apps');
     Route::any('management', 'FileController@management');
 
     Route::get('project/{project}/intro', 'FileController@project');
