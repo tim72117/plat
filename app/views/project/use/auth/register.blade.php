@@ -48,7 +48,7 @@
                 </div>
             </div>
             <div flex="60" flex-sm="100" flex-xs="100">
-                <form class="ui segment top attached" name="register" ng-submit="register.$valid && saveRegister()" novalidate ng-if="step == 'write'">
+                <form class="ui form segment top attached" name="register" ng-submit="register.$valid && saveRegister()" novalidate ng-if="step == 'write'" ng-class="{error: errors.length > 0}">
 
                     <div>
                         <md-input-container class="md-icon-float md-block">
@@ -148,6 +148,13 @@
 
                     <div>
                         <md-checkbox ng-repeat="position in positions" ng-model="user.positions[position.id]">@{{position.title}}</md-checkbox>
+                    </div>
+
+                    <div class="ui error message">
+                        <div class="header">資料錯誤</div>
+                        <div class="ui horizontal list">
+                        <span class="item" ng-repeat="error in errors">@{{ error }}</span>
+                        </div>
                     </div>
 
                     <div>
