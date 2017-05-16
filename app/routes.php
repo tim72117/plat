@@ -67,11 +67,4 @@ Route::post('data/post/{table}', 'DataExchangeController@post');
 //平台---------------------------------------------------------------------------------------------------------------------------------
 
 Route::get('project', function() { return Redirect::to('project/' . Config::get('project.default')); });
-Route::get('/', function() { return View::make('web.index'); });
-Route::get('home/{page?}', 'WebController@web');
-Route::when('home/school', 'auth');
-
-Route::get('oauth/authorize/{project}', array('uses' => 'OAuthController@getAuthorize'));
-Route::post('oauth/authorize/{project}', array('uses' => 'OAuthController@postAuthorize'));
-Route::post('oauth/access_token', array('before' => '', 'uses' => 'OAuthController@postAccessToken'));
-Route::get('oauth/resource' , array('before' => 'oauth', 'uses' => 'OAuthController@resource'));
+Route::get('/', function() { return Redirect::to('project'); });
