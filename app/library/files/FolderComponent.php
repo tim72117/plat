@@ -144,7 +144,7 @@ class FolderComponent extends CommFile {
 
             $groups->each(function ($group) use($shareds) {
                 $group->selected = in_array($group->id, $shareds['group']);
-                $group->users->each(function ($user) use($shareds) {
+                $group->users->load('members.organizations.now')->each(function ($user) use($shareds) {
                     $user->selected = in_array($user->id, $shareds['user']);
                 });
             });

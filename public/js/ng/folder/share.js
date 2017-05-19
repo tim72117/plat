@@ -29,7 +29,7 @@ angular.module('share', [])
                             <div class="ui vertical inverted menu">
                                 <div class="header item"><i class="user icon"></i>成員({{ group_description }})</div>
                                 <a class="item" ng-class="{active: user.selected}" ng-repeat="user in users" ng-click="select(user);unselectGroup()">
-                                    {{ user.username }}<i class="tag green icon" ng-show="user.selected"></i>
+                                    {{ user.username }}<div ng-show="user.org">({{user.org}})</div><i class="tag green icon" ng-show="user.selected"></i>
                                 </a>
                             </div>
                         </div>
@@ -84,9 +84,33 @@ angular.module('share', [])
                     group.open = false;
                 });
                 group.open = true;
-                if (group.users.length > 0){
+                if (group.users.length > 0) {
                     $scope.users = group.users;
                     $scope.group_description = group.description;
+                    angular.forEach($scope.users, function(data, key) {
+                        if (data.members.length > 0)
+                        {
+                            angular.forEach(data.members, function(data) {
+                                if (data.organizations.length > 0)
+                                {
+                                    var orgLength = data.organizations.length;
+                                    var keepGoing = true;
+                                    angular.forEach(data.organizations, function(data) {
+                                        if(keepGoing)
+                                        {
+                                            var objOrg = data.now.name;
+                                            if (!angular.isDefined(objOrg) || objOrg !== null)
+                                            {
+                                                $scope.users[key].org = orgLength > 1 ? (objOrg + '...') : objOrg;
+                                                keepGoing = false;
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+
                 } else {
                     $scope.users = [];
                 }
