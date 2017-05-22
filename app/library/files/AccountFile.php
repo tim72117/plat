@@ -229,6 +229,8 @@ class AccountFile extends CommFile {
 
         $disabled = isset($member) ? $member->delete() : false;
 
+        DB::table('users')->where('id', $member->user_id)->update(array('disabled' => 1));
+
         return ['disabled' => $disabled];
     }
 
