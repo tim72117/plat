@@ -87,30 +87,23 @@ angular.module('share', [])
                 if (group.users.length > 0) {
                     $scope.users = group.users;
                     $scope.group_description = group.description;
+
                     angular.forEach($scope.users, function(data, key) {
-                        if (data.members.length > 0)
-                        {
-                            angular.forEach(data.members, function(data) {
-                                if (data.organizations.length > 0)
+                        angular.forEach(data.members, function(member) {
+
+                            var keepGoing = true;
+                            angular.forEach(member.organizations, function(organization) {
+                                var objOrg = organization.now.name;
+                                if (angular.isUndefined(objOrg) || objOrg == null) return;
+
+                                if (keepGoing)
                                 {
-                                    var orgLength = data.organizations.length;
-                                    var keepGoing = true;
-                                    angular.forEach(data.organizations, function(data) {
-                                        if(keepGoing)
-                                        {
-                                            var objOrg = data.now.name;
-                                            if (!angular.isDefined(objOrg) || objOrg !== null)
-                                            {
-                                                $scope.users[key].org = orgLength > 1 ? (objOrg + '...') : objOrg;
-                                                keepGoing = false;
-                                            }
-                                        }
-                                    });
+                                    $scope.users[key].org = member.organizations.length > 1 ? (objOrg + '...') : objOrg;
+                                    keepGoing = false;
                                 }
                             });
-                        }
+                        });
                     });
-
                 } else {
                     $scope.users = [];
                 }
