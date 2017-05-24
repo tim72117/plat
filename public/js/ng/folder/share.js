@@ -88,8 +88,8 @@ angular.module('share', [])
                     $scope.users = group.users;
                     $scope.group_description = group.description;
 
-                    angular.forEach($scope.users, function(data, key) {
-                        angular.forEach(data.members, function(member) {
+                    angular.forEach($scope.users, function(user, key) {
+                        angular.forEach(user.members, function(member) {
 
                             var keepGoing = true;
                             angular.forEach(member.organizations, function(organization) {
