@@ -212,13 +212,7 @@ class AccountFile extends CommFile {
     public function sendActiveMail()
     {
         try {
-            $project_id = Member::find(Input::get('member_id'))
-                                    ->user
-                                    ->positions
-                                    ->first()
-                                    ->project_id;
-
-            $project = Project::find($project_id);
+            $project = Project::find($this->configs['project_id']);
 
             $strSubject = $project->name.'帳號啟用通知';
 

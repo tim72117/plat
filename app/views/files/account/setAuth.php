@@ -250,7 +250,7 @@ app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog, $timeout
         $mdDialog.show(confirm).then(function()
         {
             $scope.loading = true;
-            $http({method: 'POST', url: 'sendActiveMail', data:{member_id: profile.member_id, email: profile.email}})
+            $http({method: 'POST', url: 'sendActiveMail', data:{email: profile.email}})
             .success(function(data, status, headers, config) {
                 $mdToast.show(
                   $mdToast.simple()
