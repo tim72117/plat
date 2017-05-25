@@ -225,7 +225,6 @@ app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog, $timeout
                     .title((profile.actived) ? '是否要開通帳號?' : '是否要取消帳號?')
                     .ok('是')
                     .cancel('否') ;
-
         $mdDialog.show(confirm).then(function()
         {
             profile.saving = true;
@@ -251,17 +250,22 @@ app.controller('usersCtrl', function($scope, $http, $filter, $mdDialog, $timeout
         $mdDialog.show(confirm).then(function()
         {
             $scope.loading = true;
-            $http({method: 'POST', url: 'sendActiveMail', data:{email: profile.email}})
+            $http({method: 'POST', url: 'sendActiveMail', data:{member_id: profile.member_id, email: profile.email}})
             .success(function(data, status, headers, config) {
                 $mdToast.show(
                   $mdToast.simple()
-                    .textContent(data.sended)
+                    .textContent('開通通知信送出成功!')
                     .hideDelay(1000)
                 );
                 $scope.loading = false;
             })
             .error(function(e) {
-                console.log(e);
+                $mdToast.show(
+                  $mdToast.simple()
+                    .textContent('開通通知信送出失敗!')
+                    .hideDelay(1000)
+                );
+                $scope.loading = false;
             });
         }, function() {
 

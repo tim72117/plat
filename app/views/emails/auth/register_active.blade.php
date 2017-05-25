@@ -8,8 +8,8 @@
             <p>親愛的業務承辦人：</p>
             您好！<br>
             您的帳號已獲開通！<br>
-            可登入中小學師資資料庫整合平臺：<br>
-            <a href="https://teacher.edu.tw/project/tted">https://teacher.edu.tw/project/tted</a><br>
+            可登入{{ $project->name }}：<br>
+            <a href="https://teacher.edu.tw/project/{{ $project->code }}">https://teacher.edu.tw/project/{{ $project->code }}</a><br>
             <br>
             <br>
             <p>感謝您！</p>

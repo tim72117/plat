@@ -212,14 +212,23 @@ class AccountFile extends CommFile {
     public function sendActiveMail()
     {
         try {
-            Mail::send('emails.auth.register_active', [], function($message) {
+            $project_id = Member::find(Input::get('member_id'))
+                                    ->user
+                                    ->positions
+                                    ->first()
+                                    ->project_id;
+
+            $project = Project::find($project_id);
+
+            $strSubject = $project->name.'帳號啟用通知';
+
+            Mail::send('emails.auth.register_active', ['project' => $project], function($message) use ($strSubject) {
                 $message
                     ->from('usedatabase.smtp2@gmail.com', '國立臺灣師範大學教育研究與評鑑中心')
-                    ->to(Input::get('email'))->subject('中小學師資資料庫整合平臺帳號啟用通知');
+                    ->to(Input::get('email'))->subject($strSubject);
             });
-            return ['sended' => '開通通知信送出成功!'];
         } catch (Exception $e){
-            return ['sended' => '開通通知信送出失敗!'];
+
         }
     }
 
