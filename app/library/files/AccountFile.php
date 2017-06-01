@@ -232,7 +232,7 @@ class AccountFile extends CommFile {
 
         $disabled = isset($member) ? $member->delete() : false;
 
-        $member->user->inGroups()->detach(Input::get('group_id'));
+        $member->user->inGroups()->detach();
 
         return ['disabled' => $disabled];
     }
