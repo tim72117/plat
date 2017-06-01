@@ -10,6 +10,8 @@ use Plat;
 
 class USED {
 
+    public $full = false;
+
     private $tables;
 
     function __construct()
@@ -77,7 +79,7 @@ class USED {
     {
         $survey = $this->tables[Input::get('name')];
 
-        $query = DB::table($survey->info->database . '.dbo.' . $survey->info->table . ' AS info')->whereIn('info.'.$survey->shid, $this->getSchools());
+        $query = DB::table($survey->info->database . '.dbo.' . $survey->info->table . ' AS info')->whereIn('info.' . $survey->shid, $this->getSchools());
 
         $this->setDeletedAtQuery($query, $survey->info);
 
@@ -88,9 +90,9 @@ class USED {
         }
 
         $query->leftJoin($survey->pstat->database . '.dbo.' . $survey->pstat->table . ' AS pstat', $survey->pstat->join_Key, '=', 'pstat.newcid')
-                ->select('pstat.'.$survey->qid)->whereNotNull('pstat.'.$survey->qid)->where('pstat.'.$survey->qid,'<>','');
+                ->select('pstat.' . $survey->qid . ' AS comment')->whereNotNull('pstat.' . $survey->qid)->where('pstat.' . $survey->qid, '<>', '');
 
-        return ['openingQuestions' => $query->get(), 'qid' => $survey->qid];
+        return ['openingQuestions' => $query->get()];
 
     }
 

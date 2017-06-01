@@ -24,7 +24,7 @@
                     <div class="item" ng-repeat="type in types">
                         <div class="header">{{ type.title }}</div>
                         <div class="menu">
-                            <a class="item" ng-repeat="quesTitle in quesTitles[type.key]" ng-class="{active: doc.selected}" ng-click="selectQues(quesTitle.name)">
+                            <a class="item" ng-repeat="quesTitle in quesTitles[type.key]" ng-class="{active: quesTitle.selected}" ng-click="selectQues(quesTitle)">
                                 {{ quesTitle.title }}
                             </a>
                         </div>
@@ -39,7 +39,7 @@
                         <tr>
                             <td colspan="2">
                                 <button class="ui olive button" >
-                                    <i class="puzzle icon"></i> 請問您對學校或老師有何建議?{{openingQuestions.length}}
+                                    <i class="puzzle icon"></i> 請問您對學校或老師有何建議?
                                 </button>
                             </td>
                         </tr>
@@ -47,7 +47,7 @@
                             <td>無查詢結果</td>
                         </tr>
                         <tr ng-repeat="openingQuestion in openingQuestions">
-                            <td>{{ openingQuestion[qid] }}</td>
+                            <td>{{ openingQuestion['comment'] }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -72,6 +72,7 @@
 app.controller('openingQuestionController', function($scope, $filter, $interval, $http) {
     $scope.types = [{key: 'seniorOne', title: '高一專一學生'}, {key: 'seniorTwo', title: '高二專二學生'}, {key: 'parentTwo', title: '高二專二家長調查'}];
     $scope.openingQuestions = [];
+    $scope.preQues = '';
     $scope.getTitles = function() {
         $scope.loading = true;
         $http({method: 'POST', url: 'getTitles', data:{}})
@@ -83,13 +84,15 @@ app.controller('openingQuestionController', function($scope, $filter, $interval,
         });
     };
 
-    $scope.selectQues = function(name) {
+    $scope.selectQues = function(quesTitle) {
         $scope.loading = true;
-        $http({method: 'POST', url: 'getOpeningQuestions', data:{name: name}})
+        $http({method: 'POST', url: 'getOpeningQuestions', data:{name: quesTitle.name}})
         .success(function(data, status, headers, config) {
             $scope.openingQuestions = data.openingQuestions;
-            $scope.qid = data.qid;
             $scope.loading = false;
+            $scope.preQues.selected = false;
+            $scope.preQues = quesTitle;
+            quesTitle.selected = true;
         }).error(function(e){
             console.log(e);
         });
