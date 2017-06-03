@@ -10,6 +10,7 @@ use Row\Table;
 use Row\Column;
 use Carbon\Carbon;
 use Illuminate\Support\MessageBag;
+use Plat\Field\SheetRepository;
 
 /**
  * Rows data Repository.
@@ -120,9 +121,7 @@ class RowsFile extends CommFile {
     {
         parent::create();
 
-        $sheet = $this->add_sheet();
-
-        $this->add_table($sheet, $this->database, $this->generate_table());
+        SheetRepository::create($this->file)->init();
     }
 
     /**
@@ -187,59 +186,40 @@ class RowsFile extends CommFile {
         return 'files.rows.set_rows_owner';
     }
 
-    public function generate_table()
-    {
-        return 'row_' . Carbon::now()->formatLocalized('%Y%m%d_%H%M%S') . '_' . strtolower(str_random(5));
-    }
-
-    private function add_sheet()
-    {
-        return $this->file->sheets()->create(['title' => '', 'editable' => true, 'fillable' => true]);
-    }
-
-    private function add_table($sheet, $database, $name)
-    {
-        $sheet->tables()->create(['database' => $database, 'name' => $name, 'lock' => false, 'construct_at' => Carbon::now()->toDateTimeString()]);
-    }
-
     private function init_sheets()
     {
         if (!$this->file->sheets()->getQuery()->exists()) {
-            $this->add_sheet();
+            SheetRepository::create($this->file);
         }
-        $this->file->sheets->each(function($sheet) {
-            if (!$sheet->tables()->getQuery()->exists()) {
-                $this->add_table($sheet, $this->database, $this->generate_table());
-            }
-        });
     }
 
     public function get_file()
     {
         $this->init_sheets();
 
-        $sheets = $this->file->sheets()->with(['tables.columns'])->get()->each(function($sheet) {
-            $sheet->tables->each(function($table) use($sheet) {
-                !$sheet->editable && $this->table_construct($table);
-                if ($this->has_table($table)) {
-                    $query = DB::table($table->database. '.dbo.' . $table->name)->whereNull('deleted_at');
-                    if (!$this->isCreater() || !Input::get('editor', false)) {
-                        $query->where('created_by', $this->user->id);
-                    }
-                    $table->count = $query->count();
-                } else {
-                    $this->table_build($table);
+        $sheets = $this->file->sheets()->with(['tables.columns'])->get()->each(function ($sheet) {
+            SheetRepository::target($sheet)->init()->bulid();
+
+            $sheet->load('tables')->tables->each(function ($table) {
+
+                $query = DB::table($table->database. '.dbo.' . $table->name)->whereNull('deleted_at');
+                if (!$this->isCreater() && Input::get('editor', false)) {
+                    $query->where('created_by', $this->user->id);
                 }
+                if ($table->builded_at) {
+                    $table->count = $query->count();
+                }
+
+                $table->columns->each(function($column) {
+                    if (isset($this->rules[$column->rules]['editor']) && $this->rules[$column->rules]['editor'] == 'menu') {
+                        $answers = $this->setAnswers($column);
+                    }
+                });
             });
         });
 
         $sheets->first()->selected = true;
 
-        $sheets->first()->tables->first()->columns->each(function($column) {
-            if (isset($this->rules[$column->rules]['editor']) && $this->rules[$column->rules]['editor'] == 'menu') {
-                $answers = $this->setAnswers($column);
-            }
-        });
 
         return [
             'title'    => $this->file->title,
@@ -400,47 +380,6 @@ class RowsFile extends CommFile {
         }
 
         return $column_errors;
-    }
-
-    /**
-     * Determine if table is exist.
-     */
-    private function has_table($table)
-    {
-        return DB::table($table->database . '.INFORMATION_SCHEMA.COLUMNS')->where('TABLE_NAME', $table->name)->exists();
-    }
-
-    /**
-     * Build table if sheet was changed.
-     */
-    private function table_construct($table)
-    {
-        if (!isset($table->builded_at) || Carbon::parse($table->builded_at)->diffInSeconds(new Carbon($table->construct_at), false) > 0) {
-            $this->table_build($table);
-        }
-    }
-
-    private function table_build($table)
-    {
-        $this->has_table($table) && Schema::drop($table->database . '.dbo.' . $table->name);
-
-        Schema::create($table->database . '.dbo.' . $table->name, function($query) use($table) {
-            $query->increments('id');
-
-            foreach ($table->columns as $column) {
-                $this->column_bulid($query, 'C' . $column->id, $column->rules);
-            }
-
-            $query->integer('file_id');
-            $query->dateTime('updated_at');
-            $query->dateTime('created_at');
-            $query->dateTime('deleted_at')->nullable();
-            $query->integer('updated_by');
-            $query->integer('created_by');
-            $query->integer('deleted_by')->nullable();
-        });
-
-        $table->update(['builded_at' => Carbon::now()->toDateTimeString()]);
     }
 
     private function column_bulid($query, $name, $rule_key, $indexs = [])
@@ -1029,23 +968,11 @@ class RowsFile extends CommFile {
     {
         $dependTable = $this->file->sheets[0]->tables->first();
         $doc = parent::saveAs();
-        $this->file->sheets->each(function($sheet)use($doc,$dependTable) {
+        $this->file->sheets->each(function($sheet)use($doc, $dependTable) {
             $cloneSheet = $sheet->replicate();
             $cloneSheet->file_id = $doc->file_id;
             $cloneSheet->save();
-            $sheet->tables->each(function($table)use($cloneSheet,$dependTable) {
-                $cloneTable = $table->replicate();
-                $cloneTable->name = $this->generate_table();
-                $cloneTable->sheet_id = $cloneSheet->id;
-                $cloneTable->lock = true;
-                $cloneTable->save();
-                $cloneTable->depend_tables()->attach($cloneTable->id, array('depend_table_id' => $dependTable->id));
-                $table->columns->each(function($column)use($cloneTable) {
-                    $cloneColumn = $column->replicate();
-                    $cloneColumn->table_id = $cloneTable->id;
-                    $cloneColumn->save();
-                });
-            });
+            SheetRepository::target($cloneSheet)->cloneTable($dependTable);
         });
     }
 
